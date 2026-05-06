@@ -82,15 +82,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  background: #f5f5f5;
+  border-bottom: 1px solid var(--ds-divider);
+  background: var(--ds-bg);
 }
 
 .menu-header h3 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .menu-content {
@@ -111,7 +111,7 @@
   margin: 0 0 12px 0;
   font-size: 14px;
   font-weight: 600;
-  color: #666;
+  color: var(--ds-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -178,19 +178,19 @@
   display: flex;
   align-items: center;
   padding: 10px 12px;
-  background: #f9f9f9;
+  background: var(--ds-surface-2);
   border-radius: 8px;
-  border-left: 3px solid #3f51b5;
+  border-left: 3px solid var(--ds-marine);
   transition: background-color 0.2s ease;
 }
 
 .recent-action-item:hover {
-  background: #f0f0f0;
+  background: var(--ds-surface-offset);
 }
 
 .recent-action-icon {
   margin-right: 12px;
-  color: #3f51b5;
+  color: var(--ds-marine);
   font-size: 20px;
   width: 20px;
   height: 20px;
@@ -205,13 +205,13 @@
 .recent-action-label {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
   line-height: 1.2;
 }
 
 .recent-action-time {
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
   margin-top: 2px;
 }
 
@@ -219,13 +219,13 @@
   display: flex;
   align-items: center;
   padding: 12px;
-  background: #e8f5e9;
+  background: var(--ds-success-hl);
   border-radius: 8px;
   margin-top: 16px;
 }
 
 .voip-status-icon {
-  color: #4caf50;
+  color: var(--ds-success);
   margin-right: 8px;
   font-size: 20px;
   width: 20px;
@@ -234,7 +234,7 @@
 
 .voip-status-text {
   font-size: 13px;
-  color: #2e7d32;
+  color: var(--ds-success);
   font-weight: 500;
 }
 
@@ -255,50 +255,50 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .quick-actions-menu {
-    background: #1e1e1e;
-    color: #fff;
+    background: var(--ds-text);
+    color: var(--ds-text-inverse);
   }
 
   .menu-header {
-    background: #2a2a2a;
-    border-bottom-color: #444;
+    background: var(--ds-text);
+    border-bottom-color: var(--ds-text-muted);
   }
 
   .menu-header h3 {
-    color: #fff;
+    color: var(--ds-text-inverse);
   }
 
   .actions-section h4 {
-    color: #aaa;
+    color: var(--ds-text-faint);
   }
 
   .recent-action-item {
-    background: #2a2a2a;
-    border-left-color: #7986cb;
+    background: var(--ds-text);
+    border-left-color: var(--ds-marine-light);
   }
 
   .recent-action-item:hover {
-    background: #333;
+    background: var(--ds-text);
   }
 
   .recent-action-icon {
-    color: #7986cb;
+    color: var(--ds-marine-light);
   }
 
   .recent-action-label {
-    color: #fff;
+    color: var(--ds-text-inverse);
   }
 
   .recent-action-time {
-    color: #aaa;
+    color: var(--ds-text-faint);
   }
 
   .voip-status {
-    background: #1b5e20;
+    background: var(--ds-success);
   }
 
   .voip-status-text {
-    color: #81c784;
+    color: var(--ds-success);
   }
 }
 

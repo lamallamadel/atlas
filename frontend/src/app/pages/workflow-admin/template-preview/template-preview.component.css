@@ -1,16 +1,29 @@
 .preview-card {
+  display: block;
   height: 100%;
 }
 
-mat-card-header {
+.preview-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  padding: 16px;
+  border-bottom: 1px solid var(--ds-divider);
+}
+
+.preview-card-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ds-text);
+}
+
+.preview-card-body {
+  padding: 16px;
 }
 
 .whatsapp-preview {
-  background: linear-gradient(to bottom, #075e54 0%, #128c7e 100%);
+  background: linear-gradient(to bottom, var(--ds-marine) 0%, var(--ds-marine-light) 100%);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -21,7 +34,7 @@ mat-card-header {
   align-items: center;
   gap: 8px;
   padding: 16px;
-  background-color: #075e54;
+  background-color: var(--ds-marine);
   color: white;
   font-weight: 500;
 }
@@ -29,7 +42,7 @@ mat-card-header {
 .whatsapp-body {
   padding: 16px;
   min-height: 200px;
-  background-color: #e5ddd5;
+  background-color: var(--ds-bg);
   background-image: 
     repeating-linear-gradient(
       45deg,
@@ -65,14 +78,14 @@ mat-card-header {
 .header-section {
   margin-bottom: 8px;
   font-size: 15px;
-  color: #000;
+  color: var(--ds-text);
 }
 
 .body-section {
   margin-bottom: 8px;
   font-size: 14px;
   line-height: 1.5;
-  color: #000;
+  color: var(--ds-text);
   white-space: pre-wrap;
   word-wrap: break-word;
 }
@@ -102,8 +115,8 @@ mat-card-header {
 
 .whatsapp-button {
   background-color: white;
-  color: #128c7e;
-  border: 1px solid #128c7e;
+  color: var(--ds-marine-light);
+  border: 1px solid var(--ds-marine-light);
   border-radius: 20px;
   padding: 8px 16px;
   font-weight: 500;
@@ -112,17 +125,17 @@ mat-card-header {
 }
 
 .whatsapp-button:hover {
-  background-color: #f0f0f0;
+  background-color: var(--ds-surface-offset);
 }
 
 .whatsapp-button.url-button {
-  color: #0088cc;
-  border-color: #0088cc;
+  color: var(--ds-marine);
+  border-color: var(--ds-marine);
 }
 
 .whatsapp-button.phone-button {
-  color: #25d366;
-  border-color: #25d366;
+  color: var(--ds-success);
+  border-color: var(--ds-success);
 }
 
 .variable-info {

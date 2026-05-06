@@ -7,7 +7,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { TaskCardComponent } from './task-card.component';
-import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { OAuthService } from 'angular-oauth2-oidc';
 import {
@@ -25,7 +24,6 @@ describe('TaskListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MatDialogModule,
-        MatCardModule,
         MatCheckboxModule,
         BrowserAnimationsModule,
         FullCalendarModule,

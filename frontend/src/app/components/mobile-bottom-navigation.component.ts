@@ -44,9 +44,9 @@ interface NavItem {
       bottom: 0;
       left: 0;
       right: 0;
-      background: var(--color-neutral-0, #ffffff);
-      border-top: 1px solid var(--color-neutral-200, #e0e0e0);
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      background: var(--ds-surface);
+      border-top: 1px solid var(--ds-divider);
+      box-shadow: 0 -4px 16px color-mix(in srgb, var(--ds-text) 8%, transparent);
       z-index: 1000;
       height: 64px;
       padding-bottom: env(safe-area-inset-bottom);
@@ -66,10 +66,10 @@ interface NavItem {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 8px 4px;
+      padding: var(--ds-space-2) var(--ds-space-1);
       border: none;
       background: transparent;
-      color: var(--color-neutral-600, #757575);
+      color: var(--ds-text-muted);
       cursor: pointer;
       transition: all 0.2s ease;
       position: relative;
@@ -84,7 +84,7 @@ interface NavItem {
     }
 
     .nav-item.active {
-      color: var(--color-primary-600, #2c5aa0);
+      color: var(--ds-marine);
     }
 
     .nav-item.active::before {
@@ -95,8 +95,8 @@ interface NavItem {
       transform: translateX(-50%);
       width: 32px;
       height: 3px;
-      background: var(--color-primary-600, #2c5aa0);
-      border-radius: 0 0 3px 3px;
+      background: var(--ds-marine);
+      border-radius: 0 0 var(--ds-radius-sm) var(--ds-radius-sm);
     }
 
     .nav-icon-wrapper {
@@ -126,8 +126,8 @@ interface NavItem {
       position: absolute;
       top: -4px;
       right: -8px;
-      background: var(--color-error-500, #f44336);
-      color: white;
+      background: var(--ds-error);
+      color: var(--ds-text-inverse);
       font-size: 10px;
       font-weight: 600;
       padding: 2px 5px;
@@ -137,22 +137,22 @@ interface NavItem {
       line-height: 1.2;
     }
 
-    /* Dark theme */
+    /* Dark theme — tokens */
     .dark-theme .mobile-bottom-nav {
-      background: var(--color-neutral-900, #212121);
-      border-top-color: var(--color-neutral-700, #616161);
+      background: var(--ds-surface);
+      border-top-color: var(--ds-border);
     }
 
     .dark-theme .nav-item {
-      color: var(--color-neutral-400, #bdbdbd);
+      color: var(--ds-text-muted);
     }
 
     .dark-theme .nav-item.active {
-      color: var(--color-primary-400, #4288ce);
+      color: var(--ds-marine-light);
     }
 
     .dark-theme .nav-item.active::before {
-      background: var(--color-primary-400, #4288ce);
+      background: var(--ds-marine-light);
     }
 
     /* Safe area support for notched devices */

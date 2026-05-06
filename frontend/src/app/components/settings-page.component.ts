@@ -10,7 +10,7 @@ import { DEFAULT_PREFERENCES } from '../models/user-preferences.model';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatFormField, MatLabel, MatPrefix, MatHint } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/autocomplete';
@@ -20,7 +20,7 @@ import { MatDivider } from '@angular/material/list';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface TabConfig {
   label: string;
@@ -33,7 +33,7 @@ interface TabConfig {
     selector: 'app-settings-page',
     templateUrl: './settings-page.component.html',
     styleUrls: ['./settings-page.component.css'],
-    imports: [MatIcon, MatProgressBar, MatTabGroup, MatTab, MatTabLabel, FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, MatFormField, MatLabel, MatSelect, MatOption, MatPrefix, MatHint, MatCheckbox, MatSlideToggle, MatDivider, MatButtonToggleGroup, MatButtonToggle, MatButton, MatInput, MatProgressSpinner]
+    imports: [MatIcon, MatProgressBar, MatTabGroup, MatTab, MatTabLabel, FormsModule, ReactiveFormsModule, DsCardComponent, DsSkeletonComponent, MatFormField, MatLabel, MatSelect, MatOption, MatPrefix, MatHint, MatCheckbox, MatSlideToggle, MatDivider, MatButtonToggleGroup, MatButtonToggle, MatButton, MatInput]
 })
 export class SettingsPageComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

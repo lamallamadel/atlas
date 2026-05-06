@@ -1,11 +1,11 @@
 <div class="workflow-admin-container">
   <ds-page-header title="Administration des workflows" subtitle="Configurez les étapes CRM, modèles WhatsApp et règles de transition"></ds-page-header>
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Workflow Administration</mat-card-title>
-    </mat-card-header>
+  <ds-card class="workflow-admin-card" [pad]="false" [elevation]="'sm'">
+    <div class="workflow-admin-card-header">
+      <h2 class="workflow-admin-card-title">Workflow Administration</h2>
+    </div>
 
-    <mat-card-content>
+    <div class="workflow-admin-card-body">
       <mat-tab-group [(selectedIndex)]="selectedTab" animationDuration="300ms">
         <mat-tab label="Workflow Editor">
           <div class="tab-content">
@@ -49,6 +49,6 @@
           </div>
         </mat-tab>
       </mat-tab-group>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 </div>

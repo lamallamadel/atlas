@@ -1,12 +1,36 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { AnalyticsApiService, AnalyticsResponse, MetabaseEmbedResponse } from '../services/analytics-api.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Chart, registerables } from 'chart.js';
+import { dsFunnelBarColors, dsRgba, resolveDsToken } from '../design-system/chart-ds-colors';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
+import { MatSuffix } from '@angular/material/form-field';
+import { DsCardComponent } from '../design-system';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-analytics-dashboard',
+  standalone: true,
+  imports: [
+    FormsModule,
+    MatTabGroup,
+    MatTab,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatSuffix,
+    MatDatepicker,
+    DsSkeletonComponent,
+    DsCardComponent,
+  ],
   template: `
     <div class="analytics-dashboard">
       <mat-tab-group [(selectedIndex)]="activeTabIndex">
@@ -28,50 +52,50 @@ Chart.register(...registerables);
             </div>
     
             <div class="charts-grid">
-              <mat-card class="chart-card">
-                <mat-card-header>
-                  <mat-card-title>Cohort Analysis</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="chart-card" [pad]="false" [elevation]="'sm'">
+                <div class="analytics-card-header">
+                  <h3 class="analytics-card-title">Cohort Analysis</h3>
+                </div>
+                <div class="analytics-card-body">
                   <canvas id="cohortChart"></canvas>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
     
-              <mat-card class="chart-card">
-                <mat-card-header>
-                  <mat-card-title>Sales Funnel</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="chart-card" [pad]="false" [elevation]="'sm'">
+                <div class="analytics-card-header">
+                  <h3 class="analytics-card-title">Sales Funnel</h3>
+                </div>
+                <div class="analytics-card-body">
                   <canvas id="funnelChart"></canvas>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
     
-              <mat-card class="chart-card">
-                <mat-card-header>
-                  <mat-card-title>Agent Performance</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="chart-card" [pad]="false" [elevation]="'sm'">
+                <div class="analytics-card-header">
+                  <h3 class="analytics-card-title">Agent Performance</h3>
+                </div>
+                <div class="analytics-card-body">
                   <canvas id="agentChart"></canvas>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
     
-              <mat-card class="chart-card">
-                <mat-card-header>
-                  <mat-card-title>Market Trends</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="chart-card" [pad]="false" [elevation]="'sm'">
+                <div class="analytics-card-header">
+                  <h3 class="analytics-card-title">Market Trends</h3>
+                </div>
+                <div class="analytics-card-body">
                   <canvas id="marketChart"></canvas>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
     
-              <mat-card class="chart-card full-width">
-                <mat-card-header>
-                  <mat-card-title>Revenue Forecast</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="chart-card full-width" [pad]="false" [elevation]="'sm'">
+                <div class="analytics-card-header">
+                  <h3 class="analytics-card-title">Revenue Forecast</h3>
+                </div>
+                <div class="analytics-card-body">
                   <canvas id="revenueChart"></canvas>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
             </div>
           </div>
         </mat-tab>
@@ -100,7 +124,7 @@ Chart.register(...registerables);
     
       @if (loading) {
         <div class="loading-overlay">
-          <mat-spinner></mat-spinner>
+          <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
         </div>
       }
     </div>
@@ -131,9 +155,38 @@ Chart.register(...registerables);
       grid-column: 1 / -1;
     }
 
-    .chart-card mat-card-content {
+    .analytics-card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--ds-divider);
+    }
+
+    .analytics-card-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ds-text);
+    }
+
+    .analytics-card-body {
       height: calc(100% - 80px);
       position: relative;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .chart-card {
+      display: block;
+    }
+
+    .chart-card > .ds-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .chart-card .analytics-card-body {
+      flex: 1;
+      min-height: 0;
     }
 
     .chart-card canvas {
@@ -156,7 +209,7 @@ Chart.register(...registerables);
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(255, 255, 255, 0.8);
+      background: color-mix(in srgb, var(--ds-surface) 85%, transparent);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -273,8 +326,8 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
         datasets: [{
           label: 'Conversion Rate (%)',
           data: this.cohortData.data.map(d => d.value),
-          borderColor: '#1976d2',
-          backgroundColor: 'rgba(25, 118, 210, 0.1)',
+          borderColor: resolveDsToken('--ds-marine'),
+          backgroundColor: dsRgba('--ds-marine', 0.12),
           tension: 0.4
         }]
       },
@@ -299,7 +352,7 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
       this.funnelChart.destroy();
     }
 
-    const colors = ['#1976d2', '#2196f3', '#64b5f6', '#90caf9', '#bbdefb', '#e3f2fd'];
+    const colors = dsFunnelBarColors(this.funnelData.data.length);
 
     this.funnelChart = new Chart(canvas, {
       type: 'bar',
@@ -335,7 +388,7 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
         datasets: [{
           label: 'Performance Score',
           data: this.agentPerformanceData.data.map(d => d.value as number),
-          backgroundColor: '#4caf50'
+          backgroundColor: resolveDsToken('--ds-success')
         }]
       },
       options: {
@@ -361,8 +414,8 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
         datasets: [{
           label: 'Average Price',
           data: this.marketTrendsData.data.map(d => d.value as number),
-          borderColor: '#ff9800',
-          backgroundColor: 'rgba(255, 152, 0, 0.1)',
+          borderColor: resolveDsToken('--ds-primary'),
+          backgroundColor: dsRgba('--ds-primary', 0.12),
           tension: 0.4
         }]
       },
@@ -393,14 +446,14 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
           {
             label: 'Historical Revenue',
             data: historicalData.map(d => d.value as number),
-            borderColor: '#1976d2',
-            backgroundColor: 'rgba(25, 118, 210, 0.1)'
+            borderColor: resolveDsToken('--ds-marine'),
+            backgroundColor: dsRgba('--ds-marine', 0.12)
           },
           {
             label: 'Forecast',
             data: new Array(historicalData.length).fill(null).concat(forecastData.map(d => d.value as number)),
-            borderColor: '#ff9800',
-            backgroundColor: 'rgba(255, 152, 0, 0.1)',
+            borderColor: resolveDsToken('--ds-primary'),
+            backgroundColor: dsRgba('--ds-primary', 0.12),
             borderDash: [5, 5]
           }
         ]

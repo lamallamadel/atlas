@@ -9,7 +9,7 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 import { DatetimePickerComponent } from './datetime-picker.component';
 import { NgClass } from '@angular/common';
 import { MatButton } from '@angular/material/button';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 export interface AppointmentFormData {
   id?: number;
@@ -35,7 +35,7 @@ export interface AppointmentFormData {
             ])
         ])
     ],
-    imports: [FocusTrapDirective, MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, DatetimePickerComponent, NgClass, MatDialogActions, MatButton, MatProgressSpinner]
+    imports: [FocusTrapDirective, MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, DatetimePickerComponent, NgClass, MatDialogActions, MatButton, DsSkeletonComponent]
 })
 export class AppointmentFormDialogComponent implements OnInit {
   appointmentForm!: FormGroup;

@@ -1,10 +1,36 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { WorkflowApiService, WorkflowSimulationRequest, WorkflowSimulationResponse, WorkflowDefinition } from '../services/workflow-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DsCardComponent } from '../design-system';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatListModule } from '@angular/material/list';
 
 @Component({
   selector: 'app-workflow-simulation',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DsCardComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDividerModule,
+    MatChipsModule,
+    MatExpansionModule,
+    MatListModule,
+  ],
   templateUrl: './workflow-simulation.component.html',
   styleUrls: ['./workflow-simulation.component.css']
 })
@@ -57,11 +83,11 @@ export class WorkflowSimulationComponent implements OnInit {
   runSimulation(): void {
     if (this.simulationForm.valid) {
       this.isRunning = true;
-      
+
       let testData: any;
       try {
         testData = JSON.parse(this.simulationForm.value.testData);
-      } catch (error) {
+      } catch {
         this.snackBar.open('Invalid JSON in test data', 'Close', { duration: 3000 });
         this.isRunning = false;
         return;
@@ -117,22 +143,33 @@ export class WorkflowSimulationComponent implements OnInit {
 
   getStatusColor(status: string): string {
     switch (status) {
-      case 'COMPLETED': return 'primary';
-      case 'FAILED': return 'warn';
-      case 'RUNNING': return 'accent';
-      default: return '';
+      case 'COMPLETED':
+        return 'primary';
+      case 'FAILED':
+        return 'warn';
+      case 'RUNNING':
+        return 'accent';
+      default:
+        return '';
     }
   }
 
   getLogEventColor(eventType: string): string {
     switch (eventType) {
-      case 'START': return 'primary';
-      case 'END': return 'primary';
-      case 'VALIDATION_SUCCESS': return 'accent';
-      case 'VALIDATION_FAILED': return 'warn';
-      case 'CONDITION_FAILED': return 'warn';
-      case 'ERROR': return 'warn';
-      default: return '';
+      case 'START':
+        return 'primary';
+      case 'END':
+        return 'primary';
+      case 'VALIDATION_SUCCESS':
+        return 'accent';
+      case 'VALIDATION_FAILED':
+        return 'warn';
+      case 'CONDITION_FAILED':
+        return 'warn';
+      case 'ERROR':
+        return 'warn';
+      default:
+        return '';
     }
   }
 }

@@ -9,7 +9,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { FormsModule } from '@angular/forms';
@@ -69,7 +68,6 @@ describe('WhatsappMessagingUiComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatChipsModule,
-        MatProgressSpinnerModule,
         ScrollingModule,
         TextFieldModule,
         WhatsappMessagingUiComponent,
@@ -208,7 +206,7 @@ describe('WhatsappMessagingUiComponent', () => {
   });
 
   it('should validate image file size', () => {
-    const largeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'large.jpg', {
+    const largeFile = new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'large.jpg', {
       type: 'image/jpeg',
     });
     const result = component['validateAndCreateAttachment'](largeFile);

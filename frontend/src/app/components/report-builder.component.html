@@ -1,11 +1,11 @@
 <div class="report-builder-container">
-  <mat-card class="builder-card">
-    <mat-card-header>
-      <mat-card-title>Custom Report Builder</mat-card-title>
-      <mat-card-subtitle>Drag and drop dimensions and metrics to create your custom report</mat-card-subtitle>
-    </mat-card-header>
+  <ds-card class="builder-card" [pad]="false" [elevation]="'sm'">
+    <div class="rb-card-header">
+      <h2 class="rb-card-title">Custom Report Builder</h2>
+      <p class="rb-card-subtitle">Drag and drop dimensions and metrics to create your custom report</p>
+    </div>
 
-    <mat-card-content>
+    <div class="rb-card-body">
       <div class="builder-grid">
         <div class="available-section">
           <h3>Available Dimensions</h3>
@@ -136,15 +136,15 @@
           </button>
         </div>
       }
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 
   @if (reportGenerated) {
-    <mat-card class="results-card">
-      <mat-card-header>
-        <mat-card-title>Report Results</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
+    <ds-card class="results-card" [pad]="false" [elevation]="'sm'">
+      <div class="rb-card-header">
+        <h2 class="rb-card-title">Report Results</h2>
+      </div>
+      <div class="rb-card-body">
         <div class="export-controls">
           <mat-form-field appearance="outline">
             <mat-label>Report Title</mat-label>
@@ -199,13 +199,13 @@
             <tr mat-row *matRowDef="let row; columns: getDisplayedColumns()"></tr>
           </table>
         </div>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </ds-card>
   }
 
   @if (loading) {
     <div class="loading-overlay">
-      <mat-spinner></mat-spinner>
+      <ds-skeleton variant="circle" width="48px" height="48px"></ds-skeleton>
     </div>
   }
 </div>

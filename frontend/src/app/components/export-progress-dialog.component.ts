@@ -68,7 +68,7 @@ export interface ExportProgressDialogData {
       gap: 12px;
       margin: 0;
       padding: 16px 24px;
-      color: #2c5aa0;
+      color: var(--ds-marine);
     }
 
     .title-icon {

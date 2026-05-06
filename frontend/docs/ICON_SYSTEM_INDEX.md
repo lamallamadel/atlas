@@ -7,65 +7,64 @@ Complete documentation for the custom real estate iconography system with 38 SVG
 ### 🚀 Getting Started
 
 1. **[Quick Start Guide](./ICON_QUICK_START.md)** ⭐ START HERE
-   - 5-minute setup guide
-   - Installation checklist
-   - Basic usage examples
-   - All 38 icon IDs
-   - Troubleshooting
-
+  - 5-minute setup guide
+  - Installation checklist
+  - Basic usage examples
+  - All 38 icon IDs
+  - Troubleshooting
 2. **[Visual Reference](./ICON_VISUAL_REFERENCE.md)**
-   - Visual catalog of all icons
-   - Category organization
-   - Color recommendations
-   - Size guidelines
-   - Quick copy-paste examples
+  - Visual catalog of all icons
+  - Category organization
+  - Color recommendations
+  - Size guidelines
+  - Quick copy-paste examples
 
 ### 📖 Detailed Documentation
 
-3. **[Complete Icon Documentation](./REAL_ESTATE_ICONS.md)**
-   - Full API reference
-   - IconRegistryService methods
-   - Component properties
-   - Performance optimization
-   - Accessibility guidelines
-   - Browser support
-   - Migration from Material Icons
-
-4. **[Implementation Examples](./ICON_IMPLEMENTATION_EXAMPLES.md)**
-   - 10+ practical code examples
-   - Before/after comparisons
-   - Property card templates
-   - Dashboard implementations
-   - Action buttons
-   - Feature lists
-   - Document management
-
-5. **[Storybook Setup](../.storybook/README.md)**
-   - Storybook installation
-   - Running interactive docs
-   - Building for production
-   - Customization guide
-   - Troubleshooting
+1. **[Complete Icon Documentation](./REAL_ESTATE_ICONS.md)**
+  - Full API reference
+  - IconRegistryService methods
+  - Component properties
+  - Performance optimization
+  - Accessibility guidelines
+  - Browser support
+  - Migration from Material Icons
+2. **[Implementation Examples](./ICON_IMPLEMENTATION_EXAMPLES.md)**
+  - 10+ practical code examples
+  - Before/after comparisons
+  - Property card templates
+  - Dashboard implementations
+  - Action buttons
+  - Feature lists
+  - Document management
+3. **[Storybook Setup](../.storybook/README.md)**
+  - Storybook installation
+  - Running interactive docs
+  - Building for production
+  - Customization guide
+  - Troubleshooting
 
 ### 📊 Technical Reference
 
-6. **[Implementation Summary](../../ICON_SYSTEM_IMPLEMENTATION_SUMMARY.md)**
-   - Complete deliverables list
-   - Technical specifications
-   - File structure
-   - Integration checklist
-   - Future enhancements
+1. **[Implementation Summary](../../ICON_SYSTEM_IMPLEMENTATION_SUMMARY.md)**
+  - Complete deliverables list
+  - Technical specifications
+  - File structure
+  - Integration checklist
+  - Future enhancements
 
 ## 🎯 Quick Links by Role
 
 ### For Developers
 
 **First Time Setup** (5 minutes):
+
 1. Read [Quick Start Guide](./ICON_QUICK_START.md)
 2. Add component to AppModule
 3. Start using icons: `<app-re-icon icon="re-house"></app-re-icon>`
 
 **Common Tasks**:
+
 - Browse icons → [Visual Reference](./ICON_VISUAL_REFERENCE.md)
 - Implementation patterns → [Examples](./ICON_IMPLEMENTATION_EXAMPLES.md)
 - API reference → [Full Documentation](./REAL_ESTATE_ICONS.md)
@@ -73,18 +72,21 @@ Complete documentation for the custom real estate iconography system with 38 SVG
 ### For Designers
 
 **Design Resources**:
+
 - SVG sprite file: `src/assets/icons/real-estate-icons.svg`
 - Grid: 24x24px
 - Stroke: 2px outline
 - Style: Consistent with Material Icons
 
 **Visual Reference**:
+
 - [Visual Catalog](./ICON_VISUAL_REFERENCE.md)
 - [Storybook Interactive Gallery](../.storybook/README.md)
 
 ### For QA/Testers
 
 **Testing Resources**:
+
 - Unit tests: `src/app/components/re-icon/*.spec.ts`
 - Storybook stories: `src/stories/*.stories.ts`
 - Run tests: `npm test`
@@ -130,14 +132,16 @@ frontend/
 
 ### 38 Icons Across 6 Categories
 
-| Category | Count | Examples |
-|----------|-------|----------|
-| **House Types** | 6 | house, apartment, villa, office, warehouse, land |
-| **Rooms** | 6 | bedroom, bathroom, kitchen, living-room, garage, balcony |
-| **Amenities** | 7 | pool, garden, parking, elevator, security, heating, ac |
-| **Documents** | 5 | contract, deed, inspection, blueprint, certificate |
-| **Actions** | 7 | visit, keys, sold, rent, price, offer, calendar-visit |
-| **Measurements** | 7 | area, floor-plan, location, compass, energy, photo, virtual-tour |
+
+| Category         | Count | Examples                                                         |
+| ---------------- | ----- | ---------------------------------------------------------------- |
+| **House Types**  | 6     | house, apartment, villa, office, warehouse, land                 |
+| **Rooms**        | 6     | bedroom, bathroom, kitchen, living-room, garage, balcony         |
+| **Amenities**    | 7     | pool, garden, parking, elevator, security, heating, ac           |
+| **Documents**    | 5     | contract, deed, inspection, blueprint, certificate               |
+| **Actions**      | 7     | visit, keys, sold, rent, price, offer, calendar-visit            |
+| **Measurements** | 7     | area, floor-plan, location, compass, energy, photo, virtual-tour |
+
 
 ## 🔧 Features
 
@@ -155,16 +159,19 @@ frontend/
 ## 📝 Usage Examples
 
 ### Basic Icon
+
 ```html
 <app-re-icon icon="re-house"></app-re-icon>
 ```
 
 ### With Size & Color
+
 ```html
 <app-re-icon icon="re-house" size="large" color="#1976d2"></app-re-icon>
 ```
 
 ### In Property Card
+
 ```html
 <div class="property-card">
   <app-re-icon icon="re-house" size="medium"></app-re-icon>
@@ -177,6 +184,7 @@ frontend/
 ```
 
 ### Search Icons Programmatically
+
 ```typescript
 const results = this.iconRegistry.searchIcons('piscine');
 // Returns: [{ id: 're-pool', name: 'Piscine', ... }]
@@ -184,14 +192,14 @@ const results = this.iconRegistry.searchIcons('piscine');
 
 ## 🚦 Getting Started Checklist
 
-- [ ] 1. Read [Quick Start Guide](./ICON_QUICK_START.md)
-- [ ] 2. Add ReIconComponent to app.module.ts
-- [ ] 3. Add HttpClientModule to imports
-- [ ] 4. Test basic usage: `<app-re-icon icon="re-house"></app-re-icon>`
-- [ ] 5. Browse [Visual Reference](./ICON_VISUAL_REFERENCE.md)
-- [ ] 6. Review [Implementation Examples](./ICON_IMPLEMENTATION_EXAMPLES.md)
-- [ ] 7. (Optional) Install & run Storybook
-- [ ] 8. Replace Material Icons in templates
+- 1. Read [Quick Start Guide](./ICON_QUICK_START.md)
+- 1. Add ReIconComponent to app.module.ts
+- 1. Add HttpClientModule to imports
+- 1. Test basic usage: `<app-re-icon icon="re-house"></app-re-icon>`
+- 1. Browse [Visual Reference](./ICON_VISUAL_REFERENCE.md)
+- 1. Review [Implementation Examples](./ICON_IMPLEMENTATION_EXAMPLES.md)
+- 1. (Optional) Install & run Storybook
+- 1. Replace Material Icons in templates
 
 ## 📊 Performance Metrics
 
@@ -213,59 +221,70 @@ All modern browsers with SVG support.
 ## 🎓 Learning Path
 
 ### Beginner (15 minutes)
+
 1. Read [Quick Start](./ICON_QUICK_START.md)
 2. Try basic example
 3. Browse [Visual Reference](./ICON_VISUAL_REFERENCE.md)
 
 ### Intermediate (30 minutes)
-4. Review [Implementation Examples](./ICON_IMPLEMENTATION_EXAMPLES.md)
-5. Integrate icons into one component
-6. Run unit tests
+
+1. Review [Implementation Examples](./ICON_IMPLEMENTATION_EXAMPLES.md)
+2. Integrate icons into one component
+3. Run unit tests
 
 ### Advanced (1 hour)
-7. Read [Complete Documentation](./REAL_ESTATE_ICONS.md)
-8. Install & explore Storybook
-9. Implement search/filter functionality
-10. Replace Material Icons throughout app
+
+1. Read [Complete Documentation](./REAL_ESTATE_ICONS.md)
+2. Install & explore Storybook
+3. Implement search/filter functionality
+4. Replace Material Icons throughout app
 
 ## 🔗 External Resources
 
-- **Material Icons**: https://fonts.google.com/icons
-- **SVG Specification**: https://www.w3.org/TR/SVG2/
-- **Angular DomSanitizer**: https://angular.io/api/platform-browser/DomSanitizer
-- **Storybook**: https://storybook.js.org/
-- **WCAG Guidelines**: https://www.w3.org/WAI/WCAG21/quickref/
+- **Material Icons**: [https://fonts.google.com/icons](https://fonts.google.com/icons)
+- **SVG Specification**: [https://www.w3.org/TR/SVG2/](https://www.w3.org/TR/SVG2/)
+- **Angular DomSanitizer**: [https://angular.io/api/platform-browser/DomSanitizer](https://angular.io/api/platform-browser/DomSanitizer)
+- **Storybook**: [https://storybook.js.org/](https://storybook.js.org/)
+- **WCAG Guidelines**: [https://www.w3.org/WAI/WCAG21/quickref/](https://www.w3.org/WAI/WCAG21/quickref/)
 
 ## 💡 Common Questions
 
 ### Q: How do I add a new icon?
+
 **A**: Add SVG symbol to `real-estate-icons.svg` and metadata to `IconRegistryService`.
 
 ### Q: Can I use these icons outside Angular?
+
 **A**: Yes! Extract individual SVGs from the sprite file.
 
 ### Q: Do icons work with server-side rendering?
+
 **A**: Yes, with appropriate DomSanitizer configuration.
 
 ### Q: How do I customize icon styles?
+
 **A**: Use CSS classes or inline styles on the parent element.
 
 ### Q: Are icons accessible?
+
 **A**: Yes, with ARIA labels and semantic HTML structure.
 
 ## 🐛 Troubleshooting
 
 ### Icons Not Showing
+
 - Check HttpClientModule is imported
 - Verify SVG file exists at `assets/icons/real-estate-icons.svg`
 - Check browser console for errors
 
 ### Performance Issues
+
 - Preload icons in AppComponent.ngOnInit()
 - Verify OnPush change detection is working
 - Check for multiple HTTP requests (should be 1)
 
 ### Storybook Errors
+
 - Run `npm install` to install dependencies
 - Clear cache: `rm -rf node_modules/.cache`
 - See [Storybook README](../.storybook/README.md)
@@ -273,6 +292,7 @@ All modern browsers with SVG support.
 ## 📞 Support & Feedback
 
 For issues or questions:
+
 1. Check documentation files in this directory
 2. Run Storybook for interactive examples
 3. Review unit tests for usage patterns

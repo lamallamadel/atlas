@@ -8,7 +8,7 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 import { NgClass } from '@angular/common';
 import { DatetimePickerComponent } from './datetime-picker.component';
 import { MatButton } from '@angular/material/button';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 export interface MessageFormData {
   dossierId: number;
@@ -26,7 +26,7 @@ export interface MessageFormData {
             ])
         ])
     ],
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, NgClass, DatetimePickerComponent, MatDialogActions, MatButton, MatProgressSpinner]
+    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, NgClass, DatetimePickerComponent, MatDialogActions, MatButton, DsSkeletonComponent]
 })
 export class MessageFormDialogComponent implements OnInit {
   messageForm!: FormGroup;

@@ -13,14 +13,14 @@
     }
 
     p {
-      color: #666;
+      color: var(--ds-text-muted);
     }
   }
 
   .tabs {
     display: flex;
     gap: 1rem;
-    border-bottom: 2px solid #e5e7eb;
+    border-bottom: 2px solid var(--ds-divider);
     margin-bottom: 2rem;
 
     button {
@@ -33,12 +33,12 @@
       transition: all 0.2s;
 
       &:hover {
-        background-color: #f9fafb;
+        background-color: var(--ds-surface-2);
       }
 
       &.active {
-        color: #2563eb;
-        border-bottom-color: #2563eb;
+        color: var(--ds-marine);
+        border-bottom-color: var(--ds-marine);
       }
     }
   }
@@ -64,11 +64,11 @@
 
   .api-key-card,
   .webhook-card {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-divider);
+    border-radius: var(--ds-radius-md);
     padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--ds-shadow-xs);
 
     .key-header,
     .webhook-header {
@@ -91,10 +91,10 @@
       p {
         margin: 0.5rem 0;
         font-size: 0.875rem;
-        color: #4b5563;
+        color: var(--ds-text-muted);
 
         strong {
-          color: #1f2937;
+          color: var(--ds-text);
         }
       }
     }
@@ -109,9 +109,9 @@
   .webhook-details-panel {
     margin-top: 2rem;
     padding: 1.5rem;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-divider);
+    border-radius: var(--ds-radius-md);
 
     h3 {
       font-size: 1.25rem;
@@ -134,8 +134,8 @@
         code {
           flex: 1;
           padding: 0.5rem;
-          background: #f3f4f6;
-          border-radius: 4px;
+          background: var(--ds-surface-offset);
+          border-radius: var(--ds-radius-sm);
           font-family: monospace;
         }
       }
@@ -149,31 +149,31 @@
     margin-bottom: 2rem;
 
     .stat-card {
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
+      background: var(--ds-surface);
+      border: 1px solid var(--ds-divider);
+      border-radius: var(--ds-radius-md);
       padding: 1.5rem;
       text-align: center;
 
       h3 {
         font-size: 0.875rem;
-        color: #6b7280;
+        color: var(--ds-text-muted);
         margin-bottom: 0.5rem;
       }
 
       .stat-value {
         font-size: 2rem;
         font-weight: bold;
-        color: #1f2937;
+        color: var(--ds-text);
       }
     }
   }
 
   .deliveries-table,
   .usage-table {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-divider);
+    border-radius: var(--ds-radius-md);
     overflow: hidden;
 
     table {
@@ -181,35 +181,35 @@
       border-collapse: collapse;
 
       thead {
-        background: #f9fafb;
+        background: var(--ds-surface-2);
 
         th {
           padding: 0.75rem 1rem;
           text-align: left;
           font-weight: 600;
           font-size: 0.875rem;
-          color: #374151;
-          border-bottom: 1px solid #e5e7eb;
+          color: var(--ds-text);
+          border-bottom: 1px solid var(--ds-divider);
         }
       }
 
       tbody {
         tr {
-          border-bottom: 1px solid #e5e7eb;
+          border-bottom: 1px solid var(--ds-divider);
 
           &:last-child {
             border-bottom: none;
           }
 
           &:hover {
-            background: #f9fafb;
+            background: var(--ds-surface-2);
           }
         }
 
         td {
           padding: 0.75rem 1rem;
           font-size: 0.875rem;
-          color: #4b5563;
+          color: var(--ds-text-muted);
         }
       }
     }
@@ -217,7 +217,7 @@
 
   .badge {
     padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
+    border-radius: var(--ds-radius-pill);
     font-size: 0.75rem;
     font-weight: 600;
   }
@@ -226,7 +226,7 @@
   .btn-secondary,
   .btn-danger {
     padding: 0.5rem 1rem;
-    border-radius: 6px;
+    border-radius: var(--ds-radius-sm);
     border: none;
     font-weight: 500;
     cursor: pointer;
@@ -239,29 +239,29 @@
   }
 
   .btn-primary {
-    background: #2563eb;
-    color: white;
+    background: var(--ds-marine);
+    color: var(--ds-text-inverse);
 
     &:hover:not(:disabled) {
-      background: #1d4ed8;
+      background: color-mix(in srgb, var(--ds-marine) 88%, var(--ds-text) 12%);
     }
   }
 
   .btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--ds-surface-offset);
+    color: var(--ds-text);
 
     &:hover:not(:disabled) {
-      background: #e5e7eb;
+      background: var(--ds-divider);
     }
   }
 
   .btn-danger {
-    background: #ef4444;
-    color: white;
+    background: var(--ds-error);
+    color: var(--ds-text-inverse);
 
     &:hover:not(:disabled) {
-      background: #dc2626;
+      background: color-mix(in srgb, var(--ds-error) 88%, var(--ds-text) 12%);
     }
   }
 
@@ -271,7 +271,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: color-mix(in srgb, var(--ds-text) 35%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -279,8 +279,8 @@
   }
 
   .modal-content {
-    background: white;
-    border-radius: 8px;
+    background: var(--ds-surface);
+    border-radius: var(--ds-radius-md);
     padding: 2rem;
     max-width: 500px;
     width: 90%;
@@ -299,7 +299,7 @@
         display: block;
         font-weight: 500;
         margin-bottom: 0.5rem;
-        color: #374151;
+        color: var(--ds-text);
       }
 
       input,
@@ -307,15 +307,14 @@
       textarea {
         width: 100%;
         padding: 0.5rem;
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
+        border: 1px solid var(--ds-border);
+        border-radius: var(--ds-radius-sm);
         font-size: 0.875rem;
 
         &:focus {
           outline: none;
-          border-color: #2563eb;
-          ring: 2px;
-          ring-color: rgba(37, 99, 235, 0.1);
+          border-color: var(--ds-marine);
+          box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-marine) 18%, transparent);
         }
       }
     }
@@ -330,13 +329,13 @@
     .key-created {
       .alert {
         padding: 1rem;
-        border-radius: 6px;
+        border-radius: var(--ds-radius-sm);
         margin-bottom: 1rem;
 
         &.alert-warning {
-          background: #fef3c7;
-          color: #92400e;
-          border: 1px solid #fbbf24;
+          background: var(--ds-warning-hl);
+          color: var(--ds-warning);
+          border: 1px solid var(--ds-warning);
         }
       }
 
@@ -346,8 +345,8 @@
         code {
           display: block;
           padding: 1rem;
-          background: #f3f4f6;
-          border-radius: 6px;
+          background: var(--ds-surface-offset);
+          border-radius: var(--ds-radius-sm);
           font-family: monospace;
           word-break: break-all;
           margin-bottom: 0.5rem;

@@ -13,12 +13,12 @@
 .page-title {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-neutral-900);
+  color: var(--ds-text);
   margin: 0;
 }
 
 .page-content {
-  background: var(--color-neutral-0);
+  background: var(--ds-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   padding: var(--spacing-8);
@@ -29,17 +29,17 @@
   align-items: center;
   gap: var(--spacing-3);
   padding: var(--spacing-4);
-  background-color: var(--color-error-50);
-  border: 1px solid var(--color-error-300);
+  background-color: var(--ds-error-hl);
+  border: 1px solid var(--ds-error);
   border-radius: var(--radius-md);
-  color: var(--color-error-800);
+  color: var(--ds-error);
   margin-bottom: var(--spacing-6);
   font-size: var(--font-size-sm);
 }
 
 .error-icon {
   font-size: var(--font-size-xl);
-  color: var(--color-error-600);
+  color: var(--ds-error);
 }
 
 /* ========================================
@@ -57,7 +57,7 @@
 ::ng-deep .annonce-stepper .mat-horizontal-stepper-header-container {
   margin-bottom: var(--spacing-8);
   padding: var(--spacing-4);
-  background: var(--color-neutral-50);
+  background: var(--ds-surface-2);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
@@ -69,58 +69,58 @@
 }
 
 ::ng-deep .annonce-stepper .mat-step-header:hover {
-  background: var(--color-primary-alpha-10);
+  background: color-mix(in oklab, var(--ds-marine) 10%, transparent);
 }
 
 ::ng-deep .annonce-stepper .mat-step-header.cdk-keyboard-focused,
 ::ng-deep .annonce-stepper .mat-step-header.cdk-program-focused {
-  background: var(--color-primary-alpha-20);
+  background: color-mix(in oklab, var(--ds-marine) 20%, transparent);
 }
 
 ::ng-deep .annonce-stepper .mat-step-header .mat-step-icon {
-  background-color: var(--color-neutral-400);
-  color: var(--color-neutral-0);
+  background-color: var(--ds-text-faint);
+  color: var(--ds-surface);
   width: 32px;
   height: 32px;
   margin-right: var(--spacing-2);
 }
 
 ::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-selected {
-  background-color: var(--color-primary-500);
-  color: var(--color-neutral-0);
+  background-color: var(--ds-marine);
+  color: var(--ds-surface);
 }
 
 ::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-state-done {
-  background-color: var(--color-success-500);
-  color: var(--color-neutral-0);
+  background-color: var(--ds-success);
+  color: var(--ds-surface);
 }
 
 ::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-state-edit {
-  background-color: var(--color-primary-500);
-  color: var(--color-neutral-0);
+  background-color: var(--ds-marine);
+  color: var(--ds-surface);
 }
 
 ::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-state-error {
-  background-color: var(--color-error-500);
-  color: var(--color-neutral-0);
+  background-color: var(--ds-error);
+  color: var(--ds-surface);
 }
 
 ::ng-deep .annonce-stepper .mat-step-label {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--color-neutral-700);
+  color: var(--ds-text-muted);
   white-space: nowrap;
   overflow: visible !important;
   text-overflow: unset !important;
 }
 
 ::ng-deep .annonce-stepper .mat-step-label-selected {
-  color: var(--color-primary-700);
+  color: var(--ds-marine-hover);
   font-weight: var(--font-weight-semibold);
 }
 
 ::ng-deep .annonce-stepper .mat-stepper-horizontal-line {
-  border-top-color: var(--color-neutral-300);
+  border-top-color: var(--ds-border);
   border-top-width: 2px;
   margin: 0 var(--spacing-2);
 }
@@ -157,10 +157,10 @@
 .step-title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-neutral-900);
+  color: var(--ds-text);
   margin-bottom: var(--spacing-6);
   padding-bottom: var(--spacing-3);
-  border-bottom: 2px solid var(--color-primary-200);
+  border-bottom: 2px solid var(--ds-marine-hl);
 }
 
 /* ========================================
@@ -194,48 +194,48 @@
 }
 
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
-  color: var(--color-neutral-300);
+  color: var(--ds-border);
 }
 
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-thick {
-  color: var(--color-primary-500);
+  color: var(--ds-marine);
 }
 
 ::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
-  color: var(--color-primary-500);
-  box-shadow: 0 0 0 2px var(--color-primary-alpha-20);
+  color: var(--ds-marine);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ds-marine) 20%, transparent);
 }
 
 ::ng-deep .mat-form-field-appearance-outline.mat-form-field-invalid .mat-form-field-outline-thick {
-  color: var(--color-error-500);
+  color: var(--ds-error);
 }
 
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-label {
-  color: var(--color-neutral-600);
+  color: var(--ds-text-muted);
 }
 
 ::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-label {
-  color: var(--color-primary-600);
+  color: var(--ds-marine);
 }
 
 ::ng-deep .mat-form-field-appearance-outline.mat-form-field-invalid .mat-form-field-label {
-  color: var(--color-error-600);
+  color: var(--ds-error);
 }
 
 ::ng-deep .mat-error {
   font-size: var(--font-size-xs);
-  color: var(--color-error-600);
+  color: var(--ds-error);
   margin-top: var(--spacing-1);
 }
 
 ::ng-deep .mat-hint {
   font-size: var(--font-size-xs);
-  color: var(--color-neutral-600);
+  color: var(--ds-text-muted);
   margin-top: var(--spacing-1);
 }
 
 .required {
-  color: var(--color-error-500);
+  color: var(--ds-error);
 }
 
 /* ========================================
@@ -247,46 +247,46 @@
 }
 
 .drag-drop-zone {
-  border: 2px dashed var(--color-neutral-300);
+  border: 2px dashed var(--ds-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-8);
   text-align: center;
-  background: var(--color-neutral-50);
+  background: var(--ds-surface-2);
   transition: var(--transition-base);
   cursor: pointer;
   margin-bottom: var(--spacing-6);
 }
 
 .drag-drop-zone:hover {
-  border-color: var(--color-primary-400);
-  background: var(--color-primary-alpha-10);
+  border-color: var(--ds-marine-light);
+  background: color-mix(in oklab, var(--ds-marine) 10%, transparent);
 }
 
 .drag-drop-zone.drag-active {
-  border-color: var(--color-primary-500);
-  background: var(--color-primary-alpha-20);
+  border-color: var(--ds-marine);
+  background: color-mix(in oklab, var(--ds-marine) 20%, transparent);
   border-style: solid;
-  box-shadow: 0 0 0 4px var(--color-primary-alpha-10);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ds-marine) 10%, transparent);
 }
 
 .upload-icon {
   font-size: 64px;
   width: 64px;
   height: 64px;
-  color: var(--color-primary-400);
+  color: var(--ds-marine-light);
   margin: 0 auto var(--spacing-4);
 }
 
 .upload-text {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
-  color: var(--color-neutral-700);
+  color: var(--ds-text-muted);
   margin-bottom: var(--spacing-2);
 }
 
 .upload-subtext {
   font-size: var(--font-size-sm);
-  color: var(--color-neutral-600);
+  color: var(--ds-text-muted);
 }
 
 .add-photo-section {
@@ -296,29 +296,29 @@
 .empty-photos {
   text-align: center;
   padding: var(--spacing-8);
-  background: var(--color-neutral-50);
+  background: var(--ds-surface-2);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-neutral-200);
+  border: 1px solid var(--ds-divider);
 }
 
 .empty-icon {
   font-size: 72px;
   width: 72px;
   height: 72px;
-  color: var(--color-neutral-400);
+  color: var(--ds-text-faint);
   margin: 0 auto var(--spacing-4);
 }
 
 .empty-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
-  color: var(--color-neutral-700);
+  color: var(--ds-text-muted);
   margin-bottom: var(--spacing-2);
 }
 
 .empty-subtitle {
   font-size: var(--font-size-sm);
-  color: var(--color-neutral-600);
+  color: var(--ds-text-muted);
 }
 
 /* ========================================
@@ -344,14 +344,14 @@
 }
 
 .photo-drag-placeholder {
-  background: var(--color-primary-alpha-10);
-  border: 2px dashed var(--color-primary-400);
+  background: color-mix(in oklab, var(--ds-marine) 10%, transparent);
+  border: 2px dashed var(--ds-marine-light);
   border-radius: var(--radius-lg);
   min-height: 200px;
 }
 
 .photo-thumbnail-wrapper {
-  background: var(--color-neutral-0);
+  background: var(--ds-surface);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-md);
@@ -362,7 +362,7 @@
   position: relative;
   width: 100%;
   padding-top: 100%;
-  background: var(--color-neutral-100);
+  background: var(--ds-bg);
   overflow: hidden;
 }
 
@@ -390,8 +390,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--color-error-50);
-  color: var(--color-error-600);
+  background: var(--ds-error-hl);
+  color: var(--ds-error);
   font-size: var(--font-size-sm);
   gap: var(--spacing-2);
 }
@@ -421,12 +421,12 @@
 }
 
 .btn-delete-photo {
-  background: var(--color-error-500);
-  color: var(--color-neutral-0);
+  background: var(--ds-error);
+  color: var(--ds-surface);
 }
 
 .btn-delete-photo:hover {
-  background: var(--color-error-600);
+  background: var(--ds-error);
 }
 
 .photo-index {
@@ -434,9 +434,9 @@
   text-align: center;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  color: var(--color-neutral-700);
-  background: var(--color-neutral-50);
-  border-top: 1px solid var(--color-neutral-200);
+  color: var(--ds-text-muted);
+  background: var(--ds-surface-2);
+  border-top: 1px solid var(--ds-divider);
 }
 
 /* ========================================
@@ -469,7 +469,7 @@
   gap: var(--spacing-4);
   margin-top: var(--spacing-8);
   padding-top: var(--spacing-6);
-  border-top: 1px solid var(--color-neutral-200);
+  border-top: 1px solid var(--ds-divider);
 }
 
 .btn-cancel,
@@ -524,7 +524,7 @@
 }
 
 ::ng-deep .mat-stroked-button:hover {
-  background: var(--color-neutral-50);
+  background: var(--ds-surface-2);
 }
 
 /* ========================================

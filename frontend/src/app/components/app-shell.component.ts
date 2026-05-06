@@ -44,11 +44,11 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
       left: 0;
       right: 0;
       bottom: 0;
-      background: var(--color-neutral-100, #f5f5f5);
+      background: var(--ds-bg);
       z-index: 9999;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity var(--ds-transition-med);
     }
 
     .app-shell.loading {
@@ -57,9 +57,9 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
 
     .app-shell-header {
       height: 64px;
-      background: var(--color-neutral-0, #ffffff);
-      border-bottom: 1px solid var(--color-neutral-200, #e0e0e0);
-      padding: 0 24px;
+      background: var(--ds-surface);
+      border-bottom: 1px solid var(--ds-divider);
+      padding: 0 var(--ds-space-6);
       display: flex;
       align-items: center;
     }
@@ -74,26 +74,26 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
     .logo-skeleton {
       width: 150px;
       height: 36px;
-      background: var(--color-neutral-200, #e0e0e0);
-      border-radius: 4px;
+      background: var(--ds-surface-offset);
+      border-radius: var(--ds-radius-sm);
       animation: pulse 1.5s ease-in-out infinite;
     }
 
     .nav-skeleton {
       display: flex;
-      gap: 16px;
+      gap: var(--ds-space-4);
     }
 
     .nav-item-skeleton {
       width: 80px;
       height: 32px;
-      background: var(--color-neutral-200, #e0e0e0);
-      border-radius: 4px;
+      background: var(--ds-surface-offset);
+      border-radius: var(--ds-radius-sm);
       animation: pulse 1.5s ease-in-out infinite;
     }
 
     .app-shell-content {
-      padding: 24px;
+      padding: var(--ds-space-6);
       overflow-y: auto;
       height: calc(100vh - 128px);
     }
@@ -101,21 +101,21 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
     @media (max-width: 767px) {
       .app-shell-content {
         height: calc(100vh - 128px - 64px);
-        padding: 16px;
+        padding: var(--ds-space-4);
       }
     }
 
     .content-skeleton {
-      max-width: 1200px;
+      max-width: var(--ds-content-full);
       margin: 0 auto;
     }
 
     .card-skeleton {
-      background: var(--color-neutral-0, #ffffff);
-      border-radius: 8px;
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background: var(--ds-surface);
+      border-radius: var(--ds-radius-md);
+      padding: var(--ds-space-6);
+      margin-bottom: var(--ds-space-4);
+      box-shadow: var(--ds-shadow-sm);
     }
 
     .card-skeleton::before {
@@ -123,9 +123,9 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
       display: block;
       width: 60%;
       height: 24px;
-      background: var(--color-neutral-200, #e0e0e0);
-      border-radius: 4px;
-      margin-bottom: 12px;
+      background: var(--ds-surface-offset);
+      border-radius: var(--ds-radius-sm);
+      margin-bottom: var(--ds-space-3);
       animation: pulse 1.5s ease-in-out infinite;
     }
 
@@ -134,8 +134,8 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
       display: block;
       width: 100%;
       height: 80px;
-      background: var(--color-neutral-200, #e0e0e0);
-      border-radius: 4px;
+      background: var(--ds-surface-offset);
+      border-radius: var(--ds-radius-sm);
       animation: pulse 1.5s ease-in-out infinite;
       animation-delay: 0.2s;
     }
@@ -152,9 +152,9 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
         left: 0;
         right: 0;
         height: 64px;
-        background: var(--color-neutral-0, #ffffff);
-        border-top: 1px solid var(--color-neutral-200, #e0e0e0);
-        padding: 8px 16px;
+        background: var(--ds-surface);
+        border-top: 1px solid var(--ds-divider);
+        padding: var(--ds-space-2) var(--ds-space-4);
       }
 
       .footer-skeleton {
@@ -166,8 +166,8 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
       .footer-item-skeleton {
         width: 60px;
         height: 48px;
-        background: var(--color-neutral-200, #e0e0e0);
-        border-radius: 8px;
+        background: var(--ds-surface-offset);
+        border-radius: var(--ds-radius-md);
         animation: pulse 1.5s ease-in-out infinite;
       }
     }
@@ -181,16 +181,16 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
       }
     }
 
-    /* Dark theme */
+    /* Dark theme — tokens */
     .dark-theme .app-shell {
-      background: var(--color-neutral-900, #212121);
+      background: var(--ds-bg);
     }
 
     .dark-theme .app-shell-header,
     .dark-theme .card-skeleton,
     .dark-theme .app-shell-footer {
-      background: var(--color-neutral-800, #424242);
-      border-color: var(--color-neutral-700, #616161);
+      background: var(--ds-surface);
+      border-color: var(--ds-border);
     }
 
     .dark-theme .logo-skeleton,
@@ -198,7 +198,7 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
     .dark-theme .card-skeleton::before,
     .dark-theme .card-skeleton::after,
     .dark-theme .footer-item-skeleton {
-      background: var(--color-neutral-700, #616161);
+      background: var(--ds-surface-dynamic);
     }
   `]
 })

@@ -1,22 +1,26 @@
 .task-card {
+  display: block;
   margin-bottom: 16px;
-  transition: all 0.3s ease;
   position: relative;
 }
 
-.task-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.task-card > .ds-card {
+  transition: all 0.3s ease;
+}
+
+.task-card:hover > .ds-card {
+  box-shadow: var(--ds-shadow-md);
   transform: translateY(-2px);
 }
 
-.task-card.overdue {
-  border-left: 4px solid #e74c3c;
+.task-card.overdue > .ds-card {
+  border-left: 4px solid var(--ds-error);
   animation: pulse 2s ease-in-out infinite;
 }
 
-.task-card.completed {
+.task-card.completed > .ds-card {
   opacity: 0.7;
-  background-color: #f0f0f0;
+  background-color: var(--ds-surface-offset);
 }
 
 @keyframes pulse {
@@ -26,6 +30,14 @@
   50% {
     box-shadow: 0 4px 12px rgba(231, 76, 60, 0.6);
   }
+}
+
+.task-card-header {
+  padding: 16px 16px 0;
+}
+
+.task-card-body {
+  padding: 0 16px 16px;
 }
 
 .task-header {
@@ -39,12 +51,12 @@
   flex: 1;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .task-title.completed-text {
   text-decoration: line-through;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .priority-badge {
@@ -57,26 +69,26 @@
 }
 
 .priority-badge.priority-high {
-  background-color: #fee;
-  color: #e74c3c;
-  border: 1px solid #e74c3c;
+  background-color: var(--ds-error-hl);
+  color: var(--ds-error);
+  border: 1px solid var(--ds-error);
 }
 
 .priority-badge.priority-medium {
-  background-color: #fff4e5;
-  color: #f39c12;
-  border: 1px solid #f39c12;
+  background-color: var(--ds-warning-hl);
+  color: var(--ds-warning);
+  border: 1px solid var(--ds-warning);
 }
 
 .priority-badge.priority-low {
-  background-color: #e8f5e9;
-  color: #27ae60;
-  border: 1px solid #27ae60;
+  background-color: var(--ds-success-hl);
+  color: var(--ds-success);
+  border: 1px solid var(--ds-success);
 }
 
 .task-description {
   margin: 12px 0;
-  color: #666;
+  color: var(--ds-text-muted);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -93,14 +105,14 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .meta-item mat-icon {
   font-size: 18px;
   width: 18px;
   height: 18px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .meta-item.due-date {
@@ -108,19 +120,19 @@
 }
 
 .overdue-text {
-  color: #e74c3c !important;
+  color: var(--ds-error) !important;
 }
 
 .overdue-text mat-icon {
-  color: #e74c3c !important;
+  color: var(--ds-error) !important;
 }
 
 .approaching-text {
-  color: #f39c12 !important;
+  color: var(--ds-warning) !important;
 }
 
 .approaching-text mat-icon {
-  color: #f39c12 !important;
+  color: var(--ds-warning) !important;
 }
 
 .warning-icon {
@@ -136,20 +148,20 @@
   }
 }
 
-mat-card-actions {
+.task-card-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 8px 16px 16px;
 }
 
-mat-card-actions button {
+.task-card-actions button {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-mat-card-actions button mat-icon {
+.task-card-actions button mat-icon {
   font-size: 18px;
   width: 18px;
   height: 18px;

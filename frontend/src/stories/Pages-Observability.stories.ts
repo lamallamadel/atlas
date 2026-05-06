@@ -129,7 +129,7 @@ const MOCK_METRICS: MockMetrics = {
             <p style="margin:4px 0 0;font-size:14px;color:var(--ds-text-muted);">Courbes par intervalles de 1 minute.</p>
           </header>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;">
-            <div style="padding:16px 20px;border-radius:12px;background:var(--ds-marine,#0d2c4a);color:#fff;border-left:3px solid var(--ds-copper,#c47a3d);">
+            <div style="padding:16px 20px;border-radius:12px;background:var(--ds-marine);color:var(--ds-text-inverse);border-left:3px solid var(--ds-copper);">
               <div style="font-size:28px;font-weight:700;line-height:1;">{{ metrics.queueMetrics.totalQueued }}</div>
               <div style="margin-top:8px;font-size:14px;opacity:.85;font-weight:500;">Total en file</div>
             </div>

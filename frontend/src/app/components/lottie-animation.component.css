@@ -61,12 +61,12 @@
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #4b5563;
+  color: var(--ds-text-muted);
 }
 
 .control-btn:hover {
   background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  color: var(--ds-marine-light);
 }
 
 .control-btn:active {
@@ -74,7 +74,7 @@
 }
 
 .control-btn:focus-visible {
-  outline: 2px solid #667eea;
+  outline: 2px solid var(--ds-marine-light);
   outline-offset: 2px;
 }
 
@@ -97,7 +97,7 @@
   width: 80px;
   height: 4px;
   border-radius: 2px;
-  background: #e5e7eb;
+  background: var(--ds-divider);
   outline: none;
   -webkit-appearance: none;
   appearance: none;
@@ -109,13 +109,13 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #667eea;
+  background: var(--ds-marine-light);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .speed-slider::-webkit-slider-thumb:hover {
-  background: #5568d3;
+  background: var(--ds-marine);
   transform: scale(1.1);
 }
 
@@ -124,13 +124,13 @@
   height: 16px;
   border: none;
   border-radius: 50%;
-  background: #667eea;
+  background: var(--ds-marine-light);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .speed-slider::-moz-range-thumb:hover {
-  background: #5568d3;
+  background: var(--ds-marine);
   transform: scale(1.1);
 }
 
@@ -145,7 +145,7 @@
 .speed-label {
   font-size: 12px;
   font-weight: 500;
-  color: #4b5563;
+  color: var(--ds-text-muted);
   min-width: 32px;
   text-align: right;
 }
@@ -180,12 +180,12 @@
   }
 
   .control-btn {
-    color: #9ca3af;
+    color: var(--ds-text-faint);
   }
 
   .control-btn:hover {
     background: rgba(102, 126, 234, 0.2);
-    color: #a5b4fc;
+    color: var(--ds-marine-hl);
   }
 
   .speed-control {
@@ -193,11 +193,11 @@
   }
 
   .speed-slider {
-    background: #374151;
+    background: var(--ds-text-muted);
   }
 
   .speed-label {
-    color: #9ca3af;
+    color: var(--ds-text-faint);
   }
 }
 

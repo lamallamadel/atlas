@@ -34,11 +34,11 @@ export const ThreePlatforms: StoryObj = {
       imports: [CommonModule, DsIconComponent, DsBadgeComponent, GlassTabbarComponent, M3AppBarComponent, M3FabComponent],
     },
     template: `
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;padding:32px;background:#f0ece4;min-height:100vh;align-items:start">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;padding:32px;background:var(--ds-bg);min-height:100vh;align-items:start">
 
         <!-- ── WEB ── -->
         <div>
-          <p style="text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:12px">
+          <p style="text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ds-text-faint);margin-bottom:12px">
             🖥  WEB — 1280px
           </p>
           <div style="background:var(--ds-surface);border:1px solid var(--ds-divider);border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)">
@@ -50,7 +50,7 @@ export const ThreePlatforms: StoryObj = {
                 @for (tab of navTabs; track tab.value) {
                   <button style="width:44px;height:44px;border-radius:10px;border:none;background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s ease"
                     [style.background]="tab.value === 'dossiers' ? 'rgba(255,255,255,.15)' : ''"
-                    [style.color]="tab.value === 'dossiers' ? '#fff' : ''">
+                    [style.color]="tab.value === 'dossiers' ? 'var(--ds-text-inverse)' : ''">
                     <ds-icon [name]="tab.icon" [size]="20"></ds-icon>
                   </button>
                 }
@@ -64,7 +64,7 @@ export const ThreePlatforms: StoryObj = {
                   <button style="width:32px;height:32px;border-radius:8px;border:none;background:var(--ds-surface-offset);cursor:pointer;color:var(--ds-text-muted);display:flex;align-items:center;justify-content:center">
                     <ds-icon name="filter" [size]="16"></ds-icon>
                   </button>
-                  <button style="height:32px;padding:0 14px;border-radius:8px;border:none;background:var(--ds-marine);color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+                  <button style="height:32px;padding:0 14px;border-radius:8px;border:none;background:var(--ds-marine);color:var(--ds-text-inverse);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
                     <ds-icon name="plus" [size]="16"></ds-icon>
                     Nouveau
                   </button>
@@ -90,12 +90,12 @@ export const ThreePlatforms: StoryObj = {
 
         <!-- ── iOS ── -->
         <div>
-          <p style="text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:12px">
+          <p style="text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ds-text-faint);margin-bottom:12px">
             📱 iOS — 390×844
           </p>
-          <div style="width:280px;margin:0 auto;background:var(--ds-surface);border-radius:44px;overflow:hidden;border:6px solid #1a1a1a;box-shadow:0 8px 40px rgba(0,0,0,.25);position:relative">
+          <div style="width:280px;margin:0 auto;background:var(--ds-surface);border-radius:44px;overflow:hidden;border:6px solid var(--ds-text);box-shadow:0 8px 40px rgba(0,0,0,.25);position:relative">
             <!-- Dynamic Island -->
-            <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:100px;height:28px;background:#1a1a1a;border-radius:20px;z-index:10"></div>
+            <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:100px;height:28px;background:var(--ds-text);border-radius:20px;z-index:10"></div>
             <!-- Status bar -->
             <div style="height:44px;background:var(--ds-surface);display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 6px;position:relative;z-index:9">
               <span style="font-size:12px;font-weight:600;color:var(--ds-text)">9:41</span>
@@ -145,10 +145,10 @@ export const ThreePlatforms: StoryObj = {
 
         <!-- ── Android ── -->
         <div>
-          <p style="text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:12px">
+          <p style="text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ds-text-faint);margin-bottom:12px">
             🤖 Android — 360×800 (M3)
           </p>
-          <div style="width:280px;margin:0 auto;background:var(--ds-surface);border-radius:28px;overflow:hidden;border:4px solid #2a2a2a;box-shadow:0 8px 40px rgba(0,0,0,.25)">
+          <div style="width:280px;margin:0 auto;background:var(--ds-surface);border-radius:28px;overflow:hidden;border:4px solid var(--ds-text-muted);box-shadow:0 8px 40px rgba(0,0,0,.25)">
             <!-- Status bar -->
             <div style="height:28px;background:var(--ds-surface);padding:6px 16px;display:flex;align-items:center;justify-content:space-between">
               <span style="font-size:11px;font-weight:700;color:var(--ds-text)">9:41</span>

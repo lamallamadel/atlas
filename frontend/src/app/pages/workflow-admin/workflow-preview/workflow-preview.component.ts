@@ -3,14 +3,14 @@ import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, WorkflowNode, TransitionRule, WorkflowPreviewState } from '../models/workflow.model';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../../../design-system';
 import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-workflow-preview',
     templateUrl: './workflow-preview.component.html',
     styleUrls: ['./workflow-preview.component.css'],
-    imports: [MatButton, MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardContent, DatePipe]
+    imports: [MatButton, MatIcon, DsCardComponent, DatePipe]
 })
 export class WorkflowPreviewComponent implements OnInit {
   readonly workflow = input<WorkflowConfiguration | null>(null);

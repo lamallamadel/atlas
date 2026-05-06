@@ -1,6 +1,6 @@
 .ml-insights-dashboard {
   padding: 24px;
-  background: #f5f5f5;
+  background: var(--ds-bg);
   min-height: 100vh;
 
   .dashboard-header {
@@ -11,7 +11,7 @@
 
     h1 {
       margin: 0;
-      color: #333;
+      color: var(--ds-text);
     }
 
     .btn {
@@ -23,16 +23,16 @@
   .alert {
     margin-bottom: 24px;
     padding: 16px;
-    border-radius: 4px;
+    border-radius: var(--ds-radius-sm);
   }
 
   .loading-spinner {
     text-align: center;
     padding: 60px 20px;
-    color: #666;
+    color: var(--ds-text-muted);
 
     i {
-      color: #007bff;
+      color: var(--ds-marine-light);
       margin-bottom: 16px;
     }
 
@@ -43,25 +43,25 @@
 
   .dashboard-content {
     .card {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background: var(--ds-surface);
+      border-radius: var(--ds-radius-md);
+      box-shadow: var(--ds-shadow-sm);
       margin-bottom: 24px;
 
       .card-header {
         padding: 16px 24px;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--ds-divider);
 
         h3 {
           margin: 0;
           font-size: 18px;
-          color: #333;
+          color: var(--ds-text);
           display: flex;
           align-items: center;
           gap: 8px;
 
           i {
-            color: #007bff;
+            color: var(--ds-marine-light);
           }
         }
       }
@@ -85,13 +85,13 @@
 
           label {
             font-weight: 600;
-            color: #666;
+            color: var(--ds-text-muted);
             font-size: 14px;
           }
 
           span {
             font-size: 16px;
-            color: #333;
+            color: var(--ds-text);
 
             &.badge {
               font-size: 14px;
@@ -104,13 +104,13 @@
       }
 
       .metrics-summary {
-        border-top: 1px solid #e0e0e0;
+        border-top: 1px solid var(--ds-divider);
         padding-top: 24px;
 
         h4 {
           margin-bottom: 16px;
           font-size: 16px;
-          color: #333;
+          color: var(--ds-text);
         }
 
         .metrics-grid {
@@ -121,13 +121,13 @@
           .metric-card {
             text-align: center;
             padding: 16px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
+            background: var(--ds-surface-2);
+            border-radius: var(--ds-radius-md);
+            border: 1px solid var(--ds-divider);
 
             .metric-label {
               font-size: 12px;
-              color: #666;
+              color: var(--ds-text-muted);
               text-transform: uppercase;
               margin-bottom: 8px;
             }
@@ -135,7 +135,7 @@
             .metric-value {
               font-size: 24px;
               font-weight: 700;
-              color: #007bff;
+              color: var(--ds-marine-light);
             }
           }
         }
@@ -162,14 +162,14 @@
         width: 100%;
 
         thead {
-          background: #f8f9fa;
+          background: var(--ds-surface-2);
 
           th {
             padding: 12px;
             font-weight: 600;
-            color: #666;
+            color: var(--ds-text-muted);
             font-size: 14px;
-            border-bottom: 2px solid #e0e0e0;
+            border-bottom: 2px solid var(--ds-divider);
           }
         }
 
@@ -177,8 +177,8 @@
           td {
             padding: 12px;
             font-size: 14px;
-            color: #333;
-            border-bottom: 1px solid #e0e0e0;
+            color: var(--ds-text);
+            border-bottom: 1px solid var(--ds-divider);
 
             .badge {
               padding: 4px 8px;
@@ -193,7 +193,7 @@
           }
 
           tr:hover {
-            background: #f8f9fa;
+            background: var(--ds-surface-2);
           }
         }
       }
@@ -205,62 +205,62 @@
     padding: 4px 8px;
     font-size: 12px;
     font-weight: 600;
-    border-radius: 4px;
+    border-radius: var(--ds-radius-sm);
 
     &.badge-primary {
-      background: #007bff;
-      color: white;
+      background: var(--ds-marine-light);
+      color: var(--ds-text-inverse);
     }
 
     &.badge-success {
-      background: #28a745;
-      color: white;
+      background: var(--ds-success);
+      color: var(--ds-text-inverse);
     }
 
     &.badge-secondary {
-      background: #6c757d;
-      color: white;
+      background: var(--ds-surface-dynamic);
+      color: var(--ds-text);
     }
 
     &.badge-info {
-      background: #17a2b8;
-      color: white;
+      background: var(--ds-marine-hl);
+      color: var(--ds-marine);
     }
 
     &.badge-warning {
-      background: #ffc107;
-      color: #333;
+      background: var(--ds-warning-hl);
+      color: var(--ds-text);
     }
 
     &.badge-danger {
-      background: #dc3545;
-      color: white;
+      background: var(--ds-error);
+      color: var(--ds-text-inverse);
     }
   }
 
   .btn {
     border: none;
-    border-radius: 4px;
+    border-radius: var(--ds-radius-sm);
     cursor: pointer;
     transition: all 0.2s;
 
     &.btn-primary {
-      background: #007bff;
-      color: white;
+      background: var(--ds-marine-light);
+      color: var(--ds-text-inverse);
 
       &:hover:not(:disabled) {
-        background: #0056b3;
+        background: color-mix(in srgb, var(--ds-marine-light) 82%, var(--ds-text) 18%);
       }
     }
 
     &.btn-outline-primary {
       background: transparent;
-      border: 1px solid #007bff;
-      color: #007bff;
+      border: 1px solid var(--ds-marine-light);
+      color: var(--ds-marine-light);
 
       &:hover {
-        background: #007bff;
-        color: white;
+        background: var(--ds-marine-light);
+        color: var(--ds-text-inverse);
       }
     }
 

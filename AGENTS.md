@@ -722,6 +722,32 @@ npm run build -- --stats-json
 npx webpack-bundle-analyzer dist/frontend/stats.json
 ```
 
+## Design System (frontend) — migration et mémoire d’exécution
+
+**Objectif :** branchement total du Pro Space sur `src/app/design-system/` (`ds-*`) et sur les tokens `--ds-*`, puis suppression progressive des correctifs globaux `_atlasia-*.scss`.
+
+**Document de vérité pour l’avancement (phases, cases à cocher, commandes) :**  
+[frontend/docs/design-system-migration-plan.md](frontend/docs/design-system-migration-plan.md)
+
+**Inventaire composants / audit Phase 0 :**  
+[frontend/docs/design-system-audit.md](frontend/docs/design-system-audit.md)
+
+**Règles PR (tokens, pas de nouveau `_atlasia-*`, préférer le barrel DS) :**  
+`.cursor/rules/design-system-migration.mdc`
+
+**Contrôle SCSS (hex hors fichier tokens DS) :**
+
+```bash
+cd frontend
+npm run lint:ds-scss              # signale les violations, exit 0
+npm run lint:ds-scss -- --fail    # exit 1 si violation (pour CI quand le backlog est vide)
+npm run lint:ds-css               # idem sur `components/**/*.css` et `pages/**/*.css`
+npm run lint:ds-css -- --fail
+npm run lint:ds-legacy-vars       # `var(--at-*|--color-*)` interdits hors `_ds-semantic.scss`
+npm run lint:ds-legacy-vars -- --fail
+npm run lint:ds-colors            # SCSS + CSS + variables legacy (ordre)
+```
+
 ## End-to-End Testing
 
 ### Overview

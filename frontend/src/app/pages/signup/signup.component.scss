@@ -42,7 +42,7 @@
 
   &--active {
     background: var(--ds-marine);
-    color: var(--ds-text-inverse, #fff);
+    color: var(--ds-text-inverse);
   }
 }
 
@@ -253,7 +253,7 @@
     height: 22px;
     border-radius: 50%;
     background: var(--ds-marine);
-    color: #fff;
+    color: var(--ds-text-inverse);
     font-size: 13px;
     font-weight: 700;
     display: flex;

@@ -27,15 +27,19 @@
   @if (!loading && filteredTemplates.length > 0) {
     <div class="templates-grid">
       @for (template of filteredTemplates; track template) {
-        <mat-card class="template-card">
-          <mat-card-header>
-            <mat-icon [color]="getStatusColor(template.status)" mat-card-avatar>
-              {{ getStatusIcon(template.status) }}
-            </mat-icon>
-            <mat-card-title>{{ template.name }}</mat-card-title>
-            <mat-card-subtitle>{{ template.language }} - {{ getCategoryDisplay(template.category) }}</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
+        <ds-card class="template-card" [pad]="false" [elevation]="'sm'">
+          <div class="tpl-lib-card-header">
+            <div class="tpl-lib-avatar">
+              <mat-icon [color]="getStatusColor(template.status)">
+                {{ getStatusIcon(template.status) }}
+              </mat-icon>
+            </div>
+            <div class="tpl-lib-headings">
+              <h3 class="tpl-lib-title">{{ template.name }}</h3>
+              <p class="tpl-lib-subtitle">{{ template.language }} - {{ getCategoryDisplay(template.category) }}</p>
+            </div>
+          </div>
+          <div class="tpl-lib-body">
             <div class="template-status">
               <mat-chip [color]="getStatusColor(template.status)" selected>
                 {{ template.status }}
@@ -64,8 +68,8 @@
                 <span>{{ template.rejectionReason }}</span>
               </div>
             }
-          </mat-card-content>
-          <mat-card-actions>
+          </div>
+          <div class="tpl-lib-actions">
             <button mat-button (click)="viewTemplate(template)">
               <mat-icon>visibility</mat-icon>
               View
@@ -113,8 +117,8 @@
                 </button>
               }
             </mat-menu>
-          </mat-card-actions>
-        </mat-card>
+          </div>
+        </ds-card>
       }
     </div>
   }
@@ -136,7 +140,7 @@
 
   @if (loading) {
     <div class="loading-state">
-      <mat-spinner></mat-spinner>
+      <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
     </div>
   }
 </div>

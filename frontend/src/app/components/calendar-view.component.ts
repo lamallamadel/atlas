@@ -12,7 +12,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
@@ -20,7 +20,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/autocomplete';
 import { CalendarListViewComponent } from './calendar-list-view.component';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface CalendarEvent extends EventInput {
   id: string;
@@ -43,7 +43,7 @@ interface CalendarEvent extends EventInput {
     selector: 'app-calendar-view',
     templateUrl: './calendar-view.component.html',
     styleUrls: ['./calendar-view.component.css'],
-    imports: [MatCard, MatCardHeader, MatCardTitle, MatIconButton, MatTooltip, MatIcon, MatButton, MatCardContent, MatFormField, MatLabel, MatSelect, MatOption, FullCalendarModule, CalendarListViewComponent, MatProgressSpinner]
+    imports: [DsCardComponent, DsSkeletonComponent, MatIconButton, MatTooltip, MatIcon, MatButton, MatFormField, MatLabel, MatSelect, MatOption, FullCalendarModule, CalendarListViewComponent]
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
   readonly calendarComponent = viewChild<any>('calendar');

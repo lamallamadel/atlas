@@ -40,20 +40,21 @@ import { Subscription } from 'rxjs';
     `,
     styles: [`
     .activity-stream {
-      background: white;
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      background: var(--ds-surface);
+      border-radius: var(--ds-radius-md);
+      padding: var(--ds-space-4);
+      border: 1px solid var(--ds-divider);
+      box-shadow: var(--ds-shadow-sm);
     }
 
     .activity-header {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin: 0 0 16px 0;
+      gap: var(--ds-space-2);
+      margin: 0 0 var(--ds-space-4) 0;
       font-size: 16px;
       font-weight: 600;
-      color: #333;
+      color: var(--ds-text);
     }
 
     .header-icon {
@@ -61,11 +62,11 @@ import { Subscription } from 'rxjs';
     }
 
     .new-badge {
-      background: #ff4444;
-      color: white;
+      background: var(--ds-error);
+      color: var(--ds-text-inverse);
       font-size: 10px;
       padding: 2px 6px;
-      border-radius: 10px;
+      border-radius: var(--ds-radius-pill);
       font-weight: 700;
       animation: pulse 1s infinite;
     }
@@ -77,20 +78,20 @@ import { Subscription } from 'rxjs';
 
     .activity-item {
       display: flex;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      transition: background 0.2s;
+      gap: var(--ds-space-3);
+      padding: var(--ds-space-3);
+      border-radius: var(--ds-radius-sm);
+      margin-bottom: var(--ds-space-2);
+      transition: background var(--ds-transition-fast);
     }
 
     .activity-item:hover {
-      background: #f5f5f5;
+      background: var(--ds-surface-offset);
     }
 
     .activity-item.new-activity {
       animation: slideIn 0.5s ease-out;
-      background: #e3f2fd;
+      background: var(--ds-marine-hl);
     }
 
     .activity-avatar {
@@ -111,26 +112,26 @@ import { Subscription } from 'rxjs';
 
     .activity-description {
       font-size: 14px;
-      color: #333;
-      margin-bottom: 4px;
+      color: var(--ds-text);
+      margin-bottom: var(--ds-space-1);
       word-wrap: break-word;
     }
 
     .activity-timestamp {
       font-size: 12px;
-      color: #666;
+      color: var(--ds-text-muted);
     }
 
     .no-activities {
       text-align: center;
-      padding: 32px;
-      color: #999;
+      padding: var(--ds-space-8);
+      color: var(--ds-text-faint);
     }
 
     .empty-icon {
       font-size: 48px;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: var(--ds-space-2);
     }
 
     @keyframes slideIn {
@@ -214,16 +215,16 @@ export class CollaborationActivityStreamComponent implements OnInit, OnDestroy {
 
   getActivityColor(activityType: string): string {
     const colors: { [key: string]: string } = {
-      'edit': '#2196f3',
-      'status_change': '#ff9800',
-      'comment': '#4caf50',
-      'appointment': '#9c27b0',
-      'message': '#00bcd4',
-      'document': '#795548',
-      'task': '#8bc34a',
-      'note': '#607d8b'
+      'edit': 'var(--ds-marine)',
+      'status_change': 'var(--ds-warning)',
+      'comment': 'var(--ds-success)',
+      'appointment': 'var(--ds-primary)',
+      'message': 'var(--ds-marine-light)',
+      'document': 'var(--ds-text-muted)',
+      'task': 'var(--ds-success)',
+      'note': 'var(--ds-text-muted)'
     };
-    return colors[activityType] || '#666';
+    return colors[activityType] || 'var(--ds-text-muted)';
   }
 
   formatTimestamp(timestamp: Date): string {

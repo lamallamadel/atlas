@@ -15,7 +15,7 @@
 
   @if (loading) {
     <div class="loading-container">
-      <mat-spinner></mat-spinner>
+      <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
       <p>Chargement des activités...</p>
     </div>
   }
@@ -36,9 +36,9 @@
               {{ getActivityTypeIcon(activity.type) }}
             </mat-icon>
           </div>
-          <mat-card class="activity-card">
-            <mat-card-header>
-              <div class="avatar-container" mat-card-avatar>
+          <ds-card class="activity-card" [pad]="false" [elevation]="'sm'">
+            <div class="activity-card-header">
+              <div class="avatar-container">
                 <div class="user-avatar">
                   {{ getUserInitials(activity.createdByName || activity.createdBy) }}
                 </div>
@@ -86,8 +86,8 @@
                   <span class="activity-time">{{ formatDateTime(activity.createdAt) }}</span>
                 </div>
               </div>
-            </mat-card-header>
-            <mat-card-content>
+            </div>
+            <div class="activity-card-body">
               @if (activity.content) {
                 <div class="activity-content">
                   @if (!isExpanded(activity.id) && shouldShowExpand(activity.content)) {
@@ -114,8 +114,8 @@
                   }
                 </div>
               }
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </ds-card>
         </div>
       }
     </div>

@@ -104,16 +104,16 @@ import { CustomerPortalService } from '../services/customer-portal.service';
   styles: [`
     .dashboard-container {
       min-height: 100vh;
-      background: #f5f7fa;
+      background: var(--ds-bg);
     }
 
     .dashboard-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 24px;
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: var(--ds-space-4) var(--ds-space-6);
+      background: var(--ds-surface);
+      box-shadow: var(--ds-shadow-sm);
     }
 
     .header-left {
@@ -129,33 +129,33 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     h1 {
       margin: 0;
       font-size: 20px;
-      color: #333;
+      color: var(--ds-text);
     }
 
     .header-right {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: var(--ds-space-4);
     }
 
     .user-name {
       font-weight: 500;
-      color: #333;
+      color: var(--ds-text);
     }
 
     .logout-button {
-      padding: 8px 16px;
-      background: #f0f0f0;
-      color: #333;
+      padding: var(--ds-space-2) var(--ds-space-4);
+      background: var(--ds-surface-offset);
+      color: var(--ds-text);
       border: none;
-      border-radius: 6px;
+      border-radius: var(--ds-radius-sm);
       cursor: pointer;
       font-size: 14px;
-      transition: background 0.2s;
+      transition: background var(--ds-transition-fast);
     }
 
     .logout-button:hover {
-      background: #e0e0e0;
+      background: var(--ds-divider);
     }
 
     .loading-container {
@@ -169,11 +169,11 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     .spinner {
       width: 48px;
       height: 48px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
+      border: 4px solid var(--ds-surface-offset);
+      border-top: 4px solid var(--ds-marine);
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-bottom: 16px;
+      margin-bottom: var(--ds-space-4);
     }
 
     @keyframes spin {
@@ -182,17 +182,17 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     }
 
     .dashboard-content {
-      max-width: 1400px;
+      max-width: var(--ds-content-full);
       margin: 0 auto;
-      padding: 24px;
+      padding: var(--ds-space-6);
     }
 
     .status-banner {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 32px;
-      border-radius: 12px;
-      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--ds-marine) 0%, var(--ds-marine-light) 100%);
+      color: var(--ds-text-inverse);
+      padding: var(--ds-space-8);
+      border-radius: var(--ds-radius-lg);
+      margin-bottom: var(--ds-space-6);
     }
 
     .status-info {
@@ -207,9 +207,9 @@ import { CustomerPortalService } from '../services/customer-portal.service';
 
     .status-badge {
       display: inline-block;
-      background: rgba(255,255,255,0.2);
-      padding: 8px 16px;
-      border-radius: 6px;
+      background: color-mix(in srgb, var(--ds-text-inverse) 22%, transparent);
+      padding: var(--ds-space-2) var(--ds-space-4);
+      border-radius: var(--ds-radius-sm);
       font-size: 16px;
       font-weight: 500;
     }
@@ -221,15 +221,15 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     .progress-bar {
       width: 100%;
       height: 8px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 4px;
+      background: color-mix(in srgb, var(--ds-text-inverse) 22%, transparent);
+      border-radius: var(--ds-radius-sm);
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: var(--ds-space-2);
     }
 
     .progress-fill {
       height: 100%;
-      background: white;
+      background: var(--ds-text-inverse);
       transition: width 0.5s ease;
     }
 
@@ -240,47 +240,47 @@ import { CustomerPortalService } from '../services/customer-portal.service';
 
     .tabs {
       display: flex;
-      gap: 8px;
-      background: white;
-      padding: 16px;
-      border-radius: 8px;
-      margin-bottom: 24px;
+      gap: var(--ds-space-2);
+      background: var(--ds-surface);
+      padding: var(--ds-space-4);
+      border-radius: var(--ds-radius-md);
+      margin-bottom: var(--ds-space-6);
       overflow-x: auto;
     }
 
     .tab-button {
       position: relative;
-      padding: 12px 20px;
+      padding: var(--ds-space-3) var(--ds-space-5);
       background: transparent;
-      color: #666;
+      color: var(--ds-text-muted);
       border: none;
-      border-radius: 6px;
+      border-radius: var(--ds-radius-sm);
       cursor: pointer;
       font-size: 14px;
       font-weight: 500;
-      transition: all 0.2s;
+      transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
       white-space: nowrap;
     }
 
     .tab-button:hover {
-      background: #f0f0f0;
-      color: #333;
+      background: var(--ds-surface-offset);
+      color: var(--ds-text);
     }
 
     .tab-button.active {
-      background: #667eea;
-      color: white;
+      background: var(--ds-marine);
+      color: var(--ds-text-inverse);
     }
 
     .badge {
       position: absolute;
       top: 4px;
       right: 4px;
-      background: #ff4444;
-      color: white;
+      background: var(--ds-error);
+      color: var(--ds-text-inverse);
       font-size: 11px;
       padding: 2px 6px;
-      border-radius: 10px;
+      border-radius: var(--ds-radius-pill);
       min-width: 18px;
       text-align: center;
     }

@@ -4,7 +4,7 @@ import { dialogSlideUp, shakeX } from '../animations';
 import { FocusTrapDirective } from '../directives/focus-trap.directive';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatButton } from '@angular/material/button';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 export interface ConfirmDeleteDialogData {
   title: string;
@@ -16,7 +16,7 @@ export interface ConfirmDeleteDialogData {
     templateUrl: './confirm-delete-dialog.component.html',
     styleUrls: ['./confirm-delete-dialog.component.css'],
     animations: [dialogSlideUp, shakeX],
-    imports: [FocusTrapDirective, MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton, MatProgressSpinner]
+    imports: [FocusTrapDirective, MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton, DsSkeletonComponent]
 })
 export class ConfirmDeleteDialogComponent {
   isSubmitting = false;

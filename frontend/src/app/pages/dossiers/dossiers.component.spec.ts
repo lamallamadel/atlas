@@ -15,7 +15,6 @@ import { FilterPresetService } from '../../services/filter-preset.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
@@ -120,7 +119,6 @@ describe('DossiersComponent', () => {
         RouterTestingModule,
         FormsModule,
         ReactiveFormsModule,
-        MatCardModule,
         MatButtonModule,
         MatIconModule,
         MatTableModule,

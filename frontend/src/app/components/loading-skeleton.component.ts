@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { SpinnerVariant, SpinnerSize, SpinnerColor, SpinnerComponent } from './spinner.component';
 import { NgClass } from '@angular/common';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 export type SkeletonVariant = 'card' | 'list' | 'table' | 'form' | 'dashboard-kpi' | 'detail' | 'grid' | 'message' | 'timeline' | 'spinner';
 
@@ -9,7 +10,7 @@ export type SkeletonVariant = 'card' | 'list' | 'table' | 'form' | 'dashboard-kp
     templateUrl: './loading-skeleton.component.html',
     styleUrls: ['./loading-skeleton.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, SpinnerComponent]
+    imports: [NgClass, SpinnerComponent, DsSkeletonComponent],
 })
 export class LoadingSkeletonComponent {
   readonly variant = input<SkeletonVariant>('card');

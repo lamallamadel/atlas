@@ -195,8 +195,10 @@
         <cdk-virtual-scroll-viewport
           [itemSize]="virtualScrollItemSize()"
           class="virtual-scroll-viewport">
-          <mat-card *cdkVirtualFor="let row of dataSource.data; let i = index; trackBy: trackByRowId"
+          <ds-card *cdkVirtualFor="let row of dataSource.data; let i = index; trackBy: trackByRowId"
             class="data-card"
+            [pad]="false"
+            [elevation]="'xs'"
             (click)="onRowClick(row)"
             [attr.tabindex]="rowClickable() ? '0' : null"
             [attr.role]="rowClickable() ? 'button' : 'article'"
@@ -215,17 +217,17 @@
               </div>
             }
             <!-- Card Content -->
-            <mat-card-content>
+            <div class="data-card-body">
               @for (column of columns(); track trackByColumnKey($index, column)) {
                 <div class="card-field">
                   <span class="field-label">{{ column.header }}:</span>
                   <span class="field-value" [innerHTML]="formatValue(getRowValue(row, column.key), column, row)"></span>
                 </div>
               }
-            </mat-card-content>
+            </div>
             <!-- Card Actions -->
             @if (showActions()) {
-              <mat-card-actions class="card-actions">
+              <div class="card-actions">
                 @for (action of actions(); track trackByAction($index, action)) {
                   <button
                     [hidden]="!shouldShowAction(action, row)"
@@ -237,16 +239,18 @@
                     <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
                   </button>
                 }
-              </mat-card-actions>
+              </div>
             }
-          </mat-card>
+          </ds-card>
         </cdk-virtual-scroll-viewport>
       }
       <!-- Regular Scroll for Mobile -->
       @if (!enableVirtualScroll() && data().length > 0) {
         @for (row of dataSource.data; track trackByRowId(i, row); let i = $index) {
-          <mat-card
+          <ds-card
             class="data-card"
+            [pad]="false"
+            [elevation]="'xs'"
             (click)="onRowClick(row)"
             [attr.tabindex]="rowClickable() ? '0' : null"
             [attr.role]="rowClickable() ? 'button' : 'article'"
@@ -265,17 +269,17 @@
               </div>
             }
             <!-- Card Content -->
-            <mat-card-content>
+            <div class="data-card-body">
               @for (column of columns(); track trackByColumnKey($index, column)) {
                 <div class="card-field">
                   <span class="field-label">{{ column.header }}:</span>
                   <span class="field-value" [innerHTML]="formatValue(getRowValue(row, column.key), column, row)"></span>
                 </div>
               }
-            </mat-card-content>
+            </div>
             <!-- Card Actions -->
             @if (showActions()) {
-              <mat-card-actions class="card-actions">
+              <div class="card-actions">
                 @for (action of actions(); track trackByAction($index, action)) {
                   <button
                     [hidden]="!shouldShowAction(action, row)"
@@ -287,9 +291,9 @@
                     <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
                   </button>
                 }
-              </mat-card-actions>
+              </div>
             }
-          </mat-card>
+          </ds-card>
         }
       }
     </div>

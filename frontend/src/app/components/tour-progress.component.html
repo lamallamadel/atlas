@@ -43,24 +43,30 @@
   @if (!isLoading) {
     <div class="tour-list">
       @for (tour of tours; track tour) {
-        <mat-card class="tour-card" [class.completed]="isTourCompleted(tour.id)">
-          <mat-card-header>
-            <div mat-card-avatar class="tour-icon">
+        <ds-card
+          class="tour-card"
+          [class.completed]="isTourCompleted(tour.id)"
+          [pad]="false"
+          [elevation]="'sm'">
+          <div class="tour-card-header">
+            <div class="tour-icon tour-card-avatar">
               <mat-icon [color]="getStatusColor(tour)">{{ getStatusIcon(tour) }}</mat-icon>
             </div>
-            <mat-card-title>{{ tour.name }}</mat-card-title>
-            <mat-card-subtitle>
-              <span class="tour-duration">
-                <mat-icon class="duration-icon">schedule</mat-icon>
-                {{ tour.estimatedTime }} min
-              </span>
-              <span class="tour-steps">
-                <mat-icon class="steps-icon">layers</mat-icon>
-                {{ tour.steps.length }} étapes
-              </span>
-            </mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
+            <div class="tour-card-headings">
+              <h3 class="tour-card-title">{{ tour.name }}</h3>
+              <div class="tour-card-subtitle">
+                <span class="tour-duration">
+                  <mat-icon class="duration-icon">schedule</mat-icon>
+                  {{ tour.estimatedTime }} min
+                </span>
+                <span class="tour-steps">
+                  <mat-icon class="steps-icon">layers</mat-icon>
+                  {{ tour.steps.length }} étapes
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="tour-card-body">
             <p class="tour-description">{{ tour.description }}</p>
             @if (isTourCompleted(tour.id)) {
               <div class="tour-status">
@@ -70,8 +76,8 @@
                 </mat-chip>
               </div>
             }
-          </mat-card-content>
-          <mat-card-actions>
+          </div>
+          <div class="tour-card-actions">
             <button
               mat-raised-button
               [color]="isTourCompleted(tour.id) ? 'accent' : 'primary'"
@@ -89,15 +95,15 @@
                 Réinitialiser
               </button>
             }
-          </mat-card-actions>
-        </mat-card>
+          </div>
+        </ds-card>
       }
     </div>
   }
 
   @if (isLoading) {
     <div class="loading-state">
-      <mat-spinner diameter="40"></mat-spinner>
+      <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
       <p>Chargement des guides...</p>
     </div>
   }

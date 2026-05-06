@@ -25,7 +25,7 @@ export interface WeekGridClickEvent {
 const TYPE_COLORS: Record<WeekGridEventType, { bg: string; text: string; border: string }> = {
   appointment: { bg: 'var(--ds-marine-hl)',     text: 'var(--ds-marine)',   border: 'var(--ds-marine)' },
   task:        { bg: 'var(--ds-primary-subtle)', text: 'var(--ds-primary)', border: 'var(--ds-primary)' },
-  reminder:    { bg: '#fef3c7',                  text: '#92400e',            border: '#fbbf24' },
+  reminder:    { bg: 'var(--ds-warning-hl)',       text: 'var(--ds-warning)', border: 'var(--ds-warning)' },
   block:       { bg: 'var(--ds-surface-offset)', text: 'var(--ds-text-faint)', border: 'var(--ds-divider)' },
 };
 

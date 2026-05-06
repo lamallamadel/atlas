@@ -54,7 +54,7 @@
                 <mat-icon>table_chart</mat-icon>
               }
               @if (exportingCSV) {
-                <mat-spinner diameter="20" style="display: inline-block;"></mat-spinner>
+                <ds-skeleton variant="circle" width="20px" height="20px" style="display: inline-block;"></ds-skeleton>
               }
               <span [style.margin-left.px]="exportingCSV ? 8 : 0">{{ exportingCSV ? 'Exporting...' : 'Export CSV' }}</span>
             </button>
@@ -69,7 +69,7 @@
                 <mat-icon>picture_as_pdf</mat-icon>
               }
               @if (exportingPDF) {
-                <mat-spinner diameter="20" style="display: inline-block;"></mat-spinner>
+                <ds-skeleton variant="circle" width="20px" height="20px" style="display: inline-block;"></ds-skeleton>
               }
               <span [style.margin-left.px]="exportingPDF ? 8 : 0">{{ exportingPDF ? 'Exporting...' : 'Export PDF' }}</span>
             </button>
@@ -86,74 +86,74 @@
 
       @if (error) {
         <div class="error-message" role="alert" aria-live="assertive">
-          <mat-card>
-            <mat-card-content>
+          <ds-card [pad]="false" [elevation]="'xs'">
+            <div class="rpt-card-body">
               <mat-icon color="warn">error</mat-icon>
               <p>{{ error }}</p>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </ds-card>
         </div>
       }
 
       @if (!loading && !error) {
         <main class="dashboard-content">
           <section class="kpi-cards" aria-label="Key performance indicators" role="list">
-            <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Average response time: ' + (kpiReport?.averageResponseTimeHours?.toFixed(2) || 0) + ' hours'">
-              <mat-card-header>
+            <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Average response time: ' + (kpiReport?.averageResponseTimeHours?.toFixed(2) || 0) + ' hours'">
+              <div class="rpt-card-header">
                 <mat-icon class="kpi-icon" color="primary">schedule</mat-icon>
-                <mat-card-title>
+                <div class="rpt-card-title">
                   <h3>Avg Response Time</h3>
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
+                </div>
+              </div>
+              <div class="rpt-card-body">
                 <div class="kpi-value" aria-live="polite">{{ kpiReport?.averageResponseTimeHours?.toFixed(2) || 0 }}</div>
                 <div class="kpi-unit" aria-hidden="true">hours</div>
-              </mat-card-content>
-            </mat-card>
-            <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Appointment show rate: ' + (kpiReport?.appointmentShowRate?.toFixed(1) || 0) + ' percent'">
-              <mat-card-header>
+              </div>
+            </ds-card>
+            <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Appointment show rate: ' + (kpiReport?.appointmentShowRate?.toFixed(1) || 0) + ' percent'">
+              <div class="rpt-card-header">
                 <mat-icon class="kpi-icon" color="accent">event_available</mat-icon>
-                <mat-card-title>
+                <div class="rpt-card-title">
                   <h3>Appointment Show Rate</h3>
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
+                </div>
+              </div>
+              <div class="rpt-card-body">
                 <div class="kpi-value" aria-live="polite">{{ kpiReport?.appointmentShowRate?.toFixed(1) || 0 }}%</div>
                 <div class="kpi-unit" aria-hidden="true">completed</div>
-              </mat-card-content>
-            </mat-card>
-            <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Pipeline velocity: ' + (kpiReport?.pipelineVelocityDays?.toFixed(1) || 0) + ' days to close'">
-              <mat-card-header>
+              </div>
+            </ds-card>
+            <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Pipeline velocity: ' + (kpiReport?.pipelineVelocityDays?.toFixed(1) || 0) + ' days to close'">
+              <div class="rpt-card-header">
                 <mat-icon class="kpi-icon" style="color: #FF9800;">speed</mat-icon>
-                <mat-card-title>
+                <div class="rpt-card-title">
                   <h3>Pipeline Velocity</h3>
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
+                </div>
+              </div>
+              <div class="rpt-card-body">
                 <div class="kpi-value" aria-live="polite">{{ kpiReport?.pipelineVelocityDays?.toFixed(1) || 0 }}</div>
                 <div class="kpi-unit" aria-hidden="true">days to close</div>
-              </mat-card-content>
-            </mat-card>
-            <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Overall conversion rate: ' + (pipelineSummary?.overallConversionRate?.toFixed(1) || 0) + ' percent'">
-              <mat-card-header>
+              </div>
+            </ds-card>
+            <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Overall conversion rate: ' + (pipelineSummary?.overallConversionRate?.toFixed(1) || 0) + ' percent'">
+              <div class="rpt-card-header">
                 <mat-icon class="kpi-icon" style="color: #4CAF50;">trending_up</mat-icon>
-                <mat-card-title>
+                <div class="rpt-card-title">
                   <h3>Overall Conversion</h3>
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
+                </div>
+              </div>
+              <div class="rpt-card-body">
                 <div class="kpi-value" aria-live="polite">{{ pipelineSummary?.overallConversionRate?.toFixed(1) || 0 }}%</div>
                 <div class="kpi-unit" aria-hidden="true">win rate</div>
-              </mat-card-content>
-            </mat-card>
+              </div>
+            </ds-card>
           </section>
           <div class="charts-grid">
-            <mat-card class="chart-card clickable" [matTooltip]="'Click on a stage to view filtered dossiers'">
-              <mat-card-header>
-                <mat-card-title>
+            <ds-card [pad]="false" [elevation]="'xs'" class="chart-card clickable" [matTooltip]="'Click on a stage to view filtered dossiers'">
+              <div class="rpt-card-header">
+                <div class="rpt-card-title">
                   <mat-icon class="chart-icon">filter_list</mat-icon>
                   Conversion Funnel by Stage
-                </mat-card-title>
+                </div>
                 <button mat-icon-button [matMenuTriggerFor]="funnelMenu" aria-label="Chart options">
                   <mat-icon>more_vert</mat-icon>
                 </button>
@@ -163,8 +163,8 @@
                     Export Data
                   </button>
                 </mat-menu>
-              </mat-card-header>
-              <mat-card-content>
+              </div>
+              <div class="rpt-card-body">
                 <div class="chart-container">
                   <canvas
                     #conversionFunnelCanvas
@@ -174,14 +174,14 @@
                     [type]="conversionFunnelChartType">
                   </canvas>
                 </div>
-              </mat-card-content>
-            </mat-card>
-            <mat-card class="chart-card">
-              <mat-card-header>
-                <mat-card-title>
+              </div>
+            </ds-card>
+            <ds-card [pad]="false" [elevation]="'xs'" class="chart-card">
+              <div class="rpt-card-header">
+                <div class="rpt-card-title">
                   <mat-icon class="chart-icon">people</mat-icon>
                   Agent Performance Comparison
-                </mat-card-title>
+                </div>
                 <button mat-icon-button [matMenuTriggerFor]="agentMenu" aria-label="Chart options">
                   <mat-icon>more_vert</mat-icon>
                 </button>
@@ -191,8 +191,8 @@
                     Export Data
                   </button>
                 </mat-menu>
-              </mat-card-header>
-              <mat-card-content>
+              </div>
+              <div class="rpt-card-body">
                 <div class="chart-container">
                   <canvas
                     #agentPerformanceCanvas
@@ -202,14 +202,14 @@
                     [type]="agentPerformanceChartType">
                   </canvas>
                 </div>
-              </mat-card-content>
-            </mat-card>
-            <mat-card class="chart-card chart-card-wide">
-              <mat-card-header>
-                <mat-card-title>
+              </div>
+            </ds-card>
+            <ds-card [pad]="false" [elevation]="'xs'" class="chart-card chart-card-wide">
+              <div class="rpt-card-header">
+                <div class="rpt-card-title">
                   <mat-icon class="chart-icon">show_chart</mat-icon>
                   Revenue Forecast Over Time
-                </mat-card-title>
+                </div>
                 <button mat-icon-button [matMenuTriggerFor]="revenueMenu" aria-label="Chart options">
                   <mat-icon>more_vert</mat-icon>
                 </button>
@@ -219,8 +219,8 @@
                     Export Data
                   </button>
                 </mat-menu>
-              </mat-card-header>
-              <mat-card-content>
+              </div>
+              <div class="rpt-card-body">
                 <div class="chart-container">
                   <canvas
                     #revenueForecastCanvas
@@ -230,14 +230,14 @@
                     [type]="revenueForecastChartType">
                   </canvas>
                 </div>
-              </mat-card-content>
-            </mat-card>
-            <mat-card class="chart-card clickable" [matTooltip]="'Click on a source to view filtered dossiers'">
-              <mat-card-header>
-                <mat-card-title>
+              </div>
+            </ds-card>
+            <ds-card [pad]="false" [elevation]="'xs'" class="chart-card clickable" [matTooltip]="'Click on a source to view filtered dossiers'">
+              <div class="rpt-card-header">
+                <div class="rpt-card-title">
                   <mat-icon class="chart-icon">pie_chart</mat-icon>
                   Lead Sources Distribution
-                </mat-card-title>
+                </div>
                 <button mat-icon-button [matMenuTriggerFor]="sourceMenu" aria-label="Chart options">
                   <mat-icon>more_vert</mat-icon>
                 </button>
@@ -247,8 +247,8 @@
                     Export Data
                   </button>
                 </mat-menu>
-              </mat-card-header>
-              <mat-card-content>
+              </div>
+              <div class="rpt-card-body">
                 <div class="chart-container">
                   <canvas
                     #leadSourceCanvas
@@ -258,18 +258,18 @@
                     [type]="leadSourceChartType">
                   </canvas>
                 </div>
-              </mat-card-content>
-            </mat-card>
+              </div>
+            </ds-card>
           </div>
           <div class="detailed-metrics">
-            <mat-card class="metrics-card">
-              <mat-card-header>
-                <mat-card-title>
+            <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card">
+              <div class="rpt-card-header">
+                <div class="rpt-card-title">
                   <mat-icon class="chart-icon">leaderboard</mat-icon>
                   Agent Performance Details
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
+                </div>
+              </div>
+              <div class="rpt-card-body">
                 <div class="table-container">
                   <table mat-table [dataSource]="analyticsData?.agentPerformance || []" class="metrics-table">
                     <ng-container matColumnDef="agentName">
@@ -300,16 +300,16 @@
                     <tr mat-row *matRowDef="let row; columns: ['agentName', 'totalDossiers', 'closedDossiers', 'conversionRate', 'averageResponseTimeHours'];"></tr>
                   </table>
                 </div>
-              </mat-card-content>
-            </mat-card>
-            <mat-card class="metrics-card">
-              <mat-card-header>
-                <mat-card-title>
+              </div>
+            </ds-card>
+            <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card">
+              <div class="rpt-card-header">
+                <div class="rpt-card-title">
                   <mat-icon class="chart-icon">source</mat-icon>
                   Lead Sources Breakdown
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
+                </div>
+              </div>
+              <div class="rpt-card-body">
                 <div class="table-container">
                   <table mat-table [dataSource]="analyticsData?.leadSources || []" class="metrics-table">
                     <ng-container matColumnDef="source">
@@ -342,16 +342,16 @@
                     <tr mat-row *matRowDef="let row; columns: ['source', 'count', 'percentage', 'conversionRate'];"></tr>
                   </table>
                 </div>
-              </mat-card-content>
-            </mat-card>
-            <mat-card class="metrics-card chart-card-wide">
-              <mat-card-header>
-                <mat-card-title>
+              </div>
+            </ds-card>
+            <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card chart-card-wide">
+              <div class="rpt-card-header">
+                <div class="rpt-card-title">
                   <mat-icon class="chart-icon">insights</mat-icon>
                   Conversion Funnel Metrics
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
+                </div>
+              </div>
+              <div class="rpt-card-body">
                 <div class="table-container">
                   <table mat-table [dataSource]="analyticsData?.conversionFunnel || []" class="metrics-table">
                     <ng-container matColumnDef="stage">
@@ -387,8 +387,8 @@
                     <tr mat-row *matRowDef="let row; columns: ['stage', 'count', 'conversionRate', 'dropOffRate'];"></tr>
                   </table>
                 </div>
-              </mat-card-content>
-            </mat-card>
+              </div>
+            </ds-card>
           </div>
         </main>
       }

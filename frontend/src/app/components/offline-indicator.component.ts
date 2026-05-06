@@ -57,10 +57,10 @@ import { MatButton, MatIconButton } from '@angular/material/button';
       top: 64px;
       left: 0;
       right: 0;
-      background-color: #1976d2;
-      color: white;
-      padding: 12px 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      background-color: var(--ds-marine);
+      color: var(--ds-text-inverse);
+      padding: var(--ds-space-3) var(--ds-space-4);
+      box-shadow: var(--ds-shadow-md);
       z-index: 1000;
       display: flex;
       align-items: center;
@@ -68,21 +68,21 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     }
 
     .offline-indicator.offline {
-      background-color: #f44336;
+      background-color: var(--ds-error);
     }
 
     .offline-indicator.slow {
-      background-color: #ff9800;
+      background-color: var(--ds-warning);
     }
 
     .offline-indicator.syncing {
-      background-color: #4caf50;
+      background-color: var(--ds-success);
     }
 
     .indicator-content {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: var(--ds-space-3);
       max-width: 1200px;
       width: 100%;
     }
@@ -102,7 +102,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     .sync-progress {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--ds-space-2);
       min-width: 200px;
     }
 
@@ -116,18 +116,18 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     }
 
     .sync-button {
-      color: white;
+      color: var(--ds-text-inverse);
       border: 1px solid rgba(255, 255, 255, 0.5);
     }
 
     .dismiss-button {
-      color: white;
+      color: var(--ds-text-inverse);
     }
 
     @media (max-width: 768px) {
       .offline-indicator {
         top: 56px;
-        padding: 8px 12px;
+        padding: var(--ds-space-2) var(--ds-space-3);
       }
 
       .indicator-content {

@@ -13,8 +13,11 @@ export class DsSkeletonComponent {
   @Input() width: string | null = null;
   @Input() height: string | null = null;
   @Input() lines: number = 1;
+  /** Désactive le shimmer (placeholder statique). */
+  @Input() animate = true;
 
   get classes(): string {
-    return `ds-skeleton ds-skeleton--${this.variant}`;
+    const base = `ds-skeleton ds-skeleton--${this.variant}`;
+    return this.animate ? base : `${base} ds-skeleton--static`;
   }
 }

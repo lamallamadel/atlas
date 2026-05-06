@@ -1,7 +1,6 @@
-<div class="skeleton-container" [ngClass]="{'skeleton-animated': animate(), 'skeleton-card': variant() === 'card', 'skeleton-list': variant() === 'list', 'skeleton-table': variant() === 'table', 'skeleton-form': variant() === 'form', 'skeleton-dashboard-kpi': variant() === 'dashboard-kpi', 'skeleton-detail': variant() === 'detail', 'skeleton-grid': variant() === 'grid', 'skeleton-message': variant() === 'message', 'skeleton-timeline': variant() === 'timeline', 'skeleton-spinner': variant() === 'spinner'}" role="status" aria-live="polite" [attr.aria-label]="'Chargement en cours'">
+<div class="skeleton-container" [ngClass]="{'skeleton-card': variant() === 'card', 'skeleton-list': variant() === 'list', 'skeleton-table': variant() === 'table', 'skeleton-form': variant() === 'form', 'skeleton-dashboard-kpi': variant() === 'dashboard-kpi', 'skeleton-detail': variant() === 'detail', 'skeleton-grid': variant() === 'grid', 'skeleton-message': variant() === 'message', 'skeleton-timeline': variant() === 'timeline', 'skeleton-spinner': variant() === 'spinner'}" role="status" aria-live="polite" [attr.aria-label]="'Chargement en cours'">
   <span class="sr-only">Chargement des données en cours...</span>
 
-  <!-- Spinner variant -->
   @if (variant() === 'spinner') {
     <div class="skeleton-spinner-wrapper">
       <app-spinner
@@ -14,61 +13,58 @@
     </div>
   }
 
-  <!-- Card variant -->
   @if (variant() === 'card') {
-    <div class="skeleton-card" aria-hidden="true">
+    <div class="skeleton-card-inner" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div class="skeleton-card-item">
           <div class="skeleton-card-header">
-            <div class="skeleton-rectangle skeleton-avatar"></div>
+            <ds-skeleton variant="circle" [width]="'48px'" [height]="'48px'" [animate]="animate()" />
             <div class="skeleton-card-header-content">
-              <div class="skeleton-rectangle skeleton-title"></div>
-              <div class="skeleton-rectangle skeleton-subtitle"></div>
+              <ds-skeleton variant="rect" [width]="'60%'" [height]="'20px'" [animate]="animate()" />
+              <ds-skeleton variant="rect" [width]="'40%'" [height]="'16px'" [animate]="animate()" />
             </div>
           </div>
           <div class="skeleton-card-body">
-            <div class="skeleton-rectangle skeleton-line"></div>
-            <div class="skeleton-rectangle skeleton-line"></div>
-            <div class="skeleton-rectangle skeleton-line skeleton-line-short"></div>
+            <ds-skeleton variant="rect" [width]="'100%'" [height]="'14px'" [animate]="animate()" />
+            <ds-skeleton variant="rect" [width]="'100%'" [height]="'14px'" [animate]="animate()" />
+            <ds-skeleton variant="rect" [width]="'70%'" [height]="'14px'" [animate]="animate()" />
           </div>
           <div class="skeleton-card-footer">
-            <div class="skeleton-rectangle skeleton-button-small"></div>
-            <div class="skeleton-rectangle skeleton-button-small"></div>
+            <ds-skeleton variant="rect" [width]="'80px'" [height]="'32px'" [animate]="animate()" />
+            <ds-skeleton variant="rect" [width]="'80px'" [height]="'32px'" [animate]="animate()" />
           </div>
         </div>
       }
     </div>
   }
 
-  <!-- List variant -->
   @if (variant() === 'list') {
-    <div class="skeleton-list" aria-hidden="true">
+    <div class="skeleton-list-inner" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div class="skeleton-list-item">
-          <div class="skeleton-rectangle skeleton-list-icon"></div>
+          <ds-skeleton variant="circle" [width]="'40px'" [height]="'40px'" [animate]="animate()" />
           <div class="skeleton-list-content">
-            <div class="skeleton-rectangle skeleton-list-title"></div>
-            <div class="skeleton-rectangle skeleton-list-subtitle"></div>
+            <ds-skeleton variant="rect" [width]="'70%'" [height]="'18px'" [animate]="animate()" />
+            <ds-skeleton variant="rect" [width]="'50%'" [height]="'14px'" [animate]="animate()" />
           </div>
-          <div class="skeleton-rectangle skeleton-list-action"></div>
+          <ds-skeleton variant="rect" [width]="'80px'" [height]="'32px'" [animate]="animate()" />
         </div>
       }
     </div>
   }
 
-  <!-- Table variant -->
   @if (variant() === 'table') {
-    <div class="skeleton-table" aria-hidden="true">
+    <div class="skeleton-table-inner" aria-hidden="true">
       <div class="skeleton-table-header">
         @for (i of columnsArray; track $index) {
-          <div class="skeleton-rectangle skeleton-table-header-cell"></div>
+          <ds-skeleton variant="rect" [width]="'100%'" [height]="'20px'" [animate]="animate()" />
         }
       </div>
       <div class="skeleton-table-body">
         @for (i of rowsArray; track $index) {
           <div class="skeleton-table-row">
             @for (j of columnsArray; track $index) {
-              <div class="skeleton-rectangle skeleton-table-cell"></div>
+              <ds-skeleton variant="rect" [width]="'100%'" [height]="'16px'" [animate]="animate()" />
             }
           </div>
         }
@@ -76,105 +72,99 @@
     </div>
   }
 
-  <!-- Form variant -->
   @if (variant() === 'form') {
-    <div class="skeleton-form" aria-hidden="true">
+    <div class="skeleton-form-inner" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div class="skeleton-form-group">
-          <div class="skeleton-rectangle skeleton-form-label"></div>
-          <div class="skeleton-rectangle skeleton-form-input"></div>
+          <ds-skeleton variant="rect" [width]="'120px'" [height]="'16px'" [animate]="animate()" />
+          <ds-skeleton variant="rect" [width]="'100%'" [height]="'40px'" [animate]="animate()" />
         </div>
       }
       <div class="skeleton-form-actions">
-        <div class="skeleton-rectangle skeleton-button"></div>
-        <div class="skeleton-rectangle skeleton-button"></div>
+        <ds-skeleton variant="rect" [width]="'120px'" [height]="'40px'" [animate]="animate()" />
+        <ds-skeleton variant="rect" [width]="'120px'" [height]="'40px'" [animate]="animate()" />
       </div>
     </div>
   }
 
-  <!-- Dashboard KPI variant -->
   @if (variant() === 'dashboard-kpi') {
-    <div class="skeleton-dashboard-kpi" aria-hidden="true">
+    <div class="skeleton-dashboard-kpi-inner" aria-hidden="true">
       <div class="skeleton-kpi-header">
-        <div class="skeleton-rectangle skeleton-kpi-title"></div>
+        <ds-skeleton variant="rect" [width]="'60%'" [height]="'18px'" [animate]="animate()" />
       </div>
       <div class="skeleton-kpi-value">
-        <div class="skeleton-rectangle skeleton-kpi-number"></div>
+        <ds-skeleton variant="rect" [width]="'80px'" [height]="'48px'" [animate]="animate()" />
       </div>
       <div class="skeleton-kpi-footer">
-        <div class="skeleton-rectangle skeleton-kpi-button"></div>
+        <ds-skeleton variant="rect" [width]="'100px'" [height]="'36px'" [animate]="animate()" />
       </div>
     </div>
   }
 
-  <!-- Detail variant -->
   @if (variant() === 'detail') {
-    <div class="skeleton-detail" aria-hidden="true">
+    <div class="skeleton-detail-inner" aria-hidden="true">
       <div class="skeleton-detail-header">
-        <div class="skeleton-rectangle skeleton-detail-back"></div>
-        <div class="skeleton-rectangle skeleton-detail-title"></div>
-        <div class="skeleton-rectangle skeleton-detail-badge"></div>
+        <ds-skeleton variant="rect" [width]="'120px'" [height]="'36px'" [animate]="animate()" />
+        <ds-skeleton variant="rect" [width]="'100%'" [height]="'28px'" [animate]="animate()" />
+        <ds-skeleton variant="rect" [width]="'100px'" [height]="'32px'" [animate]="animate()" />
       </div>
       <div class="skeleton-detail-content">
         @for (i of rowsArray; track $index) {
           <div class="skeleton-detail-row">
-            <div class="skeleton-rectangle skeleton-detail-label"></div>
-            <div class="skeleton-rectangle skeleton-detail-value"></div>
+            <ds-skeleton variant="rect" [width]="'150px'" [height]="'18px'" [animate]="animate()" />
+            <ds-skeleton class="skeleton-detail-value-slot" variant="rect" [width]="'100%'" [height]="'18px'" [animate]="animate()" />
           </div>
         }
       </div>
     </div>
   }
 
-  <!-- Grid variant -->
   @if (variant() === 'grid') {
-    <div class="skeleton-grid" aria-hidden="true">
+    <div class="skeleton-grid-inner" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div class="skeleton-grid-item">
-          <div class="skeleton-rectangle skeleton-grid-image"></div>
+          <ds-skeleton variant="rect" [width]="'100%'" [height]="'200px'" [animate]="animate()" />
           <div class="skeleton-grid-content">
-            <div class="skeleton-rectangle skeleton-grid-title"></div>
-            <div class="skeleton-rectangle skeleton-grid-subtitle"></div>
-            <div class="skeleton-rectangle skeleton-grid-price"></div>
+            <ds-skeleton variant="rect" [width]="'80%'" [height]="'20px'" [animate]="animate()" />
+            <ds-skeleton variant="rect" [width]="'60%'" [height]="'16px'" [animate]="animate()" />
+            <ds-skeleton variant="rect" [width]="'40%'" [height]="'24px'" [animate]="animate()" />
           </div>
         </div>
       }
     </div>
   }
 
-  <!-- Message variant -->
   @if (variant() === 'message') {
-    <div class="skeleton-message" aria-hidden="true">
+    <div class="skeleton-message-inner" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div [ngClass]="{'skeleton-message-item': true, 'skeleton-message-right': i % 2 === 0}">
           @if (i % 2 !== 0) {
-            <div class="skeleton-rectangle skeleton-message-avatar"></div>
+            <ds-skeleton variant="circle" [width]="'36px'" [height]="'36px'" [animate]="animate()" />
           }
           <div class="skeleton-message-bubble">
-            <div class="skeleton-rectangle skeleton-message-text"></div>
-            <div class="skeleton-rectangle skeleton-message-text skeleton-message-text-short"></div>
-            <div class="skeleton-rectangle skeleton-message-time"></div>
+            <ds-skeleton variant="rect" [width]="'100%'" [height]="'14px'" [animate]="animate()" />
+            <ds-skeleton variant="rect" [width]="'60%'" [height]="'14px'" [animate]="animate()" />
+            <ds-skeleton variant="rect" [width]="'60px'" [height]="'12px'" [animate]="animate()" />
           </div>
           @if (i % 2 === 0) {
-            <div class="skeleton-rectangle skeleton-message-avatar"></div>
+            <ds-skeleton variant="circle" [width]="'36px'" [height]="'36px'" [animate]="animate()" />
           }
         </div>
       }
     </div>
   }
 
-  <!-- Timeline variant -->
   @if (variant() === 'timeline') {
-    <div class="skeleton-timeline" aria-hidden="true">
+    <div class="skeleton-timeline-inner" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div class="skeleton-timeline-item">
           <div class="skeleton-timeline-marker">
-            <div class="skeleton-rectangle skeleton-timeline-dot"></div>
+            <ds-skeleton variant="circle" [width]="'16px'" [height]="'16px'" [animate]="animate()" />
           </div>
           <div class="skeleton-timeline-content">
-            <div class="skeleton-rectangle skeleton-timeline-title"></div>
-            <div class="skeleton-rectangle skeleton-timeline-description"></div>
-            <div class="skeleton-rectangle skeleton-timeline-time"></div>
+            <ds-skeleton variant="rect" [width]="'60%'" [height]="'18px'" [animate]="animate()" />
+            <ds-skeleton variant="rect" [width]="'100%'" [height]="'14px'" [animate]="animate()" />
+            <ds-skeleton variant="rect" [width]="'40%'" [height]="'12px'" [animate]="animate()" />
           </div>
         </div>
       }

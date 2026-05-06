@@ -50,13 +50,13 @@
   gap: 12px;
   margin-bottom: 20px;
   padding: 12px;
-  background-color: #f5f5f5;
+  background-color: var(--ds-bg);
   border-radius: 4px;
 }
 
 .legend-title {
   font-weight: 500;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .legend-items {
@@ -80,7 +80,7 @@
 
 .legend-label {
   font-size: 14px;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .calendar-wrapper {
@@ -108,7 +108,7 @@
 }
 
 .loading-state p {
-  color: #666;
+  color: var(--ds-text-muted);
   font-size: 16px;
 }
 
@@ -118,10 +118,10 @@
   gap: 8px;
   margin-top: 16px;
   padding: 12px;
-  background-color: #e3f2fd;
+  background-color: var(--ds-marine-hl);
   border-radius: 4px;
   font-size: 14px;
-  color: #1976d2;
+  color: var(--ds-marine);
 }
 
 .help-text mat-icon {
@@ -134,7 +134,7 @@
 /* FullCalendar — couleurs / boutons : styles/_fullcalendar-ds.scss (global) */
 
 ::ng-deep .fc {
-  font-family: var(--ds-font-body, var(--at-font-body), system-ui, sans-serif);
+  font-family: var(--ds-font-body, system-ui, sans-serif);
 }
 
 ::ng-deep .fc .fc-button:disabled {
@@ -209,11 +209,11 @@
 }
 
 ::ng-deep .fc-event-custom.fc-event-completed {
-  border-left: 4px solid #4CAF50;
+  border-left: 4px solid var(--ds-success);
 }
 
 ::ng-deep .fc .fc-timegrid-now-indicator-line {
-  border-color: #f44336;
+  border-color: var(--ds-error);
   border-width: 2px;
 }
 
@@ -279,6 +279,6 @@
 
   .calendar-wrapper {
     box-shadow: none;
-    border: 1px solid #ccc;
+    border: 1px solid var(--ds-border);
   }
 }

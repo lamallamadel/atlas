@@ -201,21 +201,21 @@ import { AsyncPipe } from '@angular/common';
       width: 52px;
       height: 52px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #2c5aa0, #7c3aed);
-      color: #fff;
+      background: linear-gradient(135deg, var(--ds-marine), var(--ds-primary));
+      color: var(--ds-text-inverse);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       z-index: 8000;
-      box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+      box-shadow: 0 4px 20px color-mix(in srgb, var(--ds-marine) 40%, transparent);
       transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
                   box-shadow 0.2s ease;
       animation: fabIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .ai-panel-fab:hover {
       transform: scale(1.1);
-      box-shadow: 0 6px 28px rgba(124, 58, 237, 0.55);
+      box-shadow: 0 6px 28px color-mix(in srgb, var(--ds-marine) 55%, transparent);
     }
     .ai-panel-fab mat-icon {
       font-size: 24px;
@@ -259,7 +259,7 @@ import { AsyncPipe } from '@angular/common';
       align-items: center;
       justify-content: space-between;
       padding: 12px 8px 12px 16px;
-      background: linear-gradient(135deg, rgba(44,90,160,0.12), rgba(124,58,237,0.08));
+      background: linear-gradient(135deg, var(--ds-marine-hl), var(--ds-primary-hl));
       border-bottom: 1px solid rgba(255,255,255,0.1);
       flex-shrink: 0;
     }
@@ -272,11 +272,11 @@ import { AsyncPipe } from '@angular/common';
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #2c5aa0, #7c3aed);
+      background: linear-gradient(135deg, var(--ds-marine), var(--ds-primary));
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      color: var(--ds-text-inverse);
       flex-shrink: 0;
     }
     .ai-panel-avatar mat-icon {
@@ -288,7 +288,7 @@ import { AsyncPipe } from '@angular/common';
       font-family: 'Urbanist', sans-serif;
       font-size: 0.9375rem;
       font-weight: 700;
-      color: var(--color-neutral-900, #111);
+      color: var(--ds-text);
       line-height: 1.2;
     }
     .ai-panel-status {
@@ -296,13 +296,13 @@ import { AsyncPipe } from '@angular/common';
       align-items: center;
       gap: 5px;
       font-size: 0.6875rem;
-      color: var(--color-neutral-500, #777);
+      color: var(--ds-text-muted);
     }
     .status-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #27ae60;
+      background: var(--ds-success);
       animation: pulse 2s ease-in-out infinite;
     }
     @keyframes pulse {
@@ -329,19 +329,19 @@ import { AsyncPipe } from '@angular/common';
       font-size: 40px;
       width: 40px;
       height: 40px;
-      color: #7c3aed;
+      color: var(--ds-primary);
       opacity: 0.85;
     }
     .welcome-title {
       font-family: 'Urbanist', sans-serif;
       font-size: 1rem;
       font-weight: 700;
-      color: var(--color-neutral-900, #111);
+      color: var(--ds-text);
       margin: 4px 0 0;
     }
     .welcome-text {
       font-size: 0.8125rem;
-      color: var(--color-neutral-500, #777);
+      color: var(--ds-text-muted);
       line-height: 1.5;
       margin: 0 0 8px;
     }
@@ -352,9 +352,9 @@ import { AsyncPipe } from '@angular/common';
       justify-content: center;
     }
     .example-chip {
-      border: 1px solid rgba(124,58,237,0.25);
-      background: rgba(124,58,237,0.06);
-      color: #7c3aed;
+      border: 1px solid color-mix(in srgb, var(--ds-primary) 25%, transparent);
+      background: color-mix(in srgb, var(--ds-primary) 6%, transparent);
+      color: var(--ds-primary);
       padding: 5px 12px;
       border-radius: 999px;
       font-size: 0.75rem;
@@ -363,7 +363,7 @@ import { AsyncPipe } from '@angular/common';
       transition: all 0.15s ease;
     }
     .example-chip:hover {
-      background: rgba(124,58,237,0.14);
+      background: color-mix(in srgb, var(--ds-primary) 14%, transparent);
       transform: translateY(-1px);
     }
 
@@ -399,11 +399,11 @@ import { AsyncPipe } from '@angular/common';
       width: 26px;
       height: 26px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #2c5aa0, #7c3aed);
+      background: linear-gradient(135deg, var(--ds-marine), var(--ds-primary));
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      color: var(--ds-text-inverse);
       flex-shrink: 0;
       margin-bottom: 2px;
     }
@@ -421,13 +421,13 @@ import { AsyncPipe } from '@angular/common';
       word-break: break-word;
     }
     .user-bubble {
-      background: linear-gradient(135deg, #2c5aa0, #7c3aed);
-      color: #fff;
+      background: linear-gradient(135deg, var(--ds-marine), var(--ds-primary));
+      color: var(--ds-text-inverse);
       border-bottom-right-radius: 4px;
     }
     .agent-bubble {
-      background: var(--color-neutral-100, #f4f4f5);
-      color: var(--color-neutral-900, #111);
+      background: var(--ds-surface-dynamic);
+      color: var(--ds-text);
       border-bottom-left-radius: 4px;
     }
 
@@ -437,7 +437,7 @@ import { AsyncPipe } from '@angular/common';
       align-items: center;
       gap: 4px;
       padding: 10px 14px;
-      background: var(--color-neutral-100, #f4f4f5);
+      background: var(--ds-surface-dynamic);
       border-radius: 14px;
       border-bottom-left-radius: 4px;
     }
@@ -445,7 +445,7 @@ import { AsyncPipe } from '@angular/common';
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #9ca3af;
+      background: var(--ds-text-faint);
       animation: typingBounce 1.2s ease-in-out infinite;
     }
     .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
@@ -467,9 +467,9 @@ import { AsyncPipe } from '@angular/common';
       align-items: center;
       gap: 4px;
       padding: 4px 10px 4px 7px;
-      border: 1px solid rgba(44,90,160,0.2);
-      background: rgba(44,90,160,0.06);
-      color: #2c5aa0;
+      border: 1px solid color-mix(in srgb, var(--ds-marine) 20%, transparent);
+      background: color-mix(in srgb, var(--ds-marine) 6%, transparent);
+      color: var(--ds-marine);
       border-radius: 999px;
       font-size: 0.7rem;
       cursor: pointer;
@@ -478,7 +478,7 @@ import { AsyncPipe } from '@angular/common';
       transition: all 0.15s ease;
     }
     .action-chip:hover {
-      background: rgba(44,90,160,0.14);
+      background: color-mix(in srgb, var(--ds-marine) 14%, transparent);
       transform: translateY(-1px);
     }
     .action-chip mat-icon {
@@ -493,7 +493,7 @@ import { AsyncPipe } from '@angular/common';
       align-items: flex-end;
       gap: 8px;
       padding: 10px 12px;
-      border-top: 1px solid var(--color-neutral-200, #e5e7eb);
+      border-top: 1px solid var(--ds-divider);
       flex-shrink: 0;
     }
     .ai-input {
@@ -504,13 +504,13 @@ import { AsyncPipe } from '@angular/common';
       background: transparent;
       font-family: 'Urbanist', sans-serif;
       font-size: 0.875rem;
-      color: var(--color-neutral-900, #111);
+      color: var(--ds-text);
       line-height: 1.4;
       max-height: 96px;
       overflow-y: auto;
     }
     .ai-input::placeholder {
-      color: var(--color-neutral-400, #9ca3af);
+      color: var(--ds-text-faint);
       font-size: 0.8125rem;
     }
     .send-btn {
@@ -518,8 +518,8 @@ import { AsyncPipe } from '@angular/common';
       height: 36px;
       border-radius: 50%;
       border: none;
-      background: var(--color-neutral-200, #e5e7eb);
-      color: var(--color-neutral-400, #9ca3af);
+      background: var(--ds-divider);
+      color: var(--ds-text-faint);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -528,10 +528,10 @@ import { AsyncPipe } from '@angular/common';
       flex-shrink: 0;
     }
     .send-btn.active {
-      background: linear-gradient(135deg, #2c5aa0, #7c3aed);
-      color: #fff;
+      background: linear-gradient(135deg, var(--ds-marine), var(--ds-primary));
+      color: var(--ds-text-inverse);
       cursor: pointer;
-      box-shadow: 0 2px 10px rgba(124,58,237,0.3);
+      box-shadow: 0 2px 10px color-mix(in srgb, var(--ds-primary) 30%, transparent);
     }
     .send-btn.active:hover {
       transform: scale(1.08);
@@ -546,12 +546,12 @@ import { AsyncPipe } from '@angular/common';
     .ai-panel-hint {
       text-align: center;
       font-size: 0.6875rem;
-      color: var(--color-neutral-400, #9ca3af);
+      color: var(--ds-text-faint);
       padding: 4px 0 8px;
       flex-shrink: 0;
     }
     .ai-panel-hint kbd {
-      background: var(--color-neutral-200, #e5e7eb);
+      background: var(--ds-divider);
       padding: 1px 4px;
       border-radius: 3px;
       font-size: 0.625rem;

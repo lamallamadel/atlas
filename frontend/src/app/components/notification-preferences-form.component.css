@@ -13,35 +13,40 @@
 }
 
 .preferences-card {
+  display: block;
   margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
 }
 
-.preferences-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+.preferences-card:hover ::ng-deep .ds-card {
+  box-shadow: var(--ds-shadow-md);
 }
 
-.preferences-card mat-card-header {
+.pref-card-header {
   margin-bottom: 16px;
+  padding: 16px 16px 0;
 }
 
-.preferences-card mat-card-title {
+.pref-card-title {
   display: flex;
   align-items: center;
   gap: 12px;
   font-size: 20px;
   font-weight: 600;
+  margin: 0 0 8px;
 }
 
-.preferences-card mat-card-title mat-icon {
-  color: var(--primary-color, #1976d2);
+.pref-card-title mat-icon {
+  color: var(--primary-color, var(--ds-marine));
 }
 
-.preferences-card mat-card-subtitle {
+.pref-card-subtitle {
   font-size: 14px;
   color: rgba(0, 0, 0, 0.6);
-  margin-top: 8px;
+  margin: 0;
+}
+
+.pref-card-body {
+  padding: 0 16px 16px;
 }
 
 /* Channels Grid */
@@ -73,7 +78,7 @@
 .channel-item:hover,
 .type-item:hover {
   background: rgba(0, 0, 0, 0.04);
-  border-color: var(--primary-color, #1976d2);
+  border-color: var(--primary-color, var(--ds-marine));
 }
 
 .channel-info,
@@ -95,7 +100,7 @@
 
 .channel-icon-active,
 .type-icon-active {
-  color: var(--primary-color, #1976d2) !important;
+  color: var(--primary-color, var(--ds-marine)) !important;
 }
 
 .channel-text,
@@ -160,7 +165,7 @@
 }
 
 .quiet-status.active {
-  color: var(--primary-color, #1976d2);
+  color: var(--primary-color, var(--ds-marine));
   font-weight: 500;
 }
 
@@ -205,7 +210,7 @@
   font-size: 20px;
   width: 20px;
   height: 20px;
-  color: var(--primary-color, #1976d2);
+  color: var(--primary-color, var(--ds-marine));
 }
 
 .quiet-hours-slider {
@@ -227,7 +232,7 @@
   font-size: 16px;
   width: 16px;
   height: 16px;
-  color: var(--primary-color, #1976d2);
+  color: var(--primary-color, var(--ds-marine));
 }
 
 /* Digest Frequency */
@@ -247,12 +252,12 @@
 
 .digest-frequency-option:hover {
   background: rgba(0, 0, 0, 0.04);
-  border-color: var(--primary-color, #1976d2);
+  border-color: var(--primary-color, var(--ds-marine));
 }
 
 .digest-frequency-option.mat-radio-checked {
   background: rgba(25, 118, 210, 0.08);
-  border-color: var(--primary-color, #1976d2);
+  border-color: var(--primary-color, var(--ds-marine));
 }
 
 .frequency-content {
@@ -270,7 +275,7 @@
   font-size: 24px;
   width: 24px;
   height: 24px;
-  color: var(--primary-color, #1976d2);
+  color: var(--primary-color, var(--ds-marine));
 }
 
 .frequency-header strong {
@@ -312,11 +317,11 @@
   font-size: 32px;
   width: 32px;
   height: 32px;
-  color: var(--primary-color, #1976d2);
+  color: var(--primary-color, var(--ds-marine));
 }
 
 .summary-item mat-icon.active {
-  color: #f57c00;
+  color: var(--ds-warning);
   animation: pulse 2s infinite;
 }
 
@@ -360,7 +365,7 @@
 }
 
 .preview-title mat-icon {
-  color: var(--primary-color, #1976d2);
+  color: var(--primary-color, var(--ds-marine));
 }
 
 .notification-examples {
@@ -407,27 +412,27 @@
   padding: 8px;
   border-radius: 50%;
   background: rgba(25, 118, 210, 0.1);
-  color: var(--primary-color, #1976d2);
+  color: var(--primary-color, var(--ds-marine));
 }
 
 .notification-icon-newDossier {
   background: rgba(76, 175, 80, 0.1) !important;
-  color: #4caf50 !important;
+  color: var(--ds-success) !important;
 }
 
 .notification-icon-newMessage {
   background: rgba(33, 150, 243, 0.1) !important;
-  color: #2196f3 !important;
+  color: var(--ds-marine) !important;
 }
 
 .notification-icon-appointment {
   background: rgba(255, 152, 0, 0.1) !important;
-  color: #ff9800 !important;
+  color: var(--ds-warning) !important;
 }
 
 .notification-icon-statusChange {
   background: rgba(156, 39, 176, 0.1) !important;
-  color: #9c27b0 !important;
+  color: var(--ds-primary) !important;
 }
 
 .notification-content {
@@ -547,7 +552,7 @@
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .preferences-card mat-card-subtitle {
+  .preferences-card .pref-card-subtitle {
     color: rgba(255, 255, 255, 0.6);
   }
 

@@ -42,7 +42,7 @@
           justify-content: center;
 
           mat-icon {
-            color: white;
+            color: var(--ds-text-inverse);
             font-size: 32px;
             width: 32px;
             height: 32px;
@@ -54,7 +54,7 @@
 
           .kpi-label {
             font-size: 13px;
-            color: #666;
+            color: var(--ds-text-muted);
             margin-bottom: 4px;
           }
 
@@ -71,11 +71,11 @@
             gap: 4px;
 
             &.positive {
-              color: #4caf50;
+              color: var(--ds-success);
             }
 
             &.negative {
-              color: #f44336;
+              color: var(--ds-error);
             }
 
             mat-icon {
@@ -87,6 +87,24 @@
         }
       }
     }
+  }
+
+  .exec-card-header {
+    padding: var(--ds-space-4, 16px);
+    border-bottom: 1px solid var(--ds-divider);
+  }
+
+  .exec-card-title {
+    margin: 0 0 var(--ds-space-1, 4px);
+    font-size: var(--font-size-lg, 1.125rem);
+    font-weight: 600;
+    color: var(--ds-text);
+  }
+
+  .exec-card-subtitle {
+    margin: 0;
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--ds-text-muted);
   }
 
   .charts-grid {
@@ -107,22 +125,23 @@
         }
       }
 
-      mat-card-content {
+      .exec-card-body {
         padding: 20px;
         min-height: 300px;
       }
     }
 
     .insights-card {
-      mat-card-header {
-        mat-card-title {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
+      .exec-card-title--icon {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: var(--font-size-lg, 1.125rem);
+        font-weight: 600;
       }
 
-      mat-card-content {
+      .exec-card-body--insights {
         padding: 0;
 
         .insight-item {
@@ -146,7 +165,7 @@
             p {
               margin: 0;
               font-size: 13px;
-              color: #666;
+              color: var(--ds-text-muted);
               line-height: 1.5;
             }
           }
@@ -165,7 +184,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: color-mix(in srgb, var(--ds-surface) 92%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;

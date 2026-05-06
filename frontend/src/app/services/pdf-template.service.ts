@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
 
 /**
  * PDF Template Types
@@ -95,11 +96,11 @@ const TYPOGRAPHY = {
     footer: 8,
   },
   colors: {
-    primary: '#2c5aa0',
-    secondary: '#e67e22',
-    text: '#333333',
-    textLight: '#666666',
-    border: '#dddddd',
+    primary: DS_CHART_FALLBACK_HEX['--ds-marine'],
+    secondary: DS_CHART_FALLBACK_HEX['--ds-primary'],
+    text: DS_CHART_FALLBACK_HEX['--ds-text'],
+    textLight: DS_CHART_FALLBACK_HEX['--ds-text-muted'],
+    border: DS_CHART_FALLBACK_HEX['--ds-divider'],
   },
   spacing: {
     section: 15,
@@ -117,8 +118,8 @@ const DEFAULT_BRAND: PdfBrandConfig = {
   phone: '+33 1 23 45 67 89',
   email: 'contact@atlas-immobilier.fr',
   website: 'www.atlas-immobilier.fr',
-  primaryColor: '#2c5aa0',
-  secondaryColor: '#e67e22',
+  primaryColor: DS_CHART_FALLBACK_HEX['--ds-marine'],
+  secondaryColor: DS_CHART_FALLBACK_HEX['--ds-primary'],
 };
 
 /**

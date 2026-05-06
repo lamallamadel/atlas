@@ -1,7 +1,6 @@
-import { Meta, StoryObj } from '@storybook/angular';
-import { moduleMetadata } from '@storybook/angular';
+import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -9,16 +8,19 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatIconModule } from '@angular/material/icon';
+import { DsInputComponent } from '../app/design-system/primitives/ds-input/ds-input.component';
+import { DsButtonComponent } from '../app/design-system/primitives/ds-button/ds-button.component';
 
 const meta: Meta = {
-  title: 'Components/Forms',
+  title: 'Design System/Recipes/Forms',
   tags: ['autodocs'],
   decorators: [
     moduleMetadata({
       imports: [
         CommonModule,
-        ReactiveFormsModule,
+        FormsModule,
+        DsInputComponent,
+        DsButtonComponent,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
@@ -26,7 +28,6 @@ const meta: Meta = {
         MatRadioModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        MatIconModule,
       ],
     }),
   ],
@@ -34,7 +35,8 @@ const meta: Meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Form components with validation, error states, and accessibility support.',
+        component:
+          'Champs simples avec ds-input (tokens DS). Listes, cases et datepicker : Angular Material tant qu’il n’y a pas d’équivalent DS — thème aligné sur --ds-*.',
       },
     },
   },
@@ -43,57 +45,23 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-export const TextInputs: Story = {
+export const DsTextFields: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Text Inputs</h2>
-        
-        <div style="display: grid; gap: 32px; max-width: 500px;">
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text); max-width: 520px;">
+        <h2 style="margin-bottom: 24px;">ds-input</h2>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <ds-input inputId="sb-fn" label="Nom complet" placeholder="Jean Dupont"></ds-input>
           <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Standard Input</h3>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Full Name</mat-label>
-              <input matInput placeholder="Enter your full name">
-              <mat-icon matPrefix>person</mat-icon>
-            </mat-form-field>
+            <ds-input inputId="sb-em" label="E-mail" type="email" placeholder="vous@exemple.com"></ds-input>
+            <p style="margin: 6px 0 0; font-size: 12px; color: var(--ds-text-faint);">Nous ne partageons pas votre adresse.</p>
           </div>
-
+          <ds-input inputId="sb-ph" label="Téléphone" type="tel" placeholder="+33 6 12 34 56 78" error="Veuillez saisir un numéro valide"></ds-input>
+          <ds-input inputId="sb-dis" label="Lecture seule" placeholder="Non modifiable" [disabled]="true"></ds-input>
           <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">With Hint</h3>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Email</mat-label>
-              <input matInput placeholder="email@example.com" type="email">
-              <mat-icon matPrefix>email</mat-icon>
-              <mat-hint>We'll never share your email</mat-hint>
-            </mat-form-field>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">With Error</h3>
-            <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-invalid">
-              <mat-label>Phone Number</mat-label>
-              <input matInput placeholder="+33 6 12 34 56 78" type="tel">
-              <mat-icon matPrefix>phone</mat-icon>
-              <mat-error>Please enter a valid phone number</mat-error>
-            </mat-form-field>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Disabled</h3>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Disabled Input</mat-label>
-              <input matInput value="Cannot edit" disabled>
-            </mat-form-field>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Textarea</h3>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Description</mat-label>
-              <textarea matInput rows="4" placeholder="Enter description..."></textarea>
-              <mat-hint align="end">0 / 500</mat-hint>
-            </mat-form-field>
+            <label style="display:block;font-weight:600;margin-bottom:8px;font-size:14px;color:var(--ds-text);">Description</label>
+            <textarea rows="4" placeholder="Votre message…" style="width:100%;padding:10px 12px;border:1px solid var(--ds-border);border-radius:var(--ds-radius-md);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;background:var(--ds-surface);"></textarea>
+            <p style="margin:6px 0 0;font-size:12px;color:var(--ds-text-faint);text-align:right;">0 / 500</p>
           </div>
         </div>
       </div>
@@ -101,54 +69,28 @@ export const TextInputs: Story = {
   }),
 };
 
-export const SelectDropdowns: Story = {
+export const MaterialSelects: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Select Dropdowns</h2>
-        
-        <div style="display: grid; gap: 32px; max-width: 500px;">
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Single Select</h3>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Property Type</mat-label>
-              <mat-select>
-                <mat-option value="apartment">Apartment</mat-option>
-                <mat-option value="house">House</mat-option>
-                <mat-option value="villa">Villa</mat-option>
-                <mat-option value="office">Office</mat-option>
-                <mat-option value="land">Land</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">With Icon</h3>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>City</mat-label>
-              <mat-select>
-                <mat-option value="paris">Paris</mat-option>
-                <mat-option value="lyon">Lyon</mat-option>
-                <mat-option value="marseille">Marseille</mat-option>
-                <mat-option value="toulouse">Toulouse</mat-option>
-              </mat-select>
-              <mat-icon matPrefix>location_city</mat-icon>
-            </mat-form-field>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Multiple Select</h3>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Amenities</mat-label>
-              <mat-select multiple>
-                <mat-option value="parking">Parking</mat-option>
-                <mat-option value="balcony">Balcony</mat-option>
-                <mat-option value="garden">Garden</mat-option>
-                <mat-option value="pool">Swimming Pool</mat-option>
-                <mat-option value="gym">Gym</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text); max-width: 520px;">
+        <h2 style="margin-bottom: 24px;">Sélecteurs (Material)</h2>
+        <div style="display: flex; flex-direction: column; gap: 28px;">
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Type de bien</mat-label>
+            <mat-select>
+              <mat-option value="apartment">Appartement</mat-option>
+              <mat-option value="house">Maison</mat-option>
+              <mat-option value="villa">Villa</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Équipements</mat-label>
+            <mat-select multiple>
+              <mat-option value="parking">Parking</mat-option>
+              <mat-option value="balcony">Balcon</mat-option>
+              <mat-option value="garden">Jardin</mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
       </div>
     `,
@@ -158,40 +100,24 @@ export const SelectDropdowns: Story = {
 export const CheckboxesAndRadios: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Checkboxes & Radio Buttons</h2>
-        
-        <div style="display: grid; gap: 32px; max-width: 500px;">
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text); max-width: 520px;">
+        <h2 style="margin-bottom: 24px;">Cases & radios (Material)</h2>
+        <div style="display: flex; flex-direction: column; gap: 24px;">
           <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Checkboxes</h3>
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-              <mat-checkbox>Accept terms and conditions</mat-checkbox>
-              <mat-checkbox checked>Send me promotional emails</mat-checkbox>
-              <mat-checkbox disabled>Disabled option</mat-checkbox>
-              <mat-checkbox indeterminate>Indeterminate state</mat-checkbox>
+            <h3 style="margin-bottom: 12px; font-size: 15px; color: var(--ds-text-muted);">Cases à cocher</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <mat-checkbox>J’accepte les conditions</mat-checkbox>
+              <mat-checkbox checked>Recevoir la newsletter</mat-checkbox>
+              <mat-checkbox disabled>Option désactivée</mat-checkbox>
             </div>
           </div>
-
           <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Radio Buttons</h3>
+            <h3 style="margin-bottom: 12px; font-size: 15px; color: var(--ds-text-muted);">Boutons radio</h3>
             <mat-radio-group>
-              <div style="display: flex; flex-direction: column; gap: 12px;">
-                <mat-radio-button value="sale">For Sale</mat-radio-button>
-                <mat-radio-button value="rent">For Rent</mat-radio-button>
-                <mat-radio-button value="both" checked>Both</mat-radio-button>
-                <mat-radio-button value="other" disabled>Other (disabled)</mat-radio-button>
-              </div>
-            </mat-radio-group>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Inline Radio Buttons</h3>
-            <mat-radio-group>
-              <div style="display: flex; gap: 24px; flex-wrap: wrap;">
-                <mat-radio-button value="1">1 Room</mat-radio-button>
-                <mat-radio-button value="2">2 Rooms</mat-radio-button>
-                <mat-radio-button value="3">3 Rooms</mat-radio-button>
-                <mat-radio-button value="4+">4+ Rooms</mat-radio-button>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <mat-radio-button value="sale">À vendre</mat-radio-button>
+                <mat-radio-button value="rent">À louer</mat-radio-button>
+                <mat-radio-button value="both" checked>Les deux</mat-radio-button>
               </div>
             </mat-radio-group>
           </div>
@@ -201,202 +127,54 @@ export const CheckboxesAndRadios: Story = {
   }),
 };
 
-export const ValidationStates: Story = {
+export const CompleteExample: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Validation States</h2>
-        
-        <div style="display: grid; gap: 32px; max-width: 500px;">
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Required Field</h3>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Email *</mat-label>
-              <input matInput placeholder="email@example.com" required>
-              <mat-hint>Required field</mat-hint>
-            </mat-form-field>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Error State</h3>
-            <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-invalid">
-              <mat-label>Password</mat-label>
-              <input matInput type="password" value="123">
-              <mat-error>
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;">error</mat-icon>
-                Password must be at least 8 characters
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Success State</h3>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Email</mat-label>
-              <input matInput value="user@example.com">
-              <mat-icon matSuffix style="color: var(--color-success-500);">check_circle</mat-icon>
-              <mat-hint style="color: var(--color-success-600);">
-                Valid email address
-              </mat-hint>
-            </mat-form-field>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Multiple Errors</h3>
-            <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-invalid">
-              <mat-label>Username</mat-label>
-              <input matInput value="ab">
-              <mat-error>
-                <ul style="margin: 4px 0; padding-left: 20px; font-size: 12px;">
-                  <li>Must be at least 3 characters</li>
-                  <li>Can only contain letters and numbers</li>
-                </ul>
-              </mat-error>
-            </mat-form-field>
-          </div>
-        </div>
-      </div>
-    `,
-  }),
-};
-
-export const CompleteForm: Story = {
-  render: () => ({
-    template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Complete Form Example</h2>
-        
-        <form style="max-width: 600px; background: white; padding: 32px; border-radius: 12px; box-shadow: var(--shadow-2);">
-          <h3 style="margin-top: 0; margin-bottom: 24px; color: var(--color-neutral-900);">Property Inquiry</h3>
-          
-          <div style="display: grid; gap: 20px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-              <mat-form-field appearance="outline">
-                <mat-label>First Name *</mat-label>
-                <input matInput required>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline">
-                <mat-label>Last Name *</mat-label>
-                <input matInput required>
-              </mat-form-field>
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Formulaire mixte</h2>
+        <div style="max-width: 600px; background: var(--ds-surface); padding: 28px; border-radius: var(--ds-radius-xl); box-shadow: var(--ds-shadow-md); border: 1px solid var(--ds-divider);">
+          <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px;">Demande d’information</h3>
+          <div style="display: grid; gap: 18px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <ds-input inputId="sb-cf1" label="Prénom *" placeholder="Prénom"></ds-input>
+              <ds-input inputId="sb-cf2" label="Nom *" placeholder="Nom"></ds-input>
             </div>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Email *</mat-label>
-              <input matInput type="email" required>
-              <mat-icon matPrefix>email</mat-icon>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Phone</mat-label>
-              <input matInput type="tel">
-              <mat-icon matPrefix>phone</mat-icon>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Property Type *</mat-label>
-              <mat-select required>
-                <mat-option value="apartment">Apartment</mat-option>
-                <mat-option value="house">House</mat-option>
-                <mat-option value="villa">Villa</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Budget Range</mat-label>
+            <ds-input inputId="sb-cf3" label="E-mail *" type="email" placeholder="vous@exemple.com"></ds-input>
+            <ds-input inputId="sb-cf4" label="Téléphone" type="tel" placeholder="+33 …"></ds-input>
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Type de bien *</mat-label>
               <mat-select>
-                <mat-option value="100k-200k">€100k - €200k</mat-option>
-                <mat-option value="200k-300k">€200k - €300k</mat-option>
-                <mat-option value="300k-500k">€300k - €500k</mat-option>
-                <mat-option value="500k+">€500k+</mat-option>
+                <mat-option value="apartment">Appartement</mat-option>
+                <mat-option value="house">Maison</mat-option>
               </mat-select>
             </mat-form-field>
-
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" style="width: 100%;">
               <mat-label>Message</mat-label>
-              <textarea matInput rows="4" placeholder="Tell us about your requirements..."></textarea>
+              <textarea matInput rows="3" placeholder="Votre besoin…"></textarea>
             </mat-form-field>
-
-            <div>
-              <mat-checkbox>I agree to the terms and conditions *</mat-checkbox>
-            </div>
-
-            <div>
-              <mat-checkbox checked>Send me property updates via email</mat-checkbox>
-            </div>
-
-            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px;">
-              <button mat-button type="button">Cancel</button>
-              <button mat-raised-button color="primary" type="submit">Submit Inquiry</button>
+            <mat-checkbox>J’accepte les conditions *</mat-checkbox>
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
+              <ds-button variant="ghost" size="md">Annuler</ds-button>
+              <ds-button variant="marine" size="md">Envoyer</ds-button>
             </div>
           </div>
-        </form>
+        </div>
       </div>
     `,
   }),
 };
 
-export const AccessibilityGuidelines: Story = {
+export const AccessibilityNote: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Form Accessibility Guidelines</h2>
-        
-        <div style="display: grid; gap: 24px;">
-          <div style="background: var(--color-success-50); padding: 20px; border-radius: 12px; border-left: 4px solid var(--color-success-500);">
-            <h3 style="margin-top: 0; color: var(--color-success-700);">✓ Do</h3>
-            <ul style="line-height: 1.8; color: var(--color-neutral-700); margin: 0;">
-              <li>Always use <code>&lt;label&gt;</code> elements for form inputs</li>
-              <li>Mark required fields with asterisk (*) and aria-required</li>
-              <li>Provide clear, specific error messages</li>
-              <li>Use aria-describedby for hints and errors</li>
-              <li>Ensure form inputs have sufficient color contrast (4.5:1)</li>
-              <li>Group related form fields with <code>&lt;fieldset&gt;</code></li>
-              <li>Make error messages programmatically associated with inputs</li>
-              <li>Provide validation feedback on blur, not just on submit</li>
-            </ul>
-          </div>
-
-          <div style="background: var(--color-error-50); padding: 20px; border-radius: 12px; border-left: 4px solid var(--color-error-500);">
-            <h3 style="margin-top: 0; color: var(--color-error-700);">✗ Don't</h3>
-            <ul style="line-height: 1.8; color: var(--color-neutral-700); margin: 0;">
-              <li>Use placeholder text as a replacement for labels</li>
-              <li>Rely solely on color to indicate errors</li>
-              <li>Make labels too small or low contrast</li>
-              <li>Disable form submission button permanently</li>
-              <li>Use vague error messages like "Invalid input"</li>
-              <li>Remove focus indicators from form fields</li>
-            </ul>
-          </div>
-
-          <div style="background: var(--color-info-50); padding: 20px; border-radius: 12px; border-left: 4px solid var(--color-info-500);">
-            <h3 style="margin-top: 0; color: var(--color-info-700);">Keyboard Navigation</h3>
-            <ul style="line-height: 1.8; color: var(--color-neutral-700); margin: 0;">
-              <li><kbd>Tab</kbd> - Move focus to next field</li>
-              <li><kbd>Shift + Tab</kbd> - Move focus to previous field</li>
-              <li><kbd>Space</kbd> - Toggle checkboxes and radio buttons</li>
-              <li><kbd>Arrow Keys</kbd> - Navigate radio button groups</li>
-              <li><kbd>Enter</kbd> - Submit form (when on submit button)</li>
-              <li>Focus order should match visual order</li>
-            </ul>
-          </div>
-
-          <div style="background: var(--color-neutral-50); padding: 24px; border-radius: 12px;">
-            <h3 style="margin-top: 0; margin-bottom: 16px; color: var(--color-neutral-800);">Error Message Example</h3>
-            <pre style="background: white; padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 13px; line-height: 1.6; margin: 0;"><code>&lt;mat-form-field&gt;
-  &lt;mat-label&gt;Email *&lt;/mat-label&gt;
-  &lt;input matInput 
-         type="email"
-         required
-         aria-required="true"
-         aria-describedby="email-error"&gt;
-  &lt;mat-error id="email-error"&gt;
-    Please enter a valid email address
-  &lt;/mat-error&gt;
-&lt;/mat-form-field&gt;</code></pre>
-          </div>
-        </div>
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text); max-width: 640px;">
+        <h2 style="margin-bottom: 16px;">Accessibilité formulaires</h2>
+        <ul style="line-height: 1.75; color: var(--ds-text-muted); padding-left: 20px;">
+          <li>Libellé visible pour chaque champ (ds-input le fournit)</li>
+          <li>Champ requis : indication textuelle + validation</li>
+          <li>Erreurs reliées au champ (aria-describedby sur ds-input en cas d’erreur)</li>
+          <li>Contraste des textes d’aide et d’erreur</li>
+        </ul>
       </div>
     `,
   }),

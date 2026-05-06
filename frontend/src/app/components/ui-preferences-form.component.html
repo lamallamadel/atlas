@@ -1,14 +1,14 @@
 <div class="ui-preferences-form">
-  <mat-card class="preferences-card">
-    <mat-card-header>
-      <mat-card-title>
+  <ds-card class="preferences-card" [pad]="false" [elevation]="'sm'">
+    <div class="pref-ui-card-header">
+      <h3 class="pref-ui-card-title">
         <mat-icon class="title-icon">palette</mat-icon>
         Préférences d'interface
-      </mat-card-title>
-      <mat-card-subtitle>
+      </h3>
+      <p class="pref-ui-card-subtitle">
         Personnalisez votre expérience utilisateur
-      </mat-card-subtitle>
-    </mat-card-header>
+      </p>
+    </div>
 
     @if (loading) {
       <mat-progress-bar
@@ -17,7 +17,7 @@
       </mat-progress-bar>
     }
 
-    <mat-card-content>
+    <div class="pref-ui-card-body">
       <form [formGroup]="preferencesForm" class="preferences-form-content">
 
         <!-- Theme Selector -->
@@ -220,17 +220,15 @@
                 </div>
 
                 <div class="preview-cards">
-                  <mat-card class="sample-card">
-                    <mat-card-content>
-                      <div class="card-content">
-                        <mat-icon>insert_chart</mat-icon>
-                        <div>
-                          <h5>Exemple de carte</h5>
-                          <p>Cet aperçu montre comment l'interface s'adapte à vos préférences</p>
-                        </div>
+                  <ds-card class="sample-card" [elevation]="'xs'" [pad]="true">
+                    <div class="card-content">
+                      <mat-icon>insert_chart</mat-icon>
+                      <div>
+                        <h5>Exemple de carte</h5>
+                        <p>Cet aperçu montre comment l'interface s'adapte à vos préférences</p>
                       </div>
-                    </mat-card-content>
-                  </mat-card>
+                    </div>
+                  </ds-card>
                 </div>
               </div>
 
@@ -242,38 +240,37 @@
           </div>
 
         </form>
-      </mat-card-content>
+    </div>
 
-      <!-- Action Buttons -->
-      <mat-card-actions class="card-actions">
-        <button
-          mat-button
-          type="button"
-          (click)="onCancel()"
-          [disabled]="!hasUnsavedChanges() || loading || saving">
-          <mat-icon>cancel</mat-icon>
-          Annuler
-        </button>
+    <div class="card-actions">
+      <button
+        mat-button
+        type="button"
+        (click)="onCancel()"
+        [disabled]="!hasUnsavedChanges() || loading || saving">
+        <mat-icon>cancel</mat-icon>
+        Annuler
+      </button>
 
-        <button
-          mat-raised-button
-          color="primary"
-          type="button"
-          (click)="onSave()"
-          [disabled]="!hasUnsavedChanges() || !preferencesForm.valid || loading || saving">
-          @if (saving) {
-            <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
-          }
-          @if (!saving) {
-            <mat-icon>save</mat-icon>
-          }
-          @if (!saving) {
-            <span>Enregistrer</span>
-          }
-          @if (saving) {
-            <span>Enregistrement...</span>
-          }
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </div>
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="onSave()"
+        [disabled]="!hasUnsavedChanges() || !preferencesForm.valid || loading || saving">
+        @if (saving) {
+          <ds-skeleton variant="circle" width="20px" height="20px" class="button-spinner"></ds-skeleton>
+        }
+        @if (!saving) {
+          <mat-icon>save</mat-icon>
+        }
+        @if (!saving) {
+          <span>Enregistrer</span>
+        }
+        @if (saving) {
+          <span>Enregistrement...</span>
+        }
+      </button>
+    </div>
+  </ds-card>
+</div>

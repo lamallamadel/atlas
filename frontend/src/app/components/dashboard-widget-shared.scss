@@ -1,0 +1,113 @@
+/* Chrome commun des widgets tableau de bord (ds-card + en-tête + états chargement / erreur) */
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.widget-shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.widget-shell ds-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.widget-shell ::ng-deep .ds-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+.widget-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--ds-space-5);
+  box-sizing: border-box;
+}
+
+.widget-body.edit-mode {
+  outline: 2px dashed var(--ds-border);
+  outline-offset: calc(-1 * var(--ds-space-2));
+  cursor: move;
+}
+
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--ds-space-4);
+  padding-bottom: var(--ds-space-3);
+  border-bottom: 1px solid var(--ds-divider);
+}
+
+.widget-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ds-text);
+}
+
+.widget-actions {
+  display: flex;
+  gap: var(--ds-space-2);
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--ds-space-1);
+  color: var(--ds-text-muted);
+  transition: color var(--ds-transition-fast);
+}
+
+.btn-icon:hover {
+  color: var(--ds-text);
+}
+
+.widget-loading,
+.widget-error {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  color: var(--ds-text-muted);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--ds-surface-offset);
+  border-top: 4px solid var(--ds-marine);
+  border-radius: 50%;
+  animation: dashboard-widget-spin 1s linear infinite;
+}
+
+@keyframes dashboard-widget-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .widget-body {
+    padding: var(--ds-space-4);
+  }
+}

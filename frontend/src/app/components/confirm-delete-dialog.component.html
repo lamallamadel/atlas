@@ -14,7 +14,7 @@
       [attr.aria-busy]="isSubmitting"
       [attr.aria-label]="isSubmitting ? 'Suppression en cours' : 'Confirmer la suppression'">
       @if (isSubmitting) {
-        <mat-spinner diameter="20" aria-hidden="true"></mat-spinner>
+        <ds-skeleton variant="circle" width="20px" height="20px" aria-hidden="true"></ds-skeleton>
       }
       @if (!isSubmitting) {
         <span>Supprimer</span>

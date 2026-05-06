@@ -11,17 +11,18 @@ import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field'
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
-import { MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions } from '@angular/material/card';
+import { DsCardComponent } from '../../../design-system';
 import { MatChip } from '@angular/material/chips';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../../../design-system/primitives/ds-skeleton/ds-skeleton.component';
 import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-template-library',
+    standalone: true,
     templateUrl: './template-library.component.html',
     styleUrls: ['./template-library.component.css'],
-    imports: [MatButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatPrefix, MatButtonToggleGroup, MatButtonToggle, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatChip, MatCardActions, MatMenuTrigger, MatMenu, MatMenuItem, MatProgressSpinner, DatePipe]
+    imports: [MatButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatPrefix, MatButtonToggleGroup, MatButtonToggle, DsCardComponent, DsSkeletonComponent, MatChip, MatMenuTrigger, MatMenu, MatMenuItem, DatePipe]
 })
 export class TemplateLibraryComponent implements OnInit, OnDestroy {
   templates: WhatsAppTemplate[] = [];

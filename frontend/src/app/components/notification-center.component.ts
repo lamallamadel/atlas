@@ -7,7 +7,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface GroupedNotifications {
   date: string;
@@ -19,7 +19,7 @@ interface GroupedNotifications {
     selector: 'app-notification-center',
     templateUrl: './notification-center.component.html',
     styleUrls: ['./notification-center.component.scss'],
-    imports: [MatIcon, MatIconButton, MatTooltip, MatButtonToggleGroup, MatButtonToggle, MatButton, MatProgressSpinner]
+    imports: [MatIcon, MatIconButton, MatTooltip, MatButtonToggleGroup, MatButtonToggle, MatButton, DsSkeletonComponent]
 })
 export class NotificationCenterComponent implements OnInit, OnDestroy {
   notifications: NotificationResponse[] = [];

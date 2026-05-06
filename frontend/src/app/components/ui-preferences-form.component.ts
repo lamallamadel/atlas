@@ -5,7 +5,7 @@ import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { UserPreferencesService } from '../services/user-preferences.service';
 import { ThemeService } from '../services/theme.service';
 import { NotificationService } from '../services/notification.service';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
@@ -17,7 +17,7 @@ import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-
 import { MatInput } from '@angular/material/input';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButton } from '@angular/material/button';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface Route {
   path: string;
@@ -27,9 +27,10 @@ interface Route {
 
 @Component({
     selector: 'app-ui-preferences-form',
+    standalone: true,
     templateUrl: './ui-preferences-form.component.html',
     styleUrls: ['./ui-preferences-form.component.css'],
-    imports: [MatCard, MatCardHeader, MatCardTitle, MatIcon, MatCardSubtitle, MatProgressBar, MatCardContent, FormsModule, ReactiveFormsModule, MatRadioGroup, MatRadioButton, MatHint, MatDivider, MatFormField, MatLabel, MatSelect, MatOption, MatPrefix, MatButtonToggleGroup, MatButtonToggle, MatInput, MatAutocompleteTrigger, MatAutocomplete, MatCheckbox, MatButton, MatCardActions, MatProgressSpinner]
+    imports: [DsCardComponent, DsSkeletonComponent, MatIcon, MatProgressBar, FormsModule, ReactiveFormsModule, MatRadioGroup, MatRadioButton, MatHint, MatDivider, MatFormField, MatLabel, MatSelect, MatOption, MatPrefix, MatButtonToggleGroup, MatButtonToggle, MatInput, MatAutocompleteTrigger, MatAutocomplete, MatCheckbox, MatButton]
 })
 export class UiPreferencesFormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

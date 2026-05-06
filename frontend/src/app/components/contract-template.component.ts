@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +10,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ESignatureApiService } from '../services/esignature-api.service';
 import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.models';
 
@@ -20,7 +21,7 @@ import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.m
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatCardModule,
+    DsCardComponent,
     MatButtonModule,
     MatInputModule,
     MatFormFieldModule,
@@ -28,17 +29,17 @@ import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.m
     MatTableModule,
     MatIconModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTooltipModule
   ],
   template: `
     <div class="contract-template-container">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Contract Templates</mat-card-title>
-          <mat-card-subtitle>Manage PDF contract templates for electronic signatures</mat-card-subtitle>
-        </mat-card-header>
-    
-        <mat-card-content>
+      <ds-card [pad]="false" [elevation]="'sm'">
+        <div class="ct-card-header">
+          <h3 class="ct-card-title">Contract Templates</h3>
+          <p class="ct-card-subtitle">Manage PDF contract templates for electronic signatures</p>
+        </div>
+        <div class="ct-card-body">
           @if (!showForm) {
             <div class="upload-section">
               <button mat-raised-button color="primary" (click)="showForm = true">
@@ -139,8 +140,8 @@ import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.m
               }
             </div>
           }
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </ds-card>
     </div>
     `,
   styles: [`
@@ -148,6 +149,26 @@ import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.m
       padding: 24px;
       max-width: 1200px;
       margin: 0 auto;
+    }
+
+    .ct-card-header {
+      padding: 16px 16px 0;
+    }
+
+    .ct-card-title {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .ct-card-subtitle {
+      margin: 0;
+      font-size: 14px;
+      color: var(--ds-text-muted);
+    }
+
+    .ct-card-body {
+      padding: 0 16px 16px;
     }
 
     .template-form {

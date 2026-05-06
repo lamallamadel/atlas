@@ -8,6 +8,9 @@ import { NativeCalendarService } from './native-calendar.service';
 import { NativeFilesystemService } from './native-filesystem.service';
 import { Style } from '@capacitor/status-bar';
 import { filter, take } from 'rxjs/operators';
+import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
+
+const DS_STATUS_BAR_HEX = DS_CHART_FALLBACK_HEX['--ds-marine'];
 
 /**
  * Service to initialize native app features on startup
@@ -79,9 +82,9 @@ export class NativeAppInitService {
 
     // Set status bar style based on platform
     if (platformInfo?.platform === 'ios') {
-      this.platformService.setStatusBarStyle(Style.Light, '#2c5aa0').subscribe();
+      this.platformService.setStatusBarStyle(Style.Light, DS_STATUS_BAR_HEX).subscribe();
     } else if (platformInfo?.platform === 'android') {
-      this.platformService.setStatusBarStyle(Style.Light, '#2c5aa0').subscribe();
+      this.platformService.setStatusBarStyle(Style.Light, DS_STATUS_BAR_HEX).subscribe();
     }
 
     // Get device info for analytics

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { SwipeableCardComponent } from './swipeable-card.component';
 import { MatButton } from '@angular/material/button';
+import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
 
 interface CachedDossier {
   id: number;
@@ -36,7 +37,7 @@ interface CachedDossier {
           [rightAction]="{
             icon: 'visibility',
             label: 'Voir',
-            color: '#2c5aa0',
+            color: swipeActionColor,
             action: 'view'
           }"
               (swipeRight)="viewDossier(dossier.id)"
@@ -118,15 +119,15 @@ interface CachedDossier {
       margin: 0 0 8px 0;
       font-size: 20px;
       font-weight: 600;
-      color: var(--color-neutral-900, #212121);
+      color: var(--ds-text);
     }
 
     .viewer-header h3 mat-icon {
-      color: var(--color-warning-500, #ff9800);
+      color: var(--ds-warning);
     }
 
     .subtitle {
-      color: var(--color-neutral-600, #757575);
+      color: var(--ds-text-muted);
       font-size: 14px;
       margin: 0;
     }
@@ -143,7 +144,7 @@ interface CachedDossier {
     }
 
     .dossier-card {
-      background: var(--color-neutral-0, #ffffff);
+      background: var(--ds-surface);
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -167,8 +168,8 @@ interface CachedDossier {
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--color-primary-500, #2c5aa0) 0%, var(--color-primary-700, #1f4782) 100%);
-      color: white;
+      background: linear-gradient(135deg, var(--ds-marine) 0%, var(--ds-marine-light) 100%);
+      color: var(--ds-text-inverse);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -186,7 +187,7 @@ interface CachedDossier {
       margin: 0 0 8px 0;
       font-size: 16px;
       font-weight: 600;
-      color: var(--color-neutral-900, #212121);
+      color: var(--ds-text);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -198,7 +199,7 @@ interface CachedDossier {
       gap: 6px;
       margin: 4px 0;
       font-size: 13px;
-      color: var(--color-neutral-600, #757575);
+      color: var(--ds-text-muted);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -225,23 +226,23 @@ interface CachedDossier {
     }
 
     .status-new {
-      background: var(--color-info-100, #e3f2fd);
-      color: var(--color-info-700, #1976d2);
+      background: var(--ds-marine-hl);
+      color: var(--ds-marine);
     }
 
     .status-in_progress {
-      background: var(--color-warning-100, #fff3e0);
-      color: var(--color-warning-700, #f57c00);
+      background: var(--ds-warning-hl);
+      color: var(--ds-warning);
     }
 
     .status-completed {
-      background: var(--color-success-100, #e8f5e9);
-      color: var(--color-success-700, #388e3c);
+      background: var(--ds-success-hl);
+      color: var(--ds-success);
     }
 
     .status-archived {
-      background: var(--color-neutral-200, #e0e0e0);
-      color: var(--color-neutral-700, #616161);
+      background: var(--ds-surface-dynamic);
+      color: var(--ds-text-muted);
     }
 
     .dossier-footer {
@@ -249,7 +250,7 @@ interface CachedDossier {
       justify-content: space-between;
       align-items: center;
       padding-top: 12px;
-      border-top: 1px solid var(--color-neutral-200, #e0e0e0);
+      border-top: 1px solid var(--ds-divider);
     }
 
     .cache-badge {
@@ -257,7 +258,7 @@ interface CachedDossier {
       align-items: center;
       gap: 4px;
       font-size: 12px;
-      color: var(--color-success-600, #4caf50);
+      color: var(--ds-success);
       font-weight: 500;
     }
 
@@ -269,13 +270,13 @@ interface CachedDossier {
 
     .date-info {
       font-size: 12px;
-      color: var(--color-neutral-500, #9e9e9e);
+      color: var(--ds-text-faint);
     }
 
     .empty-state {
       text-align: center;
       padding: 48px 24px;
-      background: var(--color-neutral-0, #ffffff);
+      background: var(--ds-surface);
       border-radius: 12px;
       margin-bottom: 24px;
     }
@@ -284,7 +285,7 @@ interface CachedDossier {
       font-size: 64px;
       width: 64px;
       height: 64px;
-      color: var(--color-neutral-400, #bdbdbd);
+      color: var(--ds-text-faint);
       margin-bottom: 16px;
     }
 
@@ -292,12 +293,12 @@ interface CachedDossier {
       margin: 0 0 8px 0;
       font-size: 18px;
       font-weight: 600;
-      color: var(--color-neutral-700, #616161);
+      color: var(--ds-text-muted);
     }
 
     .empty-state p {
       margin: 0;
-      color: var(--color-neutral-600, #757575);
+      color: var(--ds-text-muted);
       font-size: 14px;
     }
 
@@ -315,23 +316,23 @@ interface CachedDossier {
     /* Dark theme */
     .dark-theme .dossier-card,
     .dark-theme .empty-state {
-      background: var(--color-neutral-800, #424242);
+      background: var(--ds-surface);
     }
 
     .dark-theme .viewer-header h3,
     .dark-theme .dossier-info h4 {
-      color: var(--color-neutral-0, #ffffff);
+      color: var(--ds-text);
     }
 
     .dark-theme .subtitle,
     .dark-theme .dossier-contact,
     .dark-theme .empty-state h4,
     .dark-theme .empty-state p {
-      color: var(--color-neutral-400, #bdbdbd);
+      color: var(--ds-text-muted);
     }
 
     .dark-theme .dossier-footer {
-      border-top-color: var(--color-neutral-700, #616161);
+      border-top-color: var(--ds-divider);
     }
 
     /* Mobile adjustments */
@@ -352,6 +353,8 @@ interface CachedDossier {
     imports: [MatIcon, SwipeableCardComponent, MatButton]
 })
 export class OfflineDossiersViewerComponent implements OnInit {
+  readonly swipeActionColor = DS_CHART_FALLBACK_HEX['--ds-marine'];
+
   dossiers: CachedDossier[] = [];
 
   constructor(

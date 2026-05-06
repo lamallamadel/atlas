@@ -8,7 +8,7 @@ import { TemplateApiService } from '../services/template-api.service';
 import { WhatsAppTemplate, TemplateStatus, TemplateCategory, ComponentType, TemplateComponent, ButtonType } from '../models/template.model';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../../../design-system';
 import { MatFormField, MatLabel, MatHint, MatError, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
@@ -19,9 +19,10 @@ import { TemplatePreviewComponent } from '../template-preview/template-preview.c
 
 @Component({
     selector: 'app-template-editor',
+    standalone: true,
     templateUrl: './template-editor.component.html',
     styleUrls: ['./template-editor.component.css'],
-    imports: [MatIconButton, MatIcon, FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatLabel, MatInput, MatHint, MatError, MatSelect, MatOption, MatSuffix, MatTooltip, CdkDropList, CdkDrag, CdkDragHandle, MatCheckbox, MatButton, TemplatePreviewComponent]
+    imports: [MatIconButton, MatIcon, FormsModule, ReactiveFormsModule, DsCardComponent, MatFormField, MatLabel, MatInput, MatHint, MatError, MatSelect, MatOption, MatSuffix, MatTooltip, CdkDropList, CdkDrag, CdkDragHandle, MatCheckbox, MatButton, TemplatePreviewComponent]
 })
 export class TemplateEditorComponent implements OnInit, OnDestroy {
   templateForm!: FormGroup;

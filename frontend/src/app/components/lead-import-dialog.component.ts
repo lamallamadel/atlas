@@ -7,9 +7,9 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 import { FormsModule } from '@angular/forms';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 export interface LeadImportError {
   row: number;
@@ -30,7 +30,7 @@ export interface LeadImportResponse {
     selector: 'app-lead-import-dialog',
     templateUrl: './lead-import-dialog.component.html',
     styleUrls: ['./lead-import-dialog.component.css'],
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatButton, MatIconButton, MatRadioGroup, FormsModule, MatRadioButton, MatProgressSpinner, MatProgressBar, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions]
+    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatButton, MatIconButton, MatRadioGroup, FormsModule, MatRadioButton, DsSkeletonComponent, MatProgressBar, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions]
 })
 export class LeadImportDialogComponent {
   selectedFile: File | null = null;

@@ -33,31 +33,32 @@ import { CustomerPortalService } from '../services/customer-portal.service';
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--ds-marine) 0%, var(--ds-primary) 55%, var(--ds-marine-light) 100%);
     }
 
     .auth-card {
-      background: white;
-      border-radius: 12px;
-      padding: 48px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      background: var(--ds-surface);
+      border-radius: var(--ds-radius-lg);
+      padding: var(--ds-space-12);
+      box-shadow: var(--ds-shadow-xl);
+      border: 1px solid var(--ds-divider);
       text-align: center;
       max-width: 400px;
       width: 100%;
     }
 
     .loading-state {
-      padding: 24px;
+      padding: var(--ds-space-6);
     }
 
     .spinner {
       width: 48px;
       height: 48px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
+      border: 4px solid var(--ds-surface-offset);
+      border-top: 4px solid var(--ds-primary);
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin: 0 auto 24px;
+      margin: 0 auto var(--ds-space-6);
     }
 
     @keyframes spin {
@@ -66,35 +67,35 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     }
 
     .loading-state p {
-      color: #666;
+      color: var(--ds-text-muted);
       font-size: 16px;
     }
 
     .error-state {
-      padding: 24px;
+      padding: var(--ds-space-6);
     }
 
     .error-icon {
       font-size: 64px;
-      margin-bottom: 16px;
+      margin-bottom: var(--ds-space-4);
     }
 
     .error-state h2 {
-      color: #333;
-      margin-bottom: 12px;
+      color: var(--ds-text);
+      margin-bottom: var(--ds-space-3);
       font-size: 24px;
     }
 
     .error-state p {
-      color: #666;
-      margin-bottom: 8px;
+      color: var(--ds-text-muted);
+      margin-bottom: var(--ds-space-2);
       font-size: 16px;
     }
 
     .help-text {
-      margin-top: 24px;
+      margin-top: var(--ds-space-6);
       font-size: 14px;
-      color: #999;
+      color: var(--ds-text-faint);
     }
   `]
 })

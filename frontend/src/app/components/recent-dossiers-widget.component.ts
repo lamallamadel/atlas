@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-
 import { RouterModule } from '@angular/router';
-import { CardWidgetBaseComponent } from './card-widget-base.component';
-import { DossierApiService } from '../services/dossier-api.service';
 import { takeUntil } from 'rxjs/operators';
+import { DsCardComponent } from '../design-system/primitives/ds-card/ds-card.component';
+import { DashboardWidgetBase } from './dashboard-widget-base';
+import { DossierApiService } from '../services/dossier-api.service';
 
 interface Dossier {
   id: number;
@@ -15,224 +15,74 @@ interface Dossier {
 }
 
 @Component({
-    selector: 'app-recent-dossiers-widget',
-    imports: [RouterModule],
-    template: `
-    <div class="widget" [class.edit-mode]="editMode()">
-      <div class="widget-header">
-        <h3>{{ config().title || 'Dossiers récents' }}</h3>
-        @if (editMode()) {
-          <div class="widget-actions">
-            <button (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
-              <span class="material-icons">refresh</span>
-            </button>
-            <button (click)="onRemove()" class="btn-icon" title="Supprimer">
-              <span class="material-icons">close</span>
-            </button>
+  standalone: true,
+  selector: 'app-recent-dossiers-widget',
+  imports: [RouterModule, DsCardComponent],
+  template: `
+    <div class="widget-shell">
+      <ds-card [pad]="false" [elevation]="'sm'">
+        <div class="widget-body" [class.edit-mode]="editMode">
+          <div class="widget-header">
+            <h3>{{ config.title || 'Dossiers récents' }}</h3>
+            @if (editMode) {
+              <div class="widget-actions">
+                <button type="button" (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
+                  <span class="material-icons">refresh</span>
+                </button>
+                <button type="button" (click)="onRemove()" class="btn-icon" title="Supprimer">
+                  <span class="material-icons">close</span>
+                </button>
+              </div>
+            }
           </div>
-        }
-      </div>
-    
-      @if (!loading && !error) {
-        <div class="widget-content">
-          @if (dossiers.length > 0) {
-            <div class="dossier-list">
-              @for (dossier of dossiers; track dossier) {
-                <a
-                  [routerLink]="['/dossiers', dossier.id]"
-                  class="dossier-item">
-                  <div class="dossier-info">
-                    <div class="dossier-name">{{ dossier.leadName }}</div>
-                    <div class="dossier-contact">{{ dossier.leadPhone }}</div>
-                  </div>
-                  <div class="dossier-status">
-                    <span class="badge" [attr.data-status]="dossier.status">
-                      {{ dossier.status }}
-                    </span>
-                  </div>
-                </a>
+
+          @if (!loading && !error) {
+            <div class="widget-content">
+              @if (dossiers.length > 0) {
+                <div class="dossier-list">
+                  @for (dossier of dossiers; track dossier.id) {
+                    <a [routerLink]="['/dossiers', dossier.id]" class="dossier-item">
+                      <div class="dossier-info">
+                        <div class="dossier-name">{{ dossier.leadName }}</div>
+                        <div class="dossier-contact">{{ dossier.leadPhone }}</div>
+                      </div>
+                      <div class="dossier-status">
+                        <span class="badge" [attr.data-status]="dossier.status">
+                          {{ dossier.status }}
+                        </span>
+                      </div>
+                    </a>
+                  }
+                </div>
+              }
+              @if (dossiers.length === 0) {
+                <div class="empty-state">
+                  <span class="material-icons">folder_open</span>
+                  <p>Aucun dossier récent</p>
+                </div>
               }
             </div>
           }
-          @if (dossiers.length === 0) {
-            <div class="empty-state">
-              <span class="material-icons">folder_open</span>
-              <p>Aucun dossier récent</p>
+
+          @if (loading) {
+            <div class="widget-loading">
+              <div class="spinner"></div>
+            </div>
+          }
+
+          @if (error) {
+            <div class="widget-error">
+              <span class="material-icons">error</span>
+              <p>{{ error }}</p>
             </div>
           }
         </div>
-      }
-    
-      @if (loading) {
-        <div class="widget-loading">
-          <div class="spinner"></div>
-        </div>
-      }
-    
-      @if (error) {
-        <div class="widget-error">
-          <span class="material-icons">error</span>
-          <p>{{ error }}</p>
-        </div>
-      }
+      </ds-card>
     </div>
-    `,
-    styles: [`
-    .widget {
-      background: white;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .widget.edit-mode {
-      border: 2px dashed #ccc;
-      cursor: move;
-    }
-
-    .widget-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .widget-header h3 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .widget-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-icon {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      color: #666;
-      transition: color 0.2s;
-    }
-
-    .btn-icon:hover {
-      color: #333;
-    }
-
-    .widget-content {
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    .dossier-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .dossier-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      border: 1px solid #eee;
-      border-radius: 4px;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.2s;
-    }
-
-    .dossier-item:hover {
-      border-color: #1976d2;
-      background: #f5f9ff;
-      transform: translateX(4px);
-    }
-
-    .dossier-info {
-      flex: 1;
-    }
-
-    .dossier-name {
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 4px;
-    }
-
-    .dossier-contact {
-      font-size: 13px;
-      color: #666;
-    }
-
-    .badge {
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      background: #e3f2fd;
-      color: #1976d2;
-    }
-
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 200px;
-      color: #999;
-      gap: 8px;
-    }
-
-    .empty-state .material-icons {
-      font-size: 48px;
-    }
-
-    .widget-loading,
-    .widget-error {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      gap: 8px;
-      color: #666;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #1976d2;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @media (max-width: 768px) {
-      .widget {
-        padding: 16px;
-      }
-
-      .dossier-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-    }
-  `]
+  `,
+  styleUrls: ['./dashboard-widget-shared.scss', './recent-dossiers-widget.component.scss'],
 })
-export class RecentDossiersWidgetComponent extends CardWidgetBaseComponent {
+export class RecentDossiersWidgetComponent extends DashboardWidgetBase {
   dossiers: Dossier[] = [];
 
   constructor(private dossierService: DossierApiService) {
@@ -243,26 +93,35 @@ export class RecentDossiersWidgetComponent extends CardWidgetBaseComponent {
     this.setLoading(true);
     this.setError(null);
 
-    const limit = this.config().settings?.['limit'] as number || 5;
+    const limit = (this.config.settings?.['limit'] as number) || 5;
 
-    this.dossierService.list({ size: limit, sort: 'createdAt,desc' })
+    this.dossierService
+      .list({ size: limit, sort: 'createdAt,desc' })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.dossiers = (response.content || []).map((d: { id: number; leadName?: string; leadPhone?: string; status: string; createdAt: string }) => ({
-            id: d.id,
-            leadName: d.leadName || '',
-            leadEmail: '',
-            leadPhone: d.leadPhone || '',
-            status: d.status,
-            createdAt: d.createdAt
-          }));
+          this.dossiers = (response.content || []).map(
+            (d: {
+              id: number;
+              leadName?: string;
+              leadPhone?: string;
+              status: string;
+              createdAt: string;
+            }) => ({
+              id: d.id,
+              leadName: d.leadName || '',
+              leadEmail: '',
+              leadPhone: d.leadPhone || '',
+              status: d.status,
+              createdAt: d.createdAt,
+            }),
+          );
           this.setLoading(false);
         },
         error: () => {
           this.setError('Erreur de chargement des dossiers');
           this.setLoading(false);
-        }
+        },
       });
   }
 }

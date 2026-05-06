@@ -9,8 +9,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
@@ -121,8 +119,6 @@ describe('CalendarViewComponent', () => {
         MatSelectModule,
         MatIconModule,
         MatButtonModule,
-        MatCardModule,
-        MatProgressSpinnerModule,
         MatTooltipModule,
         CalendarViewComponent,
       ],

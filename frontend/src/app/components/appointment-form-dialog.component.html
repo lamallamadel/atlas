@@ -192,7 +192,7 @@
           [attr.aria-busy]="isSubmitting"
           [attr.aria-label]="isSubmitting ? (isEditMode ? 'Modification en cours' : 'Planification en cours') : (isEditMode ? 'Modifier le rendez-vous' : 'Planifier le rendez-vous')">
           @if (isSubmitting) {
-            <mat-spinner diameter="20" aria-hidden="true"></mat-spinner>
+            <ds-skeleton variant="circle" width="20px" height="20px" aria-hidden="true"></ds-skeleton>
           }
           @if (!isSubmitting) {
             <mat-icon>{{ isEditMode ? 'save' : 'event_available' }}</mat-icon>

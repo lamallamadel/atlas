@@ -3,20 +3,17 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-export interface WidgetConfig {
-  id: string;
-  type: string;
-  title?: string;
-  x: number;
-  y: number;
-  cols: number;
-  rows: number;
-  settings?: Record<string, unknown>;
-}
+import type {
+  DashboardGridLayout,
+  DashboardWidgetConfig,
+} from '../models/dashboard-layout.model';
 
-export interface DashboardLayout {
-  widgets: WidgetConfig[];
-}
+export type {
+  DashboardGridLayout,
+  DashboardWidgetConfig,
+  DashboardLayout,
+  WidgetConfig,
+} from '../models/dashboard-layout.model';
 
 export interface UserPreferences {
   userId: string;
@@ -33,7 +30,7 @@ export interface DashboardTemplate {
   name: string;
   description: string;
   role: string;
-  layout: DashboardLayout;
+  layout: DashboardGridLayout;
 }
 
 @Injectable({
@@ -42,7 +39,7 @@ export interface DashboardTemplate {
 export class DashboardCustomizationService {
   private readonly API_URL = '/api/v1/user-preferences';
   
-  private layoutSubject = new BehaviorSubject<DashboardLayout>({ widgets: [] });
+  private layoutSubject = new BehaviorSubject<DashboardGridLayout>({ widgets: [] });
   public layout$ = this.layoutSubject.asObservable();
 
   private editModeSubject = new BehaviorSubject<boolean>(false);
@@ -54,20 +51,24 @@ export class DashboardCustomizationService {
     return this.http.get<UserPreferences>(`${this.API_URL}/${userId}`).pipe(
       tap(prefs => {
         if (prefs.dashboardLayout && prefs.dashboardLayout['widgets']) {
-          this.layoutSubject.next({ widgets: prefs.dashboardLayout['widgets'] as WidgetConfig[] });
+          this.layoutSubject.next({
+            widgets: prefs.dashboardLayout['widgets'] as DashboardWidgetConfig[],
+          });
         }
       })
     );
   }
 
-  updateDashboardLayout(userId: string, layout: DashboardLayout): Observable<UserPreferences> {
+  updateDashboardLayout(userId: string, layout: DashboardGridLayout): Observable<UserPreferences> {
     return this.http.put<UserPreferences>(
       `${this.API_URL}/${userId}/dashboard-layout`,
       layout
     ).pipe(
       tap(prefs => {
         if (prefs.dashboardLayout && prefs.dashboardLayout['widgets']) {
-          this.layoutSubject.next({ widgets: prefs.dashboardLayout['widgets'] as WidgetConfig[] });
+          this.layoutSubject.next({
+            widgets: prefs.dashboardLayout['widgets'] as DashboardWidgetConfig[],
+          });
         }
       })
     );
@@ -87,7 +88,9 @@ export class DashboardCustomizationService {
     ).pipe(
       tap(prefs => {
         if (prefs.dashboardLayout && prefs.dashboardLayout['widgets']) {
-          this.layoutSubject.next({ widgets: prefs.dashboardLayout['widgets'] as WidgetConfig[] });
+          this.layoutSubject.next({
+            widgets: prefs.dashboardLayout['widgets'] as DashboardWidgetConfig[],
+          });
         }
       })
     );
@@ -107,7 +110,9 @@ export class DashboardCustomizationService {
     ).pipe(
       tap(prefs => {
         if (prefs.dashboardLayout && prefs.dashboardLayout['widgets']) {
-          this.layoutSubject.next({ widgets: prefs.dashboardLayout['widgets'] as WidgetConfig[] });
+          this.layoutSubject.next({
+            widgets: prefs.dashboardLayout['widgets'] as DashboardWidgetConfig[],
+          });
         }
       })
     );
@@ -117,7 +122,7 @@ export class DashboardCustomizationService {
     this.editModeSubject.next(enabled);
   }
 
-  addWidget(widget: WidgetConfig): void {
+  addWidget(widget: DashboardWidgetConfig): void {
     const currentLayout = this.layoutSubject.value;
     const updatedLayout = {
       widgets: [...currentLayout.widgets, { ...widget, id: this.generateWidgetId() }]
@@ -133,7 +138,7 @@ export class DashboardCustomizationService {
     this.layoutSubject.next(updatedLayout);
   }
 
-  updateWidget(widgetId: string, updates: Partial<WidgetConfig>): void {
+  updateWidget(widgetId: string, updates: Partial<DashboardWidgetConfig>): void {
     const currentLayout = this.layoutSubject.value;
     const updatedLayout = {
       widgets: currentLayout.widgets.map(w => 

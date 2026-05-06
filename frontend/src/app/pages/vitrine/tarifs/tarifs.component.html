@@ -19,7 +19,7 @@
     </div>
 
     <!-- PRICING GRID -->
-    <div class="at-pricing-grid" style="margin-top:var(--at-space-8)">
+    <div class="at-pricing-grid" style="margin-top:var(--ds-space-8)">
       @for (plan of plans; track plan) {
         <div class="at-pricing-card" [class.at-pricing-card--featured]="plan.featured">
           @if (plan.featured) {
@@ -28,7 +28,7 @@
           <div class="at-pricing-plan-name">{{plan.name}}</div>
           <div class="at-pricing-price">
             @if (plan.monthly) {
-              {{annual ? plan.annual : plan.monthly}} <span style="font-size:1rem;font-family:var(--at-font-body);">MAD</span>
+              {{annual ? plan.annual : plan.monthly}} <span style="font-size:1rem;font-family:var(--ds-font-body);">MAD</span>
             }
             @if (!plan.monthly) {
               Sur devis
@@ -48,10 +48,10 @@
     </div>
 
     <!-- ADD-ONS -->
-    <div style="margin-top:var(--at-space-16);">
+    <div style="margin-top:var(--ds-space-16);">
       <p class="at-section-eyebrow">Options complémentaires</p>
       <h2 class="at-section-title">Add-ons disponibles</h2>
-      <div class="at-addons-grid" style="margin-top:var(--at-space-6);">
+      <div class="at-addons-grid" style="margin-top:var(--ds-space-6);">
         @for (a of addons; track a) {
           <div class="at-addon-item">
             <svg class="at-addon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
@@ -63,10 +63,10 @@
     </div>
 
     <!-- FAQ -->
-    <div style="margin-top:var(--at-space-16); max-width:720px;">
+    <div style="margin-top:var(--ds-space-16); max-width:720px;">
       <p class="at-section-eyebrow">Foire aux questions</p>
       <h2 class="at-section-title">Questions fréquentes</h2>
-      <div style="margin-top:var(--at-space-6);">
+      <div style="margin-top:var(--ds-space-6);">
         @for (faq of faqs; track faq; let i = $index) {
           <div class="at-faq-item" [class.open]="openFaqs.has(i)">
             <button class="at-faq-question" (click)="toggleFaq(i)">
@@ -86,8 +86,8 @@
 <section class="at-section at-section-dark">
   <div class="at-container" style="text-align:center;">
     <div style="max-width:480px;margin-inline:auto;">
-      <h2 style="font-family:var(--at-font-display);font-size:var(--at-text-xl);color:white;margin-bottom:var(--at-space-5);">Toujours des questions ?</h2>
-      <p style="color:oklch(1 0 0/0.6);font-size:var(--at-text-sm);margin-bottom:var(--at-space-6);">Notre équipe vous répond sous 24h pour vous aider à choisir la solution adaptée.</p>
+      <h2 style="font-family:var(--ds-font-display);font-size:var(--ds-text-xl);color:white;margin-bottom:var(--ds-space-5);">Toujours des questions ?</h2>
+      <p style="color:oklch(1 0 0/0.6);font-size:var(--ds-text-sm);margin-bottom:var(--ds-space-6);">Notre équipe vous répond sous 24h pour vous aider à choisir la solution adaptée.</p>
       <a routerLink="/biz/contact" class="at-btn at-btn-primary at-btn-lg">Nous contacter</a>
     </div>
   </div>

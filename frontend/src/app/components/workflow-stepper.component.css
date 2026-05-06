@@ -21,7 +21,7 @@
   align-items: center;
   gap: var(--spacing-2);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-neutral-800);
+  color: var(--ds-text);
 }
 
 .workflow-meta {
@@ -40,20 +40,20 @@
   font-weight: var(--font-weight-semibold);
   border: 1px solid rgba(15, 23, 42, 0.12);
   background: var(--brand-surface-muted);
-  color: var(--color-neutral-700);
+  color: var(--ds-text-muted);
   white-space: nowrap;
 }
 
 .workflow-chip.won {
   border-color: rgba(39, 174, 96, 0.35);
   background: rgba(39, 174, 96, 0.12);
-  color: #1e824c;
+  color: var(--ds-success);
 }
 
 .workflow-chip.lost {
   border-color: rgba(231, 76, 60, 0.35);
   background: rgba(231, 76, 60, 0.12);
-  color: #b03a2e;
+  color: var(--ds-error);
 }
 
 .workflow-steps {
@@ -119,23 +119,23 @@
   font-size: 20px;
   width: 20px;
   height: 20px;
-  color: var(--color-neutral-700);
+  color: var(--ds-text-muted);
 }
 
 .workflow-step.completed .step-dot mat-icon,
 .workflow-step.active .step-dot mat-icon {
-  color: var(--color-primary-500);
+  color: var(--ds-marine);
 }
 
 .step-label {
   font-size: var(--font-size-xs);
-  color: var(--color-neutral-700);
+  color: var(--ds-text-muted);
   line-height: 1.2;
   max-width: 110px;
 }
 
 .workflow-step.active .step-label {
-  color: var(--color-neutral-900);
+  color: var(--ds-text);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -148,12 +148,12 @@
   border-radius: var(--radius-lg);
   background: linear-gradient(135deg, rgba(44, 90, 160, 0.10), rgba(230, 126, 34, 0.08));
   border: 1px solid rgba(15, 23, 42, 0.10);
-  color: var(--color-neutral-800);
+  color: var(--ds-text);
 }
 
 .workflow-hint mat-icon {
   margin-top: 2px;
-  color: var(--color-primary-500);
+  color: var(--ds-marine);
 }
 
 @media (max-width: 860px) {
@@ -204,6 +204,6 @@
 
 .workflow-progress {
   font-size: var(--font-size-xs);
-  color: var(--color-neutral-600);
+  color: var(--ds-text-muted);
   font-weight: var(--font-weight-semibold);
 }

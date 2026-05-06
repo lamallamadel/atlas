@@ -11,8 +11,8 @@ import { DossierCreateDialogComponent } from '../pages/dossiers/dossier-create-d
 import { FocusTrapDirective } from '../directives/focus-trap.directive';
 import { MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { AsyncPipe } from '@angular/common';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface CommandItem {
   id: string;
@@ -45,7 +45,7 @@ interface FuzzyResult {
     selector: 'app-command-palette',
     templateUrl: './command-palette.component.html',
     styleUrls: ['./command-palette.component.css'],
-    imports: [FocusTrapDirective, MatIcon, FormsModule, MatProgressSpinner, AsyncPipe]
+    imports: [FocusTrapDirective, MatIcon, FormsModule, DsSkeletonComponent, AsyncPipe]
 })
 export class CommandPaletteComponent implements OnInit, OnDestroy {
   readonly commandInput = viewChild<ElementRef>('commandInput');

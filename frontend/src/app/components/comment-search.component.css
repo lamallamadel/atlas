@@ -25,7 +25,7 @@
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .loading-state p {
@@ -38,7 +38,7 @@
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .no-results mat-icon {
@@ -49,30 +49,30 @@
 }
 
 .search-results {
-  background: #fff;
+  background: var(--ds-surface);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .results-header {
   padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--ds-divider);
 }
 
 .results-header h4 {
   margin: 0;
   font-size: 16px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .result-item {
   padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ds-surface-offset);
   transition: background-color 0.2s;
 }
 
 .result-item:hover {
-  background: #fafafa;
+  background: var(--ds-surface-2);
 }
 
 .result-item:last-child {
@@ -101,28 +101,28 @@
 
 .entity-id {
   font-weight: 600;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .thread-title {
-  color: #666;
+  color: var(--ds-text-muted);
   font-size: 14px;
 }
 
 .result-date {
   font-size: 12px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .result-content {
   font-size: 14px;
   line-height: 1.6;
   margin-bottom: 12px;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .result-content ::ng-deep mark {
-  background-color: #fff59d;
+  background-color: var(--ds-warning-hl);
   padding: 2px 4px;
   border-radius: 2px;
   font-weight: 500;
@@ -139,7 +139,7 @@
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .result-author mat-icon {
@@ -153,7 +153,7 @@
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #2196f3;
+  color: var(--ds-marine);
   text-decoration: none;
   font-weight: 500;
 }

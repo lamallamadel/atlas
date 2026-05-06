@@ -3,7 +3,28 @@
 }
 
 .header-card {
+  display: block;
   margin-bottom: 20px;
+}
+
+.wfl-lib-header {
+  padding: 16px 16px 0;
+}
+
+.wfl-lib-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.wfl-lib-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ds-text-muted);
+}
+
+.wfl-lib-header-body {
+  padding: 0 16px 16px;
 }
 
 .actions {
@@ -13,7 +34,12 @@
 }
 
 .filter-card {
+  display: block;
   margin-bottom: 20px;
+}
+
+.wfl-filter-body {
+  padding: 16px;
 }
 
 mat-chip-listbox {
@@ -37,14 +63,14 @@ mat-chip-option {
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .empty-state mat-icon {
   font-size: 64px;
   width: 64px;
   height: 64px;
-  color: #ccc;
+  color: var(--ds-border);
   margin-bottom: 16px;
 }
 
@@ -60,14 +86,17 @@ mat-chip-option {
 
 .template-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-.template-card mat-card-header {
+.template-card:hover ::ng-deep .ds-card {
+  box-shadow: var(--ds-shadow-md);
+}
+
+.template-card .wfl-tpl-header {
   margin-bottom: 16px;
 }
 
-.template-card [mat-card-avatar] {
+.template-card .wfl-tpl-avatar {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,15 +105,15 @@ mat-chip-option {
   border-radius: 50%;
 }
 
-.template-card [mat-card-avatar] mat-icon {
+.template-card .wfl-tpl-avatar mat-icon {
   color: white;
   font-size: 24px;
   width: 24px;
   height: 24px;
 }
 
-.template-card mat-card-content p {
-  color: #666;
+.template-card .wfl-tpl-body p {
+  color: var(--ds-text-muted);
   margin-bottom: 16px;
   min-height: 60px;
 }
@@ -92,7 +121,7 @@ mat-chip-option {
 .template-stats {
   display: flex;
   gap: 16px;
-  color: #666;
+  color: var(--ds-text-muted);
   font-size: 14px;
 }
 
@@ -108,12 +137,12 @@ mat-chip-option {
   height: 18px;
 }
 
-.template-card mat-card-actions {
+.wfl-tpl-actions {
   padding: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--ds-divider);
 }
 
-.template-card mat-card-actions button {
+.wfl-tpl-actions button {
   width: 100%;
 }
 

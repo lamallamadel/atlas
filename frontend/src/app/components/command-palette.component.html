@@ -35,11 +35,13 @@
             [attr.aria-activedescendant]="'command-item-' + selectedIndex"
             />
             @if (isSearching) {
-              <mat-spinner
-                diameter="18"
+              <ds-skeleton
+                variant="circle"
+                width="18px"
+                height="18px"
                 class="search-spinner"
                 aria-label="Recherche en cours">
-              </mat-spinner>
+              </ds-skeleton>
             }
             <div class="shortcut-badge">
               <kbd>Ctrl</kbd><span class="kbd-sep">+</span><kbd>K</kbd>
@@ -125,7 +127,7 @@
         <!-- Loading State -->
         @if (isSearching && searchQuery.length >= 2) {
           <div class="command-loading" role="status" aria-live="polite">
-            <mat-spinner diameter="32" aria-label="Recherche en cours"></mat-spinner>
+            <ds-skeleton variant="circle" width="32px" height="32px" aria-label="Recherche en cours"></ds-skeleton>
             <p>Recherche en cours dans la base...</p>
           </div>
         }

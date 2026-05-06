@@ -8,8 +8,8 @@
 
 .list-header {
   padding: 16px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--ds-bg);
+  border-bottom: 1px solid var(--ds-divider);
 }
 
 .stats {
@@ -27,12 +27,12 @@
 .stat-value {
   font-size: 24px;
   font-weight: 600;
-  color: #1976d2;
+  color: var(--ds-marine);
 }
 
 .stat-label {
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
   text-transform: uppercase;
   margin-top: 4px;
 }
@@ -47,7 +47,7 @@
 }
 
 .loading-state p {
-  color: #666;
+  color: var(--ds-text-muted);
   font-size: 14px;
 }
 
@@ -63,7 +63,7 @@
   align-items: center;
   justify-content: center;
   padding: 64px 16px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .empty-state mat-icon {
@@ -90,14 +90,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #fafafa;
+  background: var(--ds-surface-2);
   cursor: pointer;
   user-select: none;
   transition: background-color 0.2s;
 }
 
 .date-header:hover {
-  background: #f5f5f5;
+  background: var(--ds-bg);
 }
 
 .date-info {
@@ -108,18 +108,18 @@
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--ds-text);
   text-transform: capitalize;
 }
 
 .appointment-count {
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
   margin-left: 8px;
 }
 
 .expand-icon {
-  color: #666;
+  color: var(--ds-text-muted);
   transition: transform 0.2s;
 }
 
@@ -128,14 +128,14 @@
 }
 
 .appointments-container {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--ds-divider);
 }
 
 .appointment-item {
   display: flex;
   gap: 12px;
   padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ds-surface-offset);
   cursor: pointer;
   transition: background-color 0.2s;
   position: relative;
@@ -146,7 +146,7 @@
 }
 
 .appointment-item:hover {
-  background: #f9f9f9;
+  background: var(--ds-surface-2);
 }
 
 .appointment-item.mobile {
@@ -176,7 +176,7 @@
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--ds-text);
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -185,7 +185,7 @@
 
 .appointment-time {
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
   white-space: nowrap;
   font-weight: 500;
 }
@@ -202,14 +202,14 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .detail-row mat-icon {
   font-size: 18px;
   width: 18px;
   height: 18px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .detail-row span {

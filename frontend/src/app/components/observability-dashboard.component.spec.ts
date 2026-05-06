@@ -3,14 +3,12 @@ import { ObservabilityDashboardComponent } from './observability-dashboard.compo
 import { ReportingApiService } from '../services/reporting-api.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatListModule } from '@angular/material/list';
 import { MatTableModule } from '@angular/material/table';
@@ -111,14 +109,12 @@ describe('ObservabilityDashboardComponent', () => {
       imports: [
         FormsModule,
         BrowserAnimationsModule,
-        MatCardModule,
         MatIconModule,
         MatButtonModule,
         MatFormFieldModule,
         MatInputModule,
         MatMenuModule,
         MatProgressBarModule,
-        MatProgressSpinnerModule,
         MatChipsModule,
         MatListModule,
         MatTableModule,
@@ -170,7 +166,7 @@ describe('ObservabilityDashboardComponent', () => {
   });
 
   it('should load metrics on init', () => {
-    fixture.detectChanges();
+    component.ngOnInit();
 
     expect(reportingService.getObservabilityMetrics).toHaveBeenCalled();
     expect(component.metrics).toEqual(baseMockMetrics);

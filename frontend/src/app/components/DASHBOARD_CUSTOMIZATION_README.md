@@ -33,7 +33,7 @@ The Dashboard Customization System provides a complete solution for creating per
    - Handles API communication with backend
    - Manages drag-and-drop state and edit mode
 
-2. **CardWidgetBaseComponent** (`components/card-widget-base.component.ts`)
+2. **DashboardWidgetBase** (`components/dashboard-widget-base.ts`) — logique lifecycle uniquement ; la carte visuelle est **`<ds-card>`** dans chaque widget.
    - Abstract base class for all widgets
    - Provides common functionality: loading, error handling, auto-refresh
    - Lifecycle hooks for data loading and cleanup
@@ -161,14 +161,14 @@ The dashboard automatically adapts to mobile devices:
 
 ### 6. Widget Base Class
 
-All widgets extend `CardWidgetBaseComponent`:
+All widgets extend `DashboardWidgetBase` and wrap their content with **`ds-card`**:
 
 ```typescript
 @Component({
   selector: 'app-custom-widget',
   template: `...`
 })
-export class CustomWidgetComponent extends CardWidgetBaseComponent {
+export class CustomWidgetComponent extends DashboardWidgetBase {
   override loadData(): void {
     this.setLoading(true);
     // Fetch data from API
@@ -258,7 +258,7 @@ CREATE TABLE user_preferences (
 
 ### Creating a Custom Widget
 
-1. Create widget component extending `CardWidgetBaseComponent`
+1. Create widget component extending `DashboardWidgetBase`
 2. Implement `loadData()` method
 3. Register in `WidgetRegistryService`
 4. Add to dashboard component's switch statement
@@ -269,7 +269,7 @@ CREATE TABLE user_preferences (
   selector: 'app-sales-widget',
   template: `<div>Sales: {{ sales }}</div>`
 })
-export class SalesWidgetComponent extends CardWidgetBaseComponent {
+export class SalesWidgetComponent extends DashboardWidgetBase {
   sales = 0;
 
   override loadData(): void {

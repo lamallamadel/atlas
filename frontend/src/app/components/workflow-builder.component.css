@@ -3,7 +3,38 @@
 }
 
 .workflow-header {
+  display: block;
   margin-bottom: 20px;
+}
+
+.wb-card-header {
+  padding: 16px 16px 0;
+}
+
+.wb-card-header-compact {
+  padding-bottom: 8px;
+}
+
+.wb-card-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.wb-card-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ds-text-muted);
+}
+
+.wb-card-body {
+  padding: 0 16px 16px;
+}
+
+.wb-card-body-fill {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
 }
 
 .workflow-form {
@@ -39,16 +70,26 @@
   flex-direction: column;
 }
 
-.canvas-card mat-card-content,
-.sidebar-card mat-card-content {
+.canvas-card ::ng-deep .ds-card,
+.sidebar-card ::ng-deep .ds-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.canvas-card .wb-card-body-fill,
+.sidebar-card .wb-card-body-fill {
   flex: 1;
   overflow: auto;
+  min-height: 0;
 }
 
 .workflow-canvas {
-  border: 1px solid #ddd;
+  border: 1px solid var(--ds-divider);
   border-radius: 4px;
-  background: #f9f9f9;
+  background: var(--ds-surface-2);
   cursor: grab;
 }
 
@@ -66,7 +107,7 @@
 }
 
 .form-section {
-  background: #f5f5f5;
+  background: var(--ds-bg);
   padding: 16px;
   border-radius: 4px;
   margin-bottom: 16px;
@@ -75,7 +116,7 @@
 .form-section h3 {
   margin-top: 0;
   margin-bottom: 16px;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .form-section mat-form-field {
@@ -96,7 +137,7 @@ mat-list-item.selected {
 }
 
 mat-list-item {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--ds-divider);
 }
 
 mat-list-item:hover {

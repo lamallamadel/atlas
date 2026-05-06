@@ -19,6 +19,7 @@ import {
   DsEmptyStateComponent,
   DsSkeletonComponent,
 } from '../design-system';
+import { dsChartSeriesRgba, dsRgba } from '../design-system/chart-ds-colors';
 
 interface TimeSeriesPoint {
   timestamp: Date;
@@ -327,22 +328,22 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
           {
             label: 'P50 (ms)',
             data: channels.map(ch => data.latencyByChannel[ch].p50),
-            backgroundColor: 'rgba(75, 192, 192, 0.7)',
-            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: dsRgba('--ds-success', 0.72),
+            borderColor: dsRgba('--ds-success', 1),
             borderWidth: 1
           },
           {
             label: 'P95 (ms)',
             data: channels.map(ch => data.latencyByChannel[ch].p95),
-            backgroundColor: 'rgba(255, 206, 86, 0.7)',
-            borderColor: 'rgba(255, 206, 86, 1)',
+            backgroundColor: dsRgba('--ds-warning', 0.72),
+            borderColor: dsRgba('--ds-warning', 1),
             borderWidth: 1
           },
           {
             label: 'P99 (ms)',
             data: channels.map(ch => data.latencyByChannel[ch].p99),
-            backgroundColor: 'rgba(255, 99, 132, 0.7)',
-            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: dsRgba('--ds-error', 0.72),
+            borderColor: dsRgba('--ds-error', 1),
             borderWidth: 1
           }
         ]
@@ -527,14 +528,14 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
           label: 'DLQ Size',
           data: values,
           backgroundColor: values.map(v => 
-            v >= criticalThreshold ? 'rgba(244, 67, 54, 0.7)' :
-            v >= warningThreshold ? 'rgba(255, 152, 0, 0.7)' :
-            'rgba(76, 175, 80, 0.7)'
+            v >= criticalThreshold ? dsRgba('--ds-error', 0.72) :
+            v >= warningThreshold ? dsRgba('--ds-warning', 0.72) :
+            dsRgba('--ds-success', 0.72)
           ),
           borderColor: values.map(v => 
-            v >= criticalThreshold ? 'rgba(244, 67, 54, 1)' :
-            v >= warningThreshold ? 'rgba(255, 152, 0, 1)' :
-            'rgba(76, 175, 80, 1)'
+            v >= criticalThreshold ? dsRgba('--ds-error', 1) :
+            v >= warningThreshold ? dsRgba('--ds-warning', 1) :
+            dsRgba('--ds-success', 1)
           ),
           borderWidth: 2
         }]
@@ -565,7 +566,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
                 type: 'line',
                 yMin: warningThreshold,
                 yMax: warningThreshold,
-                borderColor: 'rgba(255, 152, 0, 0.8)',
+                borderColor: dsRgba('--ds-warning', 0.85),
                 borderWidth: 2,
                 borderDash: [5, 5],
                 label: {
@@ -578,7 +579,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
                 type: 'line',
                 yMin: criticalThreshold,
                 yMax: criticalThreshold,
-                borderColor: 'rgba(244, 67, 54, 0.8)',
+                borderColor: dsRgba('--ds-error', 0.85),
                 borderWidth: 2,
                 borderDash: [5, 5],
                 label: {
@@ -617,14 +618,14 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
           label: 'Quota Usage (%)',
           data: usagePercentages,
           backgroundColor: usagePercentages.map(p => 
-            p >= 90 ? 'rgba(244, 67, 54, 0.7)' :
-            p >= 75 ? 'rgba(255, 152, 0, 0.7)' :
-            'rgba(76, 175, 80, 0.7)'
+            p >= 90 ? dsRgba('--ds-error', 0.72) :
+            p >= 75 ? dsRgba('--ds-warning', 0.72) :
+            dsRgba('--ds-success', 0.72)
           ),
           borderColor: usagePercentages.map(p => 
-            p >= 90 ? 'rgba(244, 67, 54, 1)' :
-            p >= 75 ? 'rgba(255, 152, 0, 1)' :
-            'rgba(76, 175, 80, 1)'
+            p >= 90 ? dsRgba('--ds-error', 1) :
+            p >= 75 ? dsRgba('--ds-warning', 1) :
+            dsRgba('--ds-success', 1)
           ),
           borderWidth: 2
         }]
@@ -660,7 +661,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
                 type: 'line',
                 yMin: 75,
                 yMax: 75,
-                borderColor: 'rgba(255, 152, 0, 0.8)',
+                borderColor: dsRgba('--ds-warning', 0.85),
                 borderWidth: 2,
                 borderDash: [5, 5],
                 label: {
@@ -673,7 +674,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
                 type: 'line',
                 yMin: 90,
                 yMax: 90,
-                borderColor: 'rgba(244, 67, 54, 0.8)',
+                borderColor: dsRgba('--ds-error', 0.85),
                 borderWidth: 2,
                 borderDash: [5, 5],
                 label: {
@@ -695,18 +696,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
   }
 
   private getChannelColor(index: number, alpha = 1): string {
-    const colors = [
-      [54, 162, 235],   // Blue
-      [75, 192, 192],   // Teal
-      [255, 206, 86],   // Yellow
-      [153, 102, 255],  // Purple
-      [255, 159, 64],   // Orange
-      [255, 99, 132],   // Red
-      [201, 203, 207],  // Grey
-      [54, 235, 162],   // Green
-    ];
-    const color = colors[index % colors.length];
-    return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
+    return dsChartSeriesRgba(index, alpha);
   }
 
   private formatDate(date: Date): string {

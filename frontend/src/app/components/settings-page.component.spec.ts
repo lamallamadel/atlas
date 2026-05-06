@@ -4,7 +4,6 @@ import {
 } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -14,7 +13,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
@@ -72,7 +70,6 @@ describe('SettingsPageComponent', () => {
         ReactiveFormsModule,
         NoopAnimationsModule,
         MatTabsModule,
-        MatCardModule,
         MatFormFieldModule,
         MatSelectModule,
         MatCheckboxModule,
@@ -82,7 +79,6 @@ describe('SettingsPageComponent', () => {
         MatInputModule,
         MatButtonToggleModule,
         MatProgressBarModule,
-        MatProgressSpinnerModule,
         MatDividerModule,
         SettingsPageComponent,
       ],
@@ -215,8 +211,6 @@ describe('SettingsPageComponent', () => {
   });
 
   it('should format preview date correctly', () => {
-    fixture.detectChanges();
-
     component.previewDateFormat = 'dd/MM/yyyy';
     const formatted = component.getFormattedPreviewDate();
 
@@ -224,8 +218,6 @@ describe('SettingsPageComponent', () => {
   });
 
   it('should format preview time correctly', () => {
-    fixture.detectChanges();
-
     component.previewTimeFormat = 'HH:mm';
     const formatted = component.getFormattedPreviewTime();
 
@@ -233,8 +225,6 @@ describe('SettingsPageComponent', () => {
   });
 
   it('should handle tab changes', () => {
-    fixture.detectChanges();
-
     component.onTabChange(1);
 
     expect(component.selectedTabIndex).toBe(1);

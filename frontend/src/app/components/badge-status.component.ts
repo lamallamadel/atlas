@@ -1,8 +1,10 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { MatChip } from '@angular/material/chips';
-import { NgClass } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
+import {
+  DsBadgeComponent,
+  type DsBadgeStatus,
+} from '../design-system/primitives/ds-badge/ds-badge.component';
 
 export type EntityType = 'annonce' | 'dossier' | 'property';
 
@@ -21,26 +23,29 @@ interface StatusConfig {
 }
 
 @Component({
-    selector: 'app-badge-status',
-    templateUrl: './badge-status.component.html',
-    styleUrls: ['./badge-status.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [MatChip, NgClass, MatTooltip, MatIcon]
+  selector: 'app-badge-status',
+  templateUrl: './badge-status.component.html',
+  styleUrls: ['./badge-status.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DsBadgeComponent, MatTooltip, MatIcon],
 })
 export class BadgeStatusComponent {
   readonly status = input.required<string>();
   readonly entityType = input.required<EntityType>();
 
-  getStatusClass(): string {
+  /** Variante `ds-badge` pour l’entité courante. */
+  getDsBadgeStatus(): DsBadgeStatus {
     const entityType = this.entityType();
     if (entityType === 'annonce') {
-      return this.getAnnonceStatusClass(this.status() as AnnonceStatusType);
-    } else if (entityType === 'dossier') {
-      return this.getDossierStatusClass(this.status() as DossierStatusType);
-    } else if (entityType === 'property') {
-      return this.getPropertyStatusClass(this.status() as PropertyStatusType);
+      return this.mapAnnonceToDs(this.status() as AnnonceStatusType);
     }
-    return '';
+    if (entityType === 'dossier') {
+      return this.mapDossierToDs(this.status() as DossierStatusType);
+    }
+    if (entityType === 'property') {
+      return this.mapPropertyToDs(this.status() as PropertyStatusType);
+    }
+    return 'neutral';
   }
 
   getStatusConfig(): StatusConfig {
@@ -71,60 +76,57 @@ export class BadgeStatusComponent {
     return this.getStatusConfig().isPulse || false;
   }
 
-  private getAnnonceStatusClass(status: AnnonceStatusType): string {
+  private mapAnnonceToDs(status: AnnonceStatusType): DsBadgeStatus {
     switch (status) {
       case 'DRAFT':
-        return 'badge-status badge-draft';
+        return 'draft';
       case 'PUBLISHED':
-        return 'badge-status badge-active';
       case 'ACTIVE':
-        return 'badge-status badge-active';
+        return 'active';
       case 'PAUSED':
-        return 'badge-status badge-paused';
+        return 'paused';
       case 'ARCHIVED':
-        return 'badge-status badge-archived';
+        return 'archived';
       default:
-        return 'badge-status';
+        return 'neutral';
     }
   }
 
-  private getDossierStatusClass(status: DossierStatusType): string {
+  private mapDossierToDs(status: DossierStatusType): DsBadgeStatus {
     switch (status) {
       case 'NEW':
-        return 'badge-status badge-new';
+        return 'new';
       case 'QUALIFYING':
-        return 'badge-status badge-qualifying';
+        return 'qualification';
       case 'QUALIFIED':
-        return 'badge-status badge-qualified';
+        return 'success';
       case 'APPOINTMENT':
-        return 'badge-status badge-appointment';
+        return 'rdv';
       case 'WON':
-        return 'badge-status badge-won';
+        return 'won';
       case 'LOST':
-        return 'badge-status badge-lost';
+        return 'lost';
       default:
-        return 'badge-status';
+        return 'neutral';
     }
   }
 
-  private getPropertyStatusClass(status: PropertyStatusType): string {
+  private mapPropertyToDs(status: PropertyStatusType): DsBadgeStatus {
     switch (status) {
       case 'SOLD':
-        return 'badge-status badge-property-sold';
       case 'RENTED':
-        return 'badge-status badge-property-rented';
       case 'SIGNED':
-        return 'badge-status badge-property-signed';
+        return 'success';
       case 'AVAILABLE':
-        return 'badge-status badge-property-available';
+        return 'active';
       case 'PENDING':
-        return 'badge-status badge-property-pending';
+        return 'warning';
       case 'RESERVED':
-        return 'badge-status badge-property-reserved';
+        return 'warning';
       case 'WITHDRAWN':
-        return 'badge-status badge-property-withdrawn';
+        return 'archived';
       default:
-        return 'badge-status';
+        return 'neutral';
     }
   }
 

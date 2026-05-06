@@ -10,7 +10,7 @@
 .progress-bar-container {
   width: 100%;
   height: 8px;
-  background: var(--color-neutral-200);
+  background: var(--ds-divider);
   border-radius: var(--radius-full);
   overflow: hidden;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -18,10 +18,10 @@
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary-500) 0%, var(--color-primary-400) 100%);
+  background: linear-gradient(90deg, var(--ds-marine) 0%, var(--ds-marine-light) 100%);
   border-radius: var(--radius-full);
   transition: width var(--duration-slow) var(--ease-out);
-  box-shadow: 0 0 8px var(--color-primary-alpha-30);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--ds-marine) 30%, transparent);
   position: relative;
 
   &::after {
@@ -41,7 +41,7 @@
   margin-top: 12px;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-primary-600);
+  color: var(--ds-marine);
 }
 
 .elegant-stepper {
@@ -58,18 +58,18 @@
   left: calc(50% / var(--step-count, 3));
   right: calc(50% / var(--step-count, 3));
   height: 3px;
-  background: var(--color-neutral-300);
+  background: var(--ds-border);
   z-index: 0;
   border-radius: var(--radius-full);
 }
 
 .stepper-line-progress {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary-600) 0%, var(--color-primary-500) 100%);
+  background: linear-gradient(90deg, var(--ds-marine) 0%, var(--ds-marine) 100%);
   transition: width var(--duration-slow) var(--ease-out);
   position: relative;
   border-radius: var(--radius-full);
-  box-shadow: 0 0 8px var(--color-primary-alpha-30);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--ds-marine) 30%, transparent);
 
   &::after {
     content: '';
@@ -79,9 +79,9 @@
     transform: translateY(-50%);
     width: 12px;
     height: 12px;
-    background: var(--color-primary-500);
+    background: var(--ds-marine);
     border-radius: 50%;
-    box-shadow: 0 0 12px var(--color-primary-alpha-50),
+    box-shadow: 0 0 12px color-mix(in oklab, var(--ds-marine) 50%, transparent),
                 0 2px 4px rgba(0, 0, 0, 0.2);
     animation: pulse 2s ease-in-out infinite;
   }
@@ -104,9 +104,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-neutral-0);
-  border: 3px solid var(--color-neutral-300);
-  color: var(--color-neutral-600);
+  background: var(--ds-surface);
+  border: 3px solid var(--ds-border);
+  color: var(--ds-text-muted);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-lg);
   transition: all var(--duration-moderate) var(--ease-out);
@@ -123,7 +123,7 @@
 .step-label {
   margin-top: 12px;
   font-size: var(--font-size-sm);
-  color: var(--color-neutral-600);
+  color: var(--ds-text-muted);
   text-align: center;
   font-weight: var(--font-weight-medium);
   transition: all var(--duration-moderate) var(--ease-out);
@@ -133,60 +133,60 @@
 .step-description {
   margin-top: 4px;
   font-size: 11px;
-  color: var(--color-neutral-500);
+  color: var(--ds-text-faint);
   text-align: center;
   font-style: italic;
 }
 
 /* Active Step */
 .step-active .step-circle {
-  background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-500) 100%);
-  border-color: var(--color-primary-500);
-  color: var(--color-neutral-0);
-  box-shadow: 0 0 0 6px var(--color-primary-alpha-20),
+  background: linear-gradient(135deg, var(--ds-marine) 0%, var(--ds-marine) 100%);
+  border-color: var(--ds-marine);
+  color: var(--ds-surface);
+  box-shadow: 0 0 0 6px color-mix(in oklab, var(--ds-marine) 20%, transparent),
               0 6px 16px rgba(44, 90, 160, 0.35);
   transform: scale(1.1);
   animation: activePulse 2s ease-in-out infinite;
 }
 
 .step-active .step-label {
-  color: var(--color-primary-600);
+  color: var(--ds-marine);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-base);
 }
 
 /* Completed Step */
 .step-completed .step-circle {
-  background: linear-gradient(135deg, var(--color-success-700) 0%, var(--color-success-600) 100%);
-  border-color: var(--color-success-600);
-  color: var(--color-neutral-0);
+  background: linear-gradient(135deg, var(--ds-success) 0%, var(--ds-success) 100%);
+  border-color: var(--ds-success);
+  color: var(--ds-surface);
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
 .step-completed .step-label {
-  color: var(--color-success-700);
+  color: var(--ds-success);
   font-weight: var(--font-weight-medium);
 }
 
 /* Error Step */
 .step-error .step-circle {
-  background: linear-gradient(135deg, var(--color-error-700) 0%, var(--color-error-600) 100%);
-  border-color: var(--color-error-600);
-  color: var(--color-neutral-0);
+  background: linear-gradient(135deg, var(--ds-error) 0%, var(--ds-error) 100%);
+  border-color: var(--ds-error);
+  color: var(--ds-surface);
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
   animation: shake 0.4s ease-in-out;
 }
 
 .step-error .step-label {
-  color: var(--color-error-700);
+  color: var(--ds-error);
   font-weight: var(--font-weight-medium);
 }
 
 /* Pending Step */
 .step-pending .step-circle {
-  background: var(--color-neutral-100);
-  border-color: var(--color-neutral-300);
-  color: var(--color-neutral-500);
+  background: var(--ds-bg);
+  border-color: var(--ds-border);
+  color: var(--ds-text-faint);
 }
 
 /* Animations */
@@ -224,12 +224,12 @@
 @keyframes activePulse {
   0%, 100% {
     transform: scale(1.1);
-    box-shadow: 0 0 0 6px var(--color-primary-alpha-20),
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--ds-marine) 20%, transparent),
                 0 6px 16px rgba(44, 90, 160, 0.35);
   }
   50% {
     transform: scale(1.15);
-    box-shadow: 0 0 0 8px var(--color-primary-alpha-30),
+    box-shadow: 0 0 0 8px color-mix(in oklab, var(--ds-marine) 30%, transparent),
                 0 8px 20px rgba(44, 90, 160, 0.4);
   }
 }
@@ -295,12 +295,12 @@
     gap: 16px;
     padding: 12px;
     border-radius: var(--radius-lg);
-    background: var(--color-neutral-50);
+    background: var(--ds-surface-2);
     transition: background-color var(--duration-moderate) var(--ease-out);
   }
 
   .stepper-step:hover {
-    background: var(--color-neutral-100);
+    background: var(--ds-bg);
   }
 
   .step-circle {
@@ -319,14 +319,14 @@
   }
 
   .step-active {
-    background: var(--color-primary-50);
+    background: var(--ds-marine-hl);
   }
 
   .step-completed {
-    background: var(--color-success-50);
+    background: var(--ds-success-hl);
   }
 
   .step-error {
-    background: var(--color-error-50);
+    background: var(--ds-error-hl);
   }
 }

@@ -1,0 +1,14 @@
+---
+description: Règles PR — migration Design System Atlasia (frontend Angular)
+globs: frontend/src/app/**/*.ts, frontend/src/app/**/*.scss, frontend/src/app/**/*.html
+alwaysApply: false
+---
+
+# Design System — règles pour le code nouveau et les PR
+
+- **Tokens :** utiliser `var(--ds-*)` dans le SCSS des composants ; éviter les hex et l’ajout de nouvelles variables `--color-*` / `--at-*` (ponts existants dans `_ds-semantic.scss` uniquement).
+- **Composants :** si une primitive ou un pattern existe dans `src/app/design-system/` (`ds-button`, `ds-card`, `page-header`, `filter-bar`, etc.), **l’importer depuis le barrel** `design-system/index.ts` plutôt que dupliquer un atome (badge, skeleton, empty-state maison).
+- **Pro Space (`/pro/...`) :** pour une nouvelle enveloppe de contenu, préférer **`ds-card`** à **`mat-card`** ; le backlog **Phase 2 étendue** (`frontend/docs/design-system-migration-plan.md`) liste les fichiers encore à migrer.
+- **Fichiers globaux :** ne pas ajouter de nouveau fichier `src/styles/_atlasia-*.scss` ; étendre le DS ou corriger au niveau du composant / token.
+- **Vérification locale :** `cd frontend && npm run lint:ds-scss` (SCSS), `npm run lint:ds-css` (`components`/`pages` en `.css`), `npm run lint:ds-legacy-vars` (`var(--at-*|--color-*)` hors pont DS) ; `npm run lint:ds-colors` enchaîne les trois. Utiliser `-- --fail` sur chaque script pour la CI stricte.
+- **Plan et état :** `frontend/docs/design-system-migration-plan.md`

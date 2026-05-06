@@ -71,7 +71,7 @@
       [attr.aria-busy]="loading"
       [attr.aria-label]="loading ? (isEditMode ? 'Updating task' : 'Creating task') : (isEditMode ? 'Update task' : 'Create task')">
       @if (loading) {
-        <mat-spinner diameter="20" aria-hidden="true" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+        <ds-skeleton variant="circle" width="20px" height="20px" aria-hidden="true" style="display: inline-block; margin-right: 8px;"></ds-skeleton>
       }
       @if (!loading) {
         <span>{{ isEditMode ? 'Update' : 'Create' }}</span>

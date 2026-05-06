@@ -17,13 +17,13 @@ import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/autocomplete';
 import { MatInput } from '@angular/material/input';
 import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 @Component({
     selector: 'app-annonce-create',
     templateUrl: './annonce-create.component.html',
     styleUrls: ['./annonce-create.component.css'],
-    imports: [LoadingSkeletonComponent, MatStepper, MatStep, MatStepLabel, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatError, MatInput, MatButton, MatStepperNext, MatStepperPrevious, MatIconButton, MatSuffix, CdkDropList, CdkDrag, CdkDragPlaceholder, MatHint, MatProgressSpinner]
+    imports: [LoadingSkeletonComponent, DsSkeletonComponent, MatStepper, MatStep, MatStepLabel, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatError, MatInput, MatButton, MatStepperNext, MatStepperPrevious, MatIconButton, MatSuffix, CdkDropList, CdkDrag, CdkDragPlaceholder, MatHint]
 })
 export class AnnonceCreateComponent implements OnInit {
   readonly stepper = viewChild.required<MatStepper>('stepper');

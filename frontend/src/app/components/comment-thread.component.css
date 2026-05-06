@@ -1,27 +1,27 @@
 .comment-thread-container {
   display: flex;
   height: 600px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--ds-divider);
   border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: var(--ds-surface);
 }
 
 .comment-sidebar {
   width: 350px;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid var(--ds-divider);
   display: flex;
   flex-direction: column;
-  background: #fafafa;
+  background: var(--ds-surface-2);
 }
 
 .sidebar-header {
   padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--ds-divider);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fff;
+  background: var(--ds-surface);
 }
 
 .sidebar-header h3 {
@@ -46,8 +46,8 @@
 
 .new-thread-form {
   padding: 16px;
-  background: #fff;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--ds-surface);
+  border-bottom: 1px solid var(--ds-divider);
 }
 
 .new-thread-form .full-width {
@@ -68,19 +68,19 @@
 
 .thread-item {
   padding: 12px 16px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--ds-divider);
   cursor: pointer;
   transition: background-color 0.2s;
-  background: #fff;
+  background: var(--ds-surface);
 }
 
 .thread-item:hover {
-  background: #f5f5f5;
+  background: var(--ds-bg);
 }
 
 .thread-item.selected {
-  background: #e3f2fd;
-  border-left: 3px solid #2196f3;
+  background: var(--ds-marine-hl);
+  border-left: 3px solid var(--ds-marine);
 }
 
 .thread-item.resolved {
@@ -105,11 +105,11 @@
   font-size: 16px;
   width: 16px;
   height: 16px;
-  color: #4caf50;
+  color: var(--ds-success);
 }
 
 .comment-count {
-  background: #e0e0e0;
+  background: var(--ds-divider);
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 12px;
@@ -120,13 +120,13 @@
   display: flex;
   gap: 8px;
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
   margin-bottom: 4px;
 }
 
 .thread-preview {
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
   line-height: 1.4;
 }
 
@@ -136,7 +136,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .empty-state mat-icon {
@@ -156,12 +156,12 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--ds-surface);
 }
 
 .thread-detail-header {
   padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--ds-divider);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -190,7 +190,7 @@
 .comment {
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ds-surface-offset);
 }
 
 .comment:last-child {
@@ -212,7 +212,7 @@
 }
 
 .avatar-icon {
-  color: #757575;
+  color: var(--ds-text-muted);
   font-size: 24px;
   width: 24px;
   height: 24px;
@@ -220,7 +220,7 @@
 
 .comment-date {
   font-size: 12px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .comment-content {
@@ -231,7 +231,7 @@
 }
 
 .comment-content ::ng-deep .mention {
-  color: #2196f3;
+  color: var(--ds-marine);
   font-weight: 500;
 }
 
@@ -246,12 +246,12 @@
   font-size: 16px;
   width: 16px;
   height: 16px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .mention-tag {
-  background: #e3f2fd;
-  color: #2196f3;
+  background: var(--ds-marine-hl);
+  color: var(--ds-marine);
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 12px;
@@ -260,8 +260,8 @@
 
 .add-comment-section {
   padding: 16px;
-  border-top: 1px solid #e0e0e0;
-  background: #fafafa;
+  border-top: 1px solid var(--ds-divider);
+  background: var(--ds-surface-2);
 }
 
 .comment-input-container {
@@ -274,8 +274,8 @@
   bottom: 100%;
   left: 0;
   right: 0;
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-divider);
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   max-height: 200px;
@@ -293,14 +293,14 @@
 }
 
 .mention-item:hover {
-  background: #f5f5f5;
+  background: var(--ds-bg);
 }
 
 .mention-item mat-icon {
   font-size: 20px;
   width: 20px;
   height: 20px;
-  color: #757575;
+  color: var(--ds-text-muted);
 }
 
 .empty-selection {
@@ -311,7 +311,7 @@
 
 .empty-state-large {
   text-align: center;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .empty-state-large mat-icon {
@@ -341,7 +341,7 @@
     width: 100%;
     max-height: 300px;
     border-right: none;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--ds-divider);
   }
 
   .comment-main {

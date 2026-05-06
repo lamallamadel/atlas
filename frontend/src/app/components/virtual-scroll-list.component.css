@@ -7,19 +7,19 @@
 .virtual-scroll-viewport {
   height: 600px;
   width: 100%;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--ds-divider);
   border-radius: 8px;
-  background: white;
+  background: var(--ds-surface);
 }
 
 .virtual-scroll-item {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ds-divider);
   transition: background-color 0.2s ease;
   cursor: pointer;
 }
 
 .virtual-scroll-item:hover {
-  background-color: #f5f5f5;
+  background-color: var(--ds-bg);
 }
 
 .virtual-scroll-item:last-child {
@@ -31,7 +31,7 @@
   align-items: center;
   justify-content: center;
   height: 300px;
-  color: #999;
+  color: var(--ds-text-faint);
   font-size: 14px;
 }
 

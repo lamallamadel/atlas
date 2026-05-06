@@ -4,7 +4,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NotificationCenterComponent } from './notification-center.component';
 import { NotificationApiService } from '../services/notification-api.service';
@@ -20,7 +19,6 @@ describe('NotificationCenterComponent', () => {
         MatIconModule,
         MatButtonModule,
         MatButtonToggleModule,
-        MatProgressSpinnerModule,
         MatTooltipModule, NotificationCenterComponent],
     providers: [NotificationApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 }).compileComponents();

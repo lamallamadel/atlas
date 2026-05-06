@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { ActionButtonConfig, HelpLinkConfig } from './empty-state.component';
+import type { ActionButtonConfig, HelpLinkConfig } from './empty-state-actions.types';
 import { LottieAnimationType, LottieAnimationComponent } from './lottie-animation.component';
 import { MatIcon } from '@angular/material/icon';
 

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WaterfallChartComponent } from './waterfall-chart.component';
 import { SimpleChange } from '@angular/core';
+import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
 
 describe('WaterfallChartComponent', () => {
   let component: WaterfallChartComponent;
@@ -47,8 +48,10 @@ describe('WaterfallChartComponent', () => {
     expect(data.totals).toEqual([100, 50, 30, 120]);
     expect(data.floats).toEqual([0, 100, 120, 0]);
 
-    // POSITIVE = '#27ae60', NEGATIVE = '#e74c3c', TOTAL = '#2c5aa0'
-    expect(data.colors).toEqual(['#2c5aa0', '#27ae60', '#e74c3c', '#2c5aa0']);
+    const marine = DS_CHART_FALLBACK_HEX['--ds-marine'];
+    const success = DS_CHART_FALLBACK_HEX['--ds-success'];
+    const error = DS_CHART_FALLBACK_HEX['--ds-error'];
+    expect(data.colors).toEqual([marine, success, error, marine]);
   });
 
   it('should rebuild chart on changes', () => {

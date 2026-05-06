@@ -117,7 +117,7 @@
 
   @if (loading && (notifications || []).length === 0) {
     <div class="notification-loading" role="status" aria-live="polite">
-      <mat-spinner diameter="40" aria-label="Chargement en cours"></mat-spinner>
+      <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
       <p>Chargement des notifications...</p>
     </div>
   }

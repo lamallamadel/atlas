@@ -5,7 +5,6 @@ import {
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, BehaviorSubject, Subject } from 'rxjs';
@@ -70,7 +69,6 @@ describe('CommandPaletteComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MatIconModule,
-        MatProgressSpinnerModule,
         FormsModule,
         BrowserAnimationsModule,
         CommandPaletteComponent,

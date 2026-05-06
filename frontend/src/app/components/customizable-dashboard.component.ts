@@ -10,6 +10,7 @@ import { RecentDossiersWidgetComponent } from './recent-dossiers-widget.componen
 import { MyTasksWidgetComponent } from './my-tasks-widget.component';
 
 @Component({
+    standalone: true,
     selector: 'app-customizable-dashboard',
     imports: [
         FormsModule,
@@ -248,7 +249,7 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
     `,
     styles: [`
     .dashboard-container {
-      padding: 24px;
+      padding: var(--ds-space-6);
       max-width: 1600px;
       margin: 0 auto;
     }
@@ -257,71 +258,71 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: var(--ds-space-6);
     }
 
     .dashboard-header h1 {
       margin: 0;
       font-size: 28px;
       font-weight: 700;
-      color: #333;
+      color: var(--ds-text);
     }
 
     .dashboard-actions {
       display: flex;
-      gap: 12px;
+      gap: var(--ds-space-3);
     }
 
     .btn-primary,
     .btn-secondary {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border-radius: 4px;
+      gap: var(--ds-space-2);
+      padding: 10px var(--ds-space-5);
+      border-radius: var(--ds-radius-sm);
       border: none;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background-color var(--ds-transition-fast), border-color var(--ds-transition-fast), color var(--ds-transition-fast);
     }
 
     .btn-primary {
-      background: #1976d2;
-      color: white;
+      background: var(--ds-marine);
+      color: var(--ds-text-inverse);
     }
 
     .btn-primary:hover {
-      background: #1565c0;
+      background: var(--ds-marine-hover);
     }
 
     .btn-secondary {
-      background: white;
-      color: #666;
-      border: 1px solid #ddd;
+      background: var(--ds-surface);
+      color: var(--ds-text-muted);
+      border: 1px solid var(--ds-divider);
     }
 
     .btn-secondary:hover {
-      background: #f5f5f5;
+      background: var(--ds-surface-offset);
     }
 
     .btn-secondary.active {
-      background: #1976d2;
-      color: white;
-      border-color: #1976d2;
+      background: var(--ds-marine);
+      color: var(--ds-text-inverse);
+      border-color: var(--ds-marine);
     }
 
     .btn-icon {
       background: none;
       border: none;
       cursor: pointer;
-      padding: 8px;
-      color: #666;
+      padding: var(--ds-space-2);
+      color: var(--ds-text-muted);
     }
 
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      gap: 16px;
+      gap: var(--ds-space-4);
       min-height: 400px;
     }
 
@@ -339,21 +340,21 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
     }
 
     .widget-placeholder {
-      background: white;
-      border: 2px dashed #ccc;
-      border-radius: 8px;
-      padding: 20px;
+      background: var(--ds-surface);
+      border: 2px dashed var(--ds-border);
+      border-radius: var(--ds-radius-md);
+      padding: var(--ds-space-5);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100%;
-      color: #999;
+      color: var(--ds-text-faint);
     }
 
     .widget-placeholder .material-icons {
       font-size: 48px;
-      margin-bottom: 8px;
+      margin-bottom: var(--ds-space-2);
     }
 
     .empty-state {
@@ -361,25 +362,25 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 20px;
-      color: #999;
+      padding: 60px var(--ds-space-5);
+      color: var(--ds-text-faint);
       text-align: center;
     }
 
     .empty-state .material-icons {
       font-size: 72px;
-      margin-bottom: 16px;
+      margin-bottom: var(--ds-space-4);
     }
 
     .empty-state h3 {
-      margin: 0 0 8px;
+      margin: 0 0 var(--ds-space-2);
       font-size: 24px;
-      color: #666;
+      color: var(--ds-text-muted);
     }
 
     .empty-state p {
-      margin: 0 0 24px;
-      color: #999;
+      margin: 0 0 var(--ds-space-6);
+      color: var(--ds-text-faint);
     }
 
     .modal-overlay {
@@ -388,88 +389,94 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(24, 22, 15, 0.45);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: var(--ds-z-modal);
     }
 
     .modal-content {
-      background: white;
-      border-radius: 8px;
+      background: var(--ds-surface);
+      border-radius: var(--ds-radius-md);
       max-width: 800px;
       width: 90%;
       max-height: 80vh;
       display: flex;
       flex-direction: column;
+      border: 1px solid var(--ds-divider);
+      box-shadow: var(--ds-shadow-lg);
     }
 
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px;
-      border-bottom: 1px solid #eee;
+      padding: var(--ds-space-5);
+      border-bottom: 1px solid var(--ds-divider);
     }
 
     .modal-header h2 {
       margin: 0;
       font-size: 20px;
       font-weight: 600;
+      color: var(--ds-text);
     }
 
     .modal-body {
-      padding: 20px;
+      padding: var(--ds-space-5);
       overflow-y: auto;
+      color: var(--ds-text);
     }
 
     .template-grid,
     .widget-library-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
+      gap: var(--ds-space-4);
     }
 
     .template-card,
     .widget-type-card {
-      padding: 20px;
-      border: 2px solid #eee;
-      border-radius: 8px;
+      padding: var(--ds-space-5);
+      border: 2px solid var(--ds-divider);
+      border-radius: var(--ds-radius-md);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: border-color var(--ds-transition-fast), background var(--ds-transition-fast), transform var(--ds-transition-fast);
       text-align: center;
+      background: var(--ds-surface);
     }
 
     .template-card:hover,
     .widget-type-card:hover {
-      border-color: #1976d2;
-      background: #f5f9ff;
+      border-color: var(--ds-marine);
+      background: var(--ds-marine-hl);
       transform: translateY(-2px);
     }
 
     .template-icon {
-      margin-bottom: 12px;
+      margin-bottom: var(--ds-space-3);
     }
 
     .template-icon .material-icons,
     .widget-type-card .material-icons {
       font-size: 48px;
-      color: #1976d2;
+      color: var(--ds-marine);
     }
 
     .template-card h3,
     .widget-type-card h3 {
-      margin: 0 0 8px;
+      margin: 0 0 var(--ds-space-2);
       font-size: 16px;
       font-weight: 600;
+      color: var(--ds-text);
     }
 
     .template-card p,
     .widget-type-card p {
-      margin: 0 0 12px;
+      margin: 0 0 var(--ds-space-3);
       font-size: 13px;
-      color: #666;
+      color: var(--ds-text-muted);
     }
 
     .template-meta {
@@ -478,29 +485,32 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
     }
 
     .badge {
-      padding: 4px 12px;
-      border-radius: 12px;
+      padding: var(--ds-space-1) var(--ds-space-3);
+      border-radius: var(--ds-radius-pill);
       font-size: 12px;
-      background: #e3f2fd;
-      color: #1976d2;
+      background: var(--ds-marine-hl);
+      color: var(--ds-marine);
+      font-weight: 500;
     }
 
     .import-textarea {
       width: 100%;
       min-height: 300px;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      padding: var(--ds-space-3);
+      border: 1px solid var(--ds-divider);
+      border-radius: var(--ds-radius-sm);
       font-family: monospace;
       font-size: 13px;
       resize: vertical;
+      background: var(--ds-surface);
+      color: var(--ds-text);
     }
 
     .modal-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 12px;
-      margin-top: 16px;
+      gap: var(--ds-space-3);
+      margin-top: var(--ds-space-4);
     }
 
     @media (max-width: 1024px) {
@@ -511,13 +521,13 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
 
     @media (max-width: 768px) {
       .dashboard-container {
-        padding: 16px;
+        padding: var(--ds-space-4);
       }
 
       .dashboard-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 16px;
+        gap: var(--ds-space-4);
       }
 
       .dashboard-actions {

@@ -89,7 +89,7 @@ import { LocalizePipe } from '../pipes/localize.pipe';
     }
 
     .locale-check {
-      color: var(--color-primary, #1976d2);
+      color: var(--ds-marine);
       font-size: 20px;
       width: 20px;
       height: 20px;

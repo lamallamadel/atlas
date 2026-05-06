@@ -2,17 +2,9 @@ import { Component, ChangeDetectionStrategy, OnInit, OnChanges, input } from '@a
 import { SafeHtml } from '@angular/platform-browser';
 import { EmptyStateIllustrationsService, EmptyStateContext } from '../services/empty-state-illustrations.service';
 import { MatIcon } from '@angular/material/icon';
+import type { ActionButtonConfig, HelpLinkConfig } from './empty-state-actions.types';
 
-export interface ActionButtonConfig {
-  label: string;
-  icon?: string;
-  handler: () => void;
-}
-
-export interface HelpLinkConfig {
-  label: string;
-  url: string;
-}
+export type { ActionButtonConfig, HelpLinkConfig } from './empty-state-actions.types';
 
 @Component({
     selector: 'app-empty-state',

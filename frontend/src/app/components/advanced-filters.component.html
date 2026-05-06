@@ -140,14 +140,13 @@
     <!-- Result Count -->
     @if (resultCount !== null || countLoading) {
       <div class="result-count-section">
-        <mat-card class="count-card">
-          <mat-card-content>
+        <ds-card class="count-card" [pad]="true" [elevation]="'xs'">
             <div class="count-content">
               @if (!countLoading) {
                 <mat-icon class="count-icon">filter_list</mat-icon>
               }
               @if (countLoading) {
-                <mat-spinner diameter="24"></mat-spinner>
+                <ds-skeleton variant="circle" width="24px" height="24px"></ds-skeleton>
               }
               @if (!countLoading) {
                 <span class="count-text">
@@ -160,8 +159,7 @@
                 </span>
               }
             </div>
-          </mat-card-content>
-        </mat-card>
+        </ds-card>
       </div>
     }
 

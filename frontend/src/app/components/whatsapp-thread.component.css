@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #e5ddd5;
+  background: var(--ds-bg);
   position: relative;
 }
 
@@ -12,7 +12,7 @@
   justify-content: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #ff9800;
+  background: var(--ds-warning);
   color: white;
   font-size: 14px;
   font-weight: 500;
@@ -54,7 +54,7 @@
   padding: 6px 12px;
   background: rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  color: #667781;
+  color: var(--ds-text-muted);
   font-size: 12px;
   font-weight: 500;
   text-transform: capitalize;
@@ -107,15 +107,15 @@
 }
 
 .swipe-actions .action-retry {
-  color: #2196f3;
+  color: var(--ds-marine);
 }
 
 .swipe-actions .action-copy {
-  color: #4caf50;
+  color: var(--ds-success);
 }
 
 .swipe-actions .action-delete {
-  color: #f44336;
+  color: var(--ds-error);
 }
 
 .message-bubble {
@@ -129,7 +129,7 @@
 }
 
 .outbound .message-bubble {
-  background: #dcf8c6;
+  background: var(--ds-success-hl);
   border-top-right-radius: 2px;
 }
 
@@ -139,14 +139,14 @@
 }
 
 .failed .message-bubble {
-  background: #ffe0e0;
-  border: 1px solid #f44336;
+  background: var(--ds-error-hl);
+  border: 1px solid var(--ds-error);
 }
 
 .message-content {
   font-size: 14px;
   line-height: 1.5;
-  color: #262626;
+  color: var(--ds-text);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -158,7 +158,7 @@
   gap: 4px;
   margin-top: 4px;
   font-size: 11px;
-  color: #667781;
+  color: var(--ds-text-muted);
 }
 
 .timestamp {
@@ -172,23 +172,23 @@
 }
 
 .delivery-status.status-pending {
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .delivery-status.status-sent {
-  color: #667781;
+  color: var(--ds-text-muted);
 }
 
 .delivery-status.status-delivered {
-  color: #34b7f1;
+  color: var(--ds-marine-light);
 }
 
 .delivery-status.status-read {
-  color: #34b7f1;
+  color: var(--ds-marine-light);
 }
 
 .delivery-status.status-failed {
-  color: #f44336;
+  color: var(--ds-error);
 }
 
 @media (max-width: 768px) {

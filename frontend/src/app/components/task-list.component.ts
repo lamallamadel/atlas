@@ -25,6 +25,7 @@ import {
   DsSkeletonComponent,
   type DsTab,
 } from '../design-system';
+import { resolveDsToken } from '../design-system/chart-ds-colors';
 
 enum ViewMode {
   LIST = 'list',
@@ -268,19 +269,19 @@ export class TaskListComponent implements OnInit {
 
   private taskEventColor(task: TaskResponse): string {
     if (task.status === TaskStatus.COMPLETED) {
-      return '#2e7d32';
+      return resolveDsToken('--ds-success');
     }
     const overdue = !!task.dueDate && new Date(task.dueDate) < new Date();
     if (overdue) {
-      return '#c62828';
+      return resolveDsToken('--ds-error');
     }
     if (task.priority === TaskPriority.HIGH) {
-      return '#c62828';
+      return resolveDsToken('--ds-error');
     }
     if (task.priority === TaskPriority.MEDIUM) {
-      return '#e65100';
+      return resolveDsToken('--ds-warning');
     }
-    return '#1a4472';
+    return resolveDsToken('--ds-marine-light');
   }
 
   updateCalendarEvents(): void {

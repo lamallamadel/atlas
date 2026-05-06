@@ -1,10 +1,10 @@
-<mat-card class="preview-card">
-  <mat-card-header>
-    <mat-card-title>Live Preview</mat-card-title>
+<ds-card class="preview-card" [pad]="false" [elevation]="'sm'">
+  <div class="preview-card-header">
+    <h3 class="preview-card-title">Live Preview</h3>
     <mat-icon matTooltip="Preview how your message will appear in WhatsApp">info</mat-icon>
-  </mat-card-header>
+  </div>
 
-  <mat-card-content>
+  <div class="preview-card-body">
     <div class="whatsapp-preview">
       <div class="whatsapp-header">
         <mat-icon>chat</mat-icon>
@@ -100,5 +100,5 @@
         </div>
       </div>
     }
-  </mat-card-content>
-</mat-card>
+  </div>
+</ds-card>

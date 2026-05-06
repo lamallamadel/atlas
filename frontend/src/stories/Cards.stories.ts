@@ -1,19 +1,19 @@
 import { Meta, StoryObj } from '@storybook/angular';
 import { moduleMetadata } from '@storybook/angular';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
+import { DsButtonComponent } from '../app/design-system/primitives/ds-button/ds-button.component';
+import { DsIconComponent } from '../app/design-system/icons/ds-icon.component';
+import { DsCardComponent } from '../app/design-system/primitives/ds-card/ds-card.component';
 
 const meta: Meta = {
-  title: 'Design System/Cards',
+  title: 'Design System/Recipes/Cards',
   decorators: [
     moduleMetadata({
       imports: [
         CommonModule,
-        MatCardModule,
-        MatIconModule,
-        MatButtonModule,
+        DsCardComponent,
+        DsButtonComponent,
+        DsIconComponent,
       ],
     }),
   ],
@@ -31,7 +31,7 @@ export const BasicCard: Story = {
       <div class="card">
         <div class="card__header">
           <div class="card__icon">
-            <mat-icon>home</mat-icon>
+            <ds-icon name="home"></ds-icon>
           </div>
           <div>
             <h3 class="card__title">Basic Card</h3>
@@ -48,12 +48,12 @@ export const BasicCard: Story = {
             2 hours ago
           </span>
           <div class="card__actions">
-            <button mat-icon-button aria-label="Favorite">
-              <mat-icon>favorite_border</mat-icon>
-            </button>
-            <button mat-icon-button aria-label="Share">
-              <mat-icon>share</mat-icon>
-            </button>
+            <ds-button variant="icon" size="md" ariaLabel="Favori">
+              <ds-icon name="star"></ds-icon>
+            </ds-button>
+            <ds-button variant="icon" size="md" ariaLabel="Partager">
+              <ds-icon name="upload"></ds-icon>
+            </ds-button>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@ export const SemanticColors: Story = {
         <div class="card card--primary">
           <div class="card__header">
             <div class="card__icon">
-              <mat-icon>star</mat-icon>
+              <ds-icon name="star"></ds-icon>
             </div>
             <h4 class="card__title">Primary</h4>
           </div>
@@ -98,7 +98,7 @@ export const SemanticColors: Story = {
         <div class="card card--success">
           <div class="card__header">
             <div class="card__icon">
-              <mat-icon>check_circle</mat-icon>
+              <ds-icon name="check"></ds-icon>
             </div>
             <h4 class="card__title">Success</h4>
           </div>
@@ -110,7 +110,7 @@ export const SemanticColors: Story = {
         <div class="card card--warning">
           <div class="card__header">
             <div class="card__icon">
-              <mat-icon>warning</mat-icon>
+              <ds-icon name="alert-circle"></ds-icon>
             </div>
             <h4 class="card__title">Warning</h4>
           </div>
@@ -122,7 +122,7 @@ export const SemanticColors: Story = {
         <div class="card card--error">
           <div class="card__header">
             <div class="card__icon">
-              <mat-icon>error</mat-icon>
+              <ds-icon name="close"></ds-icon>
             </div>
             <h4 class="card__title">Error</h4>
           </div>
@@ -134,7 +134,7 @@ export const SemanticColors: Story = {
         <div class="card card--info">
           <div class="card__header">
             <div class="card__icon">
-              <mat-icon>info</mat-icon>
+              <ds-icon name="info"></ds-icon>
             </div>
             <h4 class="card__title">Info</h4>
           </div>
@@ -146,7 +146,7 @@ export const SemanticColors: Story = {
         <div class="card card--secondary">
           <div class="card__header">
             <div class="card__icon">
-              <mat-icon>label</mat-icon>
+              <ds-icon name="folder"></ds-icon>
             </div>
             <h4 class="card__title">Secondary</h4>
           </div>
@@ -254,7 +254,7 @@ export const PropertyCard: Story = {
         
         <div class="card__header">
           <div class="card__icon">
-            <mat-icon>home</mat-icon>
+            <ds-icon name="building"></ds-icon>
           </div>
           <div>
             <h3 class="card__title">Luxury Apartment</h3>
@@ -276,12 +276,12 @@ export const PropertyCard: Story = {
             €350,000
           </span>
           <div class="card__actions">
-            <button mat-icon-button aria-label="Favorite">
-              <mat-icon>favorite_border</mat-icon>
-            </button>
-            <button mat-icon-button aria-label="Share">
-              <mat-icon>share</mat-icon>
-            </button>
+            <ds-button variant="icon" size="md" ariaLabel="Favori">
+              <ds-icon name="star"></ds-icon>
+            </ds-button>
+            <ds-button variant="icon" size="md" ariaLabel="Partager">
+              <ds-icon name="upload"></ds-icon>
+            </ds-button>
           </div>
         </div>
       </div>
@@ -289,49 +289,62 @@ export const PropertyCard: Story = {
   }),
 };
 
-export const MaterialCard: Story = {
+/** Carte riche équivalente à l’ancien exemple Material : en-tête + corps + actions. */
+export const DsCardWithHeaderAndActions: Story = {
   render: () => ({
     template: `
-      <mat-card style="max-width: 400px;">
-        <mat-card-header>
-          <div mat-card-avatar style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-lg); background-color: var(--color-primary-50); color: var(--color-primary-600);">
-            <mat-icon>business</mat-icon>
+      <ds-card [pad]="false" [elevation]="'sm'" style="display: block; max-width: 400px;">
+        <div
+          style="display: flex; align-items: flex-start; gap: 12px; padding: 16px 16px 0;">
+          <div
+            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--ds-radius-md); flex-shrink: 0; background: var(--ds-marine-hl); color: var(--ds-marine);">
+            <ds-icon name="building"></ds-icon>
           </div>
-          <mat-card-title>Material Card</mat-card-title>
-          <mat-card-subtitle>Automatically Styled</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p>
-            Material Design cards automatically receive the new visual depth design
-            with 12px border radius, subtle borders, gradient background, and smooth
-            elevation transitions on hover.
+          <div>
+            <h3 style="margin: 0 0 4px; font-size: 1.125rem; font-weight: 600; color: var(--ds-text);">
+              Ds Card
+            </h3>
+            <p style="margin: 0; font-size: 0.875rem; color: var(--ds-text-muted);">
+              Primitive <code style="font-size: 0.8em;">ds-card</code> + contenu projeté
+            </p>
+          </div>
+        </div>
+        <div style="padding: 16px; color: var(--ds-text);">
+          <p style="margin: 0;">
+            Surface <strong>ds-card</strong> : rayon DS, bordure <code>--ds-divider</code>, ombre selon
+            <code>elevation</code> ; le contenu (titre, texte, actions) reste du HTML applicatif.
           </p>
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <button mat-button>CANCEL</button>
-          <button mat-raised-button color="primary">OK</button>
-        </mat-card-actions>
-      </mat-card>
+        </div>
+        <div
+          style="display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; padding: 8px 16px 16px; border-top: 1px solid var(--ds-divider);">
+          <ds-button variant="ghost" size="md">Annuler</ds-button>
+          <ds-button variant="marine" size="md">OK</ds-button>
+        </div>
+      </ds-card>
     `,
   }),
 };
 
-export const SelectedMaterialCard: Story = {
+/** Carte sélectionnée : <code>aria-selected</code> + mise en avant accessibilité / focus. */
+export const DsCardSelected: Story = {
   render: () => ({
     template: `
-      <mat-card [attr.aria-selected]="true" style="max-width: 400px;">
-        <mat-card-header>
-          <mat-card-title>Selected Material Card</mat-card-title>
-          <mat-card-subtitle>With Inner Glow Effect</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p>
-            This card is marked as selected with aria-selected="true",
-            automatically displaying the inner glow effect with primary color
-            and enhanced border.
+      <ds-card
+        [pad]="false"
+        [elevation]="'md'"
+        [attr.aria-selected]="true"
+        role="group"
+        aria-label="Carte sélectionnée (exemple)"
+        style="display: block; max-width: 400px; outline: 2px solid var(--ds-marine); outline-offset: 2px; box-shadow: var(--ds-shadow-md);">
+        <div style="padding: 16px;">
+          <h3 style="margin: 0 0 8px; font-size: 1.125rem; font-weight: 600; color: var(--ds-text);">
+            Carte sélectionnée
+          </h3>
+          <p style="margin: 0; font-size: 0.875rem; color: var(--ds-text-muted);">
+            État « sélectionné » : <code>aria-selected="true"</code>, contour et ombre renforcés (tokens <code>--ds-*</code>).
           </p>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </ds-card>
     `,
   }),
 };
@@ -342,7 +355,7 @@ export const CardGrid: Story = {
       <div class="card-grid">
         <div class="card card--compact">
           <div class="card__icon" style="margin-bottom: var(--spacing-3);">
-            <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: var(--color-primary-500);">analytics</mat-icon>
+            <ds-icon name="chart" [size]="24" style="color: var(--ds-marine);"></ds-icon>
           </div>
           <h4 class="card__title">Total Sales</h4>
           <p style="font-size: var(--font-size-3); font-weight: var(--font-weight-bold); color: var(--color-neutral-900); margin: var(--spacing-2) 0;">
@@ -355,7 +368,7 @@ export const CardGrid: Story = {
 
         <div class="card card--compact">
           <div class="card__icon" style="margin-bottom: var(--spacing-3);">
-            <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: var(--color-secondary-500);">people</mat-icon>
+            <ds-icon name="users" [size]="24" style="color: var(--ds-copper);"></ds-icon>
           </div>
           <h4 class="card__title">New Leads</h4>
           <p style="font-size: var(--font-size-3); font-weight: var(--font-weight-bold); color: var(--color-neutral-900); margin: var(--spacing-2) 0;">
@@ -368,7 +381,7 @@ export const CardGrid: Story = {
 
         <div class="card card--compact">
           <div class="card__icon" style="margin-bottom: var(--spacing-3);">
-            <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: var(--color-info-500);">home_work</mat-icon>
+            <ds-icon name="building" [size]="24" style="color: var(--ds-marine);"></ds-icon>
           </div>
           <h4 class="card__title">Properties</h4>
           <p style="font-size: var(--font-size-3); font-weight: var(--font-weight-bold); color: var(--color-neutral-900); margin: var(--spacing-2) 0;">
@@ -381,7 +394,7 @@ export const CardGrid: Story = {
 
         <div class="card card--compact">
           <div class="card__icon" style="margin-bottom: var(--spacing-3);">
-            <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: var(--color-warning-500);">schedule</mat-icon>
+            <ds-icon name="calendar" [size]="24" style="color: var(--ds-copper);"></ds-icon>
           </div>
           <h4 class="card__title">Appointments</h4>
           <p style="font-size: var(--font-size-3); font-weight: var(--font-weight-bold); color: var(--color-neutral-900); margin: var(--spacing-2) 0;">

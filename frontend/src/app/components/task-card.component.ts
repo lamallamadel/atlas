@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { TaskResponse, TaskPriority, TaskStatus } from '../services/task-api.service';
 import { fadeIn, scaleIn } from '../animations';
-import { MatCard, MatCardHeader, MatCardContent, MatCardActions } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
@@ -12,7 +12,7 @@ import { DatePipe } from '@angular/common';
     templateUrl: './task-card.component.html',
     styleUrls: ['./task-card.component.css'],
     animations: [fadeIn, scaleIn],
-    imports: [MatCard, MatCardHeader, MatCheckbox, MatCardContent, MatIcon, MatCardActions, MatButton, DatePipe]
+    imports: [DsCardComponent, MatCheckbox, MatIcon, MatButton, DatePipe]
 })
 export class TaskCardComponent {
   readonly task = input.required<TaskResponse>();

@@ -2,7 +2,7 @@
   position: absolute;
   width: 150px;
   background: white;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--ds-divider);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
@@ -25,7 +25,7 @@
 }
 
 .workflow-node.transition-start {
-  border-color: #2196F3;
+  border-color: var(--ds-marine);
   border-width: 3px;
   animation: pulse 1.5s infinite;
 }
@@ -62,13 +62,13 @@
 .node-label {
   font-weight: 500;
   font-size: 14px;
-  color: #333;
+  color: var(--ds-text);
   margin-bottom: 4px;
 }
 
 .node-status {
   font-size: 11px;
-  color: #666;
+  color: var(--ds-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -77,7 +77,7 @@
   display: flex;
   justify-content: center;
   padding: 8px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--ds-divider);
 }
 
 .add-transition-btn {
@@ -91,7 +91,7 @@
   top: 4px;
   right: 4px;
   cursor: move;
-  color: #999;
+  color: var(--ds-text-faint);
   opacity: 0;
   transition: opacity 0.2s;
 }

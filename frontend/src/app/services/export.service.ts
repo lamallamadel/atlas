@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
+
+const DS_MARINE = DS_CHART_FALLBACK_HEX['--ds-marine'];
+const DS_PRIMARY = DS_CHART_FALLBACK_HEX['--ds-primary'];
+const DS_BG = DS_CHART_FALLBACK_HEX['--ds-bg'];
+const DS_TEXT_MUTED = DS_CHART_FALLBACK_HEX['--ds-text-muted'];
+const DS_DIVIDER = DS_CHART_FALLBACK_HEX['--ds-divider'];
 
 export interface ExportProgress {
   stage: 'preparing' | 'generating' | 'complete' | 'error';
@@ -36,8 +43,8 @@ export class ExportService {
     title: 'Export',
     filename: 'export',
     orientation: 'portrait',
-    primaryColor: '#2c5aa0',
-    secondaryColor: '#e67e22',
+    primaryColor: DS_MARINE,
+    secondaryColor: DS_PRIMARY,
     includeDate: true,
     includePageNumbers: true
   };
@@ -81,7 +88,7 @@ export class ExportService {
       }
 
       doc.setFontSize(18);
-      doc.setTextColor(finalConfig.primaryColor || '#2c5aa0');
+      doc.setTextColor(finalConfig.primaryColor || DS_MARINE);
       doc.text(finalConfig.title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 10;
 
@@ -130,7 +137,7 @@ export class ExportService {
         body: tableRows.map(row => columns.map(col => row[col.key] as string)),
         theme: 'striped',
         headStyles: {
-          fillColor: finalConfig.primaryColor || '#2c5aa0',
+          fillColor: finalConfig.primaryColor || DS_MARINE,
           textColor: '#ffffff',
           fontStyle: 'bold',
           halign: 'left'
@@ -315,7 +322,7 @@ export class ExportService {
       }
       
       .header .date {
-        color: #666;
+        color: ${DS_TEXT_MUTED};
         font-size: 12px;
       }
       
@@ -341,24 +348,24 @@ export class ExportService {
         padding: 10px;
         text-align: left;
         font-weight: bold;
-        border: 1px solid #ddd;
+        border: 1px solid ${DS_DIVIDER};
       }
       
       td {
         padding: 8px;
-        border: 1px solid #ddd;
+        border: 1px solid ${DS_DIVIDER};
         text-align: left;
       }
       
       tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
+        background-color: ${DS_BG};
       }
       
       .footer {
         margin-top: 20px;
         text-align: center;
         font-size: 10px;
-        color: #666;
+        color: ${DS_TEXT_MUTED};
       }
     }
   </style>

@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard.component';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -19,13 +18,7 @@ import {
 @Component({
   selector: 'app-loading-skeleton',
   template: '',
-  imports: [
-    RouterTestingModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-  ],
+  imports: [],
 })
 class MockLoadingSkeletonComponent {
   readonly variant = input<string>();
@@ -35,13 +28,7 @@ class MockLoadingSkeletonComponent {
 @Component({
   selector: 'app-empty-state',
   template: '',
-  imports: [
-    RouterTestingModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-  ],
+  imports: [],
 })
 class MockEmptyStateComponent {
   readonly message = input<string>();
@@ -86,7 +73,6 @@ describe('DashboardComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
-        MatCardModule,
         MatIconModule,
         MatButtonModule,
         MatButtonToggleModule,

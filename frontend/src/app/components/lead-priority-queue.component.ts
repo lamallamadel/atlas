@@ -1,33 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 
-import { MatCardModule } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { LeadScoringApiService, LeadPriority } from '../services/lead-scoring-api.service';
 import { ToastNotificationService } from '../services/toast-notification.service';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 @Component({
   selector: 'app-lead-priority-queue',
   standalone: true,
   imports: [
-    MatCardModule,
+    DsCardComponent,
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatProgressSpinnerModule,
+    DsSkeletonComponent,
     MatTooltipModule
 ],
   template: `
-    <mat-card class="priority-queue-card">
-      <mat-card-header>
-        <mat-card-title>
+    <ds-card class="priority-queue-card" [pad]="false" [elevation]="'md'">
+      <div class="pq-header">
+        <div class="pq-title">
           <mat-icon class="title-icon">trending_up</mat-icon>
           High-Priority Leads
-        </mat-card-title>
+        </div>
         <div class="header-actions">
           <button mat-icon-button (click)="refresh()" [disabled]="loading" matTooltip="Refresh">
             <mat-icon>refresh</mat-icon>
@@ -36,12 +36,12 @@ import { ToastNotificationService } from '../services/toast-notification.service
             <mat-icon>calculate</mat-icon>
           </button>
         </div>
-      </mat-card-header>
+      </div>
     
-      <mat-card-content>
+      <div class="pq-body">
         @if (loading) {
           <div class="loading-container">
-            <mat-spinner diameter="40"></mat-spinner>
+            <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
           </div>
         }
     
@@ -124,35 +124,39 @@ import { ToastNotificationService } from '../services/toast-notification.service
             }
           </div>
         }
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </ds-card>
     `,
   styles: [`
     .priority-queue-card {
-      margin: 20px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: block;
+      margin: var(--ds-space-5);
     }
 
-    mat-card-header {
+    .pq-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px;
-      border-bottom: 1px solid #e0e0e0;
+      padding: var(--ds-space-4);
+      border-bottom: 1px solid var(--ds-divider);
     }
 
-    mat-card-title {
+    .pq-title {
       display: flex;
       align-items: center;
       font-size: 20px;
       font-weight: 600;
-      color: #2c3e50;
+      color: var(--ds-text);
       margin: 0;
     }
 
+    .pq-body {
+      padding: 0 var(--ds-space-4) var(--ds-space-4);
+    }
+
     .title-icon {
-      margin-right: 8px;
-      color: #3498db;
+      margin-right: var(--ds-space-2);
+      color: var(--ds-marine);
     }
 
     .header-actions {
@@ -172,16 +176,16 @@ import { ToastNotificationService } from '../services/toast-notification.service
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 20px;
-      color: #7f8c8d;
+      padding: 60px var(--ds-space-5);
+      color: var(--ds-text-muted);
     }
 
     .empty-icon {
       font-size: 64px;
       width: 64px;
       height: 64px;
-      color: #bdc3c7;
-      margin-bottom: 16px;
+      color: var(--ds-text-faint);
+      margin-bottom: var(--ds-space-4);
     }
 
     .leads-list {
@@ -194,33 +198,33 @@ import { ToastNotificationService } from '../services/toast-notification.service
     .lead-item {
       display: flex;
       align-items: center;
-      padding: 16px;
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      border-left: 4px solid #3498db;
+      padding: var(--ds-space-4);
+      background: var(--ds-surface);
+      border: 1px solid var(--ds-divider);
+      border-radius: var(--ds-radius-md);
+      border-left: 4px solid var(--ds-marine);
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .lead-item:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--ds-shadow-md);
       transform: translateY(-2px);
     }
 
     .lead-item.urgent {
-      border-left-color: #e74c3c;
-      background: #fff5f5;
+      border-left-color: var(--ds-error);
+      background: var(--ds-error-hl);
     }
 
     .lead-item.high {
-      border-left-color: #f39c12;
-      background: #fffbf0;
+      border-left-color: var(--ds-warning);
+      background: var(--ds-warning-hl);
     }
 
     .lead-item.medium {
-      border-left-color: #3498db;
-      background: #f8fcff;
+      border-left-color: var(--ds-marine);
+      background: var(--ds-marine-hl);
     }
 
     .lead-score {
@@ -235,13 +239,13 @@ import { ToastNotificationService } from '../services/toast-notification.service
     .score-value {
       font-size: 32px;
       font-weight: bold;
-      color: #2c3e50;
+      color: var(--ds-text);
       line-height: 1;
     }
 
     .score-label {
       font-size: 12px;
-      color: #7f8c8d;
+      color: var(--ds-text-muted);
       text-transform: uppercase;
     }
 
@@ -253,8 +257,8 @@ import { ToastNotificationService } from '../services/toast-notification.service
     .lead-name {
       font-size: 18px;
       font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 8px;
+      color: var(--ds-text);
+      margin-bottom: var(--ds-space-2);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -285,7 +289,7 @@ import { ToastNotificationService } from '../services/toast-notification.service
       display: flex;
       gap: 12px;
       font-size: 13px;
-      color: #7f8c8d;
+      color: var(--ds-text-muted);
     }
 
     .breakdown-item {
@@ -311,23 +315,23 @@ import { ToastNotificationService } from '../services/toast-notification.service
     }
 
     .urgency-chip.urgent {
-      background-color: #e74c3c !important;
-      color: white !important;
+      background-color: var(--ds-error) !important;
+      color: var(--ds-text-inverse) !important;
     }
 
     .urgency-chip.high {
-      background-color: #f39c12 !important;
-      color: white !important;
+      background-color: var(--ds-warning) !important;
+      color: var(--ds-text-inverse) !important;
     }
 
     .urgency-chip.medium {
-      background-color: #3498db !important;
-      color: white !important;
+      background-color: var(--ds-marine) !important;
+      color: var(--ds-text-inverse) !important;
     }
 
     .urgency-chip.low {
-      background-color: #95a5a6 !important;
-      color: white !important;
+      background-color: var(--ds-surface-dynamic) !important;
+      color: var(--ds-text-muted) !important;
     }
 
     .lead-actions {

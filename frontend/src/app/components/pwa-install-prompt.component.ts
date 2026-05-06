@@ -35,21 +35,21 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     .pwa-install-banner {
       position: fixed;
       bottom: 80px;
-      left: 16px;
-      right: 16px;
-      background: var(--color-neutral-0, #ffffff);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-      padding: 16px;
-      z-index: 1001;
+      left: var(--ds-space-4);
+      right: var(--ds-space-4);
+      background: var(--ds-surface);
+      border-radius: var(--ds-radius-lg);
+      box-shadow: var(--ds-shadow-lg);
+      padding: var(--ds-space-4);
+      z-index: 1001; /* au-dessus de la barre mobile (1000) ; non couvert par l’échelle --ds-z-* */
       max-width: 500px;
       margin: 0 auto;
     }
 
     @media (min-width: 768px) {
       .pwa-install-banner {
-        bottom: 24px;
-        left: 24px;
+        bottom: var(--ds-space-6);
+        left: var(--ds-space-6);
         right: auto;
       }
     }
@@ -57,19 +57,19 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     .banner-content {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
+      gap: var(--ds-space-3);
     }
 
     .banner-icon {
       flex-shrink: 0;
       width: 48px;
       height: 48px;
-      background: linear-gradient(135deg, var(--color-primary-500, #2c5aa0) 0%, var(--color-primary-700, #1f4782) 100%);
-      border-radius: 12px;
+      background: linear-gradient(135deg, var(--ds-marine) 0%, var(--ds-marine-light) 100%);
+      border-radius: var(--ds-radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: var(--ds-text-inverse);
     }
 
     .banner-icon mat-icon {
@@ -84,23 +84,23 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     }
 
     .banner-text h4 {
-      margin: 0 0 4px 0;
+      margin: 0 0 var(--ds-space-1) 0;
       font-size: 16px;
       font-weight: 600;
-      color: var(--color-neutral-900, #212121);
+      color: var(--ds-text);
     }
 
     .banner-text p {
       margin: 0;
       font-size: 13px;
-      color: var(--color-neutral-600, #757575);
+      color: var(--ds-text-muted);
       line-height: 1.4;
     }
 
     .banner-actions {
       display: flex;
-      gap: 8px;
-      margin-top: 12px;
+      gap: var(--ds-space-2);
+      margin-top: var(--ds-space-3);
       flex-wrap: wrap;
     }
 
@@ -111,7 +111,8 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     }
 
     .btn-install {
-      background: linear-gradient(135deg, var(--color-primary-500, #2c5aa0) 0%, var(--color-primary-700, #1f4782) 100%);
+      background: linear-gradient(135deg, var(--ds-marine) 0%, var(--ds-marine-hover) 100%);
+      color: var(--ds-text-inverse);
     }
 
     .btn-close {
@@ -128,25 +129,17 @@ import { MatButton, MatIconButton } from '@angular/material/button';
       height: 20px;
     }
 
-    /* Dark theme */
+    /* Dark theme — surfaces / texte pilotés par les tokens */
     .dark-theme .pwa-install-banner {
-      background: var(--color-neutral-800, #424242);
-    }
-
-    .dark-theme .banner-text h4 {
-      color: var(--color-neutral-0, #ffffff);
-    }
-
-    .dark-theme .banner-text p {
-      color: var(--color-neutral-300, #e0e0e0);
+      background: var(--ds-surface);
     }
 
     /* Mobile adjustments */
     @media (max-width: 599px) {
       .pwa-install-banner {
         bottom: 72px;
-        left: 8px;
-        right: 8px;
+        left: var(--ds-space-2);
+        right: var(--ds-space-2);
       }
 
       .banner-content {

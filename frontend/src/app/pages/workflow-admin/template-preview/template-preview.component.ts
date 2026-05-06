@@ -1,6 +1,6 @@
 import { Component, OnChanges, SimpleChanges, input } from '@angular/core';
 import { WhatsAppTemplate, ComponentType, TemplateComponent, ButtonType } from '../models/template.model';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../../../design-system';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
@@ -12,7 +12,7 @@ import { LineBreakPipe } from '../pipes/line-break.pipe';
     selector: 'app-template-preview',
     templateUrl: './template-preview.component.html',
     styleUrls: ['./template-preview.component.css'],
-    imports: [MatCard, MatCardHeader, MatCardTitle, MatIcon, MatTooltip, MatCardContent, MatButton, MatDivider, MatChipListbox, MatChip, LineBreakPipe]
+    imports: [DsCardComponent, MatIcon, MatTooltip, MatButton, MatDivider, MatChipListbox, MatChip, LineBreakPipe]
 })
 export class TemplatePreviewComponent implements OnChanges {
   readonly template = input<WhatsAppTemplate>();

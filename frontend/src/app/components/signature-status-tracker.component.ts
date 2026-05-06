@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -15,7 +15,7 @@ import { switchMap } from 'rxjs/operators';
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
+    DsCardComponent,
     MatIconModule,
     MatButtonModule,
     MatChipsModule,
@@ -24,16 +24,16 @@ import { switchMap } from 'rxjs/operators';
   template: `
     <div class="signature-tracker-container">
       @for (request of signatureRequests; track request) {
-        <mat-card class="signature-card">
-          <mat-card-header>
-            <mat-card-title>{{ request.subject }}</mat-card-title>
-            <mat-card-subtitle>
+        <ds-card class="signature-card" [pad]="false" [elevation]="'sm'">
+          <div class="signature-card-header">
+            <h3 class="signature-card-title">{{ request.subject }}</h3>
+            <div class="signature-card-subtitle">
               <mat-chip [class]="getStatusClass(request.status)">
                 {{ getStatusLabel(request.status) }}
               </mat-chip>
-            </mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
+            </div>
+          </div>
+          <div class="signature-card-body">
             <div class="workflow-visualization">
               <div class="workflow-step" [class.active]="isStepActive(request, 'SENT')" [class.completed]="isStepCompleted(request, 'SENT')">
                 <div class="step-icon">
@@ -124,8 +124,8 @@ import { switchMap } from 'rxjs/operators';
                 }
               </div>
             }
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </ds-card>
       }
     
       @if (signatureRequests.length === 0) {
@@ -142,7 +142,27 @@ import { switchMap } from 'rxjs/operators';
     }
 
     .signature-card {
+      display: block;
       margin-bottom: 24px;
+    }
+
+    .signature-card-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--ds-divider, #e0e0e0);
+    }
+
+    .signature-card-title {
+      margin: 0 0 8px;
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+
+    .signature-card-subtitle {
+      margin: 0;
+    }
+
+    .signature-card-body {
+      padding: 16px;
     }
 
     .workflow-visualization {

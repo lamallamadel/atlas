@@ -7,7 +7,6 @@ import {
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 describe('KanbanBoardComponent', () => {
   let component: KanbanBoardComponent;
@@ -30,7 +29,6 @@ describe('KanbanBoardComponent', () => {
       imports: [
         DragDropModule,
         MatIconModule,
-        MatProgressSpinnerModule,
         KanbanBoardComponent,
       ],
       providers: [

@@ -1,12 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { OAuthService } from 'angular-oauth2-oidc';
 
 import { TourProgressComponent } from './tour-progress.component';
@@ -38,12 +36,10 @@ describe('TourProgressComponent', () => {
       imports: [
         TourProgressComponent,
         RouterTestingModule,
-        MatCardModule,
         MatIconModule,
         MatProgressBarModule,
         MatButtonModule,
         MatChipsModule,
-        MatProgressSpinnerModule,
       ],
       providers: [
         TourDefinitionService,

@@ -148,11 +148,11 @@
           @if (activeTab === 'informations') {
             <div class="tab-content">
               <!-- Section Essentiel -->
-              <mat-card class="info-section-essential">
-                <mat-card-header>
-                  <mat-card-title>Essentiel</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="info-section-essential" [pad]="false" [elevation]="'xs'">
+                <div class="info-section-header">
+                  <h3 class="info-section-title">Essentiel</h3>
+                </div>
+                <div class="info-section-body">
                   <div class="essential-grid">
                     <div class="essential-item">
                       <span class="essential-label">Statut</span>
@@ -184,15 +184,15 @@
                       </div>
                     }
                   </div>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
               <!-- Grid 2 colonnes pour Prospect et Annonce -->
               <div class="sections-container">
-                <mat-card class="info-section">
-                  <mat-card-header>
-                    <mat-card-title>Prospect</mat-card-title>
-                  </mat-card-header>
-                  <mat-card-content>
+                <ds-card class="info-section" [pad]="false" [elevation]="'xs'">
+                  <div class="info-section-header">
+                    <h3 class="info-section-title">Prospect</h3>
+                  </div>
+                  <div class="info-section-body">
                     @if (isLeadEmpty()) {
                       <div class="lead-empty-state">
                         <p class="lead-empty-message">Informations du prospect non renseignées</p>
@@ -277,13 +277,13 @@
                             }
                           </div>
                         }
-                      </mat-card-content>
-                    </mat-card>
-                    <mat-card class="info-section">
-                      <mat-card-header>
-                        <mat-card-title>Annonce liée</mat-card-title>
-                      </mat-card-header>
-                      <mat-card-content>
+                      </div>
+                    </ds-card>
+                    <ds-card class="info-section" [pad]="false" [elevation]="'xs'">
+                      <div class="info-section-header">
+                        <h3 class="info-section-title">Annonce liée</h3>
+                      </div>
+                      <div class="info-section-body">
                         @if (dossier.annonceId) {
                           <div class="field-group">
                             <div class="field-row">
@@ -297,8 +297,8 @@
                             <p class="empty-state-text">Aucune annonce liée à ce dossier</p>
                           </div>
                         }
-                      </mat-card-content>
-                    </mat-card>
+                      </div>
+                    </ds-card>
                   </div>
                   <!-- Accordéon Détails système -->
                   <mat-expansion-panel class="system-details-section">
@@ -348,12 +348,11 @@
           @if (activeTab === 'parties') {
                 <div class="tab-content">
                   @if (!dossier.parties || dossier.parties.length === 0) {
-                    <app-empty-state
-                      message="Aucune partie prenante enregistrée" subtext="Ajoutez propriétaire, acheteur, notaire, etc."
-              [primaryAction]="{
-                label: 'Ajouter une partie prenante',
-                handler: togglePartieForm.bind(this)
-              }"></app-empty-state>
+                    <ds-empty-state
+                      title="Aucune partie prenante enregistrée"
+                      description="Ajoutez propriétaire, acheteur, notaire, etc."
+                      ctaLabel="Ajouter une partie prenante"
+                      (ctaClick)="togglePartieForm()" />
                   }
                   @if (dossier.parties && dossier.parties.length > 0) {
                     <div>
@@ -864,13 +863,11 @@
                       </div>
                       <!-- Shared Notes with Live Cursors -->
                       <div class="collaboration-panel">
-                        <mat-card>
-                          <mat-card-header>
-                            <mat-card-title>
-                              📝 Shared Notes
-                            </mat-card-title>
-                          </mat-card-header>
-                          <mat-card-content>
+                        <ds-card class="collab-notes-card" [pad]="false" [elevation]="'xs'">
+                          <div class="info-section-header">
+                            <h3 class="info-section-title">📝 Shared Notes</h3>
+                          </div>
+                          <div class="info-section-body">
                             <textarea
                               [(ngModel)]="dossier.notes"
                               (input)="onNotesInput($event)"
@@ -879,8 +876,8 @@
                               rows="10">
                             </textarea>
                             <app-collaboration-cursor fieldName="notes"></app-collaboration-cursor>
-                          </mat-card-content>
-                        </mat-card>
+                          </div>
+                        </ds-card>
                       </div>
                       <!-- Filter Presets -->
                       <div class="collaboration-panel full-width">

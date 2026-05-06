@@ -43,33 +43,34 @@ import { CryptoService } from '../services/crypto.service';
     `,
   styles: [`
     .message-container {
-      padding: 24px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: var(--ds-space-6);
+      background: var(--ds-surface);
+      border-radius: var(--ds-radius-md);
+      border: 1px solid var(--ds-divider);
+      box-shadow: var(--ds-shadow-sm);
       max-width: 800px;
       margin: 0 auto;
     }
 
     h2 {
-      margin: 0 0 24px 0;
+      margin: 0 0 var(--ds-space-6) 0;
       font-size: 20px;
-      color: #333;
+      color: var(--ds-text);
     }
 
     .messages-list {
       max-height: 400px;
       overflow-y: auto;
-      margin-bottom: 24px;
-      padding: 16px;
-      background: #f8f9fa;
-      border-radius: 8px;
+      margin-bottom: var(--ds-space-6);
+      padding: var(--ds-space-4);
+      background: var(--ds-surface-offset);
+      border-radius: var(--ds-radius-md);
     }
 
     .message-bubble {
-      margin-bottom: 16px;
-      padding: 12px 16px;
-      border-radius: 12px;
+      margin-bottom: var(--ds-space-4);
+      padding: var(--ds-space-3) var(--ds-space-4);
+      border-radius: var(--ds-radius-lg);
       max-width: 70%;
       animation: slideIn 0.3s ease-out;
     }
@@ -86,22 +87,22 @@ import { CryptoService } from '../services/crypto.service';
     }
 
     .from-client {
-      background: #667eea;
-      color: white;
+      background: var(--ds-marine);
+      color: var(--ds-text-inverse);
       margin-left: auto;
       text-align: right;
     }
 
     .from-agent {
-      background: white;
-      color: #333;
-      border: 1px solid #e0e0e0;
+      background: var(--ds-surface);
+      color: var(--ds-text);
+      border: 1px solid var(--ds-divider);
       margin-right: auto;
       text-align: left;
     }
 
     .message-content {
-      margin-bottom: 4px;
+      margin-bottom: var(--ds-space-1);
       word-wrap: break-word;
     }
 
@@ -112,39 +113,41 @@ import { CryptoService } from '../services/crypto.service';
 
     .message-form {
       display: flex;
-      gap: 12px;
+      gap: var(--ds-space-3);
       align-items: flex-end;
     }
 
     .message-input {
       flex: 1;
-      padding: 12px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
+      padding: var(--ds-space-3);
+      border: 1px solid var(--ds-divider);
+      border-radius: var(--ds-radius-md);
       font-family: inherit;
       font-size: 14px;
       resize: vertical;
+      background: var(--ds-surface);
+      color: var(--ds-text);
     }
 
     .message-input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--ds-marine);
     }
 
     .send-button {
-      padding: 12px 24px;
-      background: #667eea;
-      color: white;
+      padding: var(--ds-space-3) var(--ds-space-6);
+      background: var(--ds-marine);
+      color: var(--ds-text-inverse);
       border: none;
-      border-radius: 8px;
+      border-radius: var(--ds-radius-md);
       cursor: pointer;
       font-size: 14px;
       font-weight: 500;
-      transition: background 0.2s;
+      transition: background var(--ds-transition-fast);
     }
 
     .send-button:hover:not(:disabled) {
-      background: #5568d3;
+      background: var(--ds-marine-hover);
     }
 
     .send-button:disabled {

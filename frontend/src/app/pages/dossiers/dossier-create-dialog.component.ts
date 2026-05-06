@@ -10,16 +10,16 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel, MatError, MatHint, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatAutocompleteTrigger, MatAutocomplete, MatOption } from '@angular/material/autocomplete';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { AsyncPipe } from '@angular/common';
+import { DsSkeletonComponent } from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 @Component({
     selector: 'app-dossier-create-dialog',
     templateUrl: './dossier-create-dialog.component.html',
     styleUrls: ['./dossier-create-dialog.component.css'],
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatIcon, MatButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatHint, MatSuffix, MatProgressSpinner, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatDialogActions, AsyncPipe]
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatIcon, MatButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatHint, MatSuffix, DsSkeletonComponent, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatDialogActions, AsyncPipe]
 })
 export class DossierCreateDialogComponent implements OnInit {
   dossierForm!: FormGroup;

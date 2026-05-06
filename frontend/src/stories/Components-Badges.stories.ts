@@ -1,22 +1,23 @@
-import { Meta, StoryObj } from '@storybook/angular';
-import { moduleMetadata } from '@storybook/angular';
+import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
 import { CommonModule } from '@angular/common';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatIconModule } from '@angular/material/icon';
+import { DsBadgeComponent } from '../app/design-system/primitives/ds-badge/ds-badge.component';
+import { DsIconComponent } from '../app/design-system/icons/ds-icon.component';
+import { DsFilterChipComponent } from '../app/design-system/primitives/ds-filter-chip/ds-filter-chip.component';
 
 const meta: Meta = {
-  title: 'Components/Badges',
+  title: 'Design System/Recipes/Badges & chips',
   tags: ['autodocs'],
   decorators: [
     moduleMetadata({
-      imports: [CommonModule, MatChipsModule, MatIconModule],
+      imports: [CommonModule, DsBadgeComponent, DsIconComponent, DsFilterChipComponent],
     }),
   ],
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Badge and chip components for status indicators, tags, and labels with semantic colors.',
+        component:
+          'Statuts CRM et indicateurs avec ds-badge, pastilles sur icônes, filtres avec ds-filter-chip. Voir aussi Design System / Primitives / DsBadge pour les props détaillées.',
       },
     },
   },
@@ -25,281 +26,86 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-export const StatusBadges: Story = {
+export const CrmStatuses: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Status Badges</h2>
-        
-        <div style="display: grid; gap: 32px;">
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Semantic Status</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-success-100); color: var(--color-success-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                ● Success
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-warning-100); color: var(--color-warning-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                ● Warning
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-error-100); color: var(--color-error-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                ● Error
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-info-100); color: var(--color-info-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                ● Info
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-neutral-200); color: var(--color-neutral-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                ● Neutral
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Dossier Status</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-info-100); color: var(--color-info-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                New
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-warning-100); color: var(--color-warning-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                In Progress
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-primary-100); color: var(--color-primary-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                Under Review
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-success-100); color: var(--color-success-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                Completed
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-error-100); color: var(--color-error-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                Rejected
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-neutral-200); color: var(--color-neutral-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                Archived
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Property Type</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-primary-100); color: var(--color-primary-800); border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Sale
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-secondary-100); color: var(--color-secondary-800); border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Rent
-              </span>
-              <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-info-100); color: var(--color-info-800); border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Commercial
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">With Icons</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--color-success-100); color: var(--color-success-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">check_circle</mat-icon>
-                Verified
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--color-warning-100); color: var(--color-warning-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">schedule</mat-icon>
-                Pending
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--color-info-100); color: var(--color-info-800); border-radius: var(--radius-full); font-size: 13px; font-weight: 500;">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">star</mat-icon>
-                Featured
-              </span>
-            </div>
-          </div>
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Statuts dossier (CRM)</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+          <ds-badge status="new">Nouveau</ds-badge>
+          <ds-badge status="qualification">Qualification</ds-badge>
+          <ds-badge status="rdv">RDV</ds-badge>
+          <ds-badge status="won">Gagné</ds-badge>
+          <ds-badge status="lost">Perdu</ds-badge>
+          <ds-badge status="archived">Archivé</ds-badge>
         </div>
       </div>
     `,
   }),
 };
 
-export const CountBadges: Story = {
+export const SemanticStatuses: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Count Badges</h2>
-        
-        <div style="display: grid; gap: 32px;">
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Notification Counts</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center;">
-              <div style="position: relative; display: inline-flex;">
-                <mat-icon style="font-size: 32px; width: 32px; height: 32px; color: var(--color-neutral-600);">notifications</mat-icon>
-                <span style="position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; background: var(--color-error-500); color: white; border-radius: var(--radius-full); font-size: 11px; font-weight: 600; padding: 0 6px;">
-                  5
-                </span>
-              </div>
-
-              <div style="position: relative; display: inline-flex;">
-                <mat-icon style="font-size: 32px; width: 32px; height: 32px; color: var(--color-neutral-600);">mail</mat-icon>
-                <span style="position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; background: var(--color-primary-500); color: white; border-radius: var(--radius-full); font-size: 11px; font-weight: 600; padding: 0 6px;">
-                  12
-                </span>
-              </div>
-
-              <div style="position: relative; display: inline-flex;">
-                <mat-icon style="font-size: 32px; width: 32px; height: 32px; color: var(--color-neutral-600);">shopping_cart</mat-icon>
-                <span style="position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; background: var(--color-success-500); color: white; border-radius: var(--radius-full); font-size: 11px; font-weight: 600; padding: 0 6px;">
-                  3
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">High Count (99+)</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center;">
-              <div style="position: relative; display: inline-flex;">
-                <mat-icon style="font-size: 32px; width: 32px; height: 32px; color: var(--color-neutral-600);">inbox</mat-icon>
-                <span style="position: absolute; top: -4px; right: -4px; min-width: 24px; height: 20px; display: flex; align-items: center; justify-content: center; background: var(--color-error-500); color: white; border-radius: var(--radius-full); font-size: 11px; font-weight: 600; padding: 0 6px;">
-                  99+
-                </span>
-              </div>
-            </div>
-            <div style="margin-top: 12px; font-size: 14px; color: var(--color-neutral-600);">
-              Show "99+" for counts over 99 to prevent layout overflow
-            </div>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Dot Indicator (No Count)</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center;">
-              <div style="position: relative; display: inline-flex;">
-                <mat-icon style="font-size: 32px; width: 32px; height: 32px; color: var(--color-neutral-600);">notifications</mat-icon>
-                <span style="position: absolute; top: 2px; right: 2px; width: 10px; height: 10px; background: var(--color-error-500); border-radius: var(--radius-full); border: 2px solid white;">
-                </span>
-              </div>
-              <div style="position: relative; display: inline-flex;">
-                <mat-icon style="font-size: 32px; width: 32px; height: 32px; color: var(--color-neutral-600);">message</mat-icon>
-                <span style="position: absolute; top: 2px; right: 2px; width: 10px; height: 10px; background: var(--color-primary-500); border-radius: var(--radius-full); border: 2px solid white;">
-                </span>
-              </div>
-            </div>
-            <div style="margin-top: 12px; font-size: 14px; color: var(--color-neutral-600);">
-              Use when you only need to indicate presence, not quantity
-            </div>
-          </div>
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Sémantique générique</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <ds-badge status="success">Succès</ds-badge>
+          <ds-badge status="warning">Attention</ds-badge>
+          <ds-badge status="error">Erreur</ds-badge>
+          <ds-badge status="info">Info</ds-badge>
+          <ds-badge status="neutral">Neutre</ds-badge>
         </div>
       </div>
     `,
   }),
 };
 
-export const Tags: Story = {
+export const WithIcons: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Tags & Chips</h2>
-        
-        <div style="display: grid; gap: 32px;">
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Basic Tags</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <mat-chip-set>
-                <mat-chip>JavaScript</mat-chip>
-                <mat-chip>TypeScript</mat-chip>
-                <mat-chip>Angular</mat-chip>
-                <mat-chip>RxJS</mat-chip>
-                <mat-chip>Material</mat-chip>
-              </mat-chip-set>
-            </div>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Removable Tags</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <mat-chip-set>
-                <mat-chip>
-                  Paris
-                  <button matChipRemove aria-label="Remove Paris">
-                    <mat-icon>cancel</mat-icon>
-                  </button>
-                </mat-chip>
-                <mat-chip>
-                  Lyon
-                  <button matChipRemove aria-label="Remove Lyon">
-                    <mat-icon>cancel</mat-icon>
-                  </button>
-                </mat-chip>
-                <mat-chip>
-                  Marseille
-                  <button matChipRemove aria-label="Remove Marseille">
-                    <mat-icon>cancel</mat-icon>
-                  </button>
-                </mat-chip>
-              </mat-chip-set>
-            </div>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Colored Tags</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--color-primary-500); color: white; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Primary
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--color-secondary-500); color: white; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Secondary
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--color-success-500); color: white; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Success
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--color-warning-500); color: white; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Warning
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--color-error-500); color: white; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Error
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Outlined Tags</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1px solid var(--color-primary-500); color: var(--color-primary-700); border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Primary
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1px solid var(--color-secondary-500); color: var(--color-secondary-700); border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Secondary
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1px solid var(--color-success-500); color: var(--color-success-700); border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-                Success
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `,
-  }),
-};
-
-export const BadgeSizes: Story = {
-  render: () => ({
-    template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Badge Sizes</h2>
-        
-        <div style="display: grid; gap: 24px;">
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Small</h3>
-            <span style="display: inline-flex; align-items: center; padding: 4px 8px; background: var(--color-primary-100); color: var(--color-primary-800); border-radius: var(--radius-md); font-size: 11px; font-weight: 500;">
-              Small Badge
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Badges avec icône DS</h2>
+        <p style="color:var(--ds-text-muted);font-size:14px;margin-bottom:16px;">Désactiver le point intégré : showDot=false</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+          <ds-badge status="success" [showDot]="false">
+            <span style="display:inline-flex;align-items:center;gap:6px;">
+              <ds-icon name="check" [size]="16"></ds-icon> Vérifié
             </span>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Medium (Default)</h3>
-            <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: var(--color-primary-100); color: var(--color-primary-800); border-radius: var(--radius-md); font-size: 13px; font-weight: 500;">
-              Medium Badge
+          </ds-badge>
+          <ds-badge status="warning" [showDot]="false">
+            <span style="display:inline-flex;align-items:center;gap:6px;">
+              <ds-icon name="calendar" [size]="16"></ds-icon> En attente
             </span>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Large</h3>
-            <span style="display: inline-flex; align-items: center; padding: 8px 16px; background: var(--color-primary-100); color: var(--color-primary-800); border-radius: var(--radius-lg); font-size: 14px; font-weight: 500;">
-              Large Badge
+          </ds-badge>
+          <ds-badge status="info" [showDot]="false">
+            <span style="display:inline-flex;align-items:center;gap:6px;">
+              <ds-icon name="star" [size]="16"></ds-icon> À la une
             </span>
+          </ds-badge>
+        </div>
+      </div>
+    `,
+  }),
+};
+
+export const IconCounts: Story = {
+  render: () => ({
+    template: `
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Compteurs sur icônes</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:center;">
+          <div style="position:relative;display:inline-flex;">
+            <ds-icon name="mail" [size]="24" style="color:var(--ds-text-muted)"></ds-icon>
+            <span style="position:absolute;top:-6px;right:-8px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:var(--ds-error);color:var(--ds-text-inverse);border-radius:var(--ds-radius-pill);font-size:11px;font-weight:700;padding:0 6px;">5</span>
+          </div>
+          <div style="position:relative;display:inline-flex;">
+            <ds-icon name="tasks" [size]="24" style="color:var(--ds-text-muted)"></ds-icon>
+            <span style="position:absolute;top:-6px;right:-8px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:var(--ds-marine);color:var(--ds-text-inverse);border-radius:var(--ds-radius-pill);font-size:11px;font-weight:700;padding:0 6px;">12</span>
+          </div>
+          <div style="position:relative;display:inline-flex;">
+            <ds-icon name="building" [size]="24" style="color:var(--ds-text-muted)"></ds-icon>
+            <span style="position:absolute;top:0;right:0;width:10px;height:10px;background:var(--ds-error);border-radius:50%;border:2px solid var(--ds-surface);"></span>
           </div>
         </div>
       </div>
@@ -307,66 +113,45 @@ export const BadgeSizes: Story = {
   }),
 };
 
-export const CodeExamples: Story = {
+export const FilterChips: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Code Examples</h2>
-        
-        <div style="display: grid; gap: 24px;">
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">HTML - Status Badge</h3>
-            <pre style="background: var(--color-neutral-50); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 13px; line-height: 1.6;"><code>&lt;span class="badge badge--success"&gt;
-  Active
-&lt;/span&gt;
-
-&lt;!-- CSS --&gt;
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  border-radius: var(--radius-full);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.badge--success {
-  background: var(--color-success-100);
-  color: var(--color-success-800);
-}</code></pre>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">HTML - Count Badge</h3>
-            <pre style="background: var(--color-neutral-50); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 13px; line-height: 1.6;"><code>&lt;div class="icon-with-badge"&gt;
-  &lt;mat-icon&gt;notifications&lt;/mat-icon&gt;
-  &lt;span class="count-badge"&gt;5&lt;/span&gt;
-&lt;/div&gt;
-
-&lt;!-- CSS --&gt;
-.icon-with-badge {
-  position: relative;
-  display: inline-flex;
-}
-
-.count-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-error-500);
-  color: white;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 600;
-  padding: 0 6px;
-}</code></pre>
-          </div>
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Filtres (ds-filter-chip)</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <ds-filter-chip [active]="true">Tous</ds-filter-chip>
+          <ds-filter-chip>Nouveaux</ds-filter-chip>
+          <ds-filter-chip [count]="4">En cours</ds-filter-chip>
+          <ds-filter-chip>Gagnés</ds-filter-chip>
         </div>
+      </div>
+    `,
+  }),
+};
+
+export const Sizes: Story = {
+  render: () => ({
+    template: `
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Tailles ds-badge</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+          <ds-badge status="new" size="sm">SM</ds-badge>
+          <ds-badge status="new" size="md">MD</ds-badge>
+        </div>
+      </div>
+    `,
+  }),
+};
+
+export const UsageSnippet: Story = {
+  render: () => ({
+    template: `
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 16px;">Exemple Angular</h2>
+        <pre style="background:var(--ds-surface-2);padding:16px;border-radius:var(--ds-radius-md);overflow-x:auto;font-family:monospace;font-size:13px;line-height:1.55;border:1px solid var(--ds-divider);"><code>&lt;ds-badge status="won" size="sm"&gt;Gagné&lt;/ds-badge&gt;
+&lt;ds-badge status="success" [showDot]="false"&gt;
+  &lt;ds-icon name="check" [size]="16" /&gt; OK
+&lt;/ds-badge&gt;</code></pre>
       </div>
     `,
   }),

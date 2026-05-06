@@ -8,7 +8,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction, PaginationData, GenericTableComponent } from '../../components/generic-table.component';
-import { ActionButtonConfig, EmptyStateComponent } from '../../components/empty-state.component';
+import type { ActionButtonConfig } from '../../components/empty-state-actions.types';
 import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
@@ -29,7 +29,6 @@ import { DossierFilterApiService, DossierFilterRequest, FilterCondition } from '
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
-import { SkeletonLoaderComponent } from '../../components/skeleton-loader.component';
 import { KanbanBoardComponent } from '../../components/kanban-board.component';
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -41,6 +40,7 @@ import { DsAvatarComponent }      from '../../design-system/primitives/ds-avatar
 import { DsBadgeComponent, DsBadgeStatus } from '../../design-system/primitives/ds-badge/ds-badge.component';
 import { DsEmptyStateComponent }  from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
 import { DsSkeletonComponent }    from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DS_CHART_FALLBACK_HEX } from '../../design-system/chart-ds-colors';
 
 interface AppliedFilter {
   key: string;
@@ -96,11 +96,14 @@ export class DossiersComponent implements OnInit {
   ];
 
   getDossierBadgeStatus(status: string): DsBadgeStatus {
-    const map: Record<string, DsBadgeStatus> = {
-      NEW: 'new', QUALIFICATION: 'qualification', RDV: 'rdv',
-      WON: 'won', LOST: 'lost', ARCHIVED: 'archived',
-    };
-    return (map[status] as DsBadgeStatus) ?? 'neutral';
+    const normalized = status === 'QUALIFICATION' ? DossierStatus.QUALIFYING : status;
+    if ((Object.values(DossierStatus) as string[]).includes(normalized)) {
+      return this.dossierStatusToDsBadge(normalized as DossierStatus);
+    }
+    if (status === 'ARCHIVED') {
+      return 'archived';
+    }
+    return 'neutral';
   }
 
   onStatusFilterChange(value: string): void {
@@ -824,21 +827,26 @@ export class DossiersComponent implements OnInit {
   }
 
   getStatusBadgeClass(status: DossierStatus): string {
+    const variant = this.dossierStatusToDsBadge(status);
+    return `ds-badge ds-badge--md ds-badge--no-dot ds-badge--${variant}`;
+  }
+
+  private dossierStatusToDsBadge(status: DossierStatus): DsBadgeStatus {
     switch (status) {
       case DossierStatus.NEW:
-        return 'badge-status badge-new';
+        return 'new';
       case DossierStatus.QUALIFYING:
-        return 'badge-status badge-qualifying';
+        return 'qualification';
       case DossierStatus.QUALIFIED:
-        return 'badge-status badge-qualified';
+        return 'success';
       case DossierStatus.APPOINTMENT:
-        return 'badge-status badge-appointment';
+        return 'rdv';
       case DossierStatus.WON:
-        return 'badge-status badge-won';
+        return 'won';
       case DossierStatus.LOST:
-        return 'badge-status badge-lost';
+        return 'lost';
       default:
-        return 'badge-status';
+        return 'neutral';
     }
   }
 
@@ -1070,8 +1078,8 @@ export class DossiersComponent implements OnInit {
     const exportConfig = {
       title: 'Liste des Dossiers',
       filename: 'dossiers',
-      primaryColor: '#2c5aa0',
-      secondaryColor: '#e67e22'
+      primaryColor: DS_CHART_FALLBACK_HEX['--ds-marine'],
+      secondaryColor: DS_CHART_FALLBACK_HEX['--ds-primary'],
     };
 
     this.dialog.open(ExportProgressDialogComponent, {

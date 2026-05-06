@@ -13,7 +13,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
@@ -38,7 +37,6 @@ import { FilterPresetService } from '../../services/filter-preset.service';
     MatButtonModule,
     MatChipsModule,
     MatMenuModule,
-    MatCardModule,
     MatDialogModule,
   ],
 })
@@ -69,7 +67,6 @@ class GenericTableStubComponent {
     MatButtonModule,
     MatChipsModule,
     MatMenuModule,
-    MatCardModule,
     MatDialogModule,
   ],
 })
@@ -96,7 +93,6 @@ class EmptyStateStubComponent {
     MatButtonModule,
     MatChipsModule,
     MatMenuModule,
-    MatCardModule,
     MatDialogModule,
   ],
 })
@@ -191,7 +187,6 @@ describe('AnnoncesComponent', () => {
         MatButtonModule,
         MatChipsModule,
         MatMenuModule,
-        MatCardModule,
         MatDialogModule,
         AnnoncesComponent,
         GenericTableStubComponent,

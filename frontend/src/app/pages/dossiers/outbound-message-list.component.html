@@ -25,10 +25,9 @@
   }
 
   @if (!loading && messages.length === 0 && !error) {
-    <app-empty-state
-      [context]="EmptyStateContext.NO_MESSAGES"
-      [isNewUser]="true">
-    </app-empty-state>
+    <ds-empty-state
+      [title]="messagesEmptyTitle"
+      [description]="messagesEmptyDescription" />
   }
 
   @if (messages.length > 0) {

@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction, GenericTableComponent } from '../../components/generic-table.component';
-import { ActionButtonConfig, EmptyStateComponent } from '../../components/empty-state.component';
+import type { ActionButtonConfig } from '../../components/empty-state-actions.types';
 import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PriceFormatPipe } from '../../pipes/price-format.pipe';
@@ -24,6 +24,7 @@ import { DsButtonComponent }      from '../../design-system/primitives/ds-button
 import { DsBadgeComponent, DsBadgeStatus } from '../../design-system/primitives/ds-badge/ds-badge.component';
 import { DsEmptyStateComponent }  from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
 import { DsSkeletonComponent }    from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DS_CHART_FALLBACK_HEX } from '../../design-system/chart-ds-colors';
 
 interface AppliedFilter {
   key: string;
@@ -183,10 +184,10 @@ export class AnnoncesComponent implements OnInit {
       format: (value: unknown) => {
         const status = value as string;
         if (!status) return '<span class="text-gray-400">-</span>';
-        let badgeClass = 'badge-status';
-        if (status === 'SAIN') badgeClass += ' badge-active';
-        else if (status === 'SUSPECT') badgeClass += ' badge-paused';
-        else if (status === 'FRAUDULEUX') badgeClass += ' badge-archived';
+        let badgeClass = 'ds-badge ds-badge--md ds-badge--no-dot';
+        if (status === 'SAIN') badgeClass += ' ds-badge--success';
+        else if (status === 'SUSPECT') badgeClass += ' ds-badge--warning';
+        else if (status === 'FRAUDULEUX') badgeClass += ' ds-badge--error';
 
         const tooltipText = "Évaluation combinée basée sur la détection d\\'anomalies de prix par le modèle ML de fraud-service et l\\'analyse sémantique TF-IDF des textes similaires par dupli-service.";
 
@@ -532,19 +533,23 @@ export class AnnoncesComponent implements OnInit {
   }
 
   getStatusBadgeClass(status: AnnonceStatus): string {
+    const variant = this.annonceStatusToDsBadge(status);
+    return `ds-badge ds-badge--md ds-badge--no-dot ds-badge--${variant}`;
+  }
+
+  private annonceStatusToDsBadge(status: AnnonceStatus): DsBadgeStatus {
     switch (status) {
       case AnnonceStatus.PUBLISHED:
-        return 'badge-status badge-active';
       case AnnonceStatus.ACTIVE:
-        return 'badge-status badge-active';
+        return 'active';
       case AnnonceStatus.PAUSED:
-        return 'badge-status badge-paused';
+        return 'paused';
       case AnnonceStatus.DRAFT:
-        return 'badge-status badge-draft';
+        return 'draft';
       case AnnonceStatus.ARCHIVED:
-        return 'badge-status badge-archived';
+        return 'archived';
       default:
-        return 'badge-status';
+        return 'neutral';
     }
   }
 
@@ -643,8 +648,8 @@ export class AnnoncesComponent implements OnInit {
     const exportConfig = {
       title: 'Liste des Annonces',
       filename: 'annonces',
-      primaryColor: '#2c5aa0',
-      secondaryColor: '#e67e22'
+      primaryColor: DS_CHART_FALLBACK_HEX['--ds-marine'],
+      secondaryColor: DS_CHART_FALLBACK_HEX['--ds-primary'],
     };
 
     this.dialog.open(ExportProgressDialogComponent, {

@@ -10,8 +10,8 @@ import { MatInput } from '@angular/material/input';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatCard, MatCardContent } from '@angular/material/card';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsCardComponent } from '../design-system';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 export interface FilterCondition {
   field: string;
@@ -42,7 +42,7 @@ export interface FilterOperator {
     selector: 'app-advanced-filters',
     templateUrl: './advanced-filters.component.html',
     styleUrls: ['./advanced-filters.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, MatButtonToggleGroup, MatButtonToggle, MatFormField, MatLabel, MatSelect, MatOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatIconButton, MatIcon, MatButton, MatCard, MatCardContent, MatProgressSpinner]
+    imports: [FormsModule, ReactiveFormsModule, MatButtonToggleGroup, MatButtonToggle, MatFormField, MatLabel, MatSelect, MatOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatIconButton, MatIcon, MatButton, DsCardComponent, DsSkeletonComponent]
 })
 export class AdvancedFiltersComponent implements OnInit {
   readonly fields = input<FilterField[]>([]);

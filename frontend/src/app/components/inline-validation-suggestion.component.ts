@@ -48,56 +48,56 @@ import { MatButton } from '@angular/material/button';
     `,
     styles: [`
     .suggestion-container {
-      margin-top: 8px;
-      margin-bottom: 8px;
+      margin-top: var(--ds-space-2);
+      margin-bottom: var(--ds-space-2);
     }
 
     .suggestion-card {
-      background: #e3f2fd;
-      border: 1px solid #90caf9;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background: var(--ds-marine-hl);
+      border: 1px solid var(--ds-border);
+      border-radius: var(--ds-radius-md);
+      padding: var(--ds-space-3);
+      box-shadow: var(--ds-shadow-sm);
     }
 
     .suggestion-card.high-confidence {
-      background: #e8f5e9;
-      border-color: #81c784;
+      background: var(--ds-success-hl);
+      border-color: var(--ds-success);
     }
 
     .suggestion-header {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: var(--ds-space-2);
+      margin-bottom: var(--ds-space-3);
     }
 
     .suggestion-icon {
-      color: #1976d2;
+      color: var(--ds-marine);
       font-size: 20px;
       width: 20px;
       height: 20px;
     }
 
     .high-confidence .suggestion-icon {
-      color: #43a047;
+      color: var(--ds-success);
     }
 
     .suggestion-reason {
       font-size: 13px;
       font-weight: 500;
-      color: #1565c0;
+      color: var(--ds-marine);
     }
 
     .high-confidence .suggestion-reason {
-      color: #2e7d32;
+      color: var(--ds-success);
     }
 
     .suggestion-content {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: var(--ds-space-3);
+      margin-bottom: var(--ds-space-3);
       flex-wrap: wrap;
     }
 
@@ -110,32 +110,32 @@ import { MatButton } from '@angular/material/button';
     .label {
       display: block;
       font-size: 11px;
-      color: #666;
-      margin-bottom: 4px;
+      color: var(--ds-text-muted);
+      margin-bottom: var(--ds-space-1);
       font-weight: 500;
     }
 
     .value {
       display: block;
       font-size: 14px;
-      padding: 6px 8px;
-      background: #fff;
-      border-radius: 4px;
-      border: 1px solid #e0e0e0;
+      padding: 6px var(--ds-space-2);
+      background: var(--ds-surface);
+      border-radius: var(--ds-radius-sm);
+      border: 1px solid var(--ds-divider);
     }
 
     .value.suggested {
-      border-color: #1976d2;
-      background: #fff;
+      border-color: var(--ds-marine);
+      background: var(--ds-surface);
       font-weight: 500;
     }
 
     .high-confidence .value.suggested {
-      border-color: #43a047;
+      border-color: var(--ds-success);
     }
 
     .arrow-icon {
-      color: #757575;
+      color: var(--ds-text-muted);
       font-size: 20px;
       width: 20px;
       height: 20px;
@@ -144,7 +144,7 @@ import { MatButton } from '@angular/material/button';
 
     .suggestion-actions {
       display: flex;
-      gap: 8px;
+      gap: var(--ds-space-2);
       justify-content: flex-end;
     }
 
@@ -159,7 +159,7 @@ import { MatButton } from '@angular/material/button';
       font-size: 16px;
       width: 16px;
       height: 16px;
-      margin-right: 4px;
+      margin-right: var(--ds-space-1);
     }
 
     @media (max-width: 600px) {

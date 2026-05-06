@@ -1,10 +1,10 @@
 /* ─── HERO ─── */
 .vz-hero {
-  background: #0d2c4a;
+  background: var(--ds-marine);
   padding-block: clamp(4rem, 10vw, 7rem);
   position: relative;
   overflow: hidden;
-  color: white;
+  color: var(--ds-text-inverse);
 }
 
 .vz-hero-bg {
@@ -22,76 +22,76 @@
 .vz-hero-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: var(--at-space-2);
-  font-size: var(--at-text-xs);
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-xs);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--at-color-primary);
+  color: var(--ds-primary);
   background: oklch(1 0 0 / 0.06);
-  padding: var(--at-space-2) var(--at-space-4);
-  border-radius: var(--at-radius-full);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  border-radius: var(--ds-radius-pill);
   border: 1px solid oklch(1 0 0 / 0.1);
-  margin-bottom: var(--at-space-6);
+  margin-bottom: var(--ds-space-6);
 }
 
 .vz-hero-title {
-  font-family: var(--at-font-display);
-  font-size: var(--at-text-3xl);
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-3xl);
   font-weight: 700;
   color: white;
   line-height: 1.1;
-  margin-bottom: var(--at-space-6);
+  margin-bottom: var(--ds-space-6);
   max-width: 20ch;
 }
 
 .vz-hero-title em {
   font-style: italic;
-  color: var(--at-color-primary);
+  color: var(--ds-primary);
 }
 
 .vz-hero-lead {
-  font-size: var(--at-text-lg);
+  font-size: var(--ds-text-lg);
   color: oklch(1 0 0 / 0.65);
   max-width: 50ch;
   line-height: 1.7;
-  margin-bottom: var(--at-space-8);
+  margin-bottom: var(--ds-space-8);
 }
 
 .vz-hero-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--at-space-4);
+  gap: var(--ds-space-4);
   align-items: center;
-  margin-bottom: var(--at-space-4);
+  margin-bottom: var(--ds-space-4);
 }
 
 .vz-hero-note {
-  font-size: var(--at-text-xs);
+  font-size: var(--ds-text-xs);
   color: oklch(1 0 0 / 0.35);
-  margin-bottom: var(--at-space-12);
+  margin-bottom: var(--ds-space-12);
 }
 
 .vz-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--at-space-8);
-  padding-top: var(--at-space-8);
+  gap: var(--ds-space-8);
+  padding-top: var(--ds-space-8);
   border-top: 1px solid oklch(1 0 0 / 0.1);
 }
 
 .vz-stat-value {
-  font-family: var(--at-font-display);
-  font-size: var(--at-text-2xl);
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
   font-weight: 700;
   color: white;
   line-height: 1;
 }
 
 .vz-stat-label {
-  font-size: var(--at-text-xs);
+  font-size: var(--ds-text-xs);
   color: oklch(1 0 0 / 0.5);
-  margin-top: var(--at-space-1);
+  margin-top: var(--ds-space-1);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -100,62 +100,62 @@
 .vz-profiles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--at-space-6);
+  gap: var(--ds-space-6);
 }
 
 .vz-profile-card {
   display: block;
-  background: var(--at-color-surface);
-  border: 1.5px solid var(--at-color-border);
-  border-radius: var(--at-radius-xl);
-  padding: var(--at-space-8);
+  background: var(--ds-surface);
+  border: 1.5px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  padding: var(--ds-space-8);
   text-decoration: none;
-  transition: all var(--at-transition-med);
+  transition: all var(--ds-transition-med);
   cursor: pointer;
 }
 
 .vz-profile-card:hover {
-  border-color: var(--at-color-primary-highlight);
-  box-shadow: var(--at-shadow-md);
+  border-color: var(--ds-primary-hl);
+  box-shadow: var(--ds-shadow-md);
   transform: translateY(-2px);
 }
 
 .vz-profile-icon {
   width: 52px;
   height: 52px;
-  border-radius: var(--at-radius-lg);
-  background: var(--at-color-marine);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-marine);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  margin-bottom: var(--at-space-5);
+  margin-bottom: var(--ds-space-5);
 }
 
 .vz-profile-card h3 {
-  font-family: var(--at-font-display);
-  font-size: var(--at-text-lg);
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-lg);
   font-weight: 700;
-  color: var(--at-color-text);
-  margin-bottom: var(--at-space-3);
+  color: var(--ds-text);
+  margin-bottom: var(--ds-space-3);
 }
 
 .vz-profile-card p {
-  font-size: var(--at-text-sm);
-  color: var(--at-color-text-muted);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-muted);
   line-height: 1.7;
-  margin-bottom: var(--at-space-5);
+  margin-bottom: var(--ds-space-5);
   max-width: none;
 }
 
 .vz-profile-link {
-  font-size: var(--at-text-sm);
+  font-size: var(--ds-text-sm);
   font-weight: 600;
-  color: var(--at-color-primary);
+  color: var(--ds-primary);
 }
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 600px) {
   .vz-hero-actions { flex-direction: column; align-items: flex-start; }
-  .vz-stats { gap: var(--at-space-6); }
+  .vz-stats { gap: var(--ds-space-6); }
 }

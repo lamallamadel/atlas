@@ -3,8 +3,8 @@ import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag, 
 import { DossierResponse, DossierStatus, DossierApiService } from '../services/dossier-api.service';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { DatePipe } from '@angular/common';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface KanbanColumn {
   id: DossierStatus;
@@ -19,7 +19,7 @@ interface KanbanColumn {
     selector: 'app-kanban-board',
     templateUrl: './kanban-board.component.html',
     styleUrls: ['./kanban-board.component.css'],
-    imports: [MatIcon, CdkDropList, CdkDrag, CdkDragHandle, CdkDragPlaceholder, MatProgressSpinner, DatePipe]
+    imports: [MatIcon, DsSkeletonComponent, CdkDropList, CdkDrag, CdkDragHandle, CdkDragPlaceholder, DatePipe]
 })
 export class KanbanBoardComponent implements OnInit, OnChanges {
   readonly dossiers = input<DossierResponse[]>([]);

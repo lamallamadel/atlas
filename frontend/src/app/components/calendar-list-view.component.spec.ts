@@ -3,7 +3,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { LayoutModule } from '@angular/cdk/layout';
@@ -26,7 +25,6 @@ describe('CalendarListViewComponent', () => {
         MatDialogModule,
         MatIconModule,
         MatChipsModule,
-        MatProgressSpinnerModule,
         MatTooltipModule,
         MatButtonModule,
         LayoutModule,

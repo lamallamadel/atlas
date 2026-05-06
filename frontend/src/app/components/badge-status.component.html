@@ -1,10 +1,12 @@
-<mat-chip 
-  [ngClass]="[getStatusClass(), shouldPulse() ? 'badge-pulse' : '']"
+<ds-badge
+  [status]="getDsBadgeStatus()"
+  size="md"
+  [showDot]="false"
+  [pulse]="shouldPulse()"
   [matTooltip]="getStatusDescription()"
   matTooltipPosition="above"
-  class="badge-chip"
   role="status"
   [attr.aria-label]="getStatusLabel() + ': ' + getStatusDescription()">
-  <mat-icon class="badge-icon" aria-hidden="true">{{ getStatusIcon() }}</mat-icon>
-  <span class="badge-label">{{ getStatusLabel() }}</span>
-</mat-chip>
+  <mat-icon class="app-badge-status__icon" aria-hidden="true">{{ getStatusIcon() }}</mat-icon>
+  <span class="app-badge-status__label">{{ getStatusLabel() }}</span>
+</ds-badge>

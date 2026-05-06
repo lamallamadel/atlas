@@ -71,11 +71,11 @@
       @if (selectedTransition) {
         <form [formGroup]="transitionForm" class="rule-form">
           <h3>Configuration de la Transition</h3>
-          <mat-card class="form-section">
-            <mat-card-header>
-              <mat-card-title>Informations de base</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
+          <ds-card class="form-section" [pad]="false" [elevation]="'xs'">
+            <div class="trf-section-header">
+              <h4 class="trf-section-title">Informations de base</h4>
+            </div>
+            <div class="trf-section-body">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>De (statut)</mat-label>
                 <input matInput formControlName="fromStatus" readonly>
@@ -89,13 +89,13 @@
                 <input matInput formControlName="label" placeholder="Ex: Approuver le dossier">
                 <mat-icon matSuffix>label</mat-icon>
               </mat-form-field>
-            </mat-card-content>
-          </mat-card>
-          <mat-card class="form-section">
-            <mat-card-header>
-              <mat-card-title>Champs Requis</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
+            </div>
+          </ds-card>
+          <ds-card class="form-section" [pad]="false" [elevation]="'xs'">
+            <div class="trf-section-header">
+              <h4 class="trf-section-title">Champs Requis</h4>
+            </div>
+            <div class="trf-section-body">
               <div class="chips-container">
                 <mat-chip-listbox>
                   @for (field of requiredFieldsArray.controls; track field; let i = $index) {
@@ -121,13 +121,13 @@
                 </mat-form-field>
               </div>
               <p class="hint">Les champs requis doivent être remplis avant d'effectuer cette transition.</p>
-            </mat-card-content>
-          </mat-card>
-          <mat-card class="form-section">
-            <mat-card-header>
-              <mat-card-title>Permissions</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
+            </div>
+          </ds-card>
+          <ds-card class="form-section" [pad]="false" [elevation]="'xs'">
+            <div class="trf-section-header">
+              <h4 class="trf-section-title">Permissions</h4>
+            </div>
+            <div class="trf-section-body">
               <div class="chips-container">
                 <mat-chip-listbox>
                   @for (role of allowedRolesArray.controls; track role; let i = $index) {
@@ -153,13 +153,13 @@
                 </mat-form-field>
               </div>
               <p class="hint">Seuls les utilisateurs avec ces rôles pourront effectuer cette transition.</p>
-            </mat-card-content>
-          </mat-card>
-          <mat-card class="form-section">
-            <mat-card-header>
-              <mat-card-title>Options Avancées</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
+            </div>
+          </ds-card>
+          <ds-card class="form-section" [pad]="false" [elevation]="'xs'">
+            <div class="trf-section-header">
+              <h4 class="trf-section-title">Options Avancées</h4>
+            </div>
+            <div class="trf-section-body">
               <mat-slide-toggle formControlName="requiresApproval" color="primary">
                 <div class="toggle-label">
                   <span>Nécessite une approbation</span>
@@ -175,8 +175,8 @@
                 placeholder="Ex: score >= 80 AND leadSource === 'REFERRAL'"></textarea>
                 <mat-icon matSuffix>code</mat-icon>
               </mat-form-field>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </ds-card>
           <div class="form-actions">
             <button
               mat-raised-button

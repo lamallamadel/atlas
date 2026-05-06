@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BadgeStatusComponent } from './badge-status.component';
@@ -10,14 +9,8 @@ describe('BadgeStatusComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [
-        MatChipsModule,
-        MatIconModule,
-        MatTooltipModule,
-        BadgeStatusComponent
-    ]
-})
-    .compileComponents();
+      imports: [MatIconModule, MatTooltipModule, BadgeStatusComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(BadgeStatusComponent);
     component = fixture.componentInstance;
@@ -78,15 +71,21 @@ describe('BadgeStatusComponent', () => {
     expect(component.shouldPulse()).toBe(true);
   });
 
-  it('should return correct status class for annonce', () => {
+  it('should map annonce DRAFT to ds-badge draft', () => {
     fixture.componentRef.setInput('status', 'DRAFT');
     fixture.componentRef.setInput('entityType', 'annonce');
-    expect(component.getStatusClass()).toContain('badge-draft');
+    expect(component.getDsBadgeStatus()).toBe('draft');
   });
 
-  it('should return correct status class for dossier', () => {
+  it('should map dossier WON to ds-badge won', () => {
     fixture.componentRef.setInput('status', 'WON');
     fixture.componentRef.setInput('entityType', 'dossier');
-    expect(component.getStatusClass()).toContain('badge-won');
+    expect(component.getDsBadgeStatus()).toBe('won');
+  });
+
+  it('should map property SOLD to ds-badge success', () => {
+    fixture.componentRef.setInput('status', 'SOLD');
+    fixture.componentRef.setInput('entityType', 'property');
+    expect(component.getDsBadgeStatus()).toBe('success');
   });
 });

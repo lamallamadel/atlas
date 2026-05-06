@@ -51,7 +51,7 @@
 }
 
 .templates-table th {
-  background: #f5f5f5;
+  background: var(--ds-bg);
   font-weight: 600;
   padding: 16px;
 }
@@ -68,7 +68,7 @@
 
 .template-description {
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .no-results {
@@ -84,13 +84,13 @@
   font-size: 64px;
   width: 64px;
   height: 64px;
-  color: #ccc;
+  color: var(--ds-border);
   margin-bottom: 16px;
 }
 
 .no-results p {
   font-size: 18px;
-  color: #666;
+  color: var(--ds-text-muted);
   margin-bottom: 24px;
 }
 
@@ -105,7 +105,7 @@
 
 .loading-state p {
   margin-top: 16px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 mat-chip {

@@ -95,7 +95,7 @@ export interface DossierAction {
     styles: [`
     .mobile-dossier-card {
       position: relative;
-      background: var(--color-neutral-0);
+      background: var(--ds-surface);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-sm);
       margin-bottom: var(--spacing-3);
@@ -128,15 +128,15 @@ export interface DossierAction {
 
     .swipe-action-left {
       right: 100%;
-      background: var(--color-error-500);
-      color: var(--color-neutral-0);
+      background: var(--ds-error);
+      color: var(--ds-text-inverse);
       border-radius: var(--radius-lg) 0 0 var(--radius-lg);
     }
 
     .swipe-action-right {
       left: 100%;
-      background: var(--color-success-500);
-      color: var(--color-neutral-0);
+      background: var(--ds-success);
+      color: var(--ds-text-inverse);
       border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
     }
 
@@ -162,14 +162,14 @@ export interface DossierAction {
       position: relative;
       z-index: 1;
       padding: var(--spacing-4);
-      background: var(--color-neutral-0);
+      background: var(--ds-surface);
       border-radius: var(--radius-lg);
     }
 
     .card-header {
       margin-bottom: var(--spacing-3);
       padding-bottom: var(--spacing-3);
-      border-bottom: var(--border-width-1) solid var(--color-neutral-200);
+      border-bottom: var(--border-width-1) solid var(--ds-divider);
     }
 
     .card-title-row {
@@ -184,7 +184,7 @@ export interface DossierAction {
       margin: 0;
       font-size: var(--font-size-lg);
       font-weight: var(--font-weight-semibold);
-      color: var(--color-neutral-900);
+      color: var(--ds-text);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -195,7 +195,7 @@ export interface DossierAction {
     .card-subtitle {
       margin: 0;
       font-size: var(--font-size-sm);
-      color: var(--color-neutral-600);
+      color: var(--ds-text-muted);
       font-weight: var(--font-weight-medium);
     }
 
@@ -211,14 +211,14 @@ export interface DossierAction {
       align-items: center;
       gap: var(--spacing-1);
       font-size: var(--font-size-xs);
-      color: var(--color-neutral-600);
+      color: var(--ds-text-muted);
     }
 
     .meta-icon {
       width: 16px;
       height: 16px;
       font-size: 16px;
-      color: var(--color-neutral-500);
+      color: var(--ds-text-muted);
     }
 
     .meta-text {
@@ -242,14 +242,13 @@ export interface DossierAction {
       padding: 0;
       border: none;
       border-radius: var(--radius-full);
-      background: var(--color-neutral-100);
-      color: var(--color-neutral-700);
+      background: var(--ds-surface-dynamic);
+      color: var(--ds-text-muted);
       cursor: pointer;
       transition: all var(--duration-fast) var(--ease-out);
     }
 
     .action-btn:hover:not(:disabled) {
-      background: var(--color-neutral-200);
       transform: scale(1.05);
     }
 
@@ -269,30 +268,30 @@ export interface DossierAction {
     }
 
     .action-call {
-      background: var(--color-success-100);
-      color: var(--color-success-700);
+      background: var(--ds-success-hl);
+      color: var(--ds-success);
     }
 
     .action-call:hover:not(:disabled) {
-      background: var(--color-success-200);
+      filter: brightness(0.97);
     }
 
     .action-message {
-      background: var(--color-info-100);
-      color: var(--color-info-700);
+      background: var(--ds-marine-hl);
+      color: var(--ds-marine);
     }
 
     .action-message:hover:not(:disabled) {
-      background: var(--color-info-200);
+      filter: brightness(0.97);
     }
 
     .action-more {
-      background: var(--color-neutral-200);
-      color: var(--color-neutral-700);
+      background: var(--ds-divider);
+      color: var(--ds-text-muted);
     }
 
     .action-more:hover:not(:disabled) {
-      background: var(--color-neutral-300);
+      filter: brightness(0.95);
     }
   `],
     imports: [SwipeGestureDirective, MatIcon, BadgeStatusComponent, DateFormatPipe, PhoneFormatPipe]

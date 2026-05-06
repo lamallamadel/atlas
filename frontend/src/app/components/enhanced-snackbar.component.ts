@@ -50,15 +50,15 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     .enhanced-snackbar-content {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 4px 8px;
+      gap: var(--ds-space-3);
+      padding: var(--ds-space-1) var(--ds-space-2);
       min-width: 344px;
       max-width: 568px;
     }
 
     .enhanced-snackbar-content.critical {
-      border-left: 4px solid #f44336;
-      padding-left: 12px;
+      border-left: 4px solid var(--ds-error);
+      padding-left: var(--ds-space-3);
     }
 
     .snackbar-icon {
@@ -74,19 +74,19 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     }
 
     .snackbar-icon.icon-success mat-icon {
-      color: #4caf50;
+      color: var(--ds-success);
     }
 
     .snackbar-icon.icon-error mat-icon {
-      color: #f44336;
+      color: var(--ds-error);
     }
 
     .snackbar-icon.icon-warning mat-icon {
-      color: #ff9800;
+      color: var(--ds-warning);
     }
 
     .snackbar-icon.icon-info mat-icon {
-      color: #2196f3;
+      color: var(--ds-marine);
     }
 
     .snackbar-message {
@@ -99,7 +99,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     .snackbar-actions {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: var(--ds-space-1);
       flex-shrink: 0;
     }
 

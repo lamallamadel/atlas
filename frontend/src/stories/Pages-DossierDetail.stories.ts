@@ -229,7 +229,7 @@ const TABS: DsTab[] = [
                     <div style="font-size:11px;color:var(--ds-text-faint);margin-top:4px;">10:23 · WhatsApp</div>
                   </div>
                   <div style="align-self:flex-end;max-width:75%;">
-                    <div style="padding:8px 12px;border-radius:12px;background:var(--ds-marine);color:#fff;font-size:13px;">Bonjour Aminata, je vous propose une visite jeudi à 10h. Cela vous convient-il ?</div>
+                    <div style="padding:8px 12px;border-radius:12px;background:var(--ds-marine);color:var(--ds-text-inverse);font-size:13px;">Bonjour Aminata, je vous propose une visite jeudi à 10h. Cela vous convient-il ?</div>
                     <div style="font-size:11px;color:var(--ds-text-faint);margin-top:4px;text-align:right;">10:35 · ✓✓ Lu</div>
                   </div>
                   <div style="align-self:flex-start;max-width:75%;">

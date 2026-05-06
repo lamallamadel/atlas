@@ -28,17 +28,17 @@
 }
 
 .status-connected .status-dot {
-  background-color: #4caf50;
+  background-color: var(--ds-success);
   box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
 }
 
 .status-disconnected .status-dot {
-  background-color: #f44336;
+  background-color: var(--ds-error);
   box-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
 }
 
 .status-checking .status-dot {
-  background-color: #ff9800;
+  background-color: var(--ds-warning);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -74,15 +74,15 @@
 }
 
 .status-info mat-icon.status-connected {
-  color: #4caf50;
+  color: var(--ds-success);
 }
 
 .status-info mat-icon.status-disconnected {
-  color: #f44336;
+  color: var(--ds-error);
 }
 
 .status-info mat-icon.status-checking {
-  color: #ff9800;
+  color: var(--ds-warning);
 }
 
 .status-details {

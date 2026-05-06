@@ -47,23 +47,23 @@ interface ViewerInfo {
     .collaboration-presence {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 8px 12px;
-      background: #f5f5f5;
-      border-radius: 8px;
+      gap: var(--ds-space-4);
+      padding: var(--ds-space-2) var(--ds-space-3);
+      background: var(--ds-surface-offset);
+      border-radius: var(--ds-radius-md);
       font-size: 14px;
     }
 
     .viewers-container {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--ds-space-2);
     }
 
     .viewer-avatars {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: var(--ds-space-1);
     }
 
     .viewer-avatar {
@@ -73,12 +73,12 @@ interface ViewerInfo {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: var(--ds-text-inverse);
       font-weight: 600;
       font-size: 12px;
-      border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
+      border: 2px solid var(--ds-surface);
+      box-shadow: var(--ds-shadow-sm);
+      transition: transform var(--ds-transition-fast);
     }
 
     .viewer-avatar:hover {
@@ -89,19 +89,19 @@ interface ViewerInfo {
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: #666;
-      color: white;
+      background: var(--ds-text-muted);
+      color: var(--ds-text-inverse);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 11px;
       font-weight: 600;
-      border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border: 2px solid var(--ds-surface);
+      box-shadow: var(--ds-shadow-sm);
     }
 
     .viewer-text {
-      color: #666;
+      color: var(--ds-text-muted);
       font-weight: 500;
     }
 
@@ -109,7 +109,7 @@ interface ViewerInfo {
       display: flex;
       align-items: center;
       gap: 6px;
-      color: #666;
+      color: var(--ds-text-muted);
       font-size: 13px;
     }
 
@@ -117,7 +117,7 @@ interface ViewerInfo {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #4caf50;
+      background: var(--ds-success);
     }
 
     .activity-indicator.pulse {
@@ -209,7 +209,7 @@ export class CollaborationPresenceComponent implements OnInit, OnDestroy {
         this.viewerColors.set(userId, result.color);
       });
     }
-    return this.viewerColors.get(userId) || '#666';
+    return this.viewerColors.get(userId) || 'var(--ds-marine)';
   }
 
   private getUsernameFromCache(userId: string): string {

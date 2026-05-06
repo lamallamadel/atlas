@@ -6,7 +6,7 @@ import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { UserPreferencesService } from '../services/user-preferences.service';
 import { NotificationService } from '../services/notification.service';
 import { MatProgressBar } from '@angular/material/progress-bar';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatIcon } from '@angular/material/icon';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
@@ -14,7 +14,7 @@ import { MatHint } from '@angular/material/form-field';
 import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 import { MatDivider } from '@angular/material/list';
 import { MatButton } from '@angular/material/button';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface NotificationChannel {
   id: string;
@@ -49,6 +49,7 @@ interface NotificationExample {
 
 @Component({
     selector: 'app-notification-preferences-form',
+    standalone: true,
     templateUrl: './notification-preferences-form.component.html',
     styleUrls: ['./notification-preferences-form.component.css'],
     animations: [
@@ -63,7 +64,7 @@ interface NotificationExample {
             ])
         ])
     ],
-    imports: [FormsModule, ReactiveFormsModule, MatProgressBar, MatCard, MatCardHeader, MatCardTitle, MatIcon, MatCardSubtitle, MatCardContent, MatSlideToggle, MatSlider, MatSliderThumb, MatHint, MatRadioGroup, MatRadioButton, MatDivider, MatButton, MatProgressSpinner]
+    imports: [FormsModule, ReactiveFormsModule, MatProgressBar, DsCardComponent, DsSkeletonComponent, MatIcon, MatSlideToggle, MatSlider, MatSliderThumb, MatHint, MatRadioGroup, MatRadioButton, MatDivider, MatButton]
 })
 export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

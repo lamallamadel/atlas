@@ -1,3 +1,5 @@
+import type { UiDashboardLayout } from './dashboard-layout.model';
+
 export interface UserPreferences {
   ui?: UiPreferences;
   notifications?: NotificationPreferences;
@@ -11,27 +13,14 @@ export interface UiPreferences {
   language?: string;
   dossierViewMode?: 'list' | 'kanban';
   sidebarCollapsed?: boolean;
-  dashboardLayout?: DashboardLayout;
+  /** Grille dashboard : `x` / `y` / `cols` / `rows` (voir `DashboardWidgetConfig`) */
+  dashboardLayout?: UiDashboardLayout;
   widgetSettings?: WidgetSettings;
   density?: 'compact' | 'comfortable' | 'spacious';
   animationsEnabled?: boolean;
   defaultRoute?: string;
   syncDevices?: boolean;
   [key: string]: unknown;
-}
-
-export interface DashboardLayout {
-  widgets?: WidgetConfig[];
-  columns?: number;
-  [key: string]: unknown;
-}
-
-export interface WidgetConfig {
-  id: string;
-  type: string;
-  position: { row: number; col: number };
-  size: { width: number; height: number };
-  settings?: Record<string, unknown>;
 }
 
 export interface WidgetSettings {
@@ -125,3 +114,6 @@ export const PREFERENCE_CATEGORIES: PreferenceCategory[] = [
   'formats',
   'shortcuts'
 ];
+
+/** Réexport pour typage préférences / grille dashboard (`UiDashboardLayout` déjà utilisé ci-dessus). */
+export type { DashboardWidgetConfig } from './dashboard-layout.model';

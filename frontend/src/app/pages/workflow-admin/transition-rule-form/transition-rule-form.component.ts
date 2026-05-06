@@ -7,7 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../../../design-system';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatChipListbox, MatChip, MatChipRemove } from '@angular/material/chips';
@@ -20,7 +20,7 @@ import { MatButton } from '@angular/material/button';
     selector: 'app-transition-rule-form',
     templateUrl: './transition-rule-form.component.html',
     styleUrls: ['./transition-rule-form.component.css'],
-    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatTooltip, FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatLabel, MatInput, MatSuffix, MatChipListbox, MatChip, MatChipRemove, MatSelect, MatOption, MatSlideToggle, MatButton]
+    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatTooltip, FormsModule, ReactiveFormsModule, DsCardComponent, MatFormField, MatLabel, MatInput, MatSuffix, MatChipListbox, MatChip, MatChipRemove, MatSelect, MatOption, MatSlideToggle, MatButton]
 })
 export class TransitionRuleFormComponent implements OnInit, OnDestroy {
   workflow: WorkflowConfiguration | null = null;

@@ -4,12 +4,32 @@
   height: 100%;
 }
 
+.workflow-editor-panel-card {
+  display: block;
+}
+
+.workflow-editor-card-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ds-divider);
+}
+
+.workflow-editor-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ds-text);
+}
+
+.workflow-editor-card-body {
+  padding: 16px;
+}
+
 .editor-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: #f5f5f5;
+  background: var(--ds-bg);
   border-radius: 4px;
   margin-bottom: 16px;
 }
@@ -22,7 +42,7 @@
 .hint {
   margin: 0;
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .toolbar-actions {
@@ -35,7 +55,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #2196F3;
+  color: var(--ds-marine);
   font-weight: 500;
 }
 
@@ -49,8 +69,8 @@
 .canvas-wrapper {
   flex: 1;
   position: relative;
-  background: #fafafa;
-  border: 1px solid #e0e0e0;
+  background: var(--ds-surface-2);
+  border: 1px solid var(--ds-divider);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -74,7 +94,7 @@
 .properties-panel {
   width: 350px;
   background: white;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--ds-divider);
   border-radius: 4px;
   overflow-y: auto;
   max-height: 100%;
@@ -85,7 +105,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--ds-divider);
 }
 
 .panel-header h3 {
@@ -106,7 +126,7 @@
 
 .property-item strong {
   min-width: 120px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .transitions-list {
@@ -118,7 +138,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--ds-divider);
   border-radius: 4px;
   margin-bottom: 8px;
   cursor: pointer;
@@ -126,8 +146,8 @@
 }
 
 .transition-item:hover {
-  background: #f5f5f5;
-  border-color: #2196F3;
+  background: var(--ds-bg);
+  border-color: var(--ds-marine);
 }
 
 .transition-info {
@@ -139,7 +159,7 @@
 .empty-state {
   padding: 16px;
   text-align: center;
-  color: #999;
+  color: var(--ds-text-faint);
   font-style: italic;
 }
 

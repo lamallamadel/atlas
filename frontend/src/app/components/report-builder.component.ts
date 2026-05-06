@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag } from '@angular/cdk/drag-drop';
 import { ReportApiService, CustomReportDefinition, ReportColumn } from '../services/report-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -11,8 +11,9 @@ import { FormsModule } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/autocomplete';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { DecimalPipe, CurrencyPipe } from '@angular/common';
+import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface DimensionOption {
   id: string;
@@ -31,7 +32,7 @@ interface MetricOption {
     selector: 'app-report-builder',
     templateUrl: './report-builder.component.html',
     styleUrls: ['./report-builder.component.scss'],
-    imports: [MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, CdkDropList, CdkDrag, MatIcon, MatIconButton, MatButton, MatFormField, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatProgressSpinner, DecimalPipe, CurrencyPipe]
+    imports: [DsCardComponent, DsSkeletonComponent, CdkDropList, CdkDrag, MatIcon, MatIconButton, MatButton, MatFormField, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DecimalPipe, CurrencyPipe]
 })
 export class ReportBuilderComponent {
   availableDimensions: DimensionOption[] = [
@@ -184,7 +185,7 @@ export class ReportBuilderComponent {
               subtitle: this.reportSubtitle || `Generated on ${new Date().toLocaleDateString('fr-FR')}`,
               branding: {
                 companyName: 'CRM System',
-                primaryColor: '#428bca'
+                primaryColor: DS_CHART_FALLBACK_HEX['--ds-marine'],
               }
             },
             `${this.reportTitle.replace(/\s+/g, '_')}.pdf`

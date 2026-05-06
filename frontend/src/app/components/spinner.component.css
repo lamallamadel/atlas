@@ -93,33 +93,33 @@
 
 /* Primary */
 .spinner-primary .spinner-path {
-  stroke: var(--color-primary-500, #2c5aa0);
+  stroke: var(--ds-marine);
 }
 
 .spinner-primary .spinner-track {
-  stroke: var(--color-neutral-200, #eeeeee);
+  stroke: var(--ds-divider);
 }
 
 .spinner-primary .spinner-linear-bar {
-  background-color: var(--color-primary-500, #2c5aa0);
+  background-color: var(--ds-marine);
 }
 
 .spinner-primary .spinner-linear-track {
-  background-color: var(--color-neutral-200, #eeeeee);
+  background-color: var(--ds-divider);
 }
 
 .spinner-primary .spinner-dot {
-  background-color: var(--color-primary-500, #2c5aa0);
+  background-color: var(--ds-marine);
 }
 
 .spinner-primary .spinner-message,
 .spinner-primary .spinner-timeout-message {
-  color: var(--color-neutral-700, #616161);
+  color: var(--ds-text-muted);
 }
 
 /* White */
 .spinner-white .spinner-path {
-  stroke: var(--color-neutral-0, #ffffff);
+  stroke: var(--ds-surface);
 }
 
 .spinner-white .spinner-track {
@@ -127,7 +127,7 @@
 }
 
 .spinner-white .spinner-linear-bar {
-  background-color: var(--color-neutral-0, #ffffff);
+  background-color: var(--ds-surface);
 }
 
 .spinner-white .spinner-linear-track {
@@ -135,38 +135,38 @@
 }
 
 .spinner-white .spinner-dot {
-  background-color: var(--color-neutral-0, #ffffff);
+  background-color: var(--ds-surface);
 }
 
 .spinner-white .spinner-message,
 .spinner-white .spinner-timeout-message {
-  color: var(--color-neutral-0, #ffffff);
+  color: var(--ds-surface);
 }
 
 /* Neutral */
 .spinner-neutral .spinner-path {
-  stroke: var(--color-neutral-600, #757575);
+  stroke: var(--ds-text-muted);
 }
 
 .spinner-neutral .spinner-track {
-  stroke: var(--color-neutral-200, #eeeeee);
+  stroke: var(--ds-divider);
 }
 
 .spinner-neutral .spinner-linear-bar {
-  background-color: var(--color-neutral-600, #757575);
+  background-color: var(--ds-text-muted);
 }
 
 .spinner-neutral .spinner-linear-track {
-  background-color: var(--color-neutral-200, #eeeeee);
+  background-color: var(--ds-divider);
 }
 
 .spinner-neutral .spinner-dot {
-  background-color: var(--color-neutral-600, #757575);
+  background-color: var(--ds-text-muted);
 }
 
 .spinner-neutral .spinner-message,
 .spinner-neutral .spinner-timeout-message {
-  color: var(--color-neutral-700, #616161);
+  color: var(--ds-text-muted);
 }
 
 /* ========================================
@@ -343,7 +343,7 @@
   line-height: var(--line-height-normal, 1.5);
   font-weight: var(--font-weight-medium, 500);
   margin: 0;
-  color: var(--color-warning-700, #f57c00);
+  color: var(--ds-warning);
   animation: spinner-fade-in 0.3s ease-out;
 }
 
@@ -366,9 +366,9 @@
   padding: var(--spacing-2, 0.5rem) var(--spacing-4, 1rem);
   font-size: var(--font-size-sm, 0.875rem);
   font-weight: var(--font-weight-medium, 500);
-  color: var(--color-primary-500, #2c5aa0);
+  color: var(--ds-marine);
   background-color: transparent;
-  border: 1px solid var(--color-primary-500, #2c5aa0);
+  border: 1px solid var(--ds-marine);
   border-radius: var(--radius-md, 0.375rem);
   cursor: pointer;
   transition: background-color var(--duration-normal, 200ms) ease-in-out,
@@ -379,7 +379,7 @@
 }
 
 .spinner-cancel-btn:hover {
-  background-color: var(--color-primary-alpha-10, rgba(44, 90, 160, 0.1));
+  background-color: color-mix(in oklab, var(--ds-marine) 10%, transparent);
 }
 
 .spinner-cancel-btn:active {
@@ -387,13 +387,13 @@
 }
 
 .spinner-cancel-btn:focus {
-  outline: 2px solid var(--color-primary-500, #2c5aa0);
+  outline: 2px solid var(--ds-marine);
   outline-offset: 2px;
 }
 
 .spinner-white .spinner-cancel-btn {
-  color: var(--color-neutral-0, #ffffff);
-  border-color: var(--color-neutral-0, #ffffff);
+  color: var(--ds-surface);
+  border-color: var(--ds-surface);
 }
 
 .spinner-white .spinner-cancel-btn:hover {

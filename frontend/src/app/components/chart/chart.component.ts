@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
+import { dsChartSeriesRgba, dsRgba, resolveDsToken } from '../../design-system/chart-ds-colors';
 
 Chart.register(...registerables);
 
@@ -124,9 +125,9 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   private buildChartOptions(): any {
     const isDark = this.darkMode();
-    const gridColor = isDark ? 'rgba(158, 158, 158, 0.15)' : 'rgba(189, 189, 189, 0.15)';
-    const textColor = isDark ? '#E0E0E0' : '#616161';
-    const borderColor = isDark ? 'rgba(158, 158, 158, 0.3)' : 'rgba(189, 189, 189, 0.3)';
+    const gridColor = isDark ? dsRgba('--ds-text-faint', 0.2) : dsRgba('--ds-text', 0.07);
+    const textColor = resolveDsToken('--ds-text-muted');
+    const borderColor = dsRgba('--ds-border', isDark ? 0.55 : 0.65);
 
     const baseOptions: any = {
       responsive: true,
@@ -156,7 +157,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
           labels: {
             color: textColor,
             font: {
-              family: "'Roboto', 'Open Sans', sans-serif",
+              family: "'Plus Jakarta Sans', system-ui, sans-serif",
               size: 12,
               weight: 500
             },
@@ -169,20 +170,20 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
         },
         tooltip: {
           enabled: this.showTooltips(),
-          backgroundColor: isDark ? 'rgba(66, 66, 66, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-          titleColor: isDark ? '#FFFFFF' : '#212121',
-          bodyColor: isDark ? '#E0E0E0' : '#424242',
-          borderColor: borderColor,
+          backgroundColor: dsRgba('--ds-surface', 0.97),
+          titleColor: resolveDsToken('--ds-text'),
+          bodyColor: resolveDsToken('--ds-text-muted'),
+          borderColor,
           borderWidth: 1,
           padding: 12,
           cornerRadius: 8,
           titleFont: {
-            family: "'Roboto', 'Open Sans', sans-serif",
+            family: "'Plus Jakarta Sans', system-ui, sans-serif",
             size: 13,
             weight: 600
           },
           bodyFont: {
-            family: "'Roboto', 'Open Sans', sans-serif",
+            family: "'Plus Jakarta Sans', system-ui, sans-serif",
             size: 12,
             weight: 400
           },
@@ -228,7 +229,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
           ticks: {
             color: textColor,
             font: {
-              family: "'Roboto', 'Open Sans', sans-serif",
+              family: "'Plus Jakarta Sans', system-ui, sans-serif",
               size: 11,
               weight: 400
             },
@@ -250,7 +251,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
           ticks: {
             color: textColor,
             font: {
-              family: "'Roboto', 'Open Sans', sans-serif",
+              family: "'Plus Jakarta Sans', system-ui, sans-serif",
               size: 11,
               weight: 400
             },
@@ -269,19 +270,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private getColorForIndex(index: number, alpha = 1): string {
-    const colors = [
-      { r: 44, g: 90, b: 160 },    // primary
-      { r: 66, g: 136, b: 206 },   // secondary
-      { r: 117, g: 199, b: 127 },  // success
-      { r: 240, g: 201, b: 115 },  // warning
-      { r: 237, g: 127, b: 127 },  // error
-      { r: 125, g: 184, b: 238 },  // info
-      { r: 158, g: 158, b: 158 },  // neutral
-      { r: 171, g: 130, b: 255 }   // accent
-    ];
-
-    const color = colors[index % colors.length];
-    return `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`;
+    return dsChartSeriesRgba(index, alpha);
   }
 
   private formatValue(value: any): string {

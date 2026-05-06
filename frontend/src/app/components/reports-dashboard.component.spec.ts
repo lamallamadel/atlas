@@ -1,11 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -23,11 +21,9 @@ describe('ReportsDashboardComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [FormsModule,
-        MatCardModule,
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
-        MatProgressSpinnerModule,
         MatTableModule,
         MatDatepickerModule,
         MatNativeDateModule,

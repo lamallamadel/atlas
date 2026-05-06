@@ -7,15 +7,15 @@ import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component'
 import { NoteFormDialogComponent, NoteFormDialogResult } from './note-form-dialog.component';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatCard, MatCardHeader, MatCardAvatar, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 
 @Component({
     selector: 'app-activity-timeline',
     templateUrl: './activity-timeline.component.html',
     styleUrls: ['./activity-timeline.component.css'],
-    imports: [MatButton, MatIcon, MatProgressSpinner, MatCard, MatCardHeader, MatCardAvatar, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, MatCardContent]
+    imports: [MatButton, MatIcon, DsCardComponent, DsSkeletonComponent, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem]
 })
 export class ActivityTimelineComponent implements OnInit, OnChanges {
   readonly dossierId = input.required<number>();

@@ -13,7 +13,7 @@ h2[mat-dialog-title] {
 }
 
 .title-icon {
-  color: #1976d2;
+  color: var(--ds-marine);
   font-size: 28px;
   width: 28px;
   height: 28px;
@@ -32,23 +32,23 @@ mat-dialog-content {
 }
 
 .drop-zone {
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--ds-border);
   border-radius: 8px;
   padding: 32px;
   text-align: center;
   transition: all 0.3s ease;
-  background-color: #fafafa;
+  background-color: var(--ds-surface-2);
 }
 
 .drop-zone.dragging {
-  border-color: #1976d2;
-  background-color: #e3f2fd;
+  border-color: var(--ds-marine);
+  background-color: var(--ds-marine-hl);
   transform: scale(1.02);
 }
 
 .drop-zone.has-file {
-  border-color: #4caf50;
-  background-color: #f1f8f4;
+  border-color: var(--ds-success);
+  background-color: var(--ds-success-hl);
 }
 
 .drop-zone-empty {
@@ -62,7 +62,7 @@ mat-dialog-content {
   font-size: 72px;
   width: 72px;
   height: 72px;
-  color: #1976d2;
+  color: var(--ds-marine);
   opacity: 0.8;
 }
 
@@ -70,13 +70,13 @@ mat-dialog-content {
   margin: 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .drop-zone-subtext {
   margin: 0;
   font-size: 14px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .file-input-label {
@@ -90,7 +90,7 @@ mat-dialog-content {
 .file-hint {
   margin: 8px 0 0 0;
   font-size: 12px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .drop-zone-file {
@@ -107,7 +107,7 @@ mat-dialog-content {
   font-size: 48px;
   width: 48px;
   height: 48px;
-  color: #1976d2;
+  color: var(--ds-marine);
 }
 
 .file-info {
@@ -120,18 +120,18 @@ mat-dialog-content {
 .file-name {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
   word-break: break-word;
 }
 
 .file-size {
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
   margin-top: 4px;
 }
 
 .remove-btn {
-  color: #f44336;
+  color: var(--ds-error);
 }
 
 .strategy-section {
@@ -142,13 +142,13 @@ mat-dialog-content {
   margin: 0 0 8px 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .strategy-description {
   margin: 0 0 16px 0;
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .strategy-options {
@@ -159,18 +159,18 @@ mat-dialog-content {
 
 .strategy-option {
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--ds-divider);
   border-radius: 4px;
   transition: all 0.3s ease;
 }
 
 .strategy-option:hover {
-  background-color: #f5f5f5;
+  background-color: var(--ds-bg);
 }
 
 .strategy-option.mat-radio-button-checked {
-  border-color: #1976d2;
-  background-color: #e3f2fd;
+  border-color: var(--ds-marine);
+  background-color: var(--ds-marine-hl);
 }
 
 .option-content {
@@ -182,17 +182,17 @@ mat-dialog-content {
 .option-label {
   font-weight: 500;
   font-size: 14px;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .option-description {
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .progress-section {
   padding: 24px;
-  background-color: #f5f5f5;
+  background-color: var(--ds-bg);
   border-radius: 8px;
   text-align: center;
 }
@@ -209,7 +209,7 @@ mat-dialog-content {
   margin: 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .progress-message {
@@ -218,12 +218,12 @@ mat-dialog-content {
   justify-content: center;
   gap: 8px;
   margin-top: 16px;
-  color: #666;
+  color: var(--ds-text-muted);
   font-size: 14px;
 }
 
 .progress-icon {
-  color: #ff9800;
+  color: var(--ds-warning);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -234,7 +234,7 @@ mat-dialog-content {
 
 .results-section {
   padding: 24px;
-  background-color: #f5f5f5;
+  background-color: var(--ds-bg);
   border-radius: 8px;
 }
 
@@ -252,18 +252,18 @@ mat-dialog-content {
 }
 
 .results-icon.success {
-  color: #4caf50;
+  color: var(--ds-success);
 }
 
 .results-icon.warning {
-  color: #ff9800;
+  color: var(--ds-warning);
 }
 
 .results-title {
   margin: 0;
   font-size: 18px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .results-stats {
@@ -284,19 +284,19 @@ mat-dialog-content {
 }
 
 .stat-card.success {
-  border-left: 4px solid #4caf50;
+  border-left: 4px solid var(--ds-success);
 }
 
 .stat-card.error {
-  border-left: 4px solid #f44336;
+  border-left: 4px solid var(--ds-error);
 }
 
 .stat-card.warning {
-  border-left: 4px solid #ff9800;
+  border-left: 4px solid var(--ds-warning);
 }
 
 .stat-card.info {
-  border-left: 4px solid #2196f3;
+  border-left: 4px solid var(--ds-marine);
 }
 
 .stat-icon {
@@ -306,19 +306,19 @@ mat-dialog-content {
 }
 
 .stat-card.success .stat-icon {
-  color: #4caf50;
+  color: var(--ds-success);
 }
 
 .stat-card.error .stat-icon {
-  color: #f44336;
+  color: var(--ds-error);
 }
 
 .stat-card.warning .stat-icon {
-  color: #ff9800;
+  color: var(--ds-warning);
 }
 
 .stat-card.info .stat-icon {
-  color: #2196f3;
+  color: var(--ds-marine);
 }
 
 .stat-content {
@@ -329,13 +329,13 @@ mat-dialog-content {
 .stat-value {
   font-size: 24px;
   font-weight: 600;
-  color: #333;
+  color: var(--ds-text);
   line-height: 1;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
   margin-top: 4px;
 }
 
@@ -351,7 +351,7 @@ mat-dialog-content {
 .error-toggle {
   width: 100%;
   justify-content: flex-start;
-  color: #f44336;
+  color: var(--ds-error);
   font-weight: 500;
 }
 
@@ -359,7 +359,7 @@ mat-dialog-content {
   margin-top: 12px;
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 1px solid var(--ds-divider);
   border-radius: 4px;
   background-color: white;
 }
@@ -369,31 +369,31 @@ mat-dialog-content {
 }
 
 .errors-table th {
-  background-color: #f5f5f5;
+  background-color: var(--ds-bg);
   font-weight: 600;
-  color: #333;
+  color: var(--ds-text);
   padding: 12px;
 }
 
 .errors-table td {
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
   padding: 12px;
 }
 
 .error-row {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--ds-divider);
 }
 
 .error-row:hover {
-  background-color: #fafafa;
+  background-color: var(--ds-surface-2);
 }
 
 .field-badge {
   display: inline-block;
   padding: 4px 8px;
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: var(--ds-marine-hl);
+  color: var(--ds-marine);
   border-radius: 12px;
   font-size: 11px;
   font-weight: 500;
@@ -404,7 +404,7 @@ mat-dialog-content {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #d32f2f;
+  color: var(--ds-error);
   font-weight: 500;
 }
 
@@ -412,7 +412,7 @@ mat-dialog-content {
   font-size: 18px;
   width: 18px;
   height: 18px;
-  color: #f44336;
+  color: var(--ds-error);
 }
 
 .error-actions {
@@ -425,15 +425,15 @@ mat-dialog-content {
   gap: 8px;
   margin: 0;
   padding: 12px;
-  background-color: #fff3e0;
-  border-left: 4px solid #ff9800;
+  background-color: var(--ds-warning-hl);
+  border-left: 4px solid var(--ds-warning);
   border-radius: 4px;
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .hint-icon {
-  color: #ff9800;
+  color: var(--ds-warning);
   font-size: 20px;
   width: 20px;
   height: 20px;
@@ -442,7 +442,7 @@ mat-dialog-content {
 mat-dialog-actions {
   padding: 16px 24px;
   margin: 0;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--ds-divider);
 }
 
 @media (max-width: 768px) {

@@ -11,11 +11,39 @@ import { DsSkeletonComponent } from '../app/design-system/primitives/ds-skeleton
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
+/** Événements sur une même journée (semaine affichée = celle du calendrier interne). */
 const MOCK_EVENTS: WeekGridEvent[] = [
-  { id: '1', title: 'Visite Villa Almadies', startHour: 9, startMinute: 0, durationMinutes: 60, type: 'visit', location: 'Almadies, Dakar', color: '#0d2c4a' },
-  { id: '2', title: 'RDV Aminata Diallo', startHour: 14, startMinute: 30, durationMinutes: 45, type: 'meeting', location: 'Agence Pro Space' },
-  { id: '3', title: 'Formation équipe', startHour: 10, startMinute: 0, durationMinutes: 120, type: 'other', allDay: false },
-  { id: '4', title: 'Réunion pipeline', startHour: 16, startMinute: 0, durationMinutes: 60, type: 'meeting' },
+  {
+    id: '1',
+    title: 'Visite Villa Almadies',
+    start: new Date(2026, 4, 6, 9, 0, 0),
+    end: new Date(2026, 4, 6, 10, 0, 0),
+    type: 'appointment',
+    location: 'Almadies, Dakar',
+  },
+  {
+    id: '2',
+    title: 'RDV Aminata Diallo',
+    start: new Date(2026, 4, 6, 14, 30, 0),
+    end: new Date(2026, 4, 6, 15, 15, 0),
+    type: 'appointment',
+    location: 'Agence Pro Space',
+  },
+  {
+    id: '3',
+    title: 'Formation équipe',
+    start: new Date(2026, 4, 6, 10, 0, 0),
+    end: new Date(2026, 4, 6, 12, 0, 0),
+    type: 'task',
+    allDay: false,
+  },
+  {
+    id: '4',
+    title: 'Réunion pipeline',
+    start: new Date(2026, 4, 6, 16, 0, 0),
+    end: new Date(2026, 4, 6, 17, 0, 0),
+    type: 'task',
+  },
 ];
 
 interface MockTask {
@@ -84,7 +112,7 @@ const MOCK_TASKS: MockTask[] = [
                     </div>
                     <ds-badge [status]="t.priorityBadge" size="sm">{{ t.priorityLabel }}</ds-badge>
                     @if (t.assignee) {
-                      <div style="width:28px;height:28px;border-radius:50%;background:var(--ds-marine);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ t.assignee }}</div>
+                      <div style="width:28px;height:28px;border-radius:50%;background:var(--ds-marine);color:var(--ds-text-inverse);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ t.assignee }}</div>
                     }
                     <button style="width:32px;height:32px;border:1px solid var(--ds-divider);border-radius:6px;background:transparent;cursor:pointer;color:var(--ds-text-muted);" aria-label="Modifier">✏️</button>
                   </div>

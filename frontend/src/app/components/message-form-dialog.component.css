@@ -12,11 +12,11 @@
   gap: 12px;
   padding: 24px 24px 16px !important;
   margin: 0 !important;
-  border-bottom: 2px solid var(--color-neutral-200);
-  background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-neutral-0) 100%);
+  border-bottom: 2px solid var(--ds-divider);
+  background: linear-gradient(135deg, var(--ds-marine-hl) 0%, var(--ds-surface) 100%);
 
   mat-icon {
-    color: var(--color-primary-500);
+    color: var(--ds-marine);
     font-size: 28px;
     width: 28px;
     height: 28px;
@@ -25,7 +25,7 @@
   span {
     font-size: var(--font-size-2);
     font-weight: var(--font-weight-semibold);
-    color: var(--color-neutral-900);
+    color: var(--ds-text);
   }
 }
 
@@ -34,15 +34,15 @@
   min-height: 200px;
   max-height: 70vh;
   overflow-y: auto;
-  background: var(--color-neutral-50);
+  background: var(--ds-surface-2);
 }
 
 .elegant-dialog-actions {
   padding: 16px 24px !important;
   margin: 0 !important;
   min-height: 52px;
-  border-top: 1px solid var(--color-neutral-200);
-  background: var(--color-neutral-0);
+  border-top: 1px solid var(--ds-divider);
+  background: var(--ds-surface);
   gap: 12px;
 
   button {

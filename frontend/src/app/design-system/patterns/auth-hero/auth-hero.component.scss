@@ -24,7 +24,7 @@
     height: 36px;
     border-radius: 10px;
     background: var(--ds-marine);
-    color: white;
+    color: var(--ds-text-inverse);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -104,7 +104,7 @@
   &__hero-bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, #2c3e50 0%, var(--ds-marine) 100%);
+    background: linear-gradient(135deg, var(--ds-marine-light) 0%, var(--ds-marine) 100%);
   }
 
   &__hero-overlay {
@@ -123,7 +123,7 @@
     bottom: var(--ds-space-16);
     left: var(--ds-space-10);
     right: var(--ds-space-10);
-    color: white;
+    color: var(--ds-text-inverse);
   }
 
   &__hero-display {

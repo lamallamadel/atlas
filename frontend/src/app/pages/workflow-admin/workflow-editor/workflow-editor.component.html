@@ -49,11 +49,11 @@
         </div>
         @if (selectedNode) {
           <div class="panel-content">
-            <mat-card>
-              <mat-card-header>
-                <mat-card-title>Nœud: {{ selectedNode.label }}</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
+            <ds-card class="workflow-editor-panel-card" [pad]="false" [elevation]="'xs'">
+              <div class="workflow-editor-card-header">
+                <h3 class="workflow-editor-card-title">Nœud: {{ selectedNode.label }}</h3>
+              </div>
+              <div class="workflow-editor-card-body">
                 <div class="property-item">
                   <strong>Statut:</strong> {{ selectedNode.status }}
                 </div>
@@ -95,17 +95,17 @@
                     </div>
                   }
                 </div>
-              </mat-card-content>
-            </mat-card>
+              </div>
+            </ds-card>
           </div>
         }
         @if (selectedTransition) {
           <div class="panel-content">
-            <mat-card>
-              <mat-card-header>
-                <mat-card-title>Transition</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
+            <ds-card class="workflow-editor-panel-card" [pad]="false" [elevation]="'xs'">
+              <div class="workflow-editor-card-header">
+                <h3 class="workflow-editor-card-title">Transition</h3>
+              </div>
+              <div class="workflow-editor-card-body">
                 <div class="property-item">
                   <strong>De:</strong> {{ selectedTransition.fromStatus }}
                 </div>
@@ -145,8 +145,8 @@
                     Nécessite une approbation
                   </div>
                 }
-              </mat-card-content>
-            </mat-card>
+              </div>
+            </ds-card>
           </div>
         }
       </div>

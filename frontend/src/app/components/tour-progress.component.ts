@@ -1,16 +1,16 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { TourDefinitionService, TourDefinition } from '../services/tour-definition.service';
 import { OnboardingTourService } from '../services/onboarding-tour.service';
 import { UserPreferencesService } from '../services/user-preferences.service';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 @Component({
     selector: 'app-tour-progress',
@@ -18,11 +18,11 @@ import { UserPreferencesService } from '../services/user-preferences.service';
     imports: [
         CommonModule,
         MatButtonModule,
-        MatCardModule,
+        DsCardComponent,
         MatChipsModule,
         MatIconModule,
         MatProgressBarModule,
-        MatProgressSpinnerModule,
+        DsSkeletonComponent,
     ],
     templateUrl: './tour-progress.component.html',
     styleUrls: ['./tour-progress.component.css'],

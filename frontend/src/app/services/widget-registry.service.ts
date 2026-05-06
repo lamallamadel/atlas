@@ -1,5 +1,5 @@
 import { Injectable, Type } from '@angular/core';
-import { CardWidgetBaseComponent } from '../components/card-widget-base.component';
+import type { DashboardWidgetBase } from '../components/dashboard-widget-base';
 import { KpiWidgetComponent } from '../components/kpi-widget.component';
 import { RecentDossiersWidgetComponent } from '../components/recent-dossiers-widget.component';
 import { MyTasksWidgetComponent } from '../components/my-tasks-widget.component';
@@ -9,7 +9,7 @@ export interface WidgetMetadata {
   name: string;
   description: string;
   icon: string;
-  component: Type<CardWidgetBaseComponent>;
+  component: Type<DashboardWidgetBase>;
   defaultCols: number;
   defaultRows: number;
   minCols: number;

@@ -12,22 +12,30 @@ export type DsBadgeStatus =
   imports: [CommonModule],
   template: `
     <span [class]="classes" [attr.aria-label]="ariaLabel || null">
-      <span class="ds-badge__dot" aria-hidden="true"></span>
+      @if (showDot) {
+        <span class="ds-badge__dot" aria-hidden="true"></span>
+      }
       <ng-content></ng-content>
     </span>
   `,
-  styleUrls: ['./ds-badge.component.scss'],
 })
 export class DsBadgeComponent {
   @Input() status: DsBadgeStatus = 'neutral';
   @Input() size: 'sm' | 'md' = 'md';
   @Input() ariaLabel: string | null = null;
+  /** Affiche le point d’état (par défaut oui). Désactiver quand une icône est injectée via ng-content. */
+  @Input() showDot = true;
+  /** Animation légère pour les statuts « vivants » (nouveau, actif publié…). */
+  @Input() pulse = false;
 
   get classes(): string {
-    return [
-      'ds-badge',
-      `ds-badge--${this.status}`,
-      `ds-badge--${this.size}`,
-    ].join(' ');
+    const parts = ['ds-badge', `ds-badge--${this.status}`, `ds-badge--${this.size}`];
+    if (!this.showDot) {
+      parts.push('ds-badge--no-dot');
+    }
+    if (this.pulse) {
+      parts.push('ds-badge--pulse');
+    }
+    return parts.join(' ');
   }
 }

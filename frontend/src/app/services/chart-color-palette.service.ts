@@ -1,4 +1,10 @@
 import { Injectable } from '@angular/core';
+import {
+  colorToRgba,
+  DS_CHART_SERIES_VAR_NAMES,
+  dsRgba,
+  resolveDsToken,
+} from '../design-system/chart-ds-colors';
 
 export interface ColorPalette {
   name: string;
@@ -16,6 +22,54 @@ export interface ChartColor {
   alpha80: string;
 }
 
+/** Ordre pour graphes sur fond sombre (tons lisibles en premier). */
+const DS_CHART_DARK_SURFACE_VARS = [
+  '--ds-marine-light',
+  '--ds-primary',
+  '--ds-success',
+  '--ds-warning',
+  '--ds-error',
+  '--ds-primary-hover',
+  '--ds-marine',
+  '--ds-text-muted',
+] as const;
+
+/** Variation « vibrant » — permutation des sémantiques. */
+const DS_CHART_VIBRANT_VARS = [
+  '--ds-error',
+  '--ds-marine-light',
+  '--ds-success',
+  '--ds-warning',
+  '--ds-primary',
+  '--ds-marine',
+  '--ds-primary-hover',
+  '--ds-text-muted',
+] as const;
+
+/** Catégories métier classiques (statut / alerte). */
+const DS_CHART_CATEGORICAL_VARS = [
+  '--ds-marine',
+  '--ds-success',
+  '--ds-error',
+  '--ds-warning',
+  '--ds-marine-light',
+  '--ds-primary',
+  '--ds-primary-hover',
+  '--ds-text-muted',
+] as const;
+
+/** Surfaces « pastel » à partir des hl / neutres DS. */
+const DS_CHART_PASTEL_VARS = [
+  '--ds-marine-hl',
+  '--ds-primary-hl',
+  '--ds-success-hl',
+  '--ds-warning-hl',
+  '--ds-error-hl',
+  '--ds-primary-subtle',
+  '--ds-surface-dynamic',
+  '--ds-divider',
+] as const;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -27,161 +81,59 @@ export class ChartColorPaletteService {
   }
 
   private initializePalettes(): void {
-    this.palettes.set('default', {
-      name: 'Default',
-      colors: [
-        'rgba(44, 90, 160, 1)',    // primary
-        'rgba(66, 136, 206, 1)',   // secondary  
-        'rgba(117, 199, 127, 1)',  // success
-        'rgba(240, 201, 115, 1)',  // warning
-        'rgba(237, 127, 127, 1)',  // error
-        'rgba(125, 184, 238, 1)',  // info
-        'rgba(158, 158, 158, 1)',  // neutral
-        'rgba(171, 130, 255, 1)'   // accent
-      ],
-      alphaColors: [
-        'rgba(44, 90, 160, 0.2)',
-        'rgba(66, 136, 206, 0.2)',
-        'rgba(117, 199, 127, 0.2)',
-        'rgba(240, 201, 115, 0.2)',
-        'rgba(237, 127, 127, 0.2)',
-        'rgba(125, 184, 238, 0.2)',
-        'rgba(158, 158, 158, 0.2)',
-        'rgba(171, 130, 255, 0.2)'
-      ],
-      accessible: true,
-      wcagLevel: 'AA'
-    });
+    const alphaStandard = 0.2;
+    const alphaPastel = 0.35;
 
-    this.palettes.set('vibrant', {
-      name: 'Vibrant',
-      colors: [
-        'rgba(231, 76, 60, 1)',    // red
-        'rgba(52, 152, 219, 1)',   // blue
-        'rgba(46, 204, 113, 1)',   // green
-        'rgba(241, 196, 15, 1)',   // yellow
-        'rgba(155, 89, 182, 1)',   // purple
-        'rgba(26, 188, 156, 1)',   // turquoise
-        'rgba(230, 126, 34, 1)',   // orange
-        'rgba(149, 165, 166, 1)'   // gray
-      ],
-      alphaColors: [
-        'rgba(231, 76, 60, 0.2)',
-        'rgba(52, 152, 219, 0.2)',
-        'rgba(46, 204, 113, 0.2)',
-        'rgba(241, 196, 15, 0.2)',
-        'rgba(155, 89, 182, 0.2)',
-        'rgba(26, 188, 156, 0.2)',
-        'rgba(230, 126, 34, 0.2)',
-        'rgba(149, 165, 166, 0.2)'
-      ],
-      accessible: true,
-      wcagLevel: 'AA'
-    });
+    this.palettes.set(
+      'default',
+      this.buildDsPalette('Default', DS_CHART_SERIES_VAR_NAMES, alphaStandard, true, 'AA')
+    );
 
-    this.palettes.set('pastel', {
-      name: 'Pastel',
-      colors: [
-        'rgba(174, 214, 241, 1)',  // light blue
-        'rgba(255, 218, 193, 1)',  // light orange
-        'rgba(187, 231, 197, 1)',  // light green
-        'rgba(248, 196, 196, 1)',  // light red
-        'rgba(215, 189, 226, 1)',  // light purple
-        'rgba(250, 219, 216, 1)',  // light pink
-        'rgba(255, 243, 205, 1)',  // light yellow
-        'rgba(220, 221, 225, 1)'   // light gray
-      ],
-      alphaColors: [
-        'rgba(174, 214, 241, 0.3)',
-        'rgba(255, 218, 193, 0.3)',
-        'rgba(187, 231, 197, 0.3)',
-        'rgba(248, 196, 196, 0.3)',
-        'rgba(215, 189, 226, 0.3)',
-        'rgba(250, 219, 216, 0.3)',
-        'rgba(255, 243, 205, 0.3)',
-        'rgba(220, 221, 225, 0.3)'
-      ],
-      accessible: false,
-      wcagLevel: 'AA'
-    });
+    this.palettes.set(
+      'categorical',
+      this.buildDsPalette('Categorical', DS_CHART_CATEGORICAL_VARS, alphaStandard, true, 'AA')
+    );
 
-    this.palettes.set('dark', {
-      name: 'Dark',
-      colors: [
-        'rgba(66, 136, 206, 1)',   // light blue
-        'rgba(125, 184, 238, 1)',  // sky blue
-        'rgba(117, 199, 127, 1)',  // light green
-        'rgba(240, 201, 115, 1)',  // light yellow
-        'rgba(237, 127, 127, 1)',  // light red
-        'rgba(171, 130, 255, 1)',  // light purple
-        'rgba(255, 171, 145, 1)',  // light orange
-        'rgba(189, 189, 189, 1)'   // light gray
-      ],
-      alphaColors: [
-        'rgba(66, 136, 206, 0.2)',
-        'rgba(125, 184, 238, 0.2)',
-        'rgba(117, 199, 127, 0.2)',
-        'rgba(240, 201, 115, 0.2)',
-        'rgba(237, 127, 127, 0.2)',
-        'rgba(171, 130, 255, 0.2)',
-        'rgba(255, 171, 145, 0.2)',
-        'rgba(189, 189, 189, 0.2)'
-      ],
-      accessible: true,
-      wcagLevel: 'AA'
-    });
+    this.palettes.set(
+      'vibrant',
+      this.buildDsPalette('Vibrant', DS_CHART_VIBRANT_VARS, alphaStandard, true, 'AA')
+    );
 
+    this.palettes.set(
+      'pastel',
+      this.buildDsPalette('Pastel', DS_CHART_PASTEL_VARS, alphaPastel, false, 'AA')
+    );
+
+    this.palettes.set(
+      'dark',
+      this.buildDsPalette('Dark', DS_CHART_DARK_SURFACE_VARS, alphaStandard, true, 'AA')
+    );
+
+    const monoAnchor = colorToRgba(resolveDsToken('--ds-marine'), 1);
+    const monoColors = this.generateGradient(monoAnchor, 8);
     this.palettes.set('monochrome', {
       name: 'Monochrome',
-      colors: [
-        'rgba(44, 90, 160, 1)',    // primary-700
-        'rgba(59, 108, 179, 1)',   // primary-600
-        'rgba(66, 136, 206, 1)',   // primary-500
-        'rgba(97, 155, 217, 1)',   // primary-400
-        'rgba(158, 196, 238, 1)',  // primary-300
-        'rgba(189, 215, 245, 1)',  // primary-200
-        'rgba(220, 234, 250, 1)',  // primary-100
-        'rgba(235, 244, 253, 1)'   // primary-50
-      ],
-      alphaColors: [
-        'rgba(44, 90, 160, 0.2)',
-        'rgba(59, 108, 179, 0.2)',
-        'rgba(66, 136, 206, 0.2)',
-        'rgba(97, 155, 217, 0.2)',
-        'rgba(158, 196, 238, 0.2)',
-        'rgba(189, 215, 245, 0.2)',
-        'rgba(220, 234, 250, 0.2)',
-        'rgba(235, 244, 253, 0.2)'
-      ],
+      colors: monoColors,
+      alphaColors: monoColors.map(c => colorToRgba(c, alphaStandard)),
       accessible: true,
       wcagLevel: 'AAA'
     });
+  }
 
-    this.palettes.set('categorical', {
-      name: 'Categorical',
-      colors: [
-        'rgba(44, 90, 160, 1)',    // primary
-        'rgba(117, 199, 127, 1)',  // success
-        'rgba(237, 127, 127, 1)',  // danger
-        'rgba(240, 201, 115, 1)',  // warning
-        'rgba(125, 184, 238, 1)',  // info
-        'rgba(171, 130, 255, 1)',  // purple
-        'rgba(66, 136, 206, 1)',   // secondary
-        'rgba(158, 158, 158, 1)'   // neutral
-      ],
-      alphaColors: [
-        'rgba(44, 90, 160, 0.2)',
-        'rgba(117, 199, 127, 0.2)',
-        'rgba(237, 127, 127, 0.2)',
-        'rgba(240, 201, 115, 0.2)',
-        'rgba(125, 184, 238, 0.2)',
-        'rgba(171, 130, 255, 0.2)',
-        'rgba(66, 136, 206, 0.2)',
-        'rgba(158, 158, 158, 0.2)'
-      ],
-      accessible: true,
-      wcagLevel: 'AA'
-    });
+  private buildDsPalette(
+    name: string,
+    vars: readonly string[],
+    alpha: number,
+    accessible: boolean,
+    wcagLevel: 'AA' | 'AAA'
+  ): ColorPalette {
+    return {
+      name,
+      colors: vars.map(v => colorToRgba(resolveDsToken(v), 1)),
+      alphaColors: vars.map(v => dsRgba(v, alpha)),
+      accessible,
+      wcagLevel
+    };
   }
 
   getPalette(name: string): ColorPalette | undefined {
@@ -214,10 +166,11 @@ export class ChartColorPaletteService {
 
   getColorWithAlpha(color: string, alpha: number): string {
     const rgba = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
-    if (!rgba) return color;
-
-    const [_, r, g, b] = rgba;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    if (rgba) {
+      const [, r, g, b] = rgba;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    return colorToRgba(color, alpha);
   }
 
   getChartColor(paletteName: string, index: number): ChartColor {
@@ -242,24 +195,48 @@ export class ChartColorPaletteService {
   }
 
   getContrastColor(backgroundColor: string): string {
-    const rgba = backgroundColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-    if (!rgba) return '#212121';
+    let rgba = backgroundColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (!rgba && backgroundColor.trim().startsWith('#')) {
+      const converted = colorToRgba(backgroundColor, 1);
+      rgba = converted.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    }
+    if (!rgba) {
+      return resolveDsToken('--ds-text');
+    }
 
-    const [_, r, g, b] = rgba.map(Number);
+    const [, rs, gs, bs] = rgba;
+    const r = Number(rs);
+    const g = Number(gs);
+    const b = Number(bs);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
-    return luminance > 0.5 ? '#212121' : '#FFFFFF';
+    return luminance > 0.5 ? resolveDsToken('--ds-text') : resolveDsToken('--ds-text-inverse');
   }
 
   generateGradient(color: string, steps = 5): string[] {
-    const rgba = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-    if (!rgba) return [color];
+    let rgba = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    let r: number;
+    let g: number;
+    let b: number;
+    if (rgba) {
+      r = Number(rgba[1]);
+      g = Number(rgba[2]);
+      b = Number(rgba[3]);
+    } else {
+      const converted = colorToRgba(color, 1);
+      const m = converted.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!m) {
+        return [color];
+      }
+      r = Number(m[1]);
+      g = Number(m[2]);
+      b = Number(m[3]);
+    }
 
-    const [_, r, g, b] = rgba.map(Number);
     const gradient: string[] = [];
 
     for (let i = 0; i < steps; i++) {
-      const factor = 1 - (i / (steps - 1)) * 0.5;
+      const factor = 1 - (i / Math.max(steps - 1, 1)) * 0.5;
       const newR = Math.round(r + (255 - r) * (1 - factor));
       const newG = Math.round(g + (255 - g) * (1 - factor));
       const newB = Math.round(b + (255 - b) * (1 - factor));

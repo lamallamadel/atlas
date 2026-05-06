@@ -53,7 +53,7 @@
 
 /* Header */
 .command-header {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--ds-divider);
 }
 
 .visually-hidden {
@@ -76,7 +76,7 @@
 }
 
 .search-icon {
-  color: #666;
+  color: var(--ds-text-muted);
   font-size: 24px;
   width: 24px;
   height: 24px;
@@ -88,13 +88,13 @@
   border: none;
   outline: none;
   font-size: 16px;
-  color: #333;
+  color: var(--ds-text);
   background: transparent;
   font-family: inherit;
 }
 
 .command-input::placeholder {
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .search-spinner {
@@ -108,12 +108,12 @@
 .shortcut-hint kbd {
   display: inline-block;
   padding: 4px 8px;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  background: var(--ds-bg);
+  border: 1px solid var(--ds-divider);
   border-radius: 4px;
   font-size: 12px;
   font-family: 'Courier New', Consolas, monospace;
-  color: #666;
+  color: var(--ds-text-muted);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -130,17 +130,17 @@
 }
 
 .command-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--ds-bg);
   border-radius: 4px;
 }
 
 .command-list::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--ds-border);
   border-radius: 4px;
 }
 
 .command-list::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--ds-text-faint);
 }
 
 /* Category Header */
@@ -149,7 +149,7 @@
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  color: #666;
+  color: var(--ds-text-muted);
   letter-spacing: 0.5px;
   position: sticky;
   top: 0;
@@ -170,11 +170,11 @@
 
 .command-item:hover,
 .command-item.selected {
-  background: #f5f5f5;
+  background: var(--ds-bg);
 }
 
 .command-item.selected {
-  box-shadow: 0 0 0 2px #4CAF50;
+  box-shadow: 0 0 0 2px var(--ds-success);
 }
 
 .command-content {
@@ -185,7 +185,7 @@
 }
 
 .command-icon {
-  color: #4CAF50;
+  color: var(--ds-success);
   font-size: 24px;
   width: 24px;
   height: 24px;
@@ -200,7 +200,7 @@
 .command-label {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
   margin-bottom: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -209,7 +209,7 @@
 
 .command-description {
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -223,12 +223,12 @@
 .command-shortcut kbd {
   display: inline-block;
   padding: 3px 6px;
-  background: #f9f9f9;
-  border: 1px solid #e0e0e0;
+  background: var(--ds-surface-2);
+  border: 1px solid var(--ds-divider);
   border-radius: 3px;
   font-size: 11px;
   font-family: 'Courier New', Consolas, monospace;
-  color: #666;
+  color: var(--ds-text-muted);
   min-width: 24px;
   text-align: center;
 }
@@ -240,7 +240,7 @@
   align-items: center;
   justify-content: center;
   padding: 48px 24px;
-  color: #999;
+  color: var(--ds-text-faint);
   min-height: 200px;
 }
 
@@ -271,14 +271,14 @@
 .command-loading p {
   margin-top: 16px;
   font-size: 14px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 /* Footer */
 .command-footer {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--ds-divider);
   padding: 12px 16px;
-  background: #fafafa;
+  background: var(--ds-surface-2);
   border-radius: 0 0 12px 12px;
 }
 
@@ -294,18 +294,18 @@
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .footer-shortcut kbd {
   display: inline-block;
   padding: 2px 6px;
   background: white;
-  border: 1px solid #ddd;
+  border: 1px solid var(--ds-divider);
   border-radius: 3px;
   font-size: 11px;
   font-family: 'Courier New', Consolas, monospace;
-  color: #666;
+  color: var(--ds-text-muted);
   min-width: 20px;
   text-align: center;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -364,81 +364,81 @@
 
 /* Dark Theme Support */
 :host-context(.dark-theme) .command-palette {
-  background: #2c2c2c;
-  color: #e0e0e0;
+  background: var(--ds-text);
+  color: var(--ds-divider);
 }
 
 :host-context(.dark-theme) .command-header {
-  border-bottom-color: #444;
+  border-bottom-color: var(--ds-text-muted);
 }
 
 :host-context(.dark-theme) .search-icon {
-  color: #aaa;
+  color: var(--ds-text-faint);
 }
 
 :host-context(.dark-theme) .command-input {
-  color: #e0e0e0;
+  color: var(--ds-divider);
 }
 
 :host-context(.dark-theme) .command-input::placeholder {
-  color: #777;
+  color: var(--ds-text-muted);
 }
 
 :host-context(.dark-theme) .shortcut-hint kbd {
-  background: #3c3c3c;
-  border-color: #555;
-  color: #aaa;
+  background: var(--ds-text);
+  border-color: var(--ds-text-muted);
+  color: var(--ds-text-faint);
 }
 
 :host-context(.dark-theme) .command-category {
-  color: #aaa;
-  background: #2c2c2c;
+  color: var(--ds-text-faint);
+  background: var(--ds-text);
 }
 
 :host-context(.dark-theme) .command-item:hover,
 :host-context(.dark-theme) .command-item.selected {
-  background: #3c3c3c;
+  background: var(--ds-text);
 }
 
 :host-context(.dark-theme) .command-item.selected {
-  box-shadow: 0 0 0 2px #4CAF50;
+  box-shadow: 0 0 0 2px var(--ds-success);
 }
 
 :host-context(.dark-theme) .command-label {
-  color: #e0e0e0;
+  color: var(--ds-divider);
 }
 
 :host-context(.dark-theme) .command-description {
-  color: #aaa;
+  color: var(--ds-text-faint);
 }
 
 :host-context(.dark-theme) .command-shortcut kbd {
-  background: #3c3c3c;
-  border-color: #555;
-  color: #aaa;
+  background: var(--ds-text);
+  border-color: var(--ds-text-muted);
+  color: var(--ds-text-faint);
 }
 
 :host-context(.dark-theme) .command-empty {
-  color: #777;
+  color: var(--ds-text-muted);
 }
 
 :host-context(.dark-theme) .command-loading {
-  color: #aaa;
+  color: var(--ds-text-faint);
 }
 
 :host-context(.dark-theme) .command-footer {
-  background: #1c1c1c;
-  border-top-color: #444;
+  background: var(--ds-text);
+  border-top-color: var(--ds-text-muted);
 }
 
 :host-context(.dark-theme) .footer-shortcut {
-  color: #aaa;
+  color: var(--ds-text-faint);
 }
 
 :host-context(.dark-theme) .footer-shortcut kbd {
-  background: #2c2c2c;
-  border-color: #555;
-  color: #aaa;
+  background: var(--ds-text);
+  border-color: var(--ds-text-muted);
+  color: var(--ds-text-faint);
 }
 
 /* Accessibility */
@@ -467,13 +467,13 @@
 /* ─── Fuzzy match highlight ─────────────────────────────── */
 .command-label mark.highlight {
   background: none;
-  color: var(--color-primary-600, #2c5aa0);
+  color: var(--ds-marine);
   font-weight: 700;
   padding: 0;
 }
 
 :host-context(.dark-theme) .command-label mark.highlight {
-  color: #7eb8f7;
+  color: var(--ds-marine-light);
 }
 
 /* ─── Icon wrapper for contextual category accent ───────── */
@@ -504,8 +504,8 @@
 }
 
 .category-count {
-  background: var(--color-neutral-200, #e0e0e0);
-  color: var(--color-neutral-600, #666);
+  background: var(--ds-divider);
+  color: var(--ds-text-muted);
   font-size: 10px;
   font-weight: 600;
   padding: 1px 6px;
@@ -515,7 +515,7 @@
 
 :host-context(.dark-theme) .category-count {
   background: rgba(255, 255, 255, 0.1);
-  color: #aaa;
+  color: var(--ds-text-faint);
 }
 
 /* ─── Shortcut badge in search bar ──────────────────────── */
@@ -529,18 +529,18 @@
 
 .kbd-sep {
   font-size: 10px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 /* ─── Empty state hint ──────────────────────────────────── */
 .empty-hint {
   font-size: 12px;
-  color: #bbb;
+  color: var(--ds-border);
   margin-top: 8px !important;
 }
 
 .empty-hint em {
-  color: var(--color-primary-500, #2c5aa0);
+  color: var(--ds-marine);
   font-style: normal;
   background: rgba(44, 90, 160, 0.08);
   padding: 1px 5px;

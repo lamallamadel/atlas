@@ -6,7 +6,7 @@ import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
-import { ActionButtonConfig } from '../../components/empty-state.component';
+import type { ActionButtonConfig } from '../../components/empty-state-actions.types';
 import { DossierCreateDialogComponent } from '../dossiers/dossier-create-dialog.component';
 import { interval, Subject, takeUntil, takeWhile, BehaviorSubject, skip } from 'rxjs';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
@@ -20,6 +20,7 @@ import { DsAvatarComponent }       from '../../design-system/primitives/ds-avata
 import { DsBadgeComponent, DsBadgeStatus } from '../../design-system/primitives/ds-badge/ds-badge.component';
 import { DsEmptyStateComponent }   from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
 import { DsSkeletonComponent }     from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { colorToRgba, dsRgba, DS_CHART_FALLBACK_HEX } from '../../design-system/chart-ds-colors';
 
 type Chart = any;
 type ChartConfiguration = any;
@@ -97,11 +98,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       loading: true,
       error: '',
       icon: 'home',
-      color: '#2196f3',
+      color: DS_CHART_FALLBACK_HEX['--ds-marine'],
       chartData: [12, 19, 15, 22, 18, 25, 28],
       trend: '',
       trendValue: 0,
-      badgeColor: '#e67e22',
+      badgeColor: DS_CHART_FALLBACK_HEX['--ds-primary'],
       description: 'Propriétés disponibles'
     },
     dossiersATraiter: {
@@ -111,12 +112,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       loading: true,
       error: '',
       icon: 'person_add',
-      color: '#ff9800',
+      color: DS_CHART_FALLBACK_HEX['--ds-warning'],
       chartData: [8, 12, 10, 15, 13, 18, 20],
 
       trend: '',
       trendValue: 0,
-      badgeColor: '#4caf50',
+      badgeColor: DS_CHART_FALLBACK_HEX['--ds-success'],
       description: 'Leads en attente'
     },
     conversionWhatsApp: {
@@ -126,7 +127,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       loading: true,
       error: '',
       icon: 'connect_without_contact',
-      color: '#25D366',
+      color: DS_CHART_FALLBACK_HEX['--ds-success'],
       chartData: [4, 6, 8, 10, 15, 18, 24],
       trend: '',
       trendValue: 0
@@ -382,13 +383,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           label: card.title,
           data: card.chartData,
           borderColor: card.color,
-          backgroundColor: this.hexToRgba(card.color, 0.1),
+          backgroundColor: colorToRgba(card.color, 0.1),
           tension: 0.4,
           fill: true,
           pointRadius: 3,
           pointHoverRadius: 5,
           pointBackgroundColor: card.color,
-          pointBorderColor: '#fff',
+          pointBorderColor: DS_CHART_FALLBACK_HEX['--ds-surface'],
           pointBorderWidth: 2
         }]
       },
@@ -421,7 +422,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             display: true,
             beginAtZero: true,
             grid: {
-              color: 'rgba(0, 0, 0, 0.05)'
+              color: dsRgba('--ds-text', 0.06)
             },
             ticks: {
               font: {
@@ -440,13 +441,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     };
 
     return new Chart(canvas, config);
-  }
-
-  hexToRgba(hex: string, alpha: number): string {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   navigateToAnnoncesActives(): void {

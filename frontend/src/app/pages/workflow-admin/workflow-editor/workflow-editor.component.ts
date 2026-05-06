@@ -6,7 +6,7 @@ import { WorkflowConfiguration, WorkflowNode, TransitionRule } from '../models/w
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { WorkflowNodeComponent } from '../workflow-node/workflow-node.component';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../../../design-system';
 import { MatDivider } from '@angular/material/list';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatChipListbox, MatChip } from '@angular/material/chips';
@@ -16,7 +16,7 @@ import { DecimalPipe } from '@angular/common';
     selector: 'app-workflow-editor',
     templateUrl: './workflow-editor.component.html',
     styleUrls: ['./workflow-editor.component.css'],
-    imports: [MatIcon, MatButton, WorkflowNodeComponent, MatIconButton, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatDivider, MatTooltip, MatChipListbox, MatChip, DecimalPipe]
+    imports: [MatIcon, MatButton, WorkflowNodeComponent, MatIconButton, DsCardComponent, MatDivider, MatTooltip, MatChipListbox, MatChip, DecimalPipe]
 })
 export class WorkflowEditorComponent implements OnInit, OnDestroy {
   readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');

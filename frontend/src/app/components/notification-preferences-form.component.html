@@ -4,17 +4,17 @@
   }
 
   <!-- Channels Section -->
-  <mat-card class="preferences-card">
-    <mat-card-header>
-      <mat-card-title>
+  <ds-card class="preferences-card" [pad]="false" [elevation]="'sm'">
+    <div class="pref-card-header">
+      <h3 class="pref-card-title">
         <mat-icon>settings_input_antenna</mat-icon>
         Canaux de notification
-      </mat-card-title>
-      <mat-card-subtitle>
+      </h3>
+      <p class="pref-card-subtitle">
         Choisissez comment recevoir vos notifications ({{ getEnabledChannelsCount() }}/{{ channels.length }} actifs)
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+      </p>
+    </div>
+    <div class="pref-card-body">
       <div class="channels-grid">
         @for (channel of channels; track channel) {
           <div class="channel-item">
@@ -33,21 +33,21 @@
           </div>
         }
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 
   <!-- Notification Types Section -->
-  <mat-card class="preferences-card">
-    <mat-card-header>
-      <mat-card-title>
+  <ds-card class="preferences-card" [pad]="false" [elevation]="'sm'">
+    <div class="pref-card-header">
+      <h3 class="pref-card-title">
         <mat-icon>filter_list</mat-icon>
         Types de notification
-      </mat-card-title>
-      <mat-card-subtitle>
+      </h3>
+      <p class="pref-card-subtitle">
         Sélectionnez les événements pour lesquels vous souhaitez être notifié ({{ getEnabledTypesCount() }}/{{ notificationTypes.length }} actifs)
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+      </p>
+    </div>
+    <div class="pref-card-body">
       <div class="types-grid">
         @for (type of notificationTypes; track type) {
           <div class="type-item">
@@ -66,21 +66,21 @@
           </div>
         }
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 
   <!-- Quiet Hours Section -->
-  <mat-card class="preferences-card">
-    <mat-card-header>
-      <mat-card-title>
+  <ds-card class="preferences-card" [pad]="false" [elevation]="'sm'">
+    <div class="pref-card-header">
+      <h3 class="pref-card-title">
         <mat-icon>bedtime</mat-icon>
         Heures de silence
-      </mat-card-title>
-      <mat-card-subtitle>
+      </h3>
+      <p class="pref-card-subtitle">
         Définissez une plage horaire pendant laquelle vous ne souhaitez pas recevoir de notifications
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+      </p>
+    </div>
+    <div class="pref-card-body">
       <div class="quiet-hours-toggle">
         <div class="toggle-info">
           <strong>Activer les heures de silence</strong>
@@ -144,21 +144,21 @@
           </mat-hint>
         </div>
       }
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 
   <!-- Digest Frequency Section -->
-  <mat-card class="preferences-card">
-    <mat-card-header>
-      <mat-card-title>
+  <ds-card class="preferences-card" [pad]="false" [elevation]="'sm'">
+    <div class="pref-card-header">
+      <h3 class="pref-card-title">
         <mat-icon>schedule_send</mat-icon>
         Fréquence de groupement
-      </mat-card-title>
-      <mat-card-subtitle>
+      </h3>
+      <p class="pref-card-subtitle">
         Choisissez la fréquence à laquelle vous souhaitez recevoir vos notifications
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+      </p>
+    </div>
+    <div class="pref-card-body">
       <mat-radio-group formControlName="digestFrequency" class="digest-frequency-group">
         @for (freq of digestFrequencies; track freq) {
           <mat-radio-button
@@ -174,21 +174,21 @@
           </mat-radio-button>
         }
       </mat-radio-group>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 
   <!-- Preview Section -->
-  <mat-card class="preferences-card preview-card">
-    <mat-card-header>
-      <mat-card-title>
+  <ds-card class="preferences-card preview-card" [pad]="false" [elevation]="'sm'">
+    <div class="pref-card-header">
+      <h3 class="pref-card-title">
         <mat-icon>visibility</mat-icon>
         Aperçu des notifications
-      </mat-card-title>
-      <mat-card-subtitle>
+      </h3>
+      <p class="pref-card-subtitle">
         Voici comment vos notifications apparaîtront avec les paramètres actuels
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+      </p>
+    </div>
+    <div class="pref-card-body">
       <div class="preview-summary">
         <div class="summary-item">
           <mat-icon>settings_input_antenna</mat-icon>
@@ -261,8 +261,8 @@
           <p class="hint-text">Activez au moins un type de notification pour voir des exemples</p>
         </div>
       }
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 
   <!-- Action Buttons -->
   <div class="form-actions">
@@ -280,7 +280,7 @@
       (click)="onSave()"
       [disabled]="!hasUnsavedChanges() || !preferencesForm.valid || loading || saving">
       @if (saving) {
-        <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
+        <ds-skeleton variant="circle" width="20px" height="20px" class="button-spinner"></ds-skeleton>
       }
       @if (!saving) {
         <mat-icon>save</mat-icon>

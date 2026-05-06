@@ -9,6 +9,7 @@ import {
   viewChild
 } from '@angular/core';
 import { Chart, ChartConfiguration, ChartDataset, registerables } from 'chart.js';
+import { dsRgba, resolveDsToken } from '../design-system/chart-ds-colors';
 
 Chart.register(...registerables);
 
@@ -88,14 +89,14 @@ export interface WaterfallEntry {
       font-family: 'Urbanist', sans-serif;
       font-size: 1.125rem;
       font-weight: 700;
-      color: var(--color-neutral-900);
+      color: var(--ds-text);
       margin: 0;
       letter-spacing: -0.01em;
     }
 
     .waterfall-subtitle {
       font-size: 0.8125rem;
-      color: var(--color-neutral-500);
+      color: var(--ds-text-muted);
       font-weight: 400;
     }
 
@@ -114,7 +115,7 @@ export interface WaterfallEntry {
       flex-wrap: wrap;
       gap: 1rem;
       padding-top: 0.5rem;
-      border-top: 1px solid var(--color-neutral-200);
+      border-top: 1px solid var(--ds-divider);
     }
 
     .legend-item {
@@ -123,7 +124,7 @@ export interface WaterfallEntry {
       gap: 0.375rem;
       font-size: 0.75rem;
       font-weight: 500;
-      color: var(--color-neutral-600);
+      color: var(--ds-text-muted);
     }
 
     .legend-dot {
@@ -133,9 +134,9 @@ export interface WaterfallEntry {
       flex-shrink: 0;
     }
 
-    .legend-item.positive .legend-dot { background: #27ae60; }
-    .legend-item.negative .legend-dot { background: #e74c3c; }
-    .legend-item.total .legend-dot    { background: #2c5aa0; }
+    .legend-item.positive .legend-dot { background: var(--ds-success); }
+    .legend-item.negative .legend-dot { background: var(--ds-error); }
+    .legend-item.total .legend-dot    { background: var(--ds-marine); }
   `]
 })
 export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDestroy {
@@ -214,9 +215,9 @@ export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDest
               },
               title: (items) => items[0]?.label ?? ''
             },
-            backgroundColor: 'rgba(15, 20, 40, 0.9)',
-            titleColor: '#f0f0f0',
-            bodyColor: '#d0d0d0',
+            backgroundColor: dsRgba('--ds-marine', 0.92),
+            titleColor: resolveDsToken('--ds-text-inverse'),
+            bodyColor: dsRgba('--ds-text-inverse', 0.88),
             cornerRadius: 8,
             padding: 12
           }
@@ -227,7 +228,7 @@ export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDest
             grid: { display: false },
             ticks: {
               font: { family: 'Urbanist', size: 11, weight: 500 },
-              color: '#9e9e9e',
+              color: resolveDsToken('--ds-text-faint'),
               maxRotation: 40
             },
             border: { display: false }
@@ -235,12 +236,12 @@ export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDest
           y: {
             stacked: true,
             grid: {
-              color: 'rgba(0,0,0,0.06)',
+              color: dsRgba('--ds-text', 0.08),
               lineWidth: 1
             },
             ticks: {
               font: { family: 'Urbanist', size: 11 },
-              color: '#9e9e9e',
+              color: resolveDsToken('--ds-text-faint'),
               callback: (value) => {
                 const n = value as number;
                 if (Math.abs(n) >= 1_000_000)
@@ -264,9 +265,9 @@ export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDest
     colors: string[];
     totals: number[];
   } {
-    const POSITIVE = '#27ae60';
-    const NEGATIVE = '#e74c3c';
-    const TOTAL = '#2c5aa0';
+    const POSITIVE = resolveDsToken('--ds-success');
+    const NEGATIVE = resolveDsToken('--ds-error');
+    const TOTAL = resolveDsToken('--ds-marine');
 
     const floats: number[] = [];
     const colors: string[] = [];

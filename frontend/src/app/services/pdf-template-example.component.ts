@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { PdfTemplateService, PdfBrandConfig, PdfDocument, PdfTemplateType } from './pdf-template.service';
+import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
 
 /**
  * Example component demonstrating PDF Template Service usage
@@ -71,19 +72,19 @@ import { PdfTemplateService, PdfBrandConfig, PdfDocument, PdfTemplateType } from
     .example-section {
       margin: 20px 0;
       padding: 15px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--ds-divider);
       border-radius: 4px;
     }
     
     .example-section h3 {
       margin-top: 0;
-      color: #2c5aa0;
+      color: var(--ds-marine);
     }
     
     button {
       padding: 10px 20px;
-      background-color: #2c5aa0;
-      color: white;
+      background-color: var(--ds-marine);
+      color: var(--ds-text-inverse);
       border: none;
       border-radius: 4px;
       cursor: pointer;
@@ -91,7 +92,7 @@ import { PdfTemplateService, PdfBrandConfig, PdfDocument, PdfTemplateType } from
     }
     
     button:hover:not(:disabled) {
-      background-color: #1e4070;
+      background-color: var(--ds-marine-hover);
     }
     
     button:disabled {
@@ -110,8 +111,8 @@ import { PdfTemplateService, PdfBrandConfig, PdfDocument, PdfTemplateType } from
     .success-message {
       margin-top: 20px;
       padding: 10px;
-      background-color: #e8f5e9;
-      color: #2e7d32;
+      background-color: var(--ds-success-hl);
+      color: var(--ds-success);
       border-radius: 4px;
     }
   `]
@@ -239,8 +240,8 @@ export class PdfTemplateExampleComponent {
         phone: '+33 1 23 45 67 89',
         email: 'contact@atlas-immobilier.fr',
         website: 'www.atlas-immobilier.fr',
-        primaryColor: '#2c5aa0',
-        secondaryColor: '#e67e22',
+        primaryColor: DS_CHART_FALLBACK_HEX['--ds-marine'],
+        secondaryColor: DS_CHART_FALLBACK_HEX['--ds-primary'],
       };
 
       await this.pdfService.generateContratType(contractData, brandConfig);

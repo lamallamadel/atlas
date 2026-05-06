@@ -127,8 +127,9 @@ body.rtl {
     flex-direction: row-reverse;
   }
 
-  // Cards
-  .mat-card-header {
+  // Cards (Material + DS shells with *-card-header rows)
+  .mat-card-header,
+  ds-card [class*='card-header'] {
     flex-direction: row-reverse;
   }
 

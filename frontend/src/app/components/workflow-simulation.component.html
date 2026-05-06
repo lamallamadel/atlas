@@ -1,10 +1,10 @@
 <div class="simulation-container">
-  <mat-card class="simulation-card">
-    <mat-card-header>
-      <mat-card-title>Workflow Simulation</mat-card-title>
-      <mat-card-subtitle>Test workflow transitions with sample data before activation</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+  <ds-card class="simulation-card" [pad]="false" [elevation]="'sm'">
+    <div class="sim-card-header">
+      <h3 class="sim-card-title">Workflow Simulation</h3>
+      <p class="sim-card-subtitle">Test workflow transitions with sample data before activation</p>
+    </div>
+    <div class="sim-card-body">
       <form [formGroup]="simulationForm" class="simulation-form">
         <mat-form-field appearance="outline">
           <mat-label>Simulation Name</mat-label>
@@ -133,6 +133,6 @@
           </mat-list>
         </div>
       }
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 </div>

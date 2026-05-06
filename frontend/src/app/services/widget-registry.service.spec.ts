@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { WidgetRegistryService, WidgetMetadata } from './widget-registry.service';
-import { CardWidgetBaseComponent } from '../components/card-widget-base.component';
+import { WidgetRegistryService } from './widget-registry.service';
 
 describe('WidgetRegistryService', () => {
   let service: WidgetRegistryService;

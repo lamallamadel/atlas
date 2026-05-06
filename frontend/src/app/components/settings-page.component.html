@@ -28,12 +28,12 @@
           <!-- Préférences -->
           @if (tab.value === 'preferences') {
             <div [formGroup]="preferencesForm">
-              <mat-card class="settings-card">
-                <mat-card-header>
-                  <mat-card-title>Préférences générales</mat-card-title>
-                  <mat-card-subtitle>Configurez vos préférences d'utilisation</mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="settings-card" [pad]="false" [elevation]="'sm'">
+                <div class="settings-card-header">
+                  <h3 class="settings-card-title">Préférences générales</h3>
+                  <p class="settings-card-subtitle">Configurez vos préférences d'utilisation</p>
+                </div>
+                <div class="settings-card-body">
                   <div class="form-grid">
                     <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Langue</mat-label>
@@ -75,19 +75,19 @@
                       </mat-checkbox>
                     </div>
                   </div>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
             </div>
           }
           <!-- Notifications -->
           @if (tab.value === 'notifications') {
             <div [formGroup]="notificationsForm">
-              <mat-card class="settings-card">
-                <mat-card-header>
-                  <mat-card-title>Canaux de notification</mat-card-title>
-                  <mat-card-subtitle>Choisissez comment recevoir les notifications</mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="settings-card" [pad]="false" [elevation]="'sm'">
+                <div class="settings-card-header">
+                  <h3 class="settings-card-title">Canaux de notification</h3>
+                  <p class="settings-card-subtitle">Choisissez comment recevoir les notifications</p>
+                </div>
+                <div class="settings-card-body">
                   <div class="notification-channels">
                     <div class="notification-item">
                       <div class="notification-info">
@@ -155,14 +155,14 @@
                       <mat-slide-toggle formControlName="desktopEnabled"></mat-slide-toggle>
                     </div>
                   </div>
-                </mat-card-content>
-              </mat-card>
-              <mat-card class="settings-card">
-                <mat-card-header>
-                  <mat-card-title>Types de notification</mat-card-title>
-                  <mat-card-subtitle>Configurez les notifications par catégorie</mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
+                </div>
+              </ds-card>
+              <ds-card class="settings-card" [pad]="false" [elevation]="'sm'">
+                <div class="settings-card-header">
+                  <h3 class="settings-card-title">Types de notification</h3>
+                  <p class="settings-card-subtitle">Configurez les notifications par catégorie</p>
+                </div>
+                <div class="settings-card-body">
                   <div class="checkbox-group">
                     <mat-checkbox formControlName="dossierUpdates">
                       <div class="checkbox-label">
@@ -189,19 +189,19 @@
                       </div>
                     </mat-checkbox>
                   </div>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
             </div>
           }
           <!-- Apparence -->
           @if (tab.value === 'appearance') {
             <div [formGroup]="appearanceForm">
-              <mat-card class="settings-card">
-                <mat-card-header>
-                  <mat-card-title>Thème et apparence</mat-card-title>
-                  <mat-card-subtitle>Personnalisez l'apparence de l'application</mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="settings-card" [pad]="false" [elevation]="'sm'">
+                <div class="settings-card-header">
+                  <h3 class="settings-card-title">Thème et apparence</h3>
+                  <p class="settings-card-subtitle">Personnalisez l'apparence de l'application</p>
+                </div>
+                <div class="settings-card-body">
                   <div class="theme-selector">
                     <mat-button-toggle-group formControlName="theme" name="theme" class="theme-toggle-group">
                       @for (theme of themes; track theme) {
@@ -217,14 +217,14 @@
                     <p>Voici à quoi ressemblera l'application</p>
                     <button mat-raised-button color="primary">Bouton d'exemple</button>
                   </div>
-                </mat-card-content>
-              </mat-card>
-              <mat-card class="settings-card">
-                <mat-card-header>
-                  <mat-card-title>Formats de date et heure</mat-card-title>
-                  <mat-card-subtitle>Configurez l'affichage des dates et heures</mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
+                </div>
+              </ds-card>
+              <ds-card class="settings-card" [pad]="false" [elevation]="'sm'">
+                <div class="settings-card-header">
+                  <h3 class="settings-card-title">Formats de date et heure</h3>
+                  <p class="settings-card-subtitle">Configurez l'affichage des dates et heures</p>
+                </div>
+                <div class="settings-card-body">
                   <div class="form-grid">
                     <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Format de date</mat-label>
@@ -278,19 +278,19 @@
                       <p><strong>Heure :</strong> {{ getFormattedPreviewTime() }}</p>
                     </div>
                   </div>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
             </div>
           }
           <!-- Raccourcis -->
           @if (tab.value === 'shortcuts') {
             <div [formGroup]="shortcutsForm">
-              <mat-card class="settings-card">
-                <mat-card-header>
-                  <mat-card-title>Raccourcis clavier</mat-card-title>
-                  <mat-card-subtitle>Configurez les raccourcis clavier pour naviguer plus rapidement</mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="settings-card" [pad]="false" [elevation]="'sm'">
+                <div class="settings-card-header">
+                  <h3 class="settings-card-title">Raccourcis clavier</h3>
+                  <p class="settings-card-subtitle">Configurez les raccourcis clavier pour naviguer plus rapidement</p>
+                </div>
+                <div class="settings-card-body">
                   <div class="checkbox-group">
                     <mat-checkbox formControlName="keyboardShortcutsEnabled">
                       <strong>Activer les raccourcis clavier</strong>
@@ -342,19 +342,19 @@
                     <mat-icon>info</mat-icon>
                     Appuyez sur <kbd>?</kbd> n'importe où pour voir tous les raccourcis disponibles
                   </mat-hint>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
             </div>
           }
           <!-- Intégrations (Admin) -->
           @if (tab.value === 'integrations' && isAdmin) {
             <div [formGroup]="integrationsForm">
-              <mat-card class="settings-card">
-                <mat-card-header>
-                  <mat-card-title>Intégrations tierces</mat-card-title>
-                  <mat-card-subtitle>Connectez des services externes</mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="settings-card" [pad]="false" [elevation]="'sm'">
+                <div class="settings-card-header">
+                  <h3 class="settings-card-title">Intégrations tierces</h3>
+                  <p class="settings-card-subtitle">Connectez des services externes</p>
+                </div>
+                <div class="settings-card-body">
                   <div class="integration-item">
                     <div class="integration-header">
                       <mat-icon>calendar_today</mat-icon>
@@ -417,19 +417,19 @@
                       <mat-slide-toggle formControlName="voipEnabled"></mat-slide-toggle>
                     </div>
                   </div>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
             </div>
           }
           <!-- Système (Super Admin) -->
           @if (tab.value === 'system' && isSuperAdmin) {
             <div [formGroup]="systemForm">
-              <mat-card class="settings-card">
-                <mat-card-header>
-                  <mat-card-title>Paramètres système</mat-card-title>
-                  <mat-card-subtitle>Configuration avancée du système</mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
+              <ds-card class="settings-card" [pad]="false" [elevation]="'sm'">
+                <div class="settings-card-header">
+                  <h3 class="settings-card-title">Paramètres système</h3>
+                  <p class="settings-card-subtitle">Configuration avancée du système</p>
+                </div>
+                <div class="settings-card-body">
                   <div class="system-settings">
                     <mat-checkbox formControlName="debugMode">
                       <div class="checkbox-label">
@@ -462,8 +462,8 @@
                       </div>
                     </mat-checkbox>
                   </div>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </ds-card>
             </div>
           }
         </div>
@@ -495,7 +495,7 @@
         (click)="onSave()"
         [disabled]="!hasUnsavedChanges() || !areFormsValid() || loading || saving">
         @if (saving) {
-          <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
+          <ds-skeleton variant="circle" width="20px" height="20px" class="button-spinner"></ds-skeleton>
         }
         @if (!saving) {
           <mat-icon>save</mat-icon>

@@ -4,8 +4,24 @@
   margin: 0 auto;
 }
 
-mat-card {
+.workflow-admin-card {
+  display: block;
   margin-bottom: 24px;
+}
+
+.workflow-admin-card-header {
+  padding: 16px 16px 0;
+  border-bottom: 1px solid var(--ds-divider);
+}
+
+.workflow-admin-card-title {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.workflow-admin-card-body {
+  padding: 0;
 }
 
 .tab-content {

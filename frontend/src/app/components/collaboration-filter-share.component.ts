@@ -74,20 +74,20 @@ import { FormsModule } from '@angular/forms';
     `,
     styles: [`
     .filter-share-container {
-      background: white;
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      background: var(--ds-surface);
+      border-radius: var(--ds-radius-md);
+      padding: var(--ds-space-4);
+      box-shadow: var(--ds-shadow-sm);
     }
 
     .section-header {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin: 0 0 16px 0;
+      gap: var(--ds-space-2);
+      margin: 0 0 var(--ds-space-4) 0;
       font-size: 16px;
       font-weight: 600;
-      color: #333;
+      color: var(--ds-text);
     }
 
     .header-icon {
@@ -95,30 +95,30 @@ import { FormsModule } from '@angular/forms';
     }
 
     .filter-list {
-      margin-bottom: 24px;
+      margin-bottom: var(--ds-space-6);
     }
 
     .filter-item {
       display: flex;
-      gap: 12px;
-      padding: 12px;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      margin-bottom: 8px;
+      gap: var(--ds-space-3);
+      padding: var(--ds-space-3);
+      border: 1px solid var(--ds-divider);
+      border-radius: var(--ds-radius-sm);
+      margin-bottom: var(--ds-space-2);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
       align-items: center;
     }
 
     .filter-item:hover {
-      border-color: #2196f3;
-      box-shadow: 0 2px 6px rgba(33, 150, 243, 0.2);
+      border-color: var(--ds-marine);
+      box-shadow: var(--ds-shadow-sm);
     }
 
     .filter-icon {
       width: 40px;
       height: 40px;
-      background: #e3f2fd;
+      background: var(--ds-marine-hl);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -135,93 +135,95 @@ import { FormsModule } from '@angular/forms';
     .filter-name {
       font-weight: 600;
       font-size: 14px;
-      color: #333;
-      margin-bottom: 4px;
+      color: var(--ds-text);
+      margin-bottom: var(--ds-space-1);
     }
 
     .filter-meta {
       display: flex;
-      gap: 12px;
+      gap: var(--ds-space-3);
       font-size: 12px;
-      color: #666;
-      margin-bottom: 4px;
+      color: var(--ds-text-muted);
+      margin-bottom: var(--ds-space-1);
     }
 
     .filter-description {
       font-size: 12px;
-      color: #666;
-      margin-top: 4px;
+      color: var(--ds-text-muted);
+      margin-top: var(--ds-space-1);
     }
 
     .apply-btn {
-      padding: 6px 16px;
-      background: #2196f3;
-      color: white;
+      padding: 6px var(--ds-space-4);
+      background: var(--ds-marine);
+      color: var(--ds-text-inverse);
       border: none;
-      border-radius: 4px;
+      border-radius: var(--ds-radius-sm);
       font-weight: 500;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background var(--ds-transition-fast);
     }
 
     .apply-btn:hover {
-      background: #1976d2;
+      background: var(--ds-marine-light);
     }
 
     .no-filters {
       text-align: center;
-      padding: 32px;
-      color: #999;
+      padding: var(--ds-space-8);
+      color: var(--ds-text-faint);
     }
 
     .empty-icon {
       font-size: 48px;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: var(--ds-space-2);
     }
 
     .share-section {
-      border-top: 1px solid #e0e0e0;
-      padding-top: 16px;
+      border-top: 1px solid var(--ds-divider);
+      padding-top: var(--ds-space-4);
     }
 
     .share-section h4 {
-      margin: 0 0 12px 0;
+      margin: 0 0 var(--ds-space-3) 0;
       font-size: 14px;
       font-weight: 600;
-      color: #333;
+      color: var(--ds-text);
     }
 
     .share-form {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: var(--ds-space-2);
     }
 
     .filter-input,
     .filter-textarea {
-      padding: 8px 12px;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
+      padding: var(--ds-space-2) var(--ds-space-3);
+      border: 1px solid var(--ds-divider);
+      border-radius: var(--ds-radius-sm);
       font-size: 14px;
       font-family: inherit;
+      background: var(--ds-surface);
+      color: var(--ds-text);
     }
 
     .filter-input:focus,
     .filter-textarea:focus {
       outline: none;
-      border-color: #2196f3;
+      border-color: var(--ds-marine);
     }
 
     .share-btn {
-      padding: 10px 16px;
-      background: #4caf50;
-      color: white;
+      padding: 10px var(--ds-space-4);
+      background: var(--ds-success);
+      color: var(--ds-text-inverse);
       border: none;
-      border-radius: 4px;
+      border-radius: var(--ds-radius-sm);
       font-weight: 500;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: filter var(--ds-transition-fast);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -229,12 +231,14 @@ import { FormsModule } from '@angular/forms';
     }
 
     .share-btn:hover:not(:disabled) {
-      background: #45a049;
+      filter: brightness(0.92);
     }
 
     .share-btn:disabled {
-      background: #ccc;
+      background: var(--ds-surface-dynamic);
+      color: var(--ds-text-faint);
       cursor: not-allowed;
+      filter: none;
     }
 
     .btn-icon {

@@ -14,7 +14,7 @@
   margin: 0;
   font-size: 20px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .documents-section {
@@ -23,10 +23,10 @@
 
 .error-message {
   padding: 16px;
-  background-color: #ffebee;
-  border: 1px solid #ef5350;
+  background-color: var(--ds-error-hl);
+  border: 1px solid var(--ds-error);
   border-radius: 4px;
-  color: #c62828;
+  color: var(--ds-error);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -35,29 +35,29 @@
 .empty-state {
   padding: 60px 20px;
   text-align: center;
-  background-color: #fafafa;
+  background-color: var(--ds-surface-2);
   border-radius: 8px;
-  border: 1px dashed #ddd;
+  border: 1px dashed var(--ds-divider);
 }
 
 .empty-icon {
   font-size: 64px;
   width: 64px;
   height: 64px;
-  color: #bbb;
+  color: var(--ds-border);
   margin: 0 auto 16px;
 }
 
 .empty-text {
   font-size: 18px;
   font-weight: 500;
-  color: #666;
+  color: var(--ds-text-muted);
   margin: 0 0 8px 0;
 }
 
 .empty-subtext {
   font-size: 14px;
-  color: #999;
+  color: var(--ds-text-faint);
   margin: 0;
 }
 
@@ -69,7 +69,7 @@
 
 .document-card {
   background-color: white;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--ds-divider);
   border-radius: 8px;
   overflow: hidden;
   transition: box-shadow 0.3s ease, transform 0.2s ease;
@@ -85,8 +85,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background-color: var(--ds-bg);
+  border-bottom: 1px solid var(--ds-divider);
 }
 
 .document-icon-wrapper {
@@ -95,7 +95,7 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  background-color: #e8eaf6;
+  background-color: var(--ds-marine-hl);
   border-radius: 8px;
 }
 
@@ -103,7 +103,7 @@
   font-size: 32px;
   width: 32px;
   height: 32px;
-  color: #3f51b5;
+  color: var(--ds-marine);
 }
 
 .document-actions {
@@ -112,7 +112,7 @@
 }
 
 .delete-btn {
-  color: #f44336;
+  color: var(--ds-error);
 }
 
 .document-card-body {
@@ -126,7 +126,7 @@
   margin: 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -143,14 +143,14 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .meta-icon {
   font-size: 18px;
   width: 18px;
   height: 18px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .meta-text {
@@ -169,33 +169,33 @@
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
-  background-color: #e0e0e0;
-  color: #666;
+  background-color: var(--ds-divider);
+  color: var(--ds-text-muted);
 }
 
 .category-contract {
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: var(--ds-marine-hl);
+  color: var(--ds-marine);
 }
 
 .category-invoice {
-  background-color: #fff3e0;
-  color: #f57c00;
+  background-color: var(--ds-warning-hl);
+  color: var(--ds-warning);
 }
 
 .category-id {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
+  background-color: var(--ds-primary-hl);
+  color: var(--ds-primary-hover);
 }
 
 .category-photo {
-  background-color: #e8f5e9;
-  color: #388e3c;
+  background-color: var(--ds-success-hl);
+  color: var(--ds-success);
 }
 
 .category-other {
-  background-color: #fce4ec;
-  color: #c2185b;
+  background-color: var(--ds-error-hl);
+  color: var(--ds-error);
 }
 
 @media (max-width: 768px) {

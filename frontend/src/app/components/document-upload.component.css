@@ -17,12 +17,12 @@
 .category-label {
   font-weight: 500;
   font-size: 14px;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .category-select {
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--ds-divider);
   border-radius: 4px;
   font-size: 14px;
   background-color: white;
@@ -30,28 +30,28 @@
 }
 
 .category-select:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--ds-bg);
   cursor: not-allowed;
 }
 
 .drop-zone {
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--ds-border);
   border-radius: 8px;
   padding: 40px 20px;
   text-align: center;
-  background-color: #fafafa;
+  background-color: var(--ds-surface-2);
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .drop-zone:hover {
-  border-color: #3f51b5;
-  background-color: #f0f4ff;
+  border-color: var(--ds-marine);
+  background-color: var(--ds-marine-hl);
 }
 
 .drop-zone.dragging {
-  border-color: #3f51b5;
-  background-color: #e8f0fe;
+  border-color: var(--ds-marine);
+  background-color: var(--ds-marine-hl);
   border-width: 3px;
 }
 
@@ -59,7 +59,7 @@
   font-size: 64px;
   width: 64px;
   height: 64px;
-  color: #3f51b5;
+  color: var(--ds-marine);
   margin-bottom: 16px;
 }
 
@@ -67,12 +67,12 @@
   font-size: 16px;
   font-weight: 500;
   margin: 0 0 8px 0;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .drop-zone-subtext {
   font-size: 14px;
-  color: #666;
+  color: var(--ds-text-muted);
   margin: 0 0 16px 0;
 }
 
@@ -86,7 +86,7 @@
 
 .selected-files {
   background-color: white;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--ds-divider);
   border-radius: 8px;
   padding: 20px;
 }
@@ -95,7 +95,7 @@
   margin: 0 0 16px 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .file-list {
@@ -110,13 +110,13 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background-color: #f9f9f9;
+  background-color: var(--ds-surface-2);
   border-radius: 6px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--ds-divider);
 }
 
 .file-icon {
-  color: #3f51b5;
+  color: var(--ds-marine);
   flex-shrink: 0;
 }
 
@@ -131,7 +131,7 @@
 .file-name {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -139,7 +139,7 @@
 
 .file-size {
   font-size: 12px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .remove-btn {
@@ -154,7 +154,7 @@
 
 .upload-progress-list {
   background-color: white;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--ds-divider);
   border-radius: 8px;
   padding: 20px;
 }
@@ -163,13 +163,13 @@
   margin: 0 0 16px 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .progress-item {
   margin-bottom: 20px;
   padding: 16px;
-  background-color: #f9f9f9;
+  background-color: var(--ds-surface-2);
   border-radius: 6px;
 }
 
@@ -185,7 +185,7 @@
 }
 
 .progress-icon {
-  color: #3f51b5;
+  color: var(--ds-marine);
   flex-shrink: 0;
 }
 
@@ -193,7 +193,7 @@
   flex: 1;
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -202,7 +202,7 @@
 .progress-percentage {
   font-size: 14px;
   font-weight: 600;
-  color: #3f51b5;
+  color: var(--ds-marine);
   flex-shrink: 0;
 }
 
@@ -215,18 +215,18 @@
 }
 
 .status-uploading {
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .status-completed {
-  color: #4caf50;
+  color: var(--ds-success);
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
 .status-error {
-  color: #f44336;
+  color: var(--ds-error);
   display: flex;
   align-items: center;
   gap: 4px;

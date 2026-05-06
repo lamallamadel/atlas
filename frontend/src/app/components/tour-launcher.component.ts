@@ -67,16 +67,16 @@ const TOURS: TourMeta[] = [
     .tl { position: fixed; bottom: 24px; right: 24px; z-index: 9000; font-family: var(--ds-font-body); }
     .tl__trigger {
       width: 48px; height: 48px; border-radius: 50%;
-      background: var(--ds-marine); color: #fff; border: none; cursor: pointer;
+      background: var(--ds-marine); color: var(--ds-text-inverse); border: none; cursor: pointer;
       font-size: 20px; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 16px rgba(13,44,74,.35);
+      box-shadow: var(--ds-shadow-lg);
       transition: transform 150ms, box-shadow 150ms; position: relative;
     }
-    .tl__trigger:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(13,44,74,.45); }
+    .tl__trigger:hover { transform: scale(1.08); box-shadow: var(--ds-shadow-xl); }
     .tl__badge {
       position: absolute; top: -4px; right: -4px;
       width: 18px; height: 18px; border-radius: 50%;
-      background: var(--ds-primary); color: #fff;
+      background: var(--ds-primary); color: var(--ds-text-inverse);
       font-size: 10px; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
       border: 2px solid var(--ds-surface);
@@ -85,7 +85,7 @@ const TOURS: TourMeta[] = [
       position: absolute; bottom: 60px; right: 0; width: 320px;
       background: var(--ds-surface); border: 1px solid var(--ds-divider);
       border-radius: var(--ds-radius-lg, 12px);
-      box-shadow: 0 8px 32px rgba(13,44,74,.15); overflow: hidden;
+      box-shadow: var(--ds-shadow-xl); overflow: hidden;
     }
     .tl__header {
       display: flex; align-items: center; justify-content: space-between;
@@ -94,10 +94,11 @@ const TOURS: TourMeta[] = [
     }
     .tl__title { font-size: 13px; font-weight: 700; }
     .tl__close {
-      background: none; border: none; color: rgba(255,255,255,.7);
+      background: none; border: none;
+      color: color-mix(in srgb, var(--ds-text-inverse) 72%, transparent);
       cursor: pointer; font-size: 14px; padding: 0;
     }
-    .tl__close:hover { color: #fff; }
+    .tl__close:hover { color: var(--ds-text-inverse); }
     .tl__list { display: flex; flex-direction: column; }
     .tl__item {
       display: flex; align-items: center; gap: 12px;

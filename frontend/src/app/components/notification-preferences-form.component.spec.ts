@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatCardModule } from '@angular/material/card';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatRadioModule } from '@angular/material/radio';
@@ -9,7 +8,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { of, throwError } from 'rxjs';
 
 import { NotificationPreferencesFormComponent } from './notification-preferences-form.component';
@@ -67,7 +65,6 @@ describe('NotificationPreferencesFormComponent', () => {
       imports: [
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        MatCardModule,
         MatSlideToggleModule,
         MatSliderModule,
         MatRadioModule,
@@ -75,7 +72,6 @@ describe('NotificationPreferencesFormComponent', () => {
         MatDividerModule,
         MatButtonModule,
         MatProgressBarModule,
-        MatProgressSpinnerModule,
         NotificationPreferencesFormComponent,
       ],
       providers: [

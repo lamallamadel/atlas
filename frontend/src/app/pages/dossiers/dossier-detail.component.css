@@ -96,13 +96,13 @@
 .btn-add-lead,
 .btn-send-whatsapp {
   background: var(--ds-marine);
-  color: #fff;
+  color: var(--ds-text-inverse);
   border-color: var(--ds-marine);
 }
 .btn-update-status:hover:not(:disabled),
 .btn-update-lead:hover:not(:disabled),
 .btn-add-lead:hover:not(:disabled),
-.btn-send-whatsapp:hover:not(:disabled) { background: var(--ds-marine-hover, #07203a); }
+.btn-send-whatsapp:hover:not(:disabled) { background: var(--ds-marine-hover, var(--ds-marine-hover)); }
 
 .btn-delete { color: var(--ds-error); border-color: var(--ds-error); background: transparent; }
 .btn-delete:hover { background: rgba(198,40,40,.08); }
@@ -201,32 +201,39 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .tab-content-host { margin-top: var(--ds-space-4); }
 .tab-content { display: flex; flex-direction: column; gap: var(--ds-space-4); }
 
-/* Cards Material - surcharge DS */
+/* Cartes dossier (ds-card) */
 .info-section,
 .info-section-essential,
-mat-card.info-section,
-mat-card.info-section-essential {
+ds-card.info-section,
+ds-card.info-section-essential,
+ds-card.collab-notes-card {
+  display: block;
+}
+
+ds-card.info-section > .ds-card,
+ds-card.info-section-essential > .ds-card,
+ds-card.collab-notes-card > .ds-card {
   background: var(--ds-surface) !important;
   border: 1px solid var(--ds-divider) !important;
   border-radius: var(--ds-radius-lg, 12px) !important;
   box-shadow: none !important;
-  padding: 0 !important;
 }
-::ng-deep mat-card.info-section .mat-mdc-card-header,
-::ng-deep mat-card.info-section-essential .mat-mdc-card-header {
+
+.info-section-header {
   padding: 14px 18px 10px !important;
   border-bottom: 1px solid var(--ds-divider);
 }
-::ng-deep mat-card.info-section .mat-mdc-card-title,
-::ng-deep mat-card.info-section-essential .mat-mdc-card-title {
+
+.info-section-title {
+  margin: 0;
   font-size: 13px !important;
   font-weight: 700 !important;
   color: var(--ds-text) !important;
   letter-spacing: 0.2px;
   text-transform: uppercase;
 }
-::ng-deep mat-card.info-section .mat-mdc-card-content,
-::ng-deep mat-card.info-section-essential .mat-mdc-card-content {
+
+.info-section-body {
   padding: 18px !important;
 }
 
@@ -341,7 +348,7 @@ mat-card.info-section-essential {
   font-size: 13px; color: var(--ds-text);
 }
 .chat-bubble-outbound .chat-bubble-content {
-  background: var(--ds-marine); color: #fff;
+  background: var(--ds-marine); color: var(--ds-text-inverse);
 }
 .chat-bubble-meta { font-size: 11px; color: var(--ds-text-faint); margin-top: 4px; }
 .chat-bubble-time, .chat-bubble-status, .chat-bubble-retry { font-size: 11px; }

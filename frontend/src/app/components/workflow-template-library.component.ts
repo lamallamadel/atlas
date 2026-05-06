@@ -2,9 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { WorkflowApiService, WorkflowTemplate } from '../services/workflow-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { DsCardComponent } from '../design-system';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 @Component({
   selector: 'app-workflow-template-library',
+  standalone: true,
+  imports: [DsCardComponent, DsSkeletonComponent, MatButton, MatIcon, MatChipListbox, MatChipOption],
   templateUrl: './workflow-template-library.component.html',
   styleUrls: ['./workflow-template-library.component.css']
 })
@@ -40,10 +47,11 @@ export class WorkflowTemplateLibraryComponent implements OnInit {
     });
   }
 
-  filterByCategory(category: string): void {
-    this.selectedCategory = category;
-    if (category) {
-      this.filteredTemplates = this.templates.filter(t => t.category === category);
+  filterByCategory(category: string | undefined): void {
+    const c = category ?? '';
+    this.selectedCategory = c;
+    if (c) {
+      this.filteredTemplates = this.templates.filter((t) => t.category === c);
     } else {
       this.filteredTemplates = this.templates;
     }
@@ -75,21 +83,31 @@ export class WorkflowTemplateLibraryComponent implements OnInit {
 
   getCategoryIcon(category: string): string {
     switch (category) {
-      case 'SALE': return 'home';
-      case 'RENTAL': return 'apartment';
-      case 'MANDATE': return 'gavel';
-      case 'CONSTRUCTION': return 'construction';
-      default: return 'category';
+      case 'SALE':
+        return 'home';
+      case 'RENTAL':
+        return 'apartment';
+      case 'MANDATE':
+        return 'gavel';
+      case 'CONSTRUCTION':
+        return 'construction';
+      default:
+        return 'category';
     }
   }
 
   getCategoryColor(category: string): string {
     switch (category) {
-      case 'SALE': return '#3B82F6';
-      case 'RENTAL': return '#10B981';
-      case 'MANDATE': return '#F59E0B';
-      case 'CONSTRUCTION': return '#8B5CF6';
-      default: return '#6B7280';
+      case 'SALE':
+        return 'var(--ds-marine)';
+      case 'RENTAL':
+        return 'var(--ds-success)';
+      case 'MANDATE':
+        return 'var(--ds-copper)';
+      case 'CONSTRUCTION':
+        return 'var(--ds-info)';
+      default:
+        return 'var(--ds-text-muted)';
     }
   }
 }

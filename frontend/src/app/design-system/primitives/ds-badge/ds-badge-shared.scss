@@ -1,0 +1,79 @@
+/* Styles globaux ds-badge — utilisés par DsBadgeComponent et HTML injecté (tableaux). */
+
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--ds-radius-pill);
+  font-family: var(--ds-font-body);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+
+  &--md { height: 22px; padding: 0 10px; font-size: 11.5px; }
+  &--sm { height: 18px; padding: 0 8px;  font-size: 10.5px; }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+  }
+
+  &--no-dot .ds-badge__dot {
+    display: none;
+  }
+
+  &--pulse {
+    animation: ds-badge-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* ── Statuts CRM ── */
+  &--new            { background: var(--ds-marine-hl);    color: var(--ds-marine); }
+  &--qualification  { background: var(--ds-warning-hl);    color: var(--ds-warning); }
+  &--rdv            { background: var(--ds-primary-hl);   color: var(--ds-primary-active); }
+  &--won            { background: var(--ds-success-hl);   color: var(--ds-success); }
+  &--lost           { background: var(--ds-error-hl);     color: var(--ds-error); }
+  &--draft          { background: var(--ds-surface-offset); color: var(--ds-text-muted); }
+  &--active         { background: var(--ds-success-hl);   color: var(--ds-success); }
+  &--paused         { background: var(--ds-warning-hl);   color: var(--ds-warning); }
+  &--archived       { background: var(--ds-surface-dynamic); color: var(--ds-text-faint); }
+  &--success        { background: var(--ds-success-hl);   color: var(--ds-success); }
+  &--warning        { background: var(--ds-warning-hl);   color: var(--ds-warning); }
+  &--error          { background: var(--ds-error-hl);     color: var(--ds-error); }
+  &--info           { background: var(--ds-marine-hl);    color: var(--ds-marine); }
+  &--neutral        { background: var(--ds-surface-offset); color: var(--ds-text-muted); }
+}
+
+@keyframes ds-badge-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 28%, transparent);
+  }
+  50% {
+    opacity: 0.92;
+    box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 15%, transparent);
+  }
+}
+
+[data-theme='dark'],
+.dark-theme {
+  .ds-badge--new,
+  .ds-badge--info   { color: var(--ds-marine-light); }
+  .ds-badge--qualification {
+    background: var(--ds-marine-hover);
+    color: var(--ds-primary-hl);
+  }
+  .ds-badge--rdv {
+    background: var(--ds-primary-subtle);
+    color: var(--ds-primary);
+  }
+}
+
+/* Icônes Material dans badges tableaux / détails */
+.ds-badge .material-icons.status-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+}

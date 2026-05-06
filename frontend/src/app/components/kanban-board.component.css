@@ -20,18 +20,18 @@
   flex: 0 0 320px;
   display: flex;
   flex-direction: column;
-  background: var(--color-neutral-50);
+  background: var(--ds-surface-2);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   max-height: 100%;
 }
 
 .column-won {
-  background: linear-gradient(to bottom, #e8f5e9 0%, var(--color-neutral-50) 50px);
+  background: linear-gradient(to bottom, var(--ds-success-hl) 0%, var(--ds-surface-2) 50px);
 }
 
 .column-lost {
-  background: linear-gradient(to bottom, #fceae9 0%, var(--color-neutral-50) 50px);
+  background: linear-gradient(to bottom, var(--ds-error-hl) 0%, var(--ds-surface-2) 50px);
 }
 
 .column-header {
@@ -39,7 +39,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-4);
-  border-bottom: 2px solid var(--color-neutral-200);
+  border-bottom: 2px solid var(--ds-divider);
   background: white;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
@@ -51,7 +51,7 @@
 }
 
 .column-icon {
-  color: var(--color-primary-600);
+  color: var(--ds-marine);
   font-size: 20px;
   width: 20px;
   height: 20px;
@@ -61,7 +61,7 @@
   margin: 0;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-neutral-900);
+  color: var(--ds-text);
 }
 
 .column-count {
@@ -93,17 +93,17 @@
 }
 
 .column-content::-webkit-scrollbar-track {
-  background: var(--color-neutral-100);
+  background: var(--ds-bg);
   border-radius: var(--radius-lg);
 }
 
 .column-content::-webkit-scrollbar-thumb {
-  background: var(--color-neutral-300);
+  background: var(--ds-border);
   border-radius: var(--radius-lg);
 }
 
 .column-content::-webkit-scrollbar-thumb:hover {
-  background: var(--color-neutral-400);
+  background: var(--ds-text-faint);
 }
 
 .cdk-drop-list-dragging .kanban-card:not(.cdk-drag-placeholder) {
@@ -117,25 +117,25 @@
   padding: var(--spacing-3);
   cursor: pointer;
   transition: all var(--duration-normal) ease;
-  border: 1px solid var(--color-neutral-200);
+  border: 1px solid var(--ds-divider);
   position: relative;
 }
 
 .kanban-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
-  border-color: var(--color-primary-300);
+  border-color: var(--ds-marine-light);
 }
 
 .kanban-card:focus {
-  outline: 2px solid var(--color-primary-500);
+  outline: 2px solid var(--ds-marine);
   outline-offset: 2px;
 }
 
 .cdk-drag-preview {
   box-shadow: var(--shadow-xl);
   opacity: 0.9;
-  border: 2px solid var(--color-primary-500);
+  border: 2px solid var(--ds-marine);
   cursor: grabbing;
 }
 
@@ -144,8 +144,8 @@
 }
 
 .drag-placeholder {
-  background: var(--color-primary-50);
-  border: 2px dashed var(--color-primary-300);
+  background: var(--ds-marine-hl);
+  border: 2px dashed var(--ds-marine-light);
   border-radius: var(--radius-lg);
   min-height: 120px;
   transition: all var(--duration-normal) ease;
@@ -161,15 +161,15 @@
 .card-id {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-primary-600);
-  background: var(--color-primary-50);
+  color: var(--ds-marine);
+  background: var(--ds-marine-hl);
   padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-base);
 }
 
 .drag-handle {
   cursor: grab;
-  color: var(--color-neutral-400);
+  color: var(--ds-text-faint);
   font-size: 18px;
   width: 18px;
   height: 18px;
@@ -177,7 +177,7 @@
 }
 
 .drag-handle:hover {
-  color: var(--color-neutral-600);
+  color: var(--ds-text-muted);
 }
 
 .drag-handle:active {
@@ -207,18 +207,18 @@
 
 .lead-name {
   font-weight: var(--font-weight-medium);
-  color: var(--color-neutral-900);
+  color: var(--ds-text);
 }
 
 .lead-phone {
-  color: var(--color-neutral-700);
+  color: var(--ds-text-muted);
 }
 
 .info-icon {
   font-size: 16px;
   width: 16px;
   height: 16px;
-  color: var(--color-neutral-500);
+  color: var(--ds-text-faint);
   flex-shrink: 0;
 }
 
@@ -227,12 +227,12 @@
   align-items: flex-start;
   gap: var(--spacing-2);
   padding-top: var(--spacing-2);
-  border-top: 1px solid var(--color-neutral-100);
+  border-top: 1px solid var(--ds-bg);
 }
 
 .annonce-title {
   font-size: var(--font-size-xs);
-  color: var(--color-neutral-600);
+  color: var(--ds-text-muted);
   line-height: var(--line-height-tight);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -246,7 +246,7 @@
   gap: var(--spacing-3);
   flex-wrap: wrap;
   padding-top: var(--spacing-2);
-  border-top: 1px solid var(--color-neutral-100);
+  border-top: 1px solid var(--ds-bg);
 }
 
 .meta-item {
@@ -254,14 +254,14 @@
   align-items: center;
   gap: var(--spacing-1);
   font-size: var(--font-size-xs);
-  color: var(--color-neutral-600);
+  color: var(--ds-text-muted);
 }
 
 .meta-icon {
   font-size: 14px;
   width: 14px;
   height: 14px;
-  color: var(--color-neutral-500);
+  color: var(--ds-text-faint);
 }
 
 .card-footer {
@@ -269,7 +269,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: var(--spacing-2);
-  border-top: 1px solid var(--color-neutral-100);
+  border-top: 1px solid var(--ds-bg);
 }
 
 .card-date {
@@ -277,7 +277,7 @@
   align-items: center;
   gap: var(--spacing-1);
   font-size: var(--font-size-xs);
-  color: var(--color-neutral-500);
+  color: var(--ds-text-faint);
 }
 
 .date-icon {
@@ -292,7 +292,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-8) var(--spacing-4);
-  color: var(--color-neutral-400);
+  color: var(--ds-text-faint);
   text-align: center;
 }
 
@@ -321,44 +321,44 @@
 
 .kanban-loading p {
   margin: 0;
-  color: var(--color-neutral-600);
+  color: var(--ds-text-muted);
   font-size: var(--font-size-base);
 }
 
 ::ng-deep .badge-new {
-  background: linear-gradient(135deg, var(--color-warning-50), var(--color-warning-100));
-  color: var(--color-warning-800);
-  border: 1px solid var(--color-warning-300);
+  background: linear-gradient(135deg, var(--ds-warning-hl), var(--ds-warning-hl));
+  color: var(--ds-warning);
+  border: 1px solid var(--ds-warning);
 }
 
 ::ng-deep .badge-qualifying {
-  background: linear-gradient(135deg, var(--color-info-50), var(--color-info-100));
-  color: var(--color-info-800);
-  border: 1px solid var(--color-info-300);
+  background: linear-gradient(135deg, var(--ds-marine-hl), var(--ds-marine-hl));
+  color: var(--ds-marine-hover);
+  border: 1px solid var(--ds-marine-light);
 }
 
 ::ng-deep .badge-qualified {
-  background: linear-gradient(135deg, var(--color-success-50), var(--color-success-100));
-  color: var(--color-success-800);
-  border: 1px solid var(--color-success-300);
+  background: linear-gradient(135deg, var(--ds-success-hl), var(--ds-success-hl));
+  color: var(--ds-success);
+  border: 1px solid var(--ds-success);
 }
 
 ::ng-deep .badge-appointment {
-  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
-  color: var(--color-primary-800);
-  border: 1px solid var(--color-primary-300);
+  background: linear-gradient(135deg, var(--ds-marine-hl), var(--ds-marine-hl));
+  color: var(--ds-marine-hover);
+  border: 1px solid var(--ds-marine-light);
 }
 
 ::ng-deep .badge-won {
-  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-  color: #1b5e20;
-  border: 1px solid #4caf50;
+  background: linear-gradient(135deg, var(--ds-success-hl), var(--ds-success-hl));
+  color: var(--ds-success);
+  border: 1px solid var(--ds-success);
 }
 
 ::ng-deep .badge-lost {
-  background: linear-gradient(135deg, var(--color-error-50), var(--color-error-100));
-  color: var(--color-error-800);
-  border: 1px solid var(--color-error-300);
+  background: linear-gradient(135deg, var(--ds-error-hl), var(--ds-error-hl));
+  color: var(--ds-error);
+  border: 1px solid var(--ds-error);
 }
 
 @media (max-width: 768px) {

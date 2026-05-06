@@ -1,22 +1,47 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AnalyticsApiService, ScheduledReportRequest, ScheduledReportResponse } from '../services/analytics-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { DsCardComponent } from '../design-system';
 
 @Component({
   selector: 'app-scheduled-reports',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DsCardComponent,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatChipsModule,
+    MatTooltipModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatCheckboxModule,
+  ],
   template: `
     <div class="scheduled-reports">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Scheduled Reports</mat-card-title>
+      <ds-card [pad]="false" [elevation]="'sm'">
+        <div class="sr-card-header">
+          <h3 class="sr-card-title">Scheduled Reports</h3>
           <button mat-raised-button color="primary" (click)="createReport()">
             <mat-icon>add</mat-icon>
             Schedule New Report
           </button>
-        </mat-card-header>
-    
-        <mat-card-content>
+        </div>
+        <div class="sr-card-body">
           <table mat-table [dataSource]="reports" class="reports-table">
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Name</th>
@@ -67,15 +92,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
           </table>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </ds-card>
     
       @if (editingReport) {
-        <mat-card class="report-form-card">
-          <mat-card-header>
-            <mat-card-title>{{editingReport.id ? 'Edit' : 'Create'}} Scheduled Report</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+        <ds-card class="report-form-card" [pad]="false" [elevation]="'sm'">
+          <div class="sr-form-card-header">
+            <h3 class="sr-card-title">{{editingReport.id ? 'Edit' : 'Create'}} Scheduled Report</h3>
+          </div>
+          <div class="sr-form-card-body">
             <form [formGroup]="reportForm">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Report Name</mat-label>
@@ -152,8 +177,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
                 [disabled]="!reportForm.valid">Save</button>
               </div>
             </form>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </ds-card>
       }
     </div>
     `,
@@ -162,11 +187,32 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
       padding: 20px;
     }
 
-    mat-card-header {
+    .sr-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      padding: 16px 16px 0;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .sr-card-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .sr-card-body {
+      padding: 0 16px 16px;
+    }
+
+    .sr-form-card-header {
+      padding: 16px 16px 0;
+    }
+
+    .sr-form-card-body {
+      padding: 0 16px 16px;
     }
 
     .reports-table {
@@ -175,6 +221,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
     }
 
     .report-form-card {
+      display: block;
       margin-top: 20px;
     }
 

@@ -17,7 +17,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatCardModule } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -49,7 +49,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
         MatProgressBarModule,
         
         MatTabsModule,
-        MatCardModule,
+        DsCardComponent,
         MatExpansionModule,
         MatPaginatorModule,
         MatDatepickerModule,
@@ -77,7 +77,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
         MatProgressBarModule,
         
         MatTabsModule,
-        MatCardModule,
+        DsCardComponent,
         MatExpansionModule,
         MatPaginatorModule,
         MatDatepickerModule,

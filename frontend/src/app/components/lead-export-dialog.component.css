@@ -13,7 +13,7 @@ h2[mat-dialog-title] {
 }
 
 .title-icon {
-  color: #1976d2;
+  color: var(--ds-marine);
   font-size: 28px;
   width: 28px;
   height: 28px;
@@ -50,13 +50,13 @@ mat-dialog-content {
   margin: 0;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .section-description {
   margin: 0 0 12px 0;
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .column-actions {
@@ -73,7 +73,7 @@ mat-dialog-content {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
   padding: 16px;
-  background-color: #f5f5f5;
+  background-color: var(--ds-bg);
   border-radius: 8px;
 }
 
@@ -86,9 +86,9 @@ mat-dialog-content {
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background-color: #e3f2fd;
+  background-color: var(--ds-marine-hl);
   border-radius: 4px;
-  color: #1976d2;
+  color: var(--ds-marine);
   font-size: 14px;
   font-weight: 500;
 }
@@ -124,16 +124,16 @@ mat-divider {
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background-color: #fff3e0;
-  border-left: 4px solid #ff9800;
+  background-color: var(--ds-warning-hl);
+  border-left: 4px solid var(--ds-warning);
   border-radius: 4px;
   font-size: 13px;
-  color: #666;
+  color: var(--ds-text-muted);
 }
 
 .export-progress {
   padding: 24px;
-  background-color: #f5f5f5;
+  background-color: var(--ds-bg);
   border-radius: 8px;
   text-align: center;
 }
@@ -144,12 +144,12 @@ mat-divider {
   justify-content: center;
   gap: 8px;
   margin-top: 16px;
-  color: #666;
+  color: var(--ds-text-muted);
   font-size: 14px;
 }
 
 .progress-icon {
-  color: #1976d2;
+  color: var(--ds-marine);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -161,7 +161,7 @@ mat-divider {
 mat-dialog-actions {
   padding: 16px 24px;
   margin: 0;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--ds-divider);
 }
 
 @media (max-width: 768px) {

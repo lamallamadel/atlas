@@ -1,12 +1,38 @@
 import { Component, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { CommentService, CommentEntityType, CommentThread, CreateThreadRequest, CreateCommentRequest } from '../services/comment.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatChip } from '@angular/material/chips';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 @Component({
   selector: 'app-comment-thread',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatChip,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
+    MatTooltip,
+    DsSkeletonComponent,
+  ],
   templateUrl: './comment-thread.component.html',
   styleUrls: ['./comment-thread.component.css']
 })

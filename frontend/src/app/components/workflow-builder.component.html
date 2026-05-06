@@ -1,10 +1,10 @@
 <div class="workflow-builder-container">
-  <mat-card class="workflow-header">
-    <mat-card-header>
-      <mat-card-title>Workflow Builder</mat-card-title>
-      <mat-card-subtitle>Design and customize workflows with drag-and-drop editor</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+  <ds-card class="workflow-header" [pad]="false" [elevation]="'sm'">
+    <div class="wb-card-header">
+      <h3 class="wb-card-title">Workflow Builder</h3>
+      <p class="wb-card-subtitle">Design and customize workflows with drag-and-drop editor</p>
+    </div>
+    <div class="wb-card-body">
       <form [formGroup]="workflowForm" class="workflow-form">
         <mat-form-field appearance="outline">
           <mat-label>Workflow Name</mat-label>
@@ -37,24 +37,24 @@
           <mat-icon>play_arrow</mat-icon> Activate
         </button>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 
   <div class="builder-layout">
-    <mat-card class="canvas-card">
-      <mat-card-header>
-        <mat-card-title>Visual Editor</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
+    <ds-card class="canvas-card" [pad]="false" [elevation]="'sm'">
+      <div class="wb-card-header wb-card-header-compact">
+        <h3 class="wb-card-title">Visual Editor</h3>
+      </div>
+      <div class="wb-card-body wb-card-body-fill">
         <svg #svgCanvas class="workflow-canvas" width="100%" height="600"></svg>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </ds-card>
 
-    <mat-card class="sidebar-card">
-      <mat-card-header>
-        <mat-card-title>Properties</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
+    <ds-card class="sidebar-card" [pad]="false" [elevation]="'sm'">
+      <div class="wb-card-header wb-card-header-compact">
+        <h3 class="wb-card-title">Properties</h3>
+      </div>
+      <div class="wb-card-body wb-card-body-fill">
         <mat-tab-group>
           <mat-tab label="States">
             <div class="tab-content">
@@ -194,7 +194,7 @@
             </mat-tab>
           }
         </mat-tab-group>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </ds-card>
   </div>
 </div>

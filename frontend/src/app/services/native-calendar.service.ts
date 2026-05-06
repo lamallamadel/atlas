@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
 import { Capacitor } from '@capacitor/core';
 import { Calendar, CalendarEvent } from '@capacitor/calendar';
 import { from, Observable, of } from 'rxjs';
@@ -201,7 +202,7 @@ export class NativeCalendarService {
 
     return from(Calendar.createCalendar({
       title: this.defaultCalendarTitle,
-      color: '#2c5aa0',
+      color: DS_CHART_FALLBACK_HEX['--ds-marine'],
       isVisible: true
     })).pipe(
       map((result: any) => ({

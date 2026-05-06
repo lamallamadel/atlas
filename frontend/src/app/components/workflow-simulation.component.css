@@ -3,8 +3,29 @@
 }
 
 .simulation-card {
+  display: block;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.sim-card-header {
+  padding: 16px 16px 0;
+}
+
+.sim-card-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.sim-card-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ds-text-muted);
+}
+
+.sim-card-body {
+  padding: 0 16px 16px;
 }
 
 .simulation-form {
@@ -29,7 +50,7 @@
 
 .results-section h3 {
   margin-bottom: 16px;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .result-summary {
@@ -54,7 +75,7 @@ mat-expansion-panel-header mat-panel-title {
 }
 
 .json-output {
-  background: #f5f5f5;
+  background: var(--ds-bg);
   padding: 16px;
   border-radius: 4px;
   overflow-x: auto;
@@ -63,12 +84,12 @@ mat-expansion-panel-header mat-panel-title {
 }
 
 .error-text {
-  color: #d32f2f;
+  color: var(--ds-error);
 }
 
 .timestamp {
   font-size: 11px;
-  color: #999;
+  color: var(--ds-text-faint);
 }
 
 .history-section {
@@ -77,12 +98,12 @@ mat-expansion-panel-header mat-panel-title {
 
 .history-section h3 {
   margin-bottom: 16px;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .history-item {
   cursor: pointer;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--ds-divider);
 }
 
 .history-item:hover {

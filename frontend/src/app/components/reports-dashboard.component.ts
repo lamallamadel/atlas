@@ -19,9 +19,9 @@ import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular
 import { FormsModule } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { LoadingSkeletonComponent } from './loading-skeleton.component';
-import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { NgChartsModule } from 'ng2-charts';
@@ -31,7 +31,7 @@ import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, Ma
     selector: 'app-reports-dashboard',
     templateUrl: './reports-dashboard.component.html',
     styleUrls: ['./reports-dashboard.component.css'],
-    imports: [MatFormField, MatLabel, MatInput, MatDatepickerInput, FormsModule, MatDatepickerToggle, MatSuffix, MatDatepicker, MatButton, MatIcon, MatProgressSpinner, LoadingSkeletonComponent, MatCard, MatCardContent, MatCardHeader, MatCardTitle, MatTooltip, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, NgChartsModule, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
+    imports: [MatFormField, MatLabel, MatInput, MatDatepickerInput, FormsModule, MatDatepickerToggle, MatSuffix, MatDatepicker, MatButton, MatIcon, DsSkeletonComponent, LoadingSkeletonComponent, DsCardComponent, MatTooltip, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, NgChartsModule, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
 })
 export class ReportsDashboardComponent implements OnInit, AfterViewInit {
   readonly conversionFunnelCanvas = viewChild.required<ElementRef<HTMLCanvasElement>>('conversionFunnelCanvas');

@@ -1,8 +1,18 @@
 import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import * as d3 from 'd3';
 import { WorkflowApiService, WorkflowDefinition, WorkflowState, WorkflowTransition } from '../services/workflow-api.service';
+import { resolveDsToken } from '../design-system/chart-ds-colors';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DsCardComponent } from '../design-system';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatListModule } from '@angular/material/list';
 
 interface D3Node extends d3.SimulationNodeDatum {
   id: string;
@@ -20,6 +30,19 @@ interface D3Link extends d3.SimulationLinkDatum<D3Node> {
 
 @Component({
   selector: 'app-workflow-builder',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DsCardComponent,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatTabsModule,
+    MatListModule,
+  ],
   templateUrl: './workflow-builder.component.html',
   styleUrls: ['./workflow-builder.component.css']
 })
@@ -48,13 +71,21 @@ export class WorkflowBuilderComponent implements AfterViewInit {
 
   caseTypes = ['SALE', 'RENTAL', 'MANDATE', 'CONSTRUCTION'];
   stateTypes = ['initial', 'intermediate', 'final'];
-  stateColors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#DC2626', '#06B6D4'];
+  stateColors: string[] = [];
 
   constructor(
     private fb: FormBuilder,
     private workflowApi: WorkflowApiService,
     private snackBar: MatSnackBar
   ) {
+    this.stateColors = [
+      resolveDsToken('--ds-marine'),
+      resolveDsToken('--ds-success'),
+      resolveDsToken('--ds-warning'),
+      resolveDsToken('--ds-primary'),
+      resolveDsToken('--ds-error'),
+      resolveDsToken('--ds-marine-light'),
+    ];
     this.workflowForm = this.fb.group({
       name: ['', Validators.required],
       description: [''],
@@ -126,7 +157,7 @@ export class WorkflowBuilderComponent implements AfterViewInit {
       .enter()
       .append('line')
       .attr('class', 'link')
-      .attr('stroke', '#999')
+      .attr('stroke', resolveDsToken('--ds-text-faint'))
       .attr('stroke-width', 2)
       .attr('marker-end', 'url(#arrowhead)');
 
@@ -136,7 +167,7 @@ export class WorkflowBuilderComponent implements AfterViewInit {
       .append('text')
       .attr('class', 'link-label')
       .attr('font-size', '10px')
-      .attr('fill', '#666')
+      .attr('fill', resolveDsToken('--ds-text-muted'))
       .attr('text-anchor', 'middle')
       .text((d: D3Link) => d.label);
 
@@ -159,7 +190,7 @@ export class WorkflowBuilderComponent implements AfterViewInit {
       .attr('text-anchor', 'middle')
       .attr('dy', 4)
       .attr('font-size', '10px')
-      .attr('fill', '#fff')
+      .attr('fill', resolveDsToken('--ds-text-inverse'))
       .text((d: D3Node) => d.label);
 
     this.simulation.nodes(this.nodes);
@@ -217,7 +248,7 @@ export class WorkflowBuilderComponent implements AfterViewInit {
 
       this.states.push(newState);
       this.updateGraph();
-      this.stateForm.reset({ stateType: 'intermediate', color: '#3B82F6' });
+      this.stateForm.reset({ stateType: 'intermediate', color: resolveDsToken('--ds-marine') });
       this.isAddingState = false;
       this.snackBar.open('State added successfully', 'Close', { duration: 3000 });
     }

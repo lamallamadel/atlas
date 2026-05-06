@@ -74,7 +74,7 @@ describe('LogoComponent', () => {
 
   it('should add animated class when animate is true', async () => {
     fixture.componentRef.setInput('animate', true);
-    component.ngOnInit();
+    fixture.detectChanges();
 
     await new Promise<void>((resolve) => setTimeout(resolve, 100));
     expect(component.showAnimation).toBe(true);

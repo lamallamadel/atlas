@@ -69,7 +69,7 @@ export interface MobileActionSheetData {
     .mobile-action-sheet {
       display: flex;
       flex-direction: column;
-      background: var(--color-neutral-0);
+      background: var(--ds-surface);
       border-radius: var(--radius-xl) var(--radius-xl) 0 0;
       max-height: 80vh;
       overflow: hidden;
@@ -80,14 +80,14 @@ export interface MobileActionSheetData {
       flex-direction: column;
       align-items: center;
       padding: var(--spacing-4) var(--spacing-6) var(--spacing-2);
-      border-bottom: var(--border-width-1) solid var(--color-neutral-200);
+      border-bottom: var(--border-width-1) solid var(--ds-divider);
       position: relative;
     }
 
     .action-sheet-drag-handle {
       width: 40px;
       height: 4px;
-      background: var(--color-neutral-300);
+      background: var(--ds-border);
       border-radius: var(--radius-full);
       margin-bottom: var(--spacing-3);
     }
@@ -96,14 +96,14 @@ export interface MobileActionSheetData {
       margin: 0 0 var(--spacing-1) 0;
       font-size: var(--font-size-lg);
       font-weight: var(--font-weight-semibold);
-      color: var(--color-neutral-900);
+      color: var(--ds-text);
       text-align: center;
     }
 
     .action-sheet-subtitle {
       margin: 0;
       font-size: var(--font-size-sm);
-      color: var(--color-neutral-600);
+      color: var(--ds-text-muted);
       text-align: center;
     }
 
@@ -121,8 +121,8 @@ export interface MobileActionSheetData {
       width: 100%;
       padding: var(--spacing-4) var(--spacing-6);
       border: none;
-      background: var(--color-neutral-0);
-      color: var(--color-neutral-900);
+      background: var(--ds-surface);
+      color: var(--ds-text);
       font-size: var(--font-size-base);
       font-weight: var(--font-weight-medium);
       text-align: left;
@@ -132,11 +132,11 @@ export interface MobileActionSheetData {
     }
 
     .action-sheet-item:hover:not(:disabled) {
-      background: var(--color-neutral-50);
+      background: var(--ds-surface-2);
     }
 
     .action-sheet-item:active:not(:disabled) {
-      background: var(--color-neutral-100);
+      background: var(--ds-bg);
     }
 
     .action-sheet-item:disabled {
@@ -157,49 +157,49 @@ export interface MobileActionSheetData {
     }
 
     .action-primary {
-      color: var(--color-primary-600);
+      color: var(--ds-marine);
     }
 
     .action-primary .action-icon {
-      color: var(--color-primary-600);
+      color: var(--ds-marine);
     }
 
     .action-accent {
-      color: var(--color-secondary-600);
+      color: var(--ds-primary-hover);
     }
 
     .action-accent .action-icon {
-      color: var(--color-secondary-600);
+      color: var(--ds-primary-hover);
     }
 
     .action-warn {
-      color: var(--color-error-600);
+      color: var(--ds-error);
     }
 
     .action-warn .action-icon {
-      color: var(--color-error-600);
+      color: var(--ds-error);
     }
 
     .action-success {
-      color: var(--color-success-600);
+      color: var(--ds-success);
     }
 
     .action-success .action-icon {
-      color: var(--color-success-600);
+      color: var(--ds-success);
     }
 
     .action-sheet-footer {
       padding: var(--spacing-3) var(--spacing-4);
-      border-top: var(--border-width-1) solid var(--color-neutral-200);
-      background: var(--color-neutral-50);
+      border-top: var(--border-width-1) solid var(--ds-divider);
+      background: var(--ds-surface-2);
     }
 
     .action-sheet-cancel {
       width: 100%;
       padding: var(--spacing-4);
       border: none;
-      background: var(--color-neutral-0);
-      color: var(--color-neutral-700);
+      background: var(--ds-surface);
+      color: var(--ds-text-muted);
       font-size: var(--font-size-base);
       font-weight: var(--font-weight-semibold);
       border-radius: var(--radius-lg);
@@ -209,11 +209,11 @@ export interface MobileActionSheetData {
     }
 
     .action-sheet-cancel:hover {
-      background: var(--color-neutral-100);
+      background: var(--ds-bg);
     }
 
     .action-sheet-cancel:active {
-      background: var(--color-neutral-200);
+      background: var(--ds-divider);
     }
 
     ::ng-deep .mat-divider {

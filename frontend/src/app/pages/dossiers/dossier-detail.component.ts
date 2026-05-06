@@ -23,9 +23,9 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { DsTabsComponent, DsTab } from '../../design-system/index';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../../design-system';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
-import { EmptyStateComponent } from '../../components/empty-state.component';
+import { DsEmptyStateComponent } from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
 import { WhatsappMessagingContainerComponent } from '../../components/whatsapp-messaging-container.component';
 import { MatAnchor } from '@angular/material/button';
 import { MessagingTabComponent } from './messaging-tab.component';
@@ -71,7 +71,7 @@ export interface WhatsAppTemplate {
     selector: 'app-dossier-detail',
     templateUrl: './dossier-detail.component.html',
     styleUrls: ['./dossier-detail.component.css'],
-    imports: [LoadingSkeletonComponent, CollaborationPresenceComponent, BadgeStatusComponent, RouterLink, MatIcon, MatTooltip, FormsModule, DsTabsComponent, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, EmptyStateComponent, WhatsappMessagingContainerComponent, MatAnchor, MessagingTabComponent, DocumentListComponent, ActivityTimelineComponent, MatPaginator, CollaborationActivityStreamComponent, CollaborationCursorComponent, CollaborationFilterShareComponent, QuickActionsComponent, PhoneFormatPipe]
+    imports: [LoadingSkeletonComponent, CollaborationPresenceComponent, BadgeStatusComponent, RouterLink, MatIcon, MatTooltip, FormsModule, DsTabsComponent, DsCardComponent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, DsEmptyStateComponent, WhatsappMessagingContainerComponent, MatAnchor, MessagingTabComponent, DocumentListComponent, ActivityTimelineComponent, MatPaginator, CollaborationActivityStreamComponent, CollaborationCursorComponent, CollaborationFilterShareComponent, QuickActionsComponent, PhoneFormatPipe]
 })
 export class DossierDetailComponent implements OnInit, OnDestroy {
   dossier: DossierResponse | null = null;

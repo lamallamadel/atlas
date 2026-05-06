@@ -23,7 +23,7 @@
 
 .form-section h3 {
   margin: 0 0 16px 0;
-  color: #333;
+  color: var(--ds-text);
   font-size: 18px;
   font-weight: 500;
 }
@@ -60,7 +60,7 @@
   gap: 12px;
   align-items: flex-start;
   padding: 12px;
-  background: #f5f5f5;
+  background: var(--ds-bg);
   border-radius: 4px;
 }
 
@@ -90,7 +90,7 @@
   justify-content: flex-end;
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--ds-divider);
 }
 
 .preview-panel {
@@ -105,13 +105,13 @@
 
 .preview-panel h3 {
   margin: 0 0 16px 0;
-  color: #333;
+  color: var(--ds-text);
   font-size: 18px;
   font-weight: 500;
 }
 
 .whatsapp-preview {
-  background: linear-gradient(135deg, #dcf8c6 0%, #e8f5e9 100%);
+  background: linear-gradient(135deg, var(--ds-success-hl) 0%, var(--ds-success-hl) 100%);
   border-radius: 8px;
   padding: 20px;
   min-height: 300px;
@@ -136,7 +136,7 @@
   white-space: pre-wrap;
   word-wrap: break-word;
   font-family: inherit;
-  color: #333;
+  color: var(--ds-text);
 }
 
 .preview-note {
@@ -145,10 +145,10 @@
   gap: 8px;
   margin-top: 16px;
   padding: 12px;
-  background: #fff3cd;
+  background: var(--ds-warning-hl);
   border-radius: 4px;
   font-size: 13px;
-  color: #856404;
+  color: var(--ds-warning);
 }
 
 .preview-note mat-icon {

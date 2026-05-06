@@ -29,15 +29,28 @@
   gap: 24px;
 }
 
-mat-card {
+.te-section-card {
+  display: block;
   margin-bottom: 24px;
 }
 
-mat-card-header {
+.te-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  padding: 16px 16px 0;
+  gap: 8px;
+}
+
+.te-card-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.te-card-body {
+  padding: 0 16px 16px;
 }
 
 .form-row {
@@ -64,9 +77,9 @@ mat-card-header {
   align-items: center;
   gap: 12px;
   padding: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--ds-divider);
   border-radius: 4px;
-  background-color: #fafafa;
+  background-color: var(--ds-surface-2);
 }
 
 .variable-item {

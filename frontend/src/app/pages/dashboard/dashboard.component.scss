@@ -26,7 +26,7 @@
     color: var(--ds-text-muted);
     cursor: pointer;
     transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
-    &--active { background: var(--ds-marine); color: #fff; }
+    &--active { background: var(--ds-marine); color: var(--ds-text-inverse); }
     &:hover:not(&--active) { background: var(--ds-surface-offset); }
   }
 }

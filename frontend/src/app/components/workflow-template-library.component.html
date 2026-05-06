@@ -1,20 +1,20 @@
 <div class="template-library-container">
-  <mat-card class="header-card">
-    <mat-card-header>
-      <mat-card-title>Workflow Template Library</mat-card-title>
-      <mat-card-subtitle>Choose from pre-built workflow templates for different business scenarios</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+  <ds-card class="header-card" [pad]="false" [elevation]="'sm'">
+    <div class="wfl-lib-header">
+      <h3 class="wfl-lib-title">Workflow Template Library</h3>
+      <p class="wfl-lib-subtitle">Choose from pre-built workflow templates for different business scenarios</p>
+    </div>
+    <div class="wfl-lib-header-body">
       <div class="actions">
         <button mat-raised-button color="primary" (click)="seedTemplates()">
           <mat-icon>refresh</mat-icon> Seed System Templates
         </button>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 
-  <mat-card class="filter-card">
-    <mat-card-content>
+  <ds-card class="filter-card" [pad]="false" [elevation]="'sm'">
+    <div class="wfl-filter-body">
       <mat-chip-listbox [(value)]="selectedCategory" (change)="filterByCategory($event.value)">
         <mat-chip-option value="">All Templates</mat-chip-option>
         @for (category of categories; track category) {
@@ -24,12 +24,12 @@
           </mat-chip-option>
         }
       </mat-chip-listbox>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 
   @if (isLoading) {
     <div class="loading-container">
-      <mat-spinner></mat-spinner>
+      <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
     </div>
   }
 
@@ -43,15 +43,17 @@
   @if (!isLoading && filteredTemplates.length > 0) {
     <div class="templates-grid">
       @for (template of filteredTemplates; track template) {
-        <mat-card class="template-card">
-          <mat-card-header>
-            <div mat-card-avatar [style.background-color]="getCategoryColor(template.category)">
+        <ds-card class="template-card" [pad]="false" [elevation]="'sm'">
+          <div class="wfl-tpl-header">
+            <div class="wfl-tpl-avatar" [style.background-color]="getCategoryColor(template.category)">
               <mat-icon>{{ getCategoryIcon(template.category) }}</mat-icon>
             </div>
-            <mat-card-title>{{ template.name }}</mat-card-title>
-            <mat-card-subtitle>{{ template.category }}</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
+            <div class="wfl-tpl-headings">
+              <h3 class="wfl-tpl-title">{{ template.name }}</h3>
+              <p class="wfl-tpl-subtitle">{{ template.category }}</p>
+            </div>
+          </div>
+          <div class="wfl-tpl-body">
             <p>{{ template.description }}</p>
             <div class="template-stats">
               <span class="stat">
@@ -63,13 +65,13 @@
                 {{ template.transitionCount }} transitions
               </span>
             </div>
-          </mat-card-content>
-          <mat-card-actions>
+          </div>
+          <div class="wfl-tpl-actions">
             <button mat-raised-button color="primary" (click)="instantiateTemplate(template.id, template.name)">
               <mat-icon>content_copy</mat-icon> Use Template
             </button>
-          </mat-card-actions>
-        </mat-card>
+          </div>
+        </ds-card>
       }
     </div>
   }

@@ -2,31 +2,42 @@ import { Component, OnInit, OnDestroy, input, output } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { OutboundMessageApiService, OutboundMessageResponse, OutboundMessageStatus } from '../../services/outbound-message-api.service';
-import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
-import { EmptyStateComponent } from '../../components/empty-state.component';
+import {
+  EmptyStateContext,
+  EmptyStateIllustrationsService,
+} from '../../services/empty-state-illustrations.service';
+import { DsEmptyStateComponent } from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
 
 @Component({
-    selector: 'app-outbound-message-list',
-    templateUrl: './outbound-message-list.component.html',
-    styleUrls: ['./outbound-message-list.component.css'],
-    imports: [EmptyStateComponent]
+  selector: 'app-outbound-message-list',
+  templateUrl: './outbound-message-list.component.html',
+  styleUrls: ['./outbound-message-list.component.css'],
+  imports: [DsEmptyStateComponent],
 })
 export class OutboundMessageListComponent implements OnInit, OnDestroy {
   readonly dossierId = input.required<number>();
   readonly retryMessage = output<OutboundMessageResponse>();
 
   messages: OutboundMessageResponse[] = [];
+  /** Textes état vide (messages sortants) — alignés sur EmptyStateIllustrationsService. */
+  messagesEmptyTitle = '';
+  messagesEmptyDescription = '';
   loading = false;
   error: string | null = null;
   private pollingSubscription?: Subscription;
   private readonly POLLING_INTERVAL = 5000;
 
   OutboundMessageStatus = OutboundMessageStatus;
-  EmptyStateContext = EmptyStateContext;
 
-  constructor(private outboundMessageService: OutboundMessageApiService) {}
+  constructor(
+    private outboundMessageService: OutboundMessageApiService,
+    private emptyIllustrations: EmptyStateIllustrationsService,
+  ) {}
 
   ngOnInit(): void {
+    const cfg = this.emptyIllustrations.getConfig(EmptyStateContext.NO_MESSAGES, true);
+    this.messagesEmptyTitle = cfg.title;
+    this.messagesEmptyDescription = cfg.message;
     this.loadMessages();
     this.startPolling();
   }

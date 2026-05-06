@@ -1,7 +1,6 @@
 <div class="calendar-view-container">
-  <mat-card class="calendar-card">
-    <mat-card-header>
-      <mat-card-title>
+  <ds-card class="calendar-card" [pad]="false" [elevation]="'sm'">
+    <div class="calendar-card-header">
         <div class="header-row">
           <h2>Calendrier des rendez-vous</h2>
           <div class="header-actions">
@@ -29,10 +28,9 @@
             </button>
           </div>
         </div>
-      </mat-card-title>
-    </mat-card-header>
+    </div>
 
-    <mat-card-content>
+    <div class="calendar-card-body">
       <div class="filters-section">
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>Filtrer par assigné</mat-label>
@@ -101,7 +99,7 @@
 
       @if (isLoading) {
         <div class="loading-state">
-          <mat-spinner diameter="50"></mat-spinner>
+          <ds-skeleton variant="circle" width="50px" height="50px"></ds-skeleton>
           <p>Chargement des rendez-vous...</p>
         </div>
       }
@@ -114,6 +112,6 @@
           Glissez-déposez pour déplacer ou redimensionner.
         </span>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-card>
 </div>

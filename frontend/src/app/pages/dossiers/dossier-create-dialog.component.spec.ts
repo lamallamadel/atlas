@@ -7,7 +7,6 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
@@ -57,7 +56,6 @@ describe('DossierCreateDialogComponent', () => {
         MatExpansionModule,
         MatIconModule,
         MatButtonModule,
-        MatProgressSpinnerModule,
         DossierCreateDialogComponent,
       ],
       providers: [

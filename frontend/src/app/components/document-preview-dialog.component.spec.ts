@@ -4,7 +4,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { DocumentPreviewDialogComponent } from './document-preview-dialog.component';
 import { DocumentApiService } from '../services/document-api.service';
@@ -32,7 +31,6 @@ describe('DocumentPreviewDialogComponent', () => {
         MatButtonModule,
         MatIconModule,
         MatTooltipModule,
-        MatProgressSpinnerModule,
         DocumentPreviewDialogComponent,
       ],
       providers: [

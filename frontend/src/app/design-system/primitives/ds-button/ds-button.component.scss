@@ -59,7 +59,7 @@
     background: var(--ds-error);
     color: var(--ds-text-inverse);
     &:hover:not(:disabled) {
-      background: #b71c1c;
+      background: color-mix(in srgb, var(--ds-error) 88%, var(--ds-text) 12%);
     }
   }
 
@@ -97,7 +97,7 @@
     width: 14px;
     height: 14px;
     border: 2px solid rgba(255, 255, 255, 0.35);
-    border-top-color: white;
+    border-top-color: var(--ds-text-inverse);
     border-radius: 50%;
     animation: ds-spin 0.7s linear infinite;
   }

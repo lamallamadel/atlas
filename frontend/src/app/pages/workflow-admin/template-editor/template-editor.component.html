@@ -9,11 +9,11 @@
   <div class="editor-content">
     <div class="form-section">
       <form [formGroup]="templateForm" (ngSubmit)="onSubmit()">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Basic Information</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+        <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
+          <div class="te-card-header">
+            <h3 class="te-card-title">Basic Information</h3>
+          </div>
+          <div class="te-card-body">
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Template Name</mat-label>
@@ -56,14 +56,14 @@
               <textarea matInput formControlName="description" rows="2"
               placeholder="Internal description of this template"></textarea>
             </mat-form-field>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </ds-card>
 
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Template Content</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+        <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
+          <div class="te-card-header">
+            <h3 class="te-card-title">Template Content</h3>
+          </div>
+          <div class="te-card-body">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Header (Optional)</mat-label>
               <input matInput formControlName="headerText" placeholder="Welcome to our service!">
@@ -97,17 +97,17 @@
                 <mat-icon>add_circle_outline</mat-icon>
               </button>
             </mat-form-field>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </ds-card>
 
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Buttons (Optional)</mat-card-title>
+        <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
+          <div class="te-card-header">
+            <h3 class="te-card-title">Buttons (Optional)</h3>
             <button mat-icon-button type="button" (click)="addButton()" [disabled]="isViewMode">
               <mat-icon>add</mat-icon>
             </button>
-          </mat-card-header>
-          <mat-card-content>
+          </div>
+          <div class="te-card-body">
             <div formArrayName="buttons" class="buttons-list">
               @for (button of buttons.controls; track button; let i = $index) {
                 <div [formGroupName]="i" class="button-item">
@@ -143,17 +143,17 @@
                 </div>
               }
             </div>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </ds-card>
 
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Variables</mat-card-title>
+        <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
+          <div class="te-card-header">
+            <h3 class="te-card-title">Variables</h3>
             <button mat-icon-button type="button" (click)="addVariable()" [disabled]="isViewMode">
               <mat-icon>add</mat-icon>
             </button>
-          </mat-card-header>
-          <mat-card-content>
+          </div>
+          <div class="te-card-body">
             <div formArrayName="variables" cdkDropList (cdkDropListDropped)="onVariableDrop($event)" class="variables-list">
               @for (variable of variables.controls; track variable; let i = $index) {
                 <div
@@ -191,8 +191,8 @@
                 </div>
               }
             </div>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </ds-card>
 
         <div class="form-actions">
           <button mat-button type="button" (click)="cancel()">Cancel</button>

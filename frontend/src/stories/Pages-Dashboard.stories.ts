@@ -30,7 +30,7 @@ import { Component } from '@angular/core';
         description="Suivez vos indicateurs, gérez vos dossiers et annonces en temps réel.">
         <ng-container slot="actions">
           <div style="display:flex;border:1px solid var(--ds-divider);border-radius:99px;overflow:hidden;">
-            <button style="height:32px;padding:0 14px;border:none;background:var(--ds-marine);color:#fff;font-size:12.5px;cursor:pointer;">Aujourd'hui</button>
+            <button style="height:32px;padding:0 14px;border:none;background:var(--ds-marine);color:var(--ds-text-inverse);font-size:12.5px;cursor:pointer;">Aujourd'hui</button>
             <button style="height:32px;padding:0 14px;border:none;background:transparent;color:var(--ds-text-muted);font-size:12.5px;cursor:pointer;">7 jours</button>
             <button style="height:32px;padding:0 14px;border:none;background:transparent;color:var(--ds-text-muted);font-size:12.5px;cursor:pointer;">30 jours</button>
           </div>

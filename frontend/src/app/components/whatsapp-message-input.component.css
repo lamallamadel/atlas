@@ -1,6 +1,6 @@
 .message-input-container {
-  background: #f0f0f0;
-  border-top: 1px solid #d1d7db;
+  background: var(--ds-surface-offset);
+  border-top: 1px solid var(--ds-divider);
   position: sticky;
   bottom: 0;
   z-index: 100;
@@ -8,7 +8,7 @@
 }
 
 .message-input-container.offline {
-  background: #fff3e0;
+  background: var(--ds-warning-hl);
 }
 
 .queue-indicator {
@@ -16,10 +16,10 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #fff8e1;
-  border-bottom: 1px solid #ffeb3b;
+  background: var(--ds-warning-hl);
+  border-bottom: 1px solid var(--ds-warning-hl);
   font-size: 13px;
-  color: #f57c00;
+  color: var(--ds-warning);
 }
 
 .queue-indicator mat-icon {
@@ -33,14 +33,14 @@
 }
 
 .template-chip {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--ds-marine-hl);
+  color: var(--ds-marine);
 }
 
 .template-variables {
   padding: 12px 16px;
   background: white;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--ds-divider);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -79,7 +79,7 @@
   min-height: 40px;
   max-height: 120px;
   padding: 10px 12px;
-  border: 1px solid #d1d7db;
+  border: 1px solid var(--ds-divider);
   border-radius: 20px;
   font-size: 14px;
   font-family: inherit;
@@ -92,12 +92,12 @@
 
 .message-textarea:focus {
   outline: none;
-  border-color: #00a884;
+  border-color: var(--ds-success);
 }
 
 .message-textarea:disabled {
-  background: #f5f5f5;
-  color: #999;
+  background: var(--ds-bg);
+  color: var(--ds-text-faint);
   cursor: not-allowed;
 }
 
@@ -106,17 +106,17 @@
   width: 48px;
   height: 48px;
   min-height: 48px;
-  background: #00a884;
+  background: var(--ds-success);
   transition: all 0.2s;
 }
 
 .send-button:not(:disabled):hover {
-  background: #008c6f;
+  background: var(--ds-success);
   transform: scale(1.05);
 }
 
 .send-button:disabled {
-  background: #d1d7db;
+  background: var(--ds-divider);
   cursor: not-allowed;
 }
 

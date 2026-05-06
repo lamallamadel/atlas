@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ChartColorPaletteService } from './chart-color-palette.service';
+import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
 
 describe('ChartColorPaletteService', () => {
   let service: ChartColorPaletteService;
@@ -56,20 +57,26 @@ describe('ChartColorPaletteService', () => {
     expect(alphaColor).toBe('rgba(44, 90, 160, 0.5)');
   });
 
+  it('should generate color with custom alpha from hex', () => {
+    const hex = DS_CHART_FALLBACK_HEX['--ds-marine'];
+    const alphaColor = service.getColorWithAlpha(hex, 0.5);
+    expect(alphaColor).toBe('rgba(13, 44, 74, 0.5)');
+  });
+
   it('should get contrast color for dark background', () => {
-    const darkBg = 'rgba(44, 90, 160, 1)';
+    const darkBg = 'rgba(13, 44, 74, 1)';
     const contrast = service.getContrastColor(darkBg);
-    expect(contrast).toBe('#FFFFFF');
+    expect(contrast).toBe(DS_CHART_FALLBACK_HEX['--ds-text-inverse']);
   });
 
   it('should get contrast color for light background', () => {
     const lightBg = 'rgba(240, 240, 240, 1)';
     const contrast = service.getContrastColor(lightBg);
-    expect(contrast).toBe('#212121');
+    expect(contrast).toBe(DS_CHART_FALLBACK_HEX['--ds-text']);
   });
 
   it('should generate gradient', () => {
-    const gradient = service.generateGradient('rgba(44, 90, 160, 1)', 5);
+    const gradient = service.generateGradient('rgba(13, 44, 74, 1)', 5);
     expect(gradient.length).toBe(5);
     expect(gradient[0]).toMatch(/rgba\(\d+,\s*\d+,\s*\d+,\s*[\d.]+\)/);
   });

@@ -1,19 +1,23 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { CommonModule } from '@angular/common';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { KanbanColumnComponent, DsKanbanColumn } from '../app/design-system/patterns/kanban-column/kanban-column.component';
+import {
+  KanbanColumnComponent,
+  DsKanbanColumn,
+  type DsKanbanCard,
+} from '../app/design-system/patterns/kanban-column/kanban-column.component';
 
-const CARDS_NEW = [
-  { id: 1, title: 'Marie Dupont — Villa 5 pièces', subtitle: '+33 6 12 34 56 78', status: 'new', badge: 'Nouveau', badgeStatus: 'new', assigneeInitials: 'MD', dueDate: "Auj.", dueDateUrgent: true, tags: ['Acheteur', 'Île-de-France'], dossierRef: '#1042' },
+const CARDS_NEW: DsKanbanCard[] = [
+  { id: 1, title: 'Marie Dupont — Villa 5 pièces', subtitle: '+33 6 12 34 56 78 · #1042', status: 'new', badge: 'Nouveau', badgeStatus: 'new', assigneeInitials: 'MD', dueDate: "Auj.", dueDateUrgent: true, tags: ['Acheteur', 'Île-de-France'] },
   { id: 2, title: 'Jean Martin — Appart. T3', subtitle: '+33 7 89 01 23 45', status: 'new', badge: 'Nouveau', badgeStatus: 'new', assigneeInitials: 'JM', dueDate: 'Demain', tags: ['Locataire'] },
 ];
 
-const CARDS_QUALIFY = [
+const CARDS_QUALIFY: DsKanbanCard[] = [
   { id: 3, title: 'Sophie Bernard — Maison', subtitle: '+33 6 55 44 33 22', status: 'qualification', badge: 'Qualif.', badgeStatus: 'qualification', assigneeInitials: 'SB', dueDate: '6 mai' },
 ];
 
-const CARDS_WON = [
-  { id: 4, title: 'Paul Leroy — Duplex Paris 11', subtitle: '520 000 €', status: 'won', badge: 'Gagné', badgeStatus: 'won', assigneeInitials: 'PL', dossierRef: '#1039' },
+const CARDS_WON: DsKanbanCard[] = [
+  { id: 4, title: 'Paul Leroy — Duplex Paris 11', subtitle: '520 000 € · #1039', status: 'won', badge: 'Gagné', badgeStatus: 'won', assigneeInitials: 'PL' },
 ];
 
 const COL_NEW: DsKanbanColumn = {

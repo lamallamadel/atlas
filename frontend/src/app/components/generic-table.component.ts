@@ -13,7 +13,8 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { NgStyle } from '@angular/common';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
-import { MatCard, MatCardContent, MatCardActions } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
+import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
 
 export interface ColumnConfig {
   key: string;
@@ -46,7 +47,7 @@ export interface PaginationData {
     templateUrl: './generic-table.component.html',
     styleUrls: ['./generic-table.component.scss'],
     animations: [listStaggerAnimation],
-    imports: [MatIconButton, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, NgStyle, MatMenuTrigger, MatMenu, MatMenuItem, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, MatCard, MatCardContent, MatCardActions, MatPaginator]
+    imports: [MatIconButton, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, NgStyle, MatMenuTrigger, MatMenu, MatMenuItem, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, DsCardComponent, MatPaginator]
 })
 export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   readonly columns = input<ColumnConfig[]>([]);
@@ -301,12 +302,12 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
 
   getActionColor(color?: string): string {
     const colorMap: { [key: string]: string } = {
-      'primary': '#2c5aa0',
-      'accent': '#e67e22',
-      'warn': '#e74c3c',
-      'success': '#4caf50',
-      'error': '#e74c3c',
-      'warning': '#ff9800'
+      primary: DS_CHART_FALLBACK_HEX['--ds-marine'],
+      accent: DS_CHART_FALLBACK_HEX['--ds-primary'],
+      warn: DS_CHART_FALLBACK_HEX['--ds-error'],
+      success: DS_CHART_FALLBACK_HEX['--ds-success'],
+      error: DS_CHART_FALLBACK_HEX['--ds-error'],
+      warning: DS_CHART_FALLBACK_HEX['--ds-warning'],
     };
     return color ? (colorMap[color] || color) : colorMap['primary'];
   }

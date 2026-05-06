@@ -18,7 +18,7 @@ const ROWS = [
 ];
 
 export default {
-  title: 'Design System/Primitives/DsTable',
+  title: 'Design System/Patterns/Table',
   component: DsTableComponent,
   tags: ['autodocs'],
 } as Meta<DsTableComponent>;

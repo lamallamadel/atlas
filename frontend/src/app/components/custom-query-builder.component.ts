@@ -1,22 +1,46 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AnalyticsApiService, CustomQuery } from '../services/analytics-api.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { DsCardComponent } from '../design-system';
 
 @Component({
   selector: 'app-custom-query-builder',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    DsCardComponent,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatTableModule,
+    MatChipsModule,
+    MatTooltipModule,
+  ],
   template: `
     <div class="custom-query-builder">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Custom SQL Query Builder</mat-card-title>
+      <ds-card [pad]="false" [elevation]="'sm'">
+        <div class="cq-card-header">
+          <h3 class="cq-card-title">Custom SQL Query Builder</h3>
           <button mat-raised-button color="primary" (click)="createNewQuery()">
             <mat-icon>add</mat-icon>
             New Query
           </button>
-        </mat-card-header>
-    
-        <mat-card-content>
+        </div>
+        <div class="cq-card-body">
           @if (!editingQuery) {
             <div class="query-list">
               <mat-form-field appearance="outline" class="filter-field">
@@ -127,8 +151,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
               </button>
             </div>
           }
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </ds-card>
     </div>
     `,
   styles: [`
@@ -136,11 +160,24 @@ import { MatSnackBar } from '@angular/material/snack-bar';
       padding: 20px;
     }
 
-    mat-card-header {
+    .cq-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      padding: 16px 16px 0;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .cq-card-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .cq-card-body {
+      padding: 0 16px 16px;
     }
 
     .filter-field {

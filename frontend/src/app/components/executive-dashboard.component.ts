@@ -4,10 +4,10 @@ import { PredictiveAnalyticsService, PipelineForecast } from '../services/predic
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { DsCardComponent } from '../design-system';
 import { NgChartsModule } from 'ng2-charts';
 import { MatDivider } from '@angular/material/list';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface ExecutiveKPI {
   label: string;
@@ -22,7 +22,7 @@ interface ExecutiveKPI {
     selector: 'app-executive-dashboard',
     templateUrl: './executive-dashboard.component.html',
     styleUrls: ['./executive-dashboard.component.scss'],
-    imports: [MatButton, MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, NgChartsModule, MatDivider, MatProgressSpinner]
+    imports: [MatButton, MatIcon, DsCardComponent, DsSkeletonComponent, NgChartsModule, MatDivider]
 })
 export class ExecutiveDashboardComponent implements OnInit {
   loading = false;

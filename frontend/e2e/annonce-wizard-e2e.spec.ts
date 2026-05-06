@@ -98,7 +98,7 @@ class AnnoncesListPage {
 
   async verifyStatusBadge(title: string, statusText: string): Promise<boolean> {
     const row = this.page.locator('app-generic-table table tbody tr').filter({ hasText: title });
-    const badge = row.locator('.badge-status').filter({ hasText: statusText });
+    const badge = row.locator('.ds-badge').filter({ hasText: statusText });
     return (await badge.count()) > 0;
   }
 
@@ -342,7 +342,7 @@ test.describe('Annonce Wizard E2E Tests', () => {
     expect(await annoncesPage.verifyAnnonceInList(annonceTitle)).toBeTruthy();
 
     const row = page.locator('app-generic-table table tbody tr').filter({ hasText: annonceTitle });
-    const statusBadge = row.locator('.badge-status');
+    const statusBadge = row.locator('.ds-badge');
     await expect(statusBadge).toBeVisible({ timeout: 5000 });
 
     await annoncesPage.openAnnonceDetail(annonceTitle);

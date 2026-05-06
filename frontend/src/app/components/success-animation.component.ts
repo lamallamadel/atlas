@@ -42,7 +42,7 @@ import { trigger, state, style, transition, animate, keyframes } from '@angular/
       stroke-dashoffset: 166;
       stroke-width: 2;
       stroke-miterlimit: 10;
-      stroke: var(--color-success-500, #4caf50);
+      stroke: var(--ds-success);
       fill: none;
       animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
     }
@@ -52,7 +52,7 @@ import { trigger, state, style, transition, animate, keyframes } from '@angular/
       stroke-dasharray: 48;
       stroke-dashoffset: 48;
       stroke-width: 3;
-      stroke: var(--color-success-500, #4caf50);
+      stroke: var(--ds-success);
       animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
     }
 
@@ -65,7 +65,7 @@ import { trigger, state, style, transition, animate, keyframes } from '@angular/
     .success-message {
       font-size: 18px;
       font-weight: 500;
-      color: var(--color-success-700, #388e3c);
+      color: var(--ds-success);
       text-align: center;
       max-width: 300px;
     }

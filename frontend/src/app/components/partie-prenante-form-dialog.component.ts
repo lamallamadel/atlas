@@ -7,7 +7,7 @@ import { MatIcon } from '@angular/material/icon';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { NgClass } from '@angular/common';
 import { MatButton } from '@angular/material/button';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 export interface PartiePrenanteFormData {
   id?: number;
@@ -30,7 +30,7 @@ export interface PartiePrenanteFormData {
             ])
         ])
     ],
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, NgClass, MatDialogActions, MatButton, MatProgressSpinner]
+    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, NgClass, MatDialogActions, MatButton, DsSkeletonComponent]
 })
 export class PartiePrenanteFormDialogComponent implements OnInit {
   partieForm!: FormGroup;

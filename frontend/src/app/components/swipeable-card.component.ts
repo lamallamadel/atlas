@@ -59,7 +59,7 @@ export interface SwipeAction {
     .card-content {
       position: relative;
       z-index: 2;
-      background: var(--color-neutral-0, #ffffff);
+      background: var(--ds-surface);
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: grab;
       will-change: transform;
@@ -82,7 +82,7 @@ export interface SwipeAction {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: var(--ds-text-inverse);
       z-index: 1;
       opacity: 0;
       transition: opacity 0.3s ease;
@@ -116,7 +116,7 @@ export interface SwipeAction {
 
     /* Dark theme */
     .dark-theme .card-content {
-      background: var(--color-neutral-800, #424242);
+      background: var(--ds-surface);
     }
   `],
     imports: [MatIcon]

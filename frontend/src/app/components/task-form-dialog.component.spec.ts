@@ -8,7 +8,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -27,7 +26,6 @@ describe('TaskFormDialogComponent', () => {
         MatDatepickerModule,
         MatNativeDateModule,
         MatButtonModule,
-        MatProgressSpinnerModule,
         BrowserAnimationsModule, TaskFormDialogComponent],
     providers: [
         { provide: MatDialogRef, useValue: {} },

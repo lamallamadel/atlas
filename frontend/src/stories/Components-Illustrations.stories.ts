@@ -1,21 +1,22 @@
-import { Meta, StoryObj } from '@storybook/angular';
-import { moduleMetadata } from '@storybook/angular';
+import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
+import { DsButtonComponent } from '../app/design-system/primitives/ds-button/ds-button.component';
+import { DsIconComponent } from '../app/design-system/icons/ds-icon.component';
 
 const meta: Meta = {
-  title: 'Components/Illustrations',
+  title: 'Design System/Recipes/Illustrations',
   tags: ['autodocs'],
   decorators: [
     moduleMetadata({
-      imports: [CommonModule, MatIconModule],
+      imports: [CommonModule, DsButtonComponent, DsIconComponent],
     }),
   ],
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Illustration components for empty states, error states, and success messages.',
+        component:
+          'Blocs illustratifs (icônes DS + texte + CTA). Préférer ds-empty-state pour les cas standard ; ce fichier montre des compositions marketing / onboarding.',
       },
     },
   },
@@ -24,54 +25,52 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-export const EmptyStates: Story = {
+const panel =
+  'background: var(--ds-surface); padding: 40px 28px; border-radius: var(--ds-radius-xl); box-shadow: var(--ds-shadow-md); text-align: center; border: 1px solid var(--ds-divider);';
+const iconWrap =
+  'width: 112px; height: 112px; margin: 0 auto 20px; background: var(--ds-surface-2); border-radius: 50%; display: flex; align-items: center; justify-content: center;';
+
+export const EmptyAndErrors: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Empty States</h2>
-        
-        <div style="display: grid; gap: 32px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-          <!-- No Data -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-neutral-100); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-neutral-400);">folder_open</mat-icon>
-            </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">No Dossiers Yet</h3>
-            <p style="margin: 0 0 24px 0; color: var(--color-neutral-600); line-height: 1.6;">
-              Create your first dossier to get started
-            </p>
-            <button mat-raised-button color="primary">
-              <mat-icon>add</mat-icon>
-              Create Dossier
-            </button>
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Vides & erreurs</h2>
+        <div style="display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <div style="${panel}">
+            <div style="${iconWrap}"><ds-icon name="folder" [size]="24" style="color:var(--ds-text-faint)"></ds-icon></div>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">Aucun dossier</h3>
+            <p style="margin: 0 0 20px; color: var(--ds-text-muted); line-height: 1.55; font-size: 14px;">Créez votre premier dossier pour commencer.</p>
+            <ds-button variant="marine" size="md">Nouveau dossier</ds-button>
           </div>
-
-          <!-- No Results -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-neutral-100); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-neutral-400);">search_off</mat-icon>
-            </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">No Results Found</h3>
-            <p style="margin: 0 0 24px 0; color: var(--color-neutral-600); line-height: 1.6;">
-              Try adjusting your search or filters
-            </p>
-            <button mat-stroked-button color="primary">
-              Clear Filters
-            </button>
+          <div style="${panel}">
+            <div style="${iconWrap}"><ds-icon name="search" [size]="24" style="color:var(--ds-text-faint)"></ds-icon></div>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">Aucun résultat</h3>
+            <p style="margin: 0 0 20px; color: var(--ds-text-muted); line-height: 1.55; font-size: 14px;">Élargissez la recherche ou réinitialisez les filtres.</p>
+            <ds-button variant="ghost" size="md">Réinitialiser</ds-button>
           </div>
-
-          <!-- No Messages -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-info-50); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-info-400);">mail_outline</mat-icon>
-            </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">No Messages</h3>
-            <p style="margin: 0 0 24px 0; color: var(--color-neutral-600); line-height: 1.6;">
-              Your inbox is empty
-            </p>
-            <button mat-button color="primary">
-              Refresh
-            </button>
+          <div style="${panel}">
+            <div style="${iconWrap}background:var(--ds-marine-hl);"><ds-icon name="mail" [size]="24" style="color:var(--ds-marine)"></ds-icon></div>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">Aucun message</h3>
+            <p style="margin: 0 0 20px; color: var(--ds-text-muted); line-height: 1.55; font-size: 14px;">Votre boîte est vide.</p>
+            <ds-button variant="ghost" size="md">Actualiser</ds-button>
+          </div>
+          <div style="${panel}">
+            <div style="${iconWrap}background:color-mix(in srgb,var(--ds-error) 10%,transparent);"><ds-icon name="alert-circle" [size]="24" style="color:var(--ds-error)"></ds-icon></div>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">Échec du chargement</h3>
+            <p style="margin: 0 0 20px; color: var(--ds-text-muted); line-height: 1.55; font-size: 14px;">Réessayez dans un instant.</p>
+            <ds-button variant="danger" size="md">Réessayer</ds-button>
+          </div>
+          <div style="${panel}">
+            <div style="${iconWrap}"><ds-icon name="map" [size]="24" style="color:var(--ds-warning)"></ds-icon></div>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">Hors ligne</h3>
+            <p style="margin: 0 0 20px; color: var(--ds-text-muted); line-height: 1.55; font-size: 14px;">Vérifiez la connexion réseau.</p>
+            <ds-button variant="marine" size="md">Réessayer</ds-button>
+          </div>
+          <div style="${panel}">
+            <div style="${iconWrap}"><ds-icon name="close" [size]="24" style="color:var(--ds-text-faint)"></ds-icon></div>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">Page introuvable</h3>
+            <p style="margin: 0 0 20px; color: var(--ds-text-muted); line-height: 1.55; font-size: 14px;">L’URL demandée n’existe pas.</p>
+            <ds-button variant="marine" size="md">Accueil</ds-button>
           </div>
         </div>
       </div>
@@ -79,53 +78,29 @@ export const EmptyStates: Story = {
   }),
 };
 
-export const ErrorStates: Story = {
+export const Success: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Error States</h2>
-        
-        <div style="display: grid; gap: 32px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-          <!-- Generic Error -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-error-50); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-error-500);">error_outline</mat-icon>
-            </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">Something Went Wrong</h3>
-            <p style="margin: 0 0 24px 0; color: var(--color-neutral-600); line-height: 1.6;">
-              We couldn't complete your request. Please try again.
-            </p>
-            <button mat-raised-button color="warn">
-              Try Again
-            </button>
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Succès</h2>
+        <div style="display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <div style="${panel}">
+            <div style="${iconWrap}background:var(--ds-success-hl);"><ds-icon name="check" [size]="24" style="color:var(--ds-success)"></ds-icon></div>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">Enregistré</h3>
+            <p style="margin: 0 0 20px; color: var(--ds-text-muted); font-size: 14px;">Vos changements sont sauvegardés.</p>
+            <ds-button variant="marine" size="md">Continuer</ds-button>
           </div>
-
-          <!-- Network Error -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-warning-50); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-warning-500);">wifi_off</mat-icon>
-            </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">No Internet Connection</h3>
-            <p style="margin: 0 0 24px 0; color: var(--color-neutral-600); line-height: 1.6;">
-              Please check your network connection
-            </p>
-            <button mat-stroked-button color="primary">
-              Retry
-            </button>
+          <div style="${panel}">
+            <div style="${iconWrap}background:var(--ds-marine-hl);"><ds-icon name="mail" [size]="24" style="color:var(--ds-marine)"></ds-icon></div>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">E-mail envoyé</h3>
+            <p style="margin: 0 0 20px; color: var(--ds-text-muted); font-size: 14px;">Consultez votre boîte de réception.</p>
+            <ds-button variant="ghost" size="md">OK</ds-button>
           </div>
-
-          <!-- 404 Error -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-neutral-100); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-neutral-400);">not_interested</mat-icon>
-            </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">Page Not Found</h3>
-            <p style="margin: 0 0 24px 0; color: var(--color-neutral-600); line-height: 1.6;">
-              The page you're looking for doesn't exist
-            </p>
-            <button mat-raised-button color="primary">
-              Go Home
-            </button>
+          <div style="${panel}">
+            <div style="${iconWrap}background:var(--ds-success-hl);"><ds-icon name="upload" [size]="24" style="color:var(--ds-success)"></ds-icon></div>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">Import terminé</h3>
+            <p style="margin: 0 0 20px; color: var(--ds-text-muted); font-size: 14px;">Les fichiers sont prêts.</p>
+            <ds-button variant="ghost" size="md">Voir</ds-button>
           </div>
         </div>
       </div>
@@ -133,211 +108,69 @@ export const ErrorStates: Story = {
   }),
 };
 
-export const SuccessStates: Story = {
+export const Loading: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Success States</h2>
-        
-        <div style="display: grid; gap: 32px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-          <!-- Generic Success -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-success-50); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-success-500);">check_circle</mat-icon>
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Chargement (marketing)</h2>
+        <p style="color:var(--ds-text-muted);font-size:14px;margin-bottom:20px;">En production préférer ds-skeleton (recipe Loading States).</p>
+        <div style="display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+          <div style="${panel}">
+            <div style="${iconWrap}background:var(--ds-marine-hl);">
+              <div class="sb-ill-spin" aria-hidden="true"></div>
             </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">Success!</h3>
-            <p style="margin: 0 0 24px 0; color: var(--color-neutral-600); line-height: 1.6;">
-              Your changes have been saved successfully
-            </p>
-            <button mat-raised-button color="primary">
-              Continue
-            </button>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">Chargement…</h3>
+            <p style="margin: 0; color: var(--ds-text-muted); font-size: 14px;">Merci de patienter.</p>
           </div>
-
-          <!-- Email Sent -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-info-50); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-info-500);">mark_email_read</mat-icon>
+          <div style="${panel}">
+            <div style="${iconWrap}background:var(--ds-primary-subtle);">
+              <ds-icon name="tasks" [size]="24" class="sb-ill-pulse" style="color:var(--ds-primary)"></ds-icon>
             </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">Email Sent</h3>
-            <p style="margin: 0 0 24px 0; color: var(--color-neutral-600); line-height: 1.6;">
-              Check your inbox for further instructions
-            </p>
-            <button mat-button color="primary">
-              OK
-            </button>
-          </div>
-
-          <!-- Upload Complete -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-success-50); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-success-500);">cloud_done</mat-icon>
-            </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">Upload Complete</h3>
-            <p style="margin: 0 0 24px 0; color: var(--color-neutral-600); line-height: 1.6;">
-              3 files uploaded successfully
-            </p>
-            <button mat-stroked-button color="primary">
-              View Files
-            </button>
-          </div>
-        </div>
-      </div>
-    `,
-  }),
-};
-
-export const LoadingStates: Story = {
-  render: () => ({
-    template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Loading States</h2>
-        
-        <div style="display: grid; gap: 32px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-          <!-- Loading Data -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-primary-50); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-primary-500); animation: spin 2s linear infinite;">refresh</mat-icon>
-            </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">Loading...</h3>
-            <p style="margin: 0; color: var(--color-neutral-600); line-height: 1.6;">
-              Please wait while we fetch your data
-            </p>
-          </div>
-
-          <!-- Processing -->
-          <div style="background: white; padding: 48px 32px; border-radius: 12px; box-shadow: var(--shadow-2); text-align: center;">
-            <div style="width: 120px; height: 120px; margin: 0 auto 24px; background: var(--color-secondary-50); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: var(--color-secondary-500); animation: pulse 1.5s ease-in-out infinite;">hourglass_empty</mat-icon>
-            </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-neutral-900);">Processing...</h3>
-            <p style="margin: 0 0 16px 0; color: var(--color-neutral-600); line-height: 1.6;">
-              This may take a few moments
-            </p>
-            <div style="width: 100%; height: 4px; background: var(--color-neutral-200); border-radius: 2px; overflow: hidden;">
-              <div style="width: 60%; height: 100%; background: var(--color-primary-500); animation: progress 2s ease-in-out infinite;"></div>
+            <h3 style="margin: 0 0 8px; font-size: 18px;">Traitement…</h3>
+            <div style="margin-top:12px;height:4px;background:var(--ds-surface-offset);border-radius:2px;overflow:hidden;">
+              <div class="sb-ill-bar"></div>
             </div>
           </div>
         </div>
-
         <style>
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-          }
-          
-          @keyframes progress {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(250%); }
-          }
+          .sb-ill-spin { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--ds-surface-offset); border-top-color: var(--ds-marine); animation: sb-ill-rot 0.8s linear infinite; }
+          @keyframes sb-ill-rot { to { transform: rotate(360deg); } }
+          .sb-ill-pulse { animation: sb-ill-p 1.2s ease-in-out infinite; }
+          @keyframes sb-ill-p { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+          .sb-ill-bar { height: 100%; width: 55%; background: var(--ds-marine); animation: sb-ill-prog 1.5s ease-in-out infinite; }
+          @keyframes sb-ill-prog { 0% { transform: translateX(-100%); } 100% { transform: translateX(120%); } }
         </style>
       </div>
     `,
   }),
 };
 
-export const OnboardingIllustrations: Story = {
+export const Onboarding: Story = {
   render: () => ({
     template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Onboarding Illustrations</h2>
-        
-        <div style="display: grid; gap: 32px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-          <!-- Step 1 -->
-          <div style="background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100)); padding: 40px 24px; border-radius: 12px; text-align: center;">
-            <div style="width: 100px; height: 100px; margin: 0 auto 20px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-2);">
-              <mat-icon style="font-size: 56px; width: 56px; height: 56px; color: var(--color-primary-500);">person_add</mat-icon>
+      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
+        <h2 style="margin-bottom: 24px;">Onboarding</h2>
+        <div style="display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+          <div style="background: linear-gradient(145deg, var(--ds-marine-hl), var(--ds-surface-2)); padding: 36px 22px; border-radius: var(--ds-radius-xl); text-align: center; border: 1px solid var(--ds-divider);">
+            <div style="width: 88px; height: 88px; margin: 0 auto 16px; background: var(--ds-surface); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--ds-shadow-sm);">
+              <ds-icon name="user" [size]="24" style="color:var(--ds-marine)"></ds-icon>
             </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-primary-900);">Create Account</h3>
-            <p style="margin: 0; color: var(--color-primary-800); line-height: 1.6; font-size: 14px;">
-              Sign up in seconds and get started
-            </p>
+            <h3 style="margin: 0 0 8px; font-size: 17px;">Créer un compte</h3>
+            <p style="margin: 0; color: var(--ds-text-muted); font-size: 14px; line-height: 1.5;">Inscription rapide</p>
           </div>
-
-          <!-- Step 2 -->
-          <div style="background: linear-gradient(135deg, var(--color-secondary-50), var(--color-secondary-100)); padding: 40px 24px; border-radius: 12px; text-align: center;">
-            <div style="width: 100px; height: 100px; margin: 0 auto 20px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-2);">
-              <mat-icon style="font-size: 56px; width: 56px; height: 56px; color: var(--color-secondary-500);">business_center</mat-icon>
+          <div style="background: linear-gradient(145deg, var(--ds-primary-subtle), var(--ds-surface-2)); padding: 36px 22px; border-radius: var(--ds-radius-xl); text-align: center; border: 1px solid var(--ds-divider);">
+            <div style="width: 88px; height: 88px; margin: 0 auto 16px; background: var(--ds-surface); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--ds-shadow-sm);">
+              <ds-icon name="building" [size]="24" style="color:var(--ds-primary)"></ds-icon>
             </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-secondary-900);">Add Properties</h3>
-            <p style="margin: 0; color: var(--color-secondary-800); line-height: 1.6; font-size: 14px;">
-              Upload your property listings
-            </p>
+            <h3 style="margin: 0 0 8px; font-size: 17px;">Publier des biens</h3>
+            <p style="margin: 0; color: var(--ds-text-muted); font-size: 14px; line-height: 1.5;">Ajoutez vos annonces</p>
           </div>
-
-          <!-- Step 3 -->
-          <div style="background: linear-gradient(135deg, var(--color-success-50), var(--color-success-100)); padding: 40px 24px; border-radius: 12px; text-align: center;">
-            <div style="width: 100px; height: 100px; margin: 0 auto 20px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-2);">
-              <mat-icon style="font-size: 56px; width: 56px; height: 56px; color: var(--color-success-500);">rocket_launch</mat-icon>
+          <div style="background: linear-gradient(145deg, var(--ds-success-hl), var(--ds-surface-2)); padding: 36px 22px; border-radius: var(--ds-radius-xl); text-align: center; border: 1px solid var(--ds-divider);">
+            <div style="width: 88px; height: 88px; margin: 0 auto 16px; background: var(--ds-surface); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--ds-shadow-sm);">
+              <ds-icon name="star" [size]="24" style="color:var(--ds-success)"></ds-icon>
             </div>
-            <h3 style="margin: 0 0 8px 0; color: var(--color-success-900);">Start Selling</h3>
-            <p style="margin: 0; color: var(--color-success-800); line-height: 1.6; font-size: 14px;">
-              Manage leads and close deals
-            </p>
-          </div>
-        </div>
-      </div>
-    `,
-  }),
-};
-
-export const CodeExamples: Story = {
-  render: () => ({
-    template: `
-      <div style="font-family: system-ui, -apple-system, sans-serif;">
-        <h2 style="margin-bottom: 24px; color: var(--color-neutral-900);">Code Examples</h2>
-        
-        <div style="display: grid; gap: 24px;">
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">Empty State HTML</h3>
-            <pre style="background: var(--color-neutral-50); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 13px; line-height: 1.6;"><code>&lt;div class="empty-state"&gt;
-  &lt;div class="empty-state__icon"&gt;
-    &lt;mat-icon&gt;folder_open&lt;/mat-icon&gt;
-  &lt;/div&gt;
-  &lt;h3 class="empty-state__title"&gt;No Dossiers Yet&lt;/h3&gt;
-  &lt;p class="empty-state__message"&gt;
-    Create your first dossier to get started
-  &lt;/p&gt;
-  &lt;button mat-raised-button color="primary"&gt;
-    &lt;mat-icon&gt;add&lt;/mat-icon&gt;
-    Create Dossier
-  &lt;/button&gt;
-&lt;/div&gt;</code></pre>
-          </div>
-
-          <div>
-            <h3 style="margin-bottom: 16px; color: var(--color-neutral-800);">CSS Styling</h3>
-            <pre style="background: var(--color-neutral-50); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 13px; line-height: 1.6;"><code>.empty-state {
-  text-align: center;
-  padding: 48px 32px;
-}
-
-.empty-state__icon {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 24px;
-  background: var(--color-neutral-100);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.empty-state__title {
-  margin: 0 0 8px 0;
-  color: var(--color-neutral-900);
-}
-
-.empty-state__message {
-  margin: 0 0 24px 0;
-  color: var(--color-neutral-600);
-  line-height: 1.6;
-}</code></pre>
+            <h3 style="margin: 0 0 8px; font-size: 17px;">Conclure des ventes</h3>
+            <p style="margin: 0; color: var(--ds-text-muted); font-size: 14px; line-height: 1.5;">Suivez vos dossiers</p>
           </div>
         </div>
       </div>

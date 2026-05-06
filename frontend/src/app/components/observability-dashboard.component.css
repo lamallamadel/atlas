@@ -52,12 +52,12 @@
 }
 
 .obs-date-input:hover {
-  border-color: var(--ds-border-strong, var(--ds-marine, #0d2c4a));
+  border-color: var(--ds-border-strong, var(--ds-marine, var(--ds-marine)));
 }
 
 .obs-date-input:focus {
   outline: none;
-  border-color: var(--ds-marine, #0d2c4a);
+  border-color: var(--ds-marine, var(--ds-marine));
   box-shadow: 0 0 0 3px var(--ds-marine-soft, rgba(13, 44, 74, .12));
 }
 
@@ -76,8 +76,8 @@
 }
 
 .obs-export-trigger:hover {
-  background: var(--ds-surface-hover, var(--ds-bg-soft, #f5f7fa));
-  border-color: var(--ds-border-strong, var(--ds-marine, #0d2c4a));
+  background: var(--ds-surface-hover, var(--ds-bg-soft, var(--ds-bg)));
+  border-color: var(--ds-border-strong, var(--ds-marine, var(--ds-marine)));
 }
 
 /* ─────────── Status bar ─────────── */
@@ -94,7 +94,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--ds-success, #1f8b5b);
+  background: var(--ds-success, var(--ds-success));
   box-shadow: 0 0 0 4px rgba(31, 139, 91, .12);
 }
 
@@ -103,7 +103,7 @@
 }
 
 .obs-status__refresh {
-  color: var(--ds-success, #1f8b5b);
+  color: var(--ds-success, var(--ds-success));
   font-weight: 500;
 }
 
@@ -159,7 +159,7 @@
 .obs-summary {
   padding: var(--ds-space-4) var(--ds-space-5);
   border-radius: var(--ds-radius-md, 12px);
-  background: var(--ds-bg-soft, #f5f7fa);
+  background: var(--ds-bg-soft, var(--ds-bg));
   border-left: 3px solid var(--ds-border);
   transition: transform .15s ease, box-shadow .15s ease;
 }
@@ -184,13 +184,13 @@
 }
 
 .obs-summary--marine {
-  background: var(--ds-marine, #0d2c4a);
-  border-left-color: var(--ds-copper, #c47a3d);
+  background: var(--ds-marine, var(--ds-marine));
+  border-left-color: var(--ds-copper, var(--ds-primary));
 }
 
 .obs-summary--marine .obs-summary__value,
 .obs-summary--marine .obs-summary__label {
-  color: #fff;
+  color: var(--ds-text-inverse);
 }
 
 .obs-summary--marine .obs-summary__label {
@@ -199,21 +199,21 @@
 
 .obs-summary--success {
   background: var(--ds-success-soft, rgba(31, 139, 91, .08));
-  border-left-color: var(--ds-success, #1f8b5b);
+  border-left-color: var(--ds-success, var(--ds-success));
 }
 
 .obs-summary--warning {
   background: var(--ds-warning-soft, rgba(204, 135, 0, .08));
-  border-left-color: var(--ds-warning, #cc8700);
+  border-left-color: var(--ds-warning, var(--ds-warning));
 }
 
 .obs-summary--danger {
   background: var(--ds-danger-soft, rgba(192, 36, 36, .08));
-  border-left-color: var(--ds-danger, #c02424);
+  border-left-color: var(--ds-danger, var(--ds-error));
 }
 
 .obs-summary--danger .obs-summary__value {
-  color: var(--ds-danger, #c02424);
+  color: var(--ds-danger, var(--ds-error));
 }
 
 /* ─────────── Charts ─────────── */
@@ -221,7 +221,7 @@
   position: relative;
   height: 280px;
   padding: var(--ds-space-3);
-  background: var(--ds-bg-soft, #f5f7fa);
+  background: var(--ds-bg-soft, var(--ds-bg));
   border-radius: var(--ds-radius-md, 12px);
   margin-top: var(--ds-space-4);
 }
@@ -253,7 +253,7 @@
 }
 
 .obs-table ::ng-deep .mat-mdc-header-cell {
-  background: var(--ds-bg-soft, #f5f7fa);
+  background: var(--ds-bg-soft, var(--ds-bg));
   color: var(--ds-text-muted);
   font-weight: 600;
   font-size: var(--ds-text-xs);
@@ -271,7 +271,7 @@
 }
 
 .obs-table ::ng-deep .mat-mdc-row:hover {
-  background: var(--ds-bg-soft, #f5f7fa);
+  background: var(--ds-bg-soft, var(--ds-bg));
 }
 
 .obs-table ::ng-deep .mat-mdc-row:last-child .mat-mdc-cell {
@@ -305,20 +305,20 @@
 
 .obs-alert--warning {
   background: var(--ds-warning-soft, rgba(204, 135, 0, .08));
-  color: var(--ds-warning, #cc8700);
-  border-left: 3px solid var(--ds-warning, #cc8700);
+  color: var(--ds-warning, var(--ds-warning));
+  border-left: 3px solid var(--ds-warning, var(--ds-warning));
 }
 
 .obs-alert--critical {
   background: var(--ds-danger-soft, rgba(192, 36, 36, .08));
-  color: var(--ds-danger, #c02424);
-  border-left: 3px solid var(--ds-danger, #c02424);
+  color: var(--ds-danger, var(--ds-error));
+  border-left: 3px solid var(--ds-danger, var(--ds-error));
 }
 
 /* ─────────── Error codes list ─────────── */
 .obs-error-codes {
   padding: var(--ds-space-4);
-  background: var(--ds-bg-soft, #f5f7fa);
+  background: var(--ds-bg-soft, var(--ds-bg));
   border-radius: var(--ds-radius-md, 12px);
 }
 
@@ -368,7 +368,7 @@
   border-radius: var(--ds-radius-md, 12px);
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
-  border-left: 3px solid var(--ds-success, #1f8b5b);
+  border-left: 3px solid var(--ds-success, var(--ds-success));
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-3);
@@ -381,12 +381,12 @@
 }
 
 .obs-quota--warning {
-  border-left-color: var(--ds-warning, #cc8700);
+  border-left-color: var(--ds-warning, var(--ds-warning));
   background: var(--ds-warning-soft, rgba(204, 135, 0, .04));
 }
 
 .obs-quota--critical {
-  border-left-color: var(--ds-danger, #c02424);
+  border-left-color: var(--ds-danger, var(--ds-error));
   background: var(--ds-danger-soft, rgba(192, 36, 36, .04));
 }
 
@@ -405,11 +405,11 @@
 .obs-quota__pct {
   font-size: var(--ds-text-xl, 22px);
   font-weight: 700;
-  color: var(--ds-success, #1f8b5b);
+  color: var(--ds-success, var(--ds-success));
 }
 
-.obs-quota--warning .obs-quota__pct { color: var(--ds-warning, #cc8700); }
-.obs-quota--critical .obs-quota__pct { color: var(--ds-danger, #c02424); }
+.obs-quota--warning .obs-quota__pct { color: var(--ds-warning, var(--ds-warning)); }
+.obs-quota--critical .obs-quota__pct { color: var(--ds-danger, var(--ds-error)); }
 
 .obs-progress {
   height: 8px;
@@ -420,20 +420,20 @@
 
 .obs-progress__bar {
   height: 100%;
-  background: var(--ds-success, #1f8b5b);
+  background: var(--ds-success, var(--ds-success));
   border-radius: 999px;
   transition: width .3s ease;
 }
 
-.obs-quota--warning .obs-progress__bar { background: var(--ds-warning, #cc8700); }
-.obs-quota--critical .obs-progress__bar { background: var(--ds-danger, #c02424); }
+.obs-quota--warning .obs-progress__bar { background: var(--ds-warning, var(--ds-warning)); }
+.obs-quota--critical .obs-progress__bar { background: var(--ds-danger, var(--ds-error)); }
 
 .obs-quota__stats {
   display: flex;
   justify-content: space-between;
   margin: 0;
   padding: var(--ds-space-3);
-  background: var(--ds-bg-soft, #f5f7fa);
+  background: var(--ds-bg-soft, var(--ds-bg));
   border-radius: var(--ds-radius-sm, 8px);
 }
 
