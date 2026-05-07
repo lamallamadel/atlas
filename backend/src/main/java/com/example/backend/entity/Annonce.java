@@ -79,6 +79,9 @@ public class Annonce extends BaseEntity {
     @Column(name = "fraud_statut", length = 20)
     private String fraudStatut;
 
+    @Column(name = "virtual_tour_url", length = 1000)
+    private String virtualTourUrl;
+
     public Long getId() {
         return id;
     }
@@ -221,5 +224,13 @@ public class Annonce extends BaseEntity {
 
     public void setFraudStatut(String fraudStatut) {
         this.fraudStatut = fraudStatut;
+    }
+
+    public String getVirtualTourUrl() {
+        return virtualTourUrl;
+    }
+
+    public void setVirtualTourUrl(String virtualTourUrl) {
+        this.virtualTourUrl = virtualTourUrl;
     }
 }
