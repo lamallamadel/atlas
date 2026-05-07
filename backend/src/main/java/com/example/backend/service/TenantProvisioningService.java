@@ -217,16 +217,19 @@ public class TenantProvisioningService {
                 quotas.put("maxUsers", 5);
                 quotas.put("maxDossiers", 100);
                 quotas.put("storageGb", 10);
+                quotas.put("maxAnnonces", 5);
                 break;
             case "professional":
                 quotas.put("maxUsers", 20);
                 quotas.put("maxDossiers", 1000);
                 quotas.put("storageGb", 50);
+                quotas.put("maxAnnonces", -1);
                 break;
             case "enterprise":
                 quotas.put("maxUsers", -1);
                 quotas.put("maxDossiers", -1);
                 quotas.put("storageGb", 500);
+                quotas.put("maxAnnonces", -1);
                 break;
         }
 

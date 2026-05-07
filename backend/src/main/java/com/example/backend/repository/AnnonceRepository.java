@@ -28,6 +28,8 @@ public interface AnnonceRepository
 
     Long countByStatus(AnnonceStatus status);
 
+    Long countByOrgIdAndStatus(String orgId, AnnonceStatus status);
+
     @Query("SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND a.orgId = :orgId")
     Long countByStatusAndOrgId(@Param("status") AnnonceStatus status, @Param("orgId") String orgId);
 

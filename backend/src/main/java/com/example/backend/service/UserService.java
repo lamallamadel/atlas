@@ -1,12 +1,20 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.UserInviteRequest;
+import com.example.backend.dto.UserInviteResponse;
+import com.example.backend.dto.QuotaSettingsDto;
+import com.example.backend.util.TenantContext;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +38,71 @@ public class UserService {
     private final Keycloak keycloakAdminClient;
     private final CircuitBreaker circuitBreaker;
     private final String keycloakRealm;
+    private final OrganizationSettingsService organizationSettingsService;
 
     public UserService(
             Keycloak keycloakAdminClient,
             CircuitBreaker keycloakCircuitBreaker,
-            @Value("${keycloak.admin.realm}") String keycloakRealm) {
+            @Value("${keycloak.admin.realm}") String keycloakRealm,
+            OrganizationSettingsService organizationSettingsService) {
         this.keycloakAdminClient = keycloakAdminClient;
         this.circuitBreaker = keycloakCircuitBreaker;
         this.keycloakRealm = keycloakRealm;
+        this.organizationSettingsService = organizationSettingsService;
+    }
+
+    public UserInviteResponse inviteUser(UserInviteRequest request) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null || orgId.isBlank()) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        QuotaSettingsDto quotas = organizationSettingsService.getQuotas(orgId);
+        UsersResource usersResource = keycloakAdminClient.realm(keycloakRealm).users();
+
+        if (quotas != null && quotas.getMaxUsers() != null && quotas.getMaxUsers() != -1) {
+            // Search users by orgId custom attribute
+            List<UserRepresentation> orgUsers = usersResource.search(orgId, 0, 1000);
+            long count = orgUsers.stream()
+                .filter(u -> u.getAttributes() != null && u.getAttributes().containsKey("orgId") 
+                            && u.getAttributes().get("orgId").contains(orgId))
+                .count();
+                
+            if (count >= quotas.getMaxUsers()) {
+                throw new IllegalStateException("User quota exceeded. Maximum allowed users is " + quotas.getMaxUsers() + ".");
+            }
+        }
+
+        UserRepresentation user = new UserRepresentation();
+        user.setUsername(request.getEmail());
+        user.setEmail(request.getEmail());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEnabled(true);
+        user.setEmailVerified(true);
+        user.setAttributes(Map.of("orgId", Arrays.asList(orgId), "tenant_id", Arrays.asList(orgId)));
+
+        Response response = usersResource.create(user);
+        
+        if (response.getStatus() != 201 && response.getStatus() != 409) {
+            throw new RuntimeException("Failed to create user in Keycloak, status: " + response.getStatus());
+        }
+        
+        if (response.getStatus() == 409) {
+            throw new IllegalStateException("User with this email already exists.");
+        }
+        
+        String path = response.getLocation().getPath();
+        String userId = path.substring(path.lastIndexOf('/') + 1);
+        
+        // Trigger password reset email
+        try {
+            usersResource.get(userId).executeActionsEmail(Arrays.asList("UPDATE_PASSWORD"));
+        } catch (Exception e) {
+            log.warn("Failed to send password reset email to user {}, {}", userId, e.getMessage());
+        }
+        
+        return new UserInviteResponse(userId, request.getEmail(), "INVITED");
     }
 
     public String getUserDisplayName(String userId) {

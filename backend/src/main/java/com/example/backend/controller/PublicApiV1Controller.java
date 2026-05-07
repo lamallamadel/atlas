@@ -13,6 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.backend.service.SyndicationService;
+import org.springframework.http.MediaType;
+
 @RestController
 @RequestMapping("/api/public/v1")
 @Tag(name = "Public API v1", description = "Public API endpoints for third-party integrations")
@@ -21,10 +24,34 @@ public class PublicApiV1Controller {
 
     private final DossierService dossierService;
     private final WebhookService webhookService;
+    private final SyndicationService syndicationService;
 
-    public PublicApiV1Controller(DossierService dossierService, WebhookService webhookService) {
+    public PublicApiV1Controller(DossierService dossierService, WebhookService webhookService, SyndicationService syndicationService) {
         this.dossierService = dossierService;
         this.webhookService = webhookService;
+        this.syndicationService = syndicationService;
+    }
+
+    @GetMapping(value = "/syndication/mubawab", produces = MediaType.APPLICATION_XML_VALUE)
+    @Operation(summary = "Mubawab XML Feed", description = "Export active properties in Mubawab XML format")
+    public ResponseEntity<String> getMubawabFeed(@RequestAttribute("orgId") String orgId) {
+        try {
+            String xml = syndicationService.generateMubawabFeed(orgId);
+            return ResponseEntity.ok(xml);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping(value = "/syndication/avito", produces = MediaType.APPLICATION_XML_VALUE)
+    @Operation(summary = "Avito XML Feed", description = "Export active properties in Avito XML format")
+    public ResponseEntity<String> getAvitoFeed(@RequestAttribute("orgId") String orgId) {
+        try {
+            String xml = syndicationService.generateAvitoFeed(orgId);
+            return ResponseEntity.ok(xml);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/dossiers")

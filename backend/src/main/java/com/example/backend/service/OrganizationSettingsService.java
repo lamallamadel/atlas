@@ -405,6 +405,7 @@ public class OrganizationSettingsService {
         response.setVersion(entity.getVersion());
         response.setCreatedAt(entity.getCreatedAt());
         response.setUpdatedAt(entity.getUpdatedAt());
+        response.setVerifiedPro(entity.getVerifiedPro());
 
         Map<String, Object> settings = entity.getSettings();
         if (settings != null) {
@@ -469,14 +470,14 @@ public class OrganizationSettingsService {
     private QuotaSettingsDto extractQuotas(Map<String, Object> settings) {
         Object quotasObj = settings.get("quotas");
         if (quotasObj == null) {
-            return new QuotaSettingsDto(10, 1000, 10000L, "STANDARD");
+            return new QuotaSettingsDto(10, 1000, 10000L, -1, "STANDARD");
         }
 
         try {
             return objectMapper.convertValue(quotasObj, QuotaSettingsDto.class);
         } catch (Exception e) {
             logger.warn("Failed to parse quota settings", e);
-            return new QuotaSettingsDto(10, 1000, 10000L, "STANDARD");
+            return new QuotaSettingsDto(10, 1000, 10000L, -1, "STANDARD");
         }
     }
 

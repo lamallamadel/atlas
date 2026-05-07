@@ -30,6 +30,9 @@ public class OrganizationSettings {
     @Column(name = "whatsapp_quota_tier", nullable = false)
     private Integer whatsappQuotaTier = 1;
 
+    @Column(name = "verified_pro", nullable = false)
+    private Boolean verifiedPro = false;
+
     @Version
     @Column(name = "version", nullable = false)
     private Integer version = 1;
@@ -107,5 +110,13 @@ public class OrganizationSettings {
 
     public void setWhatsappQuotaTier(Integer whatsappQuotaTier) {
         this.whatsappQuotaTier = whatsappQuotaTier;
+    }
+
+    public Boolean getVerifiedPro() {
+        return verifiedPro;
+    }
+
+    public void setVerifiedPro(Boolean verifiedPro) {
+        this.verifiedPro = verifiedPro;
     }
 }

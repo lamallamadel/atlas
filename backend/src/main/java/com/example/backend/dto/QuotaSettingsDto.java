@@ -18,16 +18,21 @@ public class QuotaSettingsDto {
     @Min(value = 1, message = "Max storage (in MB) must be at least 1")
     private Long maxStorage;
 
+    @NotNull(message = "Max annonces is required")
+    @Min(value = -1, message = "Max annonces must be at least -1 (-1 means unlimited)")
+    private Integer maxAnnonces;
+
     @NotBlank(message = "Rate limit tier is required")
     private String rateLimitTier;
 
     public QuotaSettingsDto() {}
 
     public QuotaSettingsDto(
-            Integer maxUsers, Integer maxDossiers, Long maxStorage, String rateLimitTier) {
+            Integer maxUsers, Integer maxDossiers, Long maxStorage, Integer maxAnnonces, String rateLimitTier) {
         this.maxUsers = maxUsers;
         this.maxDossiers = maxDossiers;
         this.maxStorage = maxStorage;
+        this.maxAnnonces = maxAnnonces;
         this.rateLimitTier = rateLimitTier;
     }
 
@@ -53,6 +58,14 @@ public class QuotaSettingsDto {
 
     public void setMaxStorage(Long maxStorage) {
         this.maxStorage = maxStorage;
+    }
+
+    public Integer getMaxAnnonces() {
+        return maxAnnonces;
+    }
+
+    public void setMaxAnnonces(Integer maxAnnonces) {
+        this.maxAnnonces = maxAnnonces;
     }
 
     public String getRateLimitTier() {

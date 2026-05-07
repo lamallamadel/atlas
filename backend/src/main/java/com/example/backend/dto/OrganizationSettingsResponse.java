@@ -10,6 +10,7 @@ public class OrganizationSettingsResponse {
     private IntegrationSettingsDto integrations;
     private WorkflowSettingsDto workflow;
     private QuotaSettingsDto quotas;
+    private Boolean verifiedPro;
     private Integer version;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -62,6 +63,14 @@ public class OrganizationSettingsResponse {
 
     public void setQuotas(QuotaSettingsDto quotas) {
         this.quotas = quotas;
+    }
+
+    public Boolean getVerifiedPro() {
+        return verifiedPro;
+    }
+
+    public void setVerifiedPro(Boolean verifiedPro) {
+        this.verifiedPro = verifiedPro;
     }
 
     public Integer getVersion() {

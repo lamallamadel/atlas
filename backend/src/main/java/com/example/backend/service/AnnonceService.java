@@ -38,18 +38,21 @@ public class AnnonceService {
     @Nullable private final SearchService searchService;
     private final MetricsService metricsService;
     @Nullable private final BrainScoringService brainScoringService;
+    @Nullable private final OrganizationSettingsService organizationSettingsService;
 
     public AnnonceService(
             AnnonceRepository annonceRepository,
             AnnonceMapper annonceMapper,
             @Autowired(required = false) @Nullable SearchService searchService,
             MetricsService metricsService,
-            @Autowired(required = false) @Nullable BrainScoringService brainScoringService) {
+            @Autowired(required = false) @Nullable BrainScoringService brainScoringService,
+            @Autowired(required = false) @Nullable OrganizationSettingsService organizationSettingsService) {
         this.annonceRepository = annonceRepository;
         this.annonceMapper = annonceMapper;
         this.searchService = searchService;
         this.metricsService = metricsService;
         this.brainScoringService = brainScoringService;
+        this.organizationSettingsService = organizationSettingsService;
     }
 
     public AnnonceMapper getAnnonceMapper() {
@@ -86,6 +89,7 @@ public class AnnonceService {
         annonce.setUpdatedAt(now);
 
         validateActiveAnnonce(annonce);
+        checkAnnonceQuota(orgId, annonce);
 
         Annonce saved = annonceRepository.save(annonce);
         if (searchService != null) {
@@ -157,6 +161,9 @@ public class AnnonceService {
         annonceMapper.updateEntity(annonce, request);
 
         validateActiveAnnonce(annonce);
+        if (request.getStatus() != null && AnnonceStatus.ACTIVE.equals(request.getStatus())) {
+            checkAnnonceQuota(orgId, annonce);
+        }
 
         annonce.setUpdatedAt(LocalDateTime.now());
         Annonce updated = annonceRepository.save(annonce);
@@ -423,5 +430,17 @@ public class AnnonceService {
         }
 
         return annonceRepository.findAll(spec, pageable);
+    }
+
+    private void checkAnnonceQuota(String orgId, Annonce annonce) {
+        if (AnnonceStatus.ACTIVE.equals(annonce.getStatus()) && organizationSettingsService != null) {
+            com.example.backend.dto.QuotaSettingsDto quotas = organizationSettingsService.getQuotas(orgId);
+            if (quotas != null && quotas.getMaxAnnonces() != null && quotas.getMaxAnnonces() != -1) {
+                long currentCount = annonceRepository.countByOrgIdAndStatus(orgId, AnnonceStatus.ACTIVE);
+                if (currentCount >= quotas.getMaxAnnonces()) {
+                    throw new IllegalStateException("Annonce quota exceeded. Maximum allowed active annonces is " + quotas.getMaxAnnonces() + ".");
+                }
+            }
+        }
     }
 }
