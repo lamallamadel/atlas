@@ -23,6 +23,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -34,6 +36,8 @@ class AnnonceServiceTest {
     @Autowired private AnnonceService annonceService;
 
     @Autowired private AnnonceRepository annonceRepository;
+
+    @MockitoBean private OrganizationSettingsService organizationSettingsService;
 
     @BeforeEach
     void setUp() {
@@ -436,6 +440,19 @@ class AnnonceServiceTest {
         } finally {
             TenantContext.clear();
         }
+    }
+
+    @Test
+    void testCreateAnnonce_QuotaExceeded() {
+        AnnonceCreateRequest request = createBasicRequest();
+        request.setStatus(AnnonceStatus.ACTIVE);
+
+        com.example.backend.dto.QuotaSettingsDto quotas = new com.example.backend.dto.QuotaSettingsDto(5, 100, 1000L, 0, "STARTER");
+        when(organizationSettingsService.getQuotas(DEFAULT_ORG)).thenReturn(quotas);
+
+        assertThatThrownBy(() -> annonceService.create(request))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Annonce quota exceeded");
     }
 
     private AnnonceCreateRequest createBasicRequest() {
