@@ -1,118 +1,30 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { CustomerPortalActivity } from '../models/customer-portal.models';
+import { TimelineComponent, type DsTimelineEvent } from '../design-system';
 
 @Component({
   selector: 'app-dossier-timeline-view',
-  template: `
-    <div class="timeline-container">
-      <h2>Historique de votre dossier</h2>
-    
-      @if (!activities || activities.length === 0) {
-        <div class="empty-state">
-          <p>Aucune activité pour le moment</p>
-        </div>
-      }
-    
-      <div class="timeline">
-        @for (activity of activities; track activity) {
-          <div class="timeline-item">
-            <div class="timeline-marker"></div>
-            <div class="timeline-content">
-              <div class="activity-header">
-                <span class="activity-type">{{ activity.friendlyDescription }}</span>
-                <span class="activity-date">{{ activity.createdAt | date:'short' }}</span>
-              </div>
-              @if (activity.content) {
-                <div class="activity-body">
-                  {{ activity.content }}
-                </div>
-              }
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-    `,
-  styles: [`
-    .timeline-container {
-      padding: 24px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      margin: 0 0 24px 0;
-      font-size: 20px;
-      color: #333;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 48px;
-      color: #999;
-    }
-
-    .timeline {
-      position: relative;
-      padding-left: 40px;
-    }
-
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 8px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #e0e0e0;
-    }
-
-    .timeline-item {
-      position: relative;
-      margin-bottom: 24px;
-    }
-
-    .timeline-marker {
-      position: absolute;
-      left: -36px;
-      top: 4px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #667eea;
-      border: 3px solid white;
-      box-shadow: 0 0 0 2px #667eea;
-    }
-
-    .timeline-content {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 16px;
-    }
-
-    .activity-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .activity-type {
-      font-weight: 600;
-      color: #333;
-    }
-
-    .activity-date {
-      font-size: 14px;
-      color: #999;
-    }
-
-    .activity-body {
-      color: #666;
-      line-height: 1.5;
-    }
-  `]
+  standalone: true,
+  imports: [CommonModule, TimelineComponent],
+  providers: [DatePipe],
+  templateUrl: './dossier-timeline-view.component.html',
+  styleUrls: ['./dossier-timeline-view.component.scss'],
 })
 export class DossierTimelineViewComponent {
   @Input() activities: CustomerPortalActivity[] = [];
+
+  private readonly datePipe = inject(DatePipe);
+
+  get timelineEvents(): DsTimelineEvent[] {
+    const list = this.activities ?? [];
+    return list.map((activity, index) => ({
+      date: activity.createdAt,
+      dateDisplay:
+        this.datePipe.transform(activity.createdAt, 'short', undefined, 'fr-FR') ?? activity.createdAt,
+      title: activity.friendlyDescription,
+      description: activity.content?.trim() ? activity.content : undefined,
+      variant: index % 2 === 0 ? 'copper' : 'marine',
+    }));
+  }
 }

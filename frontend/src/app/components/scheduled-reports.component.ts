@@ -7,7 +7,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -25,7 +24,6 @@ import { DsCardComponent } from '../design-system';
     MatIconModule,
     MatTableModule,
     MatChipsModule,
-    MatTooltipModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -80,10 +78,10 @@ import { DsCardComponent } from '../design-system';
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef>Actions</th>
               <td mat-cell *matCellDef="let report">
-                <button mat-icon-button (click)="editReport(report)" matTooltip="Edit">
+                <button type="button" mat-icon-button (click)="editReport(report)" title="Edit">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button (click)="deleteReport(report)" matTooltip="Delete" color="warn">
+                <button type="button" mat-icon-button (click)="deleteReport(report)" title="Delete" color="warn">
                   <mat-icon>delete</mat-icon>
                 </button>
               </td>

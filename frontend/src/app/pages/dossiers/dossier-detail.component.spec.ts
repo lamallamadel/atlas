@@ -360,7 +360,7 @@ describe('DossierDetailComponent', () => {
 
   it('should navigate back to dossiers list', () => {
     component.goBack();
-    expect(router.navigate).toHaveBeenCalledWith(['/dossiers']);
+    expect(router.navigate).toHaveBeenCalledWith(['/pro/dossiers']);
   });
 
   it('should render tabs in the template', () => {

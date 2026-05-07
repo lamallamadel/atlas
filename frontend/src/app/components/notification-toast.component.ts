@@ -20,12 +20,17 @@ import {
 } from '../services/toast-notification.service';
 import { NgClass } from '@angular/common';
 import { SwipeGestureDirective } from '../directives/swipe-gesture.directive';
-import { MatIcon } from '@angular/material/icon';
+import { DsIconComponent } from '../design-system/icons/ds-icon.component';
+import {
+  DsButtonComponent,
+  type DsButtonVariant,
+} from '../design-system/primitives/ds-button/ds-button.component';
 
 @Component({
     selector: 'app-notification-toast',
+    standalone: true,
     templateUrl: './notification-toast.component.html',
-    styleUrls: ['./notification-toast.component.css'],
+    styleUrls: ['./notification-toast.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations: [
         trigger('toastAnimation', [
@@ -54,7 +59,7 @@ import { MatIcon } from '@angular/material/icon';
             ])
         ])
     ],
-    imports: [NgClass, SwipeGestureDirective, MatIcon]
+    imports: [NgClass, SwipeGestureDirective, DsIconComponent, DsButtonComponent],
 })
 export class NotificationToastComponent implements OnInit, OnDestroy {
   toastGroups: Map<ToastPosition, ActiveToast[]> = new Map();
@@ -121,12 +126,23 @@ export class NotificationToastComponent implements OnInit, OnDestroy {
 
   getIcon(type: ToastType): string {
     const icons: Record<ToastType, string> = {
-      success: 'check_circle',
-      error: 'cancel',
-      warning: 'warning',
-      info: 'info'
+      success: 'check',
+      error: 'alert-circle',
+      warning: 'alert-circle',
+      info: 'info',
     };
     return icons[type];
+  }
+
+  actionVariant(type: ToastType): DsButtonVariant {
+    switch (type) {
+      case 'error':
+        return 'danger';
+      case 'warning':
+        return 'copper';
+      default:
+        return 'ghost';
+    }
   }
 
   getProgress(toast: ActiveToast): number {

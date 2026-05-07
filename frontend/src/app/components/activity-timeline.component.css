@@ -57,13 +57,17 @@
   color: var(--ds-text-faint);
 }
 
-.no-activities mat-icon {
-  font-size: 80px;
-  width: 80px;
-  height: 80px;
+.no-activities-icon {
   margin-bottom: var(--spacing-4);
   opacity: 0.4;
   color: var(--ds-text-faint);
+  width: 80px;
+  height: 80px;
+}
+
+.no-activities-icon svg {
+  width: 80px;
+  height: 80px;
 }
 
 .no-activities p {
@@ -149,39 +153,39 @@
   border-color: var(--ds-marine-light);
 }
 
-.timeline-marker mat-icon {
-  font-size: 24px;
-  width: 24px;
-  height: 24px;
+.timeline-marker .activity-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: var(--transition-transform);
 }
 
-.timeline-item:hover .timeline-marker mat-icon {
+.timeline-item:hover .timeline-marker .activity-badge {
   transform: scale(1.1);
 }
 
 /* Icon colors based on activity type */
-.activity-badge.activity-note mat-icon {
+.activity-badge.activity-note {
   color: var(--ds-marine);
 }
 
-.activity-badge.activity-status mat-icon {
+.activity-badge.activity-status {
   color: var(--ds-warning);
 }
 
-.activity-badge.activity-appointment mat-icon {
+.activity-badge.activity-appointment {
   color: var(--ds-success);
 }
 
-.activity-badge.activity-message mat-icon {
+.activity-badge.activity-message {
   color: var(--ds-primary);
 }
 
-.activity-badge.activity-system mat-icon {
+.activity-badge.activity-system {
   color: var(--ds-text-muted);
 }
 
-.activity-badge.activity-consent mat-icon {
+.activity-badge.activity-consent {
   color: var(--ds-marine);
 }
 
@@ -296,6 +300,23 @@
   opacity: 1;
 }
 
+.actions-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: var(--spacing-1);
+  cursor: pointer;
+  color: var(--ds-text-muted);
+}
+
+.actions-menu-trigger:focus-visible {
+  outline: 2px solid var(--ds-marine);
+  outline-offset: 2px;
+}
+
 .activity-meta {
   display: flex;
   align-items: center;
@@ -338,9 +359,10 @@
 
 .expand-button {
   margin-top: var(--spacing-3);
+  color: var(--ds-marine);
 }
 
-.expand-button mat-icon {
+.expand-button ds-icon {
   margin-right: var(--spacing-1);
 }
 
@@ -361,9 +383,7 @@
 }
 
 .visibility-badge .badge-icon {
-  font-size: 14px;
-  width: 14px;
-  height: 14px;
+  flex-shrink: 0;
 }
 
 .visibility-badge.visibility-internal {
@@ -373,7 +393,7 @@
 }
 
 .visibility-badge.visibility-internal .badge-icon {
-  color: var(--ds-marine);
+  color: inherit;
 }
 
 .visibility-badge.visibility-client {
@@ -383,7 +403,62 @@
 }
 
 .visibility-badge.visibility-client .badge-icon {
-  color: var(--ds-warning);
+  color: inherit;
+}
+
+.menu-item-icon {
+  flex-shrink: 0;
+  margin-right: var(--spacing-2);
+  vertical-align: middle;
+}
+
+.menu-item-icon--warn {
+  color: var(--ds-error);
+}
+
+.tl-note-menu-origin {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tl-note-menu-dropdown {
+  min-width: 200px;
+  background: var(--ds-surface-elevated);
+  color: var(--ds-text-primary);
+  border-radius: var(--ds-radius-lg, var(--radius-lg));
+  box-shadow: var(--ds-shadow-lg);
+  border: 1px solid var(--ds-border-subtle);
+  overflow: hidden;
+}
+
+.tl-note-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  margin: 0;
+  padding: var(--spacing-3) var(--spacing-4);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: var(--ds-text-primary);
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.tl-note-menu-item:hover {
+  background: var(--ds-primary-subtle);
+}
+
+.tl-note-menu-item:focus-visible {
+  outline: 2px solid var(--ds-marine);
+  outline-offset: -2px;
+}
+
+.tl-note-menu-item .menu-item-icon {
+  margin-right: 0;
 }
 
 /* ========================================
@@ -480,12 +555,6 @@
     width: 28px;
     height: 28px;
     border-width: 2px;
-  }
-
-  .timeline-marker mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
   }
 
   .activity-card {

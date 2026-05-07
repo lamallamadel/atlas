@@ -95,10 +95,8 @@ test.describe('Workflow Stepper E2E Tests - Dossier Status Progression', () => {
       activeStepIndex: 4,
       isClosed: true,
       closeLabel: 'Gagné',
-      closeIcon: 'check_circle'
     });
 
-    await verifyStepIcons(workflowStepper, ['fiber_new', 'manage_search', 'verified', 'event', 'emoji_events']);
     await verifyStepLabels(workflowStepper, ['Nouveau', 'Qualification', 'Qualifié', 'Rendez-vous', 'Clôture (Gagné)']);
 
     await verifyStatusIsTerminal(page, 'WON');
@@ -163,10 +161,8 @@ test.describe('Workflow Stepper E2E Tests - Dossier Status Progression', () => {
       activeStepIndex: 4,
       isClosed: true,
       closeLabel: 'Perdu',
-      closeIcon: 'cancel'
     });
 
-    await verifyStepIcons(workflowStepper, ['fiber_new', 'manage_search', 'verified', 'event', 'cancel']);
     await verifyStepLabels(workflowStepper, ['Nouveau', 'Qualification', 'Qualifié', 'Rendez-vous', 'Clôture (Perdu)']);
 
     await verifyStatusIsTerminal(page, 'LOST');
@@ -257,23 +253,25 @@ test.describe('Workflow Stepper E2E Tests - Dossier Status Progression', () => {
     const progressBar = workflowStepper.locator('.workflow-bar');
     await expect(progressBar).toBeVisible();
 
-    const stepsList = workflowStepper.locator('ol.workflow-steps');
-    await expect(stepsList).toBeVisible();
+    const stepper = workflowStepper.locator('ds-stage-stepper');
+    await expect(stepper).toBeVisible();
 
-    const steps = workflowStepper.locator('.workflow-step');
+    const steps = workflowStepper.locator('.ds-stages__step');
     await expect(steps).toHaveCount(5);
 
     const hintSection = workflowStepper.locator('.workflow-hint');
     await expect(hintSection).toBeVisible();
 
-    const hintIcon = hintSection.locator('mat-icon');
-    await expect(hintIcon).toContainText('tips_and_updates');
+    const hintIcon = hintSection.locator('ds-icon');
+    await expect(hintIcon).toBeVisible();
 
-    const allIcons = workflowStepper.locator('mat-icon');
+    const allIcons = workflowStepper.locator('ds-icon');
     const iconCount = await allIcons.count();
+    expect(iconCount).toBeGreaterThan(0);
     for (let i = 0; i < iconCount; i++) {
       const icon = allIcons.nth(i);
-      await expect(icon).toHaveAttribute('aria-hidden', 'true');
+      const svg = icon.locator('svg');
+      await expect(svg).toHaveAttribute('aria-hidden', 'true');
     }
   });
 
@@ -358,8 +356,8 @@ test.describe('Workflow Stepper E2E Tests - Dossier Status Progression', () => {
     await expect(chip).toHaveClass(/won/);
     await expect(chip).toContainText('Gagné');
 
-    const wonIcon = chip.locator('mat-icon');
-    await expect(wonIcon).toContainText('check_circle');
+    const wonIcon = chip.locator('ds-icon');
+    await expect(wonIcon).toBeVisible();
   });
 });
 
@@ -391,7 +389,6 @@ interface WorkflowStateExpectation {
   activeStepIndex: number;
   isClosed: boolean;
   closeLabel?: string;
-  closeIcon?: string;
 }
 
 async function verifyWorkflowState(
@@ -413,15 +410,15 @@ async function verifyWorkflowState(
     await expect(hintSection).toContainText(expected.hint);
   }
 
-  const steps = workflowStepper.locator('.workflow-step');
+  const steps = workflowStepper.locator('.ds-stages__step');
 
   for (const completedIndex of expected.completedSteps) {
-    const step = steps.nth(completedIndex);
-    await expect(step).toHaveClass(/completed/);
+    const pill = steps.nth(completedIndex).locator('.ds-stages__pill');
+    await expect(pill).toHaveClass(/ds-stages__pill--done/);
   }
 
-  const activeStep = steps.nth(expected.activeStepIndex);
-  await expect(activeStep).toHaveClass(/active/);
+  const activePill = steps.nth(expected.activeStepIndex).locator('.ds-stages__pill');
+  await expect(activePill).toHaveClass(/ds-stages__pill--current/);
 
   if (expected.isClosed) {
     const chip = workflowStepper.locator('.workflow-chip');
@@ -431,10 +428,8 @@ async function verifyWorkflowState(
       await expect(chip).toContainText(expected.closeLabel);
     }
 
-    if (expected.closeIcon) {
-      const chipIcon = chip.locator('mat-icon');
-      await expect(chipIcon).toContainText(expected.closeIcon);
-    }
+    const chipIcon = chip.locator('ds-icon');
+    await expect(chipIcon).toBeVisible();
   } else {
     const chip = workflowStepper.locator('.workflow-chip');
     const isVisible = await chip.isVisible().catch(() => false);
@@ -442,18 +437,8 @@ async function verifyWorkflowState(
   }
 }
 
-async function verifyStepIcons(workflowStepper: any, expectedIcons: string[]): Promise<void> {
-  const steps = workflowStepper.locator('.workflow-step');
-  
-  for (let i = 0; i < expectedIcons.length; i++) {
-    const step = steps.nth(i);
-    const icon = step.locator('.step-dot mat-icon');
-    await expect(icon).toContainText(expectedIcons[i]);
-  }
-}
-
 async function verifyStepLabels(workflowStepper: any, expectedLabels: string[]): Promise<void> {
-  const stepLabels = workflowStepper.locator('.step-label');
+  const stepLabels = workflowStepper.locator('.ds-stages__label');
   
   for (let i = 0; i < expectedLabels.length; i++) {
     const label = stepLabels.nth(i);

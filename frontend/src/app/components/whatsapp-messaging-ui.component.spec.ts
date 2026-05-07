@@ -5,7 +5,6 @@ import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import {} from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
@@ -64,7 +63,6 @@ describe('WhatsappMessagingUiComponent', () => {
 
         MatIconModule,
         MatButtonModule,
-        MatTooltipModule,
         MatFormFieldModule,
         MatInputModule,
         MatChipsModule,

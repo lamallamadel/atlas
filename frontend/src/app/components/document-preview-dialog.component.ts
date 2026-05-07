@@ -3,7 +3,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentApiService, DocumentResponse } from '../services/document-api.service';
 import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
@@ -15,7 +14,7 @@ export interface DocumentPreviewDialogData {
     selector: 'app-document-preview-dialog',
     templateUrl: './document-preview-dialog.component.html',
     styleUrls: ['./document-preview-dialog.component.css'],
-    imports: [MatIconButton, MatTooltip, MatIcon, MatButton, DsSkeletonComponent]
+    imports: [MatIconButton, MatIcon, MatButton, DsSkeletonComponent]
 })
 export class DocumentPreviewDialogComponent implements OnInit {
   previewUrl: SafeResourceUrl | null = null;

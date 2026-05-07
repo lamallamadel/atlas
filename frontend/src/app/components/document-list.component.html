@@ -35,15 +35,15 @@
                 <mat-icon class="document-icon">{{ getFileIcon(document) }}</mat-icon>
               </div>
               <div class="document-actions">
-                <button mat-icon-button [matTooltip]="isPreviewable(document) ? 'Aperçu' : 'Aperçu non disponible'"
+                <button type="button" mat-icon-button [attr.title]="isPreviewable(document) ? 'Aperçu' : 'Aperçu non disponible'"
                   [disabled]="!isPreviewable(document)" (click)="previewDocument(document)" aria-label="Aperçu du document">
                   <mat-icon>visibility</mat-icon>
                 </button>
-                <button mat-icon-button matTooltip="Télécharger" (click)="downloadDocument(document)"
+                <button type="button" mat-icon-button title="Télécharger" (click)="downloadDocument(document)"
                   aria-label="Télécharger le document">
                   <mat-icon>download</mat-icon>
                 </button>
-                <button mat-icon-button matTooltip="Supprimer" (click)="deleteDocument(document)"
+                <button type="button" mat-icon-button title="Supprimer" (click)="deleteDocument(document)"
                   aria-label="Supprimer le document" class="delete-btn">
                   <mat-icon>delete</mat-icon>
                 </button>
@@ -76,8 +76,8 @@
                   }
                   @if (getAiStatusText(document.contentType)) {
                     <span [class]="getAiStatusClass(document.contentType)"
-                      [matTooltip]="'Analyse sémantique du texte extrait (OCR) de votre document via notre microservice d\'Intelligence Artificielle (document-service)'"
-                      matTooltipPosition="above" style="cursor:help;">
+                      [attr.title]="documentAiAnalysisHint"
+                      style="cursor:help;">
                       IA Atlas: {{ getAiStatusText(document.contentType) }}
                     </span>
                   }

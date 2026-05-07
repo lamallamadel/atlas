@@ -10,7 +10,6 @@ import {
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.service';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
@@ -38,8 +37,7 @@ import { AsyncPipe } from '@angular/common';
         tabindex="0"
         role="button"
         aria-label="Ouvrir l'assistant IA"
-        matTooltip="Assistant IA (Alt+A)"
-        matTooltipPosition="left">
+        title="Assistant IA (Alt+A)">
         <mat-icon>auto_awesome</mat-icon>
       </div>
     }
@@ -67,24 +65,25 @@ import { AsyncPipe } from '@angular/common';
               </div>
               <mat-icon
                 style="font-size: 16px; height: 16px; width: 16px; color: rgba(255,255,255,0.7); cursor: help;"
-                matTooltip="Modèle de langage (LLM) spécialisé dans l'immobilier, capable d'exécuter des actions métier via le microservice agent-service."
-                matTooltipPosition="right">
+                title="Modèle de langage (LLM) spécialisé dans l'immobilier, capable d'exécuter des actions métier via le microservice agent-service.">
                 help_outline
               </mat-icon>
             </div>
           </div>
           <div class="ai-panel-actions">
             <button
+              type="button"
               mat-icon-button
               (click)="clearConversation()"
-              matTooltip="Effacer la conversation"
+              title="Effacer la conversation"
               aria-label="Effacer la conversation">
               <mat-icon>delete_sweep</mat-icon>
             </button>
             <button
+              type="button"
               mat-icon-button
               (click)="closePanel()"
-              matTooltip="Fermer l'assistant (Esc)"
+              title="Fermer l'assistant (Esc)"
               aria-label="Fermer l'assistant IA">
               <mat-icon>close</mat-icon>
             </button>
@@ -591,7 +590,7 @@ import { AsyncPipe } from '@angular/common';
       }
     }
   `],
-    imports: [MatTooltip, MatIcon, MatIconButton, FormsModule, AsyncPipe]
+    imports: [MatIcon, MatIconButton, FormsModule, AsyncPipe]
 })
 export class AiAgentPanelComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly conversationEl = viewChild<ElementRef<HTMLDivElement>>('conversationEl');

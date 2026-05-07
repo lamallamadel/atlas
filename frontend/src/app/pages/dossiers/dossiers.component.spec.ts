@@ -5,7 +5,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DossiersComponent } from './dossiers.component';
-import { GenericTableComponent } from '../../components/generic-table.component';
 import {
   DossierApiService,
   DossierStatus,
@@ -20,17 +19,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
-import { MatMenuModule } from '@angular/material/menu';
 import {} from '@angular/material/snack-bar';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
@@ -39,6 +37,23 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
+
+/** Espions Jasmine sans `@types/jasmine` global (évite le conflit Vitest / Karma sur `expect`). */
+type KarmaSpyFn = ((...args: unknown[]) => unknown) & {
+  and: { returnValue(v: unknown): KarmaSpyFn };
+};
+
+function karmaSpy(name: string): KarmaSpyFn {
+  const base = vi.fn().mockName(name);
+  const fn = base as unknown as KarmaSpyFn;
+  fn.and = {
+    returnValue(v: unknown): KarmaSpyFn {
+      base.mockReturnValue(v);
+      return fn;
+    },
+  };
+  return fn;
+}
 
 describe('DossiersComponent', () => {
   let component: DossiersComponent;
@@ -55,42 +70,36 @@ describe('DossiersComponent', () => {
 
   beforeEach(async () => {
     const dossierApiServiceSpy = {
-      list: vi.fn().mockName('DossierApiService.list'),
-      getById: vi.fn().mockName('DossierApiService.getById'),
-      create: vi.fn().mockName('DossierApiService.create'),
-      patchStatus: vi.fn().mockName('DossierApiService.patchStatus'),
+      list: karmaSpy('DossierApiService.list'),
+      getById: karmaSpy('DossierApiService.getById'),
+      create: karmaSpy('DossierApiService.create'),
+      patchStatus: karmaSpy('DossierApiService.patchStatus'),
     };
     const annonceApiServiceSpy = {
-      list: vi.fn().mockName('AnnonceApiService.list'),
-      getById: vi.fn().mockName('AnnonceApiService.getById'),
+      list: karmaSpy('AnnonceApiService.list'),
+      getById: karmaSpy('AnnonceApiService.getById'),
     };
     const filterPresetServiceSpy = {
-      getPresets: vi.fn().mockName('FilterPresetService.getPresets'),
-      savePreset: vi.fn().mockName('FilterPresetService.savePreset'),
-      deletePreset: vi.fn().mockName('FilterPresetService.deletePreset'),
-      getPresetsLocally: vi
-        .fn()
-        .mockName('FilterPresetService.getPresetsLocally'),
-      savePresetLocally: vi
-        .fn()
-        .mockName('FilterPresetService.savePresetLocally'),
-      deletePresetLocally: vi
-        .fn()
-        .mockName('FilterPresetService.deletePresetLocally'),
+      getPresets: karmaSpy('FilterPresetService.getPresets'),
+      savePreset: karmaSpy('FilterPresetService.savePreset'),
+      deletePreset: karmaSpy('FilterPresetService.deletePreset'),
+      getPresetsLocally: karmaSpy('FilterPresetService.getPresetsLocally'),
+      savePresetLocally: karmaSpy('FilterPresetService.savePresetLocally'),
+      deletePresetLocally: karmaSpy('FilterPresetService.deletePresetLocally'),
     };
     const bottomSheetSpy = {
-      open: vi.fn().mockName('MatBottomSheet.open'),
+      open: karmaSpy('MatBottomSheet.open'),
     };
     const breakpointObserverSpy = {
-      observe: vi.fn().mockName('BreakpointObserver.observe'),
+      observe: karmaSpy('BreakpointObserver.observe'),
     };
 
-    breakpointObserverSpy.observe.mockReturnValue(
+    breakpointObserverSpy.observe.and.returnValue(
       of({ matches: false, breakpoints: {} })
     );
-    filterPresetServiceSpy.getPresets.mockReturnValue([]);
-    filterPresetServiceSpy.getPresetsLocally.mockReturnValue([]);
-    annonceApiServiceSpy.list.mockReturnValue(
+    filterPresetServiceSpy.getPresets.and.returnValue([]);
+    filterPresetServiceSpy.getPresetsLocally.and.returnValue([]);
+    annonceApiServiceSpy.list.and.returnValue(
       of({
         content: [],
         pageable: {
@@ -124,18 +133,15 @@ describe('DossiersComponent', () => {
         MatTableModule,
         MatPaginatorModule,
         MatSortModule,
-        MatTooltipModule,
         MatChipsModule,
         MatAutocompleteModule,
         MatFormFieldModule,
         MatInputModule,
         MatExpansionModule,
         MatSelectModule,
-        MatMenuModule,
 
         NoopAnimationsModule,
         DossiersComponent,
-        GenericTableComponent,
       ],
       providers: [
         {
@@ -157,7 +163,7 @@ describe('DossiersComponent', () => {
         {
           provide: MatDialog,
           useValue: {
-            open: vi.fn().mockName('MatDialog.open'),
+            open: karmaSpy('MatDialog.open'),
           },
         },
         provideHttpClient(withInterceptorsFromDi()),
@@ -211,7 +217,7 @@ describe('DossiersComponent', () => {
       empty: true,
     };
 
-    dossierApiService.list.mockReturnValue(of(mockPage));
+    dossierApiService.list.and.returnValue(of(mockPage));
     fixture.detectChanges();
 
     expect(fixture.nativeElement).toBeTruthy();
@@ -253,7 +259,7 @@ describe('DossiersComponent', () => {
       empty: false,
     };
 
-    dossierApiService.list.mockReturnValue(of(mockPage));
+    dossierApiService.list.and.returnValue(of(mockPage));
     fixture.detectChanges();
 
     expect(dossierApiService.list).toHaveBeenCalled();
@@ -293,7 +299,7 @@ describe('DossiersComponent', () => {
       empty: true,
     };
 
-    dossierApiService.list.mockReturnValue(of(mockPage));
+    dossierApiService.list.and.returnValue(of(mockPage));
 
     component.selectedStatus = DossierStatus.QUALIFIED;
     component.phoneFilter = '+33612345678';

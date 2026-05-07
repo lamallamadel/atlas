@@ -1,10 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClientAppointmentRequest } from '../models/customer-portal.models';
 import { CustomerPortalService } from '../services/customer-portal.service';
 
 @Component({
   selector: 'app-appointment-request',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="appointment-container">
       <h2>Demander un rendez-vous</h2>

@@ -12,10 +12,8 @@ import { Subject, takeUntil } from 'rxjs';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { DsCardComponent } from '../design-system';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIcon } from '@angular/material/icon';
+import { DsCardComponent, DsButtonComponent, DsIconComponent } from '../design-system';
+import { resolveDsToken } from '../design-system/chart-ds-colors';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/autocomplete';
@@ -41,9 +39,21 @@ interface CalendarEvent extends EventInput {
 
 @Component({
     selector: 'app-calendar-view',
+    standalone: true,
     templateUrl: './calendar-view.component.html',
     styleUrls: ['./calendar-view.component.css'],
-    imports: [DsCardComponent, DsSkeletonComponent, MatIconButton, MatTooltip, MatIcon, MatButton, MatFormField, MatLabel, MatSelect, MatOption, FullCalendarModule, CalendarListViewComponent]
+    imports: [
+      DsCardComponent,
+      DsSkeletonComponent,
+      DsButtonComponent,
+      DsIconComponent,
+      MatFormField,
+      MatLabel,
+      MatSelect,
+      MatOption,
+      FullCalendarModule,
+      CalendarListViewComponent,
+    ],
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
   readonly calendarComponent = viewChild<any>('calendar');
@@ -271,13 +281,13 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   private getStatusColor(status: AppointmentStatus): string {
     switch (status) {
       case AppointmentStatus.SCHEDULED:
-        return '#2196F3';
+        return resolveDsToken('--ds-marine-light');
       case AppointmentStatus.COMPLETED:
-        return '#4CAF50';
+        return resolveDsToken('--ds-success');
       case AppointmentStatus.CANCELLED:
-        return '#9E9E9E';
+        return resolveDsToken('--ds-text-faint');
       default:
-        return '#757575';
+        return resolveDsToken('--ds-text-muted');
     }
   }
 

@@ -3,8 +3,7 @@
   size="md"
   [showDot]="false"
   [pulse]="shouldPulse()"
-  [matTooltip]="getStatusDescription()"
-  matTooltipPosition="above"
+  [attr.title]="getStatusDescription()"
   role="status"
   [attr.aria-label]="getStatusLabel() + ': ' + getStatusDescription()">
   <mat-icon class="app-badge-status__icon" aria-hidden="true">{{ getStatusIcon() }}</mat-icon>

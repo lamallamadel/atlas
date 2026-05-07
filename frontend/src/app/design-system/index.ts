@@ -43,7 +43,7 @@ export type { DsBadgeStatus }                     from './primitives/ds-badge/ds
 export type { DsCardElevation }                   from './primitives/ds-card/ds-card.component';
 export type { DsAvatarSize, DsAvatarVariant }     from './primitives/ds-avatar/ds-avatar.component';
 export type { DsTab, DsTabsVariant }              from './primitives/ds-tabs/ds-tabs.component';
-export type { DsColumn, DsSortEvent }             from './primitives/ds-table/ds-table.component';
+export type { DsColumn, DsSortEvent, DsRowAction } from './primitives/ds-table/ds-table.component';
 export type { DsIconSize }                        from './icons/ds-icon.component';
 export type { IosTabItem }                        from './platform/ios/glass-tabbar.component';
 export type { M3AppBarType }                      from './platform/android/m3-app-bar.component';

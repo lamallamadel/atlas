@@ -1,18 +1,16 @@
 import { Component, input, output } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { TaskResponse, TaskPriority, TaskStatus } from '../services/task-api.service';
 import { fadeIn, scaleIn } from '../animations';
-import { DsCardComponent } from '../design-system';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatIcon } from '@angular/material/icon';
-import { MatButton } from '@angular/material/button';
-import { DatePipe } from '@angular/common';
+import { DsCardComponent, DsButtonComponent, DsIconComponent } from '../design-system';
 
 @Component({
     selector: 'app-task-card',
+    standalone: true,
     templateUrl: './task-card.component.html',
     styleUrls: ['./task-card.component.css'],
     animations: [fadeIn, scaleIn],
-    imports: [DsCardComponent, MatCheckbox, MatIcon, MatButton, DatePipe]
+    imports: [DsCardComponent, DsButtonComponent, DsIconComponent, DatePipe]
 })
 export class TaskCardComponent {
   readonly task = input.required<TaskResponse>();
@@ -40,13 +38,13 @@ export class TaskCardComponent {
   get priorityLabel(): string {
     switch (this.task().priority) {
       case TaskPriority.HIGH:
-        return 'High';
+        return 'Haute';
       case TaskPriority.MEDIUM:
-        return 'Medium';
+        return 'Moyenne';
       case TaskPriority.LOW:
-        return 'Low';
+        return 'Basse';
       default:
-        return 'Medium';
+        return 'Moyenne';
     }
   }
 
@@ -72,31 +70,27 @@ export class TaskCardComponent {
   get dueDateLabel(): string {
     const task = this.task();
     if (!task.dueDate) {
-      return 'No due date';
+      return 'Sans échéance';
     }
     const dueDate = new Date(task.dueDate);
     const now = new Date();
     const daysDiff = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     if (daysDiff < 0) {
-      return `Overdue by ${Math.abs(daysDiff)} day${Math.abs(daysDiff) === 1 ? '' : 's'}`;
+      return `En retard de ${Math.abs(daysDiff)} jour${Math.abs(daysDiff) === 1 ? '' : 's'}`;
     } else if (daysDiff === 0) {
-      return 'Due today';
+      return "Aujourd'hui";
     } else if (daysDiff === 1) {
-      return 'Due tomorrow';
+      return 'Demain';
     } else if (daysDiff <= 7) {
-      return `Due in ${daysDiff} days`;
+      return `Dans ${daysDiff} jours`;
     } else {
       return dueDate.toLocaleDateString('fr-FR');
     }
   }
 
-  onCheckboxChange(event: any): void {
-    if (event.checked) {
-      this.taskCompleted.emit(this.task().id);
-    } else {
-      this.taskCompleted.emit(this.task().id);
-    }
+  onCheckboxChange(): void {
+    this.taskCompleted.emit(this.task().id);
   }
 
   onEdit(): void {

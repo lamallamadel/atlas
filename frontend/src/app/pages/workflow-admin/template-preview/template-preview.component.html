@@ -1,13 +1,13 @@
 <ds-card class="preview-card" [pad]="false" [elevation]="'sm'">
   <div class="preview-card-header">
     <h3 class="preview-card-title">Live Preview</h3>
-    <mat-icon matTooltip="Preview how your message will appear in WhatsApp">info</mat-icon>
+    <ds-icon name="info" [size]="16" [attr.title]="'Preview how your message will appear in WhatsApp'"></ds-icon>
   </div>
 
   <div class="preview-card-body">
     <div class="whatsapp-preview">
       <div class="whatsapp-header">
-        <mat-icon>chat</mat-icon>
+        <ds-icon name="whatsapp" [size]="16"></ds-icon>
         <span>WhatsApp Message Preview</span>
       </div>
 
@@ -36,35 +36,36 @@
           @if (buttonsComponent?.buttons && buttonsComponent!.buttons!.length > 0) {
             <div class="buttons-section">
               @for (button of buttonsComponent!.buttons; track button) {
-                <button
-                  mat-stroked-button
+                <ds-button
+                  variant="ghost"
+                  size="md"
                   class="whatsapp-button"
                   [class.url-button]="button.type === ButtonType.URL"
                   [class.phone-button]="button.type === ButtonType.PHONE_NUMBER">
-                  <mat-icon>{{ getButtonIcon(button.type) }}</mat-icon>
+                  <ds-icon [name]="getButtonIcon(button.type)" [size]="16"></ds-icon>
                   {{ button.text }}
-                </button>
+                </ds-button>
               }
             </div>
           }
           @if (template()?.variables && template()!.variables!.length > 0) {
             <div class="variable-info">
-              <mat-divider></mat-divider>
+              <div class="preview-divider"></div>
               <div class="info-header">
-                <mat-icon>code</mat-icon>
+                <ds-icon name="info" [size]="16"></ds-icon>
                 <strong>Variables ({{ template()?.variables?.length || 0 }})</strong>
               </div>
               <div class="variables-list">
-                <mat-chip-listbox>
-                  @for (variable of (template()?.variables || []); track variable) {
-                    <mat-chip>
+                @for (variable of (template()?.variables || []); track variable) {
+                  <span class="variable-chip">
+                    <ds-badge status="info" [showDot]="false">
                       <strong>{{variable.variableName}}</strong>
                       @if (variable.exampleValue) {
                         <span>: {{ variable.exampleValue }}</span>
                       }
-                    </mat-chip>
-                  }
-                </mat-chip-listbox>
+                    </ds-badge>
+                  </span>
+                }
               </div>
             </div>
           }
@@ -73,7 +74,7 @@
 
       @if (!template()) {
         <div class="empty-preview">
-          <mat-icon>preview</mat-icon>
+          <ds-icon name="info" [size]="24"></ds-icon>
           <p>Start creating your template to see a preview</p>
         </div>
       }
@@ -81,19 +82,19 @@
 
     @if (template()) {
       <div class="preview-meta">
-        <mat-divider></mat-divider>
+        <div class="preview-divider"></div>
         <div class="meta-info">
           <div class="meta-item">
-            <mat-icon>translate</mat-icon>
+            <ds-icon name="globe" [size]="16"></ds-icon>
             <span>{{ template()?.language }}</span>
           </div>
           <div class="meta-item">
-            <mat-icon>category</mat-icon>
+            <ds-icon name="chart" [size]="16"></ds-icon>
             <span>{{ template()?.category }}</span>
           </div>
           @if (template()?.status) {
             <div class="meta-item">
-              <mat-icon>info</mat-icon>
+              <ds-icon name="info" [size]="16"></ds-icon>
               <span>{{ template()?.status }}</span>
             </div>
           }

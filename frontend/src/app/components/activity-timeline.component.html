@@ -1,16 +1,14 @@
 <div class="activity-timeline-container">
   <div class="timeline-header">
     <h3>Chronologie d'activité</h3>
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="openNoteDialog()"
-      aria-label="Ajouter une nouvelle note à la chronologie"
-      (keydown.enter)="openNoteDialog()"
-      (keydown.space)="$event.preventDefault(); openNoteDialog()">
-      <mat-icon aria-hidden="true">add</mat-icon>
+    <ds-button
+      variant="marine"
+      size="md"
+      (dsClick)="openNoteDialog()"
+      ariaLabel="Ajouter une nouvelle note à la chronologie">
+      <ds-icon name="plus" [size]="20" aria-hidden="true" />
       Ajouter une note
-    </button>
+    </ds-button>
   </div>
 
   @if (loading) {
@@ -22,7 +20,7 @@
 
   @if (!loading && activities.length === 0) {
     <div class="no-activities">
-      <mat-icon>timeline</mat-icon>
+      <ds-icon name="chart" [size]="24" aria-hidden="true" class="no-activities-icon" />
       <p>Aucune activité pour le moment</p>
     </div>
   }
@@ -32,9 +30,9 @@
       @for (activity of activities; track trackByActivityId($index, activity)) {
         <div class="timeline-item">
           <div class="timeline-marker">
-            <mat-icon [class]="getActivityTypeBadgeClass(activity.type)">
-              {{ getActivityTypeIcon(activity.type) }}
-            </mat-icon>
+            <span [class]="getActivityTypeBadgeClass(activity.type)">
+              <ds-icon [name]="getActivityTypeDsIcon(activity.type)" [size]="24" aria-hidden="true" />
+            </span>
           </div>
           <ds-card class="activity-card" [pad]="false" [elevation]="'sm'">
             <div class="activity-card-header">
@@ -48,37 +46,64 @@
                   <div class="activity-title-row">
                     <span class="activity-type">{{ getActivityTypeLabel(activity.type) }}</span>
                     <span [class]="getVisibilityBadgeClass(activity.visibility)">
-                      <mat-icon class="badge-icon">{{ getVisibilityIcon(activity.visibility) }}</mat-icon>
+                      <ds-icon
+                        class="badge-icon"
+                        [name]="getVisibilityDsIcon(activity.visibility)"
+                        [size]="16"
+                        aria-hidden="true" />
                       {{ getVisibilityLabel(activity.visibility) }}
                     </span>
                   </div>
                   @if (activity.type === ActivityType.NOTE) {
-                    <button
-                      mat-icon-button
-                      [matMenuTriggerFor]="actionsMenu"
-                      class="actions-menu-button"
-                      (click)="$event.stopPropagation()"
-                      [attr.aria-label]="'Actions pour la note du ' + formatDateTime(activity.createdAt)"
-                      aria-haspopup="true">
-                      <mat-icon aria-hidden="true">more_vert</mat-icon>
-                    </button>
+                    <span class="tl-note-menu-origin" cdkOverlayOrigin #noteMenuOrigin="cdkOverlayOrigin">
+                      <button
+                        type="button"
+                        class="actions-menu-button actions-menu-trigger"
+                        (click)="toggleNoteActionsMenu(activity.id, $event)"
+                        [attr.aria-expanded]="noteActionsMenuOpenForId === activity.id"
+                        aria-haspopup="menu"
+                        [attr.aria-controls]="'tl-note-menu-' + activity.id"
+                        [attr.aria-label]="'Actions pour la note du ' + formatDateTime(activity.createdAt)">
+                        <ds-icon name="more-vertical" [size]="20" aria-hidden="true" />
+                      </button>
+                    </span>
+                    <ng-template
+                      cdkConnectedOverlay
+                      [cdkConnectedOverlayOrigin]="noteMenuOrigin"
+                      [cdkConnectedOverlayOpen]="noteActionsMenuOpenForId === activity.id"
+                      [cdkConnectedOverlayPositions]="noteMenuPositions"
+                      [cdkConnectedOverlayScrollStrategy]="noteMenuScrollStrategy"
+                      [cdkConnectedOverlayHasBackdrop]="true"
+                      [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
+                      (backdropClick)="closeNoteActionsMenu()"
+                      (detach)="closeNoteActionsMenu()"
+                      (overlayKeydown)="$event.key === 'Escape' && closeNoteActionsMenu()">
+                      <div
+                        [id]="'tl-note-menu-' + activity.id"
+                        class="tl-note-menu-dropdown"
+                        role="menu"
+                        aria-label="Menu des actions">
+                        <button
+                          type="button"
+                          class="tl-note-menu-item"
+                          role="menuitem"
+                          (click)="editActivity(activity)"
+                          aria-label="Modifier cette note">
+                          <ds-icon name="edit" [size]="20" aria-hidden="true" class="menu-item-icon" />
+                          <span>Modifier</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="tl-note-menu-item"
+                          role="menuitem"
+                          (click)="deleteActivity(activity)"
+                          aria-label="Supprimer cette note">
+                          <ds-icon name="trash" [size]="20" aria-hidden="true" class="menu-item-icon menu-item-icon--warn" />
+                          <span>Supprimer</span>
+                        </button>
+                      </div>
+                    </ng-template>
                   }
-                  <mat-menu #actionsMenu="matMenu" aria-label="Menu des actions">
-                    <button
-                      mat-menu-item
-                      (click)="editActivity(activity)"
-                      aria-label="Modifier cette note">
-                      <mat-icon aria-hidden="true">edit</mat-icon>
-                      <span>Modifier</span>
-                    </button>
-                    <button
-                      mat-menu-item
-                      (click)="deleteActivity(activity)"
-                      aria-label="Supprimer cette note">
-                      <mat-icon color="warn" aria-hidden="true">delete</mat-icon>
-                      <span>Supprimer</span>
-                    </button>
-                  </mat-menu>
                 </div>
                 <div class="activity-meta">
                   <span class="activity-author">{{ activity.createdByName || activity.createdBy }}</span>
@@ -99,18 +124,19 @@
                     [innerHTML]="sanitizeContent(activity.content)"></div>
                   }
                   @if (shouldShowExpand(activity.content)) {
-                    <button
-                      mat-button
-                      color="primary"
-                      (click)="toggleExpanded(activity.id)"
+                    <ds-button
+                      variant="ghost"
+                      size="sm"
                       class="expand-button"
-                      [attr.aria-label]="isExpanded(activity.id) ? 'Réduire le contenu de cette activité' : 'Développer le contenu de cette activité'"
-                      [attr.aria-expanded]="isExpanded(activity.id)"
-                      (keydown.enter)="toggleExpanded(activity.id)"
-                      (keydown.space)="$event.preventDefault(); toggleExpanded(activity.id)">
-                      <mat-icon aria-hidden="true">{{ isExpanded(activity.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                      (dsClick)="toggleExpanded(activity.id)"
+                      [ariaLabel]="isExpanded(activity.id) ? 'Réduire le contenu de cette activité' : 'Développer le contenu de cette activité'"
+                      [attr.aria-expanded]="isExpanded(activity.id)">
+                      <ds-icon
+                        [name]="isExpanded(activity.id) ? 'chevron-up' : 'chevron-down'"
+                        [size]="20"
+                        aria-hidden="true" />
                       {{ isExpanded(activity.id) ? 'Voir moins' : 'Voir plus' }}
-                    </button>
+                    </ds-button>
                   }
                 </div>
               }

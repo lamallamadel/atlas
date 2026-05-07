@@ -72,14 +72,18 @@
       @if (appliedFilters.length) {
         <div class="dos-active-filters" role="group" aria-label="Filtres actifs">
           @for (f of appliedFilters; track f.key) {
-            <div class="dos-filter-chip">
-              <span>{{ f.label }} : {{ f.displayValue }}</span>
-              <button (click)="removeFilter(f)" [attr.aria-label]="'Supprimer filtre ' + f.label">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span class="dos-filter-chip">
+              <ds-badge status="info" [showDot]="false" size="sm">{{ f.label }} : {{ f.displayValue }}</ds-badge>
+              <button
+                type="button"
+                class="dos-filter-chip__remove"
+                (click)="removeFilter(f)"
+                [attr.aria-label]="'Supprimer filtre ' + f.label">
+                <ds-icon name="close" [size]="16" ariaLabel="Retirer le filtre"></ds-icon>
               </button>
-            </div>
+            </span>
           }
-          <button class="dos-clear-all" (click)="clearFilters()">Tout effacer</button>
+          <button type="button" class="dos-clear-all" (click)="clearFilters()">Tout effacer</button>
         </div>
       }
     </div>
@@ -108,95 +112,45 @@
       </ds-empty-state>
     }
 
-    @if (!loading && !error && dossiers.length > 0) {
-      <div class="dos-table-wrap" role="region" aria-label="Liste des dossiers">
-        <!-- En-tête table -->
-        <div class="dos-table-header" role="row" aria-hidden="true">
-          <span class="dos-col dos-col--lead">Lead</span>
-          <span class="dos-col dos-col--phone">Téléphone</span>
-          <span class="dos-col dos-col--status">Statut</span>
-          <span class="dos-col dos-col--date">Créé le</span>
-          <span class="dos-col dos-col--annonce">Annonce</span>
-          <span class="dos-col dos-col--actions">Actions</span>
-        </div>
+    @if (!loading && !error && dossiers.length > 0 && !isMobile) {
+      <ds-card class="dos-list-card" elevation="sm" [pad]="false">
+        <div role="region" aria-label="Liste des dossiers">
+          <ds-table
+            [columns]="dsTableColumns"
+            [rows]="dossiersAsTableRows"
+            [rowActions]="dsTableRowActions"
+            [rowClickable]="true"
+            [bordered]="true"
+            label="Liste des dossiers"
+            [trackBy]="trackByDossierId"
+            (rowClick)="onDsTableRowClick($event)"
+            (rowAction)="onDsTableRowAction($event)">
+          </ds-table>
 
-        <!-- Lignes -->
-        <div class="dos-rows" role="list" [@listStaggerAnimation]="dossiers.length">
-          @for (d of dossiers; track d.id) {
-            <div
-              class="dos-row"
-              role="listitem"
-              tabindex="0"
-              (click)="goToDossier(d.id)"
-              (keydown.enter)="goToDossier(d.id)"
-              (keydown.space)="$event.preventDefault(); goToDossier(d.id)"
-              [@itemAnimation]
-              [attr.aria-label]="'Dossier ' + d.id + ', ' + (d.leadName || 'Sans nom')">
-              <!-- Lead -->
-              <div class="dos-col dos-col--lead">
-                <ds-avatar [name]="d.leadName || '?'" size="sm"></ds-avatar>
-                <div class="dos-lead-info">
-                  <span class="dos-lead-name">{{ d.leadName || '—' }}</span>
-                  <span class="dos-lead-id">#{{ d.id }}</span>
-                </div>
-              </div>
-              <!-- Téléphone -->
-              <div class="dos-col dos-col--phone">
-                <span class="dos-phone">{{ d.leadPhone | phoneFormat }}</span>
-              </div>
-              <!-- Statut -->
-              <div class="dos-col dos-col--status">
-                <ds-badge [status]="getDossierBadgeStatus(d.status)">{{ d.status }}</ds-badge>
-              </div>
-              <!-- Date -->
-              <div class="dos-col dos-col--date dos-date">
-                {{ d.createdAt | dateFormat }}
-              </div>
-              <!-- Annonce -->
-              <div class="dos-col dos-col--annonce dos-annonce-id">
-                @if (d.annonceId) {
-                  <a [routerLink]="['/pro/annonces', d.annonceId]" (click)="$event.stopPropagation()">
-                    #{{ d.annonceId }}
-                  </a>
-                } @else {
-                  <span class="dos-empty">—</span>
-                }
-              </div>
-              <!-- Actions -->
-              <div class="dos-col dos-col--actions" (click)="$event.stopPropagation()">
-                <button class="dos-action-btn" (click)="editDossier(d)" aria-label="Modifier">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10.5 9.5 3l1.5 1.5-7.5 7.5H2v-1.5z" stroke="currentColor" stroke-width="1.2" fill="currentColor" opacity=".1"/><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <button class="dos-action-btn dos-action-btn--danger" (click)="deleteDossier(d)" aria-label="Supprimer">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4h10M5 4V2h4v2M5.5 6v5M8.5 6v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><rect x="2.5" y="4" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
-                </button>
+          @if (page) {
+            <div class="dos-pagination" aria-label="Pagination">
+              <span class="dos-pagination__info">
+                {{ page.totalElements }} dossier{{ page.totalElements > 1 ? 's' : '' }} ·
+                Page {{ page.number + 1 }} / {{ page.totalPages }}
+              </span>
+              <div class="dos-pagination__btns">
+                <button
+                  type="button"
+                  class="dos-pagination__btn"
+                  [disabled]="currentPage === 0"
+                  (click)="previousPage()"
+                  aria-label="Page précédente">←</button>
+                <button
+                  type="button"
+                  class="dos-pagination__btn"
+                  [disabled]="page.last"
+                  (click)="nextPage()"
+                  aria-label="Page suivante">→</button>
               </div>
             </div>
           }
         </div>
-
-        <!-- Pagination -->
-        @if (page) {
-          <div class="dos-pagination" aria-label="Pagination">
-            <span class="dos-pagination__info">
-              {{ page.totalElements }} dossier{{ page.totalElements > 1 ? 's' : '' }} ·
-              Page {{ page.number + 1 }} / {{ page.totalPages }}
-            </span>
-            <div class="dos-pagination__btns">
-              <button
-                class="dos-pagination__btn"
-                [disabled]="currentPage === 0"
-                (click)="previousPage()"
-                aria-label="Page précédente">←</button>
-              <button
-                class="dos-pagination__btn"
-                [disabled]="page.last"
-                (click)="nextPage()"
-                aria-label="Page suivante">→</button>
-            </div>
-          </div>
-        }
-      </div>
+      </ds-card>
     }
   }
 

@@ -13,7 +13,8 @@
     <div class="header-actions">
       <button
         mat-icon-button
-        matTooltip="Actualiser"
+        type="button"
+        [attr.title]="'Actualiser'"
         (click)="loadMessages()">
         <mat-icon>refresh</mat-icon>
       </button>
@@ -21,7 +22,7 @@
         class="connection-indicator"
         [class.online]="isOnline"
         [class.offline]="!isOnline"
-        [matTooltip]="isOnline ? 'En ligne' : 'Hors ligne'">
+        [attr.title]="isOnline ? 'En ligne' : 'Hors ligne'">
         {{ isOnline ? 'wifi' : 'wifi_off' }}
       </mat-icon>
     </div>
@@ -50,56 +51,52 @@
       }
 
       @if (!loading) {
-        <div class="messages-list">
+        <div class="messages-list ds-thread ds-thread--whatsapp">
           <ng-container *cdkVirtualFor="let message of messages; trackBy: trackByMessageId; let i = index">
-            <!-- Date divider -->
             @if (showDateDivider(i)) {
-              <div class="date-divider">
+              <div class="ds-date-divider">
                 <span>{{ getDateDividerText(message.timestamp) }}</span>
               </div>
             }
-            <!-- Message bubble -->
             <div
-              class="message-wrapper"
-              [class.outbound]="message.direction === MessageDirection.OUTBOUND"
-              [class.inbound]="message.direction === MessageDirection.INBOUND"
-              [class.failed]="message.deliveryStatus === MessageDeliveryStatus.FAILED"
+              class="ds-thread__msg"
+              [class.ds-thread__msg--outbound]="message.direction === MessageDirection.OUTBOUND"
+              [class.ds-thread__msg--inbound]="message.direction === MessageDirection.INBOUND"
+              [class.ds-thread__msg--failed]="message.deliveryStatus === MessageDeliveryStatus.FAILED"
               [style.transform]="getSwipeTransform(message.id)"
               (touchstart)="onTouchStart($event, message)"
               (touchmove)="onTouchMove($event, message)"
               (touchend)="onTouchEnd($event, message)">
-              <!-- Swipe actions -->
               <div
                 class="swipe-actions"
                 [class.visible]="swipedMessageId === message.id && Math.abs(swipeOffset) > 50">
                 @if (message.deliveryStatus === MessageDeliveryStatus.FAILED) {
                   <button
                     mat-icon-button
+                    type="button"
                     class="action-retry"
                     (click)="retryMessage(message, $event)"
-                    matTooltip="Réessayer">
+                    [attr.title]="'Réessayer'">
                     <mat-icon>refresh</mat-icon>
                   </button>
                 }
                 <button
                   mat-icon-button
+                  type="button"
                   class="action-copy"
                   (click)="copyMessage(message, $event)"
-                  matTooltip="Copier">
+                  [attr.title]="'Copier'">
                   <mat-icon>content_copy</mat-icon>
                 </button>
               </div>
-              <div class="message-bubble">
-                <div class="message-content">
-                  {{ message.content }}
-                </div>
-                <div class="message-meta">
-                  <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
+              <div class="ds-thread__bubble">
+                <p class="ds-thread__text">{{ message.content }}</p>
+                <div class="ds-thread__meta">
+                  <time class="ds-thread__time">{{ formatTimestamp(message.timestamp) }}</time>
                   @if (message.direction === MessageDirection.OUTBOUND && message.deliveryStatus) {
                     <mat-icon
-                      class="delivery-status"
-                      [class]="getDeliveryStatusClass(message.deliveryStatus)"
-                      >
+                      class="ds-thread__delivery"
+                      [ngClass]="getDeliveryStatusClass(message.deliveryStatus)">
                       {{ getDeliveryStatusIcon(message.deliveryStatus) }}
                     </mat-icon>
                   }
@@ -191,9 +188,10 @@
                 </div>
                 <button
                   mat-icon-button
+                  type="button"
                   class="remove-attachment"
                   (click)="removeAttachment(i)"
-                  matTooltip="Retirer">
+                  [attr.title]="'Retirer'">
                   <mat-icon>close</mat-icon>
                 </button>
               </div>
@@ -206,19 +204,21 @@
       <div class="input-controls">
         <button
           mat-icon-button
+          type="button"
           class="template-button"
           [disabled]="!hasValidConsent"
           (click)="openTemplateSelector()"
-          [matTooltip]="selectedTemplate ? 'Modifier le modèle' : 'Sélectionner un modèle'">
+          [attr.title]="selectedTemplate ? 'Modifier le modèle' : 'Sélectionner un modèle'">
           <mat-icon>{{ selectedTemplate ? 'edit' : 'insert_drive_file' }}</mat-icon>
         </button>
 
         <button
           mat-icon-button
+          type="button"
           class="attachment-button"
           [disabled]="!hasValidConsent"
           (click)="fileInput.click()"
-          matTooltip="Joindre un fichier">
+          [attr.title]="'Joindre un fichier'">
           <mat-icon>attach_file</mat-icon>
         </button>
         <input
@@ -248,11 +248,12 @@
           <button
             mat-fab
             color="primary"
+            type="button"
             class="send-button"
             [disabled]="!canSend()"
             (click)="sendMessage()"
             [class.sending]="sending"
-            matTooltip="Envoyer">
+            [attr.title]="'Envoyer'">
             @if (!sending) {
               <mat-icon>send</mat-icon>
             }

@@ -89,7 +89,7 @@
             class="control-btn"
             (click)="zoomOut()"
             [disabled]="lightboxZoom <= 0.5"
-            matTooltip="Zoom arrière (-)">
+            title="Zoom arrière (-)">
             <mat-icon>zoom_out</mat-icon>
           </button>
           <span class="zoom-indicator">{{ (lightboxZoom * 100).toFixed(0) }}%</span>
@@ -98,7 +98,7 @@
             class="control-btn"
             (click)="zoomIn()"
             [disabled]="lightboxZoom >= 3"
-            matTooltip="Zoom avant (+)">
+            title="Zoom avant (+)">
             <mat-icon>zoom_in</mat-icon>
           </button>
           <button
@@ -106,7 +106,7 @@
             class="control-btn"
             (click)="resetZoom()"
             [disabled]="lightboxZoom === 1"
-            matTooltip="Réinitialiser le zoom (0)">
+            title="Réinitialiser le zoom (0)">
             <mat-icon>fit_screen</mat-icon>
           </button>
         </div>

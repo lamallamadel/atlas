@@ -1,21 +1,20 @@
 import { NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnChanges, SimpleChanges, input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
+import { DsIconComponent, StageStepperComponent, type DsStage } from '../design-system';
 import { DossierStatus } from '../services/dossier-api.service';
 
 type UiStep = {
   key: DossierStatus | 'CLOSE';
   label: string;
-  icon: string;
 };
 
 @Component({
-    selector: 'app-workflow-stepper',
-    standalone: true,
-    imports: [NgClass, MatIconModule],
-    templateUrl: './workflow-stepper.component.html',
-    styleUrls: ['./workflow-stepper.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-workflow-stepper',
+  standalone: true,
+  imports: [NgClass, DsIconComponent, StageStepperComponent],
+  templateUrl: './workflow-stepper.component.html',
+  styleUrls: ['./workflow-stepper.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkflowStepperComponent implements OnChanges {
   readonly status = input<DossierStatus | null>(null);
@@ -23,11 +22,11 @@ export class WorkflowStepperComponent implements OnChanges {
   constructor(private cdr: ChangeDetectorRef) {}
 
   readonly steps: UiStep[] = [
-    { key: DossierStatus.NEW, label: 'Nouveau', icon: 'fiber_new' },
-    { key: DossierStatus.QUALIFYING, label: 'Qualification', icon: 'manage_search' },
-    { key: DossierStatus.QUALIFIED, label: 'Qualifié', icon: 'verified' },
-    { key: DossierStatus.APPOINTMENT, label: 'Rendez-vous', icon: 'event' },
-    { key: 'CLOSE', label: 'Clôture', icon: 'flag' }
+    { key: DossierStatus.NEW, label: 'Nouveau' },
+    { key: DossierStatus.QUALIFYING, label: 'Qualification' },
+    { key: DossierStatus.QUALIFIED, label: 'Qualifié' },
+    { key: DossierStatus.APPOINTMENT, label: 'Rendez-vous' },
+    { key: 'CLOSE', label: 'Clôture' },
   ];
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -63,13 +62,6 @@ export class WorkflowStepperComponent implements OnChanges {
     return 'En cours';
   }
 
-  get closeIcon(): string {
-    const status = this.status();
-    if (status === DossierStatus.WON) return 'emoji_events';
-    if (status === DossierStatus.LOST) return 'cancel';
-    return 'hourglass_top';
-  }
-
   get progressPercent(): number {
     return Math.round((this.currentIndex / (this.steps.length - 1)) * 100);
   }
@@ -94,7 +86,6 @@ export class WorkflowStepperComponent implements OnChanges {
     }
   }
 
-
   get isClosed(): boolean {
     const status = this.status();
     return status === DossierStatus.WON || status === DossierStatus.LOST;
@@ -111,9 +102,11 @@ export class WorkflowStepperComponent implements OnChanges {
     return '';
   }
 
-  stepIcon(step: UiStep): string {
-    if (step.key === 'CLOSE') return this.closeIcon;
-    return step.icon;
+  get dsStages(): DsStage[] {
+    return this.steps.map((step, i) => ({
+      label: this.stepLabel(step),
+      state: i < this.currentIndex ? 'done' : i === this.currentIndex ? 'current' : 'upcoming',
+    }));
   }
 
   stepLabel(step: UiStep): string {

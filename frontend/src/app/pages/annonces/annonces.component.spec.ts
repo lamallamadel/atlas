@@ -12,7 +12,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
@@ -22,6 +21,15 @@ import {
   AnnonceStatus,
 } from '../../services/annonce-api.service';
 import { FilterPresetService } from '../../services/filter-preset.service';
+
+type KarmaSpyFn = ((...args: unknown[]) => unknown) & {
+  and: { returnValue(v: unknown): KarmaSpyFn };
+};
+
+function karmaSpy(name: string): KarmaSpyFn {
+  const jasmineRef = (globalThis as unknown as { jasmine: { createSpy(n: string): KarmaSpyFn } }).jasmine;
+  return jasmineRef.createSpy(name);
+}
 
 @Component({
   selector: 'app-generic-table',
@@ -36,7 +44,6 @@ import { FilterPresetService } from '../../services/filter-preset.service';
     MatIconModule,
     MatButtonModule,
     MatChipsModule,
-    MatMenuModule,
     MatDialogModule,
   ],
 })
@@ -66,7 +73,6 @@ class GenericTableStubComponent {
     MatIconModule,
     MatButtonModule,
     MatChipsModule,
-    MatMenuModule,
     MatDialogModule,
   ],
 })
@@ -92,7 +98,6 @@ class EmptyStateStubComponent {
     MatIconModule,
     MatButtonModule,
     MatChipsModule,
-    MatMenuModule,
     MatDialogModule,
   ],
 })
@@ -133,46 +138,38 @@ describe('AnnoncesComponent', () => {
 
   beforeEach(async () => {
     const annonceApiServiceSpy = {
-      list: vi.fn().mockName('AnnonceApiService.list'),
-      getDistinctCities: vi
-        .fn()
-        .mockName('AnnonceApiService.getDistinctCities'),
-      getById: vi.fn().mockName('AnnonceApiService.getById'),
-      create: vi.fn().mockName('AnnonceApiService.create'),
-      update: vi.fn().mockName('AnnonceApiService.update'),
+      list: karmaSpy('AnnonceApiService.list'),
+      getDistinctCities: karmaSpy('AnnonceApiService.getDistinctCities'),
+      getById: karmaSpy('AnnonceApiService.getById'),
+      create: karmaSpy('AnnonceApiService.create'),
+      update: karmaSpy('AnnonceApiService.update'),
     };
 
     const filterPresetServiceSpy = {
-      getPresets: vi.fn().mockName('FilterPresetService.getPresets'),
-      savePreset: vi.fn().mockName('FilterPresetService.savePreset'),
-      deletePreset: vi.fn().mockName('FilterPresetService.deletePreset'),
-      getPresetsLocally: vi
-        .fn()
-        .mockName('FilterPresetService.getPresetsLocally'),
-      savePresetLocally: vi
-        .fn()
-        .mockName('FilterPresetService.savePresetLocally'),
-      deletePresetLocally: vi
-        .fn()
-        .mockName('FilterPresetService.deletePresetLocally'),
+      getPresets: karmaSpy('FilterPresetService.getPresets'),
+      savePreset: karmaSpy('FilterPresetService.savePreset'),
+      deletePreset: karmaSpy('FilterPresetService.deletePreset'),
+      getPresetsLocally: karmaSpy('FilterPresetService.getPresetsLocally'),
+      savePresetLocally: karmaSpy('FilterPresetService.savePresetLocally'),
+      deletePresetLocally: karmaSpy('FilterPresetService.deletePresetLocally'),
     };
 
     const bottomSheetSpy = {
-      open: vi.fn().mockName('MatBottomSheet.open'),
+      open: karmaSpy('MatBottomSheet.open'),
     };
 
     const breakpointObserverSpy = {
-      observe: vi.fn().mockName('BreakpointObserver.observe'),
+      observe: karmaSpy('BreakpointObserver.observe'),
     };
-    breakpointObserverSpy.observe.mockReturnValue(
+    breakpointObserverSpy.observe.and.returnValue(
       of({ matches: false, breakpoints: {} })
     );
 
     // Default safe stubs for ngOnInit() calls.
-    annonceApiServiceSpy.getDistinctCities.mockReturnValue(of([]));
-    annonceApiServiceSpy.list.mockReturnValue(of(emptyPage));
-    filterPresetServiceSpy.getPresets.mockReturnValue([]);
-    filterPresetServiceSpy.getPresetsLocally.mockReturnValue([]);
+    annonceApiServiceSpy.getDistinctCities.and.returnValue(of([]));
+    annonceApiServiceSpy.list.and.returnValue(of(emptyPage));
+    filterPresetServiceSpy.getPresets.and.returnValue([]);
+    filterPresetServiceSpy.getPresetsLocally.and.returnValue([]);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -186,7 +183,6 @@ describe('AnnoncesComponent', () => {
         MatIconModule,
         MatButtonModule,
         MatChipsModule,
-        MatMenuModule,
         MatDialogModule,
         AnnoncesComponent,
         GenericTableStubComponent,
@@ -242,22 +238,26 @@ describe('AnnoncesComponent', () => {
       empty: false,
     };
 
-    annonceApiService.list.mockReturnValue(of(mockPage));
-    annonceApiService.getDistinctCities.mockReturnValue(of(['Tanger']));
+    annonceApiService.list.and.returnValue(of(mockPage));
+    annonceApiService.getDistinctCities.and.returnValue(of(['Tanger']));
 
     fixture.detectChanges(); // triggers ngOnInit
 
     expect(annonceApiService.getDistinctCities).toHaveBeenCalled();
-    expect(annonceApiService.list).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 0, size: 10 })
-    );
+    expect(annonceApiService.list).toHaveBeenCalled();
+    const listSpy = annonceApiService.list as unknown as {
+      calls: { mostRecent: () => { args: [{ page: number; size: number }] } };
+    };
+    const listParams = listSpy.calls.mostRecent().args[0];
+    expect(listParams.page).toBe(0);
+    expect(listParams.size).toBe(10);
     expect(component.annonces.length).toBe(1);
     expect(component.annonces[0].title).toBe('Test Annonce');
   });
 
   it('should render component', () => {
-    annonceApiService.list.mockReturnValue(of(emptyPage));
-    annonceApiService.getDistinctCities.mockReturnValue(of([]));
+    annonceApiService.list.and.returnValue(of(emptyPage));
+    annonceApiService.getDistinctCities.and.returnValue(of([]));
 
     fixture.detectChanges();
 

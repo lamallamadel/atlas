@@ -1,9 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { PropertyRecommendation } from '../models/customer-portal.models';
 import { CustomerPortalService } from '../services/customer-portal.service';
 
 @Component({
   selector: 'app-property-recommendation',
+  standalone: true,
+  imports: [CommonModule],
   template: `
     <div class="recommendations-container">
       <h2>Propriétés recommandées</h2>

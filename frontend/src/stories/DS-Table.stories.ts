@@ -17,6 +17,31 @@ const ROWS = [
   { id: 1038, name: 'Claire Moreau',   phone: '+33 7 66 77 88 99', status: 'Perdu',         date: '25 avr. 2026' },
 ];
 
+const RICH_COLUMNS = [
+  { key: 'id', header: '#', width: '56px' },
+  {
+    key: 'name',
+    header: 'Contact',
+    sortable: true,
+    cell: (row: Record<string, unknown>) =>
+      `<strong>${row['name']}</strong><br><small style="color:var(--ds-text-muted)">${row['phone']}</small>`,
+  },
+  {
+    key: 'status',
+    header: 'Statut',
+    sortable: true,
+    cell: (row: Record<string, unknown>) =>
+      `<span class="ds-badge ds-badge--info">${row['status']}</span>`,
+  },
+  { key: 'date', header: 'Dernière activité', sortable: true, align: 'right' as const },
+];
+
+const ROW_ACTIONS = [
+  { icon: 'eye', label: 'Voir', action: 'view' },
+  { icon: 'edit', label: 'Éditer', action: 'edit', show: (row: Record<string, unknown>) => row['status'] !== 'Perdu' },
+  { icon: 'trash', label: 'Supprimer', action: 'delete' },
+];
+
 export default {
   title: 'Design System/Patterns/Table',
   component: DsTableComponent,
@@ -35,4 +60,19 @@ export const Loading: Story = {
 
 export const Empty: Story = {
   args: { columns: COLUMNS, rows: [], bordered: true, emptyMessage: 'Aucun dossier trouvé. Ajustez vos filtres.' },
+};
+
+export const AdvancedGenericTableLike: Story = {
+  args: {
+    columns: RICH_COLUMNS,
+    rows: ROWS,
+    bordered: true,
+    rowClickable: true,
+    selectableRows: true,
+    selectedRows: [ROWS[0], ROWS[2]],
+    sortColumn: 'name',
+    sortDirection: 'asc',
+    rowActions: ROW_ACTIONS,
+    label: 'Tableau dossiers style generic-table',
+  },
 };

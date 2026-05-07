@@ -1,8 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CustomerPortalService } from '../services/customer-portal.service';
 
 @Component({
   selector: 'app-consent-management',
+  standalone: true,
+  imports: [CommonModule],
   template: `
     <div class="consent-container">
       <h2>Préférences de communication</h2>

@@ -5,7 +5,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 
 export interface Photo {
   id: string | number;
@@ -22,7 +21,7 @@ export interface Photo {
     selector: 'app-photo-gallery',
     templateUrl: './photo-gallery.component.html',
     styleUrls: ['./photo-gallery.component.css'],
-    imports: [MatIcon, CdkDropList, CdkDrag, MatIconButton, CdkDragHandle, MatTooltip]
+    imports: [MatIcon, CdkDropList, CdkDrag, MatIconButton, CdkDragHandle]
 })
 export class PhotoGalleryComponent implements OnInit, OnDestroy {
   readonly photos = input<Photo[]>([]);

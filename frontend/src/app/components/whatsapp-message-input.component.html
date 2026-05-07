@@ -44,10 +44,11 @@
     <div class="input-wrapper">
       <button
         mat-icon-button
+        type="button"
         class="template-button"
         [disabled]="disabled()"
         (click)="openTemplateSelector()"
-        matTooltip="Sélectionner un modèle">
+        [attr.title]="selectedTemplate ? 'Modifier le modèle' : 'Sélectionner un modèle'">
         <mat-icon>{{ selectedTemplate ? 'edit' : 'insert_drive_file' }}</mat-icon>
       </button>
 

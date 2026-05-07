@@ -1,0 +1,11 @@
+<div class="dossier-timeline">
+  <h2 class="dossier-timeline__title">Historique de votre dossier</h2>
+
+  @if (!activities || activities.length === 0) {
+    <div class="dossier-timeline__empty">
+      <p>Aucune activité pour le moment</p>
+    </div>
+  } @else {
+    <ds-timeline class="dossier-timeline__ds" [events]="timelineEvents" />
+  }
+</div>

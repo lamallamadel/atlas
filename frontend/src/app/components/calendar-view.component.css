@@ -29,8 +29,10 @@
   align-items: center;
 }
 
-.header-actions button mat-icon {
-  margin-right: 4px;
+.header-actions ds-button.header-toggle--active {
+  outline: 2px solid var(--ds-marine);
+  outline-offset: 1px;
+  border-radius: var(--ds-radius-md, 6px);
 }
 
 .filters-section {
@@ -75,7 +77,19 @@
   width: 20px;
   height: 20px;
   border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--ds-divider);
+}
+
+.legend-color--scheduled {
+  background-color: var(--ds-marine-light);
+}
+
+.legend-color--completed {
+  background-color: var(--ds-success);
+}
+
+.legend-color--cancelled {
+  background-color: var(--ds-text-faint);
 }
 
 .legend-label {
@@ -124,11 +138,10 @@
   color: var(--ds-marine);
 }
 
-.help-text mat-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
+.help-text ds-icon {
+  flex-shrink: 0;
   margin-top: 2px;
+  color: var(--ds-marine);
 }
 
 /* FullCalendar — couleurs / boutons : styles/_fullcalendar-ds.scss (global) */

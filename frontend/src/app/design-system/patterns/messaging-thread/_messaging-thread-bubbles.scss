@@ -1,0 +1,178 @@
+/**
+ * Bulles et rangées du fil de discussion — partagé entre
+ * `ds-messaging-thread`, WhatsApp et les commentaires alignés DS.
+ */
+.ds-thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-4);
+
+  &__msg {
+    display: flex;
+    gap: var(--ds-space-2);
+    max-width: 80%;
+
+    &--inbound {
+      align-self: flex-start;
+    }
+
+    &--outbound {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    &--failed {
+      .ds-thread__text {
+        background: var(--ds-error-hl);
+        border: 1px solid var(--ds-error);
+        color: var(--ds-text);
+      }
+    }
+  }
+
+  &__avatar {
+    flex: none;
+    align-self: flex-end;
+  }
+
+  &__bubble {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  &__text {
+    padding: 10px 14px;
+    margin: 0;
+    border-radius: var(--ds-radius-lg);
+    font-size: 13.5px;
+    line-height: 1.45;
+    word-break: break-word;
+    white-space: pre-wrap;
+
+    &--rich {
+      white-space: normal;
+    }
+
+    &--rich .mention {
+      color: var(--ds-marine);
+      font-weight: 600;
+    }
+  }
+
+  &__msg--inbound &__text {
+    background: var(--ds-surface-offset);
+    color: var(--ds-text);
+    border-top-left-radius: 4px;
+  }
+
+  &__msg--outbound &__text {
+    background: var(--ds-marine);
+    color: var(--ds-text-inverse);
+    border-top-right-radius: 4px;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--ds-text-muted);
+  }
+
+  &__time {
+    font-size: 11px;
+    color: var(--ds-text-faint);
+    padding: 0 4px;
+  }
+
+  &__msg--outbound &__time {
+    text-align: right;
+  }
+
+  &__delivery {
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+    line-height: 1;
+
+    &.status-pending {
+      color: var(--ds-text-faint);
+    }
+
+    &.status-sent {
+      color: var(--ds-text-muted);
+    }
+
+    &.status-delivered,
+    &.status-read {
+      color: var(--ds-marine-light);
+    }
+
+    &.status-failed {
+      color: var(--ds-error);
+    }
+  }
+
+  /** Fil WhatsApp : bulles vertes / surface (conserve la distinction produit) */
+  &--whatsapp {
+    .ds-thread__msg--outbound .ds-thread__text {
+      background: var(--ds-success-hl);
+      color: var(--ds-text);
+    }
+
+    .ds-thread__msg--inbound .ds-thread__text {
+      background: var(--ds-surface);
+      color: var(--ds-text);
+    }
+
+    .ds-thread__msg--failed .ds-thread__text {
+      background: var(--ds-error-hl);
+      border: 1px solid var(--ds-error);
+      color: var(--ds-text);
+    }
+  }
+
+  /** Commentaires : en-tête auteur + date au-dessus du texte */
+  &--comments {
+    padding: var(--ds-space-3) 0;
+    gap: var(--ds-space-3);
+  }
+
+  &__comment-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ds-space-2);
+    margin-bottom: 4px;
+    font-size: 12px;
+    color: var(--ds-text-muted);
+
+    strong {
+      color: var(--ds-text);
+      font-size: 13px;
+    }
+  }
+}
+
+.ds-date-divider {
+  text-align: center;
+  margin: var(--ds-space-3) 0;
+  position: relative;
+
+  span {
+    display: inline-block;
+    padding: 6px 12px;
+    background: var(--ds-surface-offset);
+    border-radius: var(--ds-radius-md, 8px);
+    color: var(--ds-text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+}

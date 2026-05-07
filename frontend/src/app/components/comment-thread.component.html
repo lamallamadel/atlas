@@ -1,21 +1,26 @@
 <div class="comment-thread-container">
   <div class="comment-sidebar">
     <div class="sidebar-header">
-      <h3>
+      <h3 class="sidebar-title">
         Discussions
-        <mat-chip *ngIf="unresolvedCount > 0" class="unresolved-badge">
-          {{ unresolvedCount }}
-        </mat-chip>
+        @if (unresolvedCount > 0) {
+          <ds-badge status="warning" size="sm" [showDot]="false" class="unresolved-badge">
+            {{ unresolvedCount }}
+          </ds-badge>
+        }
       </h3>
       <div class="sidebar-actions">
-        <button mat-icon-button (click)="toggleNewThreadForm()" matTooltip="New thread">
+        <button mat-icon-button type="button" (click)="toggleNewThreadForm()" [attr.title]="'New thread'">
           <mat-icon>add_comment</mat-icon>
         </button>
-        <button mat-icon-button (click)="toggleResolvedThreads()" 
-                [matTooltip]="showResolvedThreads ? 'Hide resolved' : 'Show resolved'">
+        <button
+          mat-icon-button
+          type="button"
+          (click)="toggleResolvedThreads()"
+          [attr.title]="showResolvedThreads ? 'Hide resolved' : 'Show resolved'">
           <mat-icon>{{ showResolvedThreads ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
-        <button mat-icon-button (click)="exportAllThreads()" matTooltip="Export all">
+        <button mat-icon-button type="button" (click)="exportAllThreads()" [attr.title]="'Export all'">
           <mat-icon>download</mat-icon>
         </button>
       </div>
@@ -82,54 +87,96 @@
     <div class="thread-detail-header">
       <div class="thread-info">
         <h2>{{ selectedThread.title || 'Untitled Thread' }}</h2>
-        <div class="thread-status">
-          <mat-chip *ngIf="selectedThread.resolved" color="accent">
-            Resolved by {{ selectedThread.resolvedBy }} on {{ selectedThread.resolvedAt | date:'short' }}
-          </mat-chip>
+        <div class="thread-status" *ngIf="selectedThread.resolved">
+          <span
+            [attr.title]="
+              'Résolu par ' + selectedThread.resolvedBy + ' — ' + (selectedThread.resolvedAt | date:'short')
+            ">
+            <ds-badge status="success" size="sm" [showDot]="false">
+              Résolu
+            </ds-badge>
+          </span>
         </div>
       </div>
       <div class="thread-actions">
-        <button mat-icon-button [matMenuTriggerFor]="exportMenu" matTooltip="Export">
-          <mat-icon>download</mat-icon>
-        </button>
-        <mat-menu #exportMenu="matMenu">
-          <button mat-menu-item (click)="exportThread(selectedThread, 'text')">
-            <mat-icon>description</mat-icon>
-            <span>Export as Text</span>
+        <span class="ct-export-menu-origin" cdkOverlayOrigin #ctExportOrigin="cdkOverlayOrigin">
+          <button
+            type="button"
+            mat-icon-button
+            (click)="toggleExportThreadMenu()"
+            [attr.aria-expanded]="exportThreadMenuOpen"
+            aria-haspopup="menu"
+            aria-controls="ct-thread-export-menu"
+            [attr.title]="'Export'">
+            <mat-icon>download</mat-icon>
           </button>
-          <button mat-menu-item (click)="exportThread(selectedThread, 'csv')">
-            <mat-icon>table_chart</mat-icon>
-            <span>Export as CSV</span>
-          </button>
-        </mat-menu>
+        </span>
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="ctExportOrigin"
+          [cdkConnectedOverlayOpen]="exportThreadMenuOpen"
+          [cdkConnectedOverlayPositions]="exportThreadMenuPositions"
+          [cdkConnectedOverlayScrollStrategy]="exportThreadMenuScrollStrategy"
+          [cdkConnectedOverlayHasBackdrop]="true"
+          [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
+          (backdropClick)="closeExportThreadMenu()"
+          (detach)="closeExportThreadMenu()"
+          (overlayKeydown)="$event.key === 'Escape' && closeExportThreadMenu()">
+          <div id="ct-thread-export-menu" class="ct-export-menu-dropdown" role="menu">
+            <button
+              type="button"
+              class="ct-export-menu-item"
+              role="menuitem"
+              (click)="exportThread(selectedThread, 'text')">
+              <ds-icon name="edit" [size]="20" aria-hidden="true" />
+              <span>Export as Text</span>
+            </button>
+            <button
+              type="button"
+              class="ct-export-menu-item"
+              role="menuitem"
+              (click)="exportThread(selectedThread, 'csv')">
+              <ds-icon name="table" [size]="20" aria-hidden="true" />
+              <span>Export as CSV</span>
+            </button>
+          </div>
+        </ng-template>
 
-        <button mat-icon-button *ngIf="!selectedThread.resolved" 
-                (click)="resolveThread(selectedThread)" matTooltip="Mark as resolved">
+        <button
+          mat-icon-button
+          type="button"
+          *ngIf="!selectedThread.resolved"
+          (click)="resolveThread(selectedThread)"
+          [attr.title]="'Mark as resolved'">
           <mat-icon>check_circle</mat-icon>
         </button>
-        <button mat-icon-button *ngIf="selectedThread.resolved" 
-                (click)="unresolveThread(selectedThread)" matTooltip="Reopen">
+        <button
+          mat-icon-button
+          type="button"
+          *ngIf="selectedThread.resolved"
+          (click)="unresolveThread(selectedThread)"
+          [attr.title]="'Reopen'">
           <mat-icon>replay</mat-icon>
         </button>
-        <button mat-icon-button (click)="deleteThread(selectedThread)" matTooltip="Delete thread">
+        <button mat-icon-button type="button" (click)="deleteThread(selectedThread)" [attr.title]="'Delete thread'">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
     </div>
 
-    <div class="comments-container">
-      <div *ngFor="let comment of selectedThread.comments" class="comment">
-        <div class="comment-header">
-          <div class="comment-author">
-            <mat-icon class="avatar-icon">account_circle</mat-icon>
+    <div class="comments-container ds-thread ds-thread--comments">
+      <div *ngFor="let comment of selectedThread.comments" class="ds-thread__msg ds-thread__msg--inbound">
+        <ds-avatar [name]="comment.createdBy" size="sm" class="ds-thread__avatar"></ds-avatar>
+        <div class="ds-thread__bubble">
+          <div class="ds-thread__comment-head">
             <strong>{{ comment.createdBy }}</strong>
+            <time [attr.datetime]="comment.createdAt">{{ comment.createdAt | date:'short' }}</time>
           </div>
-          <span class="comment-date">{{ comment.createdAt | date:'short' }}</span>
-        </div>
-        <div class="comment-content" [innerHTML]="formatComment(comment.content)"></div>
-        <div class="comment-mentions" *ngIf="comment.mentions.length > 0">
-          <mat-icon>alternate_email</mat-icon>
-          <span *ngFor="let mention of comment.mentions" class="mention-tag">@{{ mention }}</span>
+          <div class="ds-thread__text ds-thread__text--rich" [innerHTML]="formatComment(comment.content)"></div>
+          <div class="comment-mentions" *ngIf="comment.mentions.length > 0">
+            <mat-icon>alternate_email</mat-icon>
+            <span *ngFor="let mention of comment.mentions" class="mention-tag">@{{ mention }}</span>
+          </div>
         </div>
       </div>
     </div>

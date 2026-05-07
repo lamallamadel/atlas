@@ -9,7 +9,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -29,6 +28,7 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { resolveDsToken } from '../design-system/chart-ds-colors';
 
 interface CalendarViewComponentPrivateApi {
   loadCalendarPlugins(): Promise<void>;
@@ -119,7 +119,6 @@ describe('CalendarViewComponent', () => {
         MatSelectModule,
         MatIconModule,
         MatButtonModule,
-        MatTooltipModule,
         CalendarViewComponent,
       ],
       providers: [
@@ -262,9 +261,9 @@ describe('CalendarViewComponent', () => {
       component as unknown as CalendarViewComponentPrivateApi
     ).getStatusColor(AppointmentStatus.CANCELLED);
 
-    expect(scheduledColor).toBe('#2196F3');
-    expect(completedColor).toBe('#4CAF50');
-    expect(cancelledColor).toBe('#9E9E9E');
+    expect(scheduledColor).toBe(resolveDsToken('--ds-marine-light'));
+    expect(completedColor).toBe(resolveDsToken('--ds-success'));
+    expect(cancelledColor).toBe(resolveDsToken('--ds-text-faint'));
   });
 
   it('should detect conflict between appointments', async () => {

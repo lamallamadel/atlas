@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewChecked, ChangeDetectorRef, HostListener, input, output, viewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
@@ -25,7 +26,6 @@ import {
 import { TemplateSelectionSheetComponent } from './template-selection-sheet.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatChipListbox, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -42,9 +42,29 @@ export interface MessageAttachment {
 
 @Component({
     selector: 'app-whatsapp-messaging-ui',
+    standalone: true,
     templateUrl: './whatsapp-messaging-ui.component.html',
-    styleUrls: ['./whatsapp-messaging-ui.component.css'],
-    imports: [MatIcon, MatIconButton, MatTooltip, DsSkeletonComponent, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, MatChipListbox, MatChip, MatChipAvatar, MatChipRemove, MatFormField, MatLabel, MatInput, FormsModule, MatSuffix, CdkTextareaAutosize, MatFabButton]
+    styleUrls: ['./whatsapp-messaging-ui.component.scss'],
+    imports: [
+      CommonModule,
+      MatIcon,
+      MatIconButton,
+      DsSkeletonComponent,
+      CdkVirtualScrollViewport,
+      CdkFixedSizeVirtualScroll,
+      CdkVirtualForOf,
+      MatChipListbox,
+      MatChip,
+      MatChipAvatar,
+      MatChipRemove,
+      MatFormField,
+      MatLabel,
+      MatInput,
+      FormsModule,
+      MatSuffix,
+      CdkTextareaAutosize,
+      MatFabButton,
+    ],
 })
 export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly dossierId = input.required<number>();

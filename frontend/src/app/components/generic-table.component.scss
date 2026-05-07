@@ -37,53 +37,6 @@
   }
 }
 
-/*
-  Text wrapping policy
-  -------------------
-  - Header: never break inside words/letters (prevents "I\nD" and "T\nE\nL..." in narrow columns)
-  - Cells: allow wrapping but avoid breaking words/letters arbitrarily.
-*/
-.mat-mdc-header-cell {
-  white-space: normal;
-  overflow-wrap: normal;
-  word-break: keep-all;
-  hyphens: none;
-}
-
-.mat-mdc-cell {
-  white-space: normal;
-  overflow-wrap: break-word;
-  word-break: normal;
-  hyphens: auto;
-}
-
-/*
-  Column sizing + header/body alignment (Angular Material MDC)
-  -----------------------------------------------------------
-  MDC tables render rows/cells with flex by default. In practice this can
-  desynchronize header/body columns (especially with sticky header + horizontal
-  scrolling + auto widths).
-
-  We force a real table layout so both header and body share the same column
-  algorithm. Column widths set via [ngStyle] then apply consistently.
-*/
-.mat-mdc-table {
-  width: 100%;
-  min-width: 100%;
-  table-layout: auto;
-  border-collapse: collapse;
-}
-
-.mat-mdc-header-row,
-.mat-mdc-row {
-  display: table-row;
-}
-
-.mat-mdc-header-cell,
-.mat-mdc-cell {
-  display: table-cell;
-  box-sizing: border-box;
-}
 
 /* Table Header with Counter and Pagination */
 .table-header {
@@ -202,218 +155,6 @@
       opacity: 0.4;
     }
   }
-}
-
-/* Table Base Styles */
-table {
-  width: 100%;
-  background: var(--ds-surface);
-  transition: var(--transition-shadow);
-}
-
-/* Sticky Header */
-table.sticky-header {
-  /* Sticky must be applied to header cells for reliable behavior with table layout. */
-  .mat-mdc-header-cell {
-    position: sticky;
-    top: 0;
-    z-index: var(--z-index-sticky);
-    background: var(--ds-surface-2);
-  }
-}
-
-/* Header Styles */
-.mat-mdc-header-cell,
-.mat-header-cell {
-  font-weight: var(--font-weight-semibold);
-  color: var(--ds-text-muted);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: var(--ds-surface-2);
-  border-bottom: 2px solid var(--ds-marine);
-  padding: var(--spacing-2, 8px) var(--spacing-3, 12px);
-
-  @include mobile-only {
-    font-size: 11px;
-    padding: var(--spacing-2, 8px) var(--spacing-2, 8px);
-  }
-}
-
-.resizable-header {
-  position: relative;
-  padding-right: var(--spacing-8) !important;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  position: relative;
-}
-
-.header-text {
-  flex: 1;
-}
-
-/* Resize Handle */
-.resize-handle {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 60%;
-  background: var(--ds-border);
-  cursor: col-resize;
-  opacity: 0;
-  transition: var(--transition-opacity);
-  border-radius: var(--radius-sm);
-
-  &:hover {
-    background: var(--ds-marine);
-    opacity: 1;
-  }
-
-  &:active {
-    opacity: 1;
-    background: var(--ds-marine);
-  }
-}
-
-.resizable-header:hover .resize-handle {
-  opacity: 0.6;
-}
-
-/* Row Styles */
-.mat-row {
-  transition: all var(--duration-normal) ease-in-out;
-  cursor: default;
-
-  &:hover {
-    background-color: color-mix(in srgb, var(--ds-marine) 10%, transparent);
-    box-shadow: var(--shadow-2);
-    transform: translateY(-1px);
-    z-index: var(--z-default);
-  }
-}
-
-.clickable-row {
-  cursor: pointer !important;
-  transition: all var(--duration-normal) ease-in-out;
-
-  &:hover {
-    background-color: var(--ds-marine-hl) !important;
-    box-shadow: var(--shadow-3);
-    transform: translateY(-2px);
-    z-index: var(--z-default);
-  }
-
-  &:active {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-2);
-  }
-}
-
-.selected-row {
-  background-color: color-mix(in srgb, var(--ds-marine) 20%, transparent) !important;
-
-  &:hover {
-    background-color: color-mix(in srgb, var(--ds-marine) 30%, transparent) !important;
-  }
-}
-
-/* Cell Styles */
-.mat-mdc-cell,
-.mat-cell {
-  color: var(--ds-text);
-  font-size: 12px;
-  padding: var(--spacing-2, 8px) var(--spacing-3, 12px);
-
-  @include mobile-only {
-    font-size: 11px;
-    padding: var(--spacing-2, 8px) var(--spacing-2, 8px);
-  }
-}
-
-.selection-cell {
-  width: 48px;
-  max-width: 48px;
-  padding: 0 var(--spacing-2) !important;
-  text-align: center;
-
-  @include mobile-only {
-    width: 40px;
-    max-width: 40px;
-  }
-}
-
-.actions-header {
-  width: 96px;
-  min-width: 96px;
-  max-width: 96px;
-
-  /* Keep the Actions column visible when horizontally scrolling */
-  position: sticky;
-  right: 0;
-  z-index: calc(var(--z-index-sticky) + 1);
-  background: var(--ds-surface-2);
-  border-left: 1px solid var(--ds-divider);
-
-  @include mobile-only {
-    min-width: 80px;
-  }
-}
-
-.actions-cell {
-  text-align: right;
-  white-space: nowrap;
-  width: 96px;
-  max-width: 96px;
-
-  /* Keep actions always discoverable */
-  position: sticky;
-  right: 0;
-  z-index: 2;
-  background-color: inherit;
-  border-left: 1px solid var(--ds-divider);
-  padding-right: var(--spacing-2);
-
-  button {
-    margin-left: var(--spacing-1);
-
-    @include mobile-only {
-      padding: var(--spacing-2);
-      width: 36px;
-      height: 36px;
-    }
-  }
-}
-
-.kebab-menu-button {
-  transition: var(--transition-base);
-
-  /* Larger target + clearer affordance */
-  width: 40px;
-  height: 40px;
-
-  &:hover {
-    background-color: var(--ds-bg);
-    transform: scale(1.1);
-  }
-}
-
-/* When hovering a row, ensure the sticky Actions cell matches the row highlight */
-.mat-row:hover .actions-cell,
-.mat-mdc-row:hover .actions-cell {
-  background-color: inherit;
-}
-
-/* Empty State */
-.no-data {
-  padding: 0 !important;
-  border-bottom: none !important;
 }
 
 .empty-state {
@@ -630,26 +371,8 @@ mat-paginator {
   }
 }
 
-/* Elevation Changes on Hover */
-.mat-elevation-z2 {
-  box-shadow: var(--shadow-2);
-}
-
 /* Print Styles */
 @media print {
-  .resize-handle {
-    display: none;
-  }
-
-  .actions-cell {
-    display: none;
-  }
-
-  .mat-row:hover {
-    box-shadow: none;
-    transform: none;
-  }
-
   .card-container .data-card > .ds-card {
     page-break-inside: avoid;
     box-shadow: none;
@@ -659,14 +382,12 @@ mat-paginator {
 
 /* Prefers reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .mat-row,
   .data-card > .ds-card,
-  .clickable-row {
+  .data-card {
     transition: none;
     animation: none;
   }
 
-  .mat-row:hover,
   .data-card:hover > .ds-card {
     transform: none;
   }

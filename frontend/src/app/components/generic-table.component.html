@@ -18,7 +18,8 @@
             <div class="table-actions">
               <button
                 mat-icon-button
-                [matTooltip]="hasSelection() ? 'Exporter la sélection en PDF' : 'Exporter tout en PDF'"
+                type="button"
+                [attr.title]="hasSelection() ? 'Exporter la sélection en PDF' : 'Exporter tout en PDF'"
                 (click)="exportToPDF()"
                 [disabled]="data().length === 0"
                 aria-label="Exporter en PDF">
@@ -26,7 +27,8 @@
               </button>
               <button
                 mat-icon-button
-                [matTooltip]="hasSelection() ? 'Exporter la sélection en Excel' : 'Exporter tout en Excel'"
+                type="button"
+                [attr.title]="hasSelection() ? 'Exporter la sélection en Excel' : 'Exporter tout en Excel'"
                 (click)="exportToExcel()"
                 [disabled]="data().length === 0"
                 aria-label="Exporter en Excel">
@@ -34,7 +36,8 @@
               </button>
               <button
                 mat-icon-button
-                [matTooltip]="hasSelection() ? 'Imprimer la sélection' : 'Imprimer tout'"
+                type="button"
+                [attr.title]="hasSelection() ? 'Imprimer la sélection' : 'Imprimer tout'"
                 (click)="printTable()"
                 [disabled]="data().length === 0"
                 aria-label="Imprimer">
@@ -46,9 +49,10 @@
             <div class="table-pagination-controls">
               <button
                 mat-icon-button
+                type="button"
                 [disabled]="paginationData()?.first"
                 (click)="onPaginationChange('previous')"
-                [matTooltip]="'Page précédente'"
+                [attr.title]="'Page précédente'"
                 aria-label="Page précédente">
                 <mat-icon>chevron_left</mat-icon>
               </button>
@@ -57,9 +61,35 @@
               </span>
               <button
                 mat-icon-button
+                type="button"
                 [disabled]="paginationData()?.last"
                 (click)="onPaginationChange('next')"
-                [matTooltip]="'Page suivante'"
+                [attr.title]="'Page suivante'"
+                aria-label="Page suivante">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          }
+          @if (showPagination() && !showInlinePagination()) {
+            <div class="table-pagination-controls">
+              <button
+                mat-icon-button
+                type="button"
+                [disabled]="dsClientPageNumber <= 1"
+                (click)="onPaginationChange('previous')"
+                [attr.title]="'Page précédente'"
+                aria-label="Page précédente">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <span class="pagination-range">
+                Page {{ dsClientPageNumber }} / {{ dsClientTotalPages }}
+              </span>
+              <button
+                mat-icon-button
+                type="button"
+                [disabled]="dsClientPageNumber >= dsClientTotalPages"
+                (click)="onPaginationChange('next')"
+                [attr.title]="'Page suivante'"
                 aria-label="Page suivante">
                 <mat-icon>chevron_right</mat-icon>
               </button>
@@ -67,116 +97,21 @@
           }
         </div>
       }
-      <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2" [class.sticky-header]="stickyHeader()" role="table" aria-label="Tableau de données">
-        <!-- Selection Column -->
-        @if (enableRowSelection()) {
-          <ng-container matColumnDef="select">
-            <th mat-header-cell *matHeaderCellDef class="selection-cell" role="columnheader">
-              <mat-checkbox
-                (change)="$event ? toggleAllRows() : null"
-                [checked]="selection.hasValue() && isAllSelected()"
-                [indeterminate]="selection.hasValue() && !isAllSelected()"
-                aria-label="Sélectionner toutes les lignes">
-              </mat-checkbox>
-            </th>
-            <td mat-cell *matCellDef="let row" class="selection-cell" role="cell">
-              <mat-checkbox
-                (click)="$event.stopPropagation()"
-                (change)="$event ? toggleRow(row) : null"
-                [checked]="selection.isSelected(row)"
-                [attr.aria-label]="'Sélectionner la ligne ' + row.id">
-              </mat-checkbox>
-            </td>
-          </ng-container>
-        }
-        <!-- Data Columns -->
-        @for (column of columns(); track trackByColumnKey($index, column)) {
-          <ng-container [matColumnDef]="column.key">
-            <th mat-header-cell *matHeaderCellDef
-              [mat-sort-header]="column.sortable !== false && enableSort() ? column.key : ''"
-              [ngStyle]="getColumnStyle(column)"
-              [class.resizable-header]="column.resizable !== false"
-              role="columnheader"
-              [attr.aria-sort]="column.sortable !== false && enableSort() ? 'none' : null">
-              <div class="header-content">
-                <span class="header-text">{{ column.header }}</span>
-                @if (column.resizable !== false) {
-                  <div
-                    class="resize-handle"
-                    (mousedown)="onResizeStart($event, column.key)"
-                    role="separator"
-                    aria-label="Redimensionner la colonne"
-                    tabindex="0">
-                  </div>
-                }
-              </div>
-            </th>
-            <td mat-cell *matCellDef="let row" [ngStyle]="getColumnStyle(column)" role="cell">
-              <span [innerHTML]="formatValue(row[column.key], column, row)"></span>
-            </td>
-          </ng-container>
-        }
-        <!-- Actions Column -->
-        @if (showActions()) {
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef class="actions-header" role="columnheader">Actions</th>
-            <td mat-cell *matCellDef="let row" class="actions-cell" role="cell">
-              @if (useKebabMenu()) {
-                <button
-                  mat-icon-button
-                  [matMenuTriggerFor]="actionMenu"
-                  (click)="$event.stopPropagation()"
-                  aria-label="Menu d'actions"
-                  class="kebab-menu-button">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #actionMenu="matMenu">
-                  @for (action of actions(); track trackByAction($index, action)) {
-                    <button
-                      [hidden]="!shouldShowAction(action, row)"
-                      mat-menu-item
-                      (click)="onAction(action.action, row)">
-                      <mat-icon [style.color]="getActionColor(action.color)">{{ action.icon }}</mat-icon>
-                      <span>{{ action.tooltip }}</span>
-                    </button>
-                  }
-                </mat-menu>
-              } @else {
-                @for (action of actions(); track trackByAction($index, action)) {
-                  <button
-                    [hidden]="!shouldShowAction(action, row)"
-                    mat-icon-button
-                    [color]="action.color || 'primary'"
-                    [matTooltip]="action.tooltip"
-                    (click)="$event.stopPropagation(); onAction(action.action, row)"
-                    [attr.aria-label]="action.tooltip || action.action">
-                    <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
-                  </button>
-                }
-              }
-            </td>
-          </ng-container>
-        }
-        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: stickyHeader()" role="row"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-          [class.clickable-row]="rowClickable()"
-          [class.selected-row]="selection.isSelected(row)"
-          (click)="onRowClick(row)"
-          [attr.tabindex]="rowClickable() ? '0' : null"
-          [attr.role]="rowClickable() ? 'button' : 'row'"
-          [attr.aria-label]="rowClickable() ? 'Ligne de tableau cliquable, appuyez sur Entrée pour voir les détails' : null"
-          (keydown.enter)="rowClickable() && onRowClick(row)"
-        (keydown.space)="rowClickable() && $event.preventDefault(); rowClickable() && onRowClick(row)"></tr>
-        <tr class="mat-row" *matNoDataRow role="row">
-          <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length" role="cell">
-            <div class="empty-state" role="status">
-              <mat-icon class="empty-icon" aria-hidden="true">inbox</mat-icon>
-              <h3 class="empty-title">Aucune donnée disponible</h3>
-              <p class="empty-message">Il n'y a actuellement aucune donnée à afficher</p>
-            </div>
-          </td>
-        </tr>
-      </table>
+      <ds-table
+        [columns]="dsColumns"
+        [rows]="dsRows"
+        [loading]="loading()"
+        [rowClickable]="rowClickable()"
+        [rowActions]="dsRowActions"
+        [selectableRows]="enableRowSelection()"
+        [selectedRows]="dsSelectedRows"
+        [label]="'Tableau de données'"
+        [emptyMessage]="'Aucune donnée disponible'"
+        (rowClick)="onRowClick($event)"
+        (rowAction)="onAction($event.action, $event.row)"
+        (selectionChange)="onDsSelectionChange($event)"
+        (sort)="onDsSort($event)">
+      </ds-table>
     </div>
   }
 
@@ -232,8 +167,9 @@
                   <button
                     [hidden]="!shouldShowAction(action, row)"
                     mat-icon-button
+                    type="button"
                     [color]="action.color || 'primary'"
-                    [matTooltip]="action.tooltip"
+                    [attr.title]="action.tooltip || ''"
                     (click)="$event.stopPropagation(); onAction(action.action, row)"
                     [attr.aria-label]="action.tooltip || action.action">
                     <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
@@ -284,8 +220,9 @@
                   <button
                     [hidden]="!shouldShowAction(action, row)"
                     mat-icon-button
+                    type="button"
                     [color]="action.color || 'primary'"
-                    [matTooltip]="action.tooltip"
+                    [attr.title]="action.tooltip || ''"
                     (click)="$event.stopPropagation(); onAction(action.action, row)"
                     [attr.aria-label]="action.tooltip || action.action">
                     <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
@@ -299,13 +236,4 @@
     </div>
   }
 
-  <!-- Paginator -->
-  @if (showPagination()) {
-    <mat-paginator
-      [pageSize]="pageSize()"
-      [pageSizeOptions]="pageSizeOptions()"
-      showFirstLastButtons
-      aria-label="Sélectionner la page de résultats">
-    </mat-paginator>
-  }
 </div>

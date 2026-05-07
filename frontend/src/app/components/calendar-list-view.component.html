@@ -24,23 +24,29 @@
   @if (!isLoading) {
     <div class="appointments-list">
       @if (groupedAppointments.length === 0) {
-        <div class="empty-state">
-          <mat-icon>event_busy</mat-icon>
-          <p>Aucun rendez-vous trouvé</p>
-        </div>
+        <ds-empty-state
+          title="Aucun rendez-vous trouvé"
+          description="Les rendez-vous planifiés apparaîtront dans cette liste." />
       }
       @for (group of groupedAppointments; track trackByGroup($index, group)) {
-        <div
-          class="date-group"
-          [class.expanded]="isGroupExpanded(group.dateLabel)">
-          <div class="date-header" role="button" tabindex="0" (click)="toggleGroup(group.dateLabel)" (keydown.enter)="toggleGroup(group.dateLabel)" (keydown.space)="$event.preventDefault(); toggleGroup(group.dateLabel)">
+        <div class="date-group" [class.expanded]="isGroupExpanded(group.dateLabel)">
+          <div
+            class="date-header"
+            role="button"
+            tabindex="0"
+            (click)="toggleGroup(group.dateLabel)"
+            (keydown.enter)="toggleGroup(group.dateLabel)"
+            (keydown.space)="$event.preventDefault(); toggleGroup(group.dateLabel)">
             <div class="date-info">
               <h3 class="date-label">{{ group.dateLabel }}</h3>
-              <span class="appointment-count">{{ group.appointments.length }} rendez-vous</span>
+              <ds-badge size="sm" status="neutral" [showDot]="false">
+                {{ group.appointments.length }} rendez-vous
+              </ds-badge>
             </div>
-            <mat-icon class="expand-icon">
-              {{ isGroupExpanded(group.dateLabel) ? 'expand_less' : 'expand_more' }}
-            </mat-icon>
+            <ds-icon
+              class="expand-icon"
+              [name]="isGroupExpanded(group.dateLabel) ? 'chevron-up' : 'chevron-down'"
+              [size]="20" />
           </div>
           @if (isGroupExpanded(group.dateLabel)) {
             <div class="appointments-container">
@@ -53,48 +59,48 @@
                   (keydown.enter)="onAppointmentClick(appointment)"
                   (keydown.space)="$event.preventDefault(); onAppointmentClick(appointment)"
                   [class.mobile]="isMobile">
-                  <div class="appointment-status-indicator"
-                    [style.background-color]="getStatusColor(appointment.status)">
-                  </div>
+                  <div
+                    class="appointment-status-indicator appointment-status-indicator--{{ appointmentStatusClass(appointment.status) }}"
+                    [title]="getStatusLabel(appointment.status)"></div>
                   <div class="appointment-content">
                     <div class="appointment-header">
                       <h4 class="appointment-title">{{ getAppointmentTitle(appointment) }}</h4>
                       <span class="appointment-time">
-                        {{ formatTime(appointment.startTime) }} - {{ formatTime(appointment.endTime) }}
+                        {{ formatTime(appointment.startTime) }} — {{ formatTime(appointment.endTime) }}
                       </span>
                     </div>
                     <div class="appointment-details">
                       @if (appointment.location) {
                         <div class="detail-row">
-                          <mat-icon>location_on</mat-icon>
+                          <ds-icon name="map" [size]="16" ariaLabel="" />
                           <span>{{ appointment.location }}</span>
                         </div>
                       }
                       <div class="detail-row">
-                        <mat-icon>schedule</mat-icon>
+                        <ds-icon name="calendar" [size]="16" ariaLabel="" />
                         <span>{{ getDuration(appointment.startTime, appointment.endTime) }}</span>
                       </div>
                       <div class="detail-row">
-                        <mat-icon>folder</mat-icon>
+                        <ds-icon name="folder" [size]="16" ariaLabel="" />
                         <span>Dossier #{{ appointment.dossierId }}</span>
                       </div>
                     </div>
                     <div class="appointment-footer">
-                      <mat-chip
-                        [style.background-color]="getStatusColor(appointment.status)"
-                        class="status-chip">
+                      <ds-badge [status]="getAppointmentBadgeStatus(appointment.status)" [showDot]="false">
                         {{ getStatusLabel(appointment.status) }}
-                      </mat-chip>
+                      </ds-badge>
                     </div>
                   </div>
                   @if (!isMobile) {
                     <div class="appointment-actions">
-                      <button
-                        mat-icon-button
-                        (click)="onAppointmentClick(appointment); $event.stopPropagation()"
-                        matTooltip="Voir les détails">
-                        <mat-icon>visibility</mat-icon>
-                      </button>
+                      <ds-button
+                        variant="icon"
+                        size="sm"
+                        ariaLabel="Voir les détails"
+                        [attr.title]="'Voir les détails'"
+                        (dsClick)="onAppointmentClick(appointment); $event.stopPropagation()">
+                        <ds-icon name="info" [size]="16" ariaLabel="" />
+                      </ds-button>
                     </div>
                   }
                 </div>

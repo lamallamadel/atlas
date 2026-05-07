@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatIconModule } from '@angular/material/icon';
 import { NotificationToastComponent } from './notification-toast.component';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { AriaLiveAnnouncerService } from '../services/aria-live-announcer.service';
@@ -10,30 +9,25 @@ import { of } from 'rxjs';
 describe('NotificationToastComponent', () => {
   let component: NotificationToastComponent;
   let fixture: ComponentFixture<NotificationToastComponent>;
-  let toastService: AngularVitestPartialMock<ToastNotificationService>;
+  const dismissedIds: string[] = [];
 
   beforeEach(async () => {
+    dismissedIds.length = 0;
     const toastServiceSpy = {
-      dismiss: vi.fn().mockName('ToastNotificationService.dismiss'),
+      dismiss: (id: string) => {
+        dismissedIds.push(id);
+      },
       activeToasts: of([]),
     };
 
     await TestBed.configureTestingModule({
-      imports: [
-        BrowserAnimationsModule,
-        MatIconModule,
-        NotificationToastComponent,
-      ],
+      imports: [BrowserAnimationsModule, NotificationToastComponent],
       providers: [
         { provide: ToastNotificationService, useValue: toastServiceSpy },
         AriaLiveAnnouncerService,
         MatSnackBar,
       ],
     }).compileComponents();
-
-    toastService = TestBed.inject(
-      ToastNotificationService
-    ) as AngularVitestPartialMock<ToastNotificationService>;
   });
 
   beforeEach(() => {
@@ -47,9 +41,9 @@ describe('NotificationToastComponent', () => {
   });
 
   it('should get correct icon for toast type', () => {
-    expect(component.getIcon('success')).toBe('check_circle');
-    expect(component.getIcon('error')).toBe('cancel');
-    expect(component.getIcon('warning')).toBe('warning');
+    expect(component.getIcon('success')).toBe('check');
+    expect(component.getIcon('error')).toBe('alert-circle');
+    expect(component.getIcon('warning')).toBe('alert-circle');
     expect(component.getIcon('info')).toBe('info');
   });
 
@@ -83,7 +77,7 @@ describe('NotificationToastComponent', () => {
     };
 
     component.onDismiss(toast);
-    expect(toastService.dismiss).toHaveBeenCalledWith('test-1');
+    expect(dismissedIds).toEqual(['test-1']);
   });
 
   it('should get correct position class', () => {

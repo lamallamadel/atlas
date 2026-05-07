@@ -10,7 +10,6 @@ import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { ESignatureApiService } from '../services/esignature-api.service';
 import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.models';
 
@@ -30,7 +29,6 @@ import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.m
     MatIconModule,
     MatDialogModule,
     MatSnackBarModule,
-    MatTooltipModule
   ],
   template: `
     <div class="contract-template-container">
@@ -124,7 +122,7 @@ import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.m
                 <ng-container matColumnDef="actions">
                   <th mat-header-cell *matHeaderCellDef>Actions</th>
                   <td mat-cell *matCellDef="let template">
-                    <button mat-icon-button color="warn" (click)="deleteTemplate(template.id)" matTooltip="Delete">
+                    <button type="button" mat-icon-button color="warn" (click)="deleteTemplate(template.id)" title="Delete">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </td>

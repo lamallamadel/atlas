@@ -4,28 +4,32 @@
         <div class="header-row">
           <h2>Calendrier des rendez-vous</h2>
           <div class="header-actions">
-            <button
-              mat-icon-button
-              (click)="refreshCalendar()"
-              matTooltip="Actualiser"
-              [disabled]="isLoading">
-              <mat-icon>refresh</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              (click)="toggleListView()"
-              matTooltip="Vue liste"
-              [color]="showListView ? 'primary' : 'default'">
-              <mat-icon>{{ showListView ? 'calendar_view_month' : 'list' }}</mat-icon>
-            </button>
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="exportToICal()"
-              [disabled]="isLoading">
-              <mat-icon>file_download</mat-icon>
+            <ds-button
+              variant="icon"
+              size="sm"
+              [disabled]="isLoading"
+              ariaLabel="Actualiser"
+              [attr.title]="'Actualiser'"
+              (dsClick)="refreshCalendar()">
+              <ds-icon name="refresh" [size]="20" aria-hidden="true" />
+            </ds-button>
+            <ds-button
+              variant="icon"
+              size="sm"
+              [class.header-toggle--active]="showListView"
+              [ariaLabel]="showListView ? 'Afficher le calendrier' : 'Vue liste'"
+              [attr.title]="showListView ? 'Vue calendrier' : 'Vue liste'"
+              (dsClick)="toggleListView()">
+              <ds-icon [name]="showListView ? 'calendar' : 'tasks'" [size]="20" aria-hidden="true" />
+            </ds-button>
+            <ds-button
+              variant="marine"
+              size="md"
+              [disabled]="isLoading"
+              (dsClick)="exportToICal()">
+              <ds-icon name="download" [size]="20" aria-hidden="true" />
               Exporter iCal
-            </button>
+            </ds-button>
           </div>
         </div>
     </div>
@@ -61,18 +65,18 @@
       </div>
 
       <div class="legend-section">
-        <div class="legend-title">Légende:</div>
+        <div class="legend-title">Légende :</div>
         <div class="legend-items">
           <div class="legend-item">
-            <span class="legend-color" style="background-color: #2196F3;"></span>
+            <span class="legend-color legend-color--scheduled"></span>
             <span class="legend-label">Planifié</span>
           </div>
           <div class="legend-item">
-            <span class="legend-color" style="background-color: #4CAF50;"></span>
+            <span class="legend-color legend-color--completed"></span>
             <span class="legend-label">Terminé</span>
           </div>
           <div class="legend-item">
-            <span class="legend-color" style="background-color: #9E9E9E;"></span>
+            <span class="legend-color legend-color--cancelled"></span>
             <span class="legend-label">Annulé</span>
           </div>
         </div>
@@ -105,7 +109,7 @@
       }
 
       <div class="help-text">
-        <mat-icon>info</mat-icon>
+        <ds-icon name="info" [size]="20" aria-hidden="true" />
         <span>
           Cliquez sur un créneau vide pour créer un rendez-vous.
           Cliquez sur un rendez-vous pour le modifier.

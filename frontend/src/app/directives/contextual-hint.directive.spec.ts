@@ -1,9 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { ContextualHintDirective } from './contextual-hint.directive';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @Component({
     template: `
@@ -13,7 +11,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
       [hintControl]="testControl">
   `,
     standalone: true,
-    imports: [ReactiveFormsModule, MatTooltipModule, ContextualHintDirective]
+    imports: [ReactiveFormsModule, ContextualHintDirective]
 })
 class TestComponent {
   testControl = new FormControl('');
@@ -32,9 +30,7 @@ describe('ContextualHintDirective', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        ReactiveFormsModule, 
-        MatTooltipModule, 
-        BrowserAnimationsModule,
+        ReactiveFormsModule,
         ContextualHintDirective, 
         TestComponent
       ]

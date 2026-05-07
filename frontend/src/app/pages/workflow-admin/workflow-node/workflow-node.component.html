@@ -28,17 +28,18 @@
 
   @if (!isTransitionMode()) {
     <div class="node-actions">
-      <button
-        mat-icon-button
+      <ds-button
+        variant="icon"
         class="add-transition-btn"
-        (click)="onAddTransition($event)"
-        matTooltip="Ajouter une transition">
-        <mat-icon>add_link</mat-icon>
-      </button>
+        ariaLabel="Ajouter une transition"
+        (dsClick)="onAddTransition($event)"
+        [attr.title]="'Ajouter une transition'">
+        <ds-icon name="plus" [size]="16"></ds-icon>
+      </ds-button>
     </div>
   }
 
   <div class="drag-handle" cdkDragHandle>
-    <mat-icon>drag_indicator</mat-icon>
+    <ds-icon name="bars-asc" [size]="16"></ds-icon>
   </div>
 </div>

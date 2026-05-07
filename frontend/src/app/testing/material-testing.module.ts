@@ -25,7 +25,6 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { LayoutModule } from '@angular/cdk/layout';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -57,7 +56,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
         MatSidenavModule,
         MatToolbarModule,
         MatListModule,
-        MatMenuModule,
         MatDividerModule,
         LayoutModule
     ], 
@@ -85,7 +83,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
         MatSidenavModule,
         MatToolbarModule,
         MatListModule,
-        MatMenuModule,
         MatDividerModule,
         LayoutModule
     ], 

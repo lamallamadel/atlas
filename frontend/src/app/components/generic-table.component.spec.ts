@@ -1,11 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSortModule } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { LayoutModule } from '@angular/cdk/layout';
 import {
@@ -33,12 +29,8 @@ describe('GenericTableComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         BrowserAnimationsModule,
-        MatTableModule,
-        MatPaginatorModule,
-        MatSortModule,
         MatIconModule,
         MatButtonModule,
-        MatTooltipModule,
         MatCheckboxModule,
         LayoutModule,
         GenericTableComponent,
@@ -58,35 +50,6 @@ describe('GenericTableComponent', () => {
 
   it('should initialize dataSource with provided data', () => {
     expect(component.dataSource.data).toEqual(mockData);
-  });
-
-  it('should update displayed columns including actions', () => {
-    fixture.componentRef.setInput('showActions', true);
-    component.updateDisplayedColumns();
-    expect(component.displayedColumns).toEqual([
-      'id',
-      'name',
-      'email',
-      'actions',
-    ]);
-  });
-
-  it('should update displayed columns without actions', () => {
-    fixture.componentRef.setInput('showActions', false);
-    component.updateDisplayedColumns();
-    expect(component.displayedColumns).toEqual(['id', 'name', 'email']);
-  });
-
-  it('should update displayed columns with selection', () => {
-    fixture.componentRef.setInput('enableRowSelection', true);
-    fixture.componentRef.setInput('showActions', false);
-    component.updateDisplayedColumns();
-    expect(component.displayedColumns).toEqual([
-      'select',
-      'id',
-      'name',
-      'email',
-    ]);
   });
 
   it('should emit rowAction event when action is triggered', () => {
@@ -185,29 +148,57 @@ describe('GenericTableComponent', () => {
     expect(component.selectionChange.emit).toHaveBeenCalledWith([mockData[0]]);
   });
 
-  it('should handle column width settings', () => {
-    const column: ColumnConfig = {
-      key: 'name',
-      header: 'Name',
-      width: '200px',
-      minWidth: '100px',
-    };
-
-    const style = component.getColumnStyle(column);
-    expect(style['width']).toBe('200px');
-    expect(style['min-width']).toBe('100px');
+  it('should map ds columns from input columns', () => {
+    expect(component.dsColumns.length).toBe(mockColumns.length);
+    expect(component.dsColumns[0].key).toBe('id');
   });
 
-  it('should initialize column widths from config', () => {
-    const columnsWithWidth: ColumnConfig[] = [
-      { key: 'id', header: 'ID', width: '100px' },
-      { key: 'name', header: 'Name', width: '200px' },
+  it('should sort datasource with ds sort event', () => {
+    component.dataSource.data = [
+      { id: 2, name: 'Bravo' },
+      { id: 1, name: 'Alpha' },
     ];
 
-    fixture.componentRef.setInput('columns', columnsWithWidth);
-    component.initializeColumnWidths();
+    component.onDsSort({ column: 'id', direction: 'asc' });
+    expect((component.dataSource.data[0] as { id: number }).id).toBe(1);
 
-    expect(component.columnWidths.get('id')).toBe(100);
-    expect(component.columnWidths.get('name')).toBe(200);
+    component.onDsSort({ column: 'name', direction: 'desc' });
+    expect((component.dataSource.data[0] as { name: string }).name).toBe('Bravo');
+  });
+
+  it('should expose mapped ds row actions when actions enabled', () => {
+    fixture.componentRef.setInput('showActions', true);
+    fixture.detectChanges();
+
+    const actions = component.dsRowActions;
+    expect(actions.length).toBeGreaterThan(0);
+    expect(actions[0].action).toBe('view');
+    expect(actions[0].icon).toBe('eye');
+  });
+
+  it('should sync selection from ds-table selectionChange', () => {
+    vi.spyOn(component.selectionChange, 'emit');
+    fixture.componentRef.setInput('enableRowSelection', true);
+    fixture.detectChanges();
+
+    component.onDsSelectionChange([mockData[0]] as unknown as Record<string, unknown>[]);
+
+    expect(component.selection.isSelected(mockData[0])).toBe(true);
+    expect(component.selectionChange.emit).toHaveBeenCalledWith([mockData[0]]);
+  });
+
+  it('should paginate ds rows in client mode', () => {
+    fixture.componentRef.setInput('showPagination', true);
+    fixture.componentRef.setInput('showInlinePagination', false);
+    fixture.componentRef.setInput('pageSize', 1);
+    fixture.componentRef.setInput('data', mockData);
+    fixture.detectChanges();
+
+    expect(component.dsRows.length).toBe(1);
+    expect((component.dsRows[0] as { id: number }).id).toBe(1);
+
+    component.onPaginationChange('next');
+    expect(component.dsRows.length).toBe(1);
+    expect((component.dsRows[0] as { id: number }).id).toBe(2);
   });
 });

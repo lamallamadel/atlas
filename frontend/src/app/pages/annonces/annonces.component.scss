@@ -1,5 +1,3 @@
-@use '../../../styles/variables' as vars;
-
 /* ── Atlasia DS Layout ── */
 .pro-page {
   padding: var(--ds-space-8);
@@ -77,23 +75,27 @@
   &:hover { color: var(--ds-error); }
 }
 
-/* ── Chips filtres actifs ── */
-.ann-chips { display: flex; gap: var(--ds-space-2); flex-wrap: wrap; }
-.ann-chip {
+/* ── Filtres actifs (ds-badge + bouton) ── */
+.ann-chips { display: flex; gap: var(--ds-space-2); flex-wrap: wrap; align-items: center; }
+.ann-filter-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 26px;
-  padding: 0 10px;
-  background: var(--ds-primary-hl);
-  color: var(--ds-primary-active);
-  border-radius: var(--ds-radius-pill);
-  font-size: 11.5px;
-  font-weight: 500;
-  button {
-    background: none; border: none; cursor: pointer;
-    color: inherit; opacity: 0.7; padding: 0; display: flex;
-    &:hover { opacity: 1; }
+  gap: 4px;
+}
+.ann-filter-chip__remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ds-text-muted);
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ds-radius-sm);
+  line-height: 0;
+  &:hover {
+    color: var(--ds-text);
+    background: var(--ds-surface-offset);
   }
 }
 
@@ -207,59 +209,44 @@
   }
 }
 
-/* ── Vue liste ── */
-.ann-table-wrap {
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-divider);
+/* ── Vue liste : ds-card + ds-table ── */
+.ann-list-card {
   border-radius: var(--ds-radius-lg);
   overflow: hidden;
-  box-shadow: var(--ds-shadow-xs);
 }
-.ann-table-header {
-  display: grid;
-  grid-template-columns: 56px 1fr 130px 110px 110px 100px 80px;
-  padding: 10px var(--ds-space-4);
-  background: var(--ds-surface-offset);
-  border-bottom: 1px solid var(--ds-divider);
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--ds-text-faint);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-.ann-rows { display: flex; flex-direction: column; }
-.ann-row {
-  display: grid;
-  grid-template-columns: 56px 1fr 130px 110px 110px 100px 80px;
+.ann-ds-thumb {
+  display: inline-flex;
   align-items: center;
-  padding: 6px var(--ds-space-4);
-  min-height: 60px;
-  border-bottom: 1px solid var(--ds-divider);
-  cursor: pointer;
-  transition: background var(--ds-transition-fast);
-  &:last-child { border-bottom: none; }
-  &:hover { background: var(--ds-surface-offset); }
-  &:focus-visible { outline: 2px solid var(--ds-marine); outline-offset: -2px; }
+  justify-content: center;
+  vertical-align: middle;
+  &--empty {
+    width: 44px;
+    height: 36px;
+    border-radius: var(--ds-radius-sm);
+    background: var(--ds-surface-offset);
+    color: var(--ds-text-faint);
+  }
 }
-.ann-col--actions { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
-
-.ann-row-thumb {
+.ann-ds-thumb-img {
   width: 44px;
   height: 36px;
   border-radius: var(--ds-radius-sm);
   object-fit: cover;
-  &--empty {
-    background: var(--ds-surface-offset);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--ds-text-faint);
-  }
+  display: block;
 }
-.ann-title { font-size: 13.5px; font-weight: 600; color: var(--ds-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ann-city  { font-size: 12.5px; color: var(--ds-text-muted); }
-.ann-price { font-size: 13px; font-weight: 700; color: var(--ds-marine); white-space: nowrap; }
-.ann-date  { font-size: 12px; color: var(--ds-text-faint); }
+.ann-ds-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ds-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  display: inline-block;
+}
+.ann-ds-city { font-size: 12.5px; color: var(--ds-text-muted); }
+.ann-ds-price { font-size: 13px; font-weight: 700; color: var(--ds-marine); white-space: nowrap; }
+.ann-ds-date { font-size: 12px; color: var(--ds-text-faint); }
 
 .ann-icon-btn {
   width: 30px;
@@ -284,6 +271,11 @@
   justify-content: space-between;
   padding: var(--ds-space-4) 0;
   margin-top: var(--ds-space-4);
+  &--in-card {
+    padding: 12px var(--ds-space-4);
+    margin-top: 0;
+    border-top: 1px solid var(--ds-divider);
+  }
   &__info { font-size: 12.5px; color: var(--ds-text-muted); }
   &__btns { display: flex; gap: var(--ds-space-1); }
   &__btn {
@@ -300,4 +292,4 @@
     &:disabled { opacity: 0.4; cursor: not-allowed; }
   }
 }
-
+

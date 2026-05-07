@@ -89,6 +89,32 @@
     white-space: nowrap;
   }
 
+  &__th--actions,
+  &__th--select,
+  &__td--actions {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  &__th--select,
+  &__td--select {
+    text-align: center;
+  }
+
+  &__td--actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  &__checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--ds-marine);
+    cursor: pointer;
+  }
+
   /* ── État vide ── */
   &__empty {
     padding: 48px 24px;

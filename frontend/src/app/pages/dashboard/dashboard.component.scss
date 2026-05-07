@@ -1,5 +1,3 @@
-@use '../../../styles/utilities' as *;
-
 /* ── Layout pro-page ── */
 .pro-page {
   padding: var(--ds-space-8);
@@ -32,11 +30,14 @@
 }
 
 /* ── KPI Grid ── */
+.dash-panel--kpi {
+  margin-bottom: var(--ds-space-8);
+}
+
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: var(--ds-space-4);
-  margin-bottom: var(--ds-space-8);
 }
 
 /* ── Main grid 2 colonnes ── */
@@ -47,35 +48,43 @@
   @media (max-width: 1024px) { grid-template-columns: 1fr; }
 }
 
-/* ── Section card ── */
-.dash-section {
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-divider);
-  border-radius: var(--ds-radius-lg);
-  padding: var(--ds-space-5);
+/* Contenu des cartes DS */
+.dash-stack {
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-4);
-
-  &__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  &__title {
-    font-family: var(--ds-font-body);
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--ds-text);
-    letter-spacing: 0.2px;
-    margin: 0;
-  }
-
-  &__actions { display: flex; gap: var(--ds-space-1); }
 }
 
-.dash-right-col { display: flex; flex-direction: column; gap: var(--ds-space-4); }
+.dash-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dash-section__title {
+  font-family: var(--ds-font-body);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ds-text);
+  letter-spacing: 0.2px;
+  margin: 0;
+}
+
+.dash-section__actions {
+  display: flex;
+  gap: var(--ds-space-1);
+}
+
+.dash-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+
+.dash-panel ds-card {
+  display: block;
+  width: 100%;
+}
 
 /* ── Boutons icône export ── */
 .dash-icon-btn {
@@ -103,8 +112,8 @@
 }
 
 .dash-error {
-  padding: 12px 16px;
-  background: rgba(198,40,40,.08);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-error-hl);
   color: var(--ds-error);
   border: 1px solid var(--ds-error);
   border-radius: var(--ds-radius-md);
@@ -189,7 +198,7 @@
 
   &:hover {
     background: var(--ds-surface-offset);
-    box-shadow: var(--ds-shadow-xs, 0 1px 3px rgba(0,0,0,.08));
+    box-shadow: var(--ds-shadow-xs);
   }
 
   &__icon {
@@ -201,8 +210,8 @@
     flex: none;
 
     &--copper  { background: var(--ds-primary-hl);  color: var(--ds-primary); }
-    &--success { background: rgba(46,125,50,.1);     color: var(--ds-success); }
-    &--warning { background: rgba(230,81,0,.1);      color: var(--ds-warning); }
+    &--success { background: var(--ds-success-hl); color: var(--ds-success); }
+    &--warning { background: var(--ds-warning-hl);   color: var(--ds-warning); }
   }
 }
 

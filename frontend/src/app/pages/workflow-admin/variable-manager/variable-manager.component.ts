@@ -1,17 +1,14 @@
 import { Component, input, output } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { TemplateVariable, ComponentType } from '../models/template.model';
-import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIcon } from '@angular/material/icon';
-import { MatChip } from '@angular/material/chips';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { DsBadgeComponent, DsButtonComponent, DsIconComponent } from '../../../design-system';
 
 @Component({
     selector: 'app-variable-manager',
     templateUrl: './variable-manager.component.html',
     styleUrls: ['./variable-manager.component.css'],
-    imports: [MatIconButton, MatTooltip, MatIcon, CdkDropList, CdkDrag, CdkDragHandle, MatChip, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle]
+    imports: [CdkDropList, CdkDrag, CdkDragHandle, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, DsButtonComponent, DsIconComponent, DsBadgeComponent]
 })
 export class VariableManagerComponent {
   readonly variables = input<TemplateVariable[]>([]);
@@ -50,15 +47,15 @@ export class VariableManagerComponent {
   getComponentTypeIcon(type: ComponentType): string {
     switch (type) {
       case ComponentType.HEADER:
-        return 'title';
+        return 'info';
       case ComponentType.BODY:
-        return 'subject';
+        return 'mail';
       case ComponentType.FOOTER:
-        return 'notes';
+        return 'table';
       case ComponentType.BUTTONS:
-        return 'smart_button';
+        return 'tasks';
       default:
-        return 'code';
+        return 'info';
     }
   }
 }

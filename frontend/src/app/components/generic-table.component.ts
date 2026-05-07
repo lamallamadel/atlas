@@ -1,20 +1,16 @@
-import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, OnDestroy, input, output, viewChild } from '@angular/core';
-import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, input, output } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, takeUntil } from 'rxjs';
 import { listStaggerAnimation } from '../animations/list-animations';
 import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { NgStyle } from '@angular/common';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
 import { DsCardComponent } from '../design-system';
 import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
+import { DsTableComponent, DsColumn, DsRowAction, DsSortEvent } from '../design-system/primitives/ds-table/ds-table.component';
 
 export interface ColumnConfig {
   key: string;
@@ -47,9 +43,9 @@ export interface PaginationData {
     templateUrl: './generic-table.component.html',
     styleUrls: ['./generic-table.component.scss'],
     animations: [listStaggerAnimation],
-    imports: [MatIconButton, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, NgStyle, MatMenuTrigger, MatMenu, MatMenuItem, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, DsCardComponent, MatPaginator]
+    imports: [MatIconButton, MatIcon, MatCheckbox, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, DsCardComponent, DsTableComponent]
 })
-export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
+export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   readonly columns = input<ColumnConfig[]>([]);
   readonly data = input<unknown[]>([]);
   readonly showActions = input(true);
@@ -70,6 +66,7 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
   readonly useKebabMenu = input(false);
   readonly showTableHeader = input(false);
   readonly showInlinePagination = input(false);
+  readonly loading = input(false);
   readonly paginationData = input<PaginationData>();
   readonly counterSingular = input('élément');
   readonly counterPlural = input('éléments');
@@ -94,23 +91,64 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
     data: unknown[];
   }>();
 
-  readonly paginator = viewChild(MatPaginator);
-  readonly sort = viewChild(MatSort);
-
   dataSource = new MatTableDataSource<unknown>([]);
-  displayedColumns: string[] = [];
   selection = new SelectionModel<unknown>(true, []);
   isMobile = false;
-  columnWidths: Map<string, number> = new Map();
+  currentClientPage = 0;
   
   private destroy$ = new Subject<void>();
+
+  get dsColumns(): DsColumn<Record<string, unknown>>[] {
+    return this.columns().map((column) => ({
+      key: column.key,
+      header: column.header,
+      sortable: column.sortable !== false && this.enableSort(),
+      width: column.width,
+      cell: (row: Record<string, unknown>) => this.formatValue(row[column.key], column, row),
+    }));
+  }
+
+  get dsRows(): Record<string, unknown>[] {
+    if (!this.showPagination() || this.showInlinePagination()) {
+      return this.dataSource.data as Record<string, unknown>[];
+    }
+    const pageSize = this.pageSize();
+    const start = this.currentClientPage * pageSize;
+    return this.dataSource.data.slice(start, start + pageSize) as Record<string, unknown>[];
+  }
+
+  get dsSelectedRows(): Record<string, unknown>[] {
+    return this.selection.selected as Record<string, unknown>[];
+  }
+
+  get dsClientTotalPages(): number {
+    if (!this.showPagination() || this.showInlinePagination()) {
+      return 1;
+    }
+    return Math.max(1, Math.ceil(this.dataSource.data.length / this.pageSize()));
+  }
+
+  get dsClientPageNumber(): number {
+    return this.currentClientPage + 1;
+  }
+
+  get dsRowActions(): DsRowAction<Record<string, unknown>>[] {
+    if (!this.showActions()) {
+      return [];
+    }
+    return this.actions().map((action) => ({
+      action: action.action,
+      label: action.tooltip,
+      ariaLabel: action.tooltip || action.action,
+      icon: this.mapMaterialIconToDs(action.icon),
+      show: action.show as ((row: Record<string, unknown>) => boolean) | undefined,
+    }));
+  }
 
   constructor(private breakpointObserver: BreakpointObserver) {}
 
   ngOnInit(): void {
     this.dataSource.data = this.data();
-    this.updateDisplayedColumns();
-    this.initializeColumnWidths();
     this.observeBreakpoints();
   }
 
@@ -118,21 +156,7 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
     if (changes['data']) {
       this.dataSource.data = this.data();
       this.selection.clear();
-    }
-    if (changes['columns']) {
-      this.updateDisplayedColumns();
-      this.initializeColumnWidths();
-    }
-  }
-
-  ngAfterViewInit(): void {
-    const paginator = this.paginator();
-    if (this.showPagination() && paginator) {
-      this.dataSource.paginator = paginator;
-    }
-    const sort = this.sort();
-    if (this.enableSort() && sort) {
-      this.dataSource.sort = sort;
+      this.currentClientPage = 0;
     }
   }
 
@@ -148,29 +172,6 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
       .subscribe(result => {
         this.isMobile = result.matches;
       });
-  }
-
-  initializeColumnWidths(): void {
-    this.columns().forEach(col => {
-      if (col.width) {
-        const widthValue = parseInt(col.width);
-        this.columnWidths.set(col.key, widthValue);
-      }
-    });
-  }
-
-  updateDisplayedColumns(): void {
-    this.displayedColumns = [];
-    
-    if (this.enableRowSelection()) {
-      this.displayedColumns.push('select');
-    }
-    
-    this.displayedColumns.push(...this.columns().map(col => col.key));
-    
-    if (this.showActions()) {
-      this.displayedColumns.push('actions');
-    }
   }
 
   onAction(action: string, row: unknown): void {
@@ -235,47 +236,6 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
     this.selectionChange.emit(this.selection.selected);
   }
 
-  onResizeStart(event: MouseEvent, columnKey: string): void {
-    event.preventDefault();
-    const startX = event.pageX;
-    const startWidth = this.columnWidths.get(columnKey) || 150;
-
-    const onMouseMove = (e: MouseEvent) => {
-      const diff = e.pageX - startX;
-      const newWidth = Math.max(50, startWidth + diff);
-      this.columnWidths.set(columnKey, newWidth);
-    };
-
-    const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  }
-
-  getColumnWidth(columnKey: string): string {
-    const width = this.columnWidths.get(columnKey);
-    return width ? `${width}px` : 'auto';
-  }
-
-  getColumnStyle(column: ColumnConfig): { [key: string]: string } {
-    const style: { [key: string]: string } = {};
-    
-    if (column.width) {
-      style['width'] = column.width;
-    } else if (this.columnWidths.has(column.key)) {
-      style['width'] = this.getColumnWidth(column.key);
-    }
-    
-    if (column.minWidth) {
-      style['min-width'] = column.minWidth;
-    }
-    
-    return style;
-  }
-
   getRowValue(row: unknown, columnKey: string): unknown {
     return (row as any)[columnKey];
   }
@@ -292,12 +252,49 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
     return (row as any)['id'] ?? index;
   }
 
-  trackByIndex(index: number): number {
-    return index;
+  onPaginationChange(direction: 'previous' | 'next'): void {
+    if (this.showInlinePagination()) {
+      this.paginationChange.emit(direction);
+      return;
+    }
+    const totalPages = this.dsClientTotalPages;
+    if (direction === 'previous') {
+      this.currentClientPage = Math.max(0, this.currentClientPage - 1);
+    } else {
+      this.currentClientPage = Math.min(totalPages - 1, this.currentClientPage + 1);
+    }
   }
 
-  onPaginationChange(direction: 'previous' | 'next'): void {
-    this.paginationChange.emit(direction);
+  onDsSort(event: DsSortEvent): void {
+    const direction = event.direction === 'asc' ? 1 : -1;
+    const sorted = [...this.dataSource.data].sort((a, b) => {
+      const aValue = (a as Record<string, unknown>)[event.column];
+      const bValue = (b as Record<string, unknown>)[event.column];
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return -1 * direction;
+      if (bValue == null) return 1 * direction;
+      return String(aValue).localeCompare(String(bValue), undefined, { numeric: true }) * direction;
+    });
+    this.dataSource.data = sorted;
+  }
+
+  onDsSelectionChange(rows: Record<string, unknown>[]): void {
+    this.selection.clear();
+    this.selection.select(...(rows as unknown[]));
+    this.emitSelectionChange();
+  }
+
+  private mapMaterialIconToDs(icon: string): string {
+    const iconMap: Record<string, string> = {
+      visibility: 'eye',
+      edit: 'edit',
+      delete: 'trash-2',
+      more_vert: 'more-horizontal',
+      picture_as_pdf: 'file-text',
+      table_chart: 'table',
+      print: 'printer',
+    };
+    return iconMap[icon] || 'more-horizontal';
   }
 
   getActionColor(color?: string): string {

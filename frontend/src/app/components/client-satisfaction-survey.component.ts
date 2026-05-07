@@ -1,10 +1,13 @@
 import { Component, Input } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClientSatisfactionSurvey } from '../models/customer-portal.models';
 import { CustomerPortalService } from '../services/customer-portal.service';
 
 @Component({
   selector: 'app-client-satisfaction-survey',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="survey-container">
       <h2>Évaluez votre expérience</h2>

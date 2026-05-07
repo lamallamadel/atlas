@@ -5,7 +5,7 @@
 
 app-calendar-view .fc,
 app-task-list .fc {
-  font-family: var(--ds-font-body, var(--at-font-body), system-ui, sans-serif) !important;
+  font-family: var(--ds-font-body, system-ui, sans-serif) !important;
 
   --fc-border-color: var(--ds-divider);
   --fc-page-bg-color: transparent;
@@ -29,7 +29,7 @@ app-task-list .fc {
 app-calendar-view .fc .fc-toolbar-title,
 app-task-list .fc .fc-toolbar-title {
   color: var(--ds-text) !important;
-  font-family: var(--ds-font-body, var(--at-font-body), system-ui, sans-serif) !important;
+  font-family: var(--ds-font-body, system-ui, sans-serif) !important;
   font-weight: 700 !important;
   letter-spacing: -0.02em;
 }

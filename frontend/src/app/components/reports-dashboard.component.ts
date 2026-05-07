@@ -1,5 +1,6 @@
-import { Component, OnInit, ElementRef, AfterViewInit, viewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, AfterViewInit, viewChild, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ChartType } from 'chart.js';
@@ -17,23 +18,54 @@ import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field'
 import { MatInput } from '@angular/material/input';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
 import { FormsModule } from '@angular/forms';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 import { LoadingSkeletonComponent } from './loading-skeleton.component';
-import { DsCardComponent } from '../design-system';
+import { DsCardComponent, type DsColumn } from '../design-system';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { DsButtonComponent } from '../design-system/primitives/ds-button/ds-button.component';
+import { DsIconComponent } from '../design-system/icons/ds-icon.component';
+import { DsTableComponent } from '../design-system/primitives/ds-table/ds-table.component';
 import { NgChartsModule } from 'ng2-charts';
-import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 
 @Component({
     selector: 'app-reports-dashboard',
     templateUrl: './reports-dashboard.component.html',
     styleUrls: ['./reports-dashboard.component.css'],
-    imports: [MatFormField, MatLabel, MatInput, MatDatepickerInput, FormsModule, MatDatepickerToggle, MatSuffix, MatDatepicker, MatButton, MatIcon, DsSkeletonComponent, LoadingSkeletonComponent, DsCardComponent, MatTooltip, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, NgChartsModule, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
+    imports: [
+      MatFormField,
+      MatLabel,
+      MatInput,
+      MatDatepickerInput,
+      FormsModule,
+      MatDatepickerToggle,
+      MatSuffix,
+      MatDatepicker,
+      DsSkeletonComponent,
+      LoadingSkeletonComponent,
+      DsCardComponent,
+      DsButtonComponent,
+      DsIconComponent,
+      DsTableComponent,
+      NgChartsModule,
+      CdkConnectedOverlay,
+      CdkOverlayOrigin,
+    ],
 })
 export class ReportsDashboardComponent implements OnInit, AfterViewInit {
+  private readonly overlay = inject(Overlay);
+
+  /** Menus « ⋮ » des graphiques (remplace `mat-menu`). */
+  chartMenu: Record<'funnel' | 'agent' | 'revenue' | 'source', boolean> = {
+    funnel: false,
+    agent: false,
+    revenue: false,
+    source: false,
+  };
+  readonly chartMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
+  readonly chartMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
+  ];
+
   readonly conversionFunnelCanvas = viewChild.required<ElementRef<HTMLCanvasElement>>('conversionFunnelCanvas');
   readonly agentPerformanceCanvas = viewChild.required<ElementRef<HTMLCanvasElement>>('agentPerformanceCanvas');
   readonly revenueForecastCanvas = viewChild.required<ElementRef<HTMLCanvasElement>>('revenueForecastCanvas');
@@ -51,6 +83,17 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
 
   dateFrom = '';
   dateTo = '';
+
+  agentDetailColumns: DsColumn<Record<string, unknown>>[] = [];
+  leadSourceColumns: DsColumn<Record<string, unknown>>[] = [];
+  funnelColumns: DsColumn<Record<string, unknown>>[] = [];
+
+  readonly trackByAgentDetail = (_i: number, row: Record<string, unknown>) =>
+    String(row['agentName'] ?? _i);
+  readonly trackByLeadSourceRow = (_i: number, row: Record<string, unknown>) =>
+    String(row['source'] ?? _i);
+  readonly trackByFunnelRow = (_i: number, row: Record<string, unknown>) =>
+    String(row['stage'] ?? _i);
 
   // Chart instances
   private conversionFunnelChart: any = null;
@@ -248,7 +291,23 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
     private router: Router
   ) { }
 
+  toggleChartMenu(key: keyof typeof this.chartMenu): void {
+    const willOpen = !this.chartMenu[key];
+    this.closeAllChartMenus();
+    if (willOpen) {
+      this.chartMenu[key] = true;
+    }
+  }
+
+  closeAllChartMenus(): void {
+    (Object.keys(this.chartMenu) as (keyof typeof this.chartMenu)[]).forEach((k) => {
+      this.chartMenu[k] = false;
+    });
+  }
+
   ngOnInit(): void {
+    this.initDetailTableColumns();
+
     const today = new Date();
     const thirtyDaysAgo = new Date(today);
     thirtyDaysAgo.setDate(today.getDate() - 30);
@@ -257,6 +316,123 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
     this.dateFrom = this.formatDate(thirtyDaysAgo);
 
     this.loadReports();
+  }
+
+  get agentDetailRows(): Record<string, unknown>[] {
+    return (this.analyticsData?.agentPerformance ?? []) as unknown as Record<string, unknown>[];
+  }
+
+  get leadSourceRows(): Record<string, unknown>[] {
+    return (this.analyticsData?.leadSources ?? []) as unknown as Record<string, unknown>[];
+  }
+
+  get funnelRows(): Record<string, unknown>[] {
+    return (this.analyticsData?.conversionFunnel ?? []) as unknown as Record<string, unknown>[];
+  }
+
+  onLeadSourceRowClick(row: Record<string, unknown>): void {
+    this.drillDownToSource(String(row['source'] ?? ''));
+  }
+
+  onFunnelRowClick(row: Record<string, unknown>): void {
+    this.drillDownToStage(String(row['stage'] ?? ''));
+  }
+
+  private initDetailTableColumns(): void {
+    this.agentDetailColumns = [
+      { key: 'agentName', header: 'Agent Name' },
+      { key: 'totalDossiers', header: 'Total Dossiers', align: 'right' },
+      { key: 'closedDossiers', header: 'Closed', align: 'right' },
+      {
+        key: 'conversionRate',
+        header: 'Conversion Rate',
+        align: 'right',
+        cell: (row) => {
+          const v = Number(row['conversionRate'] ?? 0);
+          const cls = v >= 50 ? 'high' : v >= 25 ? 'medium' : '';
+          return `<span class="conversion-rate ${cls}">${v.toFixed(1)}%</span>`;
+        },
+      },
+      {
+        key: 'averageResponseTimeHours',
+        header: 'Avg Response Time',
+        align: 'right',
+        cell: (row) => {
+          const v = Number(row['averageResponseTimeHours'] ?? 0);
+          return `${v.toFixed(1)}h`;
+        },
+      },
+    ];
+
+    this.leadSourceColumns = [
+      {
+        key: 'source',
+        header: 'Source',
+        cell: (row) => {
+          const s = String(row['source'] ?? '');
+          return `<span class="rpt-drill-label">${this.escapeHtml(s)}</span>`;
+        },
+      },
+      { key: 'count', header: 'Count', align: 'right' },
+      {
+        key: 'percentage',
+        header: 'Percentage',
+        cell: (row) => {
+          const p = Number(row['percentage'] ?? 0);
+          const safe = Math.min(100, Math.max(0, p));
+          return `<div class="percentage-bar"><div class="percentage-fill" style="width: ${safe}%"></div><span class="percentage-text">${p.toFixed(1)}%</span></div>`;
+        },
+      },
+      {
+        key: 'conversionRate',
+        header: 'Conversion Rate',
+        align: 'right',
+        cell: (row) => {
+          const v = Number(row['conversionRate'] ?? 0);
+          return `${v.toFixed(1)}%`;
+        },
+      },
+    ];
+
+    this.funnelColumns = [
+      {
+        key: 'stage',
+        header: 'Stage',
+        cell: (row) => {
+          const s = String(row['stage'] ?? '');
+          return `<span class="rpt-drill-label">${this.escapeHtml(s)}</span>`;
+        },
+      },
+      { key: 'count', header: 'Count', align: 'right' },
+      {
+        key: 'conversionRate',
+        header: 'Conversion Rate',
+        align: 'right',
+        cell: (row) => {
+          const v = Number(row['conversionRate'] ?? 0);
+          const cls = v >= 70 ? 'high' : v >= 40 ? 'medium' : '';
+          return `<span class="conversion-rate ${cls}">${v.toFixed(1)}%</span>`;
+        },
+      },
+      {
+        key: 'dropOffRate',
+        header: 'Drop-off Rate',
+        align: 'right',
+        cell: (row) => {
+          const v = Number(row['dropOffRate'] ?? 0);
+          const cls = v >= 30 ? 'high' : v >= 15 ? 'medium' : '';
+          return `<span class="dropoff-rate ${cls}">${v.toFixed(1)}%</span>`;
+        },
+      },
+    ];
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -537,6 +713,7 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    this.closeAllChartMenus();
     this.exportingCSV = true;
     this.error = null;
 

@@ -11,6 +11,7 @@ export type DsButtonSize = 'sm' | 'md' | 'lg';
   imports: [CommonModule, MatRippleModule],
   template: `
     <button
+      [attr.type]="nativeType"
       [class]="classes"
       [disabled]="disabled || loading"
       [attr.aria-busy]="loading"
@@ -31,6 +32,8 @@ export type DsButtonSize = 'sm' | 'md' | 'lg';
   styleUrls: ['./ds-button.component.scss'],
 })
 export class DsButtonComponent {
+  /** Par défaut `button` pour éviter une soumission involontaire dans les <form>. */
+  @Input() nativeType: 'button' | 'submit' | 'reset' = 'button';
   @Input() variant: DsButtonVariant = 'marine';
   @Input() size: DsButtonSize = 'md';
   @Input() disabled = false;

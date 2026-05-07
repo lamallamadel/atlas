@@ -1,17 +1,17 @@
 <div class="template-library-container">
   <div class="library-header">
     <h2>WhatsApp Template Library</h2>
-    <button mat-raised-button color="primary" (click)="createNewTemplate()">
-      <mat-icon>add</mat-icon>
+    <ds-button variant="marine" size="md" (dsClick)="createNewTemplate()">
+      <ds-icon name="plus" [size]="16"></ds-icon>
       Create Template
-    </button>
+    </ds-button>
   </div>
 
   <div class="library-filters">
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Search templates</mat-label>
       <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" placeholder="Search by name or description">
-      <mat-icon matPrefix>search</mat-icon>
+      <ds-icon matPrefix name="search" [size]="16"></ds-icon>
     </mat-form-field>
 
     <mat-button-toggle-group [(ngModel)]="selectedStatus" (change)="onStatusFilterChange(selectedStatus)" class="status-filter">
@@ -26,13 +26,11 @@
 
   @if (!loading && filteredTemplates.length > 0) {
     <div class="templates-grid">
-      @for (template of filteredTemplates; track template) {
+      @for (template of filteredTemplates; track template.id ?? $index) {
         <ds-card class="template-card" [pad]="false" [elevation]="'sm'">
           <div class="tpl-lib-card-header">
             <div class="tpl-lib-avatar">
-              <mat-icon [color]="getStatusColor(template.status)">
-                {{ getStatusIcon(template.status) }}
-              </mat-icon>
+              <ds-icon [name]="getStatusIcon(template.status)" [size]="20"></ds-icon>
             </div>
             <div class="tpl-lib-headings">
               <h3 class="tpl-lib-title">{{ template.name }}</h3>
@@ -41,9 +39,11 @@
           </div>
           <div class="tpl-lib-body">
             <div class="template-status">
-              <mat-chip [color]="getStatusColor(template.status)" selected>
+              <span class="tpl-lib-status-chip">
+                <span class="ds-badge ds-badge--{{ getStatusBadge(template.status) }} ds-badge--sm ds-badge--no-dot">
                 {{ template.status }}
-              </mat-chip>
+                </span>
+              </span>
             </div>
             @if (template.description) {
               <p class="template-description">
@@ -52,71 +52,92 @@
             }
             <div class="template-meta">
               <span class="meta-item">
-                <mat-icon>update</mat-icon>
+                <ds-icon name="clock" [size]="16"></ds-icon>
                 {{ template.updatedAt | date:'short' }}
               </span>
               @if (template.variables && template.variables.length > 0) {
                 <span class="meta-item">
-                  <mat-icon>code</mat-icon>
+                  <ds-icon name="chart" [size]="16"></ds-icon>
                   {{ template.variables.length }} variable(s)
                 </span>
               }
             </div>
             @if (template.status === TemplateStatus.REJECTED && template.rejectionReason) {
               <div class="rejection-reason">
-                <mat-icon color="warn">error</mat-icon>
+                <ds-icon name="alert-circle" [size]="20"></ds-icon>
                 <span>{{ template.rejectionReason }}</span>
               </div>
             }
           </div>
           <div class="tpl-lib-actions">
-            <button mat-button (click)="viewTemplate(template)">
-              <mat-icon>visibility</mat-icon>
+            <button mat-button type="button" (click)="viewTemplate(template)">
+              <ds-icon name="info" [size]="16"></ds-icon>
               View
             </button>
             @if (template.status !== TemplateStatus.PENDING_APPROVAL && template.status !== TemplateStatus.ACTIVE) {
-              <button mat-button (click)="editTemplate(template)">
-                <mat-icon>edit</mat-icon>
+              <button mat-button type="button" (click)="editTemplate(template)">
+                <ds-icon name="edit" [size]="16"></ds-icon>
                 Edit
               </button>
             }
-            <button mat-button [matMenuTriggerFor]="menu">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="duplicateTemplate(template)">
-                <mat-icon>content_copy</mat-icon>
-                Duplicate
-              </button>
-              @if (template.status === TemplateStatus.DRAFT) {
-                <button mat-menu-item (click)="submitForApproval(template)"
-                  >
-                  <mat-icon>send</mat-icon>
-                  Submit for Approval
+            @if (template.id != null) {
+              <span class="wf-tpl-card-menu-origin" cdkOverlayOrigin #wfTplMenuOrigin="cdkOverlayOrigin">
+                <button
+                  mat-button
+                  type="button"
+                  (click)="toggleTplCardMenu(template.id, $event)"
+                  [attr.aria-expanded]="tplCardMenuOpenForId === template.id"
+                  aria-haspopup="menu"
+                  [attr.aria-controls]="'wf-tpl-card-menu-' + template.id">
+                  <ds-icon name="more-vertical" [size]="16"></ds-icon>
                 </button>
-              }
-              @if (template.status === TemplateStatus.ACTIVE) {
-                <button mat-menu-item (click)="pauseTemplate(template)"
-                  >
-                  <mat-icon>pause</mat-icon>
-                  Pause
-                </button>
-              }
-              @if (template.status === TemplateStatus.INACTIVE) {
-                <button mat-menu-item (click)="activateTemplate(template)"
-                  >
-                  <mat-icon>play_arrow</mat-icon>
-                  Activate
-                </button>
-              }
-              @if (template.status !== TemplateStatus.ACTIVE) {
-                <button mat-menu-item (click)="deleteTemplate(template)"
-                  >
-                  <mat-icon color="warn">delete</mat-icon>
-                  Delete
-                </button>
-              }
-            </mat-menu>
+              </span>
+              <ng-template
+                cdkConnectedOverlay
+                [cdkConnectedOverlayOrigin]="wfTplMenuOrigin"
+                [cdkConnectedOverlayOpen]="tplCardMenuOpenForId === template.id"
+                [cdkConnectedOverlayPositions]="tplCardMenuPositions"
+                [cdkConnectedOverlayScrollStrategy]="tplCardMenuScrollStrategy"
+                [cdkConnectedOverlayHasBackdrop]="true"
+                [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
+                (backdropClick)="closeTplCardMenu()"
+                (detach)="closeTplCardMenu()"
+                (overlayKeydown)="$event.key === 'Escape' && closeTplCardMenu()">
+                <div
+                  [id]="'wf-tpl-card-menu-' + template.id"
+                  class="wf-tpl-card-menu-dropdown"
+                  role="menu">
+                  <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="duplicateTemplate(template)">
+                    <ds-icon name="edit" [size]="16"></ds-icon>
+                    Duplicate
+                  </button>
+                  @if (template.status === TemplateStatus.DRAFT) {
+                    <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="submitForApproval(template)">
+                      <ds-icon name="upload" [size]="16"></ds-icon>
+                      Submit for Approval
+                    </button>
+                  }
+                  @if (template.status === TemplateStatus.ACTIVE) {
+                    <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="pauseTemplate(template)">
+                      <ds-icon name="info" [size]="16"></ds-icon>
+                      Pause
+                    </button>
+                  }
+                  @if (template.status === TemplateStatus.INACTIVE) {
+                    <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="activateTemplate(template)">
+                      <ds-icon name="check" [size]="16"></ds-icon>
+                      Activate
+                    </button>
+                  }
+                  @if (template.status !== TemplateStatus.ACTIVE) {
+                    <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="deleteTemplate(template)">
+                      <ds-icon name="trash" [size]="16"></ds-icon>
+                      Delete
+                    </button>
+                  }
+                </div>
+              </ng-template>
+            }
           </div>
         </ds-card>
       }
@@ -124,18 +145,14 @@
   }
 
   @if (!loading && filteredTemplates.length === 0) {
-    <div class="empty-state">
-      <mat-icon>inbox</mat-icon>
-      <h3>No templates found</h3>
-      @if (searchQuery || selectedStatus !== 'ALL') {
-        <p>Try adjusting your filters</p>
-      }
-      @if (!searchQuery && selectedStatus === 'ALL') {
-        <button mat-raised-button color="primary" (click)="createNewTemplate()">
-          Create Your First Template
-        </button>
-      }
-    </div>
+    <ds-card elevation="sm">
+      <ds-empty-state
+        title="No templates found"
+        [description]="searchQuery || selectedStatus !== 'ALL' ? 'Try adjusting your filters' : 'Create your first template to get started.'"
+        [ctaLabel]="searchQuery || selectedStatus !== 'ALL' ? null : 'Create Your First Template'"
+        (ctaClick)="createNewTemplate()">
+      </ds-empty-state>
+    </ds-card>
   }
 
   @if (loading) {

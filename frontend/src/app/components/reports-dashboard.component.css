@@ -43,26 +43,17 @@
   min-width: 150px;
 }
 
-.apply-filter-btn {
-  height: 56px;
-}
-
 .export-controls {
   display: flex;
   gap: var(--spacing-2, 8px);
   flex-wrap: wrap;
+  align-items: center;
 }
 
-.export-btn {
-  display: flex;
+.export-controls ds-button ::ng-deep .ds-btn {
+  display: inline-flex;
   align-items: center;
   gap: var(--spacing-1, 4px);
-}
-
-.export-btn mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
 }
 
 .loading-container {
@@ -71,7 +62,7 @@
 
 .error-message ds-card > .ds-card {
   border-left: 4px solid var(--ds-error);
-  background-color: rgba(244, 67, 54, 0.05);
+  background-color: var(--ds-error-hl);
 }
 
 .error-message .rpt-card-body {
@@ -80,10 +71,9 @@
   gap: var(--spacing-3, 12px);
 }
 
-.error-message mat-icon {
-  font-size: 24px;
-  width: 24px;
-  height: 24px;
+.rpt-error-icon {
+  flex-shrink: 0;
+  color: var(--ds-error);
 }
 
 .dashboard-content {
@@ -100,13 +90,13 @@
 
 .kpi-card {
   display: block;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--ds-divider);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .kpi-card:hover > .ds-card {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--ds-shadow-sm);
 }
 
 .kpi-card .rpt-card-header {
@@ -116,9 +106,23 @@
 }
 
 .kpi-icon {
-  font-size: 24px;
-  width: 24px;
-  height: 24px;
+  flex-shrink: 0;
+}
+
+.kpi-icon--marine {
+  color: var(--ds-marine);
+}
+
+.kpi-icon--primary {
+  color: var(--ds-primary);
+}
+
+.kpi-icon--warning {
+  color: var(--ds-warning);
+}
+
+.kpi-icon--success {
+  color: var(--ds-success);
 }
 
 .kpi-card h3 {
@@ -149,12 +153,12 @@
 }
 
 .chart-card {
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--ds-divider);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .chart-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--ds-shadow-sm);
 }
 
 .chart-card.clickable {
@@ -163,13 +167,14 @@
 
 .chart-card.clickable:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--ds-shadow-md);
 }
 
 .chart-card .rpt-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--spacing-2, 8px);
 }
 
 .chart-card .rpt-card-title {
@@ -181,10 +186,87 @@
 }
 
 .chart-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
+  flex-shrink: 0;
   color: var(--ds-marine);
+}
+
+.rpt-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin: 0;
+  border-radius: var(--ds-radius-sm);
+  background: transparent;
+  color: var(--ds-text-muted);
+  border: 1px solid var(--ds-border);
+  cursor: pointer;
+  transition:
+    background var(--ds-transition-fast),
+    color var(--ds-transition-fast);
+}
+
+.rpt-menu-trigger:hover {
+  background: var(--ds-surface-offset);
+  color: var(--ds-text);
+}
+
+.rpt-menu-trigger:focus-visible {
+  outline: 2px solid var(--ds-marine);
+  outline-offset: 2px;
+}
+
+.rpt-chart-menu-origin {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.rpt-chart-menu-dropdown {
+  min-width: 200px;
+  background: var(--ds-surface-elevated);
+  color: var(--ds-text-primary);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-lg);
+  border: 1px solid var(--ds-border-subtle);
+  overflow: hidden;
+}
+
+.rpt-chart-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2, 8px);
+  width: 100%;
+  margin: 0;
+  padding: var(--spacing-3, 12px) var(--spacing-4, 16px);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: var(--ds-text-primary);
+  transition: background-color var(--ds-transition-fast);
+}
+
+.rpt-chart-menu-item:hover {
+  background: var(--ds-primary-subtle);
+}
+
+.rpt-chart-menu-item:focus-visible {
+  outline: 2px solid var(--ds-marine);
+  outline-offset: -2px;
+}
+
+.rpt-chart-menu-item .ds-icon {
+  flex-shrink: 0;
+  color: var(--ds-text-muted);
+}
+
+.rpt-chart-menu-item:hover .ds-icon {
+  color: var(--ds-primary);
 }
 
 .chart-card-wide {
@@ -209,11 +291,11 @@
 }
 
 .metrics-card {
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--ds-divider);
 }
 
 .metrics-card .rpt-card-header {
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  border-bottom: 1px solid var(--ds-divider);
   padding-bottom: var(--spacing-3, 12px);
   margin-bottom: var(--spacing-3, 12px);
 }
@@ -226,100 +308,63 @@
   font-weight: var(--font-weight-semibold, 600);
 }
 
-.table-container {
+.rpt-table-body {
   overflow-x: auto;
 }
 
-.metrics-table {
-  width: 100%;
-  font-size: var(--font-size-sm, 13px);
-}
-
-.metrics-table th {
-  color: var(--ds-text-muted);
-  font-weight: var(--font-weight-semibold, 600);
-  background-color: rgba(15, 23, 42, 0.03);
-}
-
-.metrics-table td {
-  color: var(--ds-text);
-}
-
-.metrics-table tr:hover {
-  background-color: rgba(15, 23, 42, 0.02);
-}
-
-.source-link {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1, 4px);
-  padding: 0;
-  min-width: auto;
-  color: var(--ds-marine);
-  text-transform: none;
+:host ::ng-deep .rpt-table-body .rpt-drill-label {
   font-weight: var(--font-weight-medium, 500);
+  color: var(--ds-marine);
 }
 
-.source-link mat-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.source-link:hover mat-icon {
-  opacity: 1;
-}
-
-.conversion-rate,
-.dropoff-rate {
+:host ::ng-deep .rpt-table-body .conversion-rate,
+:host ::ng-deep .rpt-table-body .dropoff-rate {
   display: inline-block;
   padding: var(--spacing-1, 4px) var(--spacing-2, 8px);
-  border-radius: 4px;
+  border-radius: var(--ds-radius-sm, 4px);
   font-weight: var(--font-weight-semibold, 600);
 }
 
-.conversion-rate {
-  background-color: rgba(244, 67, 54, 0.1);
+:host ::ng-deep .rpt-table-body .conversion-rate {
+  background-color: var(--ds-error-hl);
   color: var(--ds-error);
 }
 
-.conversion-rate.medium {
-  background-color: rgba(255, 152, 0, 0.1);
+:host ::ng-deep .rpt-table-body .conversion-rate.medium {
+  background-color: var(--ds-warning-hl);
   color: var(--ds-warning);
 }
 
-.conversion-rate.high {
-  background-color: rgba(76, 175, 80, 0.1);
+:host ::ng-deep .rpt-table-body .conversion-rate.high {
+  background-color: var(--ds-success-hl);
   color: var(--ds-success);
 }
 
-.dropoff-rate {
-  background-color: rgba(76, 175, 80, 0.1);
+:host ::ng-deep .rpt-table-body .dropoff-rate {
+  background-color: var(--ds-success-hl);
   color: var(--ds-success);
 }
 
-.dropoff-rate.medium {
-  background-color: rgba(255, 152, 0, 0.1);
+:host ::ng-deep .rpt-table-body .dropoff-rate.medium {
+  background-color: var(--ds-warning-hl);
   color: var(--ds-warning);
 }
 
-.dropoff-rate.high {
-  background-color: rgba(244, 67, 54, 0.1);
+:host ::ng-deep .rpt-table-body .dropoff-rate.high {
+  background-color: var(--ds-error-hl);
   color: var(--ds-error);
 }
 
-.percentage-bar {
+:host ::ng-deep .rpt-table-body .percentage-bar {
   position: relative;
   width: 100%;
   height: 24px;
-  background-color: rgba(15, 23, 42, 0.05);
-  border-radius: 4px;
+  background-color: var(--ds-surface-offset);
+  border-radius: var(--ds-radius-sm, 4px);
   overflow: hidden;
 }
 
-.percentage-fill {
+:host ::ng-deep .rpt-table-body .percentage-fill {
   position: absolute;
   top: 0;
   left: 0;
@@ -328,7 +373,7 @@
   transition: width 0.3s ease;
 }
 
-.percentage-text {
+:host ::ng-deep .rpt-table-body .percentage-text {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -398,16 +443,17 @@
     width: 100%;
   }
 
-  .apply-filter-btn {
-    width: 100%;
-  }
-
   .export-controls {
     width: 100%;
   }
 
-  .export-btn {
+  .export-controls ds-button {
     flex: 1;
+  }
+
+  .export-controls ds-button ::ng-deep .ds-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -430,10 +476,6 @@
 
   .chart-card-wide .chart-container {
     height: 260px;
-  }
-
-  .metrics-table {
-    font-size: var(--font-size-xs, 12px);
   }
 }
 

@@ -21,10 +21,10 @@
             }
 
             <div class="actions">
-              <button mat-raised-button color="primary" (click)="onSaveWorkflow()">
-                <mat-icon>save</mat-icon>
+              <ds-button variant="marine" size="md" (dsClick)="onSaveWorkflow()">
+                <ds-icon name="upload" [size]="16" />
                 Save Workflow
-              </button>
+              </ds-button>
             </div>
           </div>
         </mat-tab>
@@ -42,10 +42,10 @@
             <p class="tab-description">
               Manage WhatsApp message templates for your organization. Templates must be approved by WhatsApp before they can be used.
             </p>
-            <button mat-raised-button color="primary" routerLink="/workflow-admin/templates">
-              <mat-icon>message</mat-icon>
+            <ds-button variant="marine" size="md" [routerLink]="'/workflow-admin/templates'">
+              <ds-icon name="whatsapp" [size]="16" />
               Manage Templates
-            </button>
+            </ds-button>
           </div>
         </mat-tab>
       </mat-tab-group>

@@ -1,23 +1,23 @@
 .workflow-admin-container {
-  padding: 24px;
+  padding: var(--ds-space-6);
   max-width: 1600px;
   margin: 0 auto;
 }
 
 .workflow-admin-card {
   display: block;
-  margin-bottom: 24px;
+  margin-bottom: var(--ds-space-6);
 }
 
 .workflow-admin-card-header {
-  padding: 16px 16px 0;
+  padding: var(--ds-space-4) var(--ds-space-4) 0;
   border-bottom: 1px solid var(--ds-divider);
 }
 
 .workflow-admin-card-title {
-  margin: 0 0 12px;
-  font-size: 1.25rem;
-  font-weight: 500;
+  margin: 0 0 var(--ds-space-3);
+  font-size: var(--ds-text-xl);
+  font-weight: 600;
 }
 
 .workflow-admin-card-body {
@@ -25,41 +25,41 @@
 }
 
 .tab-content {
-  padding: 24px;
+  padding: var(--ds-space-6);
   min-height: 400px;
 }
 
 .tab-description {
-  margin-bottom: 16px;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 14px;
+  margin-bottom: var(--ds-space-4);
+  color: var(--ds-text-muted);
+  font-size: var(--ds-text-sm);
   line-height: 1.5;
 }
 
 .workflow-selector {
-  margin-bottom: 24px;
+  margin-bottom: var(--ds-space-6);
   display: flex;
   justify-content: center;
 }
 
 mat-button-toggle-group {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--ds-shadow-xs);
 }
 
 .actions {
-  margin-top: 24px;
+  margin-top: var(--ds-space-6);
   display: flex;
   justify-content: flex-end;
-  padding-top: 24px;
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  padding-top: var(--ds-space-6);
+  border-top: 1px solid var(--ds-divider);
 }
 
 @media (max-width: 768px) {
   .workflow-admin-container {
-    padding: 16px;
+    padding: var(--ds-space-4);
   }
   
   .tab-content {
-    padding: 16px;
+    padding: var(--ds-space-4);
   }
 }

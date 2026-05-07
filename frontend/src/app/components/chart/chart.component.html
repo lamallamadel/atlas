@@ -11,23 +11,41 @@
       </div>
       @if (enableExport()) {
         <div class="chart-actions">
-          <button
-            mat-icon-button
-            [matMenuTriggerFor]="exportMenu"
-            matTooltip="Exporter le graphique"
-            aria-label="Exporter le graphique">
-            <mat-icon>download</mat-icon>
-          </button>
-          <mat-menu #exportMenu="matMenu">
-            <button mat-menu-item (click)="exportChart({ format: 'png' })">
-              <mat-icon>image</mat-icon>
-              <span>Exporter en PNG</span>
+          <span class="chart-export-menu-origin" cdkOverlayOrigin #chartExportOrigin="cdkOverlayOrigin">
+            <button
+              type="button"
+              class="chart-export-trigger"
+              (click)="toggleChartExportMenu()"
+              [attr.aria-expanded]="chartExportMenuOpen"
+              aria-haspopup="menu"
+              aria-controls="chart-export-menu"
+              [attr.title]="'Exporter le graphique'"
+              aria-label="Exporter le graphique">
+              <ds-icon name="download" [size]="20" aria-hidden="true" />
             </button>
-            <button mat-menu-item (click)="exportChart({ format: 'svg' })">
-              <mat-icon>code</mat-icon>
-              <span>Exporter en SVG</span>
-            </button>
-          </mat-menu>
+          </span>
+          <ng-template
+            cdkConnectedOverlay
+            [cdkConnectedOverlayOrigin]="chartExportOrigin"
+            [cdkConnectedOverlayOpen]="chartExportMenuOpen"
+            [cdkConnectedOverlayPositions]="chartExportMenuPositions"
+            [cdkConnectedOverlayScrollStrategy]="chartExportMenuScrollStrategy"
+            [cdkConnectedOverlayHasBackdrop]="true"
+            [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
+            (backdropClick)="closeChartExportMenu()"
+            (detach)="closeChartExportMenu()"
+            (overlayKeydown)="$event.key === 'Escape' && closeChartExportMenu()">
+            <div id="chart-export-menu" class="chart-export-dropdown" role="menu">
+              <button type="button" class="chart-export-item" role="menuitem" (click)="exportChart({ format: 'png' })">
+                <ds-icon name="image" [size]="20" aria-hidden="true" />
+                <span>Exporter en PNG</span>
+              </button>
+              <button type="button" class="chart-export-item" role="menuitem" (click)="exportChart({ format: 'svg' })">
+                <ds-icon name="code" [size]="20" aria-hidden="true" />
+                <span>Exporter en SVG</span>
+              </button>
+            </div>
+          </ng-template>
         </div>
       }
     </div>

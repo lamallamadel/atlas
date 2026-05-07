@@ -11,7 +11,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { DsCardComponent } from '../design-system';
 
 @Component({
@@ -28,7 +27,6 @@ import { DsCardComponent } from '../design-system';
     MatSelectModule,
     MatTableModule,
     MatChipsModule,
-    MatTooltipModule,
   ],
   template: `
     <div class="custom-query-builder">
@@ -77,14 +75,14 @@ import { DsCardComponent } from '../design-system';
                 <ng-container matColumnDef="actions">
                   <th mat-header-cell *matHeaderCellDef>Actions</th>
                   <td mat-cell *matCellDef="let query">
-                    <button mat-icon-button (click)="editQuery(query)" matTooltip="Edit">
+                    <button type="button" mat-icon-button (click)="editQuery(query)" title="Edit">
                       <mat-icon>edit</mat-icon>
                     </button>
-                    <button mat-icon-button (click)="executeQuery(query)"
-                      [disabled]="!query.isApproved" matTooltip="Execute">
+                    <button type="button" mat-icon-button (click)="executeQuery(query)"
+                      [disabled]="!query.isApproved" title="Execute">
                       <mat-icon>play_arrow</mat-icon>
                     </button>
-                    <button mat-icon-button (click)="deleteQuery(query)" matTooltip="Delete" color="warn">
+                    <button type="button" mat-icon-button (click)="deleteQuery(query)" title="Delete" color="warn">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </td>

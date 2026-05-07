@@ -4,6 +4,8 @@ import { CustomerPortalService } from '../services/customer-portal.service';
 
 @Component({
   selector: 'app-customer-portal-auth',
+  standalone: true,
+  imports: [],
   template: `
     <div class="auth-container">
       <div class="auth-card">

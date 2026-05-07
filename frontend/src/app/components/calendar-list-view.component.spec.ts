@@ -1,32 +1,55 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatButtonModule } from '@angular/material/button';
-import { LayoutModule } from '@angular/cdk/layout';
-import { CalendarListViewComponent } from './calendar-list-view.component';
-import { AppointmentApiService } from '../services/appointment-api.service';
-import { ToastNotificationService } from '../services/toast-notification.service';
-import { of } from 'rxjs';
 import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatDialogModule } from '@angular/material/dialog';
+import { LayoutModule } from '@angular/cdk/layout';
+import { of } from 'rxjs';
+
+import { CalendarListViewComponent } from './calendar-list-view.component';
+import {
+  AppointmentApiService,
+  Page,
+  AppointmentResponse,
+} from '../services/appointment-api.service';
+import { ToastNotificationService } from '../services/toast-notification.service';
 
 describe('CalendarListViewComponent', () => {
   let component: CalendarListViewComponent;
   let fixture: ComponentFixture<CalendarListViewComponent>;
+  let listSpy: ReturnType<typeof vi.fn>;
+
+  const emptyPage: Page<AppointmentResponse> = {
+    content: [],
+    totalElements: 0,
+    totalPages: 0,
+    size: 1000,
+    number: 0,
+    last: true,
+    first: true,
+    empty: true,
+    pageable: {
+      sort: { empty: true, sorted: false, unsorted: true },
+      offset: 0,
+      pageNumber: 0,
+      pageSize: 1000,
+      paged: true,
+      unpaged: false,
+    },
+    sort: { empty: true, sorted: false, unsorted: true },
+    numberOfElements: 0,
+  };
 
   beforeEach(async () => {
+    listSpy = vi.fn().mockReturnValue(of(emptyPage));
+
     await TestBed.configureTestingModule({
       imports: [
+        NoopAnimationsModule,
         MatDialogModule,
-        MatIconModule,
-        MatChipsModule,
-        MatTooltipModule,
-        MatButtonModule,
         LayoutModule,
         CalendarListViewComponent,
       ],
@@ -34,9 +57,7 @@ describe('CalendarListViewComponent', () => {
         {
           provide: AppointmentApiService,
           useValue: {
-            list: vi
-              .fn()
-              .mockReturnValue(of({ content: [], totalElements: 0 })),
+            list: listSpy,
           },
         },
         {
@@ -61,6 +82,7 @@ describe('CalendarListViewComponent', () => {
   });
 
   it('should load appointments on init', () => {
-    expect(component.appointments).toBeDefined();
+    expect(listSpy).toHaveBeenCalled();
+    expect(component.appointments).toEqual([]);
   });
 });

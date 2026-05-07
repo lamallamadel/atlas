@@ -5,12 +5,10 @@ import { AdvancedFilter, FilterField, AdvancedFiltersComponent } from './advance
 import { FilterPreset, FilterPresetRequest, FilterPresetService } from '../services/filter-preset.service';
 import { DossierFilterApiService, DossierFilterRequest } from '../services/dossier-filter-api.service';
 import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { DsButtonComponent } from '../design-system/primitives/ds-button/ds-button.component';
+import { DsIconComponent } from '../design-system/icons/ds-icon.component';
 import { FormsModule } from '@angular/forms';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { DsInputComponent } from '../design-system/primitives/ds-input/ds-input.component';
 
 export interface AdvancedFiltersDialogData {
   filterType: string;
@@ -22,7 +20,7 @@ export interface AdvancedFiltersDialogData {
     selector: 'app-advanced-filters-dialog',
     templateUrl: './advanced-filters-dialog.component.html',
     styleUrls: ['./advanced-filters-dialog.component.css'],
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatButton, MatIcon, MatIconButton, AdvancedFiltersComponent, MatDialogActions, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox]
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, DsButtonComponent, DsIconComponent, AdvancedFiltersComponent, MatDialogActions, FormsModule, DsInputComponent]
 })
 export class AdvancedFiltersDialogComponent implements OnInit {
   predefinedPresets: FilterPreset[] = [];

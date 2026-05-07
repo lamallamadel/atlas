@@ -86,5 +86,23 @@ export const routes: Routes = [
   { path: 'search',          redirectTo: 'pro/search',    pathMatch: 'full' },
   { path: 'workflow-admin',  redirectTo: 'pro/workflow-admin', pathMatch: 'prefix' },
 
+  // Portail client B2C (lien magique — hors layout Pro / Public)
+  {
+    path: 'customer-portal',
+    children: [
+      {
+        path: 'auth',
+        loadComponent: () =>
+          import('./components/customer-portal-auth.component').then((m) => m.CustomerPortalAuthComponent),
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./components/customer-portal-dashboard.component').then((m) => m.CustomerPortalDashboardComponent),
+      },
+      { path: '', pathMatch: 'full', redirectTo: 'auth' },
+    ],
+  },
+
   { path: '**', redirectTo: '' }
 ];

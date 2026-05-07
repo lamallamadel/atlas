@@ -8,12 +8,14 @@
         <h3 class="section-title">Filtres rapides</h3>
         <div class="quick-filters-grid">
           @for (preset of predefinedPresets; track preset) {
-            <button
-              mat-stroked-button
+            <ds-button
+              variant="ghost"
+              size="md"
               class="quick-filter-btn"
-              (click)="loadPreset(preset)">
+              [ariaLabel]="preset.name"
+              (dsClick)="loadPreset(preset)">
               <div class="quick-filter-content">
-                <mat-icon class="filter-icon">filter_alt</mat-icon>
+                <ds-icon name="filter" [size]="24" class="filter-icon"></ds-icon>
                 <div class="filter-info">
                   <span class="filter-name">{{ preset.name }}</span>
                   @if (preset.description) {
@@ -21,7 +23,7 @@
                   }
                 </div>
               </div>
-            </button>
+            </ds-button>
           }
         </div>
       </section>
@@ -34,20 +36,13 @@
         <div class="saved-presets-list">
           @for (preset of userPresets; track preset) {
             <div class="saved-preset-item">
-              <button
-                mat-button
-                class="preset-load-btn"
-                (click)="loadPreset(preset)">
-                <mat-icon>bookmark</mat-icon>
+              <ds-button variant="ghost" size="md" class="preset-load-btn" [ariaLabel]="'Charger ' + preset.name" (dsClick)="loadPreset(preset)">
+                <ds-icon name="star" [size]="20"></ds-icon>
                 <span>{{ preset.name }}</span>
-              </button>
-              <button
-                mat-icon-button
-                color="warn"
-                (click)="deletePreset(preset)"
-                class="preset-delete-btn">
-                <mat-icon>delete</mat-icon>
-              </button>
+              </ds-button>
+              <ds-button variant="icon" size="sm" class="preset-delete-btn" ariaLabel="Supprimer le filtre sauvegardé" (dsClick)="deletePreset(preset)">
+                <ds-icon name="trash" [size]="20"></ds-icon>
+              </ds-button>
             </div>
           }
         </div>
@@ -68,11 +63,11 @@
   </mat-dialog-content>
 
   <mat-dialog-actions class="dialog-actions">
-    <button mat-button (click)="cancel()">Annuler</button>
-    <button mat-raised-button color="accent" (click)="openSaveDialog()" [disabled]="!currentFilter">
-      <mat-icon>save</mat-icon>
+    <ds-button variant="ghost" size="md" (dsClick)="cancel()">Annuler</ds-button>
+    <ds-button variant="copper" size="md" [disabled]="!currentFilter" ariaLabel="Sauvegarder ce filtre" (dsClick)="openSaveDialog()">
+      <ds-icon name="check" [size]="20"></ds-icon>
       Sauvegarder ce filtre
-    </button>
+    </ds-button>
   </mat-dialog-actions>
 </div>
 
@@ -81,23 +76,29 @@
   <div class="save-dialog-overlay" role="button" tabindex="0" (click)="closeSaveDialog()" (keydown.enter)="closeSaveDialog()" (keydown.space)="$event.preventDefault(); closeSaveDialog()">
     <div class="save-dialog-content" role="dialog" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
       <h3>Sauvegarder le filtre</h3>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Nom du filtre</mat-label>
-        <input matInput [(ngModel)]="presetName" placeholder="Ex: Mes dossiers urgents">
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Description (optionnel)</mat-label>
-        <textarea matInput [(ngModel)]="presetDescription" rows="3"></textarea>
-      </mat-form-field>
-      <mat-checkbox [(ngModel)]="sharePreset">
-        Partager avec mon équipe
-      </mat-checkbox>
+      <ds-input
+        class="full-width"
+        label="Nom du filtre"
+        placeholder="Ex: Mes dossiers urgents"
+        [(ngModel)]="presetName">
+      </ds-input>
+      <label for="preset-desc" class="ds-form-label">Description (optionnel)</label>
+      <textarea
+        id="preset-desc"
+        class="ds-dialog-textarea"
+        [(ngModel)]="presetDescription"
+        rows="3"
+        placeholder="Décrivez ce filtre…"></textarea>
+      <label class="ds-checkbox-row">
+        <input type="checkbox" [(ngModel)]="sharePreset" />
+        <span>Partager avec mon équipe</span>
+      </label>
       <div class="save-dialog-actions">
-        <button mat-button (click)="closeSaveDialog()">Annuler</button>
-        <button mat-raised-button color="primary" (click)="savePreset()">
-          <mat-icon>save</mat-icon>
+        <ds-button variant="ghost" size="md" (dsClick)="closeSaveDialog()">Annuler</ds-button>
+        <ds-button variant="marine" size="md" ariaLabel="Sauvegarder le filtre" (dsClick)="savePreset()">
+          <ds-icon name="check" [size]="20"></ds-icon>
           Sauvegarder
-        </button>
+        </ds-button>
       </div>
     </div>
   </div>

@@ -4,10 +4,12 @@ import { NotificationApiService, NotificationResponse } from '../services/notifi
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DsCardComponent } from '../design-system/primitives/ds-card/ds-card.component';
+import { DsBadgeComponent } from '../design-system/primitives/ds-badge/ds-badge.component';
+import { DsButtonComponent } from '../design-system/primitives/ds-button/ds-button.component';
+import { DsIconComponent } from '../design-system/icons/ds-icon.component';
 
 interface GroupedNotifications {
   date: string;
@@ -17,9 +19,19 @@ interface GroupedNotifications {
 
 @Component({
     selector: 'app-notification-center',
+    standalone: true,
     templateUrl: './notification-center.component.html',
     styleUrls: ['./notification-center.component.scss'],
-    imports: [MatIcon, MatIconButton, MatTooltip, MatButtonToggleGroup, MatButtonToggle, MatButton, DsSkeletonComponent]
+    imports: [
+      MatIcon,
+      MatButtonToggleGroup,
+      MatButtonToggle,
+      DsSkeletonComponent,
+      DsCardComponent,
+      DsBadgeComponent,
+      DsButtonComponent,
+      DsIconComponent,
+    ],
 })
 export class NotificationCenterComponent implements OnInit, OnDestroy {
   notifications: NotificationResponse[] = [];
@@ -207,13 +219,13 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   getNotificationIcon(type: string): string {
     switch (type) {
       case 'EMAIL':
-        return 'email';
+        return 'mail';
       case 'SMS':
-        return 'sms';
+        return 'phone';
       case 'WHATSAPP':
-        return 'chat';
+        return 'whatsapp';
       case 'IN_APP':
-        return 'notifications';
+        return 'tasks';
       default:
         return 'info';
     }

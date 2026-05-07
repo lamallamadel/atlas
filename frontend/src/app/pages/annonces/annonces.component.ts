@@ -4,7 +4,7 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
-import { ColumnConfig, RowAction, GenericTableComponent } from '../../components/generic-table.component';
+import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 import type { ActionButtonConfig } from '../../components/empty-state-actions.types';
 import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
@@ -15,8 +15,7 @@ import { ExportProgressDialogComponent } from '../../components/export-progress-
 import { ExportService, ColumnDef } from '../../services/export.service';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 import { FormsModule } from '@angular/forms';
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
 // Design System
 import { PageHeaderComponent }    from '../../design-system/patterns/page-header/page-header.component';
 import { FilterBarComponent, DsFilterOption } from '../../design-system/patterns/filter-bar/filter-bar.component';
@@ -24,6 +23,9 @@ import { DsButtonComponent }      from '../../design-system/primitives/ds-button
 import { DsBadgeComponent, DsBadgeStatus } from '../../design-system/primitives/ds-badge/ds-badge.component';
 import { DsEmptyStateComponent }  from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
 import { DsSkeletonComponent }    from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DsCardComponent } from '../../design-system/primitives/ds-card/ds-card.component';
+import { DsTableComponent, DsColumn, DsRowAction } from '../../design-system/primitives/ds-table/ds-table.component';
+import { DsIconComponent } from '../../design-system/icons/ds-icon.component';
 import { DS_CHART_FALLBACK_HEX } from '../../design-system/chart-ds-colors';
 
 interface AppliedFilter {
@@ -39,10 +41,11 @@ interface AppliedFilter {
     styleUrls: ['./annonces.component.scss'],
     animations: [listStaggerAnimation, itemAnimation],
     imports: [
-      FormsModule, DatePipe, DecimalPipe,
+      FormsModule, DecimalPipe,
       // Design System (nouveau template)
       PageHeaderComponent, FilterBarComponent,
       DsButtonComponent, DsBadgeComponent, DsEmptyStateComponent, DsSkeletonComponent,
+      DsCardComponent, DsTableComponent, DsIconComponent,
     ]
 })
 export class AnnoncesComponent implements OnInit {
@@ -88,6 +91,135 @@ export class AnnoncesComponent implements OnInit {
       PUBLISHED: 'active', ARCHIVED: 'archived',
     };
     return (map[status] as DsBadgeStatus) ?? 'neutral';
+  }
+
+  readonly dsTableRowActions: DsRowAction<Record<string, unknown>>[] = [
+    { icon: 'edit', label: 'Modifier', action: 'edit', ariaLabel: 'Modifier l\'annonce' }
+  ];
+
+  dsTableColumns: DsColumn<Record<string, unknown>>[] = [];
+
+  get annoncesAsTableRows(): Record<string, unknown>[] {
+    return this.annonces as unknown as Record<string, unknown>[];
+  }
+
+  trackByAnnonceId = (_index: number, row: Record<string, unknown>): number =>
+    this.annonceFromRow(row).id;
+
+  onDsTableRowClick(row: Record<string, unknown>): void {
+    this.goToAnnonce(this.annonceFromRow(row).id);
+  }
+
+  onDsTableRowAction(event: { action: string; row: Record<string, unknown> }): void {
+    const a = this.annonceFromRow(event.row);
+    if (event.action === 'edit') {
+      this.editAnnonce(a.id);
+    }
+  }
+
+  private buildDsTableColumns(): DsColumn<Record<string, unknown>>[] {
+    return [
+      {
+        key: 'photo',
+        header: 'Photo',
+        width: '72px',
+        sortable: false,
+        cell: (row) => this.renderThumbCell(this.annonceFromRow(row))
+      },
+      {
+        key: 'title',
+        header: 'Titre',
+        sortable: false,
+        cell: (row) =>
+          `<span class="ann-ds-title">${this.escapeHtml(this.annonceFromRow(row).title || '—')}</span>`
+      },
+      {
+        key: 'city',
+        header: 'Ville',
+        width: '130px',
+        sortable: false,
+        cell: (row) =>
+          `<span class="ann-ds-city">${this.escapeHtml(this.annonceFromRow(row).city || '—')}</span>`
+      },
+      {
+        key: 'price',
+        header: 'Prix',
+        width: '110px',
+        sortable: false,
+        cell: (row) => {
+          const a = this.annonceFromRow(row);
+          const price =
+            a.price === undefined || a.price === null
+              ? '—'
+              : this.priceFormatPipe.transform(a.price, a.currency || 'EUR');
+          return `<span class="ann-ds-price">${this.escapeHtml(price)}</span>`;
+        }
+      },
+      {
+        key: 'status',
+        header: 'Statut',
+        width: '120px',
+        sortable: false,
+        cell: (row) => {
+          const a = this.annonceFromRow(row);
+          const badgeClass = this.getStatusBadgeClass(a.status);
+          const label = this.escapeHtml(this.getStatusLabel(a.status));
+          return `<span class="${badgeClass}">${label}</span>`;
+        }
+      },
+      {
+        key: 'createdAt',
+        header: 'Créé le',
+        width: '110px',
+        sortable: false,
+        cell: (row) => {
+          const a = this.annonceFromRow(row);
+          const d = this.dateFormatPipe.transform(a.createdAt) || '—';
+          return `<span class="ann-ds-date">${this.escapeHtml(d)}</span>`;
+        }
+      }
+    ];
+  }
+
+  private renderThumbCell(a: AnnonceResponse): string {
+    const url = this.safePhotoUrl(a.photos?.[0]);
+    const alt = this.escapeHtml(a.title || '');
+    if (!url) {
+      return `<span class="ann-ds-thumb ann-ds-thumb--empty" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="9" r="2" stroke="currentColor" stroke-width="1.2"/></svg></span>`;
+    }
+    return `<span class="ann-ds-thumb"><img class="ann-ds-thumb-img" src="${this.escapeAttr(url)}" alt="${alt}" loading="lazy" decoding="async"/></span>`;
+  }
+
+  private safePhotoUrl(url: string | undefined): string | null {
+    if (!url || typeof url !== 'string') {
+      return null;
+    }
+    const t = url.trim();
+    if (/^https?:\/\//i.test(t) || t.startsWith('/') || t.startsWith('./')) {
+      return t;
+    }
+    return null;
+  }
+
+  private escapeAttr(value: string): string {
+    return (value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
+      .replace(/</g, '&lt;');
+  }
+
+  private escapeHtml(value: string): string {
+    return (value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  private annonceFromRow(row: Record<string, unknown>): AnnonceResponse {
+    return row as unknown as AnnonceResponse;
   }
 
   onStatusChange(value: string): void {
@@ -255,6 +387,7 @@ export class AnnoncesComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.dsTableColumns = this.buildDsTableColumns();
     this.loadCities();
     this.loadSavedPresets();
 

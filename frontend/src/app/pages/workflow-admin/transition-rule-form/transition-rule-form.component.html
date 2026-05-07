@@ -24,7 +24,7 @@
                   role="button"
                   [attr.aria-label]="'Sélectionner la transition ' + (transition.label || 'vers ' + transition.toStatus)">
                   <div class="transition-summary">
-                    <mat-icon>arrow_forward</mat-icon>
+                    <ds-icon name="chevron-right" [size]="16"></ds-icon>
                     <div class="transition-details">
                       <div class="transition-label">{{ transition.label || 'Sans titre' }}</div>
                       <div class="transition-target">Vers: {{ transition.toStatus }}</div>
@@ -32,16 +32,17 @@
                   </div>
                   <div class="transition-badges">
                     @if (transition.requiresApproval) {
-                      <mat-icon
+                      <ds-icon
+                        name="lock"
+                        [size]="16"
                         class="approval-badge"
-                        matTooltip="Nécessite une approbation">
-                        verified_user
-                      </mat-icon>
+                        [attr.title]="'Nécessite une approbation'">
+                      </ds-icon>
                     }
                     @if (transition.requiredFields && transition.requiredFields.length > 0) {
                       <span
                         class="fields-badge"
-                        [matTooltip]="'Champs requis: ' + transition.requiredFields.join(', ')">
+                        [attr.title]="'Champs requis: ' + transition.requiredFields.join(', ')">
                         {{ transition.requiredFields.length }} champs
                       </span>
                     }
@@ -62,7 +63,7 @@
     <div class="form-panel">
       @if (!selectedTransition) {
         <div class="no-selection">
-          <mat-icon>rule</mat-icon>
+          <ds-icon name="info" [size]="24"></ds-icon>
           <h3>Sélectionnez une transition</h3>
           <p>Choisissez une transition dans la liste pour configurer ses règles</p>
         </div>
@@ -87,7 +88,7 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Label de la transition</mat-label>
                 <input matInput formControlName="label" placeholder="Ex: Approuver le dossier">
-                <mat-icon matSuffix>label</mat-icon>
+                <ds-icon name="info" [size]="16" matSuffix></ds-icon>
               </mat-form-field>
             </div>
           </ds-card>
@@ -97,16 +98,18 @@
             </div>
             <div class="trf-section-body">
               <div class="chips-container">
-                <mat-chip-listbox>
+                <div class="chips-wrap">
                   @for (field of requiredFieldsArray.controls; track field; let i = $index) {
-                    <mat-chip
-                      [removable]="true"
-                      (removed)="removeRequiredField(i)">
+                    <span class="chip-item">
+                      <ds-badge status="info" [showDot]="false">
                       {{ field.value }}
-                      <mat-icon matChipRemove>cancel</mat-icon>
-                    </mat-chip>
+                      </ds-badge>
+                      <ds-button variant="icon" ariaLabel="Retirer le champ requis" (dsClick)="removeRequiredField(i)">
+                        <ds-icon name="close" [size]="16"></ds-icon>
+                      </ds-button>
+                    </span>
                   }
-                </mat-chip-listbox>
+                </div>
               </div>
               <div class="add-field-section">
                 <mat-form-field appearance="outline" class="field-select">
@@ -129,16 +132,18 @@
             </div>
             <div class="trf-section-body">
               <div class="chips-container">
-                <mat-chip-listbox>
+                <div class="chips-wrap">
                   @for (role of allowedRolesArray.controls; track role; let i = $index) {
-                    <mat-chip
-                      [removable]="true"
-                      (removed)="removeAllowedRole(i)">
+                    <span class="chip-item">
+                      <ds-badge status="neutral" [showDot]="false">
                       {{ role.value }}
-                      <mat-icon matChipRemove>cancel</mat-icon>
-                    </mat-chip>
+                      </ds-badge>
+                      <ds-button variant="icon" ariaLabel="Retirer le rôle autorisé" (dsClick)="removeAllowedRole(i)">
+                        <ds-icon name="close" [size]="16"></ds-icon>
+                      </ds-button>
+                    </span>
                   }
-                </mat-chip-listbox>
+                </div>
               </div>
               <div class="add-field-section">
                 <mat-form-field appearance="outline" class="field-select">
@@ -173,26 +178,24 @@
                   formControlName="conditions"
                   rows="3"
                 placeholder="Ex: score >= 80 AND leadSource === 'REFERRAL'"></textarea>
-                <mat-icon matSuffix>code</mat-icon>
+                <ds-icon name="info" [size]="16" matSuffix></ds-icon>
               </mat-form-field>
             </div>
           </ds-card>
           <div class="form-actions">
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="onSaveTransition()"
-              [disabled]="!transitionForm.valid">
-              <mat-icon>save</mat-icon>
+            <ds-button
+              variant="marine"
+              [disabled]="!transitionForm.valid"
+              (dsClick)="onSaveTransition()">
+              <ds-icon name="check" [size]="16"></ds-icon>
               Enregistrer
-            </button>
-            <button
-              mat-raised-button
-              color="warn"
-              (click)="onDeleteTransition()">
-              <mat-icon>delete</mat-icon>
+            </ds-button>
+            <ds-button
+              variant="danger"
+              (dsClick)="onDeleteTransition()">
+              <ds-icon name="trash" [size]="16"></ds-icon>
               Supprimer
-            </button>
+            </ds-button>
           </div>
         </form>
       }

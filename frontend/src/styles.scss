@@ -20,7 +20,6 @@
 /* ─── Atlasia Design System ─── */
 
 @include meta.load-css('app/design-system/tokens/ds-semantic');
-@include meta.load-css('styles/_atlasia-shared.scss');
 
 @import './styles/animations.css';
 @import './styles/pages.css';
@@ -53,15 +52,6 @@
 */
 html,
 body {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* Material shell containers can still overflow; guard them too. */
-.mat-drawer-container,
-.mat-sidenav-container,
-.mat-drawer-content,
-.mat-sidenav-content {
   max-width: 100%;
   overflow-x: hidden;
 }
@@ -191,16 +181,6 @@ a:hover {
   text-rendering: optimizeLegibility;
   font-feature-settings: 'liga';
   vertical-align: middle;
-}
-
-/* Global kebab menu button styles */
-.kebab-menu-button {
-  transition: all 150ms ease;
-}
-
-.kebab-menu-button:hover {
-  background-color: rgba(0, 0, 0, 0.04);
-  transform: scale(1.1);
 }
 
 /* Lazy loading image styles */
@@ -431,11 +411,7 @@ textarea:focus-visible,
 .btn-icon-action:focus-visible,
 .btn-edit:focus-visible,
 .btn-delete:focus-visible,
-.kebab-menu-button:focus-visible {
-  outline: 2px solid var(--color-primary-500, #2c5aa0) !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 4px rgba(44, 90, 160, 0.2) !important;
-}
+/* NOTE: `.kebab-menu-button` supprimé (non utilisé). */
 
 .mat-mdc-menu-item:focus-visible,
 .mat-mdc-list-item:focus-visible,
@@ -470,7 +446,6 @@ a,
 .btn-update-lead,
 .btn-add-lead,
 .btn-change-status-secondary,
-.kebab-menu-button,
 .delete-preset-btn {
   min-width: 40px !important;
   min-height: 40px !important;
@@ -483,13 +458,7 @@ a,
 /* Icon buttons specific sizing */
 .mat-mdc-icon-button,
 .btn-icon-action,
-.kebab-menu-button {
-  width: 40px !important;
-  height: 40px !important;
-  min-width: 40px !important;
-  min-height: 40px !important;
-  padding: 8px !important;
-}
+/* NOTE: `.kebab-menu-button` supprimé (non utilisé). */
 
 /* SVG icons within buttons should be visible */
 .btn-icon-action svg,
@@ -499,26 +468,6 @@ a,
   height: 20px;
   min-width: 20px;
   min-height: 20px;
-}
-
-/* Skip to content link */
-.skip-to-content {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: #1976d2;
-  color: white;
-  padding: 8px 16px;
-  text-decoration: none;
-  z-index: 10000;
-  font-weight: 500;
-  border-radius: 0 0 4px 0;
-}
-
-.skip-to-content:focus {
-  top: 0;
-  outline: 2px solid #fff;
-  outline-offset: -2px;
 }
 
 /* Screen reader only text */
@@ -588,15 +537,6 @@ textarea:disabled {
   background-color: var(--color-neutral-100);
 }
 
-.dark-theme .skip-to-content {
-  background: var(--color-primary-500);
-  color: var(--color-neutral-0);
-}
-
-.dark-theme .skip-to-content:focus {
-  outline: 2px solid var(--color-primary-400);
-}
-
 /* Dark theme focus indicators - 2px solid primary */
 .dark-theme button:focus-visible,
 .dark-theme a:focus-visible,
@@ -618,11 +558,7 @@ textarea:disabled {
 .dark-theme .btn-icon-action:focus-visible,
 .dark-theme .btn-edit:focus-visible,
 .dark-theme .btn-delete:focus-visible,
-.dark-theme .kebab-menu-button:focus-visible {
-  outline: 2px solid var(--color-primary-400) !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 4px rgba(66, 136, 206, 0.2) !important;
-}
+/* NOTE: `.kebab-menu-button` supprimé (non utilisé). */
 
 .dark-theme .mat-mdc-menu-item:focus-visible,
 .dark-theme .mat-mdc-list-item:focus-visible,
@@ -912,46 +848,6 @@ kbd {
   color: var(--color-neutral-0, #ffffff);
 }
 
-/* Tour progress badge in user menu */
-.tour-progress-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.tour-progress-badge mat-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-}
-
-.tour-status-icon {
-  color: #4caf50;
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-  margin-left: auto;
-}
-
-.submenu-arrow {
-  margin-left: auto;
-  opacity: 0.6;
-}
-
-.tour-menu-header {
-  padding: 12px 16px !important;
-}
-
-.tours-submenu {
-  min-width: 280px;
-}
-
 /* =====================================================
    ATLAS 2026 — GLASSMORPHISM 2.0
    Frosted-glass card system for depth without borders.
@@ -1139,9 +1035,6 @@ kbd {
   transform: scale(0.92);
   filter: brightness(0.95);
 }
-/* Portail public + polish vitrine (hors patchs Pro — Phase 6) */
-@include meta.load-css('styles/_atlasia-public-portal.scss');
-
 /* FullCalendar — thème DS partagé */
 @include meta.load-css('styles/_fullcalendar-ds.scss');
 

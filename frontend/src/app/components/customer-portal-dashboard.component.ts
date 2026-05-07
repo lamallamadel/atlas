@@ -2,9 +2,26 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CustomerPortalDossier } from '../models/customer-portal.models';
 import { CustomerPortalService } from '../services/customer-portal.service';
+import { DossierTimelineViewComponent } from './dossier-timeline-view.component';
+import { ClientDocumentLibraryComponent } from './client-document-library.component';
+import { SecureMessageThreadComponent } from './secure-message-thread.component';
+import { AppointmentRequestComponent } from './appointment-request.component';
+import { PropertyRecommendationComponent } from './property-recommendation.component';
+import { ClientSatisfactionSurveyComponent } from './client-satisfaction-survey.component';
+import { ConsentManagementComponent } from './consent-management.component';
 
 @Component({
   selector: 'app-customer-portal-dashboard',
+  standalone: true,
+  imports: [
+    DossierTimelineViewComponent,
+    ClientDocumentLibraryComponent,
+    SecureMessageThreadComponent,
+    AppointmentRequestComponent,
+    PropertyRecommendationComponent,
+    ClientSatisfactionSurveyComponent,
+    ConsentManagementComponent,
+  ],
   template: `
     <div class="dashboard-container" [class.branded]="brandingApplied">
       <header class="dashboard-header">

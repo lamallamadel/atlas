@@ -265,16 +265,6 @@
   animation: fadeIn 150ms ease-out;
 }
 
-/* Material Sidenav animations */
-.mat-drawer-backdrop {
-  animation: fadeIn 250ms ease-out;
-}
-
-/* Material Toolbar enhancements */
-.mat-toolbar {
-  transition: box-shadow 200ms ease !important;
-}
-
 /* Material Autocomplete panel */
 .mat-mdc-autocomplete-panel {
   animation: fadeIn 200ms ease-out;
@@ -391,7 +381,6 @@
   .mat-mdc-snack-bar-container,
   .mat-mdc-dialog-container,
   .mat-mdc-tooltip,
-  .mat-drawer-backdrop,
   .mat-mdc-autocomplete-panel,
   .mat-bottom-sheet-container,
   .mat-datepicker-popup,
@@ -450,4 +439,19 @@
 
 .dark-theme .mat-ripple-element {
   background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* CDK — menus graphiques rapports (backdrop transparent, ferme au clic) */
+.cdk-overlay-backdrop.rpt-chart-menu-backdrop {
+  background: transparent;
+}
+
+/* CDK — menu export observabilité */
+.cdk-overlay-backdrop.obs-export-menu-backdrop {
+  background: transparent;
+}
+
+/* CDK — menus contextuels (timeline, commentaires, templates, graphique, statut API, langue) */
+.cdk-overlay-backdrop.ds-menu-backdrop {
+  background: transparent;
 }

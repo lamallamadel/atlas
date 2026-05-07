@@ -18,22 +18,20 @@
       </div>
     }
 
-    <div class="messages-list">
+    <div class="messages-list ds-thread ds-thread--whatsapp">
       <ng-container *cdkVirtualFor="let message of messages(); trackBy: trackByMessageId; let i = index">
 
-        <!-- Date divider -->
         @if (showDateDivider(i)) {
-          <div class="date-divider">
+          <div class="ds-date-divider">
             <span>{{ getDateDividerText(message.timestamp) }}</span>
           </div>
         }
 
-        <!-- Message bubble -->
         <div
-          class="message-wrapper"
-          [class.outbound]="message.direction === MessageDirection.OUTBOUND"
-          [class.inbound]="message.direction === MessageDirection.INBOUND"
-          [class.failed]="message.deliveryStatus === MessageDeliveryStatus.FAILED"
+          class="ds-thread__msg"
+          [class.ds-thread__msg--outbound]="message.direction === MessageDirection.OUTBOUND"
+          [class.ds-thread__msg--inbound]="message.direction === MessageDirection.INBOUND"
+          [class.ds-thread__msg--failed]="message.deliveryStatus === MessageDeliveryStatus.FAILED"
           [style.transform]="getSwipeTransform(message.id)"
           (touchstart)="onTouchStart($event, message)"
           (touchmove)="onTouchMove($event, message)"
@@ -42,46 +40,45 @@
           (mousemove)="onMouseMove($event, message)"
           (mouseup)="onMouseUp($event, message)">
 
-          <!-- Swipe actions (shown on left when swiping) -->
           <div
             class="swipe-actions"
             [class.visible]="swipedMessageId === message.id && Math.abs(swipeOffset) > 50">
             @if (message.deliveryStatus === MessageDeliveryStatus.FAILED) {
               <button
                 mat-icon-button
+                type="button"
                 class="action-retry"
                 (click)="retryMessage(message, $event)"
-                matTooltip="Réessayer">
+                [attr.title]="'Réessayer'">
                 <mat-icon>refresh</mat-icon>
               </button>
             }
             <button
               mat-icon-button
+              type="button"
               class="action-copy"
               (click)="copyMessage(message, $event)"
-              matTooltip="Copier">
+              [attr.title]="'Copier'">
               <mat-icon>content_copy</mat-icon>
             </button>
             <button
               mat-icon-button
+              type="button"
               class="action-delete"
               (click)="deleteMessage(message, $event)"
-              matTooltip="Supprimer">
+              [attr.title]="'Supprimer'">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
 
-          <div class="message-bubble">
-            <div class="message-content">
-              {{ message.content }}
-            </div>
-            <div class="message-meta">
-              <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
+          <div class="ds-thread__bubble">
+            <p class="ds-thread__text">{{ message.content }}</p>
+            <div class="ds-thread__meta">
+              <time class="ds-thread__time">{{ formatTimestamp(message.timestamp) }}</time>
               @if (message.direction === MessageDirection.OUTBOUND) {
                 <span
-                  class="delivery-status"
-                  [class]="getDeliveryStatusClass(message.deliveryStatus)"
-                  >
+                  class="ds-thread__delivery"
+                  [ngClass]="getDeliveryStatusClass(message.deliveryStatus)">
                   {{ getDeliveryStatusIcon(message.deliveryStatus) }}
                 </span>
               }

@@ -1,0 +1,121 @@
+@use '../design-system/patterns/messaging-thread/messaging-thread-bubbles' as *;
+
+.whatsapp-thread-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--ds-bg);
+  position: relative;
+}
+
+.offline-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--ds-warning);
+  color: var(--ds-text-inverse);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.messages-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &.loading {
+    opacity: 0.85;
+  }
+}
+
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.messages-list {
+  min-height: 100%;
+  padding: 16px 12px;
+}
+
+.messages-list.ds-thread--whatsapp {
+  padding: 16px 12px;
+  gap: 0;
+}
+
+.ds-thread__msg {
+  position: relative;
+  margin-bottom: 8px;
+  transition: transform 0.2s ease-out;
+  touch-action: pan-y;
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.swipe-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 8px;
+
+  &.visible {
+    opacity: 1;
+  }
+
+  button {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    line-height: 32px;
+  }
+
+  .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .action-retry {
+    color: var(--ds-marine);
+  }
+
+  .action-copy {
+    color: var(--ds-success);
+  }
+
+  .action-delete {
+    color: var(--ds-error);
+  }
+}
+
+@media (max-width: 768px) {
+  .messages-list {
+    padding: 12px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ds-thread__text {
+    font-size: 13px;
+  }
+
+  .ds-thread__meta {
+    font-size: 10px;
+  }
+}

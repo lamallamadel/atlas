@@ -229,6 +229,7 @@
           "options": {
             "karmaConfig": "karma.conf.js",
             "polyfills": [
+              "src/karma-vi-shim.js",
               "src/global-polyfill.js",
               "zone.js",
               "zone.js/testing",

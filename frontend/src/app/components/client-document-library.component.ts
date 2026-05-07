@@ -1,9 +1,12 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CustomerPortalDocument } from '../models/customer-portal.models';
 import { CustomerPortalService } from '../services/customer-portal.service';
 
 @Component({
   selector: 'app-client-document-library',
+  standalone: true,
+  imports: [CommonModule],
   template: `
     <div class="document-library">
       <h2>Vos documents</h2>

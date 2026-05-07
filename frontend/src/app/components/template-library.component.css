@@ -113,6 +113,51 @@ mat-chip {
   padding: 4px 12px;
 }
 
+.app-tpl-table-menu-origin {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.app-tpl-table-menu-dropdown {
+  min-width: 240px;
+  background: var(--ds-surface-elevated, #fff);
+  color: var(--ds-text-primary, rgba(0, 0, 0, 0.87));
+  border-radius: var(--ds-radius-lg, 8px);
+  box-shadow: var(--ds-shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.15));
+  border: 1px solid var(--ds-border-subtle, rgba(0, 0, 0, 0.08));
+  overflow: hidden;
+}
+
+.app-tpl-table-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.app-tpl-table-menu-item:hover {
+  background: var(--ds-primary-subtle, rgba(0, 0, 0, 0.04));
+}
+
+.app-tpl-table-menu-item:focus-visible {
+  outline: 2px solid var(--ds-marine, #0d2c4a);
+  outline-offset: -2px;
+}
+
+.app-tpl-table-menu-item mat-icon {
+  flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
   .header {
     flex-direction: column;

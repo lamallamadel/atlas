@@ -6,7 +6,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import {  } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { DocumentListComponent } from './document-list.component';
@@ -25,7 +24,7 @@ describe('DocumentListComponent', () => {
         
         MatIconModule,
         MatButtonModule,
-        MatTooltipModule, DocumentListComponent],
+        DocumentListComponent],
     providers: [
         { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },DocumentApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });

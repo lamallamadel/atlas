@@ -1,9 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChartComponent } from './chart.component';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('ChartComponent', () => {
@@ -12,14 +8,7 @@ describe('ChartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [
-        ChartComponent,
-        MatIconModule,
-        MatButtonModule,
-        MatMenuModule,
-        MatTooltipModule,
-        NoopAnimationsModule
-    ]
+    imports: [ChartComponent, NoopAnimationsModule]
 })
     .compileComponents();
 

@@ -58,6 +58,87 @@
   gap: 8px;
 }
 
+.chart-export-menu-origin {
+  display: inline-flex;
+  align-items: center;
+}
+
+.chart-export-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ds-text);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.chart-export-trigger:hover {
+  background: color-mix(in oklab, var(--ds-text) 8%, transparent);
+}
+
+.chart-export-trigger:focus-visible {
+  outline: 2px solid var(--ds-marine);
+  outline-offset: 2px;
+}
+
+.dark-mode .chart-export-trigger {
+  color: var(--ds-surface);
+}
+
+.dark-mode .chart-export-trigger:hover {
+  background: color-mix(in oklab, var(--ds-surface) 12%, transparent);
+}
+
+.chart-export-dropdown {
+  min-width: 220px;
+  background: var(--ds-surface-elevated);
+  color: var(--ds-text-primary);
+  border-radius: var(--ds-radius-lg, 8px);
+  box-shadow: var(--ds-shadow-lg);
+  border: 1px solid var(--ds-border-subtle);
+  overflow: hidden;
+}
+
+.chart-export-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.chart-export-item:hover {
+  background: var(--ds-primary-subtle);
+}
+
+.chart-export-item:focus-visible {
+  outline: 2px solid var(--ds-marine);
+  outline-offset: -2px;
+}
+
+.chart-export-item .ds-icon {
+  flex-shrink: 0;
+  color: var(--ds-text-muted);
+}
+
+.chart-export-item:hover .ds-icon {
+  color: var(--ds-primary);
+}
+
 .chart-container {
   position: relative;
   width: 100%;

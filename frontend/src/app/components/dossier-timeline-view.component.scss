@@ -1,0 +1,24 @@
+.dossier-timeline {
+  padding: var(--ds-space-6);
+  background: var(--ds-surface);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-sm);
+  border: 1px solid var(--ds-border);
+}
+
+.dossier-timeline__title {
+  margin: 0 0 var(--ds-space-6) 0;
+  font-size: var(--ds-font-size-lg, 1.25rem);
+  font-weight: 600;
+  color: var(--ds-text);
+}
+
+.dossier-timeline__empty {
+  text-align: center;
+  padding: var(--ds-space-12);
+  color: var(--ds-text-faint);
+}
+
+.dossier-timeline__ds {
+  display: block;
+}

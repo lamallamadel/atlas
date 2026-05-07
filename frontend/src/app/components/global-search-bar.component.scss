@@ -20,42 +20,22 @@
   position: relative;
   display: flex;
   align-items: center;
-}
-
-.search-input {
   width: 100%;
-  padding: 10px 40px 10px 40px;
-  border: 1px solid var(--ds-divider);
-  border-radius: var(--ds-radius-md);
-  font-size: 14px;
-  transition: all 0.2s ease;
-  background: var(--ds-surface);
-  color: var(--ds-text);
 
-  &:focus {
-    outline: none;
-    border-color: var(--ds-success);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ds-success) 14%, transparent);
+  ds-input {
+    flex: 1;
+    min-width: 0;
   }
 
-  &::placeholder {
-    color: var(--ds-text-faint);
+  &--has-clear ::ng-deep .ds-field__input {
+    padding-right: 40px;
   }
-}
-
-.search-icon {
-  position: absolute;
-  left: 12px;
-  color: var(--ds-text-muted);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .clear-button {
   position: absolute;
   right: 10px;
+  z-index: 2;
   background: none;
   border: none;
   cursor: pointer;
@@ -126,23 +106,10 @@
   text-align: center;
   color: var(--ds-text-muted);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--ds-surface-offset);
-    border-top: 3px solid var(--ds-success);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 
 .error {

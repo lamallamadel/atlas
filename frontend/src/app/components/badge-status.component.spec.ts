@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { BadgeStatusComponent } from './badge-status.component';
 
 describe('BadgeStatusComponent', () => {
@@ -9,7 +8,7 @@ describe('BadgeStatusComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MatIconModule, MatTooltipModule, BadgeStatusComponent],
+      imports: [MatIconModule, BadgeStatusComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BadgeStatusComponent);

@@ -1,7 +1,7 @@
 <div class="settings-page">
   <div class="settings-header">
     <h1 class="settings-title">
-      <mat-icon>settings</mat-icon>
+      <ds-icon name="settings" [size]="24"></ds-icon>
       Paramètres
     </h1>
     <p class="settings-subtitle">Personnalisez votre expérience utilisateur</p>
@@ -91,7 +91,7 @@
                   <div class="notification-channels">
                     <div class="notification-item">
                       <div class="notification-info">
-                        <mat-icon>email</mat-icon>
+                        <ds-icon name="mail" [size]="20"></ds-icon>
                         <div>
                           <strong>Email</strong>
                           <p>Recevez des notifications par email</p>
@@ -102,7 +102,7 @@
                     <mat-divider></mat-divider>
                     <div class="notification-item">
                       <div class="notification-info">
-                        <mat-icon>notifications_active</mat-icon>
+                        <ds-icon name="bell" [size]="20"></ds-icon>
                         <div>
                           <strong>Notifications push</strong>
                           <p>Notifications dans le navigateur</p>
@@ -113,7 +113,7 @@
                     <mat-divider></mat-divider>
                     <div class="notification-item">
                       <div class="notification-info">
-                        <mat-icon>sms</mat-icon>
+                        <ds-icon name="sms" [size]="20"></ds-icon>
                         <div>
                           <strong>SMS</strong>
                           <p>Recevez des alertes par SMS</p>
@@ -124,7 +124,7 @@
                     <mat-divider></mat-divider>
                     <div class="notification-item">
                       <div class="notification-info">
-                        <mat-icon>campaign</mat-icon>
+                        <ds-icon name="megaphone" [size]="20"></ds-icon>
                         <div>
                           <strong>Dans l'application</strong>
                           <p>Notifications dans l'interface</p>
@@ -135,7 +135,7 @@
                     <mat-divider></mat-divider>
                     <div class="notification-item">
                       <div class="notification-info">
-                        <mat-icon>volume_up</mat-icon>
+                        <ds-icon name="info" [size]="20"></ds-icon>
                         <div>
                           <strong>Son</strong>
                           <p>Sons de notification</p>
@@ -146,7 +146,7 @@
                     <mat-divider></mat-divider>
                     <div class="notification-item">
                       <div class="notification-info">
-                        <mat-icon>desktop_windows</mat-icon>
+                        <ds-icon name="monitor" [size]="20"></ds-icon>
                         <div>
                           <strong>Bureau</strong>
                           <p>Notifications système</p>
@@ -215,7 +215,7 @@
                   <div class="preview-card" [class.dark-preview]="previewTheme === 'dark'">
                     <h3>Aperçu</h3>
                     <p>Voici à quoi ressemblera l'application</p>
-                    <button mat-raised-button color="primary">Bouton d'exemple</button>
+                    <ds-button variant="marine" size="sm">Bouton d'exemple</ds-button>
                   </div>
                 </div>
               </ds-card>
@@ -339,7 +339,7 @@
                     </div>
                   </div>
                   <mat-hint class="shortcuts-hint">
-                    <mat-icon>info</mat-icon>
+                    <ds-icon name="info" [size]="20"></ds-icon>
                     Appuyez sur <kbd>?</kbd> n'importe où pour voir tous les raccourcis disponibles
                   </mat-hint>
                 </div>
@@ -357,7 +357,7 @@
                 <div class="settings-card-body">
                   <div class="integration-item">
                     <div class="integration-header">
-                      <mat-icon>calendar_today</mat-icon>
+                      <ds-icon name="calendar" [size]="24"></ds-icon>
                       <div>
                         <strong>Synchronisation calendrier</strong>
                         <p>Synchronisez vos rendez-vous avec votre calendrier</p>
@@ -378,7 +378,7 @@
                   <mat-divider></mat-divider>
                   <div class="integration-item">
                     <div class="integration-header">
-                      <mat-icon>email</mat-icon>
+                      <ds-icon name="mail" [size]="24"></ds-icon>
                       <div>
                         <strong>Intégration email</strong>
                         <p>Synchronisez vos emails professionnels</p>
@@ -398,7 +398,7 @@
                   <mat-divider></mat-divider>
                   <div class="integration-item">
                     <div class="integration-header">
-                      <mat-icon>chat</mat-icon>
+                      <ds-icon name="whatsapp" [size]="24"></ds-icon>
                       <div>
                         <strong>WhatsApp Business</strong>
                         <p>Messagerie WhatsApp intégrée</p>
@@ -409,7 +409,7 @@
                   <mat-divider></mat-divider>
                   <div class="integration-item">
                     <div class="integration-header">
-                      <mat-icon>phone</mat-icon>
+                      <ds-icon name="phone" [size]="24"></ds-icon>
                       <div>
                         <strong>VoIP</strong>
                         <p>Appels téléphoniques intégrés</p>
@@ -473,32 +473,34 @@
 
   <!-- Action Buttons -->
   <div class="settings-actions">
-    <button
-      mat-button
-      (click)="onRestoreDefaults()"
+    <ds-button
+      variant="ghost"
+      size="md"
+      (dsClick)="onRestoreDefaults()"
       [disabled]="loading || saving">
-      <mat-icon>restore</mat-icon>
+      <ds-icon name="refresh" [size]="16"></ds-icon>
       Restaurer par défaut
-    </button>
+    </ds-button>
 
     <div class="actions-right">
-      <button
-        mat-stroked-button
-        (click)="onCancel()"
+      <ds-button
+        variant="ghost"
+        size="md"
+        (dsClick)="onCancel()"
         [disabled]="!hasUnsavedChanges() || loading || saving">
         Annuler
-      </button>
+      </ds-button>
 
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="onSave()"
+      <ds-button
+        variant="marine"
+        size="md"
+        (dsClick)="onSave()"
         [disabled]="!hasUnsavedChanges() || !areFormsValid() || loading || saving">
         @if (saving) {
           <ds-skeleton variant="circle" width="20px" height="20px" class="button-spinner"></ds-skeleton>
         }
         @if (!saving) {
-          <mat-icon>save</mat-icon>
+          <ds-icon name="upload" [size]="16"></ds-icon>
         }
         @if (!saving) {
           <span>Enregistrer</span>
@@ -506,7 +508,7 @@
         @if (saving) {
           <span>Enregistrement...</span>
         }
-      </button>
+      </ds-button>
     </div>
   </div>
 </div>

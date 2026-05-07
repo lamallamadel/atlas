@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy, AfterViewChecked, ChangeDetectorRef, input, output, viewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MessageResponse, MessageDirection, MessageDeliveryStatus } from '../services/message-api.service';
 import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
 import { Subject } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 export interface MessageAction {
@@ -14,9 +14,18 @@ export interface MessageAction {
 
 @Component({
     selector: 'app-whatsapp-thread',
+    standalone: true,
     templateUrl: './whatsapp-thread.component.html',
-    styleUrls: ['./whatsapp-thread.component.css'],
-    imports: [MatIcon, DsSkeletonComponent, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, MatIconButton, MatTooltip]
+    styleUrls: ['./whatsapp-thread.component.scss'],
+    imports: [
+      CommonModule,
+      MatIcon,
+      DsSkeletonComponent,
+      CdkVirtualScrollViewport,
+      CdkFixedSizeVirtualScroll,
+      CdkVirtualForOf,
+      MatIconButton,
+    ],
 })
 export class WhatsappThreadComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly messages = input<MessageResponse[]>([]);

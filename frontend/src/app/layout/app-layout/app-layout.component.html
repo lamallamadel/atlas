@@ -8,66 +8,64 @@
   <mat-sidenav #drawer class="sidenav" fixedInViewport [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
     [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false"
     [attr.aria-label]="'Menu de navigation principal'">
-    <mat-toolbar class="sidenav-header" role="banner">
+    <header class="sidenav-header" role="banner">
       <span class="brand-text">Atlasia Pro</span>
-    </mat-toolbar>
-    <nav aria-label="Navigation principale">
-      <mat-nav-list class="nav-list">
-        <a mat-list-item routerLink="/dashboard" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-          aria-label="Accéder au tableau de bord" matTooltip="Raccourci: g puis h" matTooltipPosition="right">
-          <mat-icon matListItemIcon aria-hidden="true">dashboard</mat-icon>
-          <span matListItemTitle>Tableau de bord</span>
-        </a>
-        <a mat-list-item routerLink="/reports" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-          aria-label="Accéder aux rapports et KPIs">
-          <mat-icon matListItemIcon aria-hidden="true">insights</mat-icon>
-          <span matListItemTitle>Rapports et KPIs</span>
-        </a>
-        <a mat-list-item routerLink="/observability" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-          aria-label="Accéder au tableau de bord observabilité">
-          <mat-icon matListItemIcon aria-hidden="true">analytics</mat-icon>
-          <span matListItemTitle>Observabilité</span>
-        </a>
-        <a mat-list-item routerLink="/tasks" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-          aria-label="Accéder aux tâches" matTooltip="Raccourci: g puis t" matTooltipPosition="right">
-          <mat-icon matListItemIcon aria-hidden="true">task</mat-icon>
-          <span matListItemTitle>Tâches</span>
-        </a>
-        <a mat-list-item routerLink="/calendar" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-          aria-label="Accéder au calendrier" matTooltip="Raccourci: g puis c" matTooltipPosition="right">
-          <mat-icon matListItemIcon aria-hidden="true">calendar_today</mat-icon>
-          <span matListItemTitle>Calendrier</span>
-        </a>
-        <a mat-list-item routerLink="/annonces" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-          aria-label="Accéder aux annonces" matTooltip="Raccourci: g puis a" matTooltipPosition="right">
-          <mat-icon matListItemIcon aria-hidden="true">campaign</mat-icon>
-          <span matListItemTitle>Annonces</span>
-        </a>
-        <a mat-list-item routerLink="/dossiers" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-          aria-label="Accéder aux dossiers" matTooltip="Raccourci: g puis d" matTooltipPosition="right">
-          <mat-icon matListItemIcon aria-hidden="true">folder</mat-icon>
-          <span matListItemTitle>Dossiers @if (dossiersPendingCount$ | async; as count) {
-            <span class="badge-count">({{
-            count }})</span>
-          }</span>
-        </a>
-        <mat-divider></mat-divider>
-        <a mat-list-item routerLink="/workflow-admin" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-          aria-label="Configuration des workflows">
-          <mat-icon matListItemIcon aria-hidden="true">settings</mat-icon>
-          <span matListItemTitle>Workflows</span>
-        </a>
-      </mat-nav-list>
+    </header>
+    <nav class="nav-list" aria-label="Navigation principale">
+      <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+        aria-label="Accéder au tableau de bord" title="Raccourci : g puis h">
+        <ds-icon class="nav-link-icon" name="chart" [size]="20" aria-hidden="true"></ds-icon>
+        <span class="nav-link-title">Tableau de bord</span>
+      </a>
+      <a class="nav-link" routerLink="/reports" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+        aria-label="Accéder aux rapports et KPIs">
+        <ds-icon class="nav-link-icon" name="bars-asc" [size]="20" aria-hidden="true"></ds-icon>
+        <span class="nav-link-title">Rapports et KPIs</span>
+      </a>
+      <a class="nav-link" routerLink="/observability" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+        aria-label="Accéder au tableau de bord observabilité">
+        <ds-icon class="nav-link-icon" name="gauge" [size]="20" aria-hidden="true"></ds-icon>
+        <span class="nav-link-title">Observabilité</span>
+      </a>
+      <a class="nav-link" routerLink="/tasks" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+        aria-label="Accéder aux tâches" title="Raccourci : g puis t">
+        <ds-icon class="nav-link-icon" name="tasks" [size]="20" aria-hidden="true"></ds-icon>
+        <span class="nav-link-title">Tâches</span>
+      </a>
+      <a class="nav-link" routerLink="/calendar" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+        aria-label="Accéder au calendrier" title="Raccourci : g puis c">
+        <ds-icon class="nav-link-icon" name="calendar" [size]="20" aria-hidden="true"></ds-icon>
+        <span class="nav-link-title">Calendrier</span>
+      </a>
+      <a class="nav-link" routerLink="/annonces" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+        aria-label="Accéder aux annonces" title="Raccourci : g puis a">
+        <ds-icon class="nav-link-icon" name="megaphone" [size]="20" aria-hidden="true"></ds-icon>
+        <span class="nav-link-title">Annonces</span>
+      </a>
+      <a class="nav-link" routerLink="/dossiers" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+        aria-label="Accéder aux dossiers" title="Raccourci : g puis d">
+        <ds-icon class="nav-link-icon" name="folder" [size]="20" aria-hidden="true"></ds-icon>
+        <span class="nav-link-title">Dossiers @if (dossiersPendingCount$ | async; as count) {
+          <span class="badge-count">({{
+          count }})</span>
+        }</span>
+      </a>
+      <div class="layout-divider" role="separator" aria-hidden="true"></div>
+      <a class="nav-link" routerLink="/workflow-admin" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+        aria-label="Configuration des workflows">
+        <ds-icon class="nav-link-icon" name="settings" [size]="20" aria-hidden="true"></ds-icon>
+        <span class="nav-link-title">Workflows</span>
+      </a>
     </nav>
   </mat-sidenav>
 
   <mat-sidenav-content class="sidenav-content">
-    <mat-toolbar color="primary" class="top-toolbar" role="banner">
+    <header class="top-toolbar" role="banner">
       @if (isHandset$ | async) {
-        <button type="button" mat-icon-button (click)="drawer.toggle()" class="menu-button"
+        <ds-button variant="icon" (dsClick)="drawer.toggle()" class="menu-button" ariaLabel="Ouvrir le menu de navigation"
           aria-label="Ouvrir le menu de navigation" [attr.aria-expanded]="drawer.opened">
-          <mat-icon aria-hidden="true">menu</mat-icon>
-        </button>
+          <ds-icon name="bars-asc" [size]="20" aria-hidden="true"></ds-icon>
+        </ds-button>
       }
 
       <span class="toolbar-spacer"></span>
@@ -78,174 +76,249 @@
 
       <span class="toolbar-spacer"></span>
 
-      <button mat-icon-button (click)="toggleTheme()" class="theme-toggle-button"
+      <ds-button variant="icon" (dsClick)="toggleTheme()" class="theme-toggle-button"
         [attr.aria-label]="(isDarkTheme$ | async) ? 'Basculer en mode clair' : 'Basculer en mode sombre'"
-        [matTooltip]="(isDarkTheme$ | async) ? 'Mode clair' : 'Mode sombre'" matTooltipPosition="below">
-        <mat-icon aria-hidden="true">
-          {{ (isDarkTheme$ | async) ? 'light_mode' : 'dark_mode' }}
-        </mat-icon>
-      </button>
+        [attr.title]="(isDarkTheme$ | async) ? 'Passer en mode clair' : 'Passer en mode sombre'">
+        <ds-icon [name]="(isDarkTheme$ | async) ? 'monitor' : 'settings'" [size]="20" aria-hidden="true"></ds-icon>
+      </ds-button>
 
-      <button mat-icon-button (click)="showKeyboardShortcuts()" class="keyboard-shortcuts-button"
-        aria-label="Afficher les raccourcis clavier" matTooltip="Raccourcis clavier (?)" matTooltipPosition="below">
-        <mat-icon aria-hidden="true">keyboard</mat-icon>
-      </button>
+      <ds-button variant="icon" (dsClick)="showKeyboardShortcuts()" class="keyboard-shortcuts-button"
+        aria-label="Afficher les raccourcis clavier" title="Raccourcis clavier (?)">
+        <ds-icon name="info" [size]="20" aria-hidden="true"></ds-icon>
+      </ds-button>
 
-      <button mat-icon-button [matMenuTriggerFor]="notificationMenu" class="notification-menu-button"
-        aria-label="Ouvrir le centre de notifications" matTooltip="Notifications" matTooltipPosition="below"
-        (menuOpened)="notificationMenuOpen = true" (menuClosed)="notificationMenuOpen = false">
-        <mat-icon [matBadge]="(unreadNotificationCount$ | async) || 0"
-          [matBadgeHidden]="(unreadNotificationCount$ | async) === 0" matBadgeColor="warn" matBadgeSize="small"
-          aria-hidden="true">
-          notifications
-        </mat-icon>
-      </button>
+      <span class="notification-menu-anchor" cdkOverlayOrigin #notificationOverlayOrigin="cdkOverlayOrigin">
+        @let unreadCount = (unreadNotificationCount$ | async) ?? 0;
+        <ds-button variant="icon" class="notification-menu-button"
+          (dsClick)="toggleNotificationMenu()"
+          [attr.aria-expanded]="notificationMenuOpen"
+          aria-haspopup="dialog"
+          aria-controls="notification-center-panel"
+          [attr.aria-label]="unreadCount > 0
+            ? 'Ouvrir le centre de notifications, ' + unreadCount + ' non lues'
+            : 'Ouvrir le centre de notifications'"
+          title="Notifications">
+          <span class="toolbar-icon-badge-wrap">
+            <ds-icon name="bell" [size]="20" aria-hidden="true"></ds-icon>
+            @if (unreadCount > 0) {
+              <span class="toolbar-count-badge" aria-hidden="true">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+            }
+          </span>
+        </ds-button>
+      </span>
 
-      <mat-menu #notificationMenu="matMenu" class="notification-dropdown-menu" aria-label="Centre de notifications">
-        <div (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" (keyup)="$event.stopPropagation()"
-          (keypress)="$event.stopPropagation()" class="notification-menu-content" tabindex="0" role="region"
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="notificationOverlayOrigin"
+        [cdkConnectedOverlayOpen]="notificationMenuOpen"
+        [cdkConnectedOverlayPositions]="toolbarDropdownPositions"
+        [cdkConnectedOverlayScrollStrategy]="toolbarDropdownScrollStrategy"
+        [cdkConnectedOverlayHasBackdrop]="true"
+        [cdkConnectedOverlayBackdropClass]="'shell-toolbar-overlay-backdrop'"
+        (backdropClick)="closeNotificationMenu()"
+        (detach)="closeNotificationMenu()"
+        (overlayKeydown)="$event.key === 'Escape' && closeNotificationMenu()">
+        <div id="notification-center-panel" class="notification-panel-dropdown" role="dialog"
           aria-label="Centre de notifications">
-          <app-notification-center></app-notification-center>
+          <div (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"
+            (keyup)="$event.stopPropagation()" (keypress)="$event.stopPropagation()"
+            class="notification-menu-content" tabindex="0" role="region" aria-label="Centre de notifications">
+            <app-notification-center></app-notification-center>
+          </div>
         </div>
-      </mat-menu>
+      </ng-template>
 
-      <button mat-icon-button [matMenuTriggerFor]="helpMenu" class="help-menu-button"
-        aria-label="Aide et guides interactifs" matTooltip="Aide (?)" matTooltipPosition="below">
-        <mat-icon aria-hidden="true">help_outline</mat-icon>
-      </button>
+      <span class="help-menu-anchor" cdkOverlayOrigin #helpOverlayOrigin="cdkOverlayOrigin">
+        <ds-button variant="icon" class="help-menu-button"
+          (dsClick)="toggleHelpPanel()"
+          [attr.aria-expanded]="helpPanelOpen"
+          aria-haspopup="menu"
+          aria-controls="help-menu-panel"
+          aria-label="Aide et guides interactifs" title="Aide (?)">
+          <ds-icon name="info" [size]="20" aria-hidden="true"></ds-icon>
+        </ds-button>
+      </span>
 
-      <mat-menu #helpMenu="matMenu" class="help-menu" aria-label="Menu d'aide">
-        <div class="help-menu-header" mat-menu-item disabled>
-          <mat-icon aria-hidden="true">school</mat-icon>
-          <span>Guides interactifs</span>
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="helpOverlayOrigin"
+        [cdkConnectedOverlayOpen]="helpPanelOpen"
+        [cdkConnectedOverlayPositions]="toolbarDropdownPositions"
+        [cdkConnectedOverlayScrollStrategy]="toolbarDropdownScrollStrategy"
+        [cdkConnectedOverlayHasBackdrop]="true"
+        [cdkConnectedOverlayBackdropClass]="'shell-toolbar-overlay-backdrop'"
+        (backdropClick)="closeHelpPanel()"
+        (detach)="closeHelpPanel()"
+        (overlayKeydown)="$event.key === 'Escape' && closeHelpPanel()">
+        <div id="help-menu-panel" class="help-menu-dropdown" role="menu" aria-label="Menu d'aide">
+          <div class="help-menu-header" role="presentation">
+            <ds-icon name="info" [size]="16" aria-hidden="true"></ds-icon>
+            <span>Guides interactifs</span>
+          </div>
+          <div class="menu-divider" role="separator"></div>
+          <button type="button" class="help-menu-item" role="menuitem"
+            (click)="startTourFromHelp('dossier-creation')"
+            aria-label="Démarrer le guide de création de dossier">
+            <ds-icon name="plus" [size]="16" aria-hidden="true"></ds-icon>
+            <span>Créer un dossier</span>
+          </button>
+          <button type="button" class="help-menu-item" role="menuitem"
+            (click)="startTourFromHelp('dossier-detail')" aria-label="Démarrer le guide du détail de dossier">
+            <ds-icon name="folder" [size]="16" aria-hidden="true"></ds-icon>
+            <span>Explorer un dossier</span>
+          </button>
+          <button type="button" class="help-menu-item" role="menuitem"
+            (click)="startTourFromHelp('message-creation')" aria-label="Démarrer le guide d'envoi de message">
+            <ds-icon name="mail" [size]="16" aria-hidden="true"></ds-icon>
+            <span>Envoyer un message</span>
+          </button>
+          <button type="button" class="help-menu-item" role="menuitem"
+            (click)="startTourFromHelp('workflow-status')" aria-label="Démarrer le guide de workflow">
+            <ds-icon name="refresh" [size]="16" aria-hidden="true"></ds-icon>
+            <span>Changer le statut</span>
+          </button>
+          <div class="menu-divider" role="separator"></div>
+          <button type="button" class="help-menu-item" role="menuitem"
+            (click)="resetAllToursFromHelp()" aria-label="Réinitialiser tous les guides">
+            <ds-icon name="refresh" [size]="16" aria-hidden="true"></ds-icon>
+            <span>Réinitialiser tous les guides</span>
+          </button>
         </div>
-        <mat-divider role="separator"></mat-divider>
-        <button mat-menu-item (click)="startTour('dossier-creation')"
-          aria-label="Démarrer le guide de création de dossier">
-          <mat-icon aria-hidden="true">add_circle_outline</mat-icon>
-          <span>Créer un dossier</span>
-        </button>
-        <button mat-menu-item (click)="startTour('dossier-detail')" aria-label="Démarrer le guide du détail de dossier">
-          <mat-icon aria-hidden="true">folder_open</mat-icon>
-          <span>Explorer un dossier</span>
-        </button>
-        <button mat-menu-item (click)="startTour('message-creation')" aria-label="Démarrer le guide d'envoi de message">
-          <mat-icon aria-hidden="true">message</mat-icon>
-          <span>Envoyer un message</span>
-        </button>
-        <button mat-menu-item (click)="startTour('workflow-status')" aria-label="Démarrer le guide de workflow">
-          <mat-icon aria-hidden="true">swap_horiz</mat-icon>
-          <span>Changer le statut</span>
-        </button>
-        <mat-divider role="separator"></mat-divider>
-        <button mat-menu-item (click)="resetAllTours()" aria-label="Réinitialiser tous les guides">
-          <mat-icon aria-hidden="true">refresh</mat-icon>
-          <span>Réinitialiser tous les guides</span>
-        </button>
-      </mat-menu>
+      </ng-template>
 
       <div class="user-menu-container">
-        <button mat-icon-button class="user-menu-button" [matMenuTriggerFor]="userMenu"
-          aria-label="Ouvrir le menu utilisateur" aria-haspopup="true" [attr.aria-expanded]="userMenuOpen"
-          matTooltip="Menu utilisateur" matTooltipPosition="below">
-          <mat-icon aria-hidden="true">account_circle</mat-icon>
-        </button>
+        <span class="user-menu-anchor" cdkOverlayOrigin #userOverlayOrigin="cdkOverlayOrigin">
+          <ds-button variant="icon" class="user-menu-button" (dsClick)="toggleUserMenu()"
+            aria-label="Ouvrir le menu utilisateur" aria-haspopup="menu" [attr.aria-expanded]="userMenuOpen"
+            aria-controls="user-menu-panel" title="Menu utilisateur">
+            <ds-icon name="user" [size]="20" aria-hidden="true"></ds-icon>
+          </ds-button>
+        </span>
 
-        <mat-menu #userMenu="matMenu" class="user-dropdown-menu" aria-label="Options utilisateur">
-          <div class="user-menu-header" mat-menu-item disabled>
-            <div class="user-info">
-              <mat-icon class="user-avatar-large" aria-hidden="true">account_circle</mat-icon>
-              <div class="user-details">
-                <div class="user-name">Utilisateur</div>
-                <div class="user-email">user&#64;example.com</div>
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="userOverlayOrigin"
+          [cdkConnectedOverlayOpen]="userMenuOpen"
+          [cdkConnectedOverlayPositions]="toolbarDropdownPositions"
+          [cdkConnectedOverlayScrollStrategy]="toolbarDropdownScrollStrategy"
+          [cdkConnectedOverlayHasBackdrop]="true"
+          [cdkConnectedOverlayBackdropClass]="'shell-toolbar-overlay-backdrop'"
+          (backdropClick)="closeUserMenu()"
+          (detach)="closeUserMenu()"
+          (overlayKeydown)="$event.key === 'Escape' && closeUserMenu()">
+          <div id="user-menu-panel" class="user-menu-dropdown" role="menu" aria-label="Options utilisateur">
+            <div class="user-menu-header" role="presentation">
+              <div class="user-info">
+                <ds-icon class="user-avatar-large" name="user" [size]="24" aria-hidden="true"></ds-icon>
+                <div class="user-details">
+                  <div class="user-name">Utilisateur</div>
+                  <div class="user-email">user&#64;example.com</div>
+                </div>
               </div>
             </div>
+            <div class="menu-divider" role="separator"></div>
+
+            <button type="button" class="help-menu-item user-menu-tours-trigger" role="menuitem"
+              (click)="toggleToursSubmenu()"
+              [attr.aria-expanded]="toursSubmenuOpen"
+              aria-controls="user-menu-tours-section"
+              aria-label="Guides interactifs">
+              <ds-icon name="info" [size]="16" aria-hidden="true"></ds-icon>
+              <span>Guides interactifs</span>
+              <ds-icon class="submenu-arrow" [class.submenu-arrow-open]="toursSubmenuOpen" name="chevron-right"
+                [size]="16" aria-hidden="true"></ds-icon>
+            </button>
+
+            @if (toursSubmenuOpen) {
+              <div id="user-menu-tours-section" class="user-menu-tours-inline" role="group"
+                aria-label="Menu des guides">
+                <div class="tour-menu-header" role="presentation">
+                  <div class="tour-progress-badge">
+                    <ds-icon name="clock" [size]="16" aria-hidden="true"></ds-icon>
+                    <span>{{ tourCompletionPercentage }}% complété</span>
+                  </div>
+                </div>
+                <div class="menu-divider" role="separator"></div>
+
+                <button type="button" class="help-menu-item" role="menuitem" (click)="viewAllTours()"
+                  aria-label="Voir tous les guides">
+                  <ds-icon name="table" [size]="16" aria-hidden="true"></ds-icon>
+                  <span>Voir tous les guides</span>
+                </button>
+
+                <div class="menu-divider" role="separator"></div>
+
+                <button type="button" class="help-menu-item" role="menuitem"
+                  (click)="startQuickTour('dashboard-overview')" aria-label="Démarrer le guide du dashboard">
+                  <ds-icon name="chart" [size]="16" aria-hidden="true"></ds-icon>
+                  <span>Dashboard</span>
+                  @if (isTourCompleted('dashboard-overview')) {
+                    <ds-icon class="tour-status-icon" name="check" [size]="16" aria-hidden="true"></ds-icon>
+                  }
+                </button>
+
+                <button type="button" class="help-menu-item" role="menuitem"
+                  (click)="startQuickTour('create-dossier')" aria-label="Démarrer le guide de création de dossier">
+                  <ds-icon name="plus" [size]="16" aria-hidden="true"></ds-icon>
+                  <span>Créer un dossier</span>
+                  @if (isTourCompleted('create-dossier')) {
+                    <ds-icon class="tour-status-icon" name="check" [size]="16" aria-hidden="true"></ds-icon>
+                  }
+                </button>
+
+                <button type="button" class="help-menu-item" role="menuitem"
+                  (click)="startQuickTour('message-workflow')" aria-label="Démarrer le guide de messagerie">
+                  <ds-icon name="mail" [size]="16" aria-hidden="true"></ds-icon>
+                  <span>Messagerie</span>
+                  @if (isTourCompleted('message-workflow')) {
+                    <ds-icon class="tour-status-icon" name="check" [size]="16" aria-hidden="true"></ds-icon>
+                  }
+                </button>
+
+                <button type="button" class="help-menu-item" role="menuitem"
+                  (click)="startQuickTour('status-transitions')" aria-label="Démarrer le guide de workflow">
+                  <ds-icon name="refresh" [size]="16" aria-hidden="true"></ds-icon>
+                  <span>Workflow de statut</span>
+                  @if (isTourCompleted('status-transitions')) {
+                    <ds-icon class="tour-status-icon" name="check" [size]="16" aria-hidden="true"></ds-icon>
+                  }
+                </button>
+
+                <button type="button" class="help-menu-item" role="menuitem"
+                  (click)="startQuickTour('reports')" aria-label="Démarrer le guide des rapports">
+                  <ds-icon name="bars-asc" [size]="16" aria-hidden="true"></ds-icon>
+                  <span>Rapports</span>
+                  @if (isTourCompleted('reports')) {
+                    <ds-icon class="tour-status-icon" name="check" [size]="16" aria-hidden="true"></ds-icon>
+                  }
+                </button>
+
+                <div class="menu-divider" role="separator"></div>
+
+                <button type="button" class="help-menu-item" role="menuitem" (click)="skipAllTours()"
+                  aria-label="Ignorer tous les guides">
+                  <ds-icon name="close" [size]="16" aria-hidden="true"></ds-icon>
+                  <span>Ignorer tous les guides</span>
+                </button>
+
+                <button type="button" class="help-menu-item" role="menuitem" (click)="restartAllTours()"
+                  aria-label="Redémarrer tous les guides">
+                  <ds-icon name="refresh" [size]="16" aria-hidden="true"></ds-icon>
+                  <span>Redémarrer tous les guides</span>
+                </button>
+              </div>
+            }
+
+            <div class="menu-divider" role="separator"></div>
+            <button type="button" class="help-menu-item" role="menuitem" (click)="logout()"
+              aria-label="Se déconnecter de l'application">
+              <ds-icon name="close" [size]="16" aria-hidden="true"></ds-icon>
+              <span>Déconnexion</span>
+            </button>
           </div>
-          <mat-divider role="separator"></mat-divider>
-
-          <button mat-menu-item [matMenuTriggerFor]="toursSubMenu" aria-label="Guides interactifs">
-            <mat-icon aria-hidden="true">school</mat-icon>
-            <span>Guides interactifs</span>
-            <mat-icon class="submenu-arrow" aria-hidden="true">chevron_right</mat-icon>
-          </button>
-
-          <mat-divider role="separator"></mat-divider>
-          <button mat-menu-item (click)="logout()" aria-label="Se déconnecter de l'application">
-            <mat-icon aria-hidden="true">logout</mat-icon>
-            <span>Déconnexion</span>
-          </button>
-        </mat-menu>
-
-        <mat-menu #toursSubMenu="matMenu" class="tours-submenu" aria-label="Menu des guides">
-          <div class="tour-menu-header" mat-menu-item disabled>
-            <div class="tour-progress-badge">
-              <mat-icon aria-hidden="true">timeline</mat-icon>
-              <span>{{ tourCompletionPercentage }}% complété</span>
-            </div>
-          </div>
-          <mat-divider role="separator"></mat-divider>
-
-          <button mat-menu-item (click)="viewAllTours()" aria-label="Voir tous les guides">
-            <mat-icon aria-hidden="true">format_list_bulleted</mat-icon>
-            <span>Voir tous les guides</span>
-          </button>
-
-          <mat-divider role="separator"></mat-divider>
-
-          <button mat-menu-item (click)="startQuickTour('dashboard-overview')" aria-label="Démarrer le guide du dashboard">
-            <mat-icon aria-hidden="true">dashboard</mat-icon>
-            <span>Dashboard</span>
-            @if (isTourCompleted('dashboard-overview')) {
-              <mat-icon class="tour-status-icon" aria-hidden="true">check_circle</mat-icon>
-            }
-          </button>
-
-          <button mat-menu-item (click)="startQuickTour('create-dossier')" aria-label="Démarrer le guide de création de dossier">
-            <mat-icon aria-hidden="true">add_box</mat-icon>
-            <span>Créer un dossier</span>
-            @if (isTourCompleted('create-dossier')) {
-              <mat-icon class="tour-status-icon" aria-hidden="true">check_circle</mat-icon>
-            }
-          </button>
-
-          <button mat-menu-item (click)="startQuickTour('message-workflow')" aria-label="Démarrer le guide de messagerie">
-            <mat-icon aria-hidden="true">message</mat-icon>
-            <span>Messagerie</span>
-            @if (isTourCompleted('message-workflow')) {
-              <mat-icon class="tour-status-icon" aria-hidden="true">check_circle</mat-icon>
-            }
-          </button>
-
-          <button mat-menu-item (click)="startQuickTour('status-transitions')" aria-label="Démarrer le guide de workflow">
-            <mat-icon aria-hidden="true">sync_alt</mat-icon>
-            <span>Workflow de statut</span>
-            @if (isTourCompleted('status-transitions')) {
-              <mat-icon class="tour-status-icon" aria-hidden="true">check_circle</mat-icon>
-            }
-          </button>
-
-          <button mat-menu-item (click)="startQuickTour('reports')" aria-label="Démarrer le guide des rapports">
-            <mat-icon aria-hidden="true">assessment</mat-icon>
-            <span>Rapports</span>
-            @if (isTourCompleted('reports')) {
-              <mat-icon class="tour-status-icon" aria-hidden="true">check_circle</mat-icon>
-            }
-          </button>
-
-          <mat-divider role="separator"></mat-divider>
-
-          <button mat-menu-item (click)="skipAllTours()" aria-label="Ignorer tous les guides">
-            <mat-icon aria-hidden="true">cancel</mat-icon>
-            <span>Ignorer tous les guides</span>
-          </button>
-
-          <button mat-menu-item (click)="restartAllTours()" aria-label="Redémarrer tous les guides">
-            <mat-icon aria-hidden="true">restart_alt</mat-icon>
-            <span>Redémarrer tous les guides</span>
-          </button>
-        </mat-menu>
+        </ng-template>
       </div>
-    </mat-toolbar>
+    </header>
 
     <main id="main-content" class="main-content" role="main" tabindex="-1" appMaintainScroll>
       <div [@routeFadeSlideAnimation]="prepareRoute(outlet)">

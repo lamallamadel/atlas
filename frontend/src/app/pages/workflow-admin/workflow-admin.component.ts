@@ -3,12 +3,10 @@ import { Subject, takeUntil } from 'rxjs';
 import { WorkflowConfigService } from './services/workflow-config.service';
 import { WorkflowConfiguration, CaseType } from './models/workflow.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { DsCardComponent } from '../../design-system';
+import { DsCardComponent, DsButtonComponent, DsIconComponent } from '../../design-system';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
 import { WorkflowEditorComponent } from './workflow-editor/workflow-editor.component';
-import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 import { WorkflowPreviewComponent } from './workflow-preview/workflow-preview.component';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../design-system/index';
@@ -17,7 +15,7 @@ import { PageHeaderComponent } from '../../design-system/index';
     selector: 'app-workflow-admin',
     templateUrl: './workflow-admin.component.html',
     styleUrls: ['./workflow-admin.component.css'],
-    imports: [DsCardComponent, MatTabGroup, MatTab, MatButtonToggleGroup, MatButtonToggle, WorkflowEditorComponent, MatButton, MatIcon, WorkflowPreviewComponent, RouterLink, PageHeaderComponent]
+    imports: [DsCardComponent, DsButtonComponent, DsIconComponent, MatTabGroup, MatTab, MatButtonToggleGroup, MatButtonToggle, WorkflowEditorComponent, WorkflowPreviewComponent, RouterLink, PageHeaderComponent]
 })
 export class WorkflowAdminComponent implements OnInit, OnDestroy {
   workflow: WorkflowConfiguration | null = null;

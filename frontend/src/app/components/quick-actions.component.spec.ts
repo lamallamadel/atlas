@@ -4,7 +4,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import {} from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { QuickActionsComponent } from './quick-actions.component';
 import { QuickActionsService } from '../services/quick-actions.service';
@@ -81,7 +80,6 @@ describe('QuickActionsComponent', () => {
 
         MatButtonModule,
         MatIconModule,
-        MatTooltipModule,
         QuickActionsComponent,
       ],
       providers: [

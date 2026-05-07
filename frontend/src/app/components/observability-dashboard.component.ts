@@ -1,16 +1,10 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, NgZone, inject } from '@angular/core';
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import { ReportingApiService, ObservabilityMetrics } from '../services/reporting-api.service';
 import { interval, Subject, EMPTY } from 'rxjs';
 import { takeUntil, switchMap, startWith, catchError } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import {
-  MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell,
-  MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
-} from '@angular/material/table';
-import { DecimalPipe, DatePipe, KeyValuePipe } from '@angular/common';
-import { MatTooltip } from '@angular/material/tooltip';
-
+import { DatePipe, DecimalPipe, KeyValuePipe } from '@angular/common';
 import {
   PageHeaderComponent,
   DsButtonComponent,
@@ -18,6 +12,9 @@ import {
   DsBadgeComponent,
   DsEmptyStateComponent,
   DsSkeletonComponent,
+  DsTableComponent,
+  DsIconComponent,
+  type DsColumn,
 } from '../design-system';
 import { dsChartSeriesRgba, dsRgba } from '../design-system/chart-ds-colors';
 
@@ -32,16 +29,32 @@ interface TimeSeriesPoint {
   styleUrls: ['./observability-dashboard.component.css'],
   imports: [
     FormsModule,
-    MatMenuTrigger, MatMenu, MatMenuItem,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell,
-    MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
-    MatTooltip,
-    DecimalPipe, DatePipe, KeyValuePipe,
-    PageHeaderComponent, DsButtonComponent, DsCardComponent,
-    DsBadgeComponent, DsEmptyStateComponent, DsSkeletonComponent,
+    CdkConnectedOverlay,
+    CdkOverlayOrigin,
+    DatePipe,
+    DecimalPipe,
+    KeyValuePipe,
+    PageHeaderComponent,
+    DsButtonComponent,
+    DsCardComponent,
+    DsBadgeComponent,
+    DsEmptyStateComponent,
+    DsSkeletonComponent,
+    DsTableComponent,
+    DsIconComponent,
   ],
 })
 export class ObservabilityDashboardComponent implements OnInit, OnDestroy, AfterViewInit {
+  private readonly overlay = inject(Overlay);
+
+  /** Menu export CSV/JSON (remplace `mat-menu`). */
+  exportMenuOpen = false;
+  readonly exportMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
+  readonly exportMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
+  ];
+
   metrics: ObservabilityMetrics | null = null;
   channelNames: string[] = [];
   loading = false;
@@ -52,6 +65,14 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
 
   dateFrom = '';
   dateTo = '';
+
+  latencyColumns: DsColumn<Record<string, unknown>>[] = [];
+  dlqColumns: DsColumn<Record<string, unknown>>[] = [];
+
+  readonly trackByLatencyChannel = (_i: number, row: Record<string, unknown>) =>
+    String(row['channel'] ?? _i);
+  readonly trackByDlqMessage = (_i: number, row: Record<string, unknown>) =>
+    row['messageId'] ?? _i;
 
   // Historical data for time-series charts (1-minute intervals)
   private queueDepthHistory: TimeSeriesPoint[] = [];
@@ -85,7 +106,143 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
   }
 
   ngOnInit(): void {
+    this.initDetailTables();
     this.startAutoRefresh();
+  }
+
+  get latencyTableRows(): Record<string, unknown>[] {
+    return this.channelNames.map((ch) => ({ channel: ch })) as Record<string, unknown>[];
+  }
+
+  get dlqTableRows(): Record<string, unknown>[] {
+    const rows = this.metrics?.dlqMetrics?.recentDlqMessages ?? [];
+    return rows as unknown as Record<string, unknown>[];
+  }
+
+  private initDetailTables(): void {
+    this.latencyColumns = [
+      {
+        key: 'channel',
+        header: 'Canal',
+        cell: (row) => {
+          const ch = String(row['channel'] ?? '');
+          return `<span class="ds-badge ds-badge--info ds-badge--sm ds-badge--no-dot">${this.escapeHtml(ch)}</span>`;
+        },
+      },
+      {
+        key: 'p50',
+        header: 'P50 (ms)',
+        align: 'right',
+        cell: (row) => this.formatLatencyMetricCell(String(row['channel'] ?? ''), 'p50'),
+      },
+      {
+        key: 'p95',
+        header: 'P95 (ms)',
+        align: 'right',
+        cell: (row) => this.formatLatencyMetricCell(String(row['channel'] ?? ''), 'p95'),
+      },
+      {
+        key: 'p99',
+        header: 'P99 (ms)',
+        align: 'right',
+        cell: (row) => this.formatLatencyMetricCell(String(row['channel'] ?? ''), 'p99'),
+      },
+      {
+        key: 'average',
+        header: 'Moyenne (ms)',
+        align: 'right',
+        cell: (row) => this.formatLatencyMetricCell(String(row['channel'] ?? ''), 'average'),
+      },
+    ];
+
+    this.dlqColumns = [
+      {
+        key: 'messageId',
+        header: 'ID Message',
+        cell: (row) =>
+          `<span class="obs-mono">${this.escapeHtml(String(row['messageId'] ?? ''))}</span>`,
+      },
+      {
+        key: 'channel',
+        header: 'Canal',
+        cell: (row) => {
+          const ch = String(row['channel'] ?? '');
+          return `<span class="ds-badge ds-badge--info ds-badge--sm ds-badge--no-dot">${this.escapeHtml(ch)}</span>`;
+        },
+      },
+      {
+        key: 'errorCode',
+        header: 'Code',
+        cell: (row) => {
+          const c = String(row['errorCode'] ?? '');
+          return `<span class="ds-badge ds-badge--error ds-badge--sm ds-badge--no-dot">${this.escapeHtml(c)}</span>`;
+        },
+      },
+      {
+        key: 'errorMessage',
+        header: 'Message',
+        cell: (row) => {
+          const raw = String(row['errorMessage'] ?? '');
+          const esc = this.escapeHtml(raw);
+          const truncated =
+            raw.length > 100 ? `${this.escapeHtml(raw.slice(0, 97))}…` : esc;
+          const title = this.escapeAttr(raw);
+          return `<span class="obs-truncate-inline" title="${title}">${truncated}</span>`;
+        },
+      },
+      {
+        key: 'attemptCount',
+        header: 'Tentatives',
+        align: 'right',
+        cell: (row) => this.escapeHtml(String(row['attemptCount'] ?? '')),
+      },
+      {
+        key: 'lastAttemptAt',
+        header: 'Dernière tentative',
+        cell: (row) => {
+          const s = String(row['lastAttemptAt'] ?? '');
+          return s ? this.escapeHtml(this.formatTimestamp(s)) : '—';
+        },
+      },
+    ];
+  }
+
+  private formatLatencyMetricCell(
+    channel: string,
+    field: 'p50' | 'p95' | 'p99' | 'average'
+  ): string {
+    const lat = this.getLatency(channel);
+    if (!lat) {
+      return '—';
+    }
+    return this.formatLatencyNum(lat[field]);
+  }
+
+  private formatLatencyNum(n: unknown): string {
+    if (n == null || typeof n !== 'number' || Number.isNaN(n)) {
+      return '—';
+    }
+    return n.toLocaleString('fr-FR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  private escapeAttr(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   ngAfterViewInit(): void {
@@ -205,7 +362,16 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
     this.loadMetrics();
   }
 
+  toggleExportMenu(): void {
+    this.exportMenuOpen = !this.exportMenuOpen;
+  }
+
+  closeExportMenu(): void {
+    this.exportMenuOpen = false;
+  }
+
   exportMetrics(format: 'csv' | 'json'): void {
+    this.closeExportMenu();
     this.reportingService.exportObservabilityMetrics(format, this.dateFrom, this.dateTo)
       .subscribe({
         next: (blob) => {

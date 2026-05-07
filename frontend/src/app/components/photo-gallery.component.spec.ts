@@ -4,7 +4,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { PhotoGalleryComponent, Photo } from './photo-gallery.component';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
@@ -59,7 +58,6 @@ describe('PhotoGalleryComponent', () => {
         DragDropModule,
         MatIconModule,
         MatButtonModule,
-        MatTooltipModule,
         NoopAnimationsModule,
         PhotoGalleryComponent,
       ],

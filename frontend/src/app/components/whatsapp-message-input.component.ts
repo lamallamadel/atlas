@@ -7,7 +7,6 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 export interface WhatsAppTemplate {
@@ -28,7 +27,7 @@ export interface MessageSendRequest {
     selector: 'app-whatsapp-message-input',
     templateUrl: './whatsapp-message-input.component.html',
     styleUrls: ['./whatsapp-message-input.component.css'],
-    imports: [MatIcon, MatChipListbox, MatChip, MatChipAvatar, MatChipRemove, MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatTooltip, MatFabButton, DsSkeletonComponent]
+    imports: [MatIcon, MatChipListbox, MatChip, MatChipAvatar, MatChipRemove, MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatFabButton, DsSkeletonComponent]
 })
 export class WhatsappMessageInputComponent {
   readonly templates = input<WhatsAppTemplate[]>([]);

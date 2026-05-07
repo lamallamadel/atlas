@@ -1,5 +1,3 @@
-@use '../../../styles/variables' as vars;
-
 /* ── Atlasia DS Layout ── */
 .pro-page {
   padding: var(--ds-space-8);
@@ -42,23 +40,22 @@
 .dos-filter-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 10px;
-  background: var(--ds-marine-hl);
-  color: var(--ds-marine);
-  border-radius: var(--ds-radius-pill);
-  font-size: 12px;
-  font-weight: 500;
-  button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: inherit;
-    opacity: 0.7;
-    padding: 0;
-    display: flex;
-    &:hover { opacity: 1; }
+  gap: 4px;
+}
+.dos-filter-chip__remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ds-text-muted);
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ds-radius-sm);
+  line-height: 0;
+  &:hover {
+    color: var(--ds-text);
+    background: var(--ds-surface-offset);
   }
 }
 .dos-clear-all {
@@ -84,72 +81,72 @@
   font-size: 13.5px;
 }
 
-/* ── Table ── */
-.dos-table-wrap {
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-divider);
+/* ── Liste desktop : ds-card + ds-table ── */
+.dos-list-card {
   border-radius: var(--ds-radius-lg);
   overflow: hidden;
-  box-shadow: var(--ds-shadow-xs);
 }
 
-.dos-table-header {
-  display: grid;
-  grid-template-columns: 1fr 140px 130px 110px 90px 88px;
-  padding: 10px var(--ds-space-4);
-  background: var(--ds-surface-offset);
-  border-bottom: 1px solid var(--ds-divider);
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--ds-text-faint);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.dos-rows { display: flex; flex-direction: column; }
-
-.dos-row {
-  display: grid;
-  grid-template-columns: 1fr 140px 130px 110px 90px 88px;
+/* Cellules rendues en HTML (ds-table) */
+.dos-ds-lead-cell {
+  display: inline-flex;
   align-items: center;
-  padding: 0 var(--ds-space-4);
-  min-height: 60px;
-  border-bottom: 1px solid var(--ds-divider);
-  cursor: pointer;
-  transition: background var(--ds-transition-fast);
-
-  &:last-child { border-bottom: none; }
-  &:hover { background: var(--ds-surface-offset); }
-  &:focus-visible { outline: 2px solid var(--ds-marine); outline-offset: -2px; }
+  gap: var(--ds-space-3);
+  min-width: 0;
+  max-width: 100%;
 }
-
-.dos-col {
-  &--lead { display: flex; align-items: center; gap: var(--ds-space-3); }
-  &--actions { display: flex; align-items: center; gap: var(--ds-space-1); justify-content: flex-end; }
-}
-
-.dos-lead-info { display: flex; flex-direction: column; }
-.dos-lead-name { font-size: 13.5px; font-weight: 600; color: var(--ds-text); }
-.dos-lead-id   { font-size: 11px; color: var(--ds-text-faint); }
-.dos-phone     { font-size: 13px; color: var(--ds-text-muted); }
-.dos-date      { font-size: 12px; color: var(--ds-text-faint); }
-.dos-annonce-id { font-size: 12.5px; color: var(--ds-marine); a { color: inherit; text-decoration: underline; text-underline-offset: 2px; } }
-.dos-empty     { color: var(--ds-text-faint); }
-
-.dos-action-btn {
+.dos-ds-lead-cell__ava {
+  flex-shrink: 0;
   width: 32px;
   height: 32px;
-  border-radius: var(--ds-radius-sm);
-  border: 1px solid var(--ds-divider);
-  background: transparent;
-  color: var(--ds-text-muted);
-  display: flex;
+  border-radius: 50%;
+  background: var(--ds-marine-hl);
+  color: var(--ds-marine);
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
-  &:hover { background: var(--ds-surface-offset); color: var(--ds-text); }
-  &--danger:hover { background: var(--ds-error-hl); color: var(--ds-error); border-color: var(--ds-error); }
+}
+.dos-ds-lead-cell__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.dos-ds-lead-cell__name {
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--ds-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dos-ds-lead-cell__id {
+  font-size: 11px;
+  color: var(--ds-text-faint);
+}
+.dos-ds-phone {
+  font-size: 13px;
+  color: var(--ds-text-muted);
+}
+.dos-ds-date {
+  font-size: 12px;
+  color: var(--ds-text-faint);
+}
+.dos-ds-annonce {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ds-marine);
+}
+.dos-ds-empty {
+  color: var(--ds-text-faint);
+}
+
+/* Badges statut (innerHTML) : taille icône Material */
+.dos-list-card .status-icon {
+  font-size: 14px;
+  vertical-align: middle;
+  margin-right: 4px;
 }
 
 /* ── Pagination ── */
@@ -182,4 +179,4 @@
 
 /* ── Mobile ── */
 .dos-mobile-list { display: flex; flex-direction: column; gap: var(--ds-space-3); }
-
+

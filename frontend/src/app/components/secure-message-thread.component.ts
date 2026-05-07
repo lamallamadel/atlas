@@ -1,11 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClientSecureMessage } from '../models/customer-portal.models';
 import { CustomerPortalService } from '../services/customer-portal.service';
 import { CryptoService } from '../services/crypto.service';
 
 @Component({
   selector: 'app-secure-message-thread',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="message-container">
       <h2>Messages sécurisés</h2>

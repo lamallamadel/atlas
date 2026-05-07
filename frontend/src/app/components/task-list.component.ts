@@ -5,17 +5,12 @@ import { TaskApiService, TaskResponse, TaskStatus, TaskPriority, TaskListParams 
 import { TaskFormDialogComponent } from './task-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { AuthService } from '../services/auth.service';
-import { CalendarOptions, EventInput } from '@fullcalendar/core';
-import frLocale from '@fullcalendar/core/locales/fr';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
 import { cardStagger } from '../animations';
 import { FormsModule } from '@angular/forms';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { TaskCardComponent } from './task-card.component';
-import { FullCalendarModule } from '@fullcalendar/angular';
 import {
   PageHeaderComponent,
   DsButtonComponent,
@@ -23,9 +18,14 @@ import {
   DsTabsComponent,
   DsEmptyStateComponent,
   DsSkeletonComponent,
+  DsTableComponent,
+  WeekGridComponent,
   type DsTab,
+  type WeekGridEvent,
+  type WeekGridClickEvent,
+  type DsColumn,
+  type DsRowAction,
 } from '../design-system';
-import { resolveDsToken } from '../design-system/chart-ds-colors';
 
 enum ViewMode {
   LIST = 'list',
@@ -44,8 +44,11 @@ enum StatusFilter {
   ALL = 'all',
 }
 
+type TaskListLayout = 'cards' | 'table';
+
 @Component({
   selector: 'app-task-list',
+  standalone: true,
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.css'],
   animations: [cardStagger],
@@ -56,13 +59,14 @@ enum StatusFilter {
     MatSelect,
     MatOption,
     TaskCardComponent,
-    FullCalendarModule,
+    WeekGridComponent,
     PageHeaderComponent,
     DsButtonComponent,
     DsCardComponent,
     DsTabsComponent,
     DsEmptyStateComponent,
     DsSkeletonComponent,
+    DsTableComponent,
   ],
 })
 export class TaskListComponent implements OnInit {
@@ -74,11 +78,17 @@ export class TaskListComponent implements OnInit {
   viewMode: ViewMode = ViewMode.LIST;
   ViewMode = ViewMode;
 
+  /** Vue liste : cartes existantes ou tableau DS. */
+  listLayout: TaskListLayout = 'cards';
+
   filterType: FilterType = FilterType.ALL;
   FilterType = FilterType;
 
   statusFilter: StatusFilter = StatusFilter.ALL;
   StatusFilter = StatusFilter;
+
+  weekGridDate = new Date();
+  weekGridEvents: WeekGridEvent[] = [];
 
   readonly assignmentTabs: DsTab[] = [
     { value: FilterType.ALL, label: 'Toutes les tâches' },
@@ -87,28 +97,36 @@ export class TaskListComponent implements OnInit {
 
   readonly viewTabs: DsTab[] = [
     { value: ViewMode.LIST, label: 'Liste' },
-    { value: ViewMode.CALENDAR, label: 'Calendrier' },
+    { value: ViewMode.CALENDAR, label: 'Semaine' },
   ];
 
-  calendarOptions: CalendarOptions = {
-    plugins: [dayGridPlugin, interactionPlugin],
-    initialView: 'dayGridMonth',
-    locale: frLocale,
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'dayGridMonth,dayGridWeek',
+  readonly dsTableRowActions: DsRowAction<Record<string, unknown>>[] = [
+    {
+      icon: 'check',
+      label: 'Terminer',
+      action: 'complete',
+      ariaLabel: 'Marquer comme terminée',
+      show: (row) => this.taskFromRow(row).status !== TaskStatus.COMPLETED,
     },
-    buttonText: {
-      today: "Aujourd'hui",
-      month: 'Mois',
-      week: 'Semaine',
+    {
+      icon: 'refresh',
+      label: 'Rouvrir',
+      action: 'uncomplete',
+      ariaLabel: 'Rouvrir la tâche',
+      show: (row) => this.taskFromRow(row).status === TaskStatus.COMPLETED,
     },
-    events: [],
-    eventClick: this.handleEventClick.bind(this),
-    dateClick: this.handleDateClick.bind(this),
-    height: 'auto',
-  };
+    { icon: 'edit', label: 'Modifier', action: 'edit', ariaLabel: 'Modifier la tâche' },
+    { icon: 'trash', label: 'Supprimer', action: 'delete', ariaLabel: 'Supprimer la tâche' },
+  ];
+
+  dsTableColumns: DsColumn<Record<string, unknown>>[] = [];
+
+  get filteredTasksAsTableRows(): Record<string, unknown>[] {
+    return this.filteredTasks as unknown as Record<string, unknown>[];
+  }
+
+  trackByTaskId = (_index: number, row: Record<string, unknown>): number =>
+    this.taskFromRow(row).id;
 
   constructor(
     private taskApiService: TaskApiService,
@@ -118,6 +136,7 @@ export class TaskListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.dsTableColumns = this.buildDsTableColumns();
     this.currentUserId = this.authService.getUserId() || '';
     this.loadTasks();
   }
@@ -139,6 +158,10 @@ export class TaskListComponent implements OnInit {
     this.viewMode = value === ViewMode.CALENDAR ? ViewMode.CALENDAR : ViewMode.LIST;
   }
 
+  onWeekGridDateChange(d: Date): void {
+    this.weekGridDate = d;
+  }
+
   loadTasks(): void {
     this.loading = true;
     const params: TaskListParams = {
@@ -150,7 +173,6 @@ export class TaskListComponent implements OnInit {
       next: (page) => {
         this.tasks = page.content;
         this.applyFilters();
-        this.updateCalendarEvents();
         this.loading = false;
       },
       error: (error) => {
@@ -187,10 +209,69 @@ export class TaskListComponent implements OnInit {
     }
 
     this.filteredTasks = filtered;
+    this.rebuildWeekGridEvents();
   }
 
   onStatusFilterChange(): void {
     this.applyFilters();
+  }
+
+  private rebuildWeekGridEvents(): void {
+    this.weekGridEvents = this.filteredTasks
+      .filter((t) => !!t.dueDate)
+      .map((task) => {
+        const start = new Date(task.dueDate!);
+        if (start.getHours() === 0 && start.getMinutes() === 0 && start.getSeconds() === 0) {
+          start.setHours(9, 0, 0, 0);
+        }
+        const end = new Date(start.getTime() + 60 * 60 * 1000);
+        return {
+          id: task.id,
+          title: task.title,
+          start,
+          end,
+          type: 'task' as const,
+          assigneeInitials: this.initialsFromName(task.assignedToName),
+        };
+      });
+  }
+
+  private initialsFromName(name?: string): string | undefined {
+    if (!name?.trim()) return undefined;
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  onWeekGridEventClick(evt: WeekGridEvent): void {
+    const task = this.tasks.find((t) => t.id === evt.id);
+    if (task) {
+      this.onTaskEdit(task);
+    }
+  }
+
+  onWeekGridCellClick(ev: WeekGridClickEvent): void {
+    const d = new Date(ev.date);
+    if (ev.hour !== undefined) {
+      d.setHours(ev.hour, 0, 0, 0);
+    }
+    const dialogRef = this.dialog.open(TaskFormDialogComponent, {
+      width: '600px',
+      data: {
+        task: {
+          dueDate: d.toISOString(),
+        },
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.snackBar.open('Tâche créée', 'OK', { duration: 3000 });
+        this.loadTasks();
+      }
+    });
   }
 
   openCreateDialog(): void {
@@ -267,73 +348,6 @@ export class TaskListComponent implements OnInit {
     });
   }
 
-  private taskEventColor(task: TaskResponse): string {
-    if (task.status === TaskStatus.COMPLETED) {
-      return resolveDsToken('--ds-success');
-    }
-    const overdue = !!task.dueDate && new Date(task.dueDate) < new Date();
-    if (overdue) {
-      return resolveDsToken('--ds-error');
-    }
-    if (task.priority === TaskPriority.HIGH) {
-      return resolveDsToken('--ds-error');
-    }
-    if (task.priority === TaskPriority.MEDIUM) {
-      return resolveDsToken('--ds-warning');
-    }
-    return resolveDsToken('--ds-marine-light');
-  }
-
-  updateCalendarEvents(): void {
-    const events: EventInput[] = this.tasks
-      .filter((task) => task.dueDate)
-      .map((task) => {
-        const color = this.taskEventColor(task);
-        return {
-          id: task.id.toString(),
-          title: task.title,
-          start: task.dueDate,
-          backgroundColor: color,
-          borderColor: color,
-          extendedProps: {
-            task,
-          },
-        };
-      });
-
-    this.calendarOptions = {
-      ...this.calendarOptions,
-      events,
-    };
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handleEventClick(arg: any): void {
-    const task = arg.event.extendedProps.task as TaskResponse | undefined;
-    if (task) {
-      this.onTaskEdit(task);
-    }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handleDateClick(arg: any): void {
-    const dialogRef = this.dialog.open(TaskFormDialogComponent, {
-      width: '600px',
-      data: {
-        task: {
-          dueDate: arg.dateStr,
-        },
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.snackBar.open('Tâche créée', 'OK', { duration: 3000 });
-        this.loadTasks();
-      }
-    });
-  }
-
   get overdueCount(): number {
     return this.tasks.filter((task) => {
       if (!task.dueDate || task.status === TaskStatus.COMPLETED) {
@@ -354,5 +368,176 @@ export class TaskListComponent implements OnInit {
 
   get completedCount(): number {
     return this.tasks.filter((task) => task.status === TaskStatus.COMPLETED).length;
+  }
+
+  onDsTableRowClick(row: Record<string, unknown>): void {
+    this.onTaskEdit(this.taskFromRow(row));
+  }
+
+  onDsTableRowAction(event: { action: string; row: Record<string, unknown> }): void {
+    const t = this.taskFromRow(event.row);
+    switch (event.action) {
+      case 'complete':
+      case 'uncomplete':
+        this.onTaskCompleted(t.id);
+        break;
+      case 'edit':
+        this.onTaskEdit(t);
+        break;
+      case 'delete':
+        this.onTaskDelete(t.id);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private buildDsTableColumns(): DsColumn<Record<string, unknown>>[] {
+    return [
+      {
+        key: 'title',
+        header: 'Tâche',
+        sortable: false,
+        cell: (row) =>
+          `<span class="task-ds-title">${this.escapeHtml(this.taskFromRow(row).title || '—')}</span>`,
+      },
+      {
+        key: 'assignee',
+        header: 'Assignée à',
+        width: '160px',
+        sortable: false,
+        cell: (row) => {
+          const name = this.taskFromRow(row).assignedToName || '—';
+          return `<span class="task-ds-muted">${this.escapeHtml(name)}</span>`;
+        },
+      },
+      {
+        key: 'dueDate',
+        header: 'Échéance',
+        width: '180px',
+        sortable: false,
+        cell: (row) => {
+          const t = this.taskFromRow(row);
+          const text = this.formatDueSummary(t);
+          const cls =
+            t.status !== TaskStatus.COMPLETED && t.dueDate && new Date(t.dueDate) < new Date()
+              ? 'task-ds-due task-ds-due--late'
+              : 'task-ds-due';
+          return `<span class="${cls}">${this.escapeHtml(text)}</span>`;
+        },
+      },
+      {
+        key: 'priority',
+        header: 'Priorité',
+        width: '110px',
+        sortable: false,
+        cell: (row) => {
+          const p = this.taskFromRow(row).priority;
+          const cls = this.priorityBadgeClass(p);
+          const label = this.escapeHtml(this.priorityLabel(p));
+          return `<span class="${cls}">${label}</span>`;
+        },
+      },
+      {
+        key: 'status',
+        header: 'Statut',
+        width: '120px',
+        sortable: false,
+        cell: (row) => {
+          const s = this.taskFromRow(row).status;
+          const cls = this.statusBadgeClass(s);
+          const label = this.escapeHtml(this.statusLabel(s));
+          return `<span class="${cls}">${label}</span>`;
+        },
+      },
+    ];
+  }
+
+  private formatDueSummary(task: TaskResponse): string {
+    if (!task.dueDate) {
+      return 'Sans échéance';
+    }
+    const dueDate = new Date(task.dueDate);
+    const now = new Date();
+    const daysDiff = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (task.status === TaskStatus.COMPLETED) {
+      return dueDate.toLocaleDateString('fr-FR');
+    }
+    if (daysDiff < 0) {
+      return `En retard (${Math.abs(daysDiff)} j)`;
+    }
+    if (daysDiff === 0) {
+      return "Aujourd'hui";
+    }
+    if (daysDiff === 1) {
+      return 'Demain';
+    }
+    if (daysDiff <= 7) {
+      return `J+${daysDiff}`;
+    }
+    return dueDate.toLocaleDateString('fr-FR');
+  }
+
+  private priorityLabel(p: TaskPriority): string {
+    switch (p) {
+      case TaskPriority.HIGH:
+        return 'Haute';
+      case TaskPriority.MEDIUM:
+        return 'Moyenne';
+      case TaskPriority.LOW:
+        return 'Basse';
+      default:
+        return '—';
+    }
+  }
+
+  private priorityBadgeClass(p: TaskPriority): string {
+    switch (p) {
+      case TaskPriority.HIGH:
+        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--error';
+      case TaskPriority.MEDIUM:
+        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--warning';
+      case TaskPriority.LOW:
+        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--neutral';
+      default:
+        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--neutral';
+    }
+  }
+
+  private statusLabel(s: TaskStatus): string {
+    switch (s) {
+      case TaskStatus.COMPLETED:
+        return 'Terminée';
+      case TaskStatus.IN_PROGRESS:
+        return 'En cours';
+      case TaskStatus.PENDING:
+        return 'À faire';
+      default:
+        return String(s);
+    }
+  }
+
+  private statusBadgeClass(s: TaskStatus): string {
+    switch (s) {
+      case TaskStatus.COMPLETED:
+        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--success';
+      case TaskStatus.IN_PROGRESS:
+        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--info';
+      default:
+        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--neutral';
+    }
+  }
+
+  private escapeHtml(value: string): string {
+    return (value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  private taskFromRow(row: Record<string, unknown>): TaskResponse {
+    return row as unknown as TaskResponse;
   }
 }

@@ -20,6 +20,7 @@ import { DsAvatarComponent }       from '../../design-system/primitives/ds-avata
 import { DsBadgeComponent, DsBadgeStatus } from '../../design-system/primitives/ds-badge/ds-badge.component';
 import { DsEmptyStateComponent }   from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
 import { DsSkeletonComponent }     from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DsCardComponent }           from '../../design-system/primitives/ds-card/ds-card.component';
 import { colorToRgba, dsRgba, DS_CHART_FALLBACK_HEX } from '../../design-system/chart-ds-colors';
 
 type Chart = any;
@@ -49,6 +50,7 @@ interface KpiCard {
       AsyncPipe, DatePipe, DecimalPipe, RouterLink,
       PageHeaderComponent, KpiCardComponent, FilterBarComponent,
       DsAvatarComponent, DsBadgeComponent, DsEmptyStateComponent, DsSkeletonComponent,
+      DsCardComponent,
     ]
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {

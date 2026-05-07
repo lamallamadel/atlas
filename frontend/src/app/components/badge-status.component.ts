@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import {
   DsBadgeComponent,
@@ -27,7 +26,7 @@ interface StatusConfig {
   templateUrl: './badge-status.component.html',
   styleUrls: ['./badge-status.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DsBadgeComponent, MatTooltip, MatIcon],
+  imports: [DsBadgeComponent, MatIcon],
 })
 export class BadgeStatusComponent {
   readonly status = input.required<string>();

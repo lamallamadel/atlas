@@ -8,16 +8,18 @@ import { DocumentUploadComponent } from './document-upload.component';
 import { LoadingSkeletonComponent } from './loading-skeleton.component';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-document-list',
     templateUrl: './document-list.component.html',
     styleUrls: ['./document-list.component.css'],
-    imports: [DocumentUploadComponent, LoadingSkeletonComponent, MatButton, MatIcon, MatIconButton, MatTooltip]
+    imports: [DocumentUploadComponent, LoadingSkeletonComponent, MatButton, MatIcon, MatIconButton]
 })
 export class DocumentListComponent implements OnInit {
   readonly dossierId = input.required<number>();
+
+  readonly documentAiAnalysisHint =
+    'Analyse sémantique du texte extrait (OCR) de votre document via notre microservice d\'Intelligence Artificielle (document-service)';
 
   documents: DocumentResponse[] = [];
   loading = false;

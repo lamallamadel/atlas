@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -12,7 +13,6 @@ import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, Ma
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatChip } from '@angular/material/chips';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { 
   WhatsAppTemplateApiService, 
   WhatsAppTemplateResponse
@@ -46,15 +46,24 @@ import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-
     MatIconButton,
     MatIcon,
     MatChip,
-    MatMenuTrigger,
-    MatMenu,
-    MatMenuItem,
+    CdkConnectedOverlay,
+    CdkOverlayOrigin,
     DsSkeletonComponent,
   ],
   templateUrl: './template-library.component.html',
   styleUrls: ['./template-library.component.css']
 })
 export class TemplateLibraryComponent implements OnInit {
+  private readonly overlay = inject(Overlay);
+
+  /** Menu actions par ligne tableau. */
+  tableRowMenuOpenForId: number | null = null;
+  readonly tableRowMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
+  readonly tableRowMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
+  ];
+
   templates: WhatsAppTemplateResponse[] = [];
   filteredTemplates: WhatsAppTemplateResponse[] = [];
   loading = false;
@@ -161,15 +170,28 @@ export class TemplateLibraryComponent implements OnInit {
     this.router.navigate(['/templates/create']);
   }
 
+  toggleTableRowMenu(templateId: number, event: MouseEvent): void {
+    event.stopPropagation();
+    this.tableRowMenuOpenForId =
+      this.tableRowMenuOpenForId === templateId ? null : templateId;
+  }
+
+  closeTableRowMenu(): void {
+    this.tableRowMenuOpenForId = null;
+  }
+
   editTemplate(template: WhatsAppTemplateResponse): void {
+    this.closeTableRowMenu();
     this.router.navigate(['/templates/edit', template.id]);
   }
 
   viewVersions(template: WhatsAppTemplateResponse): void {
+    this.closeTableRowMenu();
     this.router.navigate(['/templates', template.id, 'versions']);
   }
 
   submitForApproval(template: WhatsAppTemplateResponse): void {
+    this.closeTableRowMenu();
     if (confirm(`Submit template "${template.name}" for approval?`)) {
       this.templateService.submitForApproval(template.id).subscribe({
         next: (updated) => {
@@ -185,6 +207,7 @@ export class TemplateLibraryComponent implements OnInit {
   }
 
   pollApprovalStatus(template: WhatsAppTemplateResponse): void {
+    this.closeTableRowMenu();
     this.templateService.pollApprovalStatus(template.id).subscribe({
       next: (updated) => {
         this.snackBar.open(`Status updated: ${updated.status}`, 'Close', { duration: 3000 });
@@ -198,6 +221,7 @@ export class TemplateLibraryComponent implements OnInit {
   }
 
   activateTemplate(template: WhatsAppTemplateResponse): void {
+    this.closeTableRowMenu();
     this.templateService.activateTemplate(template.id).subscribe({
       next: (updated) => {
         this.snackBar.open('Template activated', 'Close', { duration: 3000 });
@@ -211,6 +235,7 @@ export class TemplateLibraryComponent implements OnInit {
   }
 
   pauseTemplate(template: WhatsAppTemplateResponse): void {
+    this.closeTableRowMenu();
     this.templateService.pauseTemplate(template.id).subscribe({
       next: (updated) => {
         this.snackBar.open('Template paused', 'Close', { duration: 3000 });
@@ -224,6 +249,7 @@ export class TemplateLibraryComponent implements OnInit {
   }
 
   deleteTemplate(template: WhatsAppTemplateResponse): void {
+    this.closeTableRowMenu();
     if (confirm(`Delete template "${template.name}"? This action cannot be undone.`)) {
       this.templateService.deleteTemplate(template.id).subscribe({
         next: () => {

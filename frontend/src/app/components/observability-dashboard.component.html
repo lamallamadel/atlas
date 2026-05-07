@@ -37,17 +37,41 @@
         Actualiser
       </ds-button>
 
-      <button
-        type="button"
-        class="obs-export-trigger"
-        [matMenuTriggerFor]="exportMenu"
-        aria-label="Exporter les métriques">
-        Exporter ▾
-      </button>
-      <mat-menu #exportMenu="matMenu">
-        <button mat-menu-item (click)="exportMetrics('csv')">CSV</button>
-        <button mat-menu-item (click)="exportMetrics('json')">JSON</button>
-      </mat-menu>
+      <span class="obs-export-menu-origin" cdkOverlayOrigin #exportMenuOrigin="cdkOverlayOrigin">
+        <button
+          type="button"
+          class="obs-export-trigger"
+          (click)="toggleExportMenu()"
+          [attr.aria-expanded]="exportMenuOpen"
+          aria-haspopup="menu"
+          aria-controls="obs-export-menu"
+          aria-label="Exporter les métriques">
+          <span>Exporter</span>
+          <ds-icon name="chevron-down" [size]="16" />
+        </button>
+      </span>
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="exportMenuOrigin"
+        [cdkConnectedOverlayOpen]="exportMenuOpen"
+        [cdkConnectedOverlayPositions]="exportMenuPositions"
+        [cdkConnectedOverlayScrollStrategy]="exportMenuScrollStrategy"
+        [cdkConnectedOverlayHasBackdrop]="true"
+        [cdkConnectedOverlayBackdropClass]="'obs-export-menu-backdrop'"
+        (backdropClick)="closeExportMenu()"
+        (detach)="closeExportMenu()"
+        (overlayKeydown)="$event.key === 'Escape' && closeExportMenu()">
+        <div id="obs-export-menu" class="obs-export-menu-dropdown" role="menu">
+          <button type="button" class="obs-export-menu-item" role="menuitem" (click)="exportMetrics('csv')">
+            <ds-icon name="table" [size]="16" aria-hidden="true" />
+            CSV
+          </button>
+          <button type="button" class="obs-export-menu-item" role="menuitem" (click)="exportMetrics('json')">
+            <ds-icon name="chart" [size]="16" aria-hidden="true" />
+            JSON
+          </button>
+        </div>
+      </ng-template>
     </div>
   </ds-page-header>
 
@@ -122,33 +146,15 @@
           <p class="obs-section__sub">Distribution P50 / P95 / P99 par canal.</p>
         </header>
 
-        <div class="obs-table-wrap">
-          <table mat-table [dataSource]="channelNames" class="obs-table">
-            <ng-container matColumnDef="channel">
-              <th mat-header-cell *matHeaderCellDef>Canal</th>
-              <td mat-cell *matCellDef="let channel">
-                <ds-badge status="info" size="sm">{{ channel }}</ds-badge>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="p50">
-              <th mat-header-cell *matHeaderCellDef>P50 (ms)</th>
-              <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.p50 | number:'1.2-2' }}</td>
-            </ng-container>
-            <ng-container matColumnDef="p95">
-              <th mat-header-cell *matHeaderCellDef>P95 (ms)</th>
-              <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.p95 | number:'1.2-2' }}</td>
-            </ng-container>
-            <ng-container matColumnDef="p99">
-              <th mat-header-cell *matHeaderCellDef>P99 (ms)</th>
-              <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.p99 | number:'1.2-2' }}</td>
-            </ng-container>
-            <ng-container matColumnDef="average">
-              <th mat-header-cell *matHeaderCellDef>Moyenne (ms)</th>
-              <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.average | number:'1.2-2' }}</td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="['channel', 'p50', 'p95', 'p99', 'average']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['channel', 'p50', 'p95', 'p99', 'average']"></tr>
-          </table>
+        <div class="obs-table-wrap obs-table-wrap--ds">
+          <ds-table
+            [columns]="latencyColumns"
+            [rows]="latencyTableRows"
+            [bordered]="true"
+            label="Latence par canal"
+            emptyMessage="Aucun canal"
+            [trackBy]="trackByLatencyChannel">
+          </ds-table>
         </div>
 
         <div class="obs-chart obs-chart--lg">
@@ -238,41 +244,15 @@
         </div>
 
         <h3 class="obs-section__sub-title">Messages DLQ récents</h3>
-        <div class="obs-table-wrap">
-          <table mat-table [dataSource]="metrics.dlqMetrics.recentDlqMessages" class="obs-table">
-            <ng-container matColumnDef="messageId">
-              <th mat-header-cell *matHeaderCellDef>ID Message</th>
-              <td mat-cell *matCellDef="let msg" class="obs-mono">{{ msg.messageId }}</td>
-            </ng-container>
-            <ng-container matColumnDef="channel">
-              <th mat-header-cell *matHeaderCellDef>Canal</th>
-              <td mat-cell *matCellDef="let msg">
-                <ds-badge status="info" size="sm">{{ msg.channel }}</ds-badge>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="errorCode">
-              <th mat-header-cell *matHeaderCellDef>Code</th>
-              <td mat-cell *matCellDef="let msg">
-                <ds-badge status="error" size="sm">{{ msg.errorCode }}</ds-badge>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="errorMessage">
-              <th mat-header-cell *matHeaderCellDef>Message</th>
-              <td mat-cell *matCellDef="let msg" class="obs-truncate" [matTooltip]="msg.errorMessage">
-                {{ msg.errorMessage }}
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="attemptCount">
-              <th mat-header-cell *matHeaderCellDef>Tentatives</th>
-              <td mat-cell *matCellDef="let msg">{{ msg.attemptCount }}</td>
-            </ng-container>
-            <ng-container matColumnDef="lastAttemptAt">
-              <th mat-header-cell *matHeaderCellDef>Dernière tentative</th>
-              <td mat-cell *matCellDef="let msg">{{ msg.lastAttemptAt | date:'short' }}</td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="['messageId','channel','errorCode','errorMessage','attemptCount','lastAttemptAt']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['messageId','channel','errorCode','errorMessage','attemptCount','lastAttemptAt']"></tr>
-          </table>
+        <div class="obs-table-wrap obs-table-wrap--ds">
+          <ds-table
+            [columns]="dlqColumns"
+            [rows]="dlqTableRows"
+            [bordered]="true"
+            label="Messages DLQ récents"
+            emptyMessage="Aucun message"
+            [trackBy]="trackByDlqMessage">
+          </ds-table>
         </div>
       </ds-card>
 

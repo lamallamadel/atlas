@@ -1,36 +1,35 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 import { KanbanBoardComponent } from './kanban-board.component';
 import {
   DossierApiService,
   DossierStatus,
 } from '../services/dossier-api.service';
 import { ToastNotificationService } from '../services/toast-notification.service';
-import { DragDropModule } from '@angular/cdk/drag-drop';
-import { MatIconModule } from '@angular/material/icon';
 
 describe('KanbanBoardComponent', () => {
   let component: KanbanBoardComponent;
   let fixture: ComponentFixture<KanbanBoardComponent>;
-  let mockDossierService: AngularVitestPartialMock<DossierApiService>;
-  let mockToastService: AngularVitestPartialMock<ToastNotificationService>;
+  let mockDossierService: Pick<DossierApiService, 'patchStatus'>;
+  let mockToastService: Pick<
+    ToastNotificationService,
+    'success' | 'error' | 'warning' | 'info'
+  >;
 
   beforeEach(async () => {
     mockDossierService = {
-      patchStatus: vi.fn().mockName('DossierApiService.patchStatus'),
+      patchStatus: () =>
+        of({ id: 1, status: DossierStatus.QUALIFYING, orgId: 'test' } as any),
     };
     mockToastService = {
-      success: vi.fn().mockName('ToastNotificationService.success'),
-      error: vi.fn().mockName('ToastNotificationService.error'),
-      warning: vi.fn().mockName('ToastNotificationService.warning'),
-      info: vi.fn().mockName('ToastNotificationService.info'),
+      success: (): string => '',
+      error: (): string => '',
+      warning: (): string => '',
+      info: (): string => '',
     };
 
     await TestBed.configureTestingModule({
-      imports: [
-        DragDropModule,
-        MatIconModule,
-        KanbanBoardComponent,
-      ],
+      imports: [KanbanBoardComponent],
       providers: [
         { provide: DossierApiService, useValue: mockDossierService },
         { provide: ToastNotificationService, useValue: mockToastService },
@@ -50,6 +49,7 @@ describe('KanbanBoardComponent', () => {
     expect(component.columns.length).toBe(6);
     expect(component.columns[0].id).toBe(DossierStatus.NEW);
     expect(component.columns[5].id).toBe(DossierStatus.LOST);
+    expect(component.dsKanbanColumns.length).toBe(6);
   });
 
   it('should distribute dossiers to columns', () => {
@@ -61,18 +61,21 @@ describe('KanbanBoardComponent', () => {
 
     const newColumn = component.columns.find((c) => c.id === DossierStatus.NEW);
     const qualifiedColumn = component.columns.find(
-      (c) => c.id === DossierStatus.QUALIFIED
+      (c) => c.id === DossierStatus.QUALIFIED,
     );
 
     expect(newColumn?.dossiers.length).toBe(1);
     expect(qualifiedColumn?.dossiers.length).toBe(1);
+    expect(
+      component.dsKanbanColumns.find((c) => c.id === DossierStatus.NEW)?.cards.length,
+    ).toBe(1);
   });
 
   it('should validate workflow transitions', () => {
     component.ngOnInit();
     const isAllowed = (component as any).isTransitionAllowed(
       DossierStatus.NEW,
-      DossierStatus.QUALIFYING
+      DossierStatus.QUALIFYING,
     );
     expect(isAllowed).toBe(true);
   });
@@ -81,16 +84,27 @@ describe('KanbanBoardComponent', () => {
     component.ngOnInit();
     const isAllowed = (component as any).isTransitionAllowed(
       DossierStatus.WON,
-      DossierStatus.NEW
+      DossierStatus.NEW,
     );
     expect(isAllowed).toBe(false);
   });
 
-  it('should emit dossierClick event on card click', () => {
-    vi.spyOn(component.dossierClick, 'emit');
-    const dossier = { id: 1, status: DossierStatus.NEW } as any;
-    component.onCardClick(dossier);
-    expect(component.dossierClick.emit).toHaveBeenCalledWith(dossier);
+  it('should emit dossierClick event on kanban card click', () => {
+    let emitted: unknown;
+    const sub = component.dossierClick.subscribe((d) => {
+      emitted = d;
+    });
+    fixture.componentRef.setInput('dossiers', [
+      { id: 1, status: DossierStatus.NEW, orgId: 'test', leadName: 'Test' } as any,
+    ]);
+    component.ngOnInit();
+    component.onKanbanCardClick({
+      id: 1,
+      title: 'Test',
+      status: DossierStatus.NEW,
+    });
+    expect((emitted as { id: number }).id).toBe(1);
+    sub.unsubscribe();
   });
 
   it('should apply quick filter', () => {
@@ -119,10 +133,11 @@ describe('KanbanBoardComponent', () => {
       },
     });
 
-    const newColumn = component.filteredColumns.find(
-      (c) => c.id === DossierStatus.NEW
-    );
+    const newColumn = component.filteredColumns.find((c) => c.id === DossierStatus.NEW);
     expect(newColumn?.dossiers.length).toBe(1);
     expect(newColumn?.dossiers[0].leadName).toBe('John Doe');
+    expect(
+      component.dsKanbanColumns.find((c) => c.id === DossierStatus.NEW)?.cards.length,
+    ).toBe(1);
   });
 });

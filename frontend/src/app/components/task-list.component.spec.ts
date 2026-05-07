@@ -5,9 +5,7 @@ import { TaskListComponent } from './task-list.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FullCalendarModule } from '@fullcalendar/angular';
 import { TaskCardComponent } from './task-card.component';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { OAuthService } from 'angular-oauth2-oidc';
 import {
   provideHttpClient,
@@ -24,9 +22,7 @@ describe('TaskListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MatDialogModule,
-        MatCheckboxModule,
         BrowserAnimationsModule,
-        FullCalendarModule,
         TaskListComponent,
         TaskCardComponent,
       ],
@@ -49,17 +45,13 @@ describe('TaskListComponent', () => {
         {
           provide: OAuthService,
           useValue: {
-            initCodeFlow: vi.fn().mockName('OAuthService.initCodeFlow'),
-            loadDiscoveryDocumentAndTryLogin: vi
-              .fn()
-              .mockName('OAuthService.loadDiscoveryDocumentAndTryLogin'),
-            hasValidAccessToken: vi
-              .fn()
-              .mockName('OAuthService.hasValidAccessToken'),
-            configure: vi.fn().mockName('OAuthService.configure'),
-            setStorage: vi.fn().mockName('OAuthService.setStorage'),
-            logOut: vi.fn().mockName('OAuthService.logOut'),
-            getAccessToken: vi.fn().mockName('OAuthService.getAccessToken'),
+            initCodeFlow: (): void => {},
+            loadDiscoveryDocumentAndTryLogin: (): void => {},
+            hasValidAccessToken: (): boolean => false,
+            configure: (): void => {},
+            setStorage: (): void => {},
+            logOut: (): void => {},
+            getAccessToken: (): string => '',
           },
         },
         provideHttpClient(withInterceptorsFromDi()),

@@ -1,37 +1,61 @@
 <div class="api-status-indicator" [class]="getStatusClass()">
-  <button
-    mat-button
-    [matMenuTriggerFor]="statusMenu"
-    class="status-button"
-    [matTooltip]="getTooltipText()"
-    matTooltipPosition="below">
-    <span class="status-dot"></span>
-    <span class="status-text">{{ getStatusText() }}</span>
-  </button>
+  <span class="api-status-menu-origin" cdkOverlayOrigin #apiStatusOrigin="cdkOverlayOrigin">
+    <button
+      type="button"
+      mat-button
+      class="status-button"
+      (click)="toggleStatusMenu()"
+      [attr.aria-expanded]="statusMenuOpen"
+      aria-haspopup="menu"
+      aria-controls="api-status-menu"
+      [attr.title]="getTooltipText()">
+      <span class="status-dot"></span>
+      <span class="status-text">{{ getStatusText() }}</span>
+    </button>
+  </span>
 
-  <mat-menu #statusMenu="matMenu">
-    <div class="status-menu-content" mat-menu-item disabled>
-      <div class="status-info">
-        <mat-icon [class]="getStatusClass()">
-          {{ apiStatus === 'connected' ? 'check_circle' : apiStatus === 'disconnected' ? 'error' : 'sync' }}
-        </mat-icon>
-        <div class="status-details">
-          <div class="status-label">{{ getStatusText() }}</div>
-          @if (lastChecked) {
-            <div class="status-timestamp">
-              Dernière vérification: {{ lastChecked | date:'short' }}
-            </div>
-          }
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="apiStatusOrigin"
+    [cdkConnectedOverlayOpen]="statusMenuOpen"
+    [cdkConnectedOverlayPositions]="statusMenuPositions"
+    [cdkConnectedOverlayScrollStrategy]="statusMenuScrollStrategy"
+    [cdkConnectedOverlayHasBackdrop]="true"
+    [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
+    (backdropClick)="closeStatusMenu()"
+    (detach)="closeStatusMenu()"
+    (overlayKeydown)="$event.key === 'Escape' && closeStatusMenu()">
+    <div id="api-status-menu" class="api-status-dropdown" role="menu">
+      <div class="status-menu-content" aria-hidden="false">
+        <div class="status-info">
+          <ds-icon
+            class="status-menu-leading-icon"
+            [class.status-connected]="apiStatus === 'connected'"
+            [class.status-disconnected]="apiStatus === 'disconnected'"
+            [class.status-checking]="apiStatus === 'checking'"
+            [name]="statusMenuIcon()"
+            [size]="24"
+            aria-hidden="true" />
+          <div class="status-details">
+            <div class="status-label">{{ getStatusText() }}</div>
+            @if (lastChecked) {
+              <div class="status-timestamp">
+                Dernière vérification: {{ lastChecked | date:'short' }}
+              </div>
+            }
+          </div>
         </div>
       </div>
+      <div class="api-status-dropdown-divider" role="separator"></div>
+      <button
+        type="button"
+        class="api-status-menu-item"
+        role="menuitem"
+        (click)="checkApiConnection()"
+        [disabled]="apiStatus === 'checking'">
+        <ds-icon name="refresh" [size]="20" aria-hidden="true" />
+        <span>Actualiser</span>
+      </button>
     </div>
-    <mat-divider></mat-divider>
-    <button
-      mat-menu-item
-      (click)="checkApiConnection()"
-      [disabled]="apiStatus === 'checking'">
-      <mat-icon>refresh</mat-icon>
-      <span>Actualiser</span>
-    </button>
-  </mat-menu>
+  </ng-template>
 </div>

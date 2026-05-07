@@ -2,11 +2,23 @@
   <form [formGroup]="filterForm" class="filter-form">
     <!-- Logic Operator Toggle -->
     <div class="logic-operator-section">
-      <span class="logic-label" id="logic-operator-label">Conditions:</span>
-      <mat-button-toggle-group formControlName="logicOperator" aria-labelledby="logic-operator-label">
-        <mat-button-toggle value="AND">ET (AND)</mat-button-toggle>
-        <mat-button-toggle value="OR">OU (OR)</mat-button-toggle>
-      </mat-button-toggle-group>
+      <span class="logic-label" id="logic-operator-label">Conditions :</span>
+      <div class="logic-toggle" role="group" aria-labelledby="logic-operator-label">
+        <ds-button
+          size="sm"
+          [variant]="filterForm.get('logicOperator')?.value === 'AND' ? 'marine' : 'ghost'"
+          [attr.aria-pressed]="filterForm.get('logicOperator')?.value === 'AND'"
+          (dsClick)="setLogicOperator('AND')">
+          ET (AND)
+        </ds-button>
+        <ds-button
+          size="sm"
+          [variant]="filterForm.get('logicOperator')?.value === 'OR' ? 'marine' : 'ghost'"
+          [attr.aria-pressed]="filterForm.get('logicOperator')?.value === 'OR'"
+          (dsClick)="setLogicOperator('OR')">
+          OU (OR)
+        </ds-button>
+      </div>
     </div>
 
     <!-- Conditions List -->
@@ -43,17 +55,21 @@
               <div class="value-input">
                 <!-- Text Input -->
                 @if (getFieldType(i) === 'text') {
-                  <mat-form-field appearance="outline" class="value-field">
-                    <mat-label>Valeur</mat-label>
-                    <input matInput formControlName="value" placeholder="Entrer une valeur">
-                  </mat-form-field>
+                  <ds-input
+                    class="value-field"
+                    label="Valeur"
+                    placeholder="Entrer une valeur"
+                    formControlName="value">
+                  </ds-input>
                 }
-                <!-- Number Input -->
                 @if (getFieldType(i) === 'number') {
-                  <mat-form-field appearance="outline" class="value-field">
-                    <mat-label>Valeur</mat-label>
-                    <input matInput type="number" formControlName="value" placeholder="Entrer un nombre">
-                  </mat-form-field>
+                  <ds-input
+                    class="value-field"
+                    label="Valeur"
+                    type="number"
+                    placeholder="Entrer un nombre"
+                    formControlName="value">
+                  </ds-input>
                 }
                 <!-- Date Input -->
                 @if (getFieldType(i) === 'date') {
@@ -102,17 +118,15 @@
                 }
               </div>
             }
-            <!-- Remove Button -->
-            <button
-              mat-icon-button
-              color="warn"
-              type="button"
-              (click)="removeCondition(i)"
-              [disabled]="conditions.length === 1"
+            <ds-button
+              variant="icon"
+              size="sm"
               class="remove-btn"
-              aria-label="Supprimer la condition">
-              <mat-icon>delete</mat-icon>
-            </button>
+              ariaLabel="Supprimer la condition"
+              [disabled]="conditions.length === 1"
+              (dsClick)="removeCondition(i)">
+              <ds-icon name="trash" [size]="20"></ds-icon>
+            </ds-button>
           </div>
           <!-- Logic Operator Separator (except for last item) -->
           @if (i < conditions.length - 1) {
@@ -126,15 +140,10 @@
 
     <!-- Add Condition Button -->
     <div class="add-condition-section">
-      <button
-        mat-stroked-button
-        color="primary"
-        type="button"
-        (click)="addCondition()"
-        aria-label="Ajouter une condition">
-        <mat-icon>add</mat-icon>
+      <ds-button variant="ghost" size="md" ariaLabel="Ajouter une condition" (dsClick)="addCondition()">
+        <ds-icon name="plus" [size]="20"></ds-icon>
         Ajouter une condition
-      </button>
+      </ds-button>
     </div>
 
     <!-- Result Count -->
@@ -143,7 +152,7 @@
         <ds-card class="count-card" [pad]="true" [elevation]="'xs'">
             <div class="count-content">
               @if (!countLoading) {
-                <mat-icon class="count-icon">filter_list</mat-icon>
+                <ds-icon name="filter" [size]="24" class="count-icon"></ds-icon>
               }
               @if (countLoading) {
                 <ds-skeleton variant="circle" width="24px" height="24px"></ds-skeleton>
@@ -165,35 +174,29 @@
 
     <!-- Action Buttons -->
     <div class="action-buttons">
-      <button
-        mat-raised-button
-        color="primary"
-        type="button"
-        (click)="applyFilter()"
+      <ds-button
+        variant="marine"
+        size="md"
         [disabled]="!filterForm.valid"
-        aria-label="Appliquer les filtres">
-        <mat-icon>check</mat-icon>
+        ariaLabel="Appliquer les filtres"
+        (dsClick)="applyFilter()">
+        <ds-icon name="check" [size]="20"></ds-icon>
         Appliquer
-      </button>
+      </ds-button>
 
-      <button
-        mat-button
-        type="button"
-        (click)="clearFilter()"
-        aria-label="Réinitialiser les filtres">
-        <mat-icon>clear</mat-icon>
+      <ds-button variant="ghost" size="md" ariaLabel="Réinitialiser les filtres" (dsClick)="clearFilter()">
+        <ds-icon name="close" [size]="20"></ds-icon>
         Réinitialiser
-      </button>
+      </ds-button>
 
-      <button
-        mat-button
-        type="button"
-        (click)="copyUrlToClipboard()"
+      <ds-button
+        variant="ghost"
+        size="md"
         [disabled]="!filterForm.valid"
-        aria-label="Copier l'URL du filtre">
-        <mat-icon>link</mat-icon>
+        ariaLabel="Copier l'URL du filtre"
+        (dsClick)="copyUrlToClipboard()">
         Partager
-      </button>
+      </ds-button>
     </div>
   </form>
 </div>

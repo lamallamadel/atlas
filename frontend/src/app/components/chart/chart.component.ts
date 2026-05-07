@@ -1,11 +1,9 @@
-import { Component, ElementRef, AfterViewInit, OnDestroy, OnChanges, SimpleChanges, HostListener, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, AfterViewInit, OnDestroy, OnChanges, SimpleChanges, HostListener, input, output, viewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
 import { dsChartSeriesRgba, dsRgba, resolveDsToken } from '../../design-system/chart-ds-colors';
+import { DsIconComponent } from '../../design-system/icons/ds-icon.component';
 
 Chart.register(...registerables);
 
@@ -40,11 +38,21 @@ export interface ChartExportOptions {
 @Component({
     selector: 'app-chart',
     standalone: true,
-    imports: [CommonModule, MatIconModule, MatButtonModule, MatMenuModule, MatTooltipModule],
+    imports: [CommonModule, CdkConnectedOverlay, CdkOverlayOrigin, DsIconComponent],
     templateUrl: './chart.component.html',
     styleUrls: ['./chart.component.css'],
 })
 export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
+  private readonly overlay = inject(Overlay);
+
+  readonly chartExportMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
+  readonly chartExportMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
+  ];
+
+  chartExportMenuOpen = false;
+
   readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chartCanvas');
 
   readonly type = input<ChartType>('bar');
@@ -339,7 +347,16 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
     }
   }
 
+  toggleChartExportMenu(): void {
+    this.chartExportMenuOpen = !this.chartExportMenuOpen;
+  }
+
+  closeChartExportMenu(): void {
+    this.chartExportMenuOpen = false;
+  }
+
   async exportChart(options: ChartExportOptions = {}): Promise<void> {
+    this.closeChartExportMenu();
     if (!this.chart) return;
 
     const format = options.format || 'png';

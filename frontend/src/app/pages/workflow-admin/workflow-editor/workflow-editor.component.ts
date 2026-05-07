@@ -4,19 +4,15 @@ import { CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
 import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, WorkflowNode, TransitionRule } from '../models/workflow.model';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatIconButton } from '@angular/material/button';
 import { WorkflowNodeComponent } from '../workflow-node/workflow-node.component';
-import { DsCardComponent } from '../../../design-system';
-import { MatDivider } from '@angular/material/list';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatChipListbox, MatChip } from '@angular/material/chips';
+import { DsBadgeComponent, DsButtonComponent, DsCardComponent, DsIconComponent } from '../../../design-system';
 import { DecimalPipe } from '@angular/common';
 
 @Component({
     selector: 'app-workflow-editor',
     templateUrl: './workflow-editor.component.html',
     styleUrls: ['./workflow-editor.component.css'],
-    imports: [MatIcon, MatButton, WorkflowNodeComponent, MatIconButton, DsCardComponent, MatDivider, MatTooltip, MatChipListbox, MatChip, DecimalPipe]
+    imports: [MatIcon, WorkflowNodeComponent, DsCardComponent, DsButtonComponent, DsIconComponent, DsBadgeComponent, DecimalPipe]
 })
 export class WorkflowEditorComponent implements OnInit, OnDestroy {
   readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');

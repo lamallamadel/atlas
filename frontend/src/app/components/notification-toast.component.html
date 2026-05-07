@@ -18,18 +18,20 @@
           (swipeRight)="onSwipeRight(toast)">
           <div class="toast-content">
             <div class="toast-icon" [attr.aria-hidden]="true">
-              <mat-icon>{{ getIcon(toast.type) }}</mat-icon>
+              <ds-icon [name]="getIcon(toast.type)" [size]="24"></ds-icon>
             </div>
             <div class="toast-body">
               <div class="toast-message">{{ toast.message }}</div>
               @if (toast.action) {
-                <button
-                  type="button"
-                  class="toast-action-button"
-                  (click)="onAction(toast)"
-                  [attr.aria-label]="toast.action.label">
+                <ds-button
+                  class="toast-action"
+                  [variant]="actionVariant(toast.type)"
+                  size="sm"
+                  [nativeType]="'button'"
+                  [ariaLabel]="toast.action.label"
+                  (dsClick)="onAction(toast)">
                   {{ toast.action.label }}
-                </button>
+                </ds-button>
               }
             </div>
             @if (toast.dismissible) {
@@ -39,7 +41,7 @@
                 (click)="onDismiss(toast)"
                 aria-label="Fermer la notification"
                 [attr.aria-describedby]="'toast-message-' + toast.id">
-                <mat-icon>close</mat-icon>
+                <ds-icon name="close" [size]="20"></ds-icon>
               </button>
             }
           </div>

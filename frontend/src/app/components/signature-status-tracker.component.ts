@@ -4,7 +4,6 @@ import { DsCardComponent } from '../design-system';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { ESignatureApiService } from '../services/esignature-api.service';
 import { SignatureRequest, SignatureStatus } from '../models/esignature.models';
 import { interval, Subscription } from 'rxjs';
@@ -19,7 +18,6 @@ import { switchMap } from 'rxjs/operators';
     MatIconModule,
     MatButtonModule,
     MatChipsModule,
-    MatTooltipModule
   ],
   template: `
     <div class="signature-tracker-container">

@@ -5,11 +5,11 @@ import { ToastNotificationService } from '../services/toast-notification.service
 import { MatDialog } from '@angular/material/dialog';
 import { AppointmentFormDialogComponent, AppointmentFormData } from './appointment-form-dialog.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { MatIcon } from '@angular/material/icon';
-import { MatChip } from '@angular/material/chips';
-import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DsEmptyStateComponent } from '../design-system/primitives/ds-empty-state/ds-empty-state.component';
+import { DsBadgeComponent, DsBadgeStatus } from '../design-system/primitives/ds-badge/ds-badge.component';
+import { DsButtonComponent } from '../design-system/primitives/ds-button/ds-button.component';
+import { DsIconComponent } from '../design-system/icons/ds-icon.component';
 
 interface AppointmentGroup {
   date: Date;
@@ -21,7 +21,13 @@ interface AppointmentGroup {
     selector: 'app-calendar-list-view',
     templateUrl: './calendar-list-view.component.html',
     styleUrls: ['./calendar-list-view.component.css'],
-    imports: [DsSkeletonComponent, MatIcon, MatChip, MatIconButton, MatTooltip]
+    imports: [
+      DsSkeletonComponent,
+      DsEmptyStateComponent,
+      DsBadgeComponent,
+      DsButtonComponent,
+      DsIconComponent,
+    ],
 })
 export class CalendarListViewComponent implements OnInit, OnDestroy {
   readonly filterByAssignedTo = input<string | null>(null);
@@ -40,12 +46,6 @@ export class CalendarListViewComponent implements OnInit, OnDestroy {
   isLoading = false;
   isMobile = false;
   expandedGroups = new Set<string>();
-
-  readonly statusColors = {
-    [AppointmentStatus.SCHEDULED]: '#2196F3',
-    [AppointmentStatus.COMPLETED]: '#4CAF50',
-    [AppointmentStatus.CANCELLED]: '#9E9E9E'
-  };
 
   readonly statusLabels = {
     [AppointmentStatus.SCHEDULED]: 'Planifié',
@@ -203,12 +203,24 @@ export class CalendarListViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  getStatusColor(status: AppointmentStatus): string {
-    return this.statusColors[status] || '#757575';
-  }
-
   getStatusLabel(status: AppointmentStatus): string {
     return this.statusLabels[status] || status;
+  }
+
+  getAppointmentBadgeStatus(status: AppointmentStatus): DsBadgeStatus {
+    switch (status) {
+      case AppointmentStatus.COMPLETED:
+        return 'success';
+      case AppointmentStatus.CANCELLED:
+        return 'archived';
+      case AppointmentStatus.SCHEDULED:
+      default:
+        return 'rdv';
+    }
+  }
+
+  appointmentStatusClass(status: AppointmentStatus): string {
+    return String(status).toLowerCase();
   }
 
   toggleGroup(dateLabel: string): void {

@@ -16,7 +16,13 @@
 
 .logic-label {
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--ds-text);
+}
+
+.logic-toggle {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .conditions-list {
@@ -97,10 +103,6 @@
   color: white;
 }
 
-.count-card ::ng-deep .mat-mdc-card-content {
-  padding: 12px 16px !important;
-}
-
 .count-content {
   display: flex;
   align-items: center;
@@ -108,9 +110,8 @@
 }
 
 .count-icon {
-  font-size: 24px;
-  width: 24px;
-  height: 24px;
+  flex-shrink: 0;
+  color: inherit;
 }
 
 .count-text {

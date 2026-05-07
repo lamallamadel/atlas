@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { MatIcon } from '@angular/material/icon';
+import { DsIconComponent } from '../design-system';
 
 interface NavItem {
   label: string;
+  /** Clé `ds-icon` */
   icon: string;
   route: string;
   badge?: number;
@@ -24,7 +25,7 @@ interface NavItem {
             [attr.aria-current]="isActive(item.route) ? 'page' : null"
             type="button">
             <div class="nav-icon-wrapper">
-              <mat-icon [attr.aria-hidden]="true">{{ item.icon }}</mat-icon>
+              <ds-icon [name]="item.icon" [size]="24" [attr.aria-hidden]="true"></ds-icon>
               @if (item.badge && item.badge > 0) {
                 <span class="badge" [attr.aria-label]="item.badge + ' notifications'">
                   {{ item.badge > 99 ? '99+' : item.badge }}
@@ -106,10 +107,8 @@ interface NavItem {
       justify-content: center;
     }
 
-    .nav-item mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
+    .nav-item ds-icon {
+      display: flex;
     }
 
     .nav-label {
@@ -162,17 +161,17 @@ interface NavItem {
       }
     }
   `],
-    imports: [MatIcon]
+    imports: [DsIconComponent]
 })
 export class MobileBottomNavigationComponent implements OnInit {
   currentRoute = '';
   shouldShowNav = true;
 
   navItems: NavItem[] = [
-    { label: 'Tableau de bord', icon: 'dashboard', route: '/dashboard' },
+    { label: 'Tableau de bord', icon: 'chart', route: '/dashboard' },
     { label: 'Dossiers', icon: 'folder', route: '/dossiers' },
-    { label: 'Annonces', icon: 'home', route: '/annonces' },
-    { label: 'Plus', icon: 'menu', route: '/menu' }
+    { label: 'Annonces', icon: 'megaphone', route: '/annonces' },
+    { label: 'Plus', icon: 'bars-asc', route: '/menu' }
   ];
 
   constructor(private router: Router) {}

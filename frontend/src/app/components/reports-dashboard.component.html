@@ -11,385 +11,377 @@
             [matDatepicker]="fromPicker"
             [ngModel]="parseDate(dateFrom)"
             (ngModelChange)="dateFrom = formatDate($event)"
-            aria-label="Start date for filter"
-            >
-            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
-            <mat-datepicker #fromPicker></mat-datepicker>
-          </mat-form-field>
+            aria-label="Start date for filter" />
+          <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
 
-          <mat-form-field appearance="outline" class="date-field">
-            <mat-label>To Date</mat-label>
-            <input
-              matInput
-              [matDatepicker]="toPicker"
-              [ngModel]="parseDate(dateTo)"
-              (ngModelChange)="dateTo = formatDate($event)"
-              aria-label="End date for filter"
-              >
-              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
-              <mat-datepicker #toPicker></mat-datepicker>
-            </mat-form-field>
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>To Date</mat-label>
+          <input
+            matInput
+            [matDatepicker]="toPicker"
+            [ngModel]="parseDate(dateTo)"
+            (ngModelChange)="dateTo = formatDate($event)"
+            aria-label="End date for filter" />
+          <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
 
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="applyDateFilter()"
-              aria-label="Apply date filter"
-              class="apply-filter-btn"
-              >
-              <mat-icon>filter_alt</mat-icon>
-              Apply
-            </button>
-          </div>
+        <ds-button
+          class="apply-filter-btn"
+          variant="marine"
+          size="md"
+          ariaLabel="Apply date filter"
+          (dsClick)="applyDateFilter()">
+          <ds-icon name="filter" [size]="16" />
+          Apply
+        </ds-button>
+      </div>
 
-          <div class="export-controls">
-            <button
-              mat-stroked-button
-              (click)="exportToCSV()"
-              [disabled]="loading || !analyticsData || exportingCSV || exportingPDF"
-              aria-label="Export to CSV"
-              class="export-btn"
-              >
-              @if (!exportingCSV) {
-                <mat-icon>table_chart</mat-icon>
-              }
-              @if (exportingCSV) {
-                <ds-skeleton variant="circle" width="20px" height="20px" style="display: inline-block;"></ds-skeleton>
-              }
-              <span [style.margin-left.px]="exportingCSV ? 8 : 0">{{ exportingCSV ? 'Exporting...' : 'Export CSV' }}</span>
-            </button>
-            <button
-              mat-stroked-button
-              (click)="exportToPDF()"
-              [disabled]="loading || !analyticsData || exportingPDF || exportingCSV"
-              aria-label="Export to PDF"
-              class="export-btn"
-              >
-              @if (!exportingPDF) {
-                <mat-icon>picture_as_pdf</mat-icon>
-              }
-              @if (exportingPDF) {
-                <ds-skeleton variant="circle" width="20px" height="20px" style="display: inline-block;"></ds-skeleton>
-              }
-              <span [style.margin-left.px]="exportingPDF ? 8 : 0">{{ exportingPDF ? 'Exporting...' : 'Export PDF' }}</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      @if (loading) {
-        <div class="loading-container">
-          <app-loading-skeleton variant="dashboard-kpi" aria-label="Loading analytics data"></app-loading-skeleton>
-          <app-loading-skeleton variant="card" [rows]="3" style="margin-top: 24px;" aria-label="Loading charts"></app-loading-skeleton>
-        </div>
-      }
-
-      @if (error) {
-        <div class="error-message" role="alert" aria-live="assertive">
-          <ds-card [pad]="false" [elevation]="'xs'">
-            <div class="rpt-card-body">
-              <mat-icon color="warn">error</mat-icon>
-              <p>{{ error }}</p>
-            </div>
-          </ds-card>
-        </div>
-      }
-
-      @if (!loading && !error) {
-        <main class="dashboard-content">
-          <section class="kpi-cards" aria-label="Key performance indicators" role="list">
-            <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Average response time: ' + (kpiReport?.averageResponseTimeHours?.toFixed(2) || 0) + ' hours'">
-              <div class="rpt-card-header">
-                <mat-icon class="kpi-icon" color="primary">schedule</mat-icon>
-                <div class="rpt-card-title">
-                  <h3>Avg Response Time</h3>
-                </div>
-              </div>
-              <div class="rpt-card-body">
-                <div class="kpi-value" aria-live="polite">{{ kpiReport?.averageResponseTimeHours?.toFixed(2) || 0 }}</div>
-                <div class="kpi-unit" aria-hidden="true">hours</div>
-              </div>
-            </ds-card>
-            <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Appointment show rate: ' + (kpiReport?.appointmentShowRate?.toFixed(1) || 0) + ' percent'">
-              <div class="rpt-card-header">
-                <mat-icon class="kpi-icon" color="accent">event_available</mat-icon>
-                <div class="rpt-card-title">
-                  <h3>Appointment Show Rate</h3>
-                </div>
-              </div>
-              <div class="rpt-card-body">
-                <div class="kpi-value" aria-live="polite">{{ kpiReport?.appointmentShowRate?.toFixed(1) || 0 }}%</div>
-                <div class="kpi-unit" aria-hidden="true">completed</div>
-              </div>
-            </ds-card>
-            <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Pipeline velocity: ' + (kpiReport?.pipelineVelocityDays?.toFixed(1) || 0) + ' days to close'">
-              <div class="rpt-card-header">
-                <mat-icon class="kpi-icon" style="color: #FF9800;">speed</mat-icon>
-                <div class="rpt-card-title">
-                  <h3>Pipeline Velocity</h3>
-                </div>
-              </div>
-              <div class="rpt-card-body">
-                <div class="kpi-value" aria-live="polite">{{ kpiReport?.pipelineVelocityDays?.toFixed(1) || 0 }}</div>
-                <div class="kpi-unit" aria-hidden="true">days to close</div>
-              </div>
-            </ds-card>
-            <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Overall conversion rate: ' + (pipelineSummary?.overallConversionRate?.toFixed(1) || 0) + ' percent'">
-              <div class="rpt-card-header">
-                <mat-icon class="kpi-icon" style="color: #4CAF50;">trending_up</mat-icon>
-                <div class="rpt-card-title">
-                  <h3>Overall Conversion</h3>
-                </div>
-              </div>
-              <div class="rpt-card-body">
-                <div class="kpi-value" aria-live="polite">{{ pipelineSummary?.overallConversionRate?.toFixed(1) || 0 }}%</div>
-                <div class="kpi-unit" aria-hidden="true">win rate</div>
-              </div>
-            </ds-card>
-          </section>
-          <div class="charts-grid">
-            <ds-card [pad]="false" [elevation]="'xs'" class="chart-card clickable" [matTooltip]="'Click on a stage to view filtered dossiers'">
-              <div class="rpt-card-header">
-                <div class="rpt-card-title">
-                  <mat-icon class="chart-icon">filter_list</mat-icon>
-                  Conversion Funnel by Stage
-                </div>
-                <button mat-icon-button [matMenuTriggerFor]="funnelMenu" aria-label="Chart options">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #funnelMenu="matMenu">
-                  <button mat-menu-item (click)="exportToCSV()">
-                    <mat-icon>download</mat-icon>
-                    Export Data
-                  </button>
-                </mat-menu>
-              </div>
-              <div class="rpt-card-body">
-                <div class="chart-container">
-                  <canvas
-                    #conversionFunnelCanvas
-                    baseChart
-                    [data]="conversionFunnelChartData"
-                    [options]="conversionFunnelChartOptions"
-                    [type]="conversionFunnelChartType">
-                  </canvas>
-                </div>
-              </div>
-            </ds-card>
-            <ds-card [pad]="false" [elevation]="'xs'" class="chart-card">
-              <div class="rpt-card-header">
-                <div class="rpt-card-title">
-                  <mat-icon class="chart-icon">people</mat-icon>
-                  Agent Performance Comparison
-                </div>
-                <button mat-icon-button [matMenuTriggerFor]="agentMenu" aria-label="Chart options">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #agentMenu="matMenu">
-                  <button mat-menu-item (click)="exportToCSV()">
-                    <mat-icon>download</mat-icon>
-                    Export Data
-                  </button>
-                </mat-menu>
-              </div>
-              <div class="rpt-card-body">
-                <div class="chart-container">
-                  <canvas
-                    #agentPerformanceCanvas
-                    baseChart
-                    [data]="agentPerformanceChartData"
-                    [options]="agentPerformanceChartOptions"
-                    [type]="agentPerformanceChartType">
-                  </canvas>
-                </div>
-              </div>
-            </ds-card>
-            <ds-card [pad]="false" [elevation]="'xs'" class="chart-card chart-card-wide">
-              <div class="rpt-card-header">
-                <div class="rpt-card-title">
-                  <mat-icon class="chart-icon">show_chart</mat-icon>
-                  Revenue Forecast Over Time
-                </div>
-                <button mat-icon-button [matMenuTriggerFor]="revenueMenu" aria-label="Chart options">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #revenueMenu="matMenu">
-                  <button mat-menu-item (click)="exportToCSV()">
-                    <mat-icon>download</mat-icon>
-                    Export Data
-                  </button>
-                </mat-menu>
-              </div>
-              <div class="rpt-card-body">
-                <div class="chart-container">
-                  <canvas
-                    #revenueForecastCanvas
-                    baseChart
-                    [data]="revenueForecastChartData"
-                    [options]="revenueForecastChartOptions"
-                    [type]="revenueForecastChartType">
-                  </canvas>
-                </div>
-              </div>
-            </ds-card>
-            <ds-card [pad]="false" [elevation]="'xs'" class="chart-card clickable" [matTooltip]="'Click on a source to view filtered dossiers'">
-              <div class="rpt-card-header">
-                <div class="rpt-card-title">
-                  <mat-icon class="chart-icon">pie_chart</mat-icon>
-                  Lead Sources Distribution
-                </div>
-                <button mat-icon-button [matMenuTriggerFor]="sourceMenu" aria-label="Chart options">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #sourceMenu="matMenu">
-                  <button mat-menu-item (click)="exportToCSV()">
-                    <mat-icon>download</mat-icon>
-                    Export Data
-                  </button>
-                </mat-menu>
-              </div>
-              <div class="rpt-card-body">
-                <div class="chart-container">
-                  <canvas
-                    #leadSourceCanvas
-                    baseChart
-                    [data]="leadSourceChartData"
-                    [options]="leadSourceChartOptions"
-                    [type]="leadSourceChartType">
-                  </canvas>
-                </div>
-              </div>
-            </ds-card>
-          </div>
-          <div class="detailed-metrics">
-            <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card">
-              <div class="rpt-card-header">
-                <div class="rpt-card-title">
-                  <mat-icon class="chart-icon">leaderboard</mat-icon>
-                  Agent Performance Details
-                </div>
-              </div>
-              <div class="rpt-card-body">
-                <div class="table-container">
-                  <table mat-table [dataSource]="analyticsData?.agentPerformance || []" class="metrics-table">
-                    <ng-container matColumnDef="agentName">
-                      <th mat-header-cell *matHeaderCellDef>Agent Name</th>
-                      <td mat-cell *matCellDef="let element">{{ element.agentName }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="totalDossiers">
-                      <th mat-header-cell *matHeaderCellDef>Total Dossiers</th>
-                      <td mat-cell *matCellDef="let element">{{ element.totalDossiers }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="closedDossiers">
-                      <th mat-header-cell *matHeaderCellDef>Closed</th>
-                      <td mat-cell *matCellDef="let element">{{ element.closedDossiers }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="conversionRate">
-                      <th mat-header-cell *matHeaderCellDef>Conversion Rate</th>
-                      <td mat-cell *matCellDef="let element">
-                        <span class="conversion-rate" [class.high]="element.conversionRate >= 50" [class.medium]="element.conversionRate >= 25 && element.conversionRate < 50">
-                          {{ element.conversionRate.toFixed(1) }}%
-                        </span>
-                      </td>
-                    </ng-container>
-                    <ng-container matColumnDef="averageResponseTimeHours">
-                      <th mat-header-cell *matHeaderCellDef>Avg Response Time</th>
-                      <td mat-cell *matCellDef="let element">{{ element.averageResponseTimeHours.toFixed(1) }}h</td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="['agentName', 'totalDossiers', 'closedDossiers', 'conversionRate', 'averageResponseTimeHours']"></tr>
-                    <tr mat-row *matRowDef="let row; columns: ['agentName', 'totalDossiers', 'closedDossiers', 'conversionRate', 'averageResponseTimeHours'];"></tr>
-                  </table>
-                </div>
-              </div>
-            </ds-card>
-            <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card">
-              <div class="rpt-card-header">
-                <div class="rpt-card-title">
-                  <mat-icon class="chart-icon">source</mat-icon>
-                  Lead Sources Breakdown
-                </div>
-              </div>
-              <div class="rpt-card-body">
-                <div class="table-container">
-                  <table mat-table [dataSource]="analyticsData?.leadSources || []" class="metrics-table">
-                    <ng-container matColumnDef="source">
-                      <th mat-header-cell *matHeaderCellDef>Source</th>
-                      <td mat-cell *matCellDef="let element">
-                        <button mat-button class="source-link" (click)="drillDownToSource(element.source)">
-                          {{ element.source }}
-                          <mat-icon>open_in_new</mat-icon>
-                        </button>
-                      </td>
-                    </ng-container>
-                    <ng-container matColumnDef="count">
-                      <th mat-header-cell *matHeaderCellDef>Count</th>
-                      <td mat-cell *matCellDef="let element">{{ element.count }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="percentage">
-                      <th mat-header-cell *matHeaderCellDef>Percentage</th>
-                      <td mat-cell *matCellDef="let element">
-                        <div class="percentage-bar">
-                          <div class="percentage-fill" [style.width.%]="element.percentage"></div>
-                          <span class="percentage-text">{{ element.percentage.toFixed(1) }}%</span>
-                        </div>
-                      </td>
-                    </ng-container>
-                    <ng-container matColumnDef="conversionRate">
-                      <th mat-header-cell *matHeaderCellDef>Conversion Rate</th>
-                      <td mat-cell *matCellDef="let element">{{ element.conversionRate.toFixed(1) }}%</td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="['source', 'count', 'percentage', 'conversionRate']"></tr>
-                    <tr mat-row *matRowDef="let row; columns: ['source', 'count', 'percentage', 'conversionRate'];"></tr>
-                  </table>
-                </div>
-              </div>
-            </ds-card>
-            <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card chart-card-wide">
-              <div class="rpt-card-header">
-                <div class="rpt-card-title">
-                  <mat-icon class="chart-icon">insights</mat-icon>
-                  Conversion Funnel Metrics
-                </div>
-              </div>
-              <div class="rpt-card-body">
-                <div class="table-container">
-                  <table mat-table [dataSource]="analyticsData?.conversionFunnel || []" class="metrics-table">
-                    <ng-container matColumnDef="stage">
-                      <th mat-header-cell *matHeaderCellDef>Stage</th>
-                      <td mat-cell *matCellDef="let element">
-                        <button mat-button class="source-link" (click)="drillDownToStage(element.stage)">
-                          {{ element.stage }}
-                          <mat-icon>open_in_new</mat-icon>
-                        </button>
-                      </td>
-                    </ng-container>
-                    <ng-container matColumnDef="count">
-                      <th mat-header-cell *matHeaderCellDef>Count</th>
-                      <td mat-cell *matCellDef="let element">{{ element.count }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="conversionRate">
-                      <th mat-header-cell *matHeaderCellDef>Conversion Rate</th>
-                      <td mat-cell *matCellDef="let element">
-                        <span class="conversion-rate" [class.high]="element.conversionRate >= 70" [class.medium]="element.conversionRate >= 40 && element.conversionRate < 70">
-                          {{ element.conversionRate.toFixed(1) }}%
-                        </span>
-                      </td>
-                    </ng-container>
-                    <ng-container matColumnDef="dropOffRate">
-                      <th mat-header-cell *matHeaderCellDef>Drop-off Rate</th>
-                      <td mat-cell *matCellDef="let element">
-                        <span class="dropoff-rate" [class.high]="element.dropOffRate >= 30" [class.medium]="element.dropOffRate >= 15 && element.dropOffRate < 30">
-                          {{ element.dropOffRate.toFixed(1) }}%
-                        </span>
-                      </td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="['stage', 'count', 'conversionRate', 'dropOffRate']"></tr>
-                    <tr mat-row *matRowDef="let row; columns: ['stage', 'count', 'conversionRate', 'dropOffRate'];"></tr>
-                  </table>
-                </div>
-              </div>
-            </ds-card>
-          </div>
-        </main>
-      }
+      <div class="export-controls">
+        <ds-button
+          variant="ghost"
+          size="md"
+          ariaLabel="Export to CSV"
+          [disabled]="loading || !analyticsData || exportingCSV || exportingPDF"
+          (dsClick)="exportToCSV()">
+          @if (!exportingCSV) {
+            <ds-icon name="table" [size]="16" />
+          }
+          @if (exportingCSV) {
+            <ds-skeleton variant="circle" width="20px" height="20px" style="display: inline-block" />
+          }
+          <span [style.margin-left.px]="exportingCSV ? 8 : 0">{{ exportingCSV ? 'Exporting...' : 'Export CSV' }}</span>
+        </ds-button>
+        <ds-button
+          variant="ghost"
+          size="md"
+          ariaLabel="Export to PDF"
+          [disabled]="loading || !analyticsData || exportingPDF || exportingCSV"
+          (dsClick)="exportToPDF()">
+          @if (!exportingPDF) {
+            <ds-icon name="file-pdf" [size]="16" />
+          }
+          @if (exportingPDF) {
+            <ds-skeleton variant="circle" width="20px" height="20px" style="display: inline-block" />
+          }
+          <span [style.margin-left.px]="exportingPDF ? 8 : 0">{{ exportingPDF ? 'Exporting...' : 'Export PDF' }}</span>
+        </ds-button>
+      </div>
     </div>
+  </header>
+
+  @if (loading) {
+    <div class="loading-container">
+      <app-loading-skeleton variant="dashboard-kpi" aria-label="Loading analytics data"></app-loading-skeleton>
+      <app-loading-skeleton variant="card" [rows]="3" style="margin-top: 24px" aria-label="Loading charts"></app-loading-skeleton>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error-message" role="alert" aria-live="assertive">
+      <ds-card [pad]="false" [elevation]="'xs'">
+        <div class="rpt-card-body">
+          <ds-icon class="rpt-error-icon" name="alert-circle" [size]="24" ariaLabel="Erreur" />
+          <p>{{ error }}</p>
+        </div>
+      </ds-card>
+    </div>
+  }
+
+  @if (!loading && !error) {
+    <main class="dashboard-content">
+      <section class="kpi-cards" aria-label="Key performance indicators" role="list">
+        <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Average response time: ' + (kpiReport?.averageResponseTimeHours?.toFixed(2) || 0) + ' hours'">
+          <div class="rpt-card-header">
+            <ds-icon class="kpi-icon kpi-icon--marine" name="clock" [size]="24" />
+            <div class="rpt-card-title">
+              <h3>Avg Response Time</h3>
+            </div>
+          </div>
+          <div class="rpt-card-body">
+            <div class="kpi-value" aria-live="polite">{{ kpiReport?.averageResponseTimeHours?.toFixed(2) || 0 }}</div>
+            <div class="kpi-unit" aria-hidden="true">hours</div>
+          </div>
+        </ds-card>
+        <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Appointment show rate: ' + (kpiReport?.appointmentShowRate?.toFixed(1) || 0) + ' percent'">
+          <div class="rpt-card-header">
+            <ds-icon class="kpi-icon kpi-icon--primary" name="calendar" [size]="24" />
+            <div class="rpt-card-title">
+              <h3>Appointment Show Rate</h3>
+            </div>
+          </div>
+          <div class="rpt-card-body">
+            <div class="kpi-value" aria-live="polite">{{ kpiReport?.appointmentShowRate?.toFixed(1) || 0 }}%</div>
+            <div class="kpi-unit" aria-hidden="true">completed</div>
+          </div>
+        </ds-card>
+        <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Pipeline velocity: ' + (kpiReport?.pipelineVelocityDays?.toFixed(1) || 0) + ' days to close'">
+          <div class="rpt-card-header">
+            <ds-icon class="kpi-icon kpi-icon--warning" name="gauge" [size]="24" />
+            <div class="rpt-card-title">
+              <h3>Pipeline Velocity</h3>
+            </div>
+          </div>
+          <div class="rpt-card-body">
+            <div class="kpi-value" aria-live="polite">{{ kpiReport?.pipelineVelocityDays?.toFixed(1) || 0 }}</div>
+            <div class="kpi-unit" aria-hidden="true">days to close</div>
+          </div>
+        </ds-card>
+        <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Overall conversion rate: ' + (pipelineSummary?.overallConversionRate?.toFixed(1) || 0) + ' percent'">
+          <div class="rpt-card-header">
+            <ds-icon class="kpi-icon kpi-icon--success" name="trending-up" [size]="24" />
+            <div class="rpt-card-title">
+              <h3>Overall Conversion</h3>
+            </div>
+          </div>
+          <div class="rpt-card-body">
+            <div class="kpi-value" aria-live="polite">{{ pipelineSummary?.overallConversionRate?.toFixed(1) || 0 }}%</div>
+            <div class="kpi-unit" aria-hidden="true">win rate</div>
+          </div>
+        </ds-card>
+      </section>
+      <div class="charts-grid">
+        <ds-card [pad]="false" [elevation]="'xs'" class="chart-card clickable"
+          [attr.title]="'Click on a stage to view filtered dossiers'">
+          <div class="rpt-card-header">
+            <div class="rpt-card-title">
+              <ds-icon class="chart-icon" name="filter" [size]="20" />
+              Conversion Funnel by Stage
+            </div>
+            <span class="rpt-chart-menu-origin" cdkOverlayOrigin #funnelChartMenuOrigin="cdkOverlayOrigin">
+              <button type="button" class="rpt-menu-trigger" (click)="toggleChartMenu('funnel')"
+                [attr.aria-expanded]="chartMenu.funnel" aria-haspopup="menu" aria-controls="rpt-funnel-chart-menu"
+                aria-label="Chart options">
+                <ds-icon name="more-vertical" [size]="20" aria-hidden="true" />
+              </button>
+            </span>
+            <ng-template
+              cdkConnectedOverlay
+              [cdkConnectedOverlayOrigin]="funnelChartMenuOrigin"
+              [cdkConnectedOverlayOpen]="chartMenu.funnel"
+              [cdkConnectedOverlayPositions]="chartMenuPositions"
+              [cdkConnectedOverlayScrollStrategy]="chartMenuScrollStrategy"
+              [cdkConnectedOverlayHasBackdrop]="true"
+              [cdkConnectedOverlayBackdropClass]="'rpt-chart-menu-backdrop'"
+              (backdropClick)="closeAllChartMenus()"
+              (detach)="closeAllChartMenus()"
+              (overlayKeydown)="$event.key === 'Escape' && closeAllChartMenus()">
+              <div id="rpt-funnel-chart-menu" class="rpt-chart-menu-dropdown" role="menu">
+                <button type="button" class="rpt-chart-menu-item" role="menuitem" (click)="exportToCSV()">
+                  <ds-icon name="download" [size]="16" aria-hidden="true" />
+                  Export Data
+                </button>
+              </div>
+            </ng-template>
+          </div>
+          <div class="rpt-card-body">
+            <div class="chart-container">
+              <canvas
+                #conversionFunnelCanvas
+                baseChart
+                [data]="conversionFunnelChartData"
+                [options]="conversionFunnelChartOptions"
+                [type]="conversionFunnelChartType">
+              </canvas>
+            </div>
+          </div>
+        </ds-card>
+        <ds-card [pad]="false" [elevation]="'xs'" class="chart-card">
+          <div class="rpt-card-header">
+            <div class="rpt-card-title">
+              <ds-icon class="chart-icon" name="users" [size]="20" />
+              Agent Performance Comparison
+            </div>
+            <span class="rpt-chart-menu-origin" cdkOverlayOrigin #agentChartMenuOrigin="cdkOverlayOrigin">
+              <button type="button" class="rpt-menu-trigger" (click)="toggleChartMenu('agent')"
+                [attr.aria-expanded]="chartMenu.agent" aria-haspopup="menu" aria-controls="rpt-agent-chart-menu"
+                aria-label="Chart options">
+                <ds-icon name="more-vertical" [size]="20" aria-hidden="true" />
+              </button>
+            </span>
+            <ng-template
+              cdkConnectedOverlay
+              [cdkConnectedOverlayOrigin]="agentChartMenuOrigin"
+              [cdkConnectedOverlayOpen]="chartMenu.agent"
+              [cdkConnectedOverlayPositions]="chartMenuPositions"
+              [cdkConnectedOverlayScrollStrategy]="chartMenuScrollStrategy"
+              [cdkConnectedOverlayHasBackdrop]="true"
+              [cdkConnectedOverlayBackdropClass]="'rpt-chart-menu-backdrop'"
+              (backdropClick)="closeAllChartMenus()"
+              (detach)="closeAllChartMenus()"
+              (overlayKeydown)="$event.key === 'Escape' && closeAllChartMenus()">
+              <div id="rpt-agent-chart-menu" class="rpt-chart-menu-dropdown" role="menu">
+                <button type="button" class="rpt-chart-menu-item" role="menuitem" (click)="exportToCSV()">
+                  <ds-icon name="download" [size]="16" aria-hidden="true" />
+                  Export Data
+                </button>
+              </div>
+            </ng-template>
+          </div>
+          <div class="rpt-card-body">
+            <div class="chart-container">
+              <canvas
+                #agentPerformanceCanvas
+                baseChart
+                [data]="agentPerformanceChartData"
+                [options]="agentPerformanceChartOptions"
+                [type]="agentPerformanceChartType">
+              </canvas>
+            </div>
+          </div>
+        </ds-card>
+        <ds-card [pad]="false" [elevation]="'xs'" class="chart-card chart-card-wide">
+          <div class="rpt-card-header">
+            <div class="rpt-card-title">
+              <ds-icon class="chart-icon" name="chart" [size]="20" />
+              Revenue Forecast Over Time
+            </div>
+            <span class="rpt-chart-menu-origin" cdkOverlayOrigin #revenueChartMenuOrigin="cdkOverlayOrigin">
+              <button type="button" class="rpt-menu-trigger" (click)="toggleChartMenu('revenue')"
+                [attr.aria-expanded]="chartMenu.revenue" aria-haspopup="menu" aria-controls="rpt-revenue-chart-menu"
+                aria-label="Chart options">
+                <ds-icon name="more-vertical" [size]="20" aria-hidden="true" />
+              </button>
+            </span>
+            <ng-template
+              cdkConnectedOverlay
+              [cdkConnectedOverlayOrigin]="revenueChartMenuOrigin"
+              [cdkConnectedOverlayOpen]="chartMenu.revenue"
+              [cdkConnectedOverlayPositions]="chartMenuPositions"
+              [cdkConnectedOverlayScrollStrategy]="chartMenuScrollStrategy"
+              [cdkConnectedOverlayHasBackdrop]="true"
+              [cdkConnectedOverlayBackdropClass]="'rpt-chart-menu-backdrop'"
+              (backdropClick)="closeAllChartMenus()"
+              (detach)="closeAllChartMenus()"
+              (overlayKeydown)="$event.key === 'Escape' && closeAllChartMenus()">
+              <div id="rpt-revenue-chart-menu" class="rpt-chart-menu-dropdown" role="menu">
+                <button type="button" class="rpt-chart-menu-item" role="menuitem" (click)="exportToCSV()">
+                  <ds-icon name="download" [size]="16" aria-hidden="true" />
+                  Export Data
+                </button>
+              </div>
+            </ng-template>
+          </div>
+          <div class="rpt-card-body">
+            <div class="chart-container">
+              <canvas
+                #revenueForecastCanvas
+                baseChart
+                [data]="revenueForecastChartData"
+                [options]="revenueForecastChartOptions"
+                [type]="revenueForecastChartType">
+              </canvas>
+            </div>
+          </div>
+        </ds-card>
+        <ds-card [pad]="false" [elevation]="'xs'" class="chart-card clickable"
+          [attr.title]="'Click on a source to view filtered dossiers'">
+          <div class="rpt-card-header">
+            <div class="rpt-card-title">
+              <ds-icon class="chart-icon" name="pie-chart" [size]="20" />
+              Lead Sources Distribution
+            </div>
+            <span class="rpt-chart-menu-origin" cdkOverlayOrigin #sourceChartMenuOrigin="cdkOverlayOrigin">
+              <button type="button" class="rpt-menu-trigger" (click)="toggleChartMenu('source')"
+                [attr.aria-expanded]="chartMenu.source" aria-haspopup="menu" aria-controls="rpt-source-chart-menu"
+                aria-label="Chart options">
+                <ds-icon name="more-vertical" [size]="20" aria-hidden="true" />
+              </button>
+            </span>
+            <ng-template
+              cdkConnectedOverlay
+              [cdkConnectedOverlayOrigin]="sourceChartMenuOrigin"
+              [cdkConnectedOverlayOpen]="chartMenu.source"
+              [cdkConnectedOverlayPositions]="chartMenuPositions"
+              [cdkConnectedOverlayScrollStrategy]="chartMenuScrollStrategy"
+              [cdkConnectedOverlayHasBackdrop]="true"
+              [cdkConnectedOverlayBackdropClass]="'rpt-chart-menu-backdrop'"
+              (backdropClick)="closeAllChartMenus()"
+              (detach)="closeAllChartMenus()"
+              (overlayKeydown)="$event.key === 'Escape' && closeAllChartMenus()">
+              <div id="rpt-source-chart-menu" class="rpt-chart-menu-dropdown" role="menu">
+                <button type="button" class="rpt-chart-menu-item" role="menuitem" (click)="exportToCSV()">
+                  <ds-icon name="download" [size]="16" aria-hidden="true" />
+                  Export Data
+                </button>
+              </div>
+            </ng-template>
+          </div>
+          <div class="rpt-card-body">
+            <div class="chart-container">
+              <canvas
+                #leadSourceCanvas
+                baseChart
+                [data]="leadSourceChartData"
+                [options]="leadSourceChartOptions"
+                [type]="leadSourceChartType">
+              </canvas>
+            </div>
+          </div>
+        </ds-card>
+      </div>
+      <div class="detailed-metrics">
+        <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card">
+          <div class="rpt-card-header">
+            <div class="rpt-card-title">
+              <ds-icon class="chart-icon" name="bars-asc" [size]="20" />
+              Agent Performance Details
+            </div>
+          </div>
+          <div class="rpt-card-body rpt-table-body">
+            <ds-table
+              [columns]="agentDetailColumns"
+              [rows]="agentDetailRows"
+              [bordered]="true"
+              label="Agent performance details"
+              emptyMessage="Aucune donnée"
+              [trackBy]="trackByAgentDetail">
+            </ds-table>
+          </div>
+        </ds-card>
+        <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card">
+          <div class="rpt-card-header">
+            <div class="rpt-card-title">
+              <ds-icon class="chart-icon" name="search" [size]="20" />
+              Lead Sources Breakdown
+            </div>
+          </div>
+          <div class="rpt-card-body rpt-table-body">
+            <ds-table
+              [columns]="leadSourceColumns"
+              [rows]="leadSourceRows"
+              [rowClickable]="true"
+              [bordered]="true"
+              label="Lead sources"
+              emptyMessage="Aucune donnée"
+              [trackBy]="trackByLeadSourceRow"
+              (rowClick)="onLeadSourceRowClick($event)">
+            </ds-table>
+          </div>
+        </ds-card>
+        <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card chart-card-wide">
+          <div class="rpt-card-header">
+            <div class="rpt-card-title">
+              <ds-icon class="chart-icon" name="chart" [size]="20" />
+              Conversion Funnel Metrics
+            </div>
+          </div>
+          <div class="rpt-card-body rpt-table-body">
+            <ds-table
+              [columns]="funnelColumns"
+              [rows]="funnelRows"
+              [rowClickable]="true"
+              [bordered]="true"
+              label="Conversion funnel metrics"
+              emptyMessage="Aucune donnée"
+              [trackBy]="trackByFunnelRow"
+              (rowClick)="onFunnelRowClick($event)">
+            </ds-table>
+          </div>
+        </ds-card>
+      </div>
+    </main>
+  }
+</div>

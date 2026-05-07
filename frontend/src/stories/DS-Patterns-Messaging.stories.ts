@@ -59,6 +59,31 @@ export const MessagingThreadEmpty: StoryObj = {
   }),
 };
 
+export const MessagingThreadNoAvatar: StoryObj = {
+  name: 'MessagingThread / Dense no avatar',
+  render: () => ({
+    moduleMetadata: { imports: [MessagingThreadComponent] },
+    template: `
+      <div style="max-width:580px;padding:32px;background:var(--ds-bg)">
+        <ds-messaging-thread [messages]="messages" [showAvatars]="false" ariaLabel="Conversation compacte">
+        </ds-messaging-thread>
+      </div>`,
+    props: {
+      messages: [
+        ...MESSAGES,
+        {
+          id: 5,
+          senderName: 'Alice Moreau',
+          content: 'Super. Je vous partage aussi le plan du bien et les charges estimées.',
+          direction: 'outbound',
+          time: '10:13',
+          status: 'read',
+        },
+      ] as DsMessage[],
+    },
+  }),
+};
+
 export default {
   title: 'Design System/Patterns/Messaging & Timeline',
   tags: ['autodocs'],

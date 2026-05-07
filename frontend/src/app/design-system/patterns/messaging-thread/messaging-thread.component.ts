@@ -25,7 +25,9 @@ export interface DsMessage {
           <div class="ds-thread__bubble">
             <p class="ds-thread__text">{{ msg.content }}</p>
             @if (msg.time) {
-              <time class="ds-thread__time">{{ msg.time }}</time>
+              <div class="ds-thread__meta">
+                <time class="ds-thread__time">{{ msg.time }}</time>
+              </div>
             }
           </div>
         </div>

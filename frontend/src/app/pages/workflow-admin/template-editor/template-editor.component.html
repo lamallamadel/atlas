@@ -1,8 +1,8 @@
 <div class="template-editor-container">
   <div class="editor-header">
-    <button mat-icon-button (click)="cancel()">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
+    <ds-button variant="icon" size="sm" ariaLabel="Retour" (dsClick)="cancel()">
+      <ds-icon name="chevron-left" [size]="16"></ds-icon>
+    </ds-button>
     <h2>{{ isEditMode ? 'Edit Template' : isViewMode ? 'View Template' : 'Create Template' }}</h2>
   </div>
 
@@ -68,8 +68,8 @@
               <mat-label>Header (Optional)</mat-label>
               <input matInput formControlName="headerText" placeholder="Welcome to our service!">
               <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('headerText')"
-                matTooltip="Insert variable">
-                <mat-icon>add_circle_outline</mat-icon>
+                title="Insert variable">
+                <ds-icon name="plus" [size]="16"></ds-icon>
               </button>
             </mat-form-field>
 
@@ -78,8 +78,8 @@
               <textarea matInput formControlName="bodyText" rows="5"
               placeholder="Hello, your order has been confirmed."></textarea>
               <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('bodyText')"
-                matTooltip="Insert variable">
-                <mat-icon>add_circle_outline</mat-icon>
+                title="Insert variable">
+                <ds-icon name="plus" [size]="16"></ds-icon>
               </button>
               <mat-hint>Use double curly braces for placeholders</mat-hint>
               @if (templateForm.get('bodyText')?.hasError('required')) {
@@ -93,8 +93,8 @@
               <mat-label>Footer (Optional)</mat-label>
               <input matInput formControlName="footerText" placeholder="Thank you for your business">
               <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('footerText')"
-                matTooltip="Insert variable">
-                <mat-icon>add_circle_outline</mat-icon>
+                title="Insert variable">
+                <ds-icon name="plus" [size]="16"></ds-icon>
               </button>
             </mat-form-field>
           </div>
@@ -103,9 +103,9 @@
         <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
           <div class="te-card-header">
             <h3 class="te-card-title">Buttons (Optional)</h3>
-            <button mat-icon-button type="button" (click)="addButton()" [disabled]="isViewMode">
-              <mat-icon>add</mat-icon>
-            </button>
+            <ds-button variant="icon" size="sm" ariaLabel="Ajouter bouton" (dsClick)="addButton()" [disabled]="isViewMode">
+              <ds-icon name="plus" [size]="16"></ds-icon>
+            </ds-button>
           </div>
           <div class="te-card-body">
             <div formArrayName="buttons" class="buttons-list">
@@ -137,9 +137,9 @@
                       <input matInput formControlName="phoneNumber" placeholder="+1234567890">
                     </mat-form-field>
                   }
-                  <button mat-icon-button type="button" (click)="removeButton(i)" color="warn" [disabled]="isViewMode">
-                    <mat-icon>delete</mat-icon>
-                  </button>
+                  <ds-button variant="icon" size="sm" ariaLabel="Supprimer bouton" (dsClick)="removeButton(i)" [disabled]="isViewMode">
+                    <ds-icon name="trash" [size]="16"></ds-icon>
+                  </ds-button>
                 </div>
               }
             </div>
@@ -149,9 +149,9 @@
         <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
           <div class="te-card-header">
             <h3 class="te-card-title">Variables</h3>
-            <button mat-icon-button type="button" (click)="addVariable()" [disabled]="isViewMode">
-              <mat-icon>add</mat-icon>
-            </button>
+            <ds-button variant="icon" size="sm" ariaLabel="Ajouter variable" (dsClick)="addVariable()" [disabled]="isViewMode">
+              <ds-icon name="plus" [size]="16"></ds-icon>
+            </ds-button>
           </div>
           <div class="te-card-body">
             <div formArrayName="variables" cdkDropList (cdkDropListDropped)="onVariableDrop($event)" class="variables-list">
@@ -180,9 +180,9 @@
                     <input matInput formControlName="exampleValue" placeholder="John Doe">
                   </mat-form-field>
                   <mat-checkbox formControlName="isRequired">Required</mat-checkbox>
-                  <button mat-icon-button type="button" (click)="removeVariable(i)" color="warn" [disabled]="isViewMode">
-                    <mat-icon>delete</mat-icon>
-                  </button>
+                  <ds-button variant="icon" size="sm" ariaLabel="Supprimer variable" (dsClick)="removeVariable(i)" [disabled]="isViewMode">
+                    <ds-icon name="trash" [size]="16"></ds-icon>
+                  </ds-button>
                 </div>
               }
               @if (variables.length === 0) {
@@ -195,10 +195,10 @@
         </ds-card>
 
         <div class="form-actions">
-          <button mat-button type="button" (click)="cancel()">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="loading || isViewMode">
+          <ds-button variant="ghost" size="md" (dsClick)="cancel()">Cancel</ds-button>
+          <ds-button variant="marine" size="md" nativeType="submit" [disabled]="loading || isViewMode">
             {{ isEditMode ? 'Update' : 'Create' }} Template
-          </button>
+          </ds-button>
         </div>
       </form>
     </div>

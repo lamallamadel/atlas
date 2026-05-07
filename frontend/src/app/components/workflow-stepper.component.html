@@ -1,14 +1,14 @@
 <div class="workflow" role="group" aria-label="Progression du dossier">
   <div class="workflow-header">
     <div class="workflow-title">
-      <mat-icon aria-hidden="true">timeline</mat-icon>
+      <ds-icon name="chart" [size]="20" aria-hidden="true" />
       <span>Pipeline dossier</span>
     </div>
     @if (status()) {
       <div class="workflow-meta">
         @if (isClosed) {
           <span class="workflow-chip" [ngClass]="closeVariantClass">
-            <mat-icon aria-hidden="true">{{ isWon ? 'check_circle' : 'cancel' }}</mat-icon>
+            <ds-icon [name]="isWon ? 'check' : 'close'" [size]="16" aria-hidden="true" />
             <span>{{ isWon ? 'Gagné' : 'Perdu' }}</span>
           </span>
         }
@@ -23,23 +23,14 @@
     <div class="workflow-bar" [style.width.%]="progressPercent"></div>
   </div>
 
-  <ol class="workflow-steps">
-    @for (step of steps; track step; let i = $index) {
-      <li
-        class="workflow-step"
-        [class.completed]="i < currentIndex"
-        [class.active]="i === currentIndex">
-        <div class="step-dot" aria-hidden="true">
-          <mat-icon>{{ stepIcon(step) }}</mat-icon>
-        </div>
-        <div class="step-label">{{ stepLabel(step) }}</div>
-      </li>
-    }
-  </ol>
+  <ds-stage-stepper
+    class="workflow-stages"
+    [stages]="dsStages"
+    ariaLabel="Étapes du pipeline dossier" />
 
   @if (hint) {
     <div class="workflow-hint">
-      <mat-icon aria-hidden="true">tips_and_updates</mat-icon>
+      <ds-icon name="info" [size]="20" aria-hidden="true" />
       <span>{{ hint }}</span>
     </div>
   }

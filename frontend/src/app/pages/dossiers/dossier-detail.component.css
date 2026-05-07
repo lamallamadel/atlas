@@ -10,7 +10,36 @@
   margin: 0 auto;
 }
 .page-content { width: 100%; }
-.detail-content { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+
+/* ── ds-entity-detail-layout (pilote 4.3) ── */
+.dd-layout {
+  display: block;
+}
+.dd-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--ds-space-3);
+  width: 100%;
+}
+.dd-left-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+.dd-meta-card .dd-meta-body {
+  padding: var(--ds-space-4);
+}
+.dd-center-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
+  min-width: 0;
+}
+.messages-thread-card {
+  display: block;
+}
 
 /* Retour */
 .link-back {
@@ -22,18 +51,7 @@
 .link-back:hover { text-decoration: underline; }
 .arrow-left { font-size: 14px; }
 
-/* En-tete dossier */
-.dossier-header {
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-divider);
-  border-radius: var(--ds-radius-lg, 12px);
-  padding: var(--ds-space-5);
-  display: flex; flex-direction: column; gap: var(--ds-space-4);
-}
-.header-line-1 {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: var(--ds-space-3);
-}
+/* En-tête : topbar + carte résumé (colonnes layout) */
 .title-and-badge { display: flex; align-items: center; gap: var(--ds-space-3); flex-wrap: wrap; }
 .dossier-title {
   font-size: 20px; font-weight: 700;

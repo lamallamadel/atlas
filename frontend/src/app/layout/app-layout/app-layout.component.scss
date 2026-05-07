@@ -5,6 +5,48 @@
   height: 100%;
 }
 
+/* Garde-fou overflow horizontal limité au shell Pro. */
+:host ::ng-deep .mat-drawer-container,
+:host ::ng-deep .mat-sidenav-container,
+:host ::ng-deep .mat-drawer-content,
+:host ::ng-deep .mat-sidenav-content {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Animation backdrop sidenav — scoppée au shell Pro. */
+:host ::ng-deep .mat-drawer-backdrop {
+  animation: fadeIn 250ms ease-out;
+}
+
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--ds-primary);
+  color: var(--ds-text-inverse);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  text-decoration: none;
+  z-index: 10000;
+  font-weight: 500;
+  border-radius: 0 0 var(--ds-radius-sm) 0;
+}
+
+.skip-to-content:focus {
+  top: 0;
+  outline: 2px solid var(--ds-text-inverse);
+  outline-offset: -2px;
+}
+
+:host-context(.dark-theme) .skip-to-content {
+  background: var(--ds-primary);
+  color: var(--ds-text-inverse);
+}
+
+:host-context(.dark-theme) .skip-to-content:focus {
+  outline: 2px solid color-mix(in oklab, var(--ds-primary-hl) 70%, white);
+}
+
 .sidenav-container {
   height: 100vh;
   width: 100%;
@@ -44,30 +86,66 @@
 
 .nav-list {
   padding: var(--ds-space-4) var(--ds-space-2) var(--ds-space-2);
+  display: flex;
+  flex-direction: column;
 }
 
-.nav-list a {
+.layout-divider {
+  height: 1px;
+  margin: var(--ds-space-2) var(--ds-space-4);
+  background: var(--ds-divider);
+  flex-shrink: 0;
+}
+
+.menu-divider {
+  height: 1px;
+  margin: 0;
+  background: var(--ds-divider);
+  border: none;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
   margin: var(--ds-space-1) var(--ds-space-2);
-  padding-inline: var(--ds-space-3) !important;
+  padding: var(--ds-space-2) var(--ds-space-3) !important;
   min-height: 42px;
   border-radius: var(--ds-radius-lg) !important;
   color: var(--ds-text-muted) !important;
+  text-decoration: none;
+  box-sizing: border-box;
   transition:
     background var(--ds-transition-fast),
     color var(--ds-transition-fast),
     transform var(--ds-transition-fast);
 }
 
-.nav-list a mat-icon {
+.nav-link:focus-visible {
+  outline: 2px solid var(--ds-primary);
+  outline-offset: 2px;
+}
+
+.nav-link-icon {
+  flex-shrink: 0;
+}
+
+.nav-link-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-link .nav-link-icon,
+.nav-link ds-icon {
   color: inherit;
 }
 
-.nav-list a:hover {
+.nav-link:hover {
   background: var(--ds-primary-subtle) !important;
   color: var(--ds-text) !important;
 }
 
-.nav-list a.active {
+.nav-link.active {
   background: linear-gradient(
     135deg,
     color-mix(in oklab, var(--ds-primary-hl) 72%, white),
@@ -78,7 +156,8 @@
   box-shadow: inset 3px 0 0 var(--ds-primary);
 }
 
-.nav-list a.active mat-icon {
+.nav-link.active .nav-link-icon,
+.nav-link.active ds-icon {
   color: var(--ds-primary) !important;
 }
 
@@ -105,6 +184,10 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
   min-height: 56px !important;
   height: auto;
   padding: 0 var(--ds-space-4) !important;
@@ -118,17 +201,9 @@
   border-bottom: 1px solid color-mix(in oklab, white 10%, transparent);
 }
 
-:host ::ng-deep .top-toolbar.mat-toolbar {
-  --mat-toolbar-container-background-color: transparent !important;
-  --mat-toolbar-container-text-color: var(--ds-text-inverse);
-}
-
-:host ::ng-deep .top-toolbar.mat-primary {
-  --mat-sys-primary: var(--ds-text-inverse);
-}
-
 :host ::ng-deep .top-toolbar .mat-icon,
-:host ::ng-deep .top-toolbar mat-icon {
+:host ::ng-deep .top-toolbar mat-icon,
+:host ::ng-deep .top-toolbar ds-icon {
   color: var(--ds-text-inverse) !important;
 }
 
@@ -162,7 +237,33 @@
 }
 
 /* ── Menus utilisateur / aide ── */
-.help-menu-header {
+.help-menu-anchor {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+/* Backdrop des overlays du shell (aide, notifications, utilisateur). */
+:host ::ng-deep .cdk-overlay-backdrop.shell-toolbar-overlay-backdrop {
+  background: color-mix(in oklab, var(--ds-marine, #0f2744) 42%, transparent);
+}
+
+:host-context(.dark-theme) ::ng-deep .cdk-overlay-backdrop.shell-toolbar-overlay-backdrop {
+  background: color-mix(in oklab, black 55%, transparent);
+}
+
+.help-menu-dropdown {
+  min-width: 260px;
+  max-width: min(320px, 92vw);
+  background: var(--ds-surface-elevated);
+  color: var(--ds-text-primary);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-lg);
+  border: 1px solid var(--ds-border-subtle);
+  overflow: hidden;
+}
+
+.help-menu-dropdown .help-menu-header {
   display: flex;
   align-items: center;
   gap: var(--ds-space-3);
@@ -172,8 +273,9 @@
   cursor: default;
   pointer-events: none;
 
-  mat-icon {
+  ds-icon {
     color: var(--ds-marine);
+    flex-shrink: 0;
   }
 
   span {
@@ -181,20 +283,38 @@
   }
 }
 
-:host ::ng-deep .help-menu {
-  .mat-mdc-menu-item {
-    display: flex;
-    align-items: center;
-    gap: var(--ds-space-3);
-    padding: var(--ds-space-3) var(--ds-space-4);
+.help-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  width: 100%;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: var(--ds-text-primary);
+  transition: background-color var(--ds-transition-fast);
 
-    mat-icon {
-      margin-right: 0;
-    }
+  ds-icon {
+    flex-shrink: 0;
+    margin-right: 0;
+    color: var(--ds-marine);
+  }
 
-    &:hover {
-      background-color: color-mix(in oklab, var(--ds-marine-hl) 35%, transparent);
-    }
+  &:hover {
+    background: var(--ds-primary-subtle);
+  }
+
+  &:hover ds-icon {
+    color: var(--ds-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ds-focus-ring, var(--ds-primary));
+    outline-offset: -2px;
   }
 }
 
@@ -204,9 +324,26 @@
   gap: var(--ds-space-1);
 }
 
+.submenu-arrow {
+  margin-left: auto;
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: transform var(--ds-transition-fast);
+}
+
+.submenu-arrow-open {
+  transform: rotate(90deg);
+}
+
 .user-menu-container {
   position: relative;
   margin-left: var(--ds-space-4);
+}
+
+.user-menu-anchor {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 }
 
 .user-menu-button {
@@ -226,30 +363,84 @@
   height: 32px;
 }
 
-:host ::ng-deep .help-menu-header,
-:host ::ng-deep .help-menu-header mat-icon {
+.user-menu-button ds-icon {
+  width: 32px;
+  height: 32px;
+}
+
+:host ::ng-deep .help-menu-dropdown .help-menu-header ds-icon {
   color: var(--ds-marine) !important;
 }
 
-:host ::ng-deep .help-menu .mat-mdc-menu-item:hover,
-:host ::ng-deep .user-dropdown-menu button[mat-menu-item]:hover {
-  background: var(--ds-primary-subtle) !important;
+.notification-menu-anchor {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 }
 
-:host ::ng-deep .help-menu .mat-mdc-menu-item:hover mat-icon,
-:host ::ng-deep .user-dropdown-menu button[mat-menu-item]:hover mat-icon {
-  color: var(--ds-primary) !important;
-}
-
-:host ::ng-deep .user-dropdown-menu {
-  margin-top: var(--ds-space-2);
+.notification-panel-dropdown {
+  width: min(400px, 94vw);
+  max-height: min(560px, 72vh);
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-surface-elevated);
+  color: var(--ds-text-primary);
   border-radius: var(--ds-radius-lg);
   box-shadow: var(--ds-shadow-lg);
-  min-width: 280px;
+  border: 1px solid var(--ds-border-subtle);
+  overflow: hidden;
 }
 
-:host ::ng-deep .user-dropdown-menu .mat-mdc-menu-content {
-  padding: 0;
+.notification-panel-dropdown .notification-menu-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.user-menu-dropdown {
+  min-width: 280px;
+  max-width: min(360px, 94vw);
+  max-height: min(85vh, 640px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--ds-surface-elevated);
+  color: var(--ds-text-primary);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-lg);
+  border: 1px solid var(--ds-border-subtle);
+}
+
+.user-menu-tours-inline {
+  background: var(--ds-surface-2);
+  border-top: 1px solid var(--ds-divider);
+  border-bottom: 1px solid var(--ds-divider);
+}
+
+.user-menu-tours-inline .tour-menu-header {
+  padding: var(--ds-space-3) var(--ds-space-4) !important;
+}
+
+.tour-progress-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--ds-primary) 76%, white) 0%,
+    color-mix(in oklab, var(--ds-marine) 66%, black) 100%
+  );
+  color: var(--ds-text-inverse);
+  border-radius: var(--ds-radius-md);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.tour-status-icon {
+  color: var(--ds-success);
+  margin-left: auto;
 }
 
 .user-menu-header {
@@ -286,38 +477,40 @@
   color: var(--ds-text-muted);
 }
 
-:host ::ng-deep .user-dropdown-menu button[mat-menu-item] {
-  padding: var(--ds-space-3) var(--ds-space-4);
-  height: auto;
-  line-height: 1.5;
-}
-
-:host ::ng-deep .user-dropdown-menu button[mat-menu-item] mat-icon {
-  margin-right: var(--ds-space-3);
-  color: var(--ds-text-muted);
+.user-menu-dropdown .help-menu-item ds-icon:not(.tour-status-icon):not(.submenu-arrow) {
+  color: var(--ds-marine);
 }
 
 .notification-menu-button {
   position: relative;
-
-  .mat-icon {
-    position: relative;
-  }
 }
 
-.notification-dropdown-menu {
-  .mat-mdc-menu-content {
-    padding: 0;
-  }
-
-  .notification-menu-content {
-    padding: 0;
-  }
+.toolbar-icon-badge-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
 }
 
-:host ::ng-deep .notification-dropdown-menu .mat-mdc-menu-panel {
-  max-width: none !important;
-  max-height: none !important;
+.toolbar-count-badge {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-error-hl, var(--ds-error, #c62828));
+  color: var(--ds-text-inverse);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  box-sizing: border-box;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ds-marine) 35%, transparent);
 }
 
 @media (max-width: 599px) {
@@ -337,8 +530,12 @@
     margin-right: var(--ds-space-2);
   }
 
-  :host ::ng-deep .user-dropdown-menu {
+  .user-menu-dropdown {
     min-width: 240px;
+  }
+
+  .notification-panel-dropdown {
+    width: min(100vw - var(--ds-space-4), 400px);
   }
 }
 
@@ -351,7 +548,7 @@
     font-size: 1.05rem;
   }
 
-  :host ::ng-deep .user-dropdown-menu {
+  .user-menu-dropdown {
     min-width: 200px;
   }
 
@@ -383,14 +580,14 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .nav-list a:hover {
+  .nav-link:hover {
     transform: translateX(2px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .sidenav,
-  .nav-list a,
+  .nav-link,
   .user-menu-button {
     transition: none;
   }

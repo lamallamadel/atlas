@@ -1,6 +1,7 @@
-import { Component, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { CommentService, CommentEntityType, CommentThread, CreateThreadRequest, CreateCommentRequest } from '../services/comment.service';
@@ -9,9 +10,11 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatChip } from '@angular/material/chips';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { MatTooltip } from '@angular/material/tooltip';
+import {
+  DsAvatarComponent,
+  DsBadgeComponent,
+  DsIconComponent,
+} from '../design-system';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 @Component({
@@ -26,17 +29,27 @@ import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-
     MatButton,
     MatIconButton,
     MatIcon,
-    MatChip,
-    MatMenuTrigger,
-    MatMenu,
-    MatMenuItem,
-    MatTooltip,
+    DsBadgeComponent,
+    DsAvatarComponent,
+    DsIconComponent,
+    CdkConnectedOverlay,
+    CdkOverlayOrigin,
     DsSkeletonComponent,
   ],
   templateUrl: './comment-thread.component.html',
-  styleUrls: ['./comment-thread.component.css']
+  styleUrls: ['./comment-thread.component.scss']
 })
 export class CommentThreadComponent implements OnInit {
+  private readonly overlay = inject(Overlay);
+
+  /** Menu export du fil (remplace `mat-menu`). */
+  exportThreadMenuOpen = false;
+  readonly exportThreadMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
+  readonly exportThreadMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
+  ];
+
   @Input() entityType!: CommentEntityType;
   @Input() entityId!: number;
   @ViewChild('commentInput') commentInput!: ElementRef<HTMLTextAreaElement>;
@@ -147,6 +160,7 @@ export class CommentThreadComponent implements OnInit {
   }
 
   selectThread(thread: CommentThread): void {
+    this.closeExportThreadMenu();
     this.selectedThread = thread;
     this.newCommentForm.reset();
   }
@@ -250,7 +264,16 @@ export class CommentThreadComponent implements OnInit {
     });
   }
 
+  toggleExportThreadMenu(): void {
+    this.exportThreadMenuOpen = !this.exportThreadMenuOpen;
+  }
+
+  closeExportThreadMenu(): void {
+    this.exportThreadMenuOpen = false;
+  }
+
   exportThread(thread: CommentThread, format: 'text' | 'csv' = 'text'): void {
+    this.closeExportThreadMenu();
     this.commentService.exportThread(thread.id, format).subscribe({
       next: (blob) => {
         const ext = format === 'csv' ? 'csv' : 'txt';

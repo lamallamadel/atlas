@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { MatSidenav } from '@angular/material/sidenav';
 import { of } from 'rxjs';
 
 import { AppLayoutComponent } from './app-layout.component';

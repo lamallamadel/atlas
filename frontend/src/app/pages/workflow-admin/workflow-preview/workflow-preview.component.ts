@@ -1,16 +1,15 @@
 import { Component, OnInit, input } from '@angular/core';
 import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, WorkflowNode, TransitionRule, WorkflowPreviewState } from '../models/workflow.model';
-import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { DsCardComponent } from '../../../design-system';
+import { DsButtonComponent, DsCardComponent, DsIconComponent } from '../../../design-system';
 import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-workflow-preview',
     templateUrl: './workflow-preview.component.html',
     styleUrls: ['./workflow-preview.component.css'],
-    imports: [MatButton, MatIcon, DsCardComponent, DatePipe]
+    imports: [MatIcon, DsCardComponent, DsButtonComponent, DsIconComponent, DatePipe]
 })
 export class WorkflowPreviewComponent implements OnInit {
   readonly workflow = input<WorkflowConfiguration | null>(null);
@@ -71,9 +70,9 @@ export class WorkflowPreviewComponent implements OnInit {
 
   getTransitionIcon(transition: TransitionRule): string {
     if (transition.requiresApproval) {
-      return 'verified_user';
+      return 'lock';
     }
-    return 'arrow_forward';
+    return 'chevron-right';
   }
 
   getTransitionColor(transition: TransitionRule): string {

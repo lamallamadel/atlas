@@ -5,10 +5,10 @@
       <span class="document-size">{{ formatFileSize(data.document.fileSize) }}</span>
     </div>
     <div class="header-actions">
-      <button mat-icon-button matTooltip="Télécharger" (click)="download()">
+      <button type="button" mat-icon-button title="Télécharger" (click)="download()">
         <mat-icon>download</mat-icon>
       </button>
-      <button mat-icon-button matTooltip="Fermer" (click)="close()">
+      <button type="button" mat-icon-button title="Fermer" (click)="close()">
         <mat-icon>close</mat-icon>
       </button>
     </div>

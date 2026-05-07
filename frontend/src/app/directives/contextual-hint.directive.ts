@@ -1,5 +1,4 @@
 import { Directive, OnInit, OnDestroy, ElementRef, HostListener, input } from '@angular/core';
-import { MatTooltip } from '@angular/material/tooltip';
 import { AbstractControl } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -17,7 +16,6 @@ export interface ContextualHint {
 
 @Directive({
     selector: '[appContextualHint]',
-    providers: [MatTooltip],
     standalone: true
 })
 export class ContextualHintDirective implements OnInit, OnDestroy {
@@ -28,24 +26,20 @@ export class ContextualHintDirective implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private isFocused = false;
 
-  constructor(
-    private tooltip: MatTooltip,
-    private elementRef: ElementRef
-  ) {}
+  constructor(private elementRef: ElementRef<HTMLInputElement | HTMLTextAreaElement>) {}
 
   ngOnInit(): void {
-    this.tooltip.position = this.hintPosition();
-    this.updateTooltip();
+    this.updateHintAttributes();
 
     const hintControl = this.hintControl();
     if (hintControl) {
       hintControl.statusChanges
         .pipe(takeUntil(this.destroy$))
-        .subscribe(() => this.updateTooltip());
+        .subscribe(() => this.updateHintAttributes());
 
       hintControl.valueChanges
         .pipe(takeUntil(this.destroy$))
-        .subscribe(() => this.updateTooltip());
+        .subscribe(() => this.updateHintAttributes());
     }
   }
 
@@ -57,20 +51,20 @@ export class ContextualHintDirective implements OnInit, OnDestroy {
   @HostListener('focus')
   onFocus(): void {
     this.isFocused = true;
-    this.updateTooltip();
-    this.tooltip.show();
+    this.updateHintAttributes();
   }
 
   @HostListener('blur')
   onBlur(): void {
     this.isFocused = false;
-    this.updateTooltip();
-    this.tooltip.hide();
+    this.updateHintAttributes();
   }
 
-  private updateTooltip(): void {
+  private updateHintAttributes(): void {
     const message = this.getContextualMessage();
-    this.tooltip.message = message;
+    const nativeElement = this.elementRef.nativeElement;
+    nativeElement.setAttribute('title', message);
+    nativeElement.setAttribute('aria-description', message);
   }
 
   private getContextualMessage(): string {

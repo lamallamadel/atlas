@@ -7,7 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
-import { ColumnConfig, RowAction, PaginationData, GenericTableComponent } from '../../components/generic-table.component';
+import { ColumnConfig, RowAction, PaginationData } from '../../components/generic-table.component';
 import type { ActionButtonConfig } from '../../components/empty-state-actions.types';
 import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
@@ -28,18 +28,17 @@ import { FilterField } from '../../components/advanced-filters.component';
 import { DossierFilterApiService, DossierFilterRequest, FilterCondition } from '../../services/dossier-filter-api.service';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
-import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 import { KanbanBoardComponent } from '../../components/kanban-board.component';
-import { AsyncPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
 // Design System
 import { PageHeaderComponent }    from '../../design-system/patterns/page-header/page-header.component';
 import { FilterBarComponent, DsFilterOption } from '../../design-system/patterns/filter-bar/filter-bar.component';
 import { DsButtonComponent }      from '../../design-system/primitives/ds-button/ds-button.component';
-import { DsAvatarComponent }      from '../../design-system/primitives/ds-avatar/ds-avatar.component';
 import { DsBadgeComponent, DsBadgeStatus } from '../../design-system/primitives/ds-badge/ds-badge.component';
 import { DsEmptyStateComponent }  from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
 import { DsSkeletonComponent }    from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DsCardComponent }        from '../../design-system/primitives/ds-card/ds-card.component';
+import { DsTableComponent, DsColumn, DsRowAction } from '../../design-system/primitives/ds-table/ds-table.component';
+import { DsIconComponent }        from '../../design-system/icons/ds-icon.component';
 import { DS_CHART_FALLBACK_HEX } from '../../design-system/chart-ds-colors';
 
 interface AppliedFilter {
@@ -53,16 +52,15 @@ interface AppliedFilter {
     selector: 'app-dossiers',
     templateUrl: './dossiers.component.html',
     styleUrls: ['./dossiers.component.scss'],
-    animations: [listStaggerAnimation, itemAnimation],
     imports: [
-      FormsModule, ReactiveFormsModule, RouterLink,
+      FormsModule, ReactiveFormsModule,
       KanbanBoardComponent, MobileDossierCardComponent,
       // Design System (nouveau template liste)
       PageHeaderComponent, FilterBarComponent,
-      DsButtonComponent, DsAvatarComponent, DsBadgeComponent,
+      DsButtonComponent, DsBadgeComponent,
       DsEmptyStateComponent, DsSkeletonComponent,
+      DsCardComponent, DsTableComponent, DsIconComponent,
       // Pipes
-      DateFormatPipe, PhoneFormatPipe,
     ]
 })
 export class DossiersComponent implements OnInit {
@@ -126,6 +124,126 @@ export class DossiersComponent implements OnInit {
 
   deleteDossier(dossier: DossierResponse): void {
     this.confirmDeleteDossier(dossier);
+  }
+
+  /** Tableau desktop (ds-table) — colonnes HTML avec échappement côté métier. */
+  readonly dsTableRowActions: DsRowAction<Record<string, unknown>>[] = [
+    {
+      icon: 'building',
+      label: 'Annonce',
+      action: 'annonce',
+      ariaLabel: 'Voir l\'annonce liée',
+      show: (row) => !!this.dossierFromRow(row).annonceId
+    },
+    { icon: 'edit', label: 'Modifier', action: 'edit', ariaLabel: 'Modifier le dossier' },
+    { icon: 'trash', label: 'Supprimer', action: 'delete', ariaLabel: 'Supprimer le dossier' }
+  ];
+
+  dsTableColumns: DsColumn<Record<string, unknown>>[] = [];
+
+  /** ds-table attend `Record<string, unknown>[]` ; les lignes sont des `DossierResponse`. */
+  get dossiersAsTableRows(): Record<string, unknown>[] {
+    return this.dossiers as unknown as Record<string, unknown>[];
+  }
+
+  onDsTableRowClick(row: Record<string, unknown>): void {
+    this.goToDossier(this.dossierFromRow(row).id);
+  }
+
+  onDsTableRowAction(event: { action: string; row: Record<string, unknown> }): void {
+    const d = this.dossierFromRow(event.row);
+    switch (event.action) {
+      case 'annonce':
+        if (d.annonceId) {
+          this.router.navigate(['/pro/annonces', d.annonceId]);
+        }
+        break;
+      case 'edit':
+        this.editDossier(d);
+        break;
+      case 'delete':
+        this.deleteDossier(d);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private buildDsTableColumns(): DsColumn<Record<string, unknown>>[] {
+    return [
+      {
+        key: 'lead',
+        header: 'Lead',
+        width: '28%',
+        sortable: false,
+        cell: (row) => this.renderDsLeadCell(this.dossierFromRow(row))
+      },
+      {
+        key: 'leadPhone',
+        header: 'Téléphone',
+        width: '14%',
+        sortable: false,
+        cell: (row) => {
+          const d = this.dossierFromRow(row);
+          const phone = this.phoneFormatPipe.transform(d.leadPhone || '') || '—';
+          return `<span class="dos-ds-phone">${this.escapeHtml(phone)}</span>`;
+        }
+      },
+      {
+        key: 'status',
+        header: 'Statut',
+        width: '14%',
+        sortable: false,
+        cell: (row) => {
+          const d = this.dossierFromRow(row);
+          const status = d.status as DossierStatus;
+          const badgeClass = this.getStatusBadgeClass(status);
+          const icon = this.getStatusIcon(status);
+          const label = this.getStatusLabel(status);
+          return `<span class="${badgeClass}"><span class="material-icons status-icon">${icon}</span><span class="status-text">${this.escapeHtml(label)}</span></span>`;
+        }
+      },
+      {
+        key: 'createdAt',
+        header: 'Créé le',
+        width: '12%',
+        sortable: false,
+        cell: (row) => {
+          const d = this.dossierFromRow(row);
+          const formatted = this.dateFormatPipe.transform(d.createdAt) || '—';
+          return `<span class="dos-ds-date">${this.escapeHtml(formatted)}</span>`;
+        }
+      },
+      {
+        key: 'annonce',
+        header: 'Annonce',
+        width: '12%',
+        sortable: false,
+        cell: (row) => {
+          const d = this.dossierFromRow(row);
+          if (!d.annonceId) {
+            return '<span class="dos-ds-empty">—</span>';
+          }
+          return `<span class="dos-ds-annonce">#${d.annonceId}</span>`;
+        }
+      }
+    ];
+  }
+
+  private renderDsLeadCell(d: DossierResponse): string {
+    const name = this.escapeHtml(d.leadName || '—');
+    const initials = this.escapeHtml(this.getLeadInitials(d.leadName));
+    return `<span class="dos-ds-lead-cell"><span class="dos-ds-lead-cell__ava" aria-hidden="true">${initials}</span><span class="dos-ds-lead-cell__meta"><span class="dos-ds-lead-cell__name">${name}</span><span class="dos-ds-lead-cell__id">#${d.id}</span></span></span>`;
+  }
+
+  private getLeadInitials(leadName?: string): string {
+    const t = leadName?.trim();
+    if (!t) return '?';
+    const parts = t.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      return parts[0]!.slice(0, 2).toUpperCase();
+    }
+    return (parts[0]![0] + parts[parts.length - 1]![0]).toUpperCase();
   }
 
   onKanbanStatusChange(event: { id: number; status: string }): void {
@@ -382,6 +500,7 @@ export class DossiersComponent implements OnInit {
     this.setupQuickFilter();
 
     this.configureColumns();
+    this.dsTableColumns = this.buildDsTableColumns();
 
     this.breakpointObserver.observe([Breakpoints.Handset])
       .subscribe(result => {
@@ -418,6 +537,10 @@ export class DossiersComponent implements OnInit {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  private dossierFromRow(row: Record<string, unknown>): DossierResponse {
+    return row as unknown as DossierResponse;
   }
 
   setupAnnonceAutocomplete(): void {
@@ -923,9 +1046,9 @@ export class DossiersComponent implements OnInit {
     return annonce.id;
   }
 
-  trackByDossierId(index: number, dossier: DossierResponse): number {
-    return dossier.id;
-  }
+  /** Flèche : conserve `this` quand `ds-table` appelle le trackBy sans lier le contexte parent. */
+  trackByDossierId = (index: number, row: Record<string, unknown>): number =>
+    this.dossierFromRow(row).id;
 
   trackByPreset(index: number, preset: FilterPreset): string {
     return preset.name;

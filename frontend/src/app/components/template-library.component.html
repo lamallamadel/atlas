@@ -96,54 +96,70 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let template">
-            <button mat-icon-button [matMenuTriggerFor]="actionMenu">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #actionMenu="matMenu">
-              <button mat-menu-item (click)="editTemplate(template)">
-                <mat-icon>edit</mat-icon>
-                <span>Edit</span>
+            <span class="app-tpl-table-menu-origin" cdkOverlayOrigin #appTplRowMenuOrigin="cdkOverlayOrigin">
+              <button
+                mat-icon-button
+                type="button"
+                (click)="toggleTableRowMenu(template.id, $event)"
+                [attr.aria-expanded]="tableRowMenuOpenForId === template.id"
+                aria-haspopup="menu"
+                [attr.aria-controls]="'app-tpl-row-menu-' + template.id"
+                aria-label="Template actions">
+                <mat-icon>more_vert</mat-icon>
               </button>
-              <button mat-menu-item (click)="viewVersions(template)">
-                <mat-icon>history</mat-icon>
-                <span>View Versions</span>
-              </button>
-              @if (canSubmitForApproval(template)) {
-                <button mat-menu-item (click)="submitForApproval(template)"
-                  >
-                  <mat-icon>send</mat-icon>
-                  <span>Submit for Approval</span>
+            </span>
+            <ng-template
+              cdkConnectedOverlay
+              [cdkConnectedOverlayOrigin]="appTplRowMenuOrigin"
+              [cdkConnectedOverlayOpen]="tableRowMenuOpenForId === template.id"
+              [cdkConnectedOverlayPositions]="tableRowMenuPositions"
+              [cdkConnectedOverlayScrollStrategy]="tableRowMenuScrollStrategy"
+              [cdkConnectedOverlayHasBackdrop]="true"
+              [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
+              (backdropClick)="closeTableRowMenu()"
+              (detach)="closeTableRowMenu()"
+              (overlayKeydown)="$event.key === 'Escape' && closeTableRowMenu()">
+              <div [id]="'app-tpl-row-menu-' + template.id" class="app-tpl-table-menu-dropdown" role="menu">
+                <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="editTemplate(template)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
                 </button>
-              }
-              @if (canPollStatus(template)) {
-                <button mat-menu-item (click)="pollApprovalStatus(template)"
-                  >
-                  <mat-icon>refresh</mat-icon>
-                  <span>Check Approval Status</span>
+                <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="viewVersions(template)">
+                  <mat-icon>history</mat-icon>
+                  <span>View Versions</span>
                 </button>
-              }
-              @if (canActivate(template)) {
-                <button mat-menu-item (click)="activateTemplate(template)"
-                  >
-                  <mat-icon>play_arrow</mat-icon>
-                  <span>Activate</span>
-                </button>
-              }
-              @if (canPause(template)) {
-                <button mat-menu-item (click)="pauseTemplate(template)"
-                  >
-                  <mat-icon>pause</mat-icon>
-                  <span>Pause</span>
-                </button>
-              }
-              @if (canDelete(template)) {
-                <button mat-menu-item (click)="deleteTemplate(template)"
-                  >
-                  <mat-icon color="warn">delete</mat-icon>
-                  <span>Delete</span>
-                </button>
-              }
-            </mat-menu>
+                @if (canSubmitForApproval(template)) {
+                  <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="submitForApproval(template)">
+                    <mat-icon>send</mat-icon>
+                    <span>Submit for Approval</span>
+                  </button>
+                }
+                @if (canPollStatus(template)) {
+                  <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="pollApprovalStatus(template)">
+                    <mat-icon>refresh</mat-icon>
+                    <span>Check Approval Status</span>
+                  </button>
+                }
+                @if (canActivate(template)) {
+                  <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="activateTemplate(template)">
+                    <mat-icon>play_arrow</mat-icon>
+                    <span>Activate</span>
+                  </button>
+                }
+                @if (canPause(template)) {
+                  <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="pauseTemplate(template)">
+                    <mat-icon>pause</mat-icon>
+                    <span>Pause</span>
+                  </button>
+                }
+                @if (canDelete(template)) {
+                  <button type="button" class="app-tpl-table-menu-item app-tpl-table-menu-item--danger" role="menuitem" (click)="deleteTemplate(template)">
+                    <mat-icon color="warn">delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                }
+              </div>
+            </ng-template>
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

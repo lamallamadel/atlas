@@ -1,10 +1,12 @@
-import { Component, OnInit, OnDestroy, ElementRef, HostListener, viewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { SearchApiService, SearchResult } from '../services/search-api.service';
 import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { Subject, of, Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { UpperCasePipe } from '@angular/common';
+import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DsInputComponent } from '../design-system/primitives/ds-input/ds-input.component';
 
 interface GroupedResults {
   annonces: EnhancedSearchResult[];
@@ -27,10 +29,14 @@ interface RecentSearch {
     selector: 'app-global-search-bar',
     templateUrl: './global-search-bar.component.html',
     styleUrls: ['./global-search-bar.component.scss'],
-    imports: [FormsModule, UpperCasePipe]
+    imports: [FormsModule, UpperCasePipe, DsSkeletonComponent, DsInputComponent]
 })
 export class GlobalSearchBarComponent implements OnInit, OnDestroy {
-  readonly searchInput = viewChild.required<ElementRef>('searchInput');
+  readonly searchInput = viewChild.required(DsInputComponent);
+
+  /** Icône loupe (alignée sur le pattern filter-bar). */
+  readonly searchPrefixIcon =
+    '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M14 14l-2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 
   searchQuery = '';
   groupedResults: GroupedResults = {
@@ -95,8 +101,7 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  onSearchInput(event: any) {
-    const query = event.target.value;
+  onSearchQueryChange(query: string): void {
     this.searchSubject.next(query);
   }
 
@@ -143,7 +148,7 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
   selectRecentSearch(search: RecentSearch) {
     this.searchQuery = search.query;
     this.searchSubject.next(search.query);
-    this.searchInput().nativeElement.focus();
+    this.searchInput().focus();
   }
 
   removeRecentSearch(search: RecentSearch, event: Event) {
@@ -164,7 +169,7 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
   handleKeyboardShortcut(event: KeyboardEvent) {
     if (event.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
       event.preventDefault();
-      this.searchInput().nativeElement.focus();
+      this.searchInput().focus();
       return;
     }
 
@@ -198,7 +203,7 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
       case 'Escape':
         event.preventDefault();
         this.clearSearch();
-        this.searchInput()?.nativeElement?.blur();
+        this.searchInput()?.blur();
         break;
     }
   }

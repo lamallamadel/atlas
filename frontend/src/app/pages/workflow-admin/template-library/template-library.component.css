@@ -31,7 +31,7 @@
 }
 
 .status-filter {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--ds-shadow-xs);
 }
 
 .templates-grid {
@@ -94,7 +94,7 @@
 }
 
 .template-description {
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--ds-text-muted);
   font-size: 14px;
   line-height: 1.5;
   margin: 12px 0;
@@ -110,7 +110,7 @@
   gap: 8px;
   margin-top: 12px;
   font-size: 13px;
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--ds-text-muted);
 }
 
 .meta-item {
@@ -119,10 +119,8 @@
   gap: 4px;
 }
 
-.meta-item mat-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
+.meta-item ds-icon {
+  color: var(--ds-text-faint);
 }
 
 .rejection-reason {
@@ -138,9 +136,11 @@
 }
 
 .rejection-reason mat-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
+  color: var(--ds-error);
+}
+
+.rejection-reason ds-icon {
+  color: var(--ds-error);
 }
 
 .tpl-lib-actions {
@@ -156,29 +156,61 @@
   margin-right: 8px;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 64px 24px;
-  color: rgba(0, 0, 0, 0.6);
+:host ::ng-deep .tpl-lib-actions .mat-mdc-button .ds-icon {
+  margin-right: 6px;
 }
 
-.empty-state mat-icon {
-  font-size: 64px;
-  width: 64px;
-  height: 64px;
-  color: rgba(0, 0, 0, 0.3);
-  margin-bottom: 16px;
+.wf-tpl-card-menu-origin {
+  display: inline-flex;
+  align-items: center;
 }
 
-.empty-state h3 {
-  margin: 16px 0 8px;
-  font-size: 24px;
-  font-weight: 400;
+.wf-tpl-card-menu-dropdown {
+  min-width: 220px;
+  background: var(--ds-surface-elevated);
+  color: var(--ds-text-primary);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-lg);
+  border: 1px solid var(--ds-border-subtle);
+  overflow: hidden;
 }
 
-.empty-state p {
-  margin: 8px 0 24px;
-  font-size: 16px;
+.wf-tpl-card-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  width: 100%;
+  margin: 0;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: var(--ds-text-primary);
+  transition: background-color var(--ds-transition-fast);
+}
+
+.wf-tpl-card-menu-item:hover {
+  background: var(--ds-primary-subtle);
+}
+
+.wf-tpl-card-menu-item:focus-visible {
+  outline: 2px solid var(--ds-marine);
+  outline-offset: -2px;
+}
+
+.wf-tpl-card-menu-item .ds-icon {
+  flex-shrink: 0;
+  color: var(--ds-text-muted);
+}
+
+.wf-tpl-card-menu-item:hover .ds-icon {
+  color: var(--ds-primary);
+}
+
+.tpl-lib-status-chip .ds-badge {
+  text-transform: capitalize;
 }
 
 .loading-state {

@@ -4,6 +4,63 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--ds-space-2);
+  align-items: center;
+}
+
+.task-layout-toggle {
+  display: flex;
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-sm);
+  overflow: hidden;
+  background: var(--ds-surface);
+}
+
+.task-layout-btn {
+  width: 36px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--ds-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+}
+
+.task-layout-btn--active {
+  background: var(--ds-marine-hl);
+  color: var(--ds-marine);
+}
+
+.task-layout-btn:hover:not(.task-layout-btn--active) {
+  background: var(--ds-surface-offset);
+}
+
+.task-table-card {
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
+}
+
+.task-ds-title {
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--ds-text);
+}
+
+.task-ds-muted {
+  font-size: 13px;
+  color: var(--ds-text-muted);
+}
+
+.task-ds-due {
+  font-size: 12.5px;
+  color: var(--ds-text-muted);
+}
+
+.task-ds-due--late {
+  color: var(--ds-error);
+  font-weight: 600;
 }
 
 .task-toolbar-card {
@@ -47,6 +104,15 @@
 
 .task-calendar-inner {
   padding: var(--ds-space-4);
+}
+
+.task-week-grid-wrap {
+  min-height: 520px;
+}
+
+.task-week-grid-wrap ds-week-grid {
+  display: block;
+  min-height: 480px;
 }
 
 .task-loading {

@@ -1,9 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TaskCardComponent } from './task-card.component';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { TaskPriority, TaskStatus } from '../services/task-api.service';
 
 describe('TaskCardComponent', () => {
@@ -14,9 +11,6 @@ describe('TaskCardComponent', () => {
     await TestBed.configureTestingModule({
     imports: [
         NoopAnimationsModule,
-        MatCheckboxModule,
-        MatIconModule,
-        MatButtonModule,
         TaskCardComponent
     ]
 })

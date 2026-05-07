@@ -1,19 +1,17 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TemplateApiService } from '../services/template-api.service';
 import { WhatsAppTemplate, TemplateStatus } from '../models/template.model';
-import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
-import { DsCardComponent } from '../../../design-system';
-import { MatChip } from '@angular/material/chips';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
+import { DsBadgeStatus, DsButtonComponent, DsCardComponent, DsEmptyStateComponent, DsIconComponent } from '../../../design-system';
 import { DsSkeletonComponent } from '../../../design-system/primitives/ds-skeleton/ds-skeleton.component';
 import { DatePipe } from '@angular/common';
 
@@ -22,9 +20,19 @@ import { DatePipe } from '@angular/common';
     standalone: true,
     templateUrl: './template-library.component.html',
     styleUrls: ['./template-library.component.css'],
-    imports: [MatButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatPrefix, MatButtonToggleGroup, MatButtonToggle, DsCardComponent, DsSkeletonComponent, MatChip, MatMenuTrigger, MatMenu, MatMenuItem, DatePipe]
+    imports: [MatFormField, MatLabel, MatInput, FormsModule, MatPrefix, MatButton, MatButtonToggleGroup, MatButtonToggle, DsCardComponent, DsButtonComponent, DsIconComponent, DsEmptyStateComponent, DsSkeletonComponent, CdkConnectedOverlay, CdkOverlayOrigin, DatePipe]
 })
 export class TemplateLibraryComponent implements OnInit, OnDestroy {
+  private readonly overlay = inject(Overlay);
+
+  /** Menu « ⋮ » par carte template (`mat-menu` → CDK). */
+  tplCardMenuOpenForId: number | null = null;
+  readonly tplCardMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
+  readonly tplCardMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
+  ];
+
   templates: WhatsAppTemplate[] = [];
   filteredTemplates: WhatsAppTemplate[] = [];
   selectedStatus: TemplateStatus | 'ALL' = 'ALL';
@@ -100,7 +108,21 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
     this.router.navigate(['/workflow-admin/templates', template.id]);
   }
 
+  toggleTplCardMenu(templateId: number | undefined, event: MouseEvent): void {
+    event.stopPropagation();
+    if (templateId == null) {
+      return;
+    }
+    this.tplCardMenuOpenForId =
+      this.tplCardMenuOpenForId === templateId ? null : templateId;
+  }
+
+  closeTplCardMenu(): void {
+    this.tplCardMenuOpenForId = null;
+  }
+
   duplicateTemplate(template: WhatsAppTemplate): void {
+    this.closeTplCardMenu();
     const duplicate = {
       ...template,
       id: undefined,
@@ -116,6 +138,7 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
   }
 
   deleteTemplate(template: WhatsAppTemplate): void {
+    this.closeTplCardMenu();
     if (template.status === TemplateStatus.ACTIVE) {
       this.snackBar.open('Cannot delete an active template. Please pause it first.', 'Close', { duration: 5000 });
       return;
@@ -153,6 +176,7 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
   }
 
   pauseTemplate(template: WhatsAppTemplate): void {
+    this.closeTplCardMenu();
     this.templateService.deactivateTemplate(template.id!)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -168,6 +192,7 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
   }
 
   activateTemplate(template: WhatsAppTemplate): void {
+    this.closeTplCardMenu();
     this.templateService.activateTemplate(template.id!)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -182,33 +207,33 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
       });
   }
 
-  getStatusColor(status: TemplateStatus): string {
-    switch (status) {
-      case TemplateStatus.ACTIVE:
-        return 'accent';
-      case TemplateStatus.PENDING_APPROVAL:
-        return 'warn';
-      case TemplateStatus.REJECTED:
-        return 'warn';
-      case TemplateStatus.INACTIVE:
-        return '';
-      default:
-        return '';
-    }
-  }
-
   getStatusIcon(status: TemplateStatus): string {
     switch (status) {
       case TemplateStatus.ACTIVE:
-        return 'check_circle';
+        return 'check';
       case TemplateStatus.PENDING_APPROVAL:
-        return 'schedule';
+        return 'clock';
       case TemplateStatus.REJECTED:
-        return 'cancel';
+        return 'alert-circle';
       case TemplateStatus.INACTIVE:
-        return 'pause_circle';
+        return 'info';
       default:
         return 'edit';
+    }
+  }
+
+  getStatusBadge(status: TemplateStatus): DsBadgeStatus {
+    switch (status) {
+      case TemplateStatus.ACTIVE:
+        return 'success';
+      case TemplateStatus.PENDING_APPROVAL:
+        return 'warning';
+      case TemplateStatus.REJECTED:
+        return 'error';
+      case TemplateStatus.INACTIVE:
+        return 'neutral';
+      default:
+        return 'draft';
     }
   }
 

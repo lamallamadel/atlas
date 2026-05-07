@@ -1,8 +1,8 @@
 # Atlasia Design System — Audit Phase 0
 
-> **Figé le :** 2026-05-04  
+> **Figé le :** 2026-05-07  
 > **Référence visuelle :** `frontend/design-system-source/` (copie de `frontend/design system/`)  
-> **Décision unique adoptée :** les tokens de `design-system-source/tokens.css` (Marine #0d2c4a, Copper #b5622e, Warm bg #f8f7f4) sont la source de vérité. Les couches `--at-`* et `--color-*` deviennent des alias vers `--ds-*`. Suppression progressive en Phase 6.
+> **Décision unique adoptée :** les tokens de `design-system-source/tokens.css` (Marine #0d2c4a, Copper #b5622e, Warm bg #f8f7f4) sont la source de vérité. Les couches `--at-*` et `--color-*` restent des alias legacy vers `--ds-*` (aucun usage direct `var(--at-*)` restant dans `frontend/src`).
 
 ---
 
@@ -15,7 +15,7 @@
 | ------------ | ------------------------------------------------------------------------ |
 | `tokens.css` | Token dans `design-system-source/tokens.css` (source officielle)         |
 | `--ds-*`     | Token Angular actuel dans `src/app/design-system/tokens/_ds-tokens.scss` |
-| `--at-*`     | Token legacy dans `src/styles/_atlasia-tokens.scss`                      |
+| `--at-*`     | Alias legacy déclarés dans `src/app/design-system/tokens/_ds-semantic.scss` |
 | `--color-*`  | Token très legacy dans `src/styles/variables.scss`                       |
 | **Décision** | Alias à créer / Garder / Supprimer                                       |
 
@@ -137,12 +137,12 @@
 
 11 fichiers, ~5 233 lignes, ~147 KB de CSS compilé.
 
-### Fichiers de tokens (à conserver et fusionner)
+### Fichiers de tokens (état actuel)
 
 
 | Fichier                | Taille | Rôle                                                                              | Verdict                                                                                                 |
 | ---------------------- | ------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `_atlasia-tokens.scss` | ~166L  | Déclare tous les `--at-color-*`, `--at-space-*`, `--at-shadow-*`, `--at-radius-*` | **Conserver** jusqu'à Phase 6. En Phase 6 : supprimer et remplacer par aliases dans `_ds-semantic.scss` |
+| `_atlasia-tokens.scss` | ~166L (historique) | Ancien fichier de déclaration `--at-*`. | **Déjà supprimé**. Les aliases `--at-*` sont portés par `_ds-semantic.scss`. |
 
 
 ### Fichiers de bridge (à absorber progressivement)
@@ -150,8 +150,8 @@
 
 | Fichier                   | Taille      | Rôle                                                                                                                                                   | Verdict                                                                                                        |
 | ------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `_atlasia-pro-shell.scss` | 660L / 18KB | Identity Bridge principal : écrase les styles Material/Angular pour aligner sur Atlasia. Crée le shell (`app-layout`, sidebar, topbar, `pro-content`). | **Conserver** jusqu'à Phase 5 terminée. À absorber dans le composant `app-layout` refondé.                     |
-| `_atlasia-shared.scss`    | 679L / 19KB | Styles partagés Portail B2C + Vitrine B2B (cartes annonce, hero public, search bar publique).                                                          | **Conserver**. Concerne les pages publiques, pas le Pro Space. Ne pas supprimer avant Phase 5 pages publiques. |
+| `_atlasia-pro-shell.scss` | 660L / 18KB | Identity Bridge principal (historique) : shell `app-layout`, sidebar, topbar. | **Supprimé** du repo `src/styles` (styles shell absorbés dans `app-layout.component.scss`). |
+| `_atlasia-shared.scss`    | 679L / 19KB | Styles partagés Portail B2C + Vitrine B2B (cartes annonce, hero public, search bar publique). | **Conservé hors Pro**, chargé via `PublicLayout` (plus d’import global dans `styles.scss`). |
 
 
 ### Fichiers de "fix" post-rendu (à résorber par la migration DS)
@@ -159,25 +159,26 @@
 
 | Fichier                             | Taille      | Rôle                                                                                                                                          | Verdict Phase 5                                                                                                                                       |
 | ----------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `_atlasia-page-patterns.scss`       | 595L / 13KB | En-têtes de page, filter bars, tables, sections cards — les patterns généraux.                                                                | **Supprimer** après migration dashboard + dossiers + annonces (Phase 5 écrans 1–3). Déjà partiellement couvert par `ds-page-header`, `ds-filter-bar`. |
-| `_atlasia-core-flows.scss`          | 488L / 12KB | UX polish dashboard, dossiers, dossier-detail, annonces. Row hover, quick actions, badges inline.                                             | **Supprimer** après migration des 4 premiers écrans.                                                                                                  |
-| `_atlasia-semantic-pages.scss`      | 374L / 10KB | Meaning visuel des pages : command center (dashboard), CRM workspace (dossiers), case file (dossier-detail). Titres display + accents Copper. | **Supprimer** avec `_atlasia-core-flows.scss` (même scope).                                                                                           |
-| `_atlasia-density-correction.scss`  | 424L / 9KB  | Réduit les marges/paddings générés par les SCSS précédents (hacks `!important`).                                                              | ⚠️ **Fragile.** À auditer ligne par ligne avant Phase 6. Beaucoup de `!important` qui masquent des bugs de spacing. Supprimer en dernier.             |
-| `_atlasia-pro-navigation.scss`      | 301L / 7KB  | Sidebar nav, active state, dot indicator, collapse behavior.                                                                                  | **Supprimer** après refonte du composant `app-layout` / `app-sidebar`.                                                                                |
-| `_atlasia-special-screens-fix.scss` | 555L / 16KB | Correctifs observability, tâches, calendrier, kanban, advanced filters dialog.                                                                | **Supprimer** après migration Phases 5 écrans 4–9 (calendar, tasks, reports, observability, workflow-admin).                                          |
-| `_atlasia-table-dialog-repair.scss` | 503L / 14KB | Tableau dossiers : overflow horizontal, colonne actions sticky, advanced filters dialog.                                                      | **Supprimer** après migration dossiers liste + dossier-detail.                                                                                        |
-| `_atlasia-dossiers-scroll-fix.scss` | 136L / 4KB  | Scroll horizontal dossiers (chargé en dernier pour surpasser les autres).                                                                     | **Supprimer immédiatement** si le tableau dossiers est entièrement remplacé par le nouveau template DS. Le nouveau template n'a pas ce problème.      |
-| `_atlasia-public-portal.scss`       | 518L / 14KB | Pages publiques : vitrine, portail client, annonce publique, recherche.                                                                       | **Conserver**. Hors scope Pro Space.                                                                                                                  |
+| `_atlasia-page-patterns.scss`       | 595L / 13KB | En-têtes de page, filter bars, tables, sections cards — patterns généraux. | **Supprimé** (migré DS). |
+| `_atlasia-core-flows.scss`          | 488L / 12KB | UX polish dashboard, dossiers, dossier-detail, annonces. | **Supprimé** (migré DS). |
+| `_atlasia-semantic-pages.scss`      | 374L / 10KB | Meaning visuel des pages (dashboard/dossiers). | **Supprimé** (migré DS). |
+| `_atlasia-density-correction.scss`  | 424L / 9KB  | Correctifs densité historiques (`!important`). | **Supprimé** (plus d’occurrence dans `frontend/src`). |
+| `_atlasia-pro-navigation.scss`      | 301L / 7KB  | Sidebar nav historique. | **Supprimé** (refonte `app-layout`). |
+| `_atlasia-special-screens-fix.scss` | 555L / 16KB | Correctifs observability/tâches/calendrier/kanban/dialogs. | **Supprimé** (migré DS). |
+| `_atlasia-table-dialog-repair.scss` | 503L / 14KB | Correctifs tableau dossiers + dialog filtres. | **Supprimé** (migré DS). |
+| `_atlasia-dossiers-scroll-fix.scss` | 136L / 4KB  | Correctif scroll horizontal dossiers. | **Supprimé**. |
+| `_atlasia-public-portal.scss`       | 518L / 14KB | Pages publiques : vitrine, portail client, annonce publique, recherche. | **Conservé hors Pro**, chargé via `PublicLayout` (plus d’import global). |
 
 
 ### Ordre de suppression recommandé
 
 ```
-Phase 5, écrans 1-3 terminés → supprimer _atlasia-page-patterns, _atlasia-core-flows, _atlasia-semantic-pages, _atlasia-dossiers-scroll-fix
-Phase 5, écrans 4-9 terminés → supprimer _atlasia-special-screens-fix, _atlasia-table-dialog-repair, _atlasia-pro-navigation
-Phase 5, app-layout refondé  → supprimer _atlasia-pro-shell
-Phase 6                      → supprimer _atlasia-density-correction (avec tests visuels), _atlasia-tokens (remplacé par aliases)
-Hors scope Pro             → _atlasia-shared, _atlasia-public-portal conservés (pages publiques)
+État actuel (2026-05-07) :
+- Supprimés : _atlasia-page-patterns, _atlasia-core-flows, _atlasia-semantic-pages,
+  _atlasia-dossiers-scroll-fix, _atlasia-special-screens-fix, _atlasia-table-dialog-repair,
+  _atlasia-pro-navigation, _atlasia-pro-shell, _atlasia-density-correction.
+- Conservés hors Pro : _atlasia-shared, _atlasia-public-portal (chargés via PublicLayout, non globaux).
+- Phase 6 (token cleanup) : **terminée côté code applicatif** (`rg "var\\(--at-" frontend/src` → 0 résultat).
 ```
 
 ---
@@ -312,20 +313,20 @@ Hors scope Pro             → _atlasia-shared, _atlasia-public-portal conservé
 | `tour-progress.component.ts`                 | Onboarding          | Conserver (Shepherd.js)                  |
 
 
-### 3.4 Showcase / Demo → supprimer en Phase 6
+### 3.4 Showcase / Demo — état actuel
 
 
-| Composant                                    | Action                             |
-| -------------------------------------------- | ---------------------------------- |
-| `animations-demo.component.ts`               | Supprimer                          |
-| `badge-showcase.component.ts`                | Supprimer (remplacé par Storybook) |
-| `badge-status-showcase.component.ts`         | Supprimer                          |
-| `button-examples.component.ts`               | Supprimer (remplacé par Storybook) |
-| `enhanced-form-example.component.ts`         | Supprimer                          |
-| `lottie-animations-demo.component.ts`        | Supprimer                          |
-| `notification-demo.component.ts`             | Supprimer                          |
-| `whatsapp-messaging-ui-example.component.ts` | Supprimer                          |
-| `chart/chart-demo.component.ts`              | Supprimer                          |
+| Composant                                    | État |
+| -------------------------------------------- | ---- |
+| `animations-demo.component.ts`               | Supprimé ✅ |
+| `badge-showcase.component.ts`                | Supprimé ✅ (remplacé par Storybook) |
+| `badge-status-showcase.component.ts`         | Supprimé ✅ |
+| `button-examples.component.ts`               | Supprimé ✅ (remplacé par Storybook) |
+| `enhanced-form-example.component.ts`         | Supprimé ✅ |
+| `lottie-animations-demo.component.ts`        | Supprimé ✅ |
+| `notification-demo.component.ts`             | Supprimé ✅ |
+| `whatsapp-messaging-ui-example.component.ts` | Supprimé ✅ |
+| `chart/chart-demo.component.ts`              | Supprimé ✅ |
 
 
 ### Synthèse
@@ -336,7 +337,7 @@ Hors scope Pro             → _atlasia-shared, _atlasia-public-portal conservé
 | Primitives à migrer vers DS    | 15      | Remplacer par `ds-`* progressivement         |
 | Patterns à migrer vers DS      | 38      | Refondre ou absorber dans patterns DS        |
 | Domaine à garder + habiller DS | 52      | Conserver logique, appliquer DS visuellement |
-| Showcase à supprimer           | 9       | Supprimer en Phase 6                         |
+| Showcase à supprimer           | 0       | Traité (fichiers supprimés)                  |
 | Autres (specs, utils)          | 13      | Cas par cas                                  |
 | **Total**                      | **127** |                                              |
 
@@ -355,8 +356,8 @@ _ds-semantic.scss                   ← bridge --at-* → --ds-*
                                     ← bridge --spacing-* → --ds-*
                                     ← overrides Material MDC → --ds-*
      ↓ chargé en dernier
-_atlasia-pro-shell.scss             ← écrase Material (temporaire, Phase 5)
-_atlasia-*-fix.scss                 ← correctifs (temporaire, Phase 5-6)
+_atlasia-shared.scss                ← styles publics legacy (scopés `PublicLayout`)
+_atlasia-public-portal.scss         ← styles publics legacy (scopés `PublicLayout`)
 ```
 
 ### Règles fermes (à appliquer dès maintenant)

@@ -1,3 +1,9 @@
+@use "sass:meta";
+
+/* Shared public styles (.at-*) chargés uniquement avec le layout public. */
+@include meta.load-css("../../../styles/_atlasia-shared.scss");
+@include meta.load-css("../../../styles/_atlasia-public-portal.scss");
+
 /* ============================================================
    PUBLIC LAYOUT — Header, Footer, Mobile Nav
    ============================================================ */

@@ -1,18 +1,13 @@
 import { Component, OnChanges, SimpleChanges, input } from '@angular/core';
 import { WhatsAppTemplate, ComponentType, TemplateComponent, ButtonType } from '../models/template.model';
-import { DsCardComponent } from '../../../design-system';
-import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
-import { MatDivider } from '@angular/material/list';
-import { MatChipListbox, MatChip } from '@angular/material/chips';
+import { DsBadgeComponent, DsButtonComponent, DsCardComponent, DsIconComponent } from '../../../design-system';
 import { LineBreakPipe } from '../pipes/line-break.pipe';
 
 @Component({
     selector: 'app-template-preview',
     templateUrl: './template-preview.component.html',
     styleUrls: ['./template-preview.component.css'],
-    imports: [DsCardComponent, MatIcon, MatTooltip, MatButton, MatDivider, MatChipListbox, MatChip, LineBreakPipe]
+    imports: [DsCardComponent, DsIconComponent, DsButtonComponent, DsBadgeComponent, LineBreakPipe]
 })
 export class TemplatePreviewComponent implements OnChanges {
   readonly template = input<WhatsAppTemplate>();
@@ -88,9 +83,9 @@ export class TemplatePreviewComponent implements OnChanges {
       case ButtonType.PHONE_NUMBER:
         return 'phone';
       case ButtonType.CALL_TO_ACTION:
-        return 'touch_app';
+        return 'chevron-right';
       default:
-        return 'reply';
+        return 'info';
     }
   }
 }

@@ -1,11 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ApiStatusIndicatorComponent } from './api-status-indicator.component';
 import { PingService } from '../services/ping.service';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 
@@ -21,11 +18,8 @@ describe('ApiStatusIndicatorComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        MatMenuModule,
         MatButtonModule,
         MatIconModule,
-        MatTooltipModule,
-        MatDividerModule,
         NoopAnimationsModule,
         ApiStatusIndicatorComponent,
       ],

@@ -2,16 +2,16 @@ import { Component, OnInit, input, output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { debounceTime } from 'rxjs/operators';
-import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/autocomplete';
 import { MatInput } from '@angular/material/input';
+import { DsInputComponent } from '../design-system/primitives/ds-input/ds-input.component';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 import { DsCardComponent } from '../design-system';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DsButtonComponent } from '../design-system/primitives/ds-button/ds-button.component';
+import { DsIconComponent } from '../design-system/icons/ds-icon.component';
 
 export interface FilterCondition {
   field: string;
@@ -42,7 +42,7 @@ export interface FilterOperator {
     selector: 'app-advanced-filters',
     templateUrl: './advanced-filters.component.html',
     styleUrls: ['./advanced-filters.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, MatButtonToggleGroup, MatButtonToggle, MatFormField, MatLabel, MatSelect, MatOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatIconButton, MatIcon, MatButton, DsCardComponent, DsSkeletonComponent]
+    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, DsCardComponent, DsSkeletonComponent, DsButtonComponent, DsIconComponent, DsInputComponent]
 })
 export class AdvancedFiltersComponent implements OnInit {
   readonly fields = input<FilterField[]>([]);
@@ -154,6 +154,10 @@ export class AdvancedFiltersComponent implements OnInit {
     });
 
     this.conditions.push(conditionGroup);
+  }
+
+  setLogicOperator(op: 'AND' | 'OR'): void {
+    this.filterForm.patchValue({ logicOperator: op });
   }
 
   removeCondition(index: number): void {

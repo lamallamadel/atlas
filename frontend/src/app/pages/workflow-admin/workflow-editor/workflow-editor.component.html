@@ -7,13 +7,13 @@
     @if (isAddingTransition) {
       <div class="toolbar-actions">
         <span class="adding-transition-hint">
-          <mat-icon>link</mat-icon>
+          <ds-icon name="link" [size]="16"></ds-icon>
           Cliquez sur un nœud de destination
         </span>
-        <button mat-button (click)="cancelAddingTransition()">
-          <mat-icon>close</mat-icon>
+        <ds-button variant="ghost" size="md" (dsClick)="cancelAddingTransition()">
+          <ds-icon name="close" [size]="16"></ds-icon>
           Annuler
-        </button>
+        </ds-button>
       </div>
     }
   </div>
@@ -43,9 +43,9 @@
       <div class="properties-panel">
         <div class="panel-header">
           <h3>Propriétés</h3>
-          <button mat-icon-button (click)="selectedNode = null; selectedTransition = null">
-            <mat-icon>close</mat-icon>
-          </button>
+          <ds-button variant="icon" ariaLabel="Fermer le panneau" (dsClick)="selectedNode = null; selectedTransition = null">
+            <ds-icon name="close" [size]="16"></ds-icon>
+          </ds-button>
         </div>
         @if (selectedNode) {
           <div class="panel-content">
@@ -64,7 +64,7 @@
                   <strong>Icône:</strong>
                   <mat-icon [style.color]="selectedNode.color">{{ selectedNode.icon }}</mat-icon>
                 </div>
-                <mat-divider style="margin: 16px 0;"></mat-divider>
+                <div class="workflow-editor-divider"></div>
                 <h4>Transitions sortantes</h4>
                 <div class="transitions-list">
                   @for (transition of getTransitionsForNode(selectedNode); track transition) {
@@ -77,16 +77,16 @@
                       role="button"
                       [attr.aria-label]="'Sélectionner la transition ' + (transition.label || 'vers ' + transition.toStatus)">
                       <div class="transition-info">
-                        <mat-icon>arrow_forward</mat-icon>
+                        <ds-icon name="chevron-right" [size]="16"></ds-icon>
                         <span>{{ transition.label || 'Vers ' + transition.toStatus }}</span>
                       </div>
-                      <button
-                        mat-icon-button
-                        color="warn"
-                        (click)="deleteTransition(transition, $event)"
-                        matTooltip="Supprimer la transition">
-                        <mat-icon>delete</mat-icon>
-                      </button>
+                      <ds-button
+                        variant="icon"
+                        ariaLabel="Supprimer la transition"
+                        (dsClick)="deleteTransition(transition, $event)"
+                        [attr.title]="'Supprimer la transition'">
+                        <ds-icon name="trash" [size]="16"></ds-icon>
+                      </ds-button>
                     </div>
                   }
                   @if (getTransitionsForNode(selectedNode).length === 0) {
@@ -118,30 +118,26 @@
                 @if (selectedTransition.requiredFields && selectedTransition.requiredFields.length > 0) {
                   <div class="property-item">
                     <strong>Champs requis:</strong>
-                    <mat-chip-listbox>
+                    <div class="chips-wrap">
                       @for (field of selectedTransition.requiredFields; track field) {
-                        <mat-chip>
-                          {{ field }}
-                        </mat-chip>
+                        <ds-badge status="info" [showDot]="false">{{ field }}</ds-badge>
                       }
-                    </mat-chip-listbox>
+                    </div>
                   </div>
                 }
                 @if (selectedTransition.allowedRoles && selectedTransition.allowedRoles.length > 0) {
                   <div class="property-item">
                     <strong>Rôles autorisés:</strong>
-                    <mat-chip-listbox>
+                    <div class="chips-wrap">
                       @for (role of selectedTransition.allowedRoles; track role) {
-                        <mat-chip>
-                          {{ role }}
-                        </mat-chip>
+                        <ds-badge status="neutral" [showDot]="false">{{ role }}</ds-badge>
                       }
-                    </mat-chip-listbox>
+                    </div>
                   </div>
                 }
                 @if (selectedTransition.requiresApproval) {
                   <div class="property-item">
-                    <mat-icon color="warn">verified_user</mat-icon>
+                    <ds-icon name="lock" [size]="16"></ds-icon>
                     Nécessite une approbation
                   </div>
                 }

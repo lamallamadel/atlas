@@ -4,7 +4,6 @@ import { DsCardComponent } from '../design-system';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { LeadScoringApiService, LeadPriority } from '../services/lead-scoring-api.service';
 import { ToastNotificationService } from '../services/toast-notification.service';
@@ -19,7 +18,6 @@ import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-
     MatIconModule,
     MatChipsModule,
     DsSkeletonComponent,
-    MatTooltipModule
 ],
   template: `
     <ds-card class="priority-queue-card" [pad]="false" [elevation]="'md'">
@@ -29,10 +27,10 @@ import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-
           High-Priority Leads
         </div>
         <div class="header-actions">
-          <button mat-icon-button (click)="refresh()" [disabled]="loading" matTooltip="Refresh">
+          <button type="button" mat-icon-button (click)="refresh()" [disabled]="loading" title="Refresh">
             <mat-icon>refresh</mat-icon>
           </button>
-          <button mat-icon-button (click)="recalculateAll()" [disabled]="loading" matTooltip="Recalculate All Scores">
+          <button type="button" mat-icon-button (click)="recalculateAll()" [disabled]="loading" title="Recalculate All Scores">
             <mat-icon>calculate</mat-icon>
           </button>
         </div>
@@ -92,19 +90,19 @@ import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-
                     </span>
                   </div>
                   <div class="score-breakdown">
-                    <span class="breakdown-item" matTooltip="Source Score">
+                    <span class="breakdown-item" title="Source Score">
                       <mat-icon class="breakdown-icon">business</mat-icon>
                       {{ lead.score.sourceScore }}
                     </span>
-                    <span class="breakdown-item" matTooltip="Response Time Score">
+                    <span class="breakdown-item" title="Response Time Score">
                       <mat-icon class="breakdown-icon">schedule</mat-icon>
                       {{ lead.score.responseTimeScore }}
                     </span>
-                    <span class="breakdown-item" matTooltip="Engagement Score">
+                    <span class="breakdown-item" title="Engagement Score">
                       <mat-icon class="breakdown-icon">chat</mat-icon>
                       {{ lead.score.engagementScore }}
                     </span>
-                    <span class="breakdown-item" matTooltip="Property Match Score">
+                    <span class="breakdown-item" title="Property Match Score">
                       <mat-icon class="breakdown-icon">home</mat-icon>
                       {{ lead.score.propertyMatchScore }}
                     </span>
@@ -116,7 +114,7 @@ import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-
                   </mat-chip>
                 </div>
                 <div class="lead-actions">
-                  <button mat-icon-button (click)="viewDossier(lead.dossier.id); $event.stopPropagation()" matTooltip="View Details">
+                  <button type="button" mat-icon-button (click)="viewDossier(lead.dossier.id); $event.stopPropagation()" title="View Details">
                     <mat-icon>visibility</mat-icon>
                   </button>
                 </div>

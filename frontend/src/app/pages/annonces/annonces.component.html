@@ -95,12 +95,16 @@
     @if (appliedFilters.length) {
       <div class="ann-chips" role="group" aria-label="Filtres actifs">
         @for (f of appliedFilters; track f.key) {
-          <div class="ann-chip">
-            {{ f.label }}: {{ f.displayValue }}
-            <button (click)="removeFilter(f)" [attr.aria-label]="'Retirer filtre ' + f.label">
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span class="ann-filter-chip">
+            <ds-badge status="info" [showDot]="false" size="sm">{{ f.label }} : {{ f.displayValue }}</ds-badge>
+            <button
+              type="button"
+              class="ann-filter-chip__remove"
+              (click)="removeFilter(f)"
+              [attr.aria-label]="'Retirer filtre ' + f.label">
+              <ds-icon name="close" [size]="16" ariaLabel="Retirer le filtre"></ds-icon>
             </button>
-          </div>
+          </span>
         }
       </div>
     }
@@ -191,64 +195,47 @@
     </div>
   }
 
-  <!-- ── Vue LISTE ── -->
+  <!-- ── Vue LISTE (ds-table) ── -->
   @if (!loading && !error && annonces.length > 0 && viewMode === 'list') {
-    <div class="ann-table-wrap" role="region" aria-label="Liste des annonces">
-      <div class="ann-table-header" role="row" aria-hidden="true">
-        <span class="ann-col ann-col--photo">Photo</span>
-        <span class="ann-col ann-col--title">Titre</span>
-        <span class="ann-col ann-col--city">Ville</span>
-        <span class="ann-col ann-col--price">Prix</span>
-        <span class="ann-col ann-col--status">Statut</span>
-        <span class="ann-col ann-col--date">Date</span>
-        <span class="ann-col ann-col--actions">Actions</span>
-      </div>
-      <div class="ann-rows" role="list" [@listStaggerAnimation]="annonces.length">
-        @for (a of annonces; track a.id) {
-          <div
-            class="ann-row"
-            role="listitem"
-            tabindex="0"
-            (click)="goToAnnonce(a.id)"
-            (keydown.enter)="goToAnnonce(a.id)"
-            [@itemAnimation]>
-            <div class="ann-col ann-col--photo">
-              @if (a.photos?.length) {
-                <img class="ann-row-thumb" [src]="a.photos?.[0]" [alt]="a.title" loading="lazy" />
-              } @else {
-                <div class="ann-row-thumb ann-row-thumb--empty" aria-hidden="true">
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="9" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
-                </div>
-              }
-            </div>
-            <div class="ann-col ann-col--title ann-title">{{ a.title }}</div>
-            <div class="ann-col ann-col--city ann-city">{{ a.city }}</div>
-            <div class="ann-col ann-col--price ann-price">{{ a.price | number:'1.0-0' }} €</div>
-            <div class="ann-col ann-col--status">
-              <ds-badge [status]="getAnnonceBadgeStatus(a.status)">{{ a.status }}</ds-badge>
-            </div>
-            <div class="ann-col ann-col--date ann-date">{{ a.createdAt | date:'d MMM y' }}</div>
-            <div class="ann-col ann-col--actions" (click)="$event.stopPropagation()">
-              <button class="ann-icon-btn" (click)="editAnnonce(a.id)" aria-label="Modifier">
-                <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-              </button>
+    <ds-card class="ann-list-card" elevation="sm" [pad]="false">
+      <div role="region" aria-label="Liste des annonces">
+        <ds-table
+          [columns]="dsTableColumns"
+          [rows]="annoncesAsTableRows"
+          [rowActions]="dsTableRowActions"
+          [rowClickable]="true"
+          [bordered]="true"
+          label="Liste des annonces"
+          [trackBy]="trackByAnnonceId"
+          (rowClick)="onDsTableRowClick($event)"
+          (rowAction)="onDsTableRowAction($event)">
+        </ds-table>
+        @if (page) {
+          <div class="ann-pagination ann-pagination--in-card" aria-label="Pagination">
+            <span class="ann-pagination__info">
+              Page {{ page.number + 1 }} / {{ page.totalPages }} ·
+              {{ page.totalElements }} annonce{{ page.totalElements > 1 ? 's' : '' }}
+            </span>
+            <div class="ann-pagination__btns">
+              <button type="button" class="ann-pagination__btn" [disabled]="currentPage === 0" (click)="previousPage()" aria-label="Page précédente">←</button>
+              <button type="button" class="ann-pagination__btn" [disabled]="page.last" (click)="nextPage()" aria-label="Page suivante">→</button>
             </div>
           </div>
         }
       </div>
-    </div>
+    </ds-card>
   }
 
-  <!-- ── Pagination ── -->
-  @if (page && !loading) {
+  <!-- ── Pagination (vue cartes) ── -->
+  @if (page && !loading && viewMode === 'cards') {
     <div class="ann-pagination" aria-label="Pagination">
       <span class="ann-pagination__info">
         Page {{ page.number + 1 }} / {{ page.totalPages }} ·
         {{ page.totalElements }} annonce{{ page.totalElements > 1 ? 's' : '' }}
       </span>
       <div class="ann-pagination__btns">
-        <button class="ann-pagination__btn" [disabled]="currentPage === 0" (click)="previousPage()" aria-label="Page précédente">←</button>
-        <button class="ann-pagination__btn" [disabled]="page.last" (click)="nextPage()" aria-label="Page suivante">→</button>
+        <button type="button" class="ann-pagination__btn" [disabled]="currentPage === 0" (click)="previousPage()" aria-label="Page précédente">←</button>
+        <button type="button" class="ann-pagination__btn" [disabled]="page.last" (click)="nextPage()" aria-label="Page suivante">→</button>
       </div>
     </div>
   }

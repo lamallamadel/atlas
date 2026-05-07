@@ -1,23 +1,39 @@
-import { Component, OnInit, OnChanges, SimpleChanges, input } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, input, inject } from '@angular/core';
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivityApiService, ActivityResponse, ActivityType, ActivityVisibility, ActivityCreateRequest, ActivityUpdateRequest } from '../services/activity-api.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { NoteFormDialogComponent, NoteFormDialogResult } from './note-form-dialog.component';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { DsCardComponent } from '../design-system';
+import { DsButtonComponent, DsCardComponent, DsIconComponent } from '../design-system';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 
 @Component({
     selector: 'app-activity-timeline',
+    standalone: true,
     templateUrl: './activity-timeline.component.html',
     styleUrls: ['./activity-timeline.component.css'],
-    imports: [MatButton, MatIcon, DsCardComponent, DsSkeletonComponent, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem]
+    imports: [
+      DsButtonComponent,
+      DsIconComponent,
+      DsCardComponent,
+      DsSkeletonComponent,
+      CdkConnectedOverlay,
+      CdkOverlayOrigin,
+    ]
 })
 export class ActivityTimelineComponent implements OnInit, OnChanges {
+  private readonly overlay = inject(Overlay);
+
+  /** Menu actions note (remplace `mat-menu`, une ligne ouverte à la fois). */
+  noteActionsMenuOpenForId: number | null = null;
+  readonly noteMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
+  readonly noteMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
+  ];
+
   readonly dossierId = input.required<number>();
 
   activities: ActivityResponse[] = [];
@@ -159,7 +175,18 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
     });
   }
 
+  toggleNoteActionsMenu(activityId: number, event: MouseEvent): void {
+    event.stopPropagation();
+    this.noteActionsMenuOpenForId =
+      this.noteActionsMenuOpenForId === activityId ? null : activityId;
+  }
+
+  closeNoteActionsMenu(): void {
+    this.noteActionsMenuOpenForId = null;
+  }
+
   editActivity(activity: ActivityResponse): void {
+    this.closeNoteActionsMenu();
     this.openNoteDialog(activity);
   }
 
@@ -176,6 +203,7 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
   }
 
   deleteActivity(activity: ActivityResponse): void {
+    this.closeNoteActionsMenu();
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '400px',
       maxWidth: '100vw',
@@ -237,12 +265,12 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
     }
   }
 
-  getActivityTypeIcon(type: ActivityType): string {
+  getActivityTypeDsIcon(type: ActivityType): string {
     switch (type) {
-      case ActivityType.NOTE: return 'note';
-      case ActivityType.STATUS_CHANGE: return 'update';
-      case ActivityType.APPOINTMENT_CREATED: return 'event';
-      case ActivityType.MESSAGE_SENT: return 'send';
+      case ActivityType.NOTE: return 'edit';
+      case ActivityType.STATUS_CHANGE: return 'tasks';
+      case ActivityType.APPOINTMENT_CREATED: return 'calendar';
+      case ActivityType.MESSAGE_SENT: return 'upload';
       default: return 'info';
     }
   }
@@ -261,8 +289,8 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
     return visibility === ActivityVisibility.INTERNAL ? 'Interne (équipe)' : 'Visible par le client';
   }
 
-  getVisibilityIcon(visibility: ActivityVisibility): string {
-    return visibility === ActivityVisibility.INTERNAL ? 'lock' : 'visibility';
+  getVisibilityDsIcon(visibility: ActivityVisibility): string {
+    return visibility === ActivityVisibility.INTERNAL ? 'lock' : 'users';
   }
 
   getVisibilityBadgeClass(visibility: ActivityVisibility): string {

@@ -45,13 +45,6 @@ describe('WorkflowStepperComponent', () => {
       expect(component.steps[4].label).toBe('Clôture');
     });
 
-    it('should have correct step icons', () => {
-      expect(component.steps[0].icon).toBe('fiber_new');
-      expect(component.steps[1].icon).toBe('manage_search');
-      expect(component.steps[2].icon).toBe('verified');
-      expect(component.steps[3].icon).toBe('event');
-      expect(component.steps[4].icon).toBe('flag');
-    });
   });
 
   describe('Status Index Mapping', () => {
@@ -91,7 +84,7 @@ describe('WorkflowStepperComponent', () => {
     });
   });
 
-  describe('Close Label and Icon', () => {
+  describe('Close Label', () => {
     it('should return "Gagné" label for WON status', () => {
       fixture.componentRef.setInput('status', DossierStatus.WON);
       expect(component.closeLabel).toBe('Gagné');
@@ -107,20 +100,6 @@ describe('WorkflowStepperComponent', () => {
       expect(component.closeLabel).toBe('En cours');
     });
 
-    it('should return "emoji_events" icon for WON status', () => {
-      fixture.componentRef.setInput('status', DossierStatus.WON);
-      expect(component.closeIcon).toBe('emoji_events');
-    });
-
-    it('should return "cancel" icon for LOST status', () => {
-      fixture.componentRef.setInput('status', DossierStatus.LOST);
-      expect(component.closeIcon).toBe('cancel');
-    });
-
-    it('should return "hourglass_top" icon for active status', () => {
-      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
-      expect(component.closeIcon).toBe('hourglass_top');
-    });
   });
 
   describe('Progress Calculation', () => {
@@ -266,31 +245,6 @@ describe('WorkflowStepperComponent', () => {
     });
   });
 
-  describe('Step Icon Method', () => {
-    it('should return step icon for regular steps', () => {
-      const step = component.steps[0];
-      expect(component.stepIcon(step)).toBe('fiber_new');
-    });
-
-    it('should return closeIcon for CLOSE step with WON status', () => {
-      fixture.componentRef.setInput('status', DossierStatus.WON);
-      const closeStep = component.steps[4];
-      expect(component.stepIcon(closeStep)).toBe('emoji_events');
-    });
-
-    it('should return closeIcon for CLOSE step with LOST status', () => {
-      fixture.componentRef.setInput('status', DossierStatus.LOST);
-      const closeStep = component.steps[4];
-      expect(component.stepIcon(closeStep)).toBe('cancel');
-    });
-
-    it('should return hourglass icon for CLOSE step with active status', () => {
-      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
-      const closeStep = component.steps[4];
-      expect(component.stepIcon(closeStep)).toBe('hourglass_top');
-    });
-  });
-
   describe('Step Label Method', () => {
     it('should return step label for regular steps', () => {
       const step = component.steps[0];
@@ -393,19 +347,19 @@ describe('WorkflowStepperComponent', () => {
       expect(progressBar.nativeElement.style.width).toBe('25%');
     });
 
-    it('should render all 5 steps', () => {
-      const steps = fixture.debugElement.queryAll(By.css('.workflow-step'));
+    it('should render all 5 stages', () => {
+      const steps = fixture.debugElement.queryAll(By.css('.ds-stages__step'));
       expect(steps.length).toBe(5);
     });
 
-    it('should apply completed class to completed steps', () => {
-      const steps = fixture.debugElement.queryAll(By.css('.workflow-step'));
-      expect(steps[0].nativeElement.classList.contains('completed')).toBe(true);
+    it('should mark completed stages with done pill', () => {
+      const pills = fixture.debugElement.queryAll(By.css('.ds-stages__pill'));
+      expect(pills[0].nativeElement.classList.contains('ds-stages__pill--done')).toBe(true);
     });
 
-    it('should apply active class to current step', () => {
-      const steps = fixture.debugElement.queryAll(By.css('.workflow-step'));
-      expect(steps[1].nativeElement.classList.contains('active')).toBe(true);
+    it('should mark current stage with current pill', () => {
+      const pills = fixture.debugElement.queryAll(By.css('.ds-stages__pill'));
+      expect(pills[1].nativeElement.classList.contains('ds-stages__pill--current')).toBe(true);
     });
 
     it('should render hint message', () => {
@@ -414,9 +368,9 @@ describe('WorkflowStepperComponent', () => {
       expect(hint.nativeElement.textContent).toContain('Validez le besoin');
     });
 
-    it('should render icons for each step', () => {
-      const icons = fixture.debugElement.queryAll(By.css('.step-dot mat-icon'));
-      expect(icons.length).toBe(5);
+    it('should render stage stepper with five labels', () => {
+      const labels = fixture.debugElement.queryAll(By.css('.ds-stages__label'));
+      expect(labels.length).toBe(5);
     });
   });
 
@@ -441,20 +395,23 @@ describe('WorkflowStepperComponent', () => {
       expect(progress.nativeElement.getAttribute('aria-label')).toBe('Progression');
     });
 
-    it('should mark icons as aria-hidden', () => {
-      const icons = fixture.debugElement.queryAll(By.css('mat-icon'));
+    it('should mark decorative ds-icons as aria-hidden', () => {
+      const icons = fixture.debugElement.queryAll(By.css('ds-icon'));
       icons.forEach(icon => {
-        expect(icon.nativeElement.getAttribute('aria-hidden')).toBe('true');
+        const svg = icon.nativeElement.querySelector('svg');
+        expect(svg?.getAttribute('aria-hidden')).toBe('true');
       });
     });
 
-    it('should use ordered list for steps', () => {
-      const stepsList = fixture.debugElement.query(By.css('ol.workflow-steps'));
-      expect(stepsList).toBeTruthy();
+    it('should expose stage list on ds-stage-stepper', () => {
+      const stepper = fixture.debugElement.query(By.css('ds-stage-stepper'));
+      expect(stepper).toBeTruthy();
+      const list = stepper.query(By.css('.ds-stages[role="list"]'));
+      expect(list).toBeTruthy();
     });
 
-    it('should use list items for each step', () => {
-      const steps = fixture.debugElement.queryAll(By.css('.workflow-steps li'));
+    it('should use list items for each stage', () => {
+      const steps = fixture.debugElement.queryAll(By.css('.ds-stages__step[role="listitem"]'));
       expect(steps.length).toBe(5);
     });
   });
@@ -530,22 +487,24 @@ describe('WorkflowStepperComponent', () => {
       expect(chip).toBeFalsy();
     });
 
-    it('should display check_circle icon for won chip', () => {
+    it('should display ds-icon check for won chip', () => {
       fixture.componentRef.setInput('status', DossierStatus.WON);
       fixture.detectChanges();
-      
+
       const chip = fixture.debugElement.query(By.css('.workflow-chip'));
-      const icon = chip.query(By.css('mat-icon'));
-      expect(icon.nativeElement.textContent).toContain('check_circle');
+      const icon = chip.query(By.css('ds-icon'));
+      expect(icon).toBeTruthy();
+      expect(icon.componentInstance.name).toBe('check');
     });
 
-    it('should display cancel icon for lost chip', () => {
+    it('should display ds-icon close for lost chip', () => {
       fixture.componentRef.setInput('status', DossierStatus.LOST);
       fixture.detectChanges();
-      
+
       const chip = fixture.debugElement.query(By.css('.workflow-chip'));
-      const icon = chip.query(By.css('mat-icon'));
-      expect(icon.nativeElement.textContent).toContain('cancel');
+      const icon = chip.query(By.css('ds-icon'));
+      expect(icon).toBeTruthy();
+      expect(icon.componentInstance.name).toBe('close');
     });
   });
 
@@ -576,8 +535,8 @@ describe('WorkflowStepperComponent', () => {
     it('should display step labels correctly', () => {
       fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       fixture.detectChanges();
-      
-      const stepLabels = fixture.debugElement.queryAll(By.css('.step-label'));
+
+      const stepLabels = fixture.debugElement.queryAll(By.css('.ds-stages__label'));
       expect(stepLabels[0].nativeElement.textContent).toBe('Nouveau');
       expect(stepLabels[1].nativeElement.textContent).toBe('Qualification');
       expect(stepLabels[2].nativeElement.textContent).toBe('Qualifié');
@@ -588,16 +547,16 @@ describe('WorkflowStepperComponent', () => {
     it('should display enhanced close label for won status', () => {
       fixture.componentRef.setInput('status', DossierStatus.WON);
       fixture.detectChanges();
-      
-      const stepLabels = fixture.debugElement.queryAll(By.css('.step-label'));
+
+      const stepLabels = fixture.debugElement.queryAll(By.css('.ds-stages__label'));
       expect(stepLabels[4].nativeElement.textContent).toBe('Clôture (Gagné)');
     });
 
     it('should display enhanced close label for lost status', () => {
       fixture.componentRef.setInput('status', DossierStatus.LOST);
       fixture.detectChanges();
-      
-      const stepLabels = fixture.debugElement.queryAll(By.css('.step-label'));
+
+      const stepLabels = fixture.debugElement.queryAll(By.css('.ds-stages__label'));
       expect(stepLabels[4].nativeElement.textContent).toBe('Clôture (Perdu)');
     });
   });
@@ -665,12 +624,13 @@ describe('WorkflowStepperComponent', () => {
       expect(hint).toBeTruthy();
     });
 
-    it('should display correct hint icon', () => {
+    it('should display hint with ds-icon info', () => {
       fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       fixture.detectChanges();
-      
-      const hintIcon = fixture.debugElement.query(By.css('.workflow-hint mat-icon'));
-      expect(hintIcon.nativeElement.textContent).toContain('tips_and_updates');
+
+      const hintIcon = fixture.debugElement.query(By.css('.workflow-hint ds-icon'));
+      expect(hintIcon).toBeTruthy();
+      expect(hintIcon.componentInstance.name).toBe('info');
     });
 
     it('should update hint text when status changes', () => {
@@ -689,38 +649,33 @@ describe('WorkflowStepperComponent', () => {
   });
 
   describe('Visual State Classes', () => {
-    it('should not apply completed or active class to future steps', () => {
-      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING); // index 1
+    it('should not mark future stages as done or current', () => {
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       fixture.detectChanges();
-      
-      const steps = fixture.debugElement.queryAll(By.css('.workflow-step'));
-      expect(steps[2].nativeElement.classList.contains('completed')).toBe(false);
-      expect(steps[2].nativeElement.classList.contains('active')).toBe(false);
-      expect(steps[3].nativeElement.classList.contains('completed')).toBe(false);
-      expect(steps[3].nativeElement.classList.contains('active')).toBe(false);
+
+      const pills = fixture.debugElement.queryAll(By.css('.ds-stages__pill'));
+      expect(pills[2].nativeElement.classList.contains('ds-stages__pill--done')).toBe(false);
+      expect(pills[2].nativeElement.classList.contains('ds-stages__pill--current')).toBe(false);
+      expect(pills[3].nativeElement.classList.contains('ds-stages__pill--done')).toBe(false);
+      expect(pills[3].nativeElement.classList.contains('ds-stages__pill--current')).toBe(false);
     });
 
-    it('should apply both completed and active classes correctly for same workflow', () => {
-      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED); // index 2
+    it('should apply done and current pill states correctly', () => {
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED);
       fixture.detectChanges();
-      
-      const steps = fixture.debugElement.queryAll(By.css('.workflow-step'));
-      
-      // Step 0 should be completed
-      expect(steps[0].nativeElement.classList.contains('completed')).toBe(true);
-      expect(steps[0].nativeElement.classList.contains('active')).toBe(false);
-      
-      // Step 1 should be completed
-      expect(steps[1].nativeElement.classList.contains('completed')).toBe(true);
-      expect(steps[1].nativeElement.classList.contains('active')).toBe(false);
-      
-      // Step 2 should be active
-      expect(steps[2].nativeElement.classList.contains('completed')).toBe(false);
-      expect(steps[2].nativeElement.classList.contains('active')).toBe(true);
-      
-      // Step 3 should be neither
-      expect(steps[3].nativeElement.classList.contains('completed')).toBe(false);
-      expect(steps[3].nativeElement.classList.contains('active')).toBe(false);
+
+      const pills = fixture.debugElement.queryAll(By.css('.ds-stages__pill'));
+
+      expect(pills[0].nativeElement.classList.contains('ds-stages__pill--done')).toBe(true);
+      expect(pills[0].nativeElement.classList.contains('ds-stages__pill--current')).toBe(false);
+
+      expect(pills[1].nativeElement.classList.contains('ds-stages__pill--done')).toBe(true);
+      expect(pills[1].nativeElement.classList.contains('ds-stages__pill--current')).toBe(false);
+
+      expect(pills[2].nativeElement.classList.contains('ds-stages__pill--current')).toBe(true);
+      expect(pills[2].nativeElement.classList.contains('ds-stages__pill--done')).toBe(false);
+
+      expect(pills[3].nativeElement.classList.contains('ds-stages__pill--upcoming')).toBe(true);
     });
   });
 });

@@ -6,8 +6,7 @@
     class="quick-actions-fab"
     [class.fab-open]="menuOpen"
     (click)="toggleMenu()"
-    [matTooltip]="menuOpen ? 'Fermer (Alt+Q)' : 'Actions rapides (Alt+Q)'"
-    matTooltipPosition="left"
+    [attr.title]="menuOpen ? 'Fermer (Alt+Q)' : 'Actions rapides (Alt+Q)'"
     aria-label="Actions rapides">
     <mat-icon>{{ menuOpen ? 'close' : 'flash_on' }}</mat-icon>
   </button>

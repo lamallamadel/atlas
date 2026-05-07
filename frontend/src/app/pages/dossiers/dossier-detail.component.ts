@@ -20,10 +20,9 @@ import { LoadingSkeletonComponent } from '../../components/loading-skeleton.comp
 import { CollaborationPresenceComponent } from '../../components/collaboration-presence.component';
 import { BadgeStatusComponent } from '../../components/badge-status.component';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { DsTabsComponent, DsTab } from '../../design-system/index';
-import { DsCardComponent } from '../../design-system';
+import { DsCardComponent, EntityDetailLayoutComponent, MessagingThreadComponent, type DsMessage } from '../../design-system';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { DsEmptyStateComponent } from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
 import { WhatsappMessagingContainerComponent } from '../../components/whatsapp-messaging-container.component';
@@ -71,7 +70,7 @@ export interface WhatsAppTemplate {
     selector: 'app-dossier-detail',
     templateUrl: './dossier-detail.component.html',
     styleUrls: ['./dossier-detail.component.css'],
-    imports: [LoadingSkeletonComponent, CollaborationPresenceComponent, BadgeStatusComponent, RouterLink, MatIcon, MatTooltip, FormsModule, DsTabsComponent, DsCardComponent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, DsEmptyStateComponent, WhatsappMessagingContainerComponent, MatAnchor, MessagingTabComponent, DocumentListComponent, ActivityTimelineComponent, MatPaginator, CollaborationActivityStreamComponent, CollaborationCursorComponent, CollaborationFilterShareComponent, QuickActionsComponent, PhoneFormatPipe]
+    imports: [LoadingSkeletonComponent, CollaborationPresenceComponent, BadgeStatusComponent, RouterLink, MatIcon, FormsModule, DsTabsComponent, DsCardComponent, EntityDetailLayoutComponent, MessagingThreadComponent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, DsEmptyStateComponent, WhatsappMessagingContainerComponent, MatAnchor, MessagingTabComponent, DocumentListComponent, ActivityTimelineComponent, MatPaginator, CollaborationActivityStreamComponent, CollaborationCursorComponent, CollaborationFilterShareComponent, QuickActionsComponent, PhoneFormatPipe]
 })
 export class DossierDetailComponent implements OnInit, OnDestroy {
   dossier: DossierResponse | null = null;
@@ -757,7 +756,7 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/dossiers']);
+    this.router.navigate(['/pro/dossiers']);
   }
 
   formatDate(dateString: string): string {
@@ -1366,6 +1365,18 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
       const dateB = new Date(b.timestamp).getTime();
       return dateB - dateA;
     });
+  }
+
+  /** Fil chronologique onglet Messages (pattern ds-messaging-thread). */
+  getMessagesForDsThread(): DsMessage[] {
+    const lead = this.dossier?.leadName || 'Prospect';
+    return this.getMessagesSorted().map((m) => ({
+      id: m.id,
+      content: this.truncateContent(m.content),
+      direction: m.direction === MessageDirection.INBOUND ? 'inbound' : 'outbound',
+      time: this.formatMessageTimestamp(m.timestamp),
+      senderName: m.direction === MessageDirection.INBOUND ? lead : undefined
+    }));
   }
 
   openMessageDialog(): void {
