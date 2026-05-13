@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.context.ApplicationEventPublisher;
+import com.example.backend.event.DossierStatusChangedEvent;
+
 @Service
 public class DossierStatusTransitionService {
 
@@ -26,15 +29,18 @@ public class DossierStatusTransitionService {
     private final DossierStatusHistoryRepository historyRepository;
     private final MetricsService metricsService;
     private final ActivityService activityService;
+    private final ApplicationEventPublisher eventPublisher;
     private final Map<DossierStatus, Set<DossierStatus>> allowedTransitions;
 
     public DossierStatusTransitionService(
             DossierStatusHistoryRepository historyRepository,
             MetricsService metricsService,
-            ActivityService activityService) {
+            ActivityService activityService,
+            ApplicationEventPublisher eventPublisher) {
         this.historyRepository = historyRepository;
         this.metricsService = metricsService;
         this.activityService = activityService;
+        this.eventPublisher = eventPublisher;
         this.allowedTransitions = initializeTransitions();
     }
 
@@ -137,6 +143,8 @@ public class DossierStatusTransitionService {
                 fromStatus != null ? fromStatus.name() : "NONE", toStatus.name());
 
         logStatusChangeActivity(dossier, fromStatus, toStatus, userId, reason);
+
+        eventPublisher.publishEvent(new DossierStatusChangedEvent(this, dossier, fromStatus, toStatus, userId, reason));
     }
 
     private void logStatusChangeActivity(

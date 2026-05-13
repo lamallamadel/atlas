@@ -12,7 +12,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { DsCardComponent, DsButtonComponent, DsIconComponent } from '../design-system';
+import { DsCardComponent, DsButtonComponent, DsIconComponent, PageHeaderComponent } from '../design-system';
 import { resolveDsToken } from '../design-system/chart-ds-colors';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
@@ -44,6 +44,7 @@ interface CalendarEvent extends EventInput {
     styleUrls: ['./calendar-view.component.css'],
     imports: [
       DsCardComponent,
+      PageHeaderComponent,
       DsSkeletonComponent,
       DsButtonComponent,
       DsIconComponent,

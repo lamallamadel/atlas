@@ -1,26 +1,26 @@
 <div class="template-library-container">
   <div class="library-header">
-    <h2>WhatsApp Template Library</h2>
+    <h2>Bibliothèque de modèles WhatsApp</h2>
     <ds-button variant="marine" size="md" (dsClick)="createNewTemplate()">
       <ds-icon name="plus" [size]="16"></ds-icon>
-      Create Template
+      Créer un modèle
     </ds-button>
   </div>
 
   <div class="library-filters">
     <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Search templates</mat-label>
-      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" placeholder="Search by name or description">
+      <mat-label>Rechercher des modèles</mat-label>
+      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" placeholder="Rechercher par nom ou description">
       <ds-icon matPrefix name="search" [size]="16"></ds-icon>
     </mat-form-field>
 
     <mat-button-toggle-group [(ngModel)]="selectedStatus" (change)="onStatusFilterChange(selectedStatus)" class="status-filter">
-      <mat-button-toggle value="ALL">All</mat-button-toggle>
-      <mat-button-toggle [value]="TemplateStatus.DRAFT">Draft</mat-button-toggle>
-      <mat-button-toggle [value]="TemplateStatus.PENDING_APPROVAL">Pending</mat-button-toggle>
-      <mat-button-toggle [value]="TemplateStatus.ACTIVE">Active</mat-button-toggle>
-      <mat-button-toggle [value]="TemplateStatus.REJECTED">Rejected</mat-button-toggle>
-      <mat-button-toggle [value]="TemplateStatus.INACTIVE">Paused</mat-button-toggle>
+      <mat-button-toggle value="ALL">Tous</mat-button-toggle>
+      <mat-button-toggle [value]="TemplateStatus.DRAFT">Brouillon</mat-button-toggle>
+      <mat-button-toggle [value]="TemplateStatus.PENDING_APPROVAL">En attente</mat-button-toggle>
+      <mat-button-toggle [value]="TemplateStatus.ACTIVE">Actif</mat-button-toggle>
+      <mat-button-toggle [value]="TemplateStatus.REJECTED">Rejeté</mat-button-toggle>
+      <mat-button-toggle [value]="TemplateStatus.INACTIVE">En pause</mat-button-toggle>
     </mat-button-toggle-group>
   </div>
 
@@ -72,12 +72,12 @@
           <div class="tpl-lib-actions">
             <button mat-button type="button" (click)="viewTemplate(template)">
               <ds-icon name="info" [size]="16"></ds-icon>
-              View
+              Voir
             </button>
             @if (template.status !== TemplateStatus.PENDING_APPROVAL && template.status !== TemplateStatus.ACTIVE) {
               <button mat-button type="button" (click)="editTemplate(template)">
                 <ds-icon name="edit" [size]="16"></ds-icon>
-                Edit
+                Modifier
               </button>
             }
             @if (template.id != null) {
@@ -109,30 +109,30 @@
                   role="menu">
                   <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="duplicateTemplate(template)">
                     <ds-icon name="edit" [size]="16"></ds-icon>
-                    Duplicate
+                    Dupliquer
                   </button>
                   @if (template.status === TemplateStatus.DRAFT) {
                     <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="submitForApproval(template)">
                       <ds-icon name="upload" [size]="16"></ds-icon>
-                      Submit for Approval
+                      Soumettre pour approbation
                     </button>
                   }
                   @if (template.status === TemplateStatus.ACTIVE) {
                     <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="pauseTemplate(template)">
                       <ds-icon name="info" [size]="16"></ds-icon>
-                      Pause
+                      Mettre en pause
                     </button>
                   }
                   @if (template.status === TemplateStatus.INACTIVE) {
                     <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="activateTemplate(template)">
                       <ds-icon name="check" [size]="16"></ds-icon>
-                      Activate
+                      Activer
                     </button>
                   }
                   @if (template.status !== TemplateStatus.ACTIVE) {
                     <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="deleteTemplate(template)">
                       <ds-icon name="trash" [size]="16"></ds-icon>
-                      Delete
+                      Supprimer
                     </button>
                   }
                 </div>
@@ -147,9 +147,9 @@
   @if (!loading && filteredTemplates.length === 0) {
     <ds-card elevation="sm">
       <ds-empty-state
-        title="No templates found"
-        [description]="searchQuery || selectedStatus !== 'ALL' ? 'Try adjusting your filters' : 'Create your first template to get started.'"
-        [ctaLabel]="searchQuery || selectedStatus !== 'ALL' ? null : 'Create Your First Template'"
+        title="Aucun modèle trouvé"
+        [description]="searchQuery || selectedStatus !== 'ALL' ? 'Essayez d’ajuster vos filtres.' : 'Créez votre premier modèle pour commencer.'"
+        [ctaLabel]="searchQuery || selectedStatus !== 'ALL' ? null : 'Créer votre premier modèle'"
         (ctaClick)="createNewTemplate()">
       </ds-empty-state>
     </ds-card>

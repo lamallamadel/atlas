@@ -1,14 +1,14 @@
 <ds-card class="preview-card" [pad]="false" [elevation]="'sm'">
   <div class="preview-card-header">
-    <h3 class="preview-card-title">Live Preview</h3>
-    <ds-icon name="info" [size]="16" [attr.title]="'Preview how your message will appear in WhatsApp'"></ds-icon>
+    <h3 class="preview-card-title">Aperçu en direct</h3>
+    <ds-icon name="info" [size]="16" [attr.title]="'Prévisualisez l’apparence du message dans WhatsApp'"></ds-icon>
   </div>
 
   <div class="preview-card-body">
     <div class="whatsapp-preview">
       <div class="whatsapp-header">
         <ds-icon name="whatsapp" [size]="16"></ds-icon>
-        <span>WhatsApp Message Preview</span>
+        <span>Aperçu du message WhatsApp</span>
       </div>
 
       @if (template()) {
@@ -30,7 +30,7 @@
               </div>
             }
             <div class="message-time">
-              {{ 'Now' }}
+              {{ 'Maintenant' }}
             </div>
           </div>
           @if (buttonsComponent?.buttons && buttonsComponent!.buttons!.length > 0) {
@@ -75,7 +75,7 @@
       @if (!template()) {
         <div class="empty-preview">
           <ds-icon name="info" [size]="24"></ds-icon>
-          <p>Start creating your template to see a preview</p>
+          <p>Commencez à créer votre modèle pour voir un aperçu.</p>
         </div>
       }
     </div>

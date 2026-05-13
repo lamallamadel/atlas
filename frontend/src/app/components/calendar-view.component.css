@@ -17,10 +17,9 @@
   margin-bottom: 16px;
 }
 
-.header-row h2 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 500;
+.header-row--actions-only {
+  justify-content: flex-end;
+  margin-bottom: 0;
 }
 
 .header-actions {

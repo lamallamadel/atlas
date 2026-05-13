@@ -1,18 +1,14 @@
 <div class="workflow-admin-container">
-  <ds-page-header title="Administration des workflows" subtitle="Configurez les étapes CRM, modèles WhatsApp et règles de transition"></ds-page-header>
+  <ds-page-header title="Administration des workflows" subtitle="Gérez vos workflows et modèles WhatsApp d'une manière centralisée."></ds-page-header>
   <ds-card class="workflow-admin-card" [pad]="false" [elevation]="'sm'">
-    <div class="workflow-admin-card-header">
-      <h2 class="workflow-admin-card-title">Workflow Administration</h2>
-    </div>
-
     <div class="workflow-admin-card-body">
       <mat-tab-group [(selectedIndex)]="selectedTab" animationDuration="300ms">
-        <mat-tab label="Workflow Editor">
+        <mat-tab label="Éditeur">
           <div class="tab-content">
             <div class="workflow-selector">
               <mat-button-toggle-group (change)="onCaseTypeChange($event.value)" [value]="workflow?.caseType">
-                <mat-button-toggle [value]="CaseType.DOSSIER">Dossier Workflow</mat-button-toggle>
-                <mat-button-toggle [value]="CaseType.ANNONCE">Annonce Workflow</mat-button-toggle>
+                <mat-button-toggle [value]="CaseType.DOSSIER">Workflow dossier</mat-button-toggle>
+                <mat-button-toggle [value]="CaseType.ANNONCE">Workflow annonce</mat-button-toggle>
               </mat-button-toggle-group>
             </div>
 
@@ -23,13 +19,13 @@
             <div class="actions">
               <ds-button variant="marine" size="md" (dsClick)="onSaveWorkflow()">
                 <ds-icon name="upload" [size]="16" />
-                Save Workflow
+                Enregistrer le workflow
               </ds-button>
             </div>
           </div>
         </mat-tab>
 
-        <mat-tab label="Preview">
+        <mat-tab label="Aperçu">
           <div class="tab-content">
             @if (workflow) {
               <app-workflow-preview [workflow]="workflow"></app-workflow-preview>
@@ -37,14 +33,14 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="WhatsApp Templates">
+        <mat-tab label="Modèles WhatsApp">
           <div class="tab-content">
             <p class="tab-description">
-              Manage WhatsApp message templates for your organization. Templates must be approved by WhatsApp before they can be used.
+              Gérez les modèles de messages WhatsApp de votre organisation. Les modèles doivent être approuvés par WhatsApp avant utilisation.
             </p>
             <ds-button variant="marine" size="md" [routerLink]="'/workflow-admin/templates'">
               <ds-icon name="whatsapp" [size]="16" />
-              Manage Templates
+              Gérer les modèles
             </ds-button>
           </div>
         </mat-tab>

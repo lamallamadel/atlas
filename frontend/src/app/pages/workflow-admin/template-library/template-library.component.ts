@@ -70,7 +70,7 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading templates:', error);
-          this.snackBar.open('Error loading templates', 'Close', { duration: 5000 });
+          this.snackBar.open('Erreur lors du chargement des modèles', 'Fermer', { duration: 5000 });
           this.loading = false;
         }
       });
@@ -140,21 +140,21 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
   deleteTemplate(template: WhatsAppTemplate): void {
     this.closeTplCardMenu();
     if (template.status === TemplateStatus.ACTIVE) {
-      this.snackBar.open('Cannot delete an active template. Please pause it first.', 'Close', { duration: 5000 });
+      this.snackBar.open('Impossible de supprimer un modèle actif. Mettez-le d’abord en pause.', 'Fermer', { duration: 5000 });
       return;
     }
 
-    if (confirm(`Are you sure you want to delete the template "${template.name}"?`)) {
+    if (confirm(`Voulez-vous vraiment supprimer le modèle "${template.name}" ?`)) {
       this.templateService.deleteTemplate(template.id!)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.snackBar.open('Template deleted successfully', 'Close', { duration: 3000 });
+            this.snackBar.open('Modèle supprimé avec succès', 'Fermer', { duration: 3000 });
             this.loadTemplates();
           },
           error: (error) => {
             console.error('Error deleting template:', error);
-            this.snackBar.open('Error deleting template', 'Close', { duration: 5000 });
+            this.snackBar.open('Erreur lors de la suppression du modèle', 'Fermer', { duration: 5000 });
           }
         });
     }
@@ -165,12 +165,12 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Template submitted for approval', 'Close', { duration: 3000 });
+          this.snackBar.open('Modèle soumis pour approbation', 'Fermer', { duration: 3000 });
           this.loadTemplates();
         },
         error: (error) => {
           console.error('Error submitting template:', error);
-          this.snackBar.open('Error submitting template for approval', 'Close', { duration: 5000 });
+          this.snackBar.open('Erreur lors de la soumission du modèle', 'Fermer', { duration: 5000 });
         }
       });
   }
@@ -181,12 +181,12 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Template paused successfully', 'Close', { duration: 3000 });
+          this.snackBar.open('Modèle mis en pause avec succès', 'Fermer', { duration: 3000 });
           this.loadTemplates();
         },
         error: (error) => {
           console.error('Error pausing template:', error);
-          this.snackBar.open('Error pausing template', 'Close', { duration: 5000 });
+          this.snackBar.open('Erreur lors de la mise en pause du modèle', 'Fermer', { duration: 5000 });
         }
       });
   }
@@ -197,12 +197,12 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Template activated successfully', 'Close', { duration: 3000 });
+          this.snackBar.open('Modèle activé avec succès', 'Fermer', { duration: 3000 });
           this.loadTemplates();
         },
         error: (error) => {
           console.error('Error activating template:', error);
-          this.snackBar.open('Error activating template', 'Close', { duration: 5000 });
+          this.snackBar.open('Erreur lors de l’activation du modèle', 'Fermer', { duration: 5000 });
         }
       });
   }

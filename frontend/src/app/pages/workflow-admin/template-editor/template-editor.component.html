@@ -3,7 +3,7 @@
     <ds-button variant="icon" size="sm" ariaLabel="Retour" (dsClick)="cancel()">
       <ds-icon name="chevron-left" [size]="16"></ds-icon>
     </ds-button>
-    <h2>{{ isEditMode ? 'Edit Template' : isViewMode ? 'View Template' : 'Create Template' }}</h2>
+    <h2>{{ isEditMode ? 'Modifier le modèle' : isViewMode ? 'Voir le modèle' : 'Créer un modèle' }}</h2>
   </div>
 
   <div class="editor-content">
@@ -11,22 +11,22 @@
       <form [formGroup]="templateForm" (ngSubmit)="onSubmit()">
         <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
           <div class="te-card-header">
-            <h3 class="te-card-title">Basic Information</h3>
+            <h3 class="te-card-title">Informations générales</h3>
           </div>
           <div class="te-card-body">
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Template Name</mat-label>
-                <input matInput formControlName="name" placeholder="e.g., order_confirmation">
-                <mat-hint>Use lowercase letters, numbers, and underscores only</mat-hint>
+                <mat-label>Nom du modèle</mat-label>
+                <input matInput formControlName="name" placeholder="ex. confirmation_commande">
+                <mat-hint>Utilisez uniquement des lettres minuscules, chiffres et underscores</mat-hint>
                 @if (templateForm.get('name')?.hasError('required')) {
                   <mat-error>
-                    Template name is required
+                    Le nom du modèle est requis
                   </mat-error>
                 }
                 @if (templateForm.get('name')?.hasError('pattern')) {
                   <mat-error>
-                    Only lowercase letters, numbers, and underscores allowed
+                    Seules les lettres minuscules, chiffres et underscores sont autorisés
                   </mat-error>
                 }
               </mat-form-field>
@@ -34,13 +34,13 @@
 
             <div class="form-row">
               <mat-form-field appearance="outline">
-                <mat-label>Language</mat-label>
+                <mat-label>Langue</mat-label>
                 <input matInput formControlName="language" placeholder="en">
                 <mat-hint>ISO 639-1 format (e.g., en, fr, en_US)</mat-hint>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>Category</mat-label>
+                <mat-label>Catégorie</mat-label>
                 <mat-select formControlName="category">
                   @for (cat of categories; track cat) {
                     <mat-option [value]="cat">
@@ -54,46 +54,46 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Description</mat-label>
               <textarea matInput formControlName="description" rows="2"
-              placeholder="Internal description of this template"></textarea>
+              placeholder="Description interne de ce modèle"></textarea>
             </mat-form-field>
           </div>
         </ds-card>
 
         <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
           <div class="te-card-header">
-            <h3 class="te-card-title">Template Content</h3>
+            <h3 class="te-card-title">Contenu du modèle</h3>
           </div>
           <div class="te-card-body">
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Header (Optional)</mat-label>
-              <input matInput formControlName="headerText" placeholder="Welcome to our service!">
+              <mat-label>En-tête (optionnel)</mat-label>
+              <input matInput formControlName="headerText" placeholder="Bienvenue dans notre service !">
               <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('headerText')"
-                title="Insert variable">
+                title="Insérer une variable">
                 <ds-icon name="plus" [size]="16"></ds-icon>
               </button>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Body *</mat-label>
+              <mat-label>Corps *</mat-label>
               <textarea matInput formControlName="bodyText" rows="5"
-              placeholder="Hello, your order has been confirmed."></textarea>
+              placeholder="Bonjour, votre commande a été confirmée."></textarea>
               <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('bodyText')"
-                title="Insert variable">
+                title="Insérer une variable">
                 <ds-icon name="plus" [size]="16"></ds-icon>
               </button>
-              <mat-hint>Use double curly braces for placeholders</mat-hint>
+              <mat-hint>Utilisez des doubles accolades pour les variables</mat-hint>
               @if (templateForm.get('bodyText')?.hasError('required')) {
                 <mat-error>
-                  Body text is required
+                  Le contenu du message est requis
                 </mat-error>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Footer (Optional)</mat-label>
-              <input matInput formControlName="footerText" placeholder="Thank you for your business">
+              <mat-label>Pied de page (optionnel)</mat-label>
+              <input matInput formControlName="footerText" placeholder="Merci pour votre confiance">
               <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('footerText')"
-                title="Insert variable">
+                title="Insérer une variable">
                 <ds-icon name="plus" [size]="16"></ds-icon>
               </button>
             </mat-form-field>
@@ -102,7 +102,7 @@
 
         <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
           <div class="te-card-header">
-            <h3 class="te-card-title">Buttons (Optional)</h3>
+            <h3 class="te-card-title">Boutons (optionnel)</h3>
             <ds-button variant="icon" size="sm" ariaLabel="Ajouter bouton" (dsClick)="addButton()" [disabled]="isViewMode">
               <ds-icon name="plus" [size]="16"></ds-icon>
             </ds-button>
@@ -122,8 +122,8 @@
                     </mat-select>
                   </mat-form-field>
                   <mat-form-field appearance="outline">
-                    <mat-label>Button Text</mat-label>
-                    <input matInput formControlName="text" placeholder="Click here">
+                    <mat-label>Texte du bouton</mat-label>
+                    <input matInput formControlName="text" placeholder="Cliquez ici">
                   </mat-form-field>
                   @if (button.get('type')?.value === ButtonType.URL) {
                     <mat-form-field appearance="outline">
@@ -133,7 +133,7 @@
                   }
                   @if (button.get('type')?.value === ButtonType.PHONE_NUMBER) {
                     <mat-form-field appearance="outline">
-                      <mat-label>Phone Number</mat-label>
+                      <mat-label>Numéro de téléphone</mat-label>
                       <input matInput formControlName="phoneNumber" placeholder="+1234567890">
                     </mat-form-field>
                   }
@@ -162,11 +162,11 @@
                   class="variable-item">
                   <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
                   <mat-form-field appearance="outline">
-                    <mat-label>Variable Name</mat-label>
-                    <input matInput formControlName="variableName" placeholder="customer_name">
+                    <mat-label>Nom de variable</mat-label>
+                    <input matInput formControlName="variableName" placeholder="nom_client">
                   </mat-form-field>
                   <mat-form-field appearance="outline">
-                    <mat-label>Component</mat-label>
+                    <mat-label>Composant</mat-label>
                     <mat-select formControlName="componentType">
                       @for (type of componentTypes; track type) {
                         <mat-option [value]="type">
@@ -176,10 +176,10 @@
                     </mat-select>
                   </mat-form-field>
                   <mat-form-field appearance="outline">
-                    <mat-label>Example Value</mat-label>
+                    <mat-label>Valeur d’exemple</mat-label>
                     <input matInput formControlName="exampleValue" placeholder="John Doe">
                   </mat-form-field>
-                  <mat-checkbox formControlName="isRequired">Required</mat-checkbox>
+                  <mat-checkbox formControlName="isRequired">Requis</mat-checkbox>
                   <ds-button variant="icon" size="sm" ariaLabel="Supprimer variable" (dsClick)="removeVariable(i)" [disabled]="isViewMode">
                     <ds-icon name="trash" [size]="16"></ds-icon>
                   </ds-button>
@@ -187,7 +187,7 @@
               }
               @if (variables.length === 0) {
                 <div class="empty-variables">
-                  <p>No variables defined. Add variables to make your template dynamic.</p>
+                  <p>Aucune variable définie. Ajoutez des variables pour rendre votre modèle dynamique.</p>
                 </div>
               }
             </div>
@@ -195,9 +195,9 @@
         </ds-card>
 
         <div class="form-actions">
-          <ds-button variant="ghost" size="md" (dsClick)="cancel()">Cancel</ds-button>
+          <ds-button variant="ghost" size="md" (dsClick)="cancel()">Annuler</ds-button>
           <ds-button variant="marine" size="md" nativeType="submit" [disabled]="loading || isViewMode">
-            {{ isEditMode ? 'Update' : 'Create' }} Template
+            {{ isEditMode ? 'Mettre à jour' : 'Créer' }} le modèle
           </ds-button>
         </div>
       </form>

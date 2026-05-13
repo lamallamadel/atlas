@@ -1,7 +1,7 @@
 <div class="variable-manager">
   <div class="manager-header">
-    <h3>Template Variables</h3>
-    <ds-button variant="icon" ariaLabel="Ajouter une variable" (dsClick)="onAddVariable()" [attr.title]="'Add Variable'">
+    <h3>Variables du modèle</h3>
+    <ds-button variant="icon" ariaLabel="Ajouter une variable" (dsClick)="onAddVariable()" [attr.title]="'Ajouter une variable'">
       <ds-icon name="plus" [size]="16"></ds-icon>
     </ds-button>
   </div>
@@ -20,7 +20,7 @@
               <ds-icon [name]="getComponentTypeIcon(variable.componentType)" [size]="16" [attr.title]="variable.componentType"></ds-icon>
               <strong>{{ variable.variableName }}</strong>
               @if (variable.isRequired) {
-                <ds-badge class="required-chip" status="warning" [showDot]="false">Required</ds-badge>
+                <ds-badge class="required-chip" status="warning" [showDot]="false">Requis</ds-badge>
               }
             </div>
             <ds-button variant="icon" ariaLabel="Supprimer la variable" (dsClick)="onRemoveVariable(i)">
@@ -37,12 +37,12 @@
             @if (variable.exampleValue) {
               <div class="detail-item">
                 <ds-icon name="info" [size]="16"></ds-icon>
-                <span>Example: {{ variable.exampleValue }}</span>
+                <span>Exemple : {{ variable.exampleValue }}</span>
               </div>
             }
             <div class="detail-item">
               <ds-icon name="chart" [size]="16"></ds-icon>
-              <span>Position: {{ variable.position }}</span>
+              <span>Position : {{ variable.position }}</span>
             </div>
           </div>
         </div>
@@ -52,8 +52,8 @@
     @if (variables().length === 0) {
       <div class="empty-state">
         <ds-icon name="table" [size]="24"></ds-icon>
-        <p>No variables added yet</p>
-        <small>Variables make your templates dynamic</small>
+          <p>Aucune variable ajoutée pour le moment</p>
+          <small>Les variables rendent vos modèles dynamiques</small>
       </div>
     }
   </div>
@@ -63,14 +63,14 @@
       <mat-expansion-panel-header>
         <mat-panel-title>
           <ds-icon name="info" [size]="16"></ds-icon>
-          Variable Tips
+          Conseils variables
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ul>
-        <li>Use clear, descriptive variable names (e.g., customer_name, order_id)</li>
-        <li>Drag variables to reorder them</li>
-        <li>Provide example values to help preview the message</li>
-        <li>Mark critical fields as required</li>
+        <li>Utilisez des noms de variables clairs (ex. nom_client, id_commande)</li>
+        <li>Glissez-déposez les variables pour réorganiser l’ordre</li>
+        <li>Ajoutez des valeurs d’exemple pour faciliter l’aperçu</li>
+        <li>Marquez les champs critiques comme requis</li>
       </ul>
     </mat-expansion-panel>
   </div>

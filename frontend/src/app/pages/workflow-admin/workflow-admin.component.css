@@ -9,17 +9,6 @@
   margin-bottom: var(--ds-space-6);
 }
 
-.workflow-admin-card-header {
-  padding: var(--ds-space-4) var(--ds-space-4) 0;
-  border-bottom: 1px solid var(--ds-divider);
-}
-
-.workflow-admin-card-title {
-  margin: 0 0 var(--ds-space-3);
-  font-size: var(--ds-text-xl);
-  font-weight: 600;
-}
-
 .workflow-admin-card-body {
   padding: 0;
 }

@@ -31,4 +31,11 @@ public interface WorkflowTransitionRuleRepository
             @Param("fromState") String fromState,
             @Param("toState") String toState,
             @Param("orgId") String orgId);
+
+    @Query(
+            "SELECT wtr FROM WorkflowTransitionRule wtr WHERE wtr.fromState = :fromState AND wtr.toState = :toState AND wtr.isActive = true AND wtr.orgId = :orgId AND wtr.workflowDefinitionId IS NULL")
+    List<WorkflowTransitionRule> findGlobalActiveTransitions(
+            @Param("fromState") String fromState,
+            @Param("toState") String toState,
+            @Param("orgId") String orgId);
 }

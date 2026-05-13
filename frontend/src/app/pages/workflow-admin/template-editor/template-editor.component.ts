@@ -146,7 +146,7 @@ export class TemplateEditorComponent implements OnInit, OnDestroy {
   }
 
   insertVariablePlaceholder(componentField: string): void {
-    const variableName = prompt('Enter variable name (e.g., customer_name):');
+    const variableName = prompt('Saisissez un nom de variable (ex. nom_client) :');
     if (variableName) {
       const currentValue = this.templateForm.get(componentField)?.value || '';
       const placeholder = `{{${variableName}}}`;
@@ -188,7 +188,7 @@ export class TemplateEditorComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading template:', error);
-          this.snackBar.open('Error loading template', 'Close', { duration: 5000 });
+          this.snackBar.open('Erreur lors du chargement du modèle', 'Fermer', { duration: 5000 });
           this.loading = false;
         }
       });
@@ -286,7 +286,7 @@ export class TemplateEditorComponent implements OnInit, OnDestroy {
 
   onSubmit(): void {
     if (this.templateForm.invalid) {
-      this.snackBar.open('Please fill in all required fields', 'Close', { duration: 5000 });
+      this.snackBar.open('Veuillez renseigner tous les champs requis', 'Fermer', { duration: 5000 });
       return;
     }
 
@@ -298,12 +298,12 @@ export class TemplateEditorComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.snackBar.open('Template updated successfully', 'Close', { duration: 3000 });
+            this.snackBar.open('Modèle mis à jour avec succès', 'Fermer', { duration: 3000 });
             this.router.navigate(['/workflow-admin/templates']);
           },
           error: (error) => {
             console.error('Error updating template:', error);
-            this.snackBar.open('Error updating template', 'Close', { duration: 5000 });
+            this.snackBar.open('Erreur lors de la mise à jour du modèle', 'Fermer', { duration: 5000 });
             this.loading = false;
           }
         });
@@ -312,12 +312,12 @@ export class TemplateEditorComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.snackBar.open('Template created successfully', 'Close', { duration: 3000 });
+            this.snackBar.open('Modèle créé avec succès', 'Fermer', { duration: 3000 });
             this.router.navigate(['/workflow-admin/templates']);
           },
           error: (error) => {
             console.error('Error creating template:', error);
-            this.snackBar.open('Error creating template', 'Close', { duration: 5000 });
+            this.snackBar.open('Erreur lors de la création du modèle', 'Fermer', { duration: 5000 });
             this.loading = false;
           }
         });
