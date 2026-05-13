@@ -25,6 +25,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.context.ApplicationEventPublisher;
+import com.example.backend.event.AppointmentCreatedEvent;
+import com.example.backend.event.AppointmentCompletedEvent;
+
 @Service
 public class AppointmentService {
 
@@ -34,16 +38,19 @@ public class AppointmentService {
     private final AppointmentMapper appointmentMapper;
     private final MetricsService metricsService;
     private final ActivityService activityService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AppointmentService(
             AppointmentRepository appointmentRepository,
             AppointmentMapper appointmentMapper,
             MetricsService metricsService,
-            ActivityService activityService) {
+            ActivityService activityService,
+            ApplicationEventPublisher eventPublisher) {
         this.appointmentRepository = appointmentRepository;
         this.appointmentMapper = appointmentMapper;
         this.metricsService = metricsService;
         this.activityService = activityService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -78,6 +85,8 @@ public class AppointmentService {
         if (!warnings.isEmpty()) {
             response.setWarnings(warnings);
         }
+
+        eventPublisher.publishEvent(new AppointmentCreatedEvent(this, saved, saved.getCreatedBy()));
 
         return response;
     }

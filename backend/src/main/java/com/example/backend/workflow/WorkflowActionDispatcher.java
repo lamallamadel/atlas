@@ -3,6 +3,8 @@ package com.example.backend.workflow;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.WorkflowTransitionRule;
 import com.example.backend.event.DossierStatusChangedEvent;
+import com.example.backend.event.AppointmentCreatedEvent;
+import com.example.backend.event.AppointmentCompletedEvent;
 import com.example.backend.repository.WorkflowTransitionRuleRepository;
 import com.example.backend.workflow.action.WorkflowActionHandler;
 import java.util.ArrayList;
@@ -31,10 +33,29 @@ public class WorkflowActionDispatcher {
 
     @EventListener
     @Transactional
-    public void handleStatusChanged(DossierStatusChangedEvent event) {
+    public void handleDossierStatusChanged(DossierStatusChangedEvent event) {
         Dossier dossier = event.getDossier();
         String fromState = event.getFromStatus() != null ? event.getFromStatus().name() : "NONE";
         String toState = event.getToStatus().name();
+        dispatch(dossier, fromState, toState, event.getUserId());
+    }
+
+    @EventListener
+    @Transactional
+    public void handleAppointmentCreated(AppointmentCreatedEvent event) {
+        logger.debug("Appointment created event received for appointment {}", event.getAppointment().getId());
+        dispatch(event.getAppointment().getDossier(), "NONE", "APPOINTMENT_CREATED", event.getUserId());
+    }
+
+    @EventListener
+    @Transactional
+    public void handleAppointmentCompleted(AppointmentCompletedEvent event) {
+        logger.debug("Appointment completed event received for appointment {}", event.getAppointment().getId());
+        dispatch(event.getAppointment().getDossier(), "APPOINTMENT", "APPOINTMENT_COMPLETED", event.getUserId());
+    }
+
+    private void dispatch(Dossier dossier, String fromState, String toState, String userId) {
+        if (dossier == null) return;
         String orgId = dossier.getOrgId();
 
         logger.debug("Dispatching actions for dossier {} transition {} -> {}", dossier.getId(), fromState, toState);
@@ -66,7 +87,7 @@ public class WorkflowActionDispatcher {
                 String actionType = (String) actionConfig.get("type");
                 if (actionType == null) continue;
 
-                executeAction(dossier, actionType, actionConfig, event.getUserId());
+                executeAction(dossier, actionType, actionConfig, userId);
             }
         }
     }
