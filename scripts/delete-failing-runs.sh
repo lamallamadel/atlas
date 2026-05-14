@@ -133,55 +133,63 @@ log_info "Min age (mins): $MIN_AGE_MINUTES"
 IFS=',' read -ra CONCLUSION_LIST <<< "$STATUSES"
 
 # ---------------------------------------------------------------------------
-# Fetch and delete runs for each conclusion
+# Fetch all completed runs ONCE (outside the conclusion loop) so the --limit
+# budget covers every run in the repo, not just the same top-N repeated for
+# each conclusion.  gh run list --limit max is 1000.
+# ---------------------------------------------------------------------------
+log_info "Fetching up to $LIMIT completed workflow runs..."
+
+# --status completed ensures only runs with definitive conclusions are
+# returned, preventing in-progress runs (conclusion=null) from consuming
+# the --limit and masking actually-completed runs.
+if [[ -n "$WORKFLOW" ]]; then
+    GH_RAW=$(gh run list \
+        --repo "$REPO_SLUG" \
+        --workflow "$WORKFLOW" \
+        --status completed \
+        --json "databaseId,displayTitle,workflowName,createdAt,conclusion" \
+        --limit "$LIMIT" \
+        2>/dev/null || true)
+else
+    GH_RAW=$(gh run list \
+        --repo "$REPO_SLUG" \
+        --status completed \
+        --json "databaseId,displayTitle,workflowName,createdAt,conclusion" \
+        --limit "$LIMIT" \
+        2>/dev/null || true)
+fi
+
+# Validate the response is a JSON array before processing with jq.
+# Non-array responses (e.g. {"message":"..."} error objects or null) would
+# cause jq to error.  Treat them as "no runs found" and abort.
+if [[ -z "$GH_RAW" ]] || ! echo "$GH_RAW" | jq -e 'type == "array"' > /dev/null 2>&1; then
+    log_warn "Could not retrieve runs (unexpected API response). Aborting."
+    exit 0
+fi
+
+FETCHED=$(echo "$GH_RAW" | jq 'length')
+log_info "Fetched $FETCHED completed run(s). Filtering by conclusion and age..."
+
+# ---------------------------------------------------------------------------
+# Delete runs matching each requested conclusion
 # ---------------------------------------------------------------------------
 TOTAL_DELETED=0
 TOTAL_FOUND=0
 
+# gh run list does not natively support filtering by multiple conclusions in a
+# single call; using jq lets us handle a comma-separated list of conclusions
+# (e.g. "failure,cancelled,timed_out") from a single data fetch.
+# Use --arg to safely pass values (avoids jq injection).
+# The filter:
+#   1. Selects runs matching the desired conclusion
+#   2. Selects only runs older than MIN_AGE_MINUTES (age filter)
+#   3. Formats as tab-separated: id, workflowName, title, createdAt
+# Use null coalescing (//"") so @tsv never receives a raw null value.
+JQ_FILTER='[.[] | select(.conclusion == $c) | select((.createdAt | fromdateiso8601) < (now - ($min_age | tonumber) * 60)) | [(.databaseId|tostring), (.workflowName//""), (.displayTitle//""), (.createdAt//"")]] | .[] | @tsv'
+
 for CONCLUSION in "${CONCLUSION_LIST[@]}"; do
     # Trim surrounding whitespace
     CONCLUSION=$(echo "$CONCLUSION" | xargs)
-
-    log_info "Fetching runs with conclusion='$CONCLUSION'..."
-
-    # gh run list does not support --conclusion; pipe JSON output through jq.
-    # Use --arg to safely pass the conclusion value (avoids jq injection).
-    # The filter performs three steps:
-    #   1. Select runs matching the desired conclusion
-    #   2. Select only runs older than MIN_AGE_MINUTES (age filter)
-    #   3. Format as tab-separated: id, workflowName, title, createdAt
-    # Use null coalescing (//"") so @tsv never receives a raw null value.
-    JQ_FILTER='[.[] | select(.conclusion == $c) | select((.createdAt | fromdateiso8601) < (now - ($min_age | tonumber) * 60)) | [(.databaseId|tostring), (.workflowName//""), (.displayTitle//""), (.createdAt//"")]] | .[] | @tsv'
-
-    # Capture raw gh output first so we can validate it before passing to jq.
-    # gh may return null, an error object, or empty output on API/auth failures.
-    # --status completed ensures only runs with definitive conclusions are
-    # returned, preventing in-progress runs (conclusion=null) from consuming
-    # the --limit and masking actually-failed runs.
-    if [[ -n "$WORKFLOW" ]]; then
-        GH_RAW=$(gh run list \
-            --repo "$REPO_SLUG" \
-            --workflow "$WORKFLOW" \
-            --status completed \
-            --json "databaseId,displayTitle,workflowName,createdAt,conclusion" \
-            --limit "$LIMIT" \
-            2>/dev/null || true)
-    else
-        GH_RAW=$(gh run list \
-            --repo "$REPO_SLUG" \
-            --status completed \
-            --json "databaseId,displayTitle,workflowName,createdAt,conclusion" \
-            --limit "$LIMIT" \
-            2>/dev/null || true)
-    fi
-
-    # Validate the response is a JSON array before processing with jq.
-    # Non-array responses (e.g. {"message":"..."} error objects or null) would
-    # cause jq to error.  Treat them as "no runs found" and skip.
-    if [[ -z "$GH_RAW" ]] || ! echo "$GH_RAW" | jq -e 'type == "array"' > /dev/null 2>&1; then
-        log_warn "  Could not retrieve runs for conclusion='$CONCLUSION' (unexpected API response). Skipping."
-        continue
-    fi
 
     RUN_LINES=$(echo "$GH_RAW" | jq -r --arg c "$CONCLUSION" --arg min_age "$MIN_AGE_MINUTES" "$JQ_FILTER" || true)
 
