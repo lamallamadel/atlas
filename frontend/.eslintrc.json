@@ -58,6 +58,29 @@
     },
     {
       "files": [
+        "src/app/components/**/*.ts",
+        "src/app/pages/**/*.ts",
+        "src/app/services/**/*.ts",
+        "src/app/guards/**/*.ts",
+        "src/app/interceptors/**/*.ts",
+        "src/app/layout/**/*.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "warn",
+          {
+            "patterns": [
+              {
+                "group": ["@angular/material", "@angular/material/*"],
+                "message": "Use the Atlasia Design System (ds-* components from 'design-system') instead of Angular Material. See P3 migration plan."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
         "*.html"
       ],
       "extends": [
