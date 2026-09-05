@@ -1,11 +1,17 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, inject, signal, computed } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
 import { DocumentApiService, DocumentCategory, DocumentResponse } from '../services/document-api.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormsModule } from '@angular/forms';
-import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatProgressBar } from '@angular/material/progress-bar';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsSkeletonComponent,
+  DsProgressBarComponent,
+  DsToastService
+} from '../design-system';
 
 export interface UploadProgress {
   file: File;
@@ -18,39 +24,62 @@ export interface UploadProgress {
 
 @Component({
     selector: 'app-document-upload',
+    standalone: true,
     templateUrl: './document-upload.component.html',
     styleUrls: ['./document-upload.component.css'],
-    imports: [FormsModule, MatIcon, MatButton, MatIconButton, MatProgressBar]
+    imports: [
+      CommonModule,
+      FormsModule, 
+      DsButtonComponent,
+      DsIconComponent,
+      DsSelectComponent,
+      DsSkeletonComponent,
+      DsProgressBarComponent
+    ]
 })
 export class DocumentUploadComponent {
+  private documentApiService = inject(DocumentApiService);
+  private toastService = inject(DsToastService);
+
   readonly dossierId = input.required<number>();
   readonly uploadComplete = output<DocumentResponse>();
-  readonly uploadError = output<string>();
 
   selectedFiles: File[] = [];
-  uploadProgresses: Map<string, UploadProgress> = new Map();
-  selectedCategory = '';
+  uploadProgressMap = signal<Map<string, UploadProgress>>(new Map());
   isDragging = false;
+  selectedCategory: DocumentCategory = DocumentCategory.OTHER;
 
-  categories = [
-    { value: '', label: 'Sélectionner une catégorie' },
-    { value: DocumentCategory.CONTRACT, label: 'Contrat' },
-    { value: DocumentCategory.INVOICE, label: 'Facture' },
-    { value: DocumentCategory.ID, label: 'Pièce d\'identité' },
-    { value: DocumentCategory.PHOTO, label: 'Photo' },
-    { value: DocumentCategory.OTHER, label: 'Autre' }
+  readonly categories: DsSelectOption[] = [
+    { value: 'ID', label: 'Pièce d\'identité' },
+    { value: 'Contract', label: 'Contrat / Offre' },
+    { value: 'Invoice', label: 'Justificatif / Facture' },
+    { value: 'Photo', label: 'Photo de bien' },
+    { value: 'Other', label: 'Autre' }
   ];
 
-  constructor(
-    private documentApiService: DocumentApiService,
-    private snackBar: MatSnackBar
-  ) {}
+  isUploading = computed(() => {
+    return Array.from(this.uploadProgressMap().values()).some(p => p.uploading);
+  });
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.addFiles(Array.from(input.files));
+  hasSelectedFiles = computed(() => this.selectedFiles.length > 0);
+
+  getUploadProgressArray = computed(() => {
+    return Array.from(this.uploadProgressMap().values());
+  });
+
+  onFileSelected(event: any): void {
+    const files: FileList = event.target.files;
+    this.addFiles(files);
+  }
+
+  private addFiles(files: FileList | File[]): void {
+    for (let i = 0; i < files.length; i++) {
+      this.selectedFiles.push(files[i]);
     }
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
   }
 
   onDragOver(event: DragEvent): void {
@@ -70,107 +99,65 @@ export class DocumentUploadComponent {
     event.stopPropagation();
     this.isDragging = false;
 
-    if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-      this.addFiles(Array.from(event.dataTransfer.files));
+    if (event.dataTransfer?.files) {
+      this.addFiles(event.dataTransfer.files);
     }
-  }
-
-  private addFiles(files: File[]): void {
-    this.selectedFiles = [...this.selectedFiles, ...files];
-  }
-
-  removeFile(index: number): void {
-    this.selectedFiles.splice(index, 1);
   }
 
   uploadFiles(): void {
-    if (this.selectedFiles.length === 0) {
-      this.snackBar.open('Aucun fichier sélectionné', 'Fermer', { duration: 3000 });
-      return;
-    }
+    const filesToUpload = [...this.selectedFiles];
+    this.selectedFiles = [];
 
-    this.selectedFiles.forEach(file => {
-      const key = this.getFileKey(file);
-      this.uploadProgresses.set(key, {
+    filesToUpload.forEach(file => {
+      const progressKey = `${file.name}-${file.size}-${Date.now()}`;
+      const progress: UploadProgress = {
         file,
         progress: 0,
         uploading: true,
         completed: false,
         error: null
-      });
+      };
 
-      this.documentApiService.upload(this.dossierId(), file, this.selectedCategory || undefined)
+      this.updateProgress(progressKey, progress);
+
+      this.documentApiService.upload(this.dossierId(), file, this.selectedCategory)
         .subscribe({
           next: (event) => {
-            const progress = this.uploadProgresses.get(key);
-            if (!progress) return;
-
-            if (event.type === HttpEventType.UploadProgress && event.total) {
-              progress.progress = Math.round((100 * event.loaded) / event.total);
+            if (event.type === HttpEventType.UploadProgress) {
+              const currentProgress = Math.round((100 * event.loaded) / (event.total || 100));
+              this.updateProgress(progressKey, { ...progress, progress: currentProgress });
             } else if (event.type === HttpEventType.Response) {
-              progress.uploading = false;
-              progress.completed = true;
-              progress.progress = 100;
-              progress.response = event.body as DocumentResponse;
-              
-              this.snackBar.open(`${file.name} téléchargé avec succès`, 'Fermer', {
-                duration: 3000,
-                panelClass: ['success-snackbar']
+              const response = event.body as DocumentResponse;
+              this.updateProgress(progressKey, { 
+                ...progress, 
+                progress: 100, 
+                uploading: false, 
+                completed: true, 
+                response 
               });
-
-              this.uploadComplete.emit(event.body as DocumentResponse);
-              
-              setTimeout(() => {
-                this.uploadProgresses.delete(key);
-                const fileIndex = this.selectedFiles.indexOf(file);
-                if (fileIndex > -1) {
-                  this.selectedFiles.splice(fileIndex, 1);
-                }
-              }, 2000);
+              this.uploadComplete.emit(response);
+              this.toastService.success(`Document "${file.name}" téléchargé avec succès`);
             }
           },
-          error: (error) => {
-            const progress = this.uploadProgresses.get(key);
-            if (progress) {
-              progress.uploading = false;
-              progress.completed = false;
-              progress.error = error.error?.message || 'Échec du téléchargement';
-              
-              this.snackBar.open(`Erreur: ${progress.error}`, 'Fermer', {
-                duration: 5000,
-                panelClass: ['error-snackbar']
-              });
-
-              if (progress.error) {
-                this.uploadError.emit(progress.error);
-              }
-            }
+          error: (err) => {
+            this.updateProgress(progressKey, { 
+              ...progress, 
+              uploading: false, 
+              error: err.error?.message || 'Échec du téléchargement' 
+            });
+            this.toastService.error(`Erreur lors du téléchargement de "${file.name}"`);
           }
         });
     });
   }
 
-  private getFileKey(file: File): string {
-    return `${file.name}_${file.size}_${file.lastModified}`;
-  }
-
-  getUploadProgressArray(): UploadProgress[] {
-    return Array.from(this.uploadProgresses.values());
-  }
-
-  getFileIcon(file: File): string {
-    return this.documentApiService.getFileIcon(file.name, file.type);
+  private updateProgress(key: string, progress: UploadProgress): void {
+    const map = new Map(this.uploadProgressMap());
+    map.set(key, progress);
+    this.uploadProgressMap.set(map);
   }
 
   formatFileSize(bytes: number): string {
     return this.documentApiService.formatFileSize(bytes);
-  }
-
-  hasSelectedFiles(): boolean {
-    return this.selectedFiles.length > 0;
-  }
-
-  isUploading(): boolean {
-    return Array.from(this.uploadProgresses.values()).some(p => p.uploading);
   }
 }

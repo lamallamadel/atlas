@@ -1,8 +1,8 @@
 import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
+import { DsIconComponent, DsIconName } from '../design-system';
 
 export interface SwipeAction {
-  icon: string;
+  icon: DsIconName;
   label: string;
   color: string;
   action: string;
@@ -16,10 +16,12 @@ export interface SwipeAction {
          [style.transform]="getTransform()">
       
       <!-- Left swipe action -->
-      <div class="swipe-action swipe-left" 
+      <div class="swipe-action swipe-left"
            [class.revealed]="swipeDistance < -50"
            [style.background-color]="leftAction?.color">
-        <mat-icon>{{ leftAction?.icon }}</mat-icon>
+        @if (leftAction?.icon) {
+          <ds-icon [name]="leftAction!.icon" [size]="28"></ds-icon>
+        }
         <span class="action-label">{{ leftAction?.label }}</span>
       </div>
 
@@ -34,10 +36,12 @@ export interface SwipeAction {
       </div>
 
       <!-- Right swipe action -->
-      <div class="swipe-action swipe-right" 
+      <div class="swipe-action swipe-right"
            [class.revealed]="swipeDistance > 50"
            [style.background-color]="rightAction?.color">
-        <mat-icon>{{ rightAction?.icon }}</mat-icon>
+        @if (rightAction?.icon) {
+          <ds-icon [name]="rightAction!.icon" [size]="28"></ds-icon>
+        }
         <span class="action-label">{{ rightAction?.label }}</span>
       </div>
     </div>
@@ -100,11 +104,9 @@ export interface SwipeAction {
       right: 0;
     }
 
-    .swipe-action mat-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
+    .swipe-action ds-icon {
       margin-bottom: 4px;
+      color: inherit;
     }
 
     .action-label {
@@ -119,7 +121,7 @@ export interface SwipeAction {
       background: var(--ds-surface);
     }
   `],
-    imports: [MatIcon]
+    imports: [DsIconComponent]
 })
 export class SwipeableCardComponent {
   @Input() leftAction?: SwipeAction;

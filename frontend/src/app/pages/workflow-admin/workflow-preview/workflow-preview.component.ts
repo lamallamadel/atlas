@@ -1,7 +1,6 @@
 import { Component, OnInit, input } from '@angular/core';
 import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, WorkflowNode, TransitionRule, WorkflowPreviewState } from '../models/workflow.model';
-import { MatIcon } from '@angular/material/icon';
 import { DsButtonComponent, DsCardComponent, DsIconComponent } from '../../../design-system';
 import { DatePipe } from '@angular/common';
 
@@ -9,7 +8,7 @@ import { DatePipe } from '@angular/common';
     selector: 'app-workflow-preview',
     templateUrl: './workflow-preview.component.html',
     styleUrls: ['./workflow-preview.component.css'],
-    imports: [MatIcon, DsCardComponent, DsButtonComponent, DsIconComponent, DatePipe]
+    imports: [DsCardComponent, DsButtonComponent, DsIconComponent, DatePipe]
 })
 export class WorkflowPreviewComponent implements OnInit {
   readonly workflow = input<WorkflowConfiguration | null>(null);

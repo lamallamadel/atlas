@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PwaService } from '../services/pwa.service';
-import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { DsButtonComponent, DsIconComponent } from '../design-system';
 
 @Component({
     selector: 'app-pwa-install-prompt',
@@ -10,24 +9,24 @@ import { MatButton, MatIconButton } from '@angular/material/button';
       <div class="pwa-install-banner" [@slideIn]>
         <div class="banner-content">
           <div class="banner-icon">
-            <mat-icon>get_app</mat-icon>
+            <ds-icon name="download" [size]="28"></ds-icon>
           </div>
           <div class="banner-text">
             <h4>Installer l'application</h4>
             <p>Accédez rapidement à CRM Immobilier depuis votre écran d'accueil</p>
           </div>
           <div class="banner-actions">
-            <button mat-button (click)="dismiss()" class="btn-dismiss">
+            <ds-button variant="ghost" size="sm" (dsClick)="dismiss()" class="btn-dismiss">
               Plus tard
-            </button>
-            <button mat-raised-button color="primary" (click)="install()" class="btn-install">
+            </ds-button>
+            <ds-button variant="marine" size="sm" (dsClick)="install()" class="btn-install">
               Installer
-            </button>
+            </ds-button>
           </div>
         </div>
-        <button mat-icon-button class="btn-close" (click)="dismiss()" aria-label="Fermer">
-          <mat-icon>close</mat-icon>
-        </button>
+        <ds-button variant="icon" size="sm" class="btn-close" (dsClick)="dismiss()" ariaLabel="Fermer">
+          <ds-icon name="close" [size]="20"></ds-icon>
+        </ds-button>
       </div>
     }
     `,
@@ -72,10 +71,8 @@ import { MatButton, MatIconButton } from '@angular/material/button';
       color: var(--ds-text-inverse);
     }
 
-    .banner-icon mat-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
+    .banner-icon ds-icon {
+      color: var(--ds-text-inverse);
     }
 
     .banner-text {
@@ -119,14 +116,6 @@ import { MatButton, MatIconButton } from '@angular/material/button';
       position: absolute;
       top: 8px;
       right: 8px;
-      width: 32px;
-      height: 32px;
-    }
-
-    .btn-close mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
     }
 
     /* Dark theme — surfaces / texte pilotés par les tokens */
@@ -155,7 +144,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
     }
   `],
     animations: [],
-    imports: [MatIcon, MatButton, MatIconButton]
+    imports: [DsButtonComponent, DsIconComponent]
 })
 export class PwaInstallPromptComponent implements OnInit {
   showPrompt = false;

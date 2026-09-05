@@ -3,7 +3,6 @@ import { Subject, takeUntil } from 'rxjs';
 import { CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
 import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, WorkflowNode, TransitionRule } from '../models/workflow.model';
-import { MatIcon } from '@angular/material/icon';
 import { WorkflowNodeComponent } from '../workflow-node/workflow-node.component';
 import { DsBadgeComponent, DsButtonComponent, DsCardComponent, DsIconComponent } from '../../../design-system';
 import { DecimalPipe } from '@angular/common';
@@ -12,7 +11,7 @@ import { DecimalPipe } from '@angular/common';
     selector: 'app-workflow-editor',
     templateUrl: './workflow-editor.component.html',
     styleUrls: ['./workflow-editor.component.css'],
-    imports: [MatIcon, WorkflowNodeComponent, DsCardComponent, DsButtonComponent, DsIconComponent, DsBadgeComponent, DecimalPipe]
+    imports: [WorkflowNodeComponent, DsCardComponent, DsButtonComponent, DsIconComponent, DsBadgeComponent, DecimalPipe]
 })
 export class WorkflowEditorComponent implements OnInit, OnDestroy {
   readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
@@ -113,6 +112,62 @@ export class WorkflowEditorComponent implements OnInit, OnDestroy {
       this.selectedTransition = null;
     }
     setTimeout(() => this.drawConnections(), 0);
+  }
+
+  onCanvasClick(event: MouseEvent): void {
+    const canvasElement = this.canvas()?.nativeElement;
+    if (!canvasElement || !this.workflow) return;
+
+    const rect = canvasElement.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+
+    let hitTransition: TransitionRule | null = null;
+    const HIT_TOLERANCE = 15; // pixels
+
+    // Iterate in reverse to select the topmost drawn line if they overlap
+    for (let i = this.workflow.transitions.length - 1; i >= 0; i--) {
+      const transition = this.workflow.transitions[i];
+      const fromNode = this.workflow.nodes.find(n => n.status === transition.fromStatus);
+      const toNode = this.workflow.nodes.find(n => n.status === transition.toStatus);
+
+      if (!fromNode || !toNode) continue;
+
+      const p0x = fromNode.x + 75;
+      const p0y = fromNode.y + 50;
+      const p2x = toNode.x + 75;
+      const p2y = toNode.y + 50;
+
+      const controlPointX = (p0x + p2x) / 2;
+      const controlPointY = (p0y + p2y) / 2;
+      const offset = Math.abs(p0x - p2x) * 0.2;
+      const p1x = controlPointX;
+      const p1y = controlPointY - offset;
+
+      // Sample points along the quadratic bezier curve
+      let isHit = false;
+      for (let t = 0; t <= 1; t += 0.05) {
+        const x = Math.pow(1 - t, 2) * p0x + 2 * (1 - t) * t * p1x + Math.pow(t, 2) * p2x;
+        const y = Math.pow(1 - t, 2) * p0y + 2 * (1 - t) * t * p1y + Math.pow(t, 2) * p2y;
+
+        const distance = Math.sqrt(Math.pow(clickX - x, 2) + Math.pow(clickY - y, 2));
+        if (distance <= HIT_TOLERANCE) {
+          isHit = true;
+          break;
+        }
+      }
+
+      if (isHit) {
+        hitTransition = transition;
+        break;
+      }
+    }
+
+    if (hitTransition) {
+      this.selectedTransition = hitTransition;
+      this.selectedNode = null;
+      this.drawConnections();
+    }
   }
 
   getTransitionsForNode(node: WorkflowNode): TransitionRule[] {

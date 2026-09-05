@@ -1,7 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { I18nService, SupportedLocale } from '../services/i18n.service';
-import { MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import { LocalizePipe } from '../pipes/localize.pipe';
 import { DsIconComponent } from '../design-system/icons/ds-icon.component';
@@ -11,7 +9,6 @@ import { DsIconComponent } from '../design-system/icons/ds-icon.component';
     template: `
     <span class="locale-menu-origin" cdkOverlayOrigin #localeOrigin="cdkOverlayOrigin">
       <button
-        mat-icon-button
         type="button"
         class="locale-switcher"
         (click)="toggleLocaleMenu()"
@@ -20,7 +17,7 @@ import { DsIconComponent } from '../design-system/icons/ds-icon.component';
         aria-controls="locale-switcher-menu"
         [attr.aria-label]="'Change language' | localize">
         <span class="locale-flag">{{ currentLocaleInfo?.flag }}</span>
-        <mat-icon class="locale-icon">language</mat-icon>
+        <ds-icon class="locale-icon" name="globe" [size]="20"></ds-icon>
       </button>
     </span>
 
@@ -69,6 +66,21 @@ import { DsIconComponent } from '../design-system/icons/ds-icon.component';
       display: flex;
       align-items: center;
       gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: var(--ds-radius-md);
+      transition: background-color 0.15s ease;
+      color: inherit;
+    }
+
+    .locale-switcher:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    :host-context(.dark-theme) .locale-switcher:hover {
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .locale-flag {
@@ -77,9 +89,7 @@ import { DsIconComponent } from '../design-system/icons/ds-icon.component';
     }
 
     .locale-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+      color: var(--ds-text-muted);
     }
 
     .locale-dropdown {
@@ -162,7 +172,7 @@ import { DsIconComponent } from '../design-system/icons/ds-icon.component';
       color: var(--ds-text-muted, rgba(255, 255, 255, 0.6));
     }
   `],
-    imports: [MatIconButton, MatIcon, CdkConnectedOverlay, CdkOverlayOrigin, LocalizePipe, DsIconComponent]
+    imports: [CdkConnectedOverlay, CdkOverlayOrigin, LocalizePipe, DsIconComponent]
 })
 export class LocaleSwitcherComponent implements OnInit {
   private readonly overlay = inject(Overlay);

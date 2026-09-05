@@ -20,7 +20,7 @@
 
   <div class="editor-container">
     <div class="canvas-wrapper">
-      <canvas #canvas class="workflow-canvas"></canvas>
+      <canvas #canvas class="workflow-canvas" (click)="onCanvasClick($event)"></canvas>
 
       <div class="nodes-container">
         @for (node of workflow?.nodes; track node) {
@@ -62,7 +62,7 @@
                 </div>
                 <div class="property-item">
                   <strong>Icône:</strong>
-                  <mat-icon [style.color]="selectedNode.color">{{ selectedNode.icon }}</mat-icon>
+                  <ds-icon [name]="selectedNode.icon || 'settings'" [size]="20" [style.color]="selectedNode.color"></ds-icon>
                 </div>
                 <div class="workflow-editor-divider"></div>
                 <h4>Transitions sortantes</h4>
@@ -139,6 +139,21 @@
                   <div class="property-item">
                     <ds-icon name="lock" [size]="16"></ds-icon>
                     Nécessite une approbation
+                  </div>
+                }
+                @if (selectedTransition.actionsJson && selectedTransition.actionsJson.length > 0) {
+                  <div class="workflow-editor-divider"></div>
+                  <h4>Actions Automatisées</h4>
+                  <div class="actions-list-preview">
+                    @for (action of selectedTransition.actionsJson; track action) {
+                      <div class="action-preview-item">
+                        <ds-icon [name]="action.type === 'SEND_EMAIL' ? 'mail' : (action.type === 'CREATE_TASK' ? 'check' : 'clock')" [size]="16"></ds-icon>
+                        <span>{{ action.type }}</span>
+                        @if (action.title || action.template) {
+                          <span class="action-detail">({{ action.title || action.template }})</span>
+                        }
+                      </div>
+                    }
                   </div>
                 }
               </div>

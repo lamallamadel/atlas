@@ -18,7 +18,7 @@
   [attr.aria-label]="'Nœud de workflow: ' + node().label">
 
   <div class="node-header" [style.background-color]="node().color">
-    <mat-icon class="node-icon">{{ node().icon || 'radio_button_unchecked' }}</mat-icon>
+    <ds-icon class="node-icon" [name]="node().icon || 'settings'" [size]="20"></ds-icon>
   </div>
 
   <div class="node-body">

@@ -1,14 +1,13 @@
 import { Component, input, output } from '@angular/core';
 import { CdkDragStart, CdkDragEnd, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { WorkflowNode } from '../models/workflow.model';
-import { MatIcon } from '@angular/material/icon';
 import { DsButtonComponent, DsIconComponent } from '../../../design-system';
 
 @Component({
     selector: 'app-workflow-node',
     templateUrl: './workflow-node.component.html',
     styleUrls: ['./workflow-node.component.css'],
-    imports: [CdkDrag, MatIcon, CdkDragHandle, DsButtonComponent, DsIconComponent]
+    imports: [CdkDrag, CdkDragHandle, DsButtonComponent, DsIconComponent]
 })
 export class WorkflowNodeComponent {
   readonly node = input.required<WorkflowNode>();

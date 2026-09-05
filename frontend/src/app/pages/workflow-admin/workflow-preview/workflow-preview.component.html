@@ -22,7 +22,7 @@
               @if (getCurrentNode(); as currentNode) {
                 <div class="current-node">
                   <div class="node-visual" [style.background-color]="currentNode.color">
-                    <mat-icon class="large-icon">{{ currentNode.icon }}</mat-icon>
+                    <ds-icon class="large-icon" [name]="currentNode.icon || 'settings'" [size]="32"></ds-icon>
                   </div>
                   <h2>{{ currentNode.label }}</h2>
                   <p class="status-text">{{ currentNode.status }}</p>

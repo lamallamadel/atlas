@@ -1,8 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { ValidationSuggestion } from '../services/form-validation.service';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { MatIcon } from '@angular/material/icon';
-import { MatButton } from '@angular/material/button';
+import { DsButtonComponent, DsIconComponent } from '../design-system';
 
 @Component({
     selector: 'app-inline-validation-suggestion',
@@ -11,7 +10,7 @@ import { MatButton } from '@angular/material/button';
       <div class="suggestion-container" @slideIn>
         <div class="suggestion-card" [class.high-confidence]="s.confidence === 'high'">
           <div class="suggestion-header">
-            <mat-icon class="suggestion-icon">{{ getConfidenceIcon() }}</mat-icon>
+            <ds-icon class="suggestion-icon" [name]="getConfidenceIcon()" [size]="20"></ds-icon>
             <span class="suggestion-reason">{{ s.reason }}</span>
           </div>
           <div class="suggestion-content">
@@ -19,28 +18,21 @@ import { MatButton } from '@angular/material/button';
               <span class="label">Valeur actuelle:</span>
               <span class="value">{{ s.originalValue }}</span>
             </div>
-            <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+            <ds-icon class="arrow-icon" name="chevron-right" [size]="20"></ds-icon>
             <div class="suggested-value">
               <span class="label">Suggestion:</span>
               <span class="value suggested">{{ s.suggestedValue }}</span>
             </div>
           </div>
           <div class="suggestion-actions">
-            <button
-              mat-button
-              color="primary"
-              (click)="onAccept()"
-              class="accept-btn">
-              <mat-icon>check</mat-icon>
+            <ds-button variant="ghost" size="sm" (dsClick)="onAccept()" class="accept-btn">
+              <ds-icon name="check" [size]="16"></ds-icon>
               Accepter
-            </button>
-            <button
-              mat-button
-              (click)="onDismiss()"
-              class="dismiss-btn">
-              <mat-icon>close</mat-icon>
+            </ds-button>
+            <ds-button variant="ghost" size="sm" (dsClick)="onDismiss()" class="dismiss-btn">
+              <ds-icon name="close" [size]="16"></ds-icon>
               Ignorer
-            </button>
+            </ds-button>
           </div>
         </div>
       </div>
@@ -74,9 +66,6 @@ import { MatButton } from '@angular/material/button';
 
     .suggestion-icon {
       color: var(--ds-marine);
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
     }
 
     .high-confidence .suggestion-icon {
@@ -136,9 +125,6 @@ import { MatButton } from '@angular/material/button';
 
     .arrow-icon {
       color: var(--ds-text-muted);
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
       flex-shrink: 0;
     }
 
@@ -151,15 +137,6 @@ import { MatButton } from '@angular/material/button';
     .accept-btn,
     .dismiss-btn {
       font-size: 12px;
-      height: 32px;
-    }
-
-    .accept-btn mat-icon,
-    .dismiss-btn mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-      margin-right: var(--ds-space-1);
     }
 
     @media (max-width: 600px) {
@@ -190,7 +167,7 @@ import { MatButton } from '@angular/material/button';
             ])
         ])
     ],
-    imports: [MatIcon, MatButton]
+    imports: [DsButtonComponent, DsIconComponent]
 })
 export class InlineValidationSuggestionComponent {
   readonly suggestion = input<ValidationSuggestion | null>(null);
@@ -212,16 +189,11 @@ export class InlineValidationSuggestionComponent {
   getConfidenceIcon(): string {
     const suggestion = this.suggestion();
     if (!suggestion) return 'info';
-    
+
     switch (suggestion.confidence) {
-      case 'high':
-        return 'verified';
-      case 'medium':
-        return 'help_outline';
-      case 'low':
-        return 'info';
-      default:
-        return 'info';
+      case 'high':   return 'check';
+      case 'medium': return 'help-circle';
+      default:       return 'info';
     }
   }
 }

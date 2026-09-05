@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { OfflineStorageService } from '../services/offline-storage.service';
 import { Router } from '@angular/router';
-import { MatIcon } from '@angular/material/icon';
 import { SwipeableCardComponent } from './swipeable-card.component';
-import { MatButton } from '@angular/material/button';
 import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
+import { DsButtonComponent, DsIconComponent } from '../design-system';
 
 interface CachedDossier {
   id: number;
@@ -24,7 +23,7 @@ interface CachedDossier {
     <div class="offline-viewer">
       <div class="viewer-header">
         <h3>
-          <mat-icon>folder_off</mat-icon>
+          <ds-icon name="folder" [size]="24"></ds-icon>
           Dossiers disponibles hors ligne
         </h3>
         <p class="subtitle">Ces dossiers sont consultables même sans connexion internet</p>
@@ -35,7 +34,7 @@ interface CachedDossier {
           @for (dossier of dossiers; track dossier) {
             <app-swipeable-card
           [rightAction]="{
-            icon: 'visibility',
+            icon: 'eye',
             label: 'Voir',
             color: swipeActionColor,
             action: 'view'
@@ -50,12 +49,12 @@ interface CachedDossier {
                   <div class="dossier-info">
                     <h4>{{ dossier.leadName }}</h4>
                     <p class="dossier-contact">
-                      <mat-icon class="small-icon">phone</mat-icon>
+                      <ds-icon name="phone" [size]="16"></ds-icon>
                       {{ dossier.leadPhone }}
                     </p>
                     @if (dossier.leadEmail) {
                       <p class="dossier-contact">
-                        <mat-icon class="small-icon">email</mat-icon>
+                        <ds-icon name="mail" [size]="16"></ds-icon>
                         {{ dossier.leadEmail }}
                       </p>
                     }
@@ -68,7 +67,7 @@ interface CachedDossier {
                 </div>
                 <div class="dossier-footer">
                   <span class="cache-badge">
-                    <mat-icon class="tiny-icon">offline_pin</mat-icon>
+                    <ds-icon name="check" [size]="16"></ds-icon>
                     Disponible hors ligne
                   </span>
                   <span class="date-info">
@@ -83,21 +82,21 @@ interface CachedDossier {
     
       @if (dossiers.length === 0) {
         <div class="empty-state">
-          <mat-icon class="empty-icon">cloud_off</mat-icon>
+          <ds-icon name="alert-circle" [size]="64" class="empty-icon"></ds-icon>
           <h4>Aucun dossier hors ligne</h4>
           <p>Les dossiers consultés récemment seront automatiquement disponibles hors ligne</p>
         </div>
       }
     
       <div class="viewer-actions">
-        <button mat-stroked-button (click)="clearCache()" [disabled]="dossiers.length === 0">
-          <mat-icon>delete_sweep</mat-icon>
+        <ds-button variant="ghost" (dsClick)="clearCache()" [disabled]="dossiers.length === 0">
+          <ds-icon name="trash" [size]="16"></ds-icon>
           Vider le cache
-        </button>
-        <button mat-raised-button color="primary" (click)="refresh()">
-          <mat-icon>refresh</mat-icon>
+        </ds-button>
+        <ds-button variant="marine" (dsClick)="refresh()">
+          <ds-icon name="refresh" [size]="16"></ds-icon>
           Actualiser
-        </button>
+        </ds-button>
       </div>
     </div>
     `,
@@ -122,7 +121,7 @@ interface CachedDossier {
       color: var(--ds-text);
     }
 
-    .viewer-header h3 mat-icon {
+    .viewer-header h3 ds-icon {
       color: var(--ds-warning);
     }
 
@@ -205,10 +204,8 @@ interface CachedDossier {
       white-space: nowrap;
     }
 
-    .small-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
+    .dossier-contact ds-icon {
+      flex-shrink: 0;
     }
 
     .dossier-status {
@@ -262,12 +259,6 @@ interface CachedDossier {
       font-weight: 500;
     }
 
-    .tiny-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-    }
-
     .date-info {
       font-size: 12px;
       color: var(--ds-text-faint);
@@ -282,9 +273,6 @@ interface CachedDossier {
     }
 
     .empty-icon {
-      font-size: 64px;
-      width: 64px;
-      height: 64px;
       color: var(--ds-text-faint);
       margin-bottom: 16px;
     }
@@ -350,7 +338,7 @@ interface CachedDossier {
       }
     }
   `],
-    imports: [MatIcon, SwipeableCardComponent, MatButton]
+    imports: [SwipeableCardComponent, DsButtonComponent, DsIconComponent]
 })
 export class OfflineDossiersViewerComponent implements OnInit {
   readonly swipeActionColor = DS_CHART_FALLBACK_HEX['--ds-marine'];
