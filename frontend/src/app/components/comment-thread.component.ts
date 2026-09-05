@@ -2,20 +2,19 @@ import { Component, Input, OnInit, ViewChild, ElementRef, inject } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
+import { DsDialogService } from '../design-system';
 import { CommentService, CommentEntityType, CommentThread, CreateThreadRequest, CreateCommentRequest } from '../services/comment.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 import {
-  DsAvatarComponent,
-  DsBadgeComponent,
+  DsInputComponent,
+  DsButtonComponent,
   DsIconComponent,
+  DsBadgeComponent,
+  DsAvatarComponent,
+  DsSkeletonComponent,
+  DsEmptyStateComponent,
+  DsToastService
 } from '../design-system';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 @Component({
   selector: 'app-comment-thread',
@@ -23,18 +22,15 @@ import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormField,
-    MatLabel,
-    MatInput,
-    MatButton,
-    MatIconButton,
-    MatIcon,
+    DsInputComponent,
+    DsButtonComponent,
+    DsIconComponent,
     DsBadgeComponent,
     DsAvatarComponent,
-    DsIconComponent,
+    DsSkeletonComponent,
+    DsEmptyStateComponent,
     CdkConnectedOverlay,
     CdkOverlayOrigin,
-    DsSkeletonComponent,
   ],
   templateUrl: './comment-thread.component.html',
   styleUrls: ['./comment-thread.component.scss']
@@ -42,7 +38,7 @@ import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-
 export class CommentThreadComponent implements OnInit {
   private readonly overlay = inject(Overlay);
 
-  /** Menu export du fil (remplace `mat-menu`). */
+  /** Menu export du fil */
   exportThreadMenuOpen = false;
   readonly exportThreadMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
   readonly exportThreadMenuPositions: ConnectedPosition[] = [
@@ -74,8 +70,8 @@ export class CommentThreadComponent implements OnInit {
   constructor(
     private commentService: CommentService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private toastService: DsToastService,
+    private dialog: DsDialogService
   ) {
     this.newThreadForm = this.fb.group({
       title: [''],
@@ -103,7 +99,7 @@ export class CommentThreadComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error loading threads:', error);
-          this.snackBar.open('Failed to load comment threads', 'Close', { duration: 3000 });
+          this.toastService.error('Failed to load comment threads');
           this.loading = false;
         }
       });
@@ -150,11 +146,11 @@ export class CommentThreadComponent implements OnInit {
         this.newThreadForm.reset();
         this.showNewThreadForm = false;
         this.unresolvedCount++;
-        this.snackBar.open('Thread created successfully', 'Close', { duration: 3000 });
+        this.toastService.success('Thread created successfully');
       },
       error: (error) => {
         console.error('Error creating thread:', error);
-        this.snackBar.open('Failed to create thread', 'Close', { duration: 3000 });
+        this.toastService.error('Failed to create thread');
       }
     });
   }
@@ -184,12 +180,12 @@ export class CommentThreadComponent implements OnInit {
         if (this.selectedThread) {
           this.selectedThread.comments.push(comment);
           this.newCommentForm.reset();
-          this.snackBar.open('Comment added successfully', 'Close', { duration: 3000 });
+          this.toastService.success('Comment added successfully');
         }
       },
       error: (error) => {
         console.error('Error adding comment:', error);
-        this.snackBar.open('Failed to add comment', 'Close', { duration: 3000 });
+        this.toastService.error('Failed to add comment');
       }
     });
   }
@@ -204,12 +200,12 @@ export class CommentThreadComponent implements OnInit {
             this.selectedThread = updatedThread;
           }
           this.unresolvedCount--;
-          this.snackBar.open('Thread marked as resolved', 'Close', { duration: 3000 });
+          this.toastService.success('Thread marked as resolved');
         }
       },
       error: (error) => {
         console.error('Error resolving thread:', error);
-        this.snackBar.open('Failed to resolve thread', 'Close', { duration: 3000 });
+        this.toastService.error('Failed to resolve thread');
       }
     });
   }
@@ -224,12 +220,12 @@ export class CommentThreadComponent implements OnInit {
             this.selectedThread = updatedThread;
           }
           this.unresolvedCount++;
-          this.snackBar.open('Thread reopened', 'Close', { duration: 3000 });
+          this.toastService.success('Thread reopened');
         }
       },
       error: (error) => {
         console.error('Error unresolving thread:', error);
-        this.snackBar.open('Failed to reopen thread', 'Close', { duration: 3000 });
+        this.toastService.error('Failed to reopen thread');
       }
     });
   }
@@ -242,7 +238,7 @@ export class CommentThreadComponent implements OnInit {
       }
     });
 
-    dialogRef.afterClosed().subscribe(confirmed => {
+    dialogRef.closed.subscribe(confirmed => {
       if (confirmed) {
         this.commentService.deleteThread(thread.id).subscribe({
           next: () => {
@@ -253,11 +249,11 @@ export class CommentThreadComponent implements OnInit {
             if (!thread.resolved) {
               this.unresolvedCount--;
             }
-            this.snackBar.open('Thread deleted successfully', 'Close', { duration: 3000 });
+            this.toastService.success('Thread deleted successfully');
           },
           error: (error) => {
             console.error('Error deleting thread:', error);
-            this.snackBar.open('Failed to delete thread', 'Close', { duration: 3000 });
+            this.toastService.error('Failed to delete thread');
           }
         });
       }
@@ -278,11 +274,11 @@ export class CommentThreadComponent implements OnInit {
       next: (blob) => {
         const ext = format === 'csv' ? 'csv' : 'txt';
         this.commentService.downloadFile(blob, `comment-thread-${thread.id}.${ext}`);
-        this.snackBar.open('Thread exported successfully', 'Close', { duration: 3000 });
+        this.toastService.success('Thread exported successfully');
       },
       error: (error) => {
         console.error('Error exporting thread:', error);
-        this.snackBar.open('Failed to export thread', 'Close', { duration: 3000 });
+        this.toastService.error('Failed to export thread');
       }
     });
   }
@@ -291,11 +287,11 @@ export class CommentThreadComponent implements OnInit {
     this.commentService.exportAllThreadsForEntity(this.entityType, this.entityId).subscribe({
       next: (blob) => {
         this.commentService.downloadFile(blob, `comments-${this.entityType.toLowerCase()}-${this.entityId}.txt`);
-        this.snackBar.open('All threads exported successfully', 'Close', { duration: 3000 });
+        this.toastService.success('All threads exported successfully');
       },
       error: (error) => {
         console.error('Error exporting threads:', error);
-        this.snackBar.open('Failed to export threads', 'Close', { duration: 3000 });
+        this.toastService.error('Failed to export threads');
       }
     });
   }

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
+import { DsDialogService } from '../../design-system';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
@@ -155,7 +155,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     protected router: Router,
     private ariaAnnouncer: AriaLiveAnnouncerService,
     private breakpointObserver: BreakpointObserver,
-    private dialog: MatDialog,
+    private dialog: DsDialogService,
     private annonceApiService: AnnonceApiService
   ) { }
 
@@ -520,7 +520,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       disableClose: false
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.closed.subscribe(result => {
       if (result) {
         if (result.openExisting) {
           this.router.navigate(['/dossiers', result.openExisting]);

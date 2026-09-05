@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy, input, output } from '@angular/core';
 import { AppointmentApiService, AppointmentResponse, AppointmentStatus } from '../services/appointment-api.service';
 import { Subject, takeUntil } from 'rxjs';
-import { ToastNotificationService } from '../services/toast-notification.service';
-import { MatDialog } from '@angular/material/dialog';
+import { NotificationService } from '../services/notification.service';
+import { DsDialogService } from '../design-system';
 import { AppointmentFormDialogComponent, AppointmentFormData } from './appointment-form-dialog.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
@@ -55,8 +55,8 @@ export class CalendarListViewComponent implements OnInit, OnDestroy {
 
   constructor(
     private appointmentService: AppointmentApiService,
-    private toastService: ToastNotificationService,
-    private dialog: MatDialog,
+    private notificationService: NotificationService,
+    private dialog: DsDialogService,
     private breakpointObserver: BreakpointObserver
   ) {}
 
@@ -113,7 +113,7 @@ export class CalendarListViewComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading appointments:', error);
-          this.toastService.error('Erreur lors du chargement des rendez-vous');
+          this.notificationService.error('Erreur lors du chargement des rendez-vous');
           this.isLoading = false;
         }
       });
@@ -259,7 +259,7 @@ export class CalendarListViewComponent implements OnInit, OnDestroy {
       } as AppointmentFormData
     });
 
-    dialogRef.afterClosed()
+    dialogRef.closed
       .pipe(takeUntil(this.destroy$))
       .subscribe(result => {
         if (result) {

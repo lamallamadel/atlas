@@ -1,8 +1,7 @@
-import { Component, OnInit, OnDestroy, HostListener, input } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, input, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { DsDialogService } from '../design-system';
 import { DossierResponse, DossierStatus } from '../services/dossier-api.service';
 import { MessageFormDialogComponent, MessageFormData } from './message-form-dialog.component';
 import { AppointmentFormDialogComponent, AppointmentFormData } from './appointment-form-dialog.component';
@@ -13,16 +12,36 @@ import { MessageCreateRequest } from '../services/message-api.service';
 import { MessageApiService } from '../services/message-api.service';
 import { AppointmentApiService, AppointmentCreateRequest } from '../services/appointment-api.service';
 import { DossierApiService } from '../services/dossier-api.service';
-import { MatFabButton, MatIconButton, MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsCardComponent, 
+  DsToastService
+} from '../design-system';
 
 @Component({
     selector: 'app-quick-actions',
+    standalone: true,
     templateUrl: './quick-actions.component.html',
     styleUrls: ['./quick-actions.component.css'],
-    imports: [MatFabButton, MatIcon, MatIconButton, MatButton]
+    imports: [
+      CommonModule, 
+      DsButtonComponent, 
+      DsIconComponent, 
+      DsCardComponent
+    ]
 })
 export class QuickActionsComponent implements OnInit, OnDestroy {
+  private dialog = inject(DsDialogService);
+  private toastService = inject(DsToastService);
+  private keyboardShortcutService = inject(KeyboardShortcutService);
+  private quickActionsService = inject(QuickActionsService);
+  private voipService = inject(VoipService);
+  private messageApiService = inject(MessageApiService);
+  private appointmentApiService = inject(AppointmentApiService);
+  private dossierApiService = inject(DossierApiService);
+
   readonly dossier = input<DossierResponse | null>(null);
   
   menuOpen = false;
@@ -32,17 +51,6 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   
   actions: QuickAction[] = [];
-
-  constructor(
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-    private keyboardShortcutService: KeyboardShortcutService,
-    private quickActionsService: QuickActionsService,
-    private voipService: VoipService,
-    private messageApiService: MessageApiService,
-    private appointmentApiService: AppointmentApiService,
-    private dossierApiService: DossierApiService
-  ) {}
 
   ngOnInit(): void {
     this.voipConfigured = this.voipService.isConfigured();
@@ -65,83 +73,22 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
 
   private setupActions(): void {
     this.actions = [
-      {
-        id: 'call-client',
-        icon: 'phone',
-        label: 'Appeler le client',
-        shortcut: 'Alt+C',
-        color: 'primary',
-        disabled: !this.canCallClient(),
-        action: () => this.callClient()
-      },
-      {
-        id: 'send-message',
-        icon: 'message',
-        label: 'Envoyer un message',
-        shortcut: 'Alt+M',
-        color: 'accent',
-        action: () => this.sendMessage()
-      },
-      {
-        id: 'schedule-appointment',
-        icon: 'event',
-        label: 'Planifier un rendez-vous',
-        shortcut: 'Alt+R',
-        color: 'primary',
-        action: () => this.scheduleAppointment()
-      },
-      {
-        id: 'change-status',
-        icon: 'swap_horiz',
-        label: 'Changer le statut',
-        shortcut: 'Alt+S',
-        color: 'warn',
-        disabled: this.isStatusChangeDisabled(),
-        action: () => this.changeStatus()
-      }
+      { id: 'call-client', icon: 'phone', label: 'Appeler le client', shortcut: 'Alt+C', color: 'primary', disabled: !this.canCallClient(), action: () => this.callClient() },
+      { id: 'send-message', icon: 'mail', label: 'Envoyer un message', shortcut: 'Alt+M', color: 'accent', action: () => this.sendMessage() },
+      { id: 'schedule-appointment', icon: 'calendar', label: 'Planifier un rendez-vous', shortcut: 'Alt+R', color: 'primary', action: () => this.scheduleAppointment() },
+      { id: 'change-status', icon: 'refresh', label: 'Changer le statut', shortcut: 'Alt+S', color: 'warn', disabled: this.isStatusChangeDisabled(), action: () => this.changeStatus() }
     ];
   }
 
   private registerKeyboardShortcuts(): void {
-    this.keyboardShortcutService.registerShortcut({
-      key: 'Alt+C',
-      description: 'Appeler le client',
-      category: 'actions',
-      action: () => this.callClient()
-    });
-
-    this.keyboardShortcutService.registerShortcut({
-      key: 'Alt+M',
-      description: 'Envoyer un message',
-      category: 'actions',
-      action: () => this.sendMessage()
-    });
-
-    this.keyboardShortcutService.registerShortcut({
-      key: 'Alt+R',
-      description: 'Planifier un rendez-vous',
-      category: 'actions',
-      action: () => this.scheduleAppointment()
-    });
-
-    this.keyboardShortcutService.registerShortcut({
-      key: 'Alt+S',
-      description: 'Changer le statut',
-      category: 'actions',
-      action: () => this.changeStatus()
-    });
-
-    this.keyboardShortcutService.registerShortcut({
-      key: 'Alt+Q',
-      description: 'Ouvrir les actions rapides',
-      category: 'actions',
-      action: () => this.toggleMenu()
-    });
+    this.keyboardShortcutService.registerShortcut({ key: 'Alt+C', description: 'Appeler le client', category: 'actions', action: () => this.callClient() });
+    this.keyboardShortcutService.registerShortcut({ key: 'Alt+M', description: 'Envoyer un message', category: 'actions', action: () => this.sendMessage() });
+    this.keyboardShortcutService.registerShortcut({ key: 'Alt+R', description: 'Planifier un rendez-vous', category: 'actions', action: () => this.scheduleAppointment() });
+    this.keyboardShortcutService.registerShortcut({ key: 'Alt+S', description: 'Changer le statut', category: 'actions', action: () => this.changeStatus() });
+    this.keyboardShortcutService.registerShortcut({ key: 'Alt+Q', description: 'Ouvrir les actions rapides', category: 'actions', action: () => this.toggleMenu() });
   }
 
-  private unregisterKeyboardShortcuts(): void {
-    // Note: In a production app, we'd want to add an unregister method to KeyboardShortcutService
-  }
+  private unregisterKeyboardShortcuts(): void {}
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
@@ -151,284 +98,92 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleMenu(): void {
-    this.menuOpen = !this.menuOpen;
-  }
-
-  closeMenu(): void {
-    this.menuOpen = false;
-  }
+  toggleMenu(): void { this.menuOpen = !this.menuOpen; }
+  closeMenu(): void { this.menuOpen = false; }
 
   private loadRecentActions(): void {
-    const dossier = this.dossier();
-    if (dossier) {
-      this.recentActions = this.quickActionsService.getRecentActions(dossier.id);
-    }
+    const d = this.dossier();
+    if (d) this.recentActions = this.quickActionsService.getRecentActions(d.id);
   }
 
-  private canCallClient(): boolean {
-    return this.voipConfigured && !!this.dossier()?.leadPhone;
-  }
-
+  private canCallClient(): boolean { return this.voipConfigured && !!this.dossier()?.leadPhone; }
   private isStatusChangeDisabled(): boolean {
-    const dossier = this.dossier();
-    if (!dossier) {
-      return true;
-    }
-    return dossier.status === DossierStatus.WON || 
-           dossier.status === DossierStatus.LOST;
+    const d = this.dossier();
+    return !d || d.status === DossierStatus.WON || d.status === DossierStatus.LOST;
   }
 
   callClient(): void {
-    const dossier = this.dossier();
-    if (!dossier || !dossier.leadPhone) {
-      this.snackBar.open('Aucun numéro de téléphone disponible', 'Fermer', {
-        duration: 3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top',
-        panelClass: ['warning-snackbar']
-      });
-      return;
-    }
+    const d = this.dossier();
+    if (!d || !d.leadPhone) { this.toastService.warning('Aucun numéro disponible'); return; }
+    if (!this.voipConfigured) { this.toastService.warning('Système VoIP non configuré'); return; }
 
-    if (!this.voipConfigured) {
-      this.snackBar.open('Le système VoIP n\'est pas configuré', 'Fermer', {
-        duration: 3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top',
-        panelClass: ['warning-snackbar']
-      });
-      return;
-    }
-
-    this.voipService.initiateCall(dossier.leadPhone, dossier.leadName || 'Client');
-    this.quickActionsService.addRecentAction({
-      dossierId: dossier.id,
-      actionId: 'call-client',
-      actionLabel: 'Appel client',
-      timestamp: new Date().toISOString()
-    });
-    
-    this.snackBar.open(`Appel en cours vers ${dossier.leadName || dossier.leadPhone}`, 'Fermer', {
-      duration: 3000,
-      horizontalPosition: 'center',
-      verticalPosition: 'top',
-      panelClass: ['success-snackbar']
-    });
-    
+    this.voipService.initiateCall(d.leadPhone, d.leadName || 'Client');
+    this.quickActionsService.addRecentAction({ dossierId: d.id, actionId: 'call-client', actionLabel: 'Appel client', timestamp: new Date().toISOString() });
+    this.toastService.success(`Appel en cours vers ${d.leadName || d.leadPhone}`);
     this.closeMenu();
   }
 
   sendMessage(): void {
-    const dossier = this.dossier();
-    if (!dossier) {
-      return;
-    }
-
-    const dialogData: MessageFormData = {
-      dossierId: dossier.id
-    };
-
-    const dialogRef = this.dialog.open(MessageFormDialogComponent, {
-      width: '500px',
-      maxWidth: '100vw',
-      maxHeight: '100vh',
-      panelClass: 'responsive-dialog',
-      data: dialogData
-    });
-
-    dialogRef.afterClosed().subscribe((result: MessageCreateRequest) => {
+    const d = this.dossier();
+    if (!d) return;
+    const dialogRef = this.dialog.open(MessageFormDialogComponent, { width: '500px', data: { dossierId: d.id } });
+    dialogRef.closed.subscribe((result: MessageCreateRequest) => {
       if (result) {
         this.messageApiService.create(result).subscribe({
           next: () => {
-            this.snackBar.open('Message créé avec succès', 'Fermer', {
-              duration: 3000,
-              horizontalPosition: 'center',
-              verticalPosition: 'top',
-              panelClass: ['success-snackbar']
-            });
-            
-            const dossierValue = this.dossier();
-            if (dossierValue) {
-              this.quickActionsService.addRecentAction({
-                dossierId: dossierValue.id,
-                actionId: 'send-message',
-                actionLabel: 'Message envoyé',
-                timestamp: new Date().toISOString()
-              });
-            }
+            this.toastService.success('Message créé avec succès');
+            this.quickActionsService.addRecentAction({ dossierId: d.id, actionId: 'send-message', actionLabel: 'Message envoyé', timestamp: new Date().toISOString() });
           },
-          error: (err) => {
-            const errorMessage = err.error?.message || 'Échec de la création du message';
-            this.snackBar.open(errorMessage, 'Fermer', {
-              duration: 5000,
-              horizontalPosition: 'center',
-              verticalPosition: 'top',
-              panelClass: ['error-snackbar']
-            });
-          }
+          error: (err) => this.toastService.error(err.error?.message || 'Échec création message')
         });
       }
     });
-
     this.closeMenu();
   }
 
   scheduleAppointment(): void {
-    const dossier = this.dossier();
-    if (!dossier) {
-      return;
-    }
-
-    const dialogData: AppointmentFormData = {
-      dossierId: dossier.id
-    };
-
-    const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
-      width: '600px',
-      maxWidth: '100vw',
-      maxHeight: '100vh',
-      panelClass: 'responsive-dialog',
-      data: dialogData
-    });
-
-    dialogRef.afterClosed().subscribe((result: AppointmentFormData) => {
+    const d = this.dossier();
+    if (!d) return;
+    const dialogRef = this.dialog.open(AppointmentFormDialogComponent, { width: '600px', data: { dossierId: d.id } });
+    dialogRef.closed.subscribe((result: AppointmentFormData) => {
       if (result && result.startTime && result.endTime) {
-        const request: AppointmentCreateRequest = {
-          dossierId: result.dossierId,
-          startTime: result.startTime,
-          endTime: result.endTime,
-          location: result.location,
-          assignedTo: result.assignedTo,
-          notes: result.notes,
-          status: result.status
-        };
-
+        const request: AppointmentCreateRequest = { dossierId: result.dossierId, startTime: result.startTime, endTime: result.endTime, location: result.location, assignedTo: result.assignedTo, notes: result.notes, status: result.status };
         this.appointmentApiService.create(request).subscribe({
           next: () => {
-            this.snackBar.open('Rendez-vous créé avec succès', 'Fermer', {
-              duration: 3000,
-              horizontalPosition: 'center',
-              verticalPosition: 'top',
-              panelClass: ['success-snackbar']
-            });
-            
-            const dossierValue = this.dossier();
-            if (dossierValue) {
-              this.quickActionsService.addRecentAction({
-                dossierId: dossierValue.id,
-                actionId: 'schedule-appointment',
-                actionLabel: 'Rendez-vous planifié',
-                timestamp: new Date().toISOString()
-              });
-            }
+            this.toastService.success('Rendez-vous créé avec succès');
+            this.quickActionsService.addRecentAction({ dossierId: d.id, actionId: 'schedule-appointment', actionLabel: 'Rendez-vous planifié', timestamp: new Date().toISOString() });
           },
-          error: (err) => {
-            const errorMessage = err.error?.message || 'Échec de la création du rendez-vous';
-            this.snackBar.open(errorMessage, 'Fermer', {
-              duration: 5000,
-              horizontalPosition: 'center',
-              verticalPosition: 'top',
-              panelClass: ['error-snackbar']
-            });
-          }
+          error: (err) => this.toastService.error(err.error?.message || 'Échec création rdv')
         });
       }
     });
-
     this.closeMenu();
   }
 
   changeStatus(): void {
-    if (!this.dossier() || this.isStatusChangeDisabled()) {
-      return;
-    }
-    
-    this.snackBar.open('Veuillez utiliser le formulaire de changement de statut dans la section détails', 'Fermer', {
-      duration: 3000,
-      horizontalPosition: 'center',
-      verticalPosition: 'top'
-    });
-
+    if (!this.dossier() || this.isStatusChangeDisabled()) return;
+    this.toastService.info('Veuillez utiliser le formulaire de statut dans les détails');
     this.closeMenu();
-  }
-
-  private getAvailableStatusOptions(): DossierStatus[] {
-    const dossier = this.dossier();
-    if (!dossier) {
-      return [];
-    }
-
-    const currentStatus = dossier.status;
-
-    switch (currentStatus) {
-      case DossierStatus.WON:
-      case DossierStatus.LOST:
-        return [currentStatus];
-      
-      case DossierStatus.NEW:
-        return [
-          DossierStatus.NEW,
-          DossierStatus.QUALIFYING,
-          DossierStatus.LOST
-        ];
-      
-      case DossierStatus.QUALIFYING:
-        return [
-          DossierStatus.QUALIFYING,
-          DossierStatus.QUALIFIED,
-          DossierStatus.LOST
-        ];
-      
-      case DossierStatus.QUALIFIED:
-        return [
-          DossierStatus.QUALIFIED,
-          DossierStatus.APPOINTMENT,
-          DossierStatus.LOST
-        ];
-      
-      case DossierStatus.APPOINTMENT:
-        return [
-          DossierStatus.APPOINTMENT,
-          DossierStatus.WON,
-          DossierStatus.LOST
-        ];
-      
-      default:
-        return [];
-    }
   }
 
   getActionIcon(actionId: string): string {
     switch (actionId) {
       case 'call-client': return 'phone';
-      case 'send-message': return 'message';
-      case 'schedule-appointment': return 'event';
-      case 'change-status': return 'swap_horiz';
-      default: return 'history';
+      case 'send-message': return 'mail';
+      case 'schedule-appointment': return 'calendar';
+      case 'change-status': return 'refresh';
+      default: return 'clock';
     }
   }
 
   formatActionTimestamp(timestamp: string): string {
     const date = new Date(timestamp);
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-
-    if (diffMins < 1) {
-      return 'À l\'instant';
-    } else if (diffMins < 60) {
-      return `Il y a ${diffMins} min`;
-    } else if (diffHours < 24) {
-      return `Il y a ${diffHours}h`;
-    } else {
-      return date.toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
+    const diffMins = Math.floor((now.getTime() - date.getTime()) / 60000);
+    if (diffMins < 1) return 'À l\'instant';
+    if (diffMins < 60) return `${diffMins} min`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `Il y a ${diffHours}h`;
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   }
 }

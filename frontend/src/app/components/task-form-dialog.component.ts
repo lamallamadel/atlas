@@ -1,39 +1,45 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
+import { DsDialogHeaderComponent, DsDialogContentComponent, DsDialogActionsComponent } from '../design-system';
 import { TaskApiService, TaskResponse, TaskPriority, User } from '../services/task-api.service';
 import { FocusTrapDirective } from '../directives/focus-trap.directive';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatFormField, MatLabel, MatError, MatHint, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
-import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
-import { MatButton } from '@angular/material/button';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DsSkeletonComponent, DsSelectComponent, type DsSelectOption, DsInputComponent, DsIconComponent, DsButtonComponent } from '../design-system';
+
+export interface TaskFormData {
+  task?: TaskResponse;
+}
 
 @Component({
     selector: 'app-task-form-dialog',
+    standalone: true,
     templateUrl: './task-form-dialog.component.html',
     styleUrls: ['./task-form-dialog.component.css'],
-    imports: [FocusTrapDirective, MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatHint, MatSelect, MatOption, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatDialogActions, MatButton, DsSkeletonComponent]
+    imports: [FocusTrapDirective, DsDialogHeaderComponent, DsDialogContentComponent, DsDialogActionsComponent, ReactiveFormsModule, DsSkeletonComponent, DsSelectComponent, DsInputComponent, DsIconComponent, DsButtonComponent]
 })
 export class TaskFormDialogComponent implements OnInit {
   taskForm: FormGroup;
   users: User[] = [];
-  priorities = [
-    { value: TaskPriority.HIGH, label: 'High' },
-    { value: TaskPriority.MEDIUM, label: 'Medium' },
-    { value: TaskPriority.LOW, label: 'Low' }
+  priorities: DsSelectOption[] = [
+    { value: TaskPriority.HIGH, label: 'Haute' },
+    { value: TaskPriority.MEDIUM, label: 'Moyenne' },
+    { value: TaskPriority.LOW, label: 'Basse' }
   ];
   isEditMode = false;
   loading = false;
 
+  get userOptions(): DsSelectOption[] {
+    return [
+      { value: '', label: 'Non assigné' },
+      ...this.users.map(u => ({ value: u.id, label: u.name }))
+    ];
+  }
+
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<TaskFormDialogComponent>,
+    private dialogRef: DialogRef<any>,
     private taskApiService: TaskApiService,
-    @Inject(MAT_DIALOG_DATA) public data: { task?: TaskResponse }
+    @Inject(DIALOG_DATA) public data: TaskFormData | null
   ) {
     this.isEditMode = !!data?.task;
     
@@ -49,7 +55,7 @@ export class TaskFormDialogComponent implements OnInit {
   ngOnInit(): void {
     this.loadUsers();
     
-    if (this.isEditMode && this.data.task) {
+    if (this.isEditMode && this.data?.task) {
       this.taskForm.patchValue({
         title: this.data.task.title,
         description: this.data.task.description || '',
@@ -84,7 +90,7 @@ export class TaskFormDialogComponent implements OnInit {
         priority: formValue.priority
       };
 
-      if (this.isEditMode && this.data.task) {
+      if (this.isEditMode && this.data?.task) {
         this.taskApiService.update(this.data.task.id, request).subscribe({
           next: (task) => {
             this.dialogRef.close(task);
@@ -115,10 +121,10 @@ export class TaskFormDialogComponent implements OnInit {
   get titleError(): string {
     const control = this.taskForm.get('title');
     if (control?.hasError('required')) {
-      return 'Title is required';
+      return 'Le titre est requis';
     }
     if (control?.hasError('maxlength')) {
-      return 'Title must be at most 200 characters';
+      return 'Le titre est trop long (max 200)';
     }
     return '';
   }
@@ -126,7 +132,7 @@ export class TaskFormDialogComponent implements OnInit {
   get descriptionError(): string {
     const control = this.taskForm.get('description');
     if (control?.hasError('maxlength')) {
-      return 'Description must be at most 1000 characters';
+      return 'La description est trop longue (max 1000)';
     }
     return '';
   }

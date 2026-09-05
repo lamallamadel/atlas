@@ -1,74 +1,81 @@
 <div class="quick-actions-container">
-  <!-- FAB Button -->
-  <button
-    mat-fab
-    color="primary"
+  <!-- FAB Button (Using ds-button with custom fab class) -->
+  <ds-button
+    variant="marine"
+    size="lg"
     class="quick-actions-fab"
     [class.fab-open]="menuOpen"
-    (click)="toggleMenu()"
+    (dsClick)="toggleMenu()"
     [attr.title]="menuOpen ? 'Fermer (Alt+Q)' : 'Actions rapides (Alt+Q)'"
-    aria-label="Actions rapides">
-    <mat-icon>{{ menuOpen ? 'close' : 'flash_on' }}</mat-icon>
-  </button>
+    ariaLabel="Actions rapides"
+    style="position: fixed; bottom: 32px; right: 32px; width: 56px; height: 56px; border-radius: 50%; box-shadow: var(--ds-shadow-lg); z-index: 1000; padding: 0; justify-content: center;">
+    <ds-icon [name]="menuOpen ? 'close' : 'megaphone'" [size]="24"></ds-icon>
+  </ds-button>
 
   <!-- Actions Menu -->
-  <div class="quick-actions-menu" [class.menu-open]="menuOpen">
-    <div class="menu-header">
-      <h3>Actions rapides</h3>
-      <button mat-icon-button (click)="closeMenu()" aria-label="Fermer">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
+  <div class="quick-actions-menu-wrapper" [class.menu-open]="menuOpen" style="position: fixed; bottom: 100px; right: 32px; z-index: 1001; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; transform: translateY(20px); pointer-events: none;">
+    @if (menuOpen) {
+      <ds-card class="quick-actions-menu" [pad]="true" elevation="md" style="width: 320px; pointer-events: auto;">
+        <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--ds-divider);">
+          <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">Actions rapides</h3>
+          <ds-button variant="icon" size="sm" (dsClick)="closeMenu()" ariaLabel="Fermer">
+            <ds-icon name="close" [size]="20"></ds-icon>
+          </ds-button>
+        </div>
 
-    <div class="menu-content">
-      <!-- Primary Actions -->
-      <div class="actions-section">
-        <h4>Actions</h4>
-        <div class="action-buttons">
-          @for (action of actions; track action) {
-            <button
-              mat-raised-button
-              [color]="action.color"
-              [disabled]="action.disabled"
-              (click)="action.action()"
-              class="action-button">
-              <mat-icon>{{ action.icon }}</mat-icon>
-              <div class="action-content">
-                <span class="action-label">{{ action.label }}</span>
-                <span class="action-shortcut">{{ action.shortcut }}</span>
+        <div class="menu-content ds-form-stack">
+          <!-- Primary Actions -->
+          <div class="actions-section ds-form-stack">
+            <h4 style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--ds-text-muted); letter-spacing: 1px; margin-bottom: 16px;">Actions</h4>
+            <div class="action-buttons-list ds-form-stack">
+              @for (action of actions; track action.id) {
+                <ds-button
+                  [variant]="action.color === 'warn' ? 'danger' : 'marine'"
+                  size="md"
+                  [disabled]="!!action.disabled"
+                  (dsClick)="action.action()"
+                  style="width: 100%; justify-content: flex-start;">
+                  <ds-icon [name]="action.icon" [size]="20" style="margin-right: 12px;"></ds-icon>
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex: 1;">
+                    <span style="font-size: 14px;">{{ action.label }}</span>
+                    <span style="font-size: 10px; opacity: 0.7; font-family: var(--ds-font-mono);">{{ action.shortcut }}</span>
+                  </div>
+                </ds-button>
+              }
+            </div>
+          </div>
+
+          <!-- Recent Actions History -->
+          @if (recentActions.length > 0) {
+            <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--ds-divider);">
+            <div class="actions-section ds-form-stack">
+              <h4 style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--ds-text-muted); letter-spacing: 1px; margin-bottom: 16px;">Historique récent</h4>
+              <div class="recent-actions-list ds-form-stack" style="gap: 12px;">
+                @for (recentAction of recentActions; track recentAction.timestamp) {
+                  <div class="recent-action-item" style="display: flex; gap: 12px; align-items: center;">
+                    <div style="width: 32px; height: 32px; border-radius: 6px; background: var(--ds-bg-subtle); display: flex; align-items: center; justify-content: center; color: var(--ds-text-muted);">
+                      <ds-icon [name]="getActionIcon(recentAction.actionId)" [size]="16"></ds-icon>
+                    </div>
+                    <div class="recent-action-content">
+                      <div style="font-size: 13px; font-weight: 600;">{{ recentAction.actionLabel }}</div>
+                      <div style="font-size: 11px; color: var(--ds-text-faint);">{{ formatActionTimestamp(recentAction.timestamp) }}</div>
+                    </div>
+                  </div>
+                }
               </div>
-            </button>
+            </div>
+          }
+
+          <!-- VoIP Status -->
+          @if (voipConfigured) {
+            <div class="voip-status" style="margin-top: 24px; padding: 12px; border-radius: var(--ds-radius-md); background: var(--ds-success-hl); display: flex; align-items: center; gap: 10px;">
+              <ds-icon name="check" [size]="16" style="color: var(--ds-success);"></ds-icon>
+              <span style="font-size: 12px; font-weight: 600; color: var(--ds-success);">Système VoIP connecté</span>
+            </div>
           }
         </div>
-      </div>
-
-      <!-- Recent Actions History -->
-      @if (recentActions.length > 0) {
-        <div class="actions-section">
-          <h4>Historique récent</h4>
-          <div class="recent-actions-list">
-            @for (recentAction of recentActions; track recentAction) {
-              <div
-                class="recent-action-item">
-                <mat-icon class="recent-action-icon">{{ getActionIcon(recentAction.actionId) }}</mat-icon>
-                <div class="recent-action-content">
-                  <span class="recent-action-label">{{ recentAction.actionLabel }}</span>
-                  <span class="recent-action-time">{{ formatActionTimestamp(recentAction.timestamp) }}</span>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-      }
-
-      <!-- VoIP Status -->
-      @if (voipConfigured) {
-        <div class="voip-status">
-          <mat-icon class="voip-status-icon">phone_in_talk</mat-icon>
-          <span class="voip-status-text">Système VoIP connecté</span>
-        </div>
-      }
-    </div>
+      </ds-card>
+    }
   </div>
 
   <!-- Backdrop -->
@@ -80,6 +87,7 @@
     (keydown.space)="closeMenu()"
     tabindex="0"
     role="button"
-    aria-label="Fermer le menu">
+    aria-label="Fermer le menu"
+    style="position: fixed; inset: 0; background: rgba(24, 22, 15, 0.2); backdrop-filter: blur(4px); z-index: 999; transition: all 0.3s ease; opacity: 0; pointer-events: none;">
   </div>
 </div>

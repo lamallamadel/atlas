@@ -4,12 +4,8 @@ import { AnalyticsApiService, AnalyticsResponse, MetabaseEmbedResponse } from '.
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Chart, registerables } from 'chart.js';
 import { dsFunnelBarColors, dsRgba, resolveDsToken } from '../design-system/chart-ds-colors';
-import { MatTabGroup, MatTab } from '@angular/material/tabs';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
-import { MatSuffix } from '@angular/material/form-field';
-import { DsCardComponent } from '../design-system';
+import { DsTabsComponent, type DsTab } from '../design-system';
+import { DsCardComponent, DsInputComponent } from '../design-system';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 Chart.register(...registerables);
@@ -19,17 +15,10 @@ Chart.register(...registerables);
   standalone: true,
   imports: [
     FormsModule,
-    MatTabGroup,
-    MatTab,
-    MatFormField,
-    MatLabel,
-    MatInput,
-    MatDatepickerInput,
-    MatDatepickerToggle,
-    MatSuffix,
-    MatDatepicker,
+    DsTabsComponent,
     DsSkeletonComponent,
     DsCardComponent,
+    DsInputComponent,
   ],
   template: `
     <div class="analytics-dashboard">
@@ -37,18 +26,18 @@ Chart.register(...registerables);
         <mat-tab label="Overview">
           <div class="tab-content">
             <div class="date-range-picker">
-              <mat-form-field>
-                <mat-label>Start Date</mat-label>
-                <input matInput [matDatepicker]="startPicker" [(ngModel)]="dateRange.start" (dateChange)="onDateRangeChange()">
-                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-                <mat-datepicker #startPicker></mat-datepicker>
-              </mat-form-field>
-              <mat-form-field>
-                <mat-label>End Date</mat-label>
-                <input matInput [matDatepicker]="endPicker" [(ngModel)]="dateRange.end" (dateChange)="onDateRangeChange()">
-                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-                <mat-datepicker #endPicker></mat-datepicker>
-              </mat-form-field>
+              <div class="ds-field" style="width: 200px;">
+                <label class="ds-field__label">Start Date</label>
+                <div class="ds-field__wrap">
+                  <input type="date" class="ds-field__input" [ngModel]="formatDate(dateRange.start)" (ngModelChange)="updateStartDate($event)">
+                </div>
+              </div>
+              <div class="ds-field" style="width: 200px;">
+                <label class="ds-field__label">End Date</label>
+                <div class="ds-field__wrap">
+                  <input type="date" class="ds-field__input" [ngModel]="formatDate(dateRange.end)" (ngModelChange)="updateEndDate($event)">
+                </div>
+              </div>
             </div>
     
             <div class="charts-grid">
@@ -218,7 +207,11 @@ Chart.register(...registerables);
   `]
 })
 export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
-  activeTabIndex = 0;
+  activeTab = 'overview';
+  readonly analyticsTabs: DsTab[] = [
+    { value: 'overview', label: 'Overview' },
+    { value: 'metabase', label: 'Metabase Dashboard' },
+  ];
 
   metabaseDashboardUrl: SafeResourceUrl | null = null;
   metabaseQuestionUrl: SafeResourceUrl | null = null;
@@ -473,7 +466,7 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
       }).subscribe({
         next: (response) => {
           this.metabaseQuestionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(response.embedUrl);
-          this.activeTabIndex = 2;
+          this.activeTab = 'drilldown';
         }
       });
     }
@@ -500,5 +493,19 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
 
   private getDefaultEndDate(): Date {
     return new Date();
+  }
+
+  updateStartDate(dateStr: string): void {
+    if (dateStr) {
+      this.dateRange.start = new Date(dateStr);
+      this.onDateRangeChange();
+    }
+  }
+
+  updateEndDate(dateStr: string): void {
+    if (dateStr) {
+      this.dateRange.end = new Date(dateStr);
+      this.onDateRangeChange();
+    }
   }
 }

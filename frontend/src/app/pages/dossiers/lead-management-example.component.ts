@@ -1,71 +1,33 @@
-import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, inject } from '@angular/core';
+import { DsDialogService } from '../../design-system';
 import { LeadImportDialogComponent } from '../../components/lead-import-dialog.component';
 import { LeadExportDialogComponent } from '../../components/lead-export-dialog.component';
+import { CommonModule } from '@angular/common';
+import { DsButtonComponent, DsIconComponent, DsToastService } from '../../design-system';
 
 @Component({
   selector: 'app-lead-management-example',
+  standalone: true,
   template: `
-    <div class="lead-management-toolbar">
-      <h2>Gestion des Prospects</h2>
-      <div class="actions">
-        <button mat-raised-button color="primary" (click)="openImportDialog()">
-          <mat-icon>upload_file</mat-icon>
+    <div class="lead-management-toolbar ds-card" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: var(--ds-surface); border-radius: var(--ds-radius-md); margin-bottom: 24px; border: 1px solid var(--ds-border);">
+      <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--ds-marine);">Gestion des Prospects</h2>
+      <div class="actions" style="display: flex; gap: 12px;">
+        <ds-button variant="marine" size="md" (dsClick)="openImportDialog()">
+          <ds-icon name="upload" [size]="16" style="margin-right: 8px;"></ds-icon>
           Importer des prospects
-        </button>
-        <button mat-raised-button (click)="openExportDialog()">
-          <mat-icon>download</mat-icon>
+        </ds-button>
+        <ds-button variant="ghost" size="md" (dsClick)="openExportDialog()">
+          <ds-icon name="download" [size]="16" style="margin-right: 8px;"></ds-icon>
           Exporter des prospects
-        </button>
+        </ds-button>
       </div>
     </div>
   `,
-  styles: [`
-    .lead-management-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
-      background-color: #f5f5f5;
-      border-radius: 8px;
-      margin-bottom: 24px;
-    }
-
-    .lead-management-toolbar h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 500;
-    }
-
-    .actions {
-      display: flex;
-      gap: 12px;
-    }
-
-    @media (max-width: 768px) {
-      .lead-management-toolbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-      }
-
-      .actions {
-        width: 100%;
-        flex-direction: column;
-      }
-
-      .actions button {
-        width: 100%;
-      }
-    }
-  `]
+  imports: [CommonModule, DsButtonComponent, DsIconComponent]
 })
 export class LeadManagementExampleComponent {
-  constructor(
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
+  private dialog = inject(DsDialogService);
+  private toastService = inject(DsToastService);
 
   openImportDialog(): void {
     const dialogRef = this.dialog.open(LeadImportDialogComponent, {
@@ -75,14 +37,9 @@ export class LeadManagementExampleComponent {
       panelClass: 'lead-import-dialog-container'
     });
 
-    dialogRef.afterClosed().subscribe((result: boolean) => {
+    dialogRef.closed.subscribe((result: boolean) => {
       if (result) {
-        this.snackBar.open('Import terminé. Rafraîchissement de la liste...', 'OK', {
-          duration: 3000,
-          panelClass: ['success-snackbar']
-        });
-        // Refresh your lead list here
-        // this.loadLeads();
+        this.toastService.success('Import terminé. Rafraîchissement de la liste...');
       }
     });
   }
@@ -94,12 +51,9 @@ export class LeadManagementExampleComponent {
       panelClass: 'lead-export-dialog-container'
     });
 
-    dialogRef.afterClosed().subscribe((result: boolean) => {
+    dialogRef.closed.subscribe((result: boolean) => {
       if (result) {
-        this.snackBar.open('Export terminé avec succès', 'OK', {
-          duration: 3000,
-          panelClass: ['success-snackbar']
-        });
+        this.toastService.success('Export terminé avec succès');
       }
     });
   }

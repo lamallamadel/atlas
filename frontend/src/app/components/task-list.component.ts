@@ -1,15 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, OnInit, inject } from '@angular/core';
+import { DsDialogService } from '../design-system';
 import { TaskApiService, TaskResponse, TaskStatus, TaskPriority, TaskListParams } from '../services/task-api.service';
 import { TaskFormDialogComponent } from './task-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { AuthService } from '../services/auth.service';
 import { cardStagger } from '../animations';
 import { FormsModule } from '@angular/forms';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
 import { TaskCardComponent } from './task-card.component';
 import {
   PageHeaderComponent,
@@ -20,12 +16,16 @@ import {
   DsSkeletonComponent,
   DsTableComponent,
   WeekGridComponent,
+  DsSelectComponent,
+  DsToastService,
+  type DsSelectOption,
   type DsTab,
   type WeekGridEvent,
   type WeekGridClickEvent,
   type DsColumn,
   type DsRowAction,
 } from '../design-system';
+import { CommonModule } from '@angular/common';
 
 enum ViewMode {
   LIST = 'list',
@@ -53,11 +53,8 @@ type TaskListLayout = 'cards' | 'table';
   styleUrls: ['./task-list.component.css'],
   animations: [cardStagger],
   imports: [
+    CommonModule,
     FormsModule,
-    MatFormField,
-    MatLabel,
-    MatSelect,
-    MatOption,
     TaskCardComponent,
     WeekGridComponent,
     PageHeaderComponent,
@@ -67,9 +64,15 @@ type TaskListLayout = 'cards' | 'table';
     DsEmptyStateComponent,
     DsSkeletonComponent,
     DsTableComponent,
+    DsSelectComponent,
   ],
 })
 export class TaskListComponent implements OnInit {
+  private taskApiService = inject(TaskApiService);
+  private dialog = inject(DsDialogService);
+  private toastService = inject(DsToastService);
+  private authService = inject(AuthService);
+
   tasks: TaskResponse[] = [];
   filteredTasks: TaskResponse[] = [];
   loading = false;
@@ -78,14 +81,20 @@ export class TaskListComponent implements OnInit {
   viewMode: ViewMode = ViewMode.LIST;
   ViewMode = ViewMode;
 
-  /** Vue liste : cartes existantes ou tableau DS. */
   listLayout: TaskListLayout = 'cards';
-
   filterType: FilterType = FilterType.ALL;
   FilterType = FilterType;
-
   statusFilter: StatusFilter = StatusFilter.ALL;
   StatusFilter = StatusFilter;
+
+  get statusFilterOptions(): DsSelectOption[] {
+    return [
+      { value: StatusFilter.ALL, label: 'Toutes' },
+      { value: StatusFilter.OVERDUE, label: `En retard (${this.overdueCount})` },
+      { value: StatusFilter.UPCOMING, label: `À venir (${this.upcomingCount})` },
+      { value: StatusFilter.COMPLETED, label: `Terminées (${this.completedCount})` },
+    ];
+  }
 
   weekGridDate = new Date();
   weekGridEvents: WeekGridEvent[] = [];
@@ -127,13 +136,6 @@ export class TaskListComponent implements OnInit {
 
   trackByTaskId = (_index: number, row: Record<string, unknown>): number =>
     this.taskFromRow(row).id;
-
-  constructor(
-    private taskApiService: TaskApiService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-    private authService: AuthService
-  ) {}
 
   ngOnInit(): void {
     this.dsTableColumns = this.buildDsTableColumns();
@@ -177,7 +179,7 @@ export class TaskListComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading tasks:', error);
-        this.snackBar.open('Impossible de charger les tâches', 'Fermer', { duration: 4000 });
+        this.toastService.error('Impossible de charger les tâches');
         this.loading = false;
       },
     });
@@ -266,9 +268,9 @@ export class TaskListComponent implements OnInit {
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.closed.subscribe((result) => {
       if (result) {
-        this.snackBar.open('Tâche créée', 'OK', { duration: 3000 });
+        this.toastService.success('Tâche créée');
         this.loadTasks();
       }
     });
@@ -280,9 +282,9 @@ export class TaskListComponent implements OnInit {
       data: {},
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.closed.subscribe((result) => {
       if (result) {
-        this.snackBar.open('Tâche créée', 'OK', { duration: 3000 });
+        this.toastService.success('Tâche créée');
         this.loadTasks();
       }
     });
@@ -294,9 +296,9 @@ export class TaskListComponent implements OnInit {
       data: { task },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.closed.subscribe((result) => {
       if (result) {
-        this.snackBar.open('Tâche mise à jour', 'OK', { duration: 3000 });
+        this.toastService.success('Tâche mise à jour');
         this.loadTasks();
       }
     });
@@ -310,16 +312,16 @@ export class TaskListComponent implements OnInit {
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.closed.subscribe((result) => {
       if (result) {
         this.taskApiService.delete(taskId).subscribe({
           next: () => {
-            this.snackBar.open('Tâche supprimée', 'OK', { duration: 3000 });
+            this.toastService.success('Tâche supprimée');
             this.loadTasks();
           },
           error: (error) => {
             console.error('Error deleting task:', error);
-            this.snackBar.open('Suppression impossible', 'Fermer', { duration: 4000 });
+            this.toastService.error('Suppression impossible');
           },
         });
       }
@@ -338,12 +340,12 @@ export class TaskListComponent implements OnInit {
     apiCall.subscribe({
       next: () => {
         const done = task.status === TaskStatus.COMPLETED;
-        this.snackBar.open(done ? 'Tâche rouverte' : 'Tâche terminée', 'OK', { duration: 3000 });
+        this.toastService.success(done ? 'Tâche rouverte' : 'Tâche terminée');
         this.loadTasks();
       },
       error: (error) => {
         console.error('Error updating task:', error);
-        this.snackBar.open('Mise à jour impossible', 'Fermer', { duration: 4000 });
+        this.toastService.error('Mise à jour impossible');
       },
     });
   }
@@ -454,77 +456,50 @@ export class TaskListComponent implements OnInit {
   }
 
   private formatDueSummary(task: TaskResponse): string {
-    if (!task.dueDate) {
-      return 'Sans échéance';
-    }
+    if (!task.dueDate) return 'Sans échéance';
     const dueDate = new Date(task.dueDate);
     const now = new Date();
     const daysDiff = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    if (task.status === TaskStatus.COMPLETED) {
-      return dueDate.toLocaleDateString('fr-FR');
-    }
-    if (daysDiff < 0) {
-      return `En retard (${Math.abs(daysDiff)} j)`;
-    }
-    if (daysDiff === 0) {
-      return "Aujourd'hui";
-    }
-    if (daysDiff === 1) {
-      return 'Demain';
-    }
-    if (daysDiff <= 7) {
-      return `J+${daysDiff}`;
-    }
+    if (task.status === TaskStatus.COMPLETED) return dueDate.toLocaleDateString('fr-FR');
+    if (daysDiff < 0) return `En retard (${Math.abs(daysDiff)} j)`;
+    if (daysDiff === 0) return "Aujourd'hui";
+    if (daysDiff === 1) return 'Demain';
+    if (daysDiff <= 7) return `J+${daysDiff}`;
     return dueDate.toLocaleDateString('fr-FR');
   }
 
   private priorityLabel(p: TaskPriority): string {
     switch (p) {
-      case TaskPriority.HIGH:
-        return 'Haute';
-      case TaskPriority.MEDIUM:
-        return 'Moyenne';
-      case TaskPriority.LOW:
-        return 'Basse';
-      default:
-        return '—';
+      case TaskPriority.HIGH: return 'Haute';
+      case TaskPriority.MEDIUM: return 'Moyenne';
+      case TaskPriority.LOW: return 'Basse';
+      default: return '—';
     }
   }
 
   private priorityBadgeClass(p: TaskPriority): string {
     switch (p) {
-      case TaskPriority.HIGH:
-        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--error';
-      case TaskPriority.MEDIUM:
-        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--warning';
-      case TaskPriority.LOW:
-        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--neutral';
-      default:
-        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--neutral';
+      case TaskPriority.HIGH: return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--error';
+      case TaskPriority.MEDIUM: return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--warning';
+      case TaskPriority.LOW: return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--neutral';
+      default: return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--neutral';
     }
   }
 
   private statusLabel(s: TaskStatus): string {
     switch (s) {
-      case TaskStatus.COMPLETED:
-        return 'Terminée';
-      case TaskStatus.IN_PROGRESS:
-        return 'En cours';
-      case TaskStatus.PENDING:
-        return 'À faire';
-      default:
-        return String(s);
+      case TaskStatus.COMPLETED: return 'Terminée';
+      case TaskStatus.IN_PROGRESS: return 'En cours';
+      case TaskStatus.PENDING: return 'À faire';
+      default: return String(s);
     }
   }
 
   private statusBadgeClass(s: TaskStatus): string {
     switch (s) {
-      case TaskStatus.COMPLETED:
-        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--success';
-      case TaskStatus.IN_PROGRESS:
-        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--info';
-      default:
-        return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--neutral';
+      case TaskStatus.COMPLETED: return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--success';
+      case TaskStatus.IN_PROGRESS: return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--info';
+      default: return 'ds-badge ds-badge--md ds-badge--no-dot ds-badge--neutral';
     }
   }
 

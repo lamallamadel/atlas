@@ -1,84 +1,77 @@
-<div appFocusTrap role="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description" aria-modal="true">
-  <h2 mat-dialog-title id="dialog-title">{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
-  <p id="dialog-description" class="sr-only">{{ isEditMode ? 'Edit task form' : 'Create new task form' }}. Fill in the fields below and submit.</p>
+<div appFocusTrap role="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description" aria-modal="true" class="ds-task-dialog">
+  <ds-dialog-header (close)="onCancel()">
+    <ds-icon name="tasks" [size]="24" aria-hidden="true"></ds-icon>
+    <span>{{ isEditMode ? 'Modifier la tâche' : 'Nouvelle tâche' }}</span>
+  </ds-dialog-header>
+  
+  <ds-dialog-content>
+    <form [formGroup]="taskForm" class="ds-form-stack">
+      
+      <ds-input
+        label="Titre"
+        placeholder="Entrer le titre de la tâche"
+        formControlName="title"
+        [error]="titleError"
+        required="true">
+      </ds-input>
 
-  <mat-dialog-content>
-    <form [formGroup]="taskForm" class="task-form">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Title <span class="required" aria-label="required">*</span></mat-label>
-        <input matInput formControlName="title" placeholder="Enter task title" maxlength="200" aria-required="true" [attr.aria-invalid]="titleError ? 'true' : 'false'">
-        @if (titleError) {
-          <mat-error role="alert">{{ titleError }}</mat-error>
-        }
-      </mat-form-field>
+      <div class="ds-field">
+        <label class="ds-field__label">Description</label>
+        <div class="ds-field__wrap">
+          <textarea
+            class="ds-field__input"
+            formControlName="description"
+            placeholder="Détails de la tâche..."
+            rows="4"
+            style="height: auto; padding: 12px;"></textarea>
+        </div>
+        <p class="ds-field__hint" style="text-align: right; font-size: 11px; margin-top: 4px; color: var(--ds-text-muted);">
+          {{ taskForm.get('description')?.value?.length || 0 }} / 1000
+        </p>
+      </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Description</mat-label>
-        <textarea
-          matInput
-          formControlName="description"
-          placeholder="Enter task description"
-          rows="4"
-          maxlength="1000"
-          aria-label="Task description"
-          [attr.aria-invalid]="descriptionError ? 'true' : 'false'">
-        </textarea>
-        <mat-hint align="end">{{ taskForm.get('description')?.value?.length || 0 }} / 1000</mat-hint>
-        @if (descriptionError) {
-          <mat-error role="alert">{{ descriptionError }}</mat-error>
-        }
-      </mat-form-field>
+      <div class="ds-form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <ds-select
+          label="Assigné à"
+          [options]="userOptions"
+          formControlName="assignedTo"
+          prefixIcon="user">
+        </ds-select>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Assigned To</mat-label>
-        <mat-select formControlName="assignedTo" aria-label="Assign task to user">
-          <mat-option [value]="''">Unassigned</mat-option>
-          @for (user of users; track user) {
-            <mat-option [value]="user.id">
-              {{ user.name }}
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+        <div class="ds-field">
+          <label class="ds-field__label">Échéance</label>
+          <div class="ds-field__wrap">
+            <input 
+              type="date" 
+              class="ds-field__input" 
+              formControlName="dueDate" />
+          </div>
+        </div>
+      </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Due Date</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="dueDate" aria-label="Task due date">
-        <mat-datepicker-toggle matSuffix [for]="picker" aria-label="Open calendar to select due date"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
+      <ds-select
+        label="Priorité"
+        [options]="priorities"
+        formControlName="priority"
+        prefixIcon="filter">
+      </ds-select>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Priority</mat-label>
-        <mat-select formControlName="priority" aria-label="Task priority level">
-          @for (priority of priorities; track priority) {
-            <mat-option [value]="priority.value">
-              {{ priority.label }}
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
     </form>
-  </mat-dialog-content>
+  </ds-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" [disabled]="loading" [attr.aria-label]="'Cancel task ' + (isEditMode ? 'editing' : 'creation')">Cancel</button>
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="onSubmit()"
-      [disabled]="!taskForm.valid || loading"
-      [attr.aria-busy]="loading"
-      [attr.aria-label]="loading ? (isEditMode ? 'Updating task' : 'Creating task') : (isEditMode ? 'Update task' : 'Create task')">
+  <ds-dialog-actions align="end">
+    <ds-button variant="ghost" size="md" (dsClick)="onCancel()" [disabled]="loading">
+      Annuler
+    </ds-button>
+    <ds-button
+      variant="marine"
+      size="md"
+      (dsClick)="onSubmit()"
+      [disabled]="!taskForm.valid || loading">
       @if (loading) {
-        <ds-skeleton variant="circle" width="20px" height="20px" aria-hidden="true" style="display: inline-block; margin-right: 8px;"></ds-skeleton>
+        <ds-skeleton variant="circle" width="20px" height="20px" aria-hidden="true"></ds-skeleton>
       }
-      @if (!loading) {
-        <span>{{ isEditMode ? 'Update' : 'Create' }}</span>
-      }
-      @if (loading) {
-        <span class="sr-only" role="status" aria-live="polite">{{ isEditMode ? 'Updating task' : 'Creating task' }}</span>
-      }
-    </button>
-  </mat-dialog-actions>
+      <span>{{ isEditMode ? 'Mettre à jour' : 'Créer' }}</span>
+    </ds-button>
+  </ds-dialog-actions>
 </div>
