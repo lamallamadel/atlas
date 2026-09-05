@@ -1,31 +1,49 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { TemplateApiService } from '../services/template-api.service';
 import { WhatsAppTemplate, TemplateStatus } from '../models/template.model';
-import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
-import { DsBadgeStatus, DsButtonComponent, DsCardComponent, DsEmptyStateComponent, DsIconComponent } from '../../../design-system';
-import { DsSkeletonComponent } from '../../../design-system/primitives/ds-skeleton/ds-skeleton.component';
-import { DatePipe } from '@angular/common';
+import { 
+  DsBadgeStatus, 
+  DsButtonComponent, 
+  DsCardComponent, 
+  DsEmptyStateComponent, 
+  DsIconComponent,
+  DsInputComponent,
+  DsSkeletonComponent,
+  DsBadgeComponent,
+  DsToastService
+} from '../../../design-system';
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-template-library',
     standalone: true,
     templateUrl: './template-library.component.html',
     styleUrls: ['./template-library.component.css'],
-    imports: [MatFormField, MatLabel, MatInput, FormsModule, MatPrefix, MatButton, MatButtonToggleGroup, MatButtonToggle, DsCardComponent, DsButtonComponent, DsIconComponent, DsEmptyStateComponent, DsSkeletonComponent, CdkConnectedOverlay, CdkOverlayOrigin, DatePipe]
+    imports: [
+      CommonModule,
+      FormsModule,
+      DsCardComponent, 
+      DsButtonComponent, 
+      DsIconComponent, 
+      DsEmptyStateComponent, 
+      DsSkeletonComponent, 
+      DsInputComponent,
+      DsBadgeComponent,
+      CdkConnectedOverlay, 
+      CdkOverlayOrigin, 
+      DatePipe
+    ]
 })
 export class TemplateLibraryComponent implements OnInit, OnDestroy {
   private readonly overlay = inject(Overlay);
+  private templateService = inject(TemplateApiService);
+  private router = inject(Router);
+  private toastService = inject(DsToastService);
 
-  /** Menu « ⋮ » par carte template (`mat-menu` → CDK). */
   tplCardMenuOpenForId: number | null = null;
   readonly tplCardMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
   readonly tplCardMenuPositions: ConnectedPosition[] = [
@@ -41,13 +59,6 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
   TemplateStatus = TemplateStatus;
 
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private templateService: TemplateApiService,
-    private router: Router,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     this.loadTemplates();
@@ -70,7 +81,7 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading templates:', error);
-          this.snackBar.open('Erreur lors du chargement des modèles', 'Fermer', { duration: 5000 });
+          this.toastService.error('Erreur lors du chargement des modèles');
           this.loading = false;
         }
       });
@@ -110,11 +121,8 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
 
   toggleTplCardMenu(templateId: number | undefined, event: MouseEvent): void {
     event.stopPropagation();
-    if (templateId == null) {
-      return;
-    }
-    this.tplCardMenuOpenForId =
-      this.tplCardMenuOpenForId === templateId ? null : templateId;
+    if (templateId == null) return;
+    this.tplCardMenuOpenForId = this.tplCardMenuOpenForId === templateId ? null : templateId;
   }
 
   closeTplCardMenu(): void {
@@ -131,16 +139,13 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
       whatsAppTemplateId: undefined,
       rejectionReason: undefined
     };
-    
-    this.router.navigate(['/workflow-admin/templates/new'], {
-      state: { template: duplicate }
-    });
+    this.router.navigate(['/workflow-admin/templates/new'], { state: { template: duplicate } });
   }
 
   deleteTemplate(template: WhatsAppTemplate): void {
     this.closeTplCardMenu();
     if (template.status === TemplateStatus.ACTIVE) {
-      this.snackBar.open('Impossible de supprimer un modèle actif. Mettez-le d’abord en pause.', 'Fermer', { duration: 5000 });
+      this.toastService.warning('Impossible de supprimer un modèle actif');
       return;
     }
 
@@ -149,12 +154,12 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.snackBar.open('Modèle supprimé avec succès', 'Fermer', { duration: 3000 });
+            this.toastService.success('Modèle supprimé avec succès');
             this.loadTemplates();
           },
           error: (error) => {
             console.error('Error deleting template:', error);
-            this.snackBar.open('Erreur lors de la suppression du modèle', 'Fermer', { duration: 5000 });
+            this.toastService.error('Erreur lors de la suppression');
           }
         });
     }
@@ -165,12 +170,12 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Modèle soumis pour approbation', 'Fermer', { duration: 3000 });
+          this.toastService.success('Modèle soumis pour approbation');
           this.loadTemplates();
         },
         error: (error) => {
           console.error('Error submitting template:', error);
-          this.snackBar.open('Erreur lors de la soumission du modèle', 'Fermer', { duration: 5000 });
+          this.toastService.error('Erreur lors de la soumission');
         }
       });
   }
@@ -181,12 +186,12 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Modèle mis en pause avec succès', 'Fermer', { duration: 3000 });
+          this.toastService.success('Modèle mis en pause');
           this.loadTemplates();
         },
         error: (error) => {
           console.error('Error pausing template:', error);
-          this.snackBar.open('Erreur lors de la mise en pause du modèle', 'Fermer', { duration: 5000 });
+          this.toastService.error('Erreur lors de la mise en pause');
         }
       });
   }
@@ -197,47 +202,38 @@ export class TemplateLibraryComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Modèle activé avec succès', 'Fermer', { duration: 3000 });
+          this.toastService.success('Modèle activé');
           this.loadTemplates();
         },
         error: (error) => {
           console.error('Error activating template:', error);
-          this.snackBar.open('Erreur lors de l’activation du modèle', 'Fermer', { duration: 5000 });
+          this.toastService.error('Erreur lors de l’activation');
         }
       });
   }
 
   getStatusIcon(status: TemplateStatus): string {
     switch (status) {
-      case TemplateStatus.ACTIVE:
-        return 'check';
-      case TemplateStatus.PENDING_APPROVAL:
-        return 'clock';
-      case TemplateStatus.REJECTED:
-        return 'alert-circle';
-      case TemplateStatus.INACTIVE:
-        return 'info';
-      default:
-        return 'edit';
+      case TemplateStatus.ACTIVE: return 'check';
+      case TemplateStatus.PENDING_APPROVAL: return 'clock';
+      case TemplateStatus.REJECTED: return 'info';
+      case TemplateStatus.INACTIVE: return 'info';
+      default: return 'edit';
     }
   }
 
   getStatusBadge(status: TemplateStatus): DsBadgeStatus {
     switch (status) {
-      case TemplateStatus.ACTIVE:
-        return 'success';
-      case TemplateStatus.PENDING_APPROVAL:
-        return 'warning';
-      case TemplateStatus.REJECTED:
-        return 'error';
-      case TemplateStatus.INACTIVE:
-        return 'neutral';
-      default:
-        return 'draft';
+      case TemplateStatus.ACTIVE: return 'success';
+      case TemplateStatus.PENDING_APPROVAL: return 'warning';
+      case TemplateStatus.REJECTED: return 'error';
+      case TemplateStatus.INACTIVE: return 'neutral';
+      default: return 'draft';
     }
   }
 
   getCategoryDisplay(category: string): string {
+    if (!category) return '';
     return category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
   }
 }

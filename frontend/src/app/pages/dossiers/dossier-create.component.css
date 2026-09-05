@@ -1,5 +1,52 @@
 @use '../../../styles/variables' as vars;
 
+.annonce-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--ds-surface-elevated, #fff);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-lg);
+  z-index: 200;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.annonce-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  border-bottom: 1px solid var(--ds-divider);
+  transition: background 0.1s;
+}
+
+.annonce-option:last-child { border-bottom: none; }
+.annonce-option:hover { background: var(--ds-bg-subtle); }
+
+.advanced-panel { border: 1px solid var(--ds-divider); border-radius: var(--ds-radius-md); overflow: hidden; }
+
+.advanced-summary {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--ds-text-muted);
+  background: var(--ds-bg-subtle);
+  list-style: none;
+}
+
+.advanced-summary::-webkit-details-marker { display: none; }
+
+.advanced-content { padding: 12px 14px; }
+
 .field-hint {
   font-size: 0.875rem;
   color: var(--ds-text-muted);

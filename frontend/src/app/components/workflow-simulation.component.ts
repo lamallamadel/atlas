@@ -1,18 +1,18 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { WorkflowApiService, WorkflowSimulationRequest, WorkflowSimulationResponse, WorkflowDefinition } from '../services/workflow-api.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { DsCardComponent } from '../design-system';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatListModule } from '@angular/material/list';
+import { 
+  DsCardComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsInputComponent,
+  DsSkeletonComponent,
+  DsBadgeComponent,
+  DsToastService
+} from '../design-system';
 
 @Component({
   selector: 'app-workflow-simulation',
@@ -20,35 +20,48 @@ import { MatListModule } from '@angular/material/list';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     DsCardComponent,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDividerModule,
-    MatChipsModule,
-    MatExpansionModule,
-    MatListModule,
+    DsButtonComponent,
+    DsIconComponent,
+    DsSelectComponent,
+    DsInputComponent,
+    DsSkeletonComponent,
+    DsBadgeComponent,
   ],
   templateUrl: './workflow-simulation.component.html',
   styleUrls: ['./workflow-simulation.component.css']
 })
 export class WorkflowSimulationComponent implements OnInit {
-  @Input() workflowDefinitionId!: number;
-  @Input() workflow!: WorkflowDefinition;
+  readonly workflowDefinitionId = input.required<number>();
+  readonly workflow = input.required<WorkflowDefinition>();
 
-  simulationForm: FormGroup;
+  private fb = inject(FormBuilder);
+  private workflowApi = inject(WorkflowApiService);
+  private toastService = inject(DsToastService);
+
+  simulationForm!: FormGroup;
   simulationResult: WorkflowSimulationResponse | null = null;
   simulationHistory: WorkflowSimulationResponse[] = [];
   isRunning = false;
   testDataJson: any = {};
 
-  constructor(
-    private fb: FormBuilder,
-    private workflowApi: WorkflowApiService,
-    private snackBar: MatSnackBar
-  ) {
+  get stateOptions(): DsSelectOption[] {
+    return this.workflow()?.statesJson.map(s => ({ value: s.stateCode, label: s.stateName })) || [];
+  }
+
+  ngOnInit(): void {
+    this.initForm();
+    if (this.workflow()) {
+      this.simulationForm.patchValue({
+        currentState: this.workflow().initialState
+      });
+      this.initializeTestData();
+    }
+    this.loadSimulationHistory();
+  }
+
+  private initForm(): void {
     this.simulationForm = this.fb.group({
       simulationName: ['Test Simulation', Validators.required],
       currentState: ['', Validators.required],
@@ -56,22 +69,12 @@ export class WorkflowSimulationComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    if (this.workflow) {
-      this.simulationForm.patchValue({
-        currentState: this.workflow.initialState
-      });
-      this.initializeTestData();
-    }
-    this.loadSimulationHistory();
-  }
-
   initializeTestData(): void {
     const sampleData: any = {
       leadName: 'John Doe',
       leadPhone: '+1234567890',
       leadEmail: 'john.doe@example.com',
-      notes: 'Sample test data'
+      notes: 'Données de test exemple'
     };
 
     this.testDataJson = sampleData;
@@ -88,13 +91,13 @@ export class WorkflowSimulationComponent implements OnInit {
       try {
         testData = JSON.parse(this.simulationForm.value.testData);
       } catch {
-        this.snackBar.open('Invalid JSON in test data', 'Close', { duration: 3000 });
+        this.toastService.error('JSON invalide dans les données de test');
         this.isRunning = false;
         return;
       }
 
       const request: WorkflowSimulationRequest = {
-        workflowDefinitionId: this.workflowDefinitionId,
+        workflowDefinitionId: this.workflowDefinitionId(),
         simulationName: this.simulationForm.value.simulationName,
         currentState: this.simulationForm.value.currentState,
         testDataJson: testData
@@ -104,20 +107,20 @@ export class WorkflowSimulationComponent implements OnInit {
         next: (result) => {
           this.simulationResult = result;
           this.isRunning = false;
-          this.snackBar.open('Simulation completed successfully', 'Close', { duration: 3000 });
+          this.toastService.success('Simulation terminée avec succès');
           this.loadSimulationHistory();
         },
         error: (error) => {
           this.isRunning = false;
-          this.snackBar.open('Simulation failed: ' + error.message, 'Close', { duration: 5000 });
+          this.toastService.error('Échec de la simulation: ' + error.message);
         }
       });
     }
   }
 
   loadSimulationHistory(): void {
-    if (this.workflowDefinitionId) {
-      this.workflowApi.getSimulationHistory(this.workflowDefinitionId).subscribe({
+    if (this.workflowDefinitionId()) {
+      this.workflowApi.getSimulationHistory(this.workflowDefinitionId()).subscribe({
         next: (history) => {
           this.simulationHistory = history;
         },
@@ -141,35 +144,12 @@ export class WorkflowSimulationComponent implements OnInit {
     return JSON.stringify(obj, null, 2);
   }
 
-  getStatusColor(status: string): string {
+  getBadgeStatus(status: string): any {
     switch (status) {
-      case 'COMPLETED':
-        return 'primary';
-      case 'FAILED':
-        return 'warn';
-      case 'RUNNING':
-        return 'accent';
-      default:
-        return '';
-    }
-  }
-
-  getLogEventColor(eventType: string): string {
-    switch (eventType) {
-      case 'START':
-        return 'primary';
-      case 'END':
-        return 'primary';
-      case 'VALIDATION_SUCCESS':
-        return 'accent';
-      case 'VALIDATION_FAILED':
-        return 'warn';
-      case 'CONDITION_FAILED':
-        return 'warn';
-      case 'ERROR':
-        return 'warn';
-      default:
-        return '';
+      case 'COMPLETED': return 'success';
+      case 'FAILED': return 'error';
+      case 'RUNNING': return 'warning';
+      default: return 'neutral';
     }
   }
 }

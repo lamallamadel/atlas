@@ -1,25 +1,41 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { DossierApiService, DossierCreateRequest, DossierResponse } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime, switchMap } from 'rxjs/operators';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatIcon } from '@angular/material/icon';
-import { MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel, MatError, MatHint, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatAutocompleteTrigger, MatAutocomplete, MatOption } from '@angular/material/autocomplete';
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
-import { AsyncPipe } from '@angular/common';
-import { DsSkeletonComponent } from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { 
+  DsSkeletonComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsInputComponent,
+  DsBadgeComponent,
+  DsCardComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../../design-system';
 
 @Component({
     selector: 'app-dossier-create-dialog',
+    standalone: true,
     templateUrl: './dossier-create-dialog.component.html',
     styleUrls: ['./dossier-create-dialog.component.css'],
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatIcon, MatButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatHint, MatSuffix, DsSkeletonComponent, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatDialogActions, AsyncPipe]
+    imports: [
+      CommonModule,
+      FormsModule, 
+      ReactiveFormsModule, 
+      AsyncPipe,
+      DsButtonComponent,
+      DsIconComponent,
+      DsInputComponent,
+      DsCardComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class DossierCreateDialogComponent implements OnInit {
   dossierForm!: FormGroup;
@@ -30,12 +46,13 @@ export class DossierCreateDialogComponent implements OnInit {
   checkingDuplicates = false;
   filteredAnnonces!: Observable<AnnonceResponse[]>;
   annonceSearchControl = this.fb.control('');
+  showAnnonceSuggestions = false;
 
   constructor(
     private fb: FormBuilder,
     private dossierApiService: DossierApiService,
     private annonceApiService: AnnonceApiService,
-    private dialogRef: MatDialogRef<DossierCreateDialogComponent>
+    private dialogRef: DialogRef<any>
   ) {}
 
   ngOnInit(): void {
@@ -48,7 +65,7 @@ export class DossierCreateDialogComponent implements OnInit {
       leadName: ['', [Validators.maxLength(255)]],
       leadPhone: ['', [
         Validators.maxLength(50),
-        Validators.pattern(/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/)
+        Validators.pattern(/^(?:(?:\+|00)212|0)\s*[5-7](?:[\s.-]*\d{2}){4}$/)
       ]],
       leadSource: ['', [Validators.maxLength(255)]],
       annonceId: [null]
@@ -85,6 +102,12 @@ export class DossierCreateDialogComponent implements OnInit {
 
   onAnnonceSelected(annonce: AnnonceResponse): void {
     this.dossierForm.patchValue({ annonceId: annonce.id });
+    this.annonceSearchControl.setValue(this.displayAnnonceFn(annonce), { emitEvent: false });
+    this.showAnnonceSuggestions = false;
+  }
+
+  onAnnonceInputBlur(): void {
+    setTimeout(() => { this.showAnnonceSuggestions = false; }, 150);
   }
 
   onAnnonceIdDirectInput(event: Event): void {

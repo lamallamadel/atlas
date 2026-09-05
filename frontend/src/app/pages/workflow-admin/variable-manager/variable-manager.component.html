@@ -59,19 +59,17 @@
   </div>
 
   <div class="variable-tips">
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <ds-icon name="info" [size]="16"></ds-icon>
-          Conseils variables
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-      <ul>
+    <details class="ds-details">
+      <summary class="ds-details__summary">
+        <ds-icon name="info" [size]="16"></ds-icon>
+        Conseils variables
+      </summary>
+      <ul class="ds-details__body">
         <li>Utilisez des noms de variables clairs (ex. nom_client, id_commande)</li>
         <li>Glissez-déposez les variables pour réorganiser l’ordre</li>
         <li>Ajoutez des valeurs d’exemple pour faciliter l’aperçu</li>
         <li>Marquez les champs critiques comme requis</li>
       </ul>
-    </mat-expansion-panel>
+    </details>
   </div>
 </div>

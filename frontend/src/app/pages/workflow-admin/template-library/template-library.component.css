@@ -4,6 +4,37 @@
   margin: 0 auto;
 }
 
+.ds-toggle-group {
+  display: inline-flex;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.ds-toggle-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--ds-surface);
+  color: var(--ds-text-muted);
+  border: none;
+  border-right: 1px solid var(--ds-border);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.ds-toggle-btn:last-child { border-right: none; }
+
+.ds-toggle-btn:hover { background: var(--ds-bg-subtle); color: var(--ds-text); }
+
+.ds-toggle-btn.active {
+  background: var(--ds-marine);
+  color: #fff;
+}
+
 .library-header {
   display: flex;
   justify-content: space-between;

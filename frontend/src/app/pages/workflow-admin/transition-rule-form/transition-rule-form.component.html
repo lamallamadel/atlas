@@ -2,16 +2,13 @@
   <div class="form-layout">
     <div class="transitions-list-panel">
       <h3>Transitions Disponibles</h3>
-      <mat-accordion>
+      <div class="trf-accordion">
         @for (node of workflow?.nodes; track node) {
-          <mat-expansion-panel
-            [expanded]="false">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <mat-icon [style.color]="node.color">{{ node.icon }}</mat-icon>
-                <span>{{ node.label }}</span>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
+          <details class="trf-panel">
+            <summary class="trf-panel-header">
+              <ds-icon [name]="node.icon || 'settings'" [size]="20" [style.color]="node.color"></ds-icon>
+              <span>{{ node.label }}</span>
+            </summary>
             <div class="transition-list">
               @for (transition of getTransitionsForNode(node); track transition) {
                 <div
@@ -55,9 +52,9 @@
                 </div>
               }
             </div>
-          </mat-expansion-panel>
+          </details>
         }
-      </mat-accordion>
+      </div>
     </div>
 
     <div class="form-panel">
@@ -70,33 +67,25 @@
       }
 
       @if (selectedTransition) {
-        <form [formGroup]="transitionForm" class="rule-form">
+        <form [formGroup]="transitionForm" class="rule-form ds-form-stack">
           <h3>Configuration de la Transition</h3>
-          <ds-card class="form-section" [pad]="false" [elevation]="'xs'">
+          
+          <ds-card class="form-section" [pad]="true" elevation="xs">
             <div class="trf-section-header">
               <h4 class="trf-section-title">Informations de base</h4>
             </div>
-            <div class="trf-section-body">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>De (statut)</mat-label>
-                <input matInput formControlName="fromStatus" readonly>
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Vers (statut)</mat-label>
-                <input matInput formControlName="toStatus" readonly>
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Label de la transition</mat-label>
-                <input matInput formControlName="label" placeholder="Ex: Approuver le dossier">
-                <ds-icon name="info" [size]="16" matSuffix></ds-icon>
-              </mat-form-field>
+            <div class="trf-section-body ds-form-stack">
+              <ds-input label="De (statut)" formControlName="fromStatus" [disabled]="true"></ds-input>
+              <ds-input label="Vers (statut)" formControlName="toStatus" [disabled]="true"></ds-input>
+              <ds-input label="Label de la transition" formControlName="label" placeholder="Ex: Approuver le dossier" prefixIcon="edit"></ds-input>
             </div>
           </ds-card>
-          <ds-card class="form-section" [pad]="false" [elevation]="'xs'">
+
+          <ds-card class="form-section" [pad]="true" elevation="xs">
             <div class="trf-section-header">
               <h4 class="trf-section-title">Champs Requis</h4>
             </div>
-            <div class="trf-section-body">
+            <div class="trf-section-body ds-form-stack">
               <div class="chips-container">
                 <div class="chips-wrap">
                   @for (field of requiredFieldsArray.controls; track field; let i = $index) {
@@ -112,25 +101,22 @@
                 </div>
               </div>
               <div class="add-field-section">
-                <mat-form-field appearance="outline" class="field-select">
-                  <mat-label>Ajouter un champ requis</mat-label>
-                  <mat-select (selectionChange)="addRequiredField($event.value)">
-                    @for (field of availableFields; track field) {
-                      <mat-option [value]="field">
-                        {{ field }}
-                      </mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
+                <ds-select
+                  label="Ajouter un champ requis"
+                  [options]="fieldOptions"
+                  placeholder="Choisir un champ..."
+                  (valueChange)="addRequiredField($event)">
+                </ds-select>
               </div>
               <p class="hint">Les champs requis doivent être remplis avant d'effectuer cette transition.</p>
             </div>
           </ds-card>
-          <ds-card class="form-section" [pad]="false" [elevation]="'xs'">
+
+          <ds-card class="form-section" [pad]="true" elevation="xs">
             <div class="trf-section-header">
               <h4 class="trf-section-title">Permissions</h4>
             </div>
-            <div class="trf-section-body">
+            <div class="trf-section-body ds-form-stack">
               <div class="chips-container">
                 <div class="chips-wrap">
                   @for (role of allowedRolesArray.controls; track role; let i = $index) {
@@ -146,43 +132,110 @@
                 </div>
               </div>
               <div class="add-field-section">
-                <mat-form-field appearance="outline" class="field-select">
-                  <mat-label>Ajouter un rôle autorisé</mat-label>
-                  <mat-select (selectionChange)="addAllowedRole($event.value)">
-                    @for (role of availableRoles; track role) {
-                      <mat-option [value]="role">
-                        {{ role }}
-                      </mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
+                <ds-select
+                  label="Ajouter un rôle autorisé"
+                  [options]="roleOptions"
+                  placeholder="Choisir un rôle..."
+                  (valueChange)="addAllowedRole($event)">
+                </ds-select>
               </div>
               <p class="hint">Seuls les utilisateurs avec ces rôles pourront effectuer cette transition.</p>
             </div>
           </ds-card>
-          <ds-card class="form-section" [pad]="false" [elevation]="'xs'">
+
+          <ds-card class="form-section" [pad]="true" elevation="xs">
             <div class="trf-section-header">
               <h4 class="trf-section-title">Options Avancées</h4>
             </div>
-            <div class="trf-section-body">
-              <mat-slide-toggle formControlName="requiresApproval" color="primary">
+            <div class="trf-section-body ds-form-stack">
+              <label class="trf-switch-field">
+                <input type="checkbox" role="switch" class="trf-switch" formControlName="requiresApproval">
                 <div class="toggle-label">
                   <span>Nécessite une approbation</span>
                   <p class="toggle-hint">Cette transition devra être approuvée par un superviseur</p>
                 </div>
-              </mat-slide-toggle>
-              <mat-form-field appearance="outline" class="full-width" style="margin-top: 16px;">
-                <mat-label>Conditions supplémentaires (optionnel)</mat-label>
-                <textarea
-                  matInput
-                  formControlName="conditions"
-                  rows="3"
-                placeholder="Ex: score >= 80 AND leadSource === 'REFERRAL'"></textarea>
-                <ds-icon name="info" [size]="16" matSuffix></ds-icon>
-              </mat-form-field>
+              </label>
+              
+              <div class="ds-field" style="margin-top: 16px;">
+                <label class="ds-field__label">Conditions supplémentaires (optionnel)</label>
+                <div class="ds-field__wrap">
+                  <textarea
+                    class="ds-field__input"
+                    formControlName="conditions"
+                    rows="3"
+                    placeholder="Ex: score >= 80 AND leadSource === 'REFERRAL'"
+                    style="height: auto; padding: 12px;"></textarea>
+                </div>
+              </div>
             </div>
           </ds-card>
-          <div class="form-actions">
+
+          <ds-card class="form-section" [pad]="true" elevation="xs">
+            <div class="trf-section-header">
+              <h4 class="trf-section-title">Actions Automatisées (Side-effects)</h4>
+              <div class="trf-header-actions">
+                <ds-button variant="ghost" size="sm" (dsClick)="addAction('CREATE_TASK')">
+                  <ds-icon name="plus" [size]="16"></ds-icon> Tâche
+                </ds-button>
+                <ds-button variant="ghost" size="sm" (dsClick)="addAction('SEND_EMAIL')">
+                  <ds-icon name="plus" [size]="16"></ds-icon> Email
+                </ds-button>
+                <ds-button variant="ghost" size="sm" (dsClick)="addAction('SCHEDULE_ACTION')">
+                  <ds-icon name="plus" [size]="16"></ds-icon> Délai
+                </ds-button>
+              </div>
+            </div>
+            <div class="trf-section-body">
+              <div formArrayName="actions" class="actions-list ds-form-stack">
+                @for (action of actionsArray.controls; track action; let i = $index) {
+                  <ds-card [formGroupName]="i" class="action-item-panel" [pad]="true" elevation="xs">
+                    <div class="action-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                      <ds-badge [status]="action.value.type === 'SCHEDULE_ACTION' ? 'warning' : 'info'">
+                        {{ action.value.type }}
+                      </ds-badge>
+                      <ds-button variant="icon" (dsClick)="removeAction(i)">
+                        <ds-icon name="trash" [size]="16"></ds-icon>
+                      </ds-button>
+                    </div>
+                    
+                    <div class="action-fields ds-form-stack">
+                      @if (action.value.type === 'CREATE_TASK') {
+                        <ds-input label="Titre de la tâche" formControlName="title"></ds-input>
+                        
+                        <ds-select
+                          label="Assigner à"
+                          [options]="[
+                            { value: 'AGENT', label: 'Agent du dossier' },
+                            { value: 'ADMIN', label: 'Administrateur' }
+                          ]"
+                          formControlName="assignTo">
+                        </ds-select>
+
+                        <ds-input label="Échéance (jours)" type="number" formControlName="dueInDays"></ds-input>
+                      }
+
+                      @if (action.value.type === 'SEND_EMAIL') {
+                        <ds-input label="Template Code" formControlName="template"></ds-input>
+                        <ds-input label="Sujet" formControlName="subject"></ds-input>
+                      }
+
+                      @if (action.value.type === 'SCHEDULE_ACTION') {
+                        <ds-input label="Délai (heures)" type="number" formControlName="delayHours"></ds-input>
+                        <p class="schedule-hint">Configurez l'action enfant ci-dessous (Délai + Action)</p>
+                      }
+                    </div>
+                  </ds-card>
+                }
+                @if (actionsArray.length === 0) {
+                  <div class="empty-actions">
+                    Aucune action configurée pour cette transition.
+                  </div>
+                }
+              </div>
+            </div>
+          </ds-card>
+
+          <div class="form-actions" style="display: flex; gap: 12px; margin-top: 24px;">
             <ds-button
               variant="marine"
               [disabled]="!transitionForm.valid"
@@ -191,7 +244,8 @@
               Enregistrer
             </ds-button>
             <ds-button
-              variant="danger"
+              variant="ghost"
+              style="--ds-btn-text: var(--ds-error);"
               (dsClick)="onDeleteTransition()">
               <ds-icon name="trash" [size]="16"></ds-icon>
               Supprimer

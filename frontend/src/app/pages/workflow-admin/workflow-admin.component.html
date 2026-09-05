@@ -1,15 +1,25 @@
 <div class="workflow-admin-container">
-  <ds-page-header title="Administration des workflows" subtitle="Gérez vos workflows et modèles WhatsApp d'une manière centralisée."></ds-page-header>
+  <ds-page-header 
+    eyebrow="Espace Pro" 
+    titleBefore="Administration" 
+    titleAccent="des workflows" 
+    description="Gérez vos workflows et modèles WhatsApp d'une manière centralisée.">
+  </ds-page-header>
+
   <ds-card class="workflow-admin-card" [pad]="false" [elevation]="'sm'">
     <div class="workflow-admin-card-body">
-      <mat-tab-group [(selectedIndex)]="selectedTab" animationDuration="300ms">
-        <mat-tab label="Éditeur">
+      <div class="workflow-admin-tabs-nav">
+        <ds-tabs [tabs]="tabs" [activeTab]="activeTab" (tabChange)="activeTab = $event"></ds-tabs>
+      </div>
+
+      <div class="tab-viewport">
+        @if (activeTab === 'editor') {
           <div class="tab-content">
             <div class="workflow-selector">
-              <mat-button-toggle-group (change)="onCaseTypeChange($event.value)" [value]="workflow?.caseType">
-                <mat-button-toggle [value]="CaseType.DOSSIER">Workflow dossier</mat-button-toggle>
-                <mat-button-toggle [value]="CaseType.ANNONCE">Workflow annonce</mat-button-toggle>
-              </mat-button-toggle-group>
+              <div class="ds-toggle-group" role="group" aria-label="Type de workflow">
+                <button type="button" class="ds-toggle-btn" [class.active]="workflow?.caseType === CaseType.DOSSIER" (click)="onCaseTypeChange(CaseType.DOSSIER)">Workflow dossier</button>
+                <button type="button" class="ds-toggle-btn" [class.active]="workflow?.caseType === CaseType.ANNONCE" (click)="onCaseTypeChange(CaseType.ANNONCE)">Workflow annonce</button>
+              </div>
             </div>
 
             @if (workflow) {
@@ -23,28 +33,34 @@
               </ds-button>
             </div>
           </div>
-        </mat-tab>
+        }
 
-        <mat-tab label="Aperçu">
+        @if (activeTab === 'preview') {
           <div class="tab-content">
             @if (workflow) {
               <app-workflow-preview [workflow]="workflow"></app-workflow-preview>
             }
           </div>
-        </mat-tab>
+        }
 
-        <mat-tab label="Modèles WhatsApp">
+        @if (activeTab === 'rules') {
+          <div class="tab-content rules-tab-content">
+            <app-transition-rule-form></app-transition-rule-form>
+          </div>
+        }
+
+        @if (activeTab === 'whatsapp') {
           <div class="tab-content">
             <p class="tab-description">
               Gérez les modèles de messages WhatsApp de votre organisation. Les modèles doivent être approuvés par WhatsApp avant utilisation.
             </p>
-            <ds-button variant="marine" size="md" [routerLink]="'/workflow-admin/templates'">
+            <a class="ds-btn ds-btn--marine ds-btn--md" style="display: inline-flex; text-decoration: none;" [routerLink]="'/workflow-admin/templates'">
               <ds-icon name="whatsapp" [size]="16" />
               Gérer les modèles
-            </ds-button>
+            </a>
           </div>
-        </mat-tab>
-      </mat-tab-group>
+        }
+      </div>
     </div>
   </ds-card>
 </div>

@@ -117,7 +117,7 @@
                 }
               </div>
 
-              <div class="form-group annonce-autocomplete">
+              <div class="form-group annonce-autocomplete" style="position: relative;">
                 <label for="annonceSearch" class="form-label">
                   Annonce liée (optionnel)
                 </label>
@@ -126,48 +126,47 @@
                   type="text"
                   class="form-input"
                   [formControl]="annonceSearchControl"
-                  [matAutocomplete]="auto"
                   placeholder="Rechercher une annonce par titre, ville ou identifiant..."
                   aria-label="Rechercher et sélectionner une annonce liée"
-                  aria-autocomplete="list"
-                  [attr.aria-expanded]="auto.isOpen"
+                  autocomplete="off"
+                  (focus)="showAnnonceSuggestions = true"
+                  (blur)="onAnnonceInputBlur()"
                   />
-                  <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayAnnonceFn.bind(this)" (optionSelected)="onAnnonceSelected($event.option.value)">
+                @if (showAnnonceSuggestions) {
+                  <div class="annonce-dropdown" role="listbox">
                     @for (annonce of filteredAnnonces | async; track annonce) {
-                      <mat-option [value]="annonce">
+                      <button type="button" class="annonce-option" role="option"
+                        (mousedown)="onAnnonceSelected(annonce)">
                         {{ displayAnnonceFn(annonce) }}
-                      </mat-option>
-                    }
-                  </mat-autocomplete>
-
-                  <mat-expansion-panel class="advanced-panel">
-                    <mat-expansion-panel-header>
-                      <mat-panel-title>
-                        Avancé
-                      </mat-panel-title>
-                    </mat-expansion-panel-header>
-                    <div class="advanced-content">
-                      <label for="annonceIdDirect" class="form-label">
-                        ID annonce (saisie directe)
-                      </label>
-                      <input
-                        id="annonceIdDirect"
-                        type="number"
-                        class="form-input"
-                        [value]="dossierForm.get('annonceId')?.value || ''"
-                        (input)="onAnnonceIdDirectInput($event)"
-                        placeholder="Saisir l'ID de l'annonce"
-                        aria-label="Saisir directement l'ID de l'annonce"
-                        />
-                      </div>
-                    </mat-expansion-panel>
-
-                    @if (getFieldError('annonceId')) {
-                      <div class="field-error" id="annonceId-error" role="alert">
-                        {{ getFieldError('annonceId') }}
-                      </div>
+                      </button>
                     }
                   </div>
+                }
+
+                <details class="advanced-panel" style="margin-top: 12px;">
+                  <summary class="advanced-summary">Avancé</summary>
+                  <div class="advanced-content">
+                    <label for="annonceIdDirect" class="form-label">
+                      ID annonce (saisie directe)
+                    </label>
+                    <input
+                      id="annonceIdDirect"
+                      type="number"
+                      class="form-input"
+                      [value]="dossierForm.get('annonceId')?.value || ''"
+                      (input)="onAnnonceIdDirectInput($event)"
+                      placeholder="Saisir l'ID de l'annonce"
+                      aria-label="Saisir directement l'ID de l'annonce"
+                      />
+                    </div>
+                  </details>
+
+                  @if (getFieldError('annonceId')) {
+                    <div class="field-error" id="annonceId-error" role="alert">
+                      {{ getFieldError('annonceId') }}
+                    </div>
+                  }
+                </div>
                 </fieldset>
 
                 <div class="form-actions">

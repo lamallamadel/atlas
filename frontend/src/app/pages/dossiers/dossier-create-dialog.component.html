@@ -1,155 +1,137 @@
-<div class="dialog-container">
-  <h2 mat-dialog-title>Créer un nouveau dossier</h2>
+<ds-dialog-header (close)="onCancel()">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <ds-icon name="plus" [size]="24" aria-hidden="true"></ds-icon>
+    <span>Créer un nouveau dossier</span>
+  </div>
+</ds-dialog-header>
 
-  <mat-dialog-content>
+<ds-dialog-content>
+  <form [formGroup]="dossierForm" class="ds-form-stack">
     @if (error) {
-      <div class="error-alert" role="alert" aria-live="assertive">
-        <mat-icon class="error-icon">warning</mat-icon>
+      <div class="ds-alert ds-alert--error" role="alert" style="margin-bottom: 24px;">
+        <ds-icon name="info" [size]="20"></ds-icon>
         <span>{{ error }}</span>
       </div>
     }
 
-    @if (duplicates.length > 0) {
-      <div class="warning-banner" role="alert" aria-live="polite">
-        <div class="warning-content">
-          <mat-icon class="warning-icon">warning</mat-icon>
-          <div class="warning-text">
-            <strong>Doublon trouvé !</strong>
-            <p>Un dossier avec ce numéro de téléphone existe déjà.</p>
+    <ds-card [pad]="true" elevation="xs" style="margin-bottom: 24px;">
+      <h3 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--ds-marine);">Informations du prospect</h3>
+      
+      <div class="ds-form-stack">
+        <ds-input
+          label="Nom complet"
+          formControlName="leadName"
+          placeholder="ex: Jean Dupont"
+          [error]="getFieldError('leadName')">
+        </ds-input>
+
+        <ds-input
+          label="Téléphone"
+          formControlName="leadPhone"
+          placeholder="06 12 34 56 78"
+          prefixIcon="phone"
+          (blur)="onPhoneBlur()"
+          [error]="getFieldError('leadPhone')">
+        </ds-input>
+
+        @if (checkingDuplicates) {
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ds-text-faint);">
+            <span class="spinner-small" style="width: 14px; height: 14px;"></span>
+            Vérification des doublons...
           </div>
-        </div>
-        <div class="warning-actions">
-          @for (duplicate of duplicates; track duplicate) {
-            <button
-              mat-stroked-button
-              color="primary"
-              (click)="openExistingDossier(duplicate.id)"
-              type="button"
-              [attr.aria-label]="'Ouvrir le dossier existant numéro ' + duplicate.id"
-              >
-              Ouvrir l'existant (ID : {{ duplicate.id }})
-            </button>
+        }
+
+        @if (duplicates.length > 0) {
+          <div class="duplicates-warning" style="background: var(--ds-warning-hl); padding: 12px; border-radius: var(--ds-radius-md); border-left: 4px solid var(--ds-warning);">
+            <p style="margin: 0 0 8px; font-size: 12px; font-weight: 700; color: var(--ds-warning-dark);">
+              <ds-icon name="info" [size]="16" style="vertical-align: middle; margin-right: 4px;"></ds-icon>
+              {{ duplicates.length }} dossier(s) existant(s) avec ce numéro :
+            </p>
+            <ul style="margin: 0; padding: 0 0 0 16px; font-size: 12px; color: var(--ds-warning-dark);">
+              @for (dup of duplicates; track dup.id) {
+                <li style="margin-bottom: 4px;">
+                  <a href="javascript:void(0)" (click)="openExistingDossier(dup.id)" style="color: inherit; text-decoration: underline;">
+                    #{{ dup.id }} - {{ dup.leadName || 'Sans nom' }} ({{ dup.status }})
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        <ds-input
+          label="Source"
+          formControlName="leadSource"
+          placeholder="ex: Facebook, Site web, Recommandation"
+          prefixIcon="megaphone"
+          [error]="getFieldError('leadSource')">
+        </ds-input>
+      </div>
+    </ds-card>
+
+    <ds-card [pad]="true" elevation="xs">
+      <h3 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--ds-marine);">Annonce associée (optionnel)</h3>
+      
+      <div class="ds-form-stack">
+        <div class="autocomplete-field ds-field" style="position: relative;">
+          <label class="ds-field__label">Rechercher une annonce</label>
+          <div class="ds-field__wrap">
+            <span class="ds-field__prefix" aria-hidden="true">
+              <ds-icon name="search" [size]="20"></ds-icon>
+            </span>
+            <input
+              class="ds-field__input ds-field__input--has-prefix"
+              [formControl]="annonceSearchControl"
+              placeholder="Titre, ville, prix..."
+              autocomplete="off"
+              (focus)="showAnnonceSuggestions = true"
+              (blur)="onAnnonceInputBlur()">
+          </div>
+          @if (showAnnonceSuggestions) {
+            <div class="annonce-dropdown" role="listbox">
+              @for (annonce of filteredAnnonces | async; track annonce.id) {
+                <button type="button" class="annonce-option" role="option"
+                  (mousedown)="onAnnonceSelected(annonce)">
+                  <span style="font-weight: 600; font-size: 14px; display: block;">{{ annonce.title }}</span>
+                  <span style="font-size: 12px; color: var(--ds-text-faint);">{{ annonce.city }} • {{ annonce.price }} {{ annonce.currency }}</span>
+                </button>
+              }
+            </div>
           }
         </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="flex: 1; height: 1px; background: var(--ds-divider);"></div>
+          <span style="font-size: 12px; color: var(--ds-text-faint); font-weight: 600;">OU</span>
+          <div style="flex: 1; height: 1px; background: var(--ds-divider);"></div>
+        </div>
+
+        <ds-input
+          label="ID de l'annonce direct"
+          type="number"
+          formControlName="annonceId"
+          placeholder="ex: 12345"
+          (input)="onAnnonceIdDirectInput($event)">
+        </ds-input>
       </div>
+    </ds-card>
+  </form>
+</ds-dialog-content>
+
+<ds-dialog-actions align="end">
+  <ds-button variant="ghost" size="md" (dsClick)="onCancel()" [disabled]="submitting">
+    Annuler
+  </ds-button>
+  <ds-button
+    variant="marine"
+    size="md"
+    (dsClick)="onSubmit()"
+    [disabled]="submitting">
+    @if (submitting) {
+      <span class="spinner-small" style="margin-right: 8px; border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>
+    } @else {
+      <ds-icon name="plus" [size]="20" style="margin-right: 8px;"></ds-icon>
     }
-
-    <form [formGroup]="dossierForm" (ngSubmit)="onSubmit()" class="dossier-form">
-      <div class="form-grid">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nom du prospect</mat-label>
-          <input
-            matInput
-            formControlName="leadName"
-            placeholder="Saisir le nom du prospect"
-            [attr.aria-invalid]="isFieldInvalid('leadName')"
-            />
-            @if (getFieldError('leadName')) {
-              <mat-error>
-                {{ getFieldError('leadName') }}
-              </mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Téléphone du prospect</mat-label>
-            <input
-              matInput
-              formControlName="leadPhone"
-              placeholder="Ex : 06 12 34 56 78"
-              (blur)="onPhoneBlur()"
-              [attr.aria-invalid]="isFieldInvalid('leadPhone')"
-              />
-              @if (!getFieldError('leadPhone')) {
-                <mat-hint>Exemple : 06 12 34 56 78</mat-hint>
-              }
-              @if (getFieldError('leadPhone')) {
-                <mat-error>
-                  {{ getFieldError('leadPhone') }}
-                </mat-error>
-              }
-              @if (checkingDuplicates) {
-                <mat-icon matSuffix>
-                  <ds-skeleton variant="circle" width="20px" height="20px"></ds-skeleton>
-                </mat-icon>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Source du prospect</mat-label>
-              <input
-                matInput
-                formControlName="leadSource"
-                placeholder="Saisir la source du prospect (ex : site web, appel entrant, référence...)"
-                [attr.aria-invalid]="isFieldInvalid('leadSource')"
-                [attr.aria-describedby]="'leadSource-hint'"
-                />
-                <mat-hint id="leadSource-hint">Indiquez d'où provient le prospect (site web, téléphone, référence, etc.)</mat-hint>
-                @if (getFieldError('leadSource')) {
-                  <mat-error>
-                    {{ getFieldError('leadSource') }}
-                  </mat-error>
-                }
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Annonce liée (optionnel)</mat-label>
-                <input
-                  matInput
-                  [formControl]="annonceSearchControl"
-                  [matAutocomplete]="auto"
-                  placeholder="Rechercher une annonce par titre, ville ou identifiant..."
-                  aria-label="Rechercher et sélectionner une annonce liée"
-                  />
-                  <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayAnnonceFn.bind(this)" (optionSelected)="onAnnonceSelected($event.option.value)">
-                    @for (annonce of filteredAnnonces | async; track annonce) {
-                      <mat-option [value]="annonce">
-                        {{ displayAnnonceFn(annonce) }}
-                      </mat-option>
-                    }
-                  </mat-autocomplete>
-                  @if (getFieldError('annonceId')) {
-                    <mat-error>
-                      {{ getFieldError('annonceId') }}
-                    </mat-error>
-                  }
-                </mat-form-field>
-              </div>
-
-              <mat-expansion-panel class="advanced-panel">
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    Avancé
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>ID annonce (saisie directe)</mat-label>
-                  <input
-                    matInput
-                    type="number"
-                    [value]="dossierForm.get('annonceId')?.value || ''"
-                    (input)="onAnnonceIdDirectInput($event)"
-                    placeholder="Saisir l'ID de l'annonce"
-                    />
-                  </mat-form-field>
-                </mat-expansion-panel>
-              </form>
-            </mat-dialog-content>
-
-            <mat-dialog-actions align="end">
-              <button mat-button type="button" (click)="onCancel()" [disabled]="submitting">
-                Annuler
-              </button>
-              <button mat-raised-button color="primary" type="submit" (click)="onSubmit()" [disabled]="submitting">
-                @if (!submitting) {
-                  <span>Créer</span>
-                }
-                @if (submitting) {
-                  <span class="btn-loading">
-                    <ds-skeleton variant="circle" width="16px" height="16px" class="inline-spinner"></ds-skeleton>
-                    Création...
-                  </span>
-                }
-              </button>
-            </mat-dialog-actions>
-          </div>
+    <span>{{ submitting ? 'Création...' : 'Créer le dossier' }}</span>
+  </ds-button>
+</ds-dialog-actions>

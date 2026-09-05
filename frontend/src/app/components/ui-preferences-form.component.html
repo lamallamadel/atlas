@@ -1,276 +1,183 @@
-<div class="ui-preferences-form">
-  <ds-card class="preferences-card" [pad]="false" [elevation]="'sm'">
-    <div class="pref-ui-card-header">
-      <h3 class="pref-ui-card-title">
-        <mat-icon class="title-icon">palette</mat-icon>
+<div class="ui-preferences-form ds-form-stack">
+  <ds-card class="preferences-card" [pad]="true" elevation="sm">
+    <div class="pref-ui-card-header" style="margin-bottom: 32px;">
+      <h3 class="pref-ui-card-title" style="margin: 0; font-size: 18px; font-weight: 700; color: var(--ds-marine); display: flex; align-items: center; gap: 12px;">
+        <ds-icon name="palette" [size]="24"></ds-icon>
         Préférences d'interface
       </h3>
-      <p class="pref-ui-card-subtitle">
-        Personnalisez votre expérience utilisateur
+      <p class="pref-ui-card-subtitle" style="margin: 4px 0 0; font-size: 14px; color: var(--ds-text-muted);">
+        Personnalisez votre expérience utilisateur Atlasia
       </p>
     </div>
 
     @if (loading) {
-      <mat-progress-bar
-        mode="indeterminate"
-        class="loading-bar">
-      </mat-progress-bar>
+      <div style="margin-bottom: 32px;">
+        <ds-progress-bar mode="indeterminate" variant="primary" style="height: 4px;"></ds-progress-bar>
+      </div>
     }
 
     <div class="pref-ui-card-body">
-      <form [formGroup]="preferencesForm" class="preferences-form-content">
+      <form [formGroup]="preferencesForm" class="ds-form-stack">
 
         <!-- Theme Selector -->
         <div class="form-section">
-          <h3 class="section-title">
-            <mat-icon>brightness_6</mat-icon>
-            Thème
-          </h3>
+          <h4 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ds-text-muted); margin-bottom: 16px;">
+            Thème visuel
+          </h4>
 
-          <mat-radio-group
+          <ds-select
+            label="Ambiance de l'interface"
+            [options]="themes"
             formControlName="theme"
-            class="theme-radio-group">
-            @for (theme of themes; track theme) {
-              <mat-radio-button
-                [value]="theme.value"
-                class="theme-radio-button">
-                <div class="radio-content">
-                  <mat-icon>{{ theme.icon }}</mat-icon>
-                  <span>{{ theme.label }}</span>
-                </div>
-              </mat-radio-button>
-            }
-          </mat-radio-group>
+            prefixIcon="settings">
+          </ds-select>
 
-          <mat-hint class="hint-text">
-            <mat-icon class="hint-icon">info</mat-icon>
-            Le mode Auto s'adapte automatiquement aux préférences de votre système
-          </mat-hint>
+          <p class="ds-field__hint" style="margin-top: 8px;">
+            Le mode Auto s'adapte automatiquement aux préférences de votre système d'exploitation.
+          </p>
         </div>
 
-        <mat-divider class="section-divider"></mat-divider>
+        <hr style="margin: 32px 0; border: none; border-top: 1px solid var(--ds-divider);">
 
         <!-- Language Selector -->
         <div class="form-section">
-          <h3 class="section-title">
-            <mat-icon>language</mat-icon>
-            Langue
-          </h3>
+          <h4 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ds-text-muted); margin-bottom: 16px;">
+            Langue et région
+          </h4>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Langue de l'interface</mat-label>
-            <mat-select formControlName="language">
-              @for (lang of languages; track lang) {
-                <mat-option [value]="lang.value">
-                  <span class="language-option">
-                    <span class="flag">{{ lang.flag }}</span>
-                    <span>{{ lang.label }}</span>
-                  </span>
-                </mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>translate</mat-icon>
-            <mat-hint>La langue sera appliquée à toute l'application</mat-hint>
-          </mat-form-field>
+          <ds-select
+            label="Langue de l'interface"
+            [options]="languages"
+            formControlName="language"
+            prefixIcon="globe">
+          </ds-select>
+          <p class="ds-field__hint" style="margin-top: 8px;">La langue sera appliquée immédiatement après l'enregistrement.</p>
         </div>
 
-        <mat-divider class="section-divider"></mat-divider>
+        <hr style="margin: 32px 0; border: none; border-top: 1px solid var(--ds-divider);">
 
         <!-- Density Selector -->
         <div class="form-section">
-          <h3 class="section-title">
-            <mat-icon>view_compact</mat-icon>
+          <h4 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ds-text-muted); margin-bottom: 16px;">
             Densité d'affichage
-          </h3>
+          </h4>
 
-          <mat-button-toggle-group
+          <ds-select
+            label="Espacement du contenu"
+            [options]="densities"
             formControlName="density"
-            class="density-toggle-group">
-            @for (density of densities; track density) {
-              <mat-button-toggle
-                [value]="density.value"
-                class="density-toggle">
-                <div class="toggle-content">
-                  <mat-icon>{{ density.icon }}</mat-icon>
-                  <div class="toggle-text">
-                    <strong>{{ density.label }}</strong>
-                    <small>{{ density.description }}</small>
-                  </div>
-                </div>
-              </mat-button-toggle>
-            }
-          </mat-button-toggle-group>
+            prefixIcon="maximize">
+          </ds-select>
         </div>
 
-        <mat-divider class="section-divider"></mat-divider>
+        <hr style="margin: 32px 0; border: none; border-top: 1px solid var(--ds-divider);">
 
         <!-- Default Route Selector -->
         <div class="form-section">
-          <h3 class="section-title">
-            <mat-icon>home</mat-icon>
-            Page par défaut
-          </h3>
+          <h4 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ds-text-muted); margin-bottom: 16px;">
+            Démarrage
+          </h4>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Page d'accueil au démarrage</mat-label>
-            <input
-              type="text"
-              matInput
-              formControlName="defaultRouteInput"
-              [matAutocomplete]="auto"
-              placeholder="Rechercher une page...">
-              <mat-icon matPrefix>search</mat-icon>
-              <mat-autocomplete
-                #auto="matAutocomplete"
-                (optionSelected)="onRouteSelected($event.option.value)">
-                @for (route of filteredRoutes; track route) {
-                  <mat-option
-                    [value]="route"
-                    class="route-option">
-                    <mat-icon class="route-icon">{{ route.icon }}</mat-icon>
-                    <span>{{ route.label }}</span>
-                    <small class="route-path">{{ route.path }}</small>
-                  </mat-option>
-                }
-              </mat-autocomplete>
-              <mat-hint>Cette page s'ouvrira automatiquement à la connexion</mat-hint>
-            </mat-form-field>
+          <ds-select
+            label="Page d'accueil au démarrage"
+            [options]="routeOptions"
+            formControlName="defaultRoute"
+            prefixIcon="search">
+          </ds-select>
+          <p class="ds-field__hint" style="margin-top: 8px;">Cette page s'ouvrira automatiquement lors de votre prochaine connexion.</p>
+        </div>
+
+        <hr style="margin: 32px 0; border: none; border-top: 1px solid var(--ds-divider);">
+
+        <!-- Sync Devices Option -->
+        <div class="form-section">
+          <h4 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ds-text-muted); margin-bottom: 16px;">
+            Synchronisation
+          </h4>
+
+          <div class="sync-option ds-card" style="padding: 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); background: var(--ds-bg-subtle);">
+            <ds-checkbox formControlName="syncDevices">
+              <div class="checkbox-content" style="margin-left: 8px;">
+                <strong style="display: block; font-size: 14px;">Synchroniser sur tous les appareils</strong>
+                <p style="margin: 4px 0 0; font-size: 12px; color: var(--ds-text-muted);">
+                  Vos préférences seront appliquées sur tous vos navigateurs et mobiles connectés.
+                </p>
+              </div>
+            </ds-checkbox>
           </div>
+        </div>
 
-          <mat-divider class="section-divider"></mat-divider>
+        <hr style="margin: 32px 0; border: none; border-top: 1px solid var(--ds-divider);">
 
-          <!-- Sync Devices Option -->
-          <div class="form-section">
-            <h3 class="section-title">
-              <mat-icon>sync</mat-icon>
-              Synchronisation
-            </h3>
+        <!-- Preview Zone -->
+        <div class="form-section">
+          <h4 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ds-text-muted); margin-bottom: 16px;">
+            Aperçu en temps réel
+          </h4>
 
-            <div class="sync-option">
-              <mat-checkbox formControlName="syncDevices" class="sync-checkbox">
-                <div class="checkbox-content">
-                  <strong>Synchroniser les préférences sur tous les appareils</strong>
-                  <p class="checkbox-description">
-                    Vos préférences seront automatiquement appliquées sur tous vos appareils connectés
-                  </p>
-                </div>
-              </mat-checkbox>
-
-              @if (syncDevices) {
-                <div class="sync-info">
-                  <mat-icon class="info-icon" color="primary">cloud_done</mat-icon>
-                  <span class="info-text">Synchronisation active</span>
-                </div>
-              }
+          <div [class]="getPreviewClasses()" style="border: 1px solid var(--ds-border); border-radius: var(--ds-radius-lg); overflow: hidden;">
+            <div class="preview-header" style="background: var(--ds-surface-offset); padding: 12px 20px; border-bottom: 1px solid var(--ds-border); display: flex; align-items: center; gap: 12px;">
+              <ds-icon name="visibility" [size]="20" style="color: var(--ds-primary);"></ds-icon>
+              <h5 style="margin: 0; font-size: 14px; font-weight: 700;">{{ getPreviewTexts().welcome }}</h5>
             </div>
-          </div>
 
-          <mat-divider class="section-divider"></mat-divider>
+            <div class="preview-content" style="padding: 24px; background: var(--ds-surface);">
+              <p style="margin-bottom: 20px; font-size: 14px;">{{ getPreviewTexts().description }}</p>
 
-          <!-- Preview Zone -->
-          <div class="form-section">
-            <h3 class="section-title">
-              <mat-icon>preview</mat-icon>
-              Aperçu en temps réel
-            </h3>
-
-            <div [class]="getPreviewClasses()">
-              <div class="preview-header">
-                <mat-icon class="preview-icon">visibility</mat-icon>
-                <h4>{{ getPreviewText().welcome }}</h4>
-              </div>
-
-              <div class="preview-content">
-                <p>{{ getPreviewText().description }}</p>
-
-                <div class="preview-details">
-                  <div class="preview-item">
-                    <mat-icon>palette</mat-icon>
-                    <span>Thème : <strong>{{ getThemeLabel() }}</strong></span>
-                  </div>
-
-                  <div class="preview-item">
-                    <mat-icon>language</mat-icon>
-                    <span>Langue : <strong>{{ getLanguageLabel() }}</strong></span>
-                  </div>
-
-                  <div class="preview-item">
-                    <mat-icon>view_compact</mat-icon>
-                    <span>Densité : <strong>{{ getDensityLabel() }}</strong></span>
-                  </div>
-
-                  @if (getSelectedRoute(); as route) {
-                    <div class="preview-item">
-                      <mat-icon>{{ route.icon }}</mat-icon>
-                      <span>Page par défaut : <strong>{{ route.label }}</strong></span>
-                    </div>
-                  }
+              <div class="preview-details" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 12px; font-size: 13px;">
+                  <ds-icon name="palette" [size]="16" style="color: var(--ds-text-faint);"></ds-icon>
+                  <span>Thème : <strong>{{ getThemeLabel() }}</strong></span>
                 </div>
 
-                <div class="preview-actions">
-                  <button mat-raised-button color="primary" type="button">
-                    <mat-icon>touch_app</mat-icon>
-                    {{ getPreviewText().button }}
-                  </button>
-
-                  <button mat-stroked-button type="button">
-                    <mat-icon>info</mat-icon>
-                    Voir plus
-                  </button>
+                <div style="display: flex; align-items: center; gap: 12px; font-size: 13px;">
+                  <ds-icon name="globe" [size]="16" style="color: var(--ds-text-faint);"></ds-icon>
+                  <span>Langue : <strong>{{ getLanguageLabel() }}</strong></span>
                 </div>
 
-                <div class="preview-cards">
-                  <ds-card class="sample-card" [elevation]="'xs'" [pad]="true">
-                    <div class="card-content">
-                      <mat-icon>insert_chart</mat-icon>
-                      <div>
-                        <h5>Exemple de carte</h5>
-                        <p>Cet aperçu montre comment l'interface s'adapte à vos préférences</p>
-                      </div>
-                    </div>
-                  </ds-card>
+                <div style="display: flex; align-items: center; gap: 12px; font-size: 13px;">
+                  <ds-icon name="maximize" [size]="16" style="color: var(--ds-text-faint);"></ds-icon>
+                  <span>Densité : <strong>{{ getDensityLabel() }}</strong></span>
                 </div>
               </div>
 
-              <div class="preview-footer">
-                <mat-icon class="footer-icon">info_outline</mat-icon>
-                <small>Les changements seront appliqués après sauvegarde</small>
+              <div class="preview-actions" style="display: flex; gap: 12px;">
+                <ds-button variant="marine" size="sm">
+                  {{ getPreviewTexts().button }}
+                </ds-button>
+
+                <ds-button variant="ghost" size="sm">
+                  Voir plus
+                </ds-button>
               </div>
             </div>
           </div>
+        </div>
 
-        </form>
+      </form>
     </div>
 
-    <div class="card-actions">
-      <button
-        mat-button
-        type="button"
-        (click)="onCancel()"
+    <div class="card-actions" style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--ds-divider);">
+      <ds-button
+        variant="ghost"
+        size="md"
+        (dsClick)="onCancel()"
         [disabled]="!hasUnsavedChanges() || loading || saving">
-        <mat-icon>cancel</mat-icon>
         Annuler
-      </button>
+      </ds-button>
 
-      <button
-        mat-raised-button
-        color="primary"
-        type="button"
-        (click)="onSave()"
+      <ds-button
+        variant="marine"
+        size="md"
+        (dsClick)="onSave()"
         [disabled]="!hasUnsavedChanges() || !preferencesForm.valid || loading || saving">
         @if (saving) {
-          <ds-skeleton variant="circle" width="20px" height="20px" class="button-spinner"></ds-skeleton>
+          <ds-skeleton variant="circle" width="18px" height="18px" style="margin-right: 8px;"></ds-skeleton>
+        } @else {
+          <ds-icon name="check" [size]="20" style="margin-right: 8px;"></ds-icon>
         }
-        @if (!saving) {
-          <mat-icon>save</mat-icon>
-        }
-        @if (!saving) {
-          <span>Enregistrer</span>
-        }
-        @if (saving) {
-          <span>Enregistrement...</span>
-        }
-      </button>
+        <span>{{ saving ? 'Enregistrement...' : 'Enregistrer les préférences' }}</span>
+      </ds-button>
     </div>
   </ds-card>
 </div>

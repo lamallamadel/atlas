@@ -1,102 +1,73 @@
-<div class="table-container">
+<div class="table-container ds-form-stack" style="width: 100%;">
   <!-- Desktop Table View -->
   @if (!isMobile) {
-    <div class="table-wrapper">
-      <!-- Table Header with Counter, Export, and Pagination -->
+    <div class="table-wrapper ds-form-stack">
+      <!-- Table Header -->
       @if (showTableHeader()) {
-        <div class="table-header">
-          <div class="table-counter">
-            <span class="counter-value">{{ data().length }}</span>
-            <span class="counter-label">{{ data().length === 1 ? counterSingular() : counterPlural() }}</span>
+        <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--ds-divider); background: var(--ds-surface);">
+          <div class="table-counter" style="display: flex; align-items: center; gap: 8px;">
+            <ds-badge status="neutral" [showDot]="false" size="sm">{{ data().length }}</ds-badge>
+            <span class="counter-label" style="font-size: 13px; font-weight: 600; color: var(--ds-text-muted);">{{ data().length === 1 ? counterSingular() : counterPlural() }}</span>
             @if (enableRowSelection() && hasSelection()) {
-              <span class="selection-info">
+              <span class="selection-info" style="font-size: 12px; color: var(--ds-primary); font-weight: 700; margin-left: 8px;">
                 ({{ getSelectedCount() }} sélectionné{{ getSelectedCount() > 1 ? 's' : '' }})
               </span>
             }
           </div>
-          @if (enableExport()) {
-            <div class="table-actions">
-              <button
-                mat-icon-button
-                type="button"
-                [attr.title]="hasSelection() ? 'Exporter la sélection en PDF' : 'Exporter tout en PDF'"
-                (click)="exportToPDF()"
-                [disabled]="data().length === 0"
-                aria-label="Exporter en PDF">
-                <mat-icon>picture_as_pdf</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
-                [attr.title]="hasSelection() ? 'Exporter la sélection en Excel' : 'Exporter tout en Excel'"
-                (click)="exportToExcel()"
-                [disabled]="data().length === 0"
-                aria-label="Exporter en Excel">
-                <mat-icon>table_chart</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
-                [attr.title]="hasSelection() ? 'Imprimer la sélection' : 'Imprimer tout'"
-                (click)="printTable()"
-                [disabled]="data().length === 0"
-                aria-label="Imprimer">
-                <mat-icon>print</mat-icon>
-              </button>
-            </div>
-          }
-          @if (showInlinePagination() && paginationData()) {
-            <div class="table-pagination-controls">
-              <button
-                mat-icon-button
-                type="button"
-                [disabled]="paginationData()?.first"
-                (click)="onPaginationChange('previous')"
-                [attr.title]="'Page précédente'"
-                aria-label="Page précédente">
-                <mat-icon>chevron_left</mat-icon>
-              </button>
-              <span class="pagination-range">
-                Page {{ (paginationData()?.number || 0) + 1 }} / {{ paginationData()?.totalPages || 0 }}
-              </span>
-              <button
-                mat-icon-button
-                type="button"
-                [disabled]="paginationData()?.last"
-                (click)="onPaginationChange('next')"
-                [attr.title]="'Page suivante'"
-                aria-label="Page suivante">
-                <mat-icon>chevron_right</mat-icon>
-              </button>
-            </div>
-          }
-          @if (showPagination() && !showInlinePagination()) {
-            <div class="table-pagination-controls">
-              <button
-                mat-icon-button
-                type="button"
-                [disabled]="dsClientPageNumber <= 1"
-                (click)="onPaginationChange('previous')"
-                [attr.title]="'Page précédente'"
-                aria-label="Page précédente">
-                <mat-icon>chevron_left</mat-icon>
-              </button>
-              <span class="pagination-range">
-                Page {{ dsClientPageNumber }} / {{ dsClientTotalPages }}
-              </span>
-              <button
-                mat-icon-button
-                type="button"
-                [disabled]="dsClientPageNumber >= dsClientTotalPages"
-                (click)="onPaginationChange('next')"
-                [attr.title]="'Page suivante'"
-                aria-label="Page suivante">
-                <mat-icon>chevron_right</mat-icon>
-              </button>
-            </div>
-          }
+
+          <div style="display: flex; gap: 12px; align-items: center;">
+            @if (enableExport()) {
+              <div class="table-actions" style="display: flex; gap: 4px;">
+                <ds-button
+                  variant="icon"
+                  size="sm"
+                  [title]="hasSelection() ? 'Exporter la sélection en PDF' : 'Exporter tout en PDF'"
+                  (dsClick)="exportToPDF()"
+                  [disabled]="data().length === 0">
+                  <ds-icon name="plus" [size]="20" style="transform: rotate(45deg);"></ds-icon>
+                </ds-button>
+                <ds-button
+                  variant="icon"
+                  size="sm"
+                  [title]="hasSelection() ? 'Exporter la sélection en Excel' : 'Exporter tout en Excel'"
+                  (dsClick)="exportToExcel()"
+                  [disabled]="data().length === 0">
+                  <ds-icon name="chart" [size]="20"></ds-icon>
+                </ds-button>
+              </div>
+            }
+
+            @if (showPagination()) {
+              <div class="table-pagination-controls" style="display: flex; align-items: center; gap: 12px;">
+                <ds-button
+                  variant="icon"
+                  size="sm"
+                  [disabled]="(showInlinePagination() ? paginationData()?.first : dsClientPageNumber === 1) ?? true"
+                  (dsClick)="onPaginationChange('previous')"
+                  ariaLabel="Page précédente">
+                  <ds-icon name="chevron-left" [size]="16"></ds-icon>
+                </ds-button>
+                <span class="pagination-range" style="font-size: 12px; font-weight: 600; color: var(--ds-text-faint);">
+                  @if (showInlinePagination()) {
+                    Page {{ (paginationData()?.number || 0) + 1 }} / {{ paginationData()?.totalPages || 0 }}
+                  } @else {
+                    Page {{ dsClientPageNumber }} / {{ dsClientTotalPages }}
+                  }
+                </span>
+                <ds-button
+                  variant="icon"
+                  size="sm"
+                  [disabled]="(showInlinePagination() ? paginationData()?.last : dsClientPageNumber >= dsClientTotalPages) ?? true"
+                  (dsClick)="onPaginationChange('next')"
+                  ariaLabel="Page suivante">
+                  <ds-icon name="chevron-right" [size]="16"></ds-icon>
+                </ds-button>
+              </div>
+            }
+          </div>
         </div>
       }
+
       <ds-table
         [columns]="dsColumns"
         [rows]="dsRows"
@@ -117,123 +88,75 @@
 
   <!-- Mobile Card View -->
   @if (isMobile) {
-    <div class="card-container">
-      @if (data().length === 0) {
-        <div class="empty-state" role="status">
-          <mat-icon class="empty-icon" aria-hidden="true">inbox</mat-icon>
-          <h3 class="empty-title">Aucune donnée disponible</h3>
-          <p class="empty-message">Il n'y a actuellement aucune donnée à afficher</p>
+    <div class="card-container ds-form-stack" style="padding: 16px; gap: 16px;">
+      @if (data().length === 0 && !loading()) {
+        <div style="padding: 48px 24px;">
+          <ds-empty-state
+            icon="folder"
+            title="Aucune donnée"
+            description="Il n'y a actuellement aucune donnée à afficher.">
+          </ds-empty-state>
         </div>
       }
-      <!-- Virtual Scroll for Mobile -->
-      @if (enableVirtualScroll() && data().length > 0) {
-        <cdk-virtual-scroll-viewport
-          [itemSize]="virtualScrollItemSize()"
-          class="virtual-scroll-viewport">
-          <ds-card *cdkVirtualFor="let row of dataSource.data; let i = index; trackBy: trackByRowId"
-            class="data-card"
-            [pad]="false"
-            [elevation]="'xs'"
-            (click)="onRowClick(row)"
-            [attr.tabindex]="rowClickable() ? '0' : null"
-            [attr.role]="rowClickable() ? 'button' : 'article'"
-            [attr.aria-label]="rowClickable() ? 'Carte cliquable, élément ' + (i + 1) + ', appuyez sur Entrée pour voir les détails' : 'Élément ' + (i + 1)"
-            (keydown.enter)="rowClickable() && onRowClick(row)"
-            (keydown.space)="rowClickable() && $event.preventDefault(); rowClickable() && onRowClick(row)">
-            <!-- Selection Checkbox -->
-            @if (enableRowSelection()) {
-              <div class="card-selection">
-                <mat-checkbox
-                  (click)="$event.stopPropagation()"
-                  (change)="$event ? toggleRow(row) : null"
-                  [checked]="selection.isSelected(row)"
-                  [attr.aria-label]="'Sélectionner l\'élément ' + (i + 1)">
-                </mat-checkbox>
-              </div>
-            }
-            <!-- Card Content -->
-            <div class="data-card-body">
-              @for (column of columns(); track trackByColumnKey($index, column)) {
-                <div class="card-field">
-                  <span class="field-label">{{ column.header }}:</span>
-                  <span class="field-value" [innerHTML]="formatValue(getRowValue(row, column.key), column, row)"></span>
-                </div>
-              }
-            </div>
-            <!-- Card Actions -->
-            @if (showActions()) {
-              <div class="card-actions">
-                @for (action of actions(); track trackByAction($index, action)) {
-                  <button
-                    [hidden]="!shouldShowAction(action, row)"
-                    mat-icon-button
-                    type="button"
-                    [color]="action.color || 'primary'"
-                    [attr.title]="action.tooltip || ''"
-                    (click)="$event.stopPropagation(); onAction(action.action, row)"
-                    [attr.aria-label]="action.tooltip || action.action">
-                    <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
-                  </button>
-                }
-              </div>
-            }
-          </ds-card>
-        </cdk-virtual-scroll-viewport>
+
+      @if (loading()) {
+        <div class="loading-skeletons ds-form-stack" style="gap: 16px;">
+          @for (i of [1,2,3,4]; track i) {
+            <ds-card [pad]="true" elevation="xs">
+              <ds-skeleton variant="rect" width="100%" height="100px" [animate]="true"></ds-skeleton>
+            </ds-card>
+          }
+        </div>
       }
-      <!-- Regular Scroll for Mobile -->
-      @if (!enableVirtualScroll() && data().length > 0) {
-        @for (row of dataSource.data; track trackByRowId(i, row); let i = $index) {
+
+      <!-- Mobile Cards -->
+      <div class="mobile-cards-list ds-form-stack" style="gap: 16px;">
+        @for (row of dsRows; track trackByRowId(i, row); let i = $index) {
           <ds-card
             class="data-card"
-            [pad]="false"
-            [elevation]="'xs'"
+            [pad]="true"
+            elevation="sm"
+            [hover]="true"
             (click)="onRowClick(row)"
-            [attr.tabindex]="rowClickable() ? '0' : null"
-            [attr.role]="rowClickable() ? 'button' : 'article'"
-            [attr.aria-label]="rowClickable() ? 'Carte cliquable, élément ' + (i + 1) + ', appuyez sur Entrée pour voir les détails' : 'Élément ' + (i + 1)"
-            (keydown.enter)="rowClickable() && onRowClick(row)"
-            (keydown.space)="rowClickable() && $event.preventDefault(); rowClickable() && onRowClick(row)">
-            <!-- Selection Checkbox -->
-            @if (enableRowSelection()) {
-              <div class="card-selection">
-                <mat-checkbox
-                  (click)="$event.stopPropagation()"
-                  (change)="$event ? toggleRow(row) : null"
-                  [checked]="selection.isSelected(row)"
-                  [attr.aria-label]="'Sélectionner l\'élément ' + (i + 1)">
-                </mat-checkbox>
+            style="cursor: pointer;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                @if (enableRowSelection()) {
+                  <ds-checkbox
+                    (click)="$event.stopPropagation()"
+                    [checked]="selection.isSelected(row)"
+                    (checkedChange)="toggleRow(row)"
+                    ariaLabel="Sélectionner">
+                  </ds-checkbox>
+                }
+                <strong style="font-size: 14px; color: var(--ds-marine);">#{{ i + 1 }}</strong>
               </div>
-            }
-            <!-- Card Content -->
-            <div class="data-card-body">
-              @for (column of columns(); track trackByColumnKey($index, column)) {
-                <div class="card-field">
-                  <span class="field-label">{{ column.header }}:</span>
-                  <span class="field-value" [innerHTML]="formatValue(getRowValue(row, column.key), column, row)"></span>
+              
+              @if (showActions()) {
+                <div class="mobile-card-actions" style="display: flex; gap: 4px;">
+                  @for (action of actions(); track action.action) {
+                    @if (shouldShowAction(action, row)) {
+                      <ds-button variant="icon" size="sm" (dsClick)="onAction(action.action, row); $event.stopPropagation()" [title]="action.tooltip">
+                        <ds-icon [name]="action.icon" [size]="20"></ds-icon>
+                      </ds-button>
+                    }
+                  }
                 </div>
               }
             </div>
-            <!-- Card Actions -->
-            @if (showActions()) {
-              <div class="card-actions">
-                @for (action of actions(); track trackByAction($index, action)) {
-                  <button
-                    [hidden]="!shouldShowAction(action, row)"
-                    mat-icon-button
-                    type="button"
-                    [color]="action.color || 'primary'"
-                    [attr.title]="action.tooltip || ''"
-                    (click)="$event.stopPropagation(); onAction(action.action, row)"
-                    [attr.aria-label]="action.tooltip || action.action">
-                    <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
-                  </button>
-                }
-              </div>
-            }
+
+            <div class="card-fields ds-form-stack" style="gap: 8px;">
+              @for (column of columns(); track column.key) {
+                <div class="card-field" style="display: flex; justify-content: space-between; font-size: 13px;">
+                  <span style="color: var(--ds-text-muted); font-weight: 500;">{{ column.header }}</span>
+                  <span [innerHTML]="formatValue(getRowValue(row, column.key), column, row)" style="font-weight: 600; text-align: right;"></span>
+                </div>
+              }
+            </div>
           </ds-card>
         }
-      }
+      </div>
     </div>
   }
-
 </div>

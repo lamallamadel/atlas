@@ -1,144 +1,150 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { VoipService, VoipConfiguration } from '../services/voip.service';
-import { CdkScrollable } from '@angular/cdk/scrolling';
 import { FormsModule } from '@angular/forms';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
-import { MatInput } from '@angular/material/input';
-import { MatButton } from '@angular/material/button';
+import {
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent,
+  DsButtonComponent,
+  DsInputComponent,
+  DsSelectComponent,
+  DsSelectOption
+} from '../design-system';
 
 @Component({
     selector: 'app-voip-config-dialog',
     template: `
-    <h2 mat-dialog-title>Configuration VoIP</h2>
-    <mat-dialog-content>
-      <form #configForm="ngForm">
-        <div class="form-field">
-          <mat-slide-toggle
-            [(ngModel)]="config.enabled"
-            name="enabled"
-            color="primary">
-            Activer VoIP
-          </mat-slide-toggle>
-        </div>
-    
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Fournisseur</mat-label>
-          <mat-select
+    <div class="ds-task-dialog">
+      <ds-dialog-header (close)="onCancel()">
+        <span>Configuration VoIP</span>
+      </ds-dialog-header>
+
+      <ds-dialog-content>
+        <form #configForm="ngForm" class="ds-form-stack">
+          <label class="voip-switch-field">
+            <input type="checkbox" role="switch" class="voip-switch" [(ngModel)]="config.enabled" name="enabled">
+            <span>Activer VoIP</span>
+          </label>
+
+          <ds-select
+            label="Fournisseur"
+            [options]="providerOptions"
             [(ngModel)]="config.provider"
             name="provider"
-            [disabled]="!config.enabled"
-            required>
-            <mat-option [value]="null">-- Sélectionner --</mat-option>
-            <mat-option value="twilio">Twilio</mat-option>
-            <mat-option value="asterisk">Asterisk</mat-option>
-            <mat-option value="custom">Personnalisé</mat-option>
-          </mat-select>
-          <mat-hint>Choisissez votre système de téléphonie</mat-hint>
-        </mat-form-field>
-    
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>URL Click-to-Call</mat-label>
-          <input
-            matInput
+            [disabled]="!config.enabled">
+          </ds-select>
+          <p class="ds-field__hint">Choisissez votre système de téléphonie</p>
+
+          <ds-input
+            label="URL Click-to-Call"
             [(ngModel)]="config.clickToCallUrl"
             name="url"
             [disabled]="!config.enabled"
-            placeholder="tel:{{'{phone}'}}"
-            [required]="config.provider === 'custom'">
-            <mat-hint>
-              Utilisez {{ '{' }}phone{{ '}' }} comme placeholder pour le numéro de téléphone
-            </mat-hint>
-          </mat-form-field>
-    
+            placeholder="tel:{phone}">
+          </ds-input>
+          <p class="ds-field__hint">Utilisez {{ '{' }}phone{{ '}' }} comme placeholder pour le numéro de téléphone</p>
+
           @if (config.provider === 'twilio' || config.provider === 'asterisk') {
-            <mat-form-field
-              appearance="outline"
-              class="full-width"
-              >
-              <mat-label>Clé API</mat-label>
-              <input
-                matInput
-                [(ngModel)]="config.apiKey"
-                name="apiKey"
-                type="password"
-                [disabled]="!config.enabled"
-                [required]="config.provider === 'twilio' || config.provider === 'asterisk'">
-                <mat-hint>Clé d'authentification pour votre fournisseur</mat-hint>
-              </mat-form-field>
-            }
-    
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Format de numéro</mat-label>
-              <mat-select
-                [(ngModel)]="config.phoneNumberFormat"
-                name="phoneFormat"
-                [disabled]="!config.enabled">
-                <mat-option [value]="undefined">Par défaut</mat-option>
-                <mat-option value="international">International (+33...)</mat-option>
-              </mat-select>
-              <mat-hint>Format d'affichage et d'appel</mat-hint>
-            </mat-form-field>
-    
-            <div class="config-examples">
-              <h3>Exemples de configuration</h3>
-              <div class="example-item">
-                <strong>Mobile (iOS/Android):</strong>
-                <code>tel:{{ '{' }}phone{{ '}' }}</code>
-              </div>
-              <div class="example-item">
-                <strong>Skype:</strong>
-                <code>skype:{{ '{' }}phone{{ '}' }}?call</code>
-              </div>
-              <div class="example-item">
-                <strong>Zoom Phone:</strong>
-                <code>zoommtg://zoom.us/call?number={{ '{' }}phone{{ '}' }}</code>
-              </div>
+            <ds-input
+              label="Clé API"
+              type="password"
+              [(ngModel)]="config.apiKey"
+              name="apiKey"
+              [disabled]="!config.enabled">
+            </ds-input>
+            <p class="ds-field__hint">Clé d'authentification pour votre fournisseur</p>
+          }
+
+          <ds-select
+            label="Format de numéro"
+            [options]="phoneFormatOptions"
+            [(ngModel)]="config.phoneNumberFormat"
+            name="phoneFormat"
+            [disabled]="!config.enabled">
+          </ds-select>
+          <p class="ds-field__hint">Format d'affichage et d'appel</p>
+
+          <div class="config-examples">
+            <h3>Exemples de configuration</h3>
+            <div class="example-item">
+              <strong>Mobile (iOS/Android):</strong>
+              <code>tel:{{ '{' }}phone{{ '}' }}</code>
             </div>
-          </form>
-        </mat-dialog-content>
-        <mat-dialog-actions align="end">
-          <button mat-button (click)="onCancel()">Annuler</button>
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="onSave()"
-            [disabled]="!configForm.valid || !config.enabled || !config.provider">
-            Enregistrer
-          </button>
-        </mat-dialog-actions>
+            <div class="example-item">
+              <strong>Skype:</strong>
+              <code>skype:{{ '{' }}phone{{ '}' }}?call</code>
+            </div>
+            <div class="example-item">
+              <strong>Zoom Phone:</strong>
+              <code>zoommtg://zoom.us/call?number={{ '{' }}phone{{ '}' }}</code>
+            </div>
+          </div>
+        </form>
+      </ds-dialog-content>
+
+      <ds-dialog-actions align="end">
+        <ds-button variant="ghost" size="md" (dsClick)="onCancel()">Annuler</ds-button>
+        <ds-button
+          variant="marine"
+          size="md"
+          (dsClick)="onSave()"
+          [disabled]="!config.enabled || !config.provider">
+          Enregistrer
+        </ds-button>
+      </ds-dialog-actions>
+    </div>
     `,
     styles: [`
-    mat-dialog-content {
-      min-width: 500px;
-      max-width: 600px;
-      padding: 24px;
+    .voip-switch-field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
     }
 
-    .form-field {
-      margin-bottom: 20px;
+    .voip-switch {
+      appearance: none;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+      background: var(--ds-border);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
     }
 
-    .full-width {
-      width: 100%;
-      margin-bottom: 16px;
+    .voip-switch::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
     }
+
+    .voip-switch:checked { background: var(--ds-marine); }
+    .voip-switch:checked::after { transform: translateX(20px); }
 
     .config-examples {
-      margin-top: 24px;
+      margin-top: 8px;
       padding: 16px;
-      background: #f5f5f5;
-      border-radius: 8px;
+      background: var(--ds-bg-subtle);
+      border-radius: var(--ds-radius-md);
+      border: 1px solid var(--ds-border);
     }
 
     .config-examples h3 {
       margin: 0 0 12px 0;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      color: #333;
+      color: var(--ds-text-muted);
     }
 
     .example-item {
@@ -149,41 +155,53 @@ import { MatButton } from '@angular/material/button';
     .example-item strong {
       display: inline-block;
       min-width: 150px;
+      color: var(--ds-text);
     }
 
     .example-item code {
-      background: white;
+      background: var(--ds-surface);
       padding: 2px 6px;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
+      border-radius: var(--ds-radius-sm);
+      font-family: var(--ds-font-mono);
       font-size: 12px;
-    }
-
-    @media (max-width: 768px) {
-      mat-dialog-content {
-        min-width: unset;
-        max-width: 100%;
-      }
+      border: 1px solid var(--ds-border);
     }
   `],
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, MatSlideToggle, MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatInput, MatDialogActions, MatButton]
+    imports: [
+      FormsModule,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent,
+      DsButtonComponent,
+      DsInputComponent,
+      DsSelectComponent
+    ]
 })
 export class VoipConfigDialogComponent {
   config: VoipConfiguration;
 
+  readonly providerOptions: DsSelectOption[] = [
+    { value: null as any, label: '-- Sélectionner --' },
+    { value: 'twilio', label: 'Twilio' },
+    { value: 'asterisk', label: 'Asterisk' },
+    { value: 'custom', label: 'Personnalisé' }
+  ];
+
+  readonly phoneFormatOptions: DsSelectOption[] = [
+    { value: undefined as any, label: 'Par défaut' },
+    { value: 'international', label: 'International (+33...)' }
+  ];
+
   constructor(
-    private dialogRef: MatDialogRef<VoipConfigDialogComponent>,
+    private dialogRef: DialogRef<any>,
     private voipService: VoipService,
-    @Inject(MAT_DIALOG_DATA) public data: VoipConfiguration | null
+    @Inject(DIALOG_DATA) public data: VoipConfiguration | null
   ) {
     if (data) {
       this.config = { ...data };
     } else {
       const currentConfig = this.voipService.getConfiguration();
-      this.config = currentConfig || {
-        enabled: false,
-        provider: null
-      };
+      this.config = currentConfig || { enabled: false, provider: null };
     }
   }
 

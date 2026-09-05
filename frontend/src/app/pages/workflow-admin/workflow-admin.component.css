@@ -4,6 +4,29 @@
   margin: 0 auto;
 }
 
+.ds-toggle-group {
+  display: inline-flex;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+}
+
+.ds-toggle-btn {
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--ds-surface);
+  color: var(--ds-text-muted);
+  border: none;
+  border-right: 1px solid var(--ds-border);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ds-toggle-btn:last-child { border-right: none; }
+.ds-toggle-btn:hover { background: var(--ds-bg-subtle); color: var(--ds-text); }
+.ds-toggle-btn.active { background: var(--ds-marine); color: #fff; }
+
 .workflow-admin-card {
   display: block;
   margin-bottom: var(--ds-space-6);
@@ -11,6 +34,16 @@
 
 .workflow-admin-card-body {
   padding: 0;
+}
+
+.workflow-admin-tabs-nav {
+  padding: var(--ds-space-4) var(--ds-space-6) 0;
+  border-bottom: 1px solid var(--ds-divider);
+  background: var(--ds-surface-subtle);
+}
+
+.tab-viewport {
+  min-height: 500px;
 }
 
 .tab-content {
@@ -29,6 +62,11 @@
   margin-bottom: var(--ds-space-6);
   display: flex;
   justify-content: center;
+}
+
+.rules-tab-content {
+  height: calc(100vh - 250px);
+  min-height: 600px;
 }
 
 mat-button-toggle-group {

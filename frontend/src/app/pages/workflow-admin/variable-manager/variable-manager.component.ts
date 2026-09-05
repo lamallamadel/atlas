@@ -1,14 +1,13 @@
 import { Component, input, output } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { TemplateVariable, ComponentType } from '../models/template.model';
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { DsBadgeComponent, DsButtonComponent, DsIconComponent } from '../../../design-system';
 
 @Component({
     selector: 'app-variable-manager',
     templateUrl: './variable-manager.component.html',
     styleUrls: ['./variable-manager.component.css'],
-    imports: [CdkDropList, CdkDrag, CdkDragHandle, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, DsButtonComponent, DsIconComponent, DsBadgeComponent]
+    imports: [CdkDropList, CdkDrag, CdkDragHandle, DsButtonComponent, DsIconComponent, DsBadgeComponent]
 })
 export class VariableManagerComponent {
   readonly variables = input<TemplateVariable[]>([]);

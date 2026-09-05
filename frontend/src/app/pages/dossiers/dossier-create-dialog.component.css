@@ -3,6 +3,36 @@
   max-width: 90vw;
 }
 
+.annonce-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--ds-surface-elevated, #fff);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-lg);
+  z-index: 200;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.annonce-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  border-bottom: 1px solid var(--ds-divider);
+  transition: background 0.1s;
+}
+
+.annonce-option:last-child { border-bottom: none; }
+.annonce-option:hover { background: var(--ds-bg-subtle); }
+
 mat-dialog-content {
   padding: 20px 24px;
   max-height: 70vh;

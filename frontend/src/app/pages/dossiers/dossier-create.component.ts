@@ -5,15 +5,13 @@ import { DossierApiService, DossierCreateRequest, DossierResponse } from '../../
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime, switchMap } from 'rxjs/operators';
-import { MatAutocompleteTrigger, MatAutocomplete, MatOption } from '@angular/material/autocomplete';
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-dossier-create',
     templateUrl: './dossier-create.component.html',
     styleUrls: ['./dossier-create.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, AsyncPipe]
+    imports: [FormsModule, ReactiveFormsModule, AsyncPipe]
 })
 export class DossierCreateComponent implements OnInit {
   dossierForm!: FormGroup;
@@ -74,8 +72,16 @@ export class DossierCreateComponent implements OnInit {
     return `${title} - ${city} - ${price} ${currency} (${status})`;
   }
 
+  showAnnonceSuggestions = false;
+
   onAnnonceSelected(annonce: AnnonceResponse): void {
     this.dossierForm.patchValue({ annonceId: annonce.id });
+    this.annonceSearchControl.setValue(this.displayAnnonceFn(annonce), { emitEvent: false });
+    this.showAnnonceSuggestions = false;
+  }
+
+  onAnnonceInputBlur(): void {
+    setTimeout(() => { this.showAnnonceSuggestions = false; }, 150);
   }
 
   onAnnonceIdDirectInput(event: Event): void {

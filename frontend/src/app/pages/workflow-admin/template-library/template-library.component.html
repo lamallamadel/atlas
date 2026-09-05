@@ -1,143 +1,141 @@
-<div class="template-library-container">
-  <div class="library-header">
-    <h2>Bibliothèque de modèles WhatsApp</h2>
+<div class="template-library-container ds-form-stack" style="padding: 32px; max-width: var(--ds-content-wide); margin: 0 auto;">
+  
+  <header class="library-header" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px;">
+    <div>
+      <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: var(--ds-marine);">Bibliothèque de modèles</h1>
+      <p style="margin: 8px 0 0; color: var(--ds-text-muted);">Gérez et suivez le statut d'approbation de vos modèles WhatsApp.</p>
+    </div>
     <ds-button variant="marine" size="md" (dsClick)="createNewTemplate()">
-      <ds-icon name="plus" [size]="16"></ds-icon>
+      <ds-icon name="plus" [size]="20" style="margin-right: 8px;"></ds-icon>
       Créer un modèle
     </ds-button>
-  </div>
+  </header>
 
-  <div class="library-filters">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Rechercher des modèles</mat-label>
-      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" placeholder="Rechercher par nom ou description">
-      <ds-icon matPrefix name="search" [size]="16"></ds-icon>
-    </mat-form-field>
+  <ds-card class="library-filters-card" [pad]="true" elevation="xs" style="margin-bottom: 32px;">
+    <div class="library-filters" style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end;">
+      <div style="flex: 1; min-width: 300px;">
+        <ds-input
+          label="Rechercher des modèles"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Nom ou description..."
+          prefixIcon="search">
+        </ds-input>
+      </div>
 
-    <mat-button-toggle-group [(ngModel)]="selectedStatus" (change)="onStatusFilterChange(selectedStatus)" class="status-filter">
-      <mat-button-toggle value="ALL">Tous</mat-button-toggle>
-      <mat-button-toggle [value]="TemplateStatus.DRAFT">Brouillon</mat-button-toggle>
-      <mat-button-toggle [value]="TemplateStatus.PENDING_APPROVAL">En attente</mat-button-toggle>
-      <mat-button-toggle [value]="TemplateStatus.ACTIVE">Actif</mat-button-toggle>
-      <mat-button-toggle [value]="TemplateStatus.REJECTED">Rejeté</mat-button-toggle>
-      <mat-button-toggle [value]="TemplateStatus.INACTIVE">En pause</mat-button-toggle>
-    </mat-button-toggle-group>
-  </div>
+      <div class="status-filter-wrapper">
+        <label class="field-label" style="display: block; margin-bottom: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--ds-text-muted); letter-spacing: 1px;">
+          Statut
+        </label>
+        <div class="ds-toggle-group" role="group" aria-label="Filtrer par statut">
+          <button type="button" class="ds-toggle-btn" [class.active]="selectedStatus === 'ALL'" (click)="onStatusFilterChange('ALL')">Tous</button>
+          <button type="button" class="ds-toggle-btn" [class.active]="selectedStatus === TemplateStatus.DRAFT" (click)="onStatusFilterChange(TemplateStatus.DRAFT)">Brouillon</button>
+          <button type="button" class="ds-toggle-btn" [class.active]="selectedStatus === TemplateStatus.PENDING_APPROVAL" (click)="onStatusFilterChange(TemplateStatus.PENDING_APPROVAL)">En attente</button>
+          <button type="button" class="ds-toggle-btn" [class.active]="selectedStatus === TemplateStatus.ACTIVE" (click)="onStatusFilterChange(TemplateStatus.ACTIVE)">Actif</button>
+          <button type="button" class="ds-toggle-btn" [class.active]="selectedStatus === TemplateStatus.REJECTED" (click)="onStatusFilterChange(TemplateStatus.REJECTED)">Rejeté</button>
+          <button type="button" class="ds-toggle-btn" [class.active]="selectedStatus === TemplateStatus.INACTIVE" (click)="onStatusFilterChange(TemplateStatus.INACTIVE)">En pause</button>
+        </div>
+      </div>
+    </div>
+  </ds-card>
 
   @if (!loading && filteredTemplates.length > 0) {
-    <div class="templates-grid">
+    <div class="templates-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px;">
       @for (template of filteredTemplates; track template.id ?? $index) {
-        <ds-card class="template-card" [pad]="false" [elevation]="'sm'">
-          <div class="tpl-lib-card-header">
-            <div class="tpl-lib-avatar">
-              <ds-icon [name]="getStatusIcon(template.status)" [size]="20"></ds-icon>
-            </div>
-            <div class="tpl-lib-headings">
-              <h3 class="tpl-lib-title">{{ template.name }}</h3>
-              <p class="tpl-lib-subtitle">{{ template.language }} - {{ getCategoryDisplay(template.category) }}</p>
-            </div>
-          </div>
-          <div class="tpl-lib-body">
-            <div class="template-status">
-              <span class="tpl-lib-status-chip">
-                <span class="ds-badge ds-badge--{{ getStatusBadge(template.status) }} ds-badge--sm ds-badge--no-dot">
-                {{ template.status }}
-                </span>
-              </span>
-            </div>
-            @if (template.description) {
-              <p class="template-description">
-                {{ template.description }}
-              </p>
-            }
-            <div class="template-meta">
-              <span class="meta-item">
-                <ds-icon name="clock" [size]="16"></ds-icon>
-                {{ template.updatedAt | date:'short' }}
-              </span>
-              @if (template.variables && template.variables.length > 0) {
-                <span class="meta-item">
-                  <ds-icon name="chart" [size]="16"></ds-icon>
-                  {{ template.variables.length }} variable(s)
-                </span>
-              }
-            </div>
-            @if (template.status === TemplateStatus.REJECTED && template.rejectionReason) {
-              <div class="rejection-reason">
-                <ds-icon name="alert-circle" [size]="20"></ds-icon>
-                <span>{{ template.rejectionReason }}</span>
-              </div>
-            }
-          </div>
-          <div class="tpl-lib-actions">
-            <button mat-button type="button" (click)="viewTemplate(template)">
-              <ds-icon name="info" [size]="16"></ds-icon>
-              Voir
-            </button>
-            @if (template.status !== TemplateStatus.PENDING_APPROVAL && template.status !== TemplateStatus.ACTIVE) {
-              <button mat-button type="button" (click)="editTemplate(template)">
-                <ds-icon name="edit" [size]="16"></ds-icon>
-                Modifier
-              </button>
-            }
-            @if (template.id != null) {
-              <span class="wf-tpl-card-menu-origin" cdkOverlayOrigin #wfTplMenuOrigin="cdkOverlayOrigin">
-                <button
-                  mat-button
-                  type="button"
-                  (click)="toggleTplCardMenu(template.id, $event)"
-                  [attr.aria-expanded]="tplCardMenuOpenForId === template.id"
-                  aria-haspopup="menu"
-                  [attr.aria-controls]="'wf-tpl-card-menu-' + template.id">
-                  <ds-icon name="more-vertical" [size]="16"></ds-icon>
-                </button>
-              </span>
-              <ng-template
-                cdkConnectedOverlay
-                [cdkConnectedOverlayOrigin]="wfTplMenuOrigin"
-                [cdkConnectedOverlayOpen]="tplCardMenuOpenForId === template.id"
-                [cdkConnectedOverlayPositions]="tplCardMenuPositions"
-                [cdkConnectedOverlayScrollStrategy]="tplCardMenuScrollStrategy"
-                [cdkConnectedOverlayHasBackdrop]="true"
-                [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
-                (backdropClick)="closeTplCardMenu()"
-                (detach)="closeTplCardMenu()"
-                (overlayKeydown)="$event.key === 'Escape' && closeTplCardMenu()">
-                <div
-                  [id]="'wf-tpl-card-menu-' + template.id"
-                  class="wf-tpl-card-menu-dropdown"
-                  role="menu">
-                  <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="duplicateTemplate(template)">
-                    <ds-icon name="edit" [size]="16"></ds-icon>
-                    Dupliquer
-                  </button>
-                  @if (template.status === TemplateStatus.DRAFT) {
-                    <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="submitForApproval(template)">
-                      <ds-icon name="upload" [size]="16"></ds-icon>
-                      Soumettre pour approbation
-                    </button>
-                  }
-                  @if (template.status === TemplateStatus.ACTIVE) {
-                    <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="pauseTemplate(template)">
-                      <ds-icon name="info" [size]="16"></ds-icon>
-                      Mettre en pause
-                    </button>
-                  }
-                  @if (template.status === TemplateStatus.INACTIVE) {
-                    <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="activateTemplate(template)">
-                      <ds-icon name="check" [size]="16"></ds-icon>
-                      Activer
-                    </button>
-                  }
-                  @if (template.status !== TemplateStatus.ACTIVE) {
-                    <button type="button" class="wf-tpl-card-menu-item" role="menuitem" (click)="deleteTemplate(template)">
-                      <ds-icon name="trash" [size]="16"></ds-icon>
-                      Supprimer
-                    </button>
-                  }
+        <ds-card class="template-card" [pad]="true" elevation="sm" [hover]="true">
+          <div class="tpl-card-content" style="display: flex; flex-direction: column; height: 100%;">
+            <div class="tpl-card-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+              <div style="display: flex; gap: 16px; align-items: center;">
+                <div class="tpl-avatar" style="width: 40px; height: 40px; border-radius: 8px; background: var(--ds-bg-subtle); display: flex; align-items: center; justify-content: center; color: var(--ds-marine);">
+                  <ds-icon [name]="getStatusIcon(template.status)" [size]="20"></ds-icon>
                 </div>
-              </ng-template>
-            }
+                <div>
+                  <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--ds-marine);">{{ template.name }}</h3>
+                  <p style="margin: 2px 0 0; font-size: 12px; color: var(--ds-text-muted);">{{ template.language }} • {{ getCategoryDisplay(template.category) }}</p>
+                </div>
+              </div>
+              
+              <div class="tpl-menu-trigger">
+                <span class="tpl-card-menu-origin" cdkOverlayOrigin #tplCardMenuOrigin="cdkOverlayOrigin">
+                  <ds-button
+                    variant="icon"
+                    size="sm"
+                    (click)="toggleTplCardMenu(template.id, $event)"
+                    [attr.aria-expanded]="tplCardMenuOpenForId === template.id"
+                    aria-haspopup="menu"
+                    aria-label="Actions du modèle">
+                    <ds-icon name="more-vertical" [size]="20"></ds-icon>
+                  </ds-button>
+                </span>
+                
+                <ng-template
+                  cdkConnectedOverlay
+                  [cdkConnectedOverlayOrigin]="tplCardMenuOrigin"
+                  [cdkConnectedOverlayOpen]="tplCardMenuOpenForId === template.id"
+                  [cdkConnectedOverlayPositions]="tplCardMenuPositions"
+                  [cdkConnectedOverlayScrollStrategy]="tplCardMenuScrollStrategy"
+                  [cdkConnectedOverlayHasBackdrop]="true"
+                  [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
+                  (backdropClick)="closeTplCardMenu()"
+                  (detach)="closeTplCardMenu()">
+                  <div class="ds-menu-dropdown ds-card" elevation="md" style="min-width: 200px; padding: 8px; border: 1px solid var(--ds-border);" role="menu">
+                    <ds-button variant="ghost" size="sm" (dsClick)="viewTemplate(template)" style="width: 100%; justify-content: flex-start;">
+                      <ds-icon name="eye" [size]="16" style="margin-right: 12px;"></ds-icon> Voir les détails
+                    </ds-button>
+                    <ds-button variant="ghost" size="sm" (dsClick)="editTemplate(template)" style="width: 100%; justify-content: flex-start;">
+                      <ds-icon name="edit" [size]="16" style="margin-right: 12px;"></ds-icon> Modifier
+                    </ds-button>
+                    <ds-button variant="ghost" size="sm" (dsClick)="duplicateTemplate(template)" style="width: 100%; justify-content: flex-start;">
+                      <ds-icon name="plus" [size]="16" style="margin-right: 12px;"></ds-icon> Dupliquer
+                    </ds-button>
+                    
+                    <hr style="margin: 8px 0; border: none; border-top: 1px solid var(--ds-divider);">
+                    
+                    @if (template.status === TemplateStatus.ACTIVE) {
+                      <ds-button variant="ghost" size="sm" (dsClick)="pauseTemplate(template)" style="width: 100%; justify-content: flex-start; color: var(--ds-warning);">
+                        <ds-icon name="refresh" [size]="16" style="margin-right: 12px;"></ds-icon> Mettre en pause
+                      </ds-button>
+                    }
+                    @if (template.status === TemplateStatus.INACTIVE) {
+                      <ds-button variant="ghost" size="sm" (dsClick)="activateTemplate(template)" style="width: 100%; justify-content: flex-start; color: var(--ds-success);">
+                        <ds-icon name="check" [size]="16" style="margin-right: 12px;"></ds-icon> Activer
+                      </ds-button>
+                    }
+                    
+                    <ds-button variant="ghost" size="sm" (dsClick)="deleteTemplate(template)" [disabled]="template.status === TemplateStatus.ACTIVE" style="width: 100%; justify-content: flex-start; color: var(--ds-error);">
+                      <ds-icon name="trash" [size]="16" style="margin-right: 12px;"></ds-icon> Supprimer
+                    </ds-button>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+
+            <div class="tpl-card-body" style="flex: 1;">
+              <div style="margin-bottom: 12px;">
+                <ds-badge [status]="getStatusBadge(template.status)" [showDot]="false" size="sm">
+                  {{ template.status }}
+                </ds-badge>
+              </div>
+
+              @if (template.description) {
+                <p style="margin: 0 0 16px; font-size: 13px; color: var(--ds-text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                  {{ template.description }}
+                </p>
+              }
+
+              <div class="tpl-card-footer" style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--ds-divider); font-size: 11px; color: var(--ds-text-faint);">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                  <ds-icon name="clock" [size]="16"></ds-icon>
+                  {{ template.updatedAt | date:'short' }}
+                </span>
+                @if (template.variables && template.variables.length > 0) {
+                  <span style="display: flex; align-items: center; gap: 6px;">
+                    <ds-icon name="chart" [size]="16"></ds-icon>
+                    {{ template.variables.length }} variable(s)
+                  </span>
+                }
+              </div>
+            </div>
           </div>
         </ds-card>
       }
@@ -145,19 +143,27 @@
   }
 
   @if (!loading && filteredTemplates.length === 0) {
-    <ds-card elevation="sm">
+    <div class="library-empty" style="padding: 100px 32px; text-align: center;">
       <ds-empty-state
+        icon="tasks"
         title="Aucun modèle trouvé"
-        [description]="searchQuery || selectedStatus !== 'ALL' ? 'Essayez d’ajuster vos filtres.' : 'Créez votre premier modèle pour commencer.'"
-        [ctaLabel]="searchQuery || selectedStatus !== 'ALL' ? null : 'Créer votre premier modèle'"
-        (ctaClick)="createNewTemplate()">
+        description="Essayez de modifier vos filtres ou créez votre premier modèle WhatsApp.">
       </ds-empty-state>
-    </ds-card>
+      @if (searchQuery || selectedStatus !== 'ALL') {
+        <ds-button variant="ghost" size="md" (dsClick)="searchQuery = ''; selectedStatus = 'ALL'; applyFilters()" style="margin-top: 16px;">
+          Effacer les filtres
+        </ds-button>
+      }
+    </div>
   }
 
   @if (loading) {
-    <div class="loading-state">
-      <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
+    <div class="library-loading" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px;">
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <ds-card [pad]="true" elevation="xs">
+          <ds-skeleton variant="rect" width="100%" height="150px" [animate]="true"></ds-skeleton>
+        </ds-card>
+      }
     </div>
   }
 </div>

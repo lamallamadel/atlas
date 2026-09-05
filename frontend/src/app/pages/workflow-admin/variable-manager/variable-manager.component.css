@@ -4,6 +4,39 @@
   gap: 16px;
 }
 
+.ds-details {
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+}
+
+.ds-details__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  background: var(--ds-surface);
+  color: var(--ds-text-muted);
+  list-style: none;
+  user-select: none;
+}
+
+.ds-details__summary::-webkit-details-marker { display: none; }
+.ds-details__summary::after { content: '▸'; margin-left: auto; transition: transform 0.2s; }
+details[open] .ds-details__summary::after { transform: rotate(90deg); }
+
+.ds-details__body {
+  padding: 12px 16px 12px 32px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--ds-text-muted);
+  background: var(--ds-bg-subtle);
+  border-top: 1px solid var(--ds-border);
+}
+
 .manager-header {
   display: flex;
   justify-content: space-between;

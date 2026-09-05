@@ -1,112 +1,76 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { UserPreferencesService } from '../services/user-preferences.service';
 import { ThemeService } from '../services/theme.service';
 import { NotificationService } from '../services/notification.service';
-import { DsCardComponent } from '../design-system';
-import { MatIcon } from '@angular/material/icon';
-import { MatProgressBar } from '@angular/material/progress-bar';
-import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
-import { MatHint, MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
-import { MatDivider } from '@angular/material/list';
-import { MatSelect } from '@angular/material/select';
-import { MatOption, MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
-import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
-import { MatInput } from '@angular/material/input';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatButton } from '@angular/material/button';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
-
-interface Route {
-  path: string;
-  label: string;
-  icon: string;
-}
+import { CommonModule } from '@angular/common';
+import {
+  DsCardComponent,
+  DsButtonComponent,
+  DsIconComponent,
+  DsSelectComponent,
+  DsSelectOption,
+  DsInputComponent,
+  DsCheckboxComponent,
+  DsProgressBarComponent,
+  DsSkeletonComponent
+} from '../design-system';
 
 @Component({
     selector: 'app-ui-preferences-form',
     standalone: true,
     templateUrl: './ui-preferences-form.component.html',
     styleUrls: ['./ui-preferences-form.component.css'],
-    imports: [DsCardComponent, DsSkeletonComponent, MatIcon, MatProgressBar, FormsModule, ReactiveFormsModule, MatRadioGroup, MatRadioButton, MatHint, MatDivider, MatFormField, MatLabel, MatSelect, MatOption, MatPrefix, MatButtonToggleGroup, MatButtonToggle, MatInput, MatAutocompleteTrigger, MatAutocomplete, MatCheckbox, MatButton]
+    imports: [
+      CommonModule,
+      FormsModule, 
+      ReactiveFormsModule, 
+      DsCardComponent, 
+      DsButtonComponent,
+      DsIconComponent,
+      DsSelectComponent,
+      DsInputComponent,
+      DsCheckboxComponent,
+      DsProgressBarComponent,
+      DsSkeletonComponent
+    ]
 })
 export class UiPreferencesFormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+  private fb = inject(FormBuilder);
+  private userPreferencesService = inject(UserPreferencesService);
+  private themeService = inject(ThemeService);
+  private notificationService = inject(NotificationService);
+
   preferencesForm!: FormGroup;
   loading = false;
   saving = false;
   
-  // Preview state
-  previewTheme: 'light' | 'dark' | 'auto' = 'light';
-  previewLanguage = 'fr';
-  previewDensity: 'compact' | 'comfortable' | 'spacious' = 'comfortable';
-  previewDefaultRoute = '/dashboard';
-  syncDevices = true;
+  originalValues: any = {};
   
-  // Original values for dirty check
-  private originalValues: any = {};
-  
-  // Available options
-  themes = [
-    { value: 'light', label: 'Clair', icon: 'light_mode' },
-    { value: 'dark', label: 'Sombre', icon: 'dark_mode' },
-    { value: 'auto', label: 'Auto', icon: 'brightness_auto' }
+  readonly densities: Array<DsSelectOption & { description: string }> = [
+    { value: 'compact', label: 'Compact', description: 'Maximum d\'informations, idéal pour les experts' },
+    { value: 'comfortable', label: 'Confortable', description: 'Espacement équilibré pour une lecture facile' },
+    { value: 'spacious', label: 'Aéré', description: 'Grand espacement pour une concentration maximale' }
   ];
-  
-  languages = [
-    { value: 'fr', label: 'Français', flag: '🇫🇷' },
-    { value: 'en', label: 'English', flag: '🇬🇧' },
-    { value: 'es', label: 'Español', flag: '🇪🇸' }
-  ];
-  
-  densities = [
-    { 
-      value: 'compact', 
-      label: 'Compact', 
-      description: 'Maximum de contenu sur l\'écran',
-      icon: 'view_compact'
-    },
-    { 
-      value: 'comfortable', 
-      label: 'Confortable', 
-      description: 'Équilibre entre contenu et espacement',
-      icon: 'view_comfortable'
-    },
-    { 
-      value: 'spacious', 
-      label: 'Spacieux', 
-      description: 'Plus d\'espace, moins de contenu',
-      icon: 'view_cozy'
-    }
-  ];
-  
-  availableRoutes: Route[] = [
-    { path: '/dashboard', label: 'Tableau de bord', icon: 'dashboard' },
-    { path: '/dossiers', label: 'Dossiers', icon: 'folder' },
-    { path: '/annonces', label: 'Annonces', icon: 'home' },
-    { path: '/tasks', label: 'Tâches', icon: 'task' },
-    { path: '/calendar', label: 'Calendrier', icon: 'calendar_today' },
-    { path: '/search', label: 'Recherche', icon: 'search' },
-    { path: '/reports', label: 'Rapports', icon: 'assessment' }
-  ];
-  
-  filteredRoutes: Route[] = [];
 
-  constructor(
-    private fb: FormBuilder,
-    private userPreferencesService: UserPreferencesService,
-    private themeService: ThemeService,
-    private notificationService: NotificationService
-  ) {}
+  readonly languages: DsSelectOption[] = [
+    { value: 'fr', label: 'Français' },
+    { value: 'en', label: 'Anglais' },
+    { value: 'es', label: 'Espagnol' },
+    { value: 'de', label: 'Allemand' }
+  ];
+
+  previewTheme = 'light';
+  previewDensity = 'comfortable';
+  previewLanguage = 'fr';
 
   ngOnInit(): void {
     this.initializeForm();
     this.loadPreferences();
-    this.setupFormListeners();
-    this.filteredRoutes = [...this.availableRoutes];
+    this.setupPreviewSync();
   }
 
   ngOnDestroy(): void {
@@ -116,174 +80,130 @@ export class UiPreferencesFormComponent implements OnInit, OnDestroy {
 
   private initializeForm(): void {
     this.preferencesForm = this.fb.group({
-      theme: ['light', Validators.required],
-      language: ['fr', Validators.required],
-      density: ['comfortable', Validators.required],
-      defaultRoute: ['/dashboard', Validators.required],
+      theme: ['light'],
+      density: ['comfortable'],
+      language: ['fr'],
+      animationsEnabled: [true],
+      sidebarCollapsed: [false],
       syncDevices: [true],
-      defaultRouteInput: ['']
+      defaultRoute: ['/dashboard']
     });
   }
 
   private loadPreferences(): void {
     this.loading = true;
-    
     this.userPreferencesService.getPreferences()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (preferences) => {
-          if (preferences.ui) {
-            this.preferencesForm.patchValue({
-              theme: preferences.ui.theme || 'light',
-              language: preferences.ui.language || 'fr',
-              density: preferences.ui.density || 'comfortable',
-              defaultRoute: preferences.ui.defaultRoute || '/dashboard',
-              syncDevices: preferences.ui.syncDevices !== false
-            });
-            
-            this.updatePreviewValues();
-          }
+        next: (prefs) => {
+          const ui = (prefs['ui'] as any) ?? prefs;
+          this.preferencesForm.patchValue({
+            theme: ui['theme'] || 'light',
+            density: ui['density'] || 'comfortable',
+            language: ui['language'] || 'fr',
+            animationsEnabled: ui['animationsEnabled'] !== false,
+            sidebarCollapsed: ui['sidebarCollapsed'] || false,
+            syncDevices: ui['syncDevices'] !== false
+          });
           this.originalValues = this.preferencesForm.value;
+          this.updatePreviews(this.originalValues);
           this.loading = false;
         },
-        error: (error) => {
-          console.error('Error loading UI preferences:', error);
+        error: (err) => {
+          console.error('Error loading preferences:', err);
           this.notificationService.error('Erreur lors du chargement des préférences');
           this.loading = false;
         }
       });
   }
 
-  private setupFormListeners(): void {
-    // Update preview on form changes
+  private setupPreviewSync(): void {
     this.preferencesForm.valueChanges
-      .pipe(debounceTime(100), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.updatePreviewValues();
-      });
-    
-    // Autocomplete filter for routes
-    this.preferencesForm.get('defaultRouteInput')?.valueChanges
-      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe(value => {
-        this.filterRoutes(value);
+      .pipe(debounceTime(200), takeUntil(this.destroy$))
+      .subscribe(values => {
+        this.updatePreviews(values);
       });
   }
 
-  private updatePreviewValues(): void {
-    const formValue = this.preferencesForm.value;
-    this.previewTheme = formValue.theme;
-    this.previewLanguage = formValue.language;
-    this.previewDensity = formValue.density;
-    this.previewDefaultRoute = formValue.defaultRoute;
-    this.syncDevices = formValue.syncDevices;
-  }
-
-  private filterRoutes(searchValue: string): void {
-    if (!searchValue) {
-      this.filteredRoutes = [...this.availableRoutes];
-      return;
-    }
-    
-    const filterValue = searchValue.toLowerCase();
-    this.filteredRoutes = this.availableRoutes.filter(route =>
-      route.label.toLowerCase().includes(filterValue) ||
-      route.path.toLowerCase().includes(filterValue)
-    );
-  }
-
-  onRouteSelected(route: Route): void {
-    this.preferencesForm.patchValue({
-      defaultRoute: route.path,
-      defaultRouteInput: route.label
-    });
-  }
-
-  displayRouteFn(path: string): string {
-    const route = this.availableRoutes.find(r => r.path === path);
-    return route ? route.label : path;
+  private updatePreviews(values: any): void {
+    this.previewTheme = values.theme;
+    this.previewDensity = values.density;
+    this.previewLanguage = values.language;
   }
 
   onSave(): void {
-    if (!this.preferencesForm.valid) {
-      this.notificationService.warning('Veuillez corriger les erreurs dans le formulaire');
-      return;
-    }
+    if (this.preferencesForm.invalid) return;
 
     this.saving = true;
-    const formValue = this.preferencesForm.value;
+    const values = this.preferencesForm.value;
 
-    const uiPreferences = {
-      theme: formValue.theme,
-      language: formValue.language,
-      density: formValue.density,
-      defaultRoute: formValue.defaultRoute,
-      syncDevices: formValue.syncDevices
-    };
-
-    this.userPreferencesService.updatePreferences('ui', uiPreferences)
+    this.userPreferencesService.updatePreferences('ui', values)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.themeService.setTheme(formValue.theme);
-          this.originalValues = this.preferencesForm.value;
+          this.originalValues = { ...values };
           this.saving = false;
+          this.notificationService.success('Préférences enregistrées avec succès');
           
-          if (formValue.syncDevices) {
-            this.notificationService.success('Préférences enregistrées et synchronisées sur tous vos appareils');
-          } else {
-            this.notificationService.success('Préférences enregistrées avec succès');
+          if (values.theme) {
+            this.themeService.setTheme(values.theme);
           }
         },
-        error: (error) => {
-          console.error('Error saving UI preferences:', error);
+        error: (err) => {
+          console.error('Error saving preferences:', err);
           this.saving = false;
-          this.notificationService.error('Erreur lors de l\'enregistrement des préférences');
+          this.notificationService.error('Erreur lors de l\'enregistrement');
         }
       });
   }
 
   onCancel(): void {
-    if (this.hasUnsavedChanges()) {
-      this.preferencesForm.patchValue(this.originalValues);
-      this.updatePreviewValues();
-      this.notificationService.info('Modifications annulées');
-    }
+    this.preferencesForm.patchValue(this.originalValues);
+    this.notificationService.info('Modifications annulées');
   }
 
   hasUnsavedChanges(): boolean {
     return JSON.stringify(this.preferencesForm.value) !== JSON.stringify(this.originalValues);
   }
 
-  getPreviewClasses(): string {
-    const classes = ['preview-zone'];
-    classes.push(`theme-${this.previewTheme}`);
-    classes.push(`density-${this.previewDensity}`);
-    classes.push(`lang-${this.previewLanguage}`);
-    return classes.join(' ');
+  getDensityDescription(): string {
+    const densityValue = this.preferencesForm.get('density')?.value;
+    const density = this.densities.find(d => d.value === densityValue);
+    return density?.description || '';
   }
 
-  getSelectedRoute(): Route | undefined {
-    return this.availableRoutes.find(r => r.path === this.previewDefaultRoute);
+  readonly themes: DsSelectOption[] = [
+    { value: 'light', label: 'Clair' },
+    { value: 'dark', label: 'Sombre' },
+    { value: 'auto', label: 'Automatique' }
+  ];
+
+  readonly routeOptions: DsSelectOption[] = [
+    { value: '/dashboard', label: 'Tableau de bord' },
+    { value: '/dossiers', label: 'Dossiers' },
+    { value: '/annonces', label: 'Annonces' },
+    { value: '/tasks', label: 'Tâches' }
+  ];
+
+  getPreviewClasses(): string {
+    return `theme-${this.previewTheme} density-${this.previewDensity} lang-${this.previewLanguage}`;
   }
 
   getThemeLabel(): string {
-    const theme = this.themes.find(t => t.value === this.previewTheme);
-    return theme ? theme.label : '';
+    const map: Record<string, string> = { light: 'Clair', dark: 'Sombre', auto: 'Automatique' };
+    return map[this.previewTheme] ?? this.previewTheme;
   }
 
   getLanguageLabel(): string {
-    const language = this.languages.find(l => l.value === this.previewLanguage);
-    return language ? language.label : '';
+    return this.languages.find(l => l.value === this.previewLanguage)?.label ?? this.previewLanguage;
   }
 
   getDensityLabel(): string {
-    const density = this.densities.find(d => d.value === this.previewDensity);
-    return density ? density.label : '';
+    return this.densities.find(d => d.value === this.previewDensity)?.label ?? this.previewDensity;
   }
 
-  getPreviewText(): { welcome: string; description: string; button: string } {
-    const texts = {
+  getPreviewTexts(): any {
+    const texts: any = {
       fr: {
         welcome: 'Bienvenue',
         description: 'Ceci est un aperçu de vos préférences d\'interface',
@@ -292,12 +212,12 @@ export class UiPreferencesFormComponent implements OnInit, OnDestroy {
       en: {
         welcome: 'Welcome',
         description: 'This is a preview of your interface preferences',
-        button: 'Example action'
+        button: 'Example Action'
       },
       es: {
         welcome: 'Bienvenido',
-        description: 'Esta es una vista previa de sus preferencias de interfaz',
-        button: 'Acción de ejemplo'
+        description: 'Esta est una vista previa de sus preferencias de interfaz',
+        button: 'Acción de exemple'
       }
     };
     
