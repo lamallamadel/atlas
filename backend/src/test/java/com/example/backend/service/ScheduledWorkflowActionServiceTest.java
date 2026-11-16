@@ -11,8 +11,8 @@ import com.example.backend.repository.ScheduledWorkflowActionRepository;
 import com.example.backend.workflow.action.WorkflowActionHandler;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,11 +59,11 @@ class ScheduledWorkflowActionServiceTest {
         action.setActionConfig(config);
         action.setUserId("user-1");
 
-        when(repository.findByRunAtBefore(any())).thenReturn(Arrays.asList(action));
+        when(repository.findByRunAtBefore(any(), any())).thenReturn(Arrays.asList(action));
         
         Dossier dossier = new Dossier();
         dossier.setId(1L);
-        when(dossierRepository.findById(1L)).thenReturn(Optional.of(dossier));
+        when(dossierRepository.findAllById(any())).thenReturn(List.of(dossier));
         
         when(actionHandler.supports("TEST")).thenReturn(true);
 

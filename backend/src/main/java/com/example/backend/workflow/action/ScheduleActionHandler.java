@@ -4,6 +4,7 @@ import com.example.backend.entity.Dossier;
 import com.example.backend.service.ScheduledWorkflowActionService;
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,7 +13,7 @@ public class ScheduleActionHandler implements WorkflowActionHandler {
     public static final String ACTION_TYPE = "SCHEDULE_ACTION";
     private final ScheduledWorkflowActionService scheduledService;
 
-    public ScheduleActionHandler(ScheduledWorkflowActionService scheduledService) {
+    public ScheduleActionHandler(@Lazy ScheduledWorkflowActionService scheduledService) {
         this.scheduledService = scheduledService;
     }
 
@@ -24,7 +25,7 @@ public class ScheduleActionHandler implements WorkflowActionHandler {
     @Override
     @SuppressWarnings("unchecked")
     public void execute(Dossier dossier, Map<String, Object> actionConfig, String userId) {
-        Integer delayHours = (Integer) actionConfig.getOrDefault("delayHours", 0);
+        int delayHours = ((Number) actionConfig.getOrDefault("delayHours", 0)).intValue();
         Map<String, Object> nextAction = (Map<String, Object>) actionConfig.get("action");
         
         if (nextAction == null) return;

@@ -4,14 +4,15 @@ import com.example.backend.entity.ScheduledWorkflowAction;
 import com.example.backend.entity.Dossier;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.ScheduledWorkflowActionRepository;
-import com.example.backend.workflow.WorkflowActionDispatcher;
 import com.example.backend.workflow.action.WorkflowActionHandler;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +57,7 @@ public class ScheduledWorkflowActionService {
     @Transactional
     public void runScheduledActions() {
         LocalDateTime now = LocalDateTime.now();
-        List<ScheduledWorkflowAction> actions = repository.findByRunAtBefore(now);
+        List<ScheduledWorkflowAction> actions = repository.findByRunAtBefore(now, PageRequest.of(0, 100));
 
         if (actions.isEmpty()) {
             return;
@@ -64,20 +65,25 @@ public class ScheduledWorkflowActionService {
 
         logger.info("Running {} scheduled workflow actions", actions.size());
 
+        // Batch-load all dossiers in one query to avoid N+1
+        List<Long> dossierIds = actions.stream()
+                .map(ScheduledWorkflowAction::getDossierId)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, Dossier> dossierMap = dossierRepository.findAllById(dossierIds).stream()
+                .collect(Collectors.toMap(Dossier::getId, Function.identity()));
+
         for (ScheduledWorkflowAction action : actions) {
             try {
-                executeScheduledTask(action);
+                executeScheduledTask(action, dossierMap.get(action.getDossierId()));
                 repository.delete(action);
             } catch (Exception e) {
                 logger.error("Failed to execute scheduled action {}: {}", action.getId(), e.getMessage(), e);
-                // Keep in DB for next retry or move to a dead-letter-table? 
-                // For now, let's keep it simple and just log.
             }
         }
     }
 
-    private void executeScheduledTask(ScheduledWorkflowAction action) {
-        Dossier dossier = dossierRepository.findById(action.getDossierId()).orElse(null);
+    private void executeScheduledTask(ScheduledWorkflowAction action, Dossier dossier) {
         if (dossier == null) {
             logger.warn("Dossier {} not found for scheduled action {}", action.getDossierId(), action.getId());
             return;
@@ -85,7 +91,7 @@ public class ScheduledWorkflowActionService {
 
         Map<String, Object> config = action.getActionConfig();
         String actionType = (String) config.get("type");
-        
+
         actionHandlers.stream()
                 .filter(h -> h.supports(actionType))
                 .findFirst()

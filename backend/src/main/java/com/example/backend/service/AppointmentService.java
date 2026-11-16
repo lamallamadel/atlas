@@ -153,6 +153,7 @@ public class AppointmentService {
             metricsService.recordAppointmentDurationSeconds(
                     -updated.getStartTime().getSecond() + updated.getEndTime().getSecond());
             logAppointmentCompletedActivity(updated);
+            eventPublisher.publishEvent(new AppointmentCompletedEvent(this, updated, updated.getUpdatedBy()));
         } else if (oldStatus != AppointmentStatus.SCHEDULED
                 && updated.getStatus() == AppointmentStatus.SCHEDULED) {
             logAppointmentScheduledActivity(updated);

@@ -44,14 +44,24 @@ public class WorkflowActionDispatcher {
     @Transactional
     public void handleAppointmentCreated(AppointmentCreatedEvent event) {
         logger.debug("Appointment created event received for appointment {}", event.getAppointment().getId());
-        dispatch(event.getAppointment().getDossier(), "NONE", "APPOINTMENT_CREATED", event.getUserId());
+        Dossier dossier = event.getAppointment().getDossier();
+        if (dossier == null) {
+            logger.warn("Appointment {} has no associated dossier, skipping workflow triggers", event.getAppointment().getId());
+            return;
+        }
+        dispatch(dossier, "NONE", "APPOINTMENT_CREATED", event.getUserId());
     }
 
     @EventListener
     @Transactional
     public void handleAppointmentCompleted(AppointmentCompletedEvent event) {
         logger.debug("Appointment completed event received for appointment {}", event.getAppointment().getId());
-        dispatch(event.getAppointment().getDossier(), "APPOINTMENT", "APPOINTMENT_COMPLETED", event.getUserId());
+        Dossier dossier = event.getAppointment().getDossier();
+        if (dossier == null) {
+            logger.warn("Appointment {} has no associated dossier, skipping workflow triggers", event.getAppointment().getId());
+            return;
+        }
+        dispatch(dossier, "APPOINTMENT", "APPOINTMENT_COMPLETED", event.getUserId());
     }
 
     private void dispatch(Dossier dossier, String fromState, String toState, String userId) {
