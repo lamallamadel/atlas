@@ -83,13 +83,6 @@
   font-size: 14px;
   line-height: 1.5;
   z-index: 9;
-
-  mat-icon {
-    color: var(--ds-warning);
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
-  }
 }
 
 .messages-container {
@@ -180,12 +173,6 @@
     line-height: 32px;
   }
 
-  .mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
   .action-retry {
     color: var(--ds-marine);
   }
@@ -193,14 +180,6 @@
   .action-copy {
     color: var(--ds-success);
   }
-}
-
-.ds-thread__meta mat-icon.ds-thread__delivery {
-  display: inline-flex;
-  align-items: center;
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
 }
 
 .empty-state {
@@ -211,14 +190,6 @@
   padding: 60px 20px;
   color: var(--ds-text-muted);
   text-align: center;
-
-  mat-icon {
-    font-size: 64px;
-    width: 64px;
-    height: 64px;
-    margin-bottom: 16px;
-    opacity: 0.3;
-  }
 
   p {
     font-size: 16px;
@@ -251,10 +222,6 @@
 .template-chip {
   background: var(--ds-marine-hl) !important;
   border: 1px solid var(--ds-marine) !important;
-
-  mat-icon {
-    color: var(--ds-marine);
-  }
 }
 
 .template-variables {
@@ -273,12 +240,6 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--ds-marine);
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
 }
 
 .variable-inputs {
@@ -308,12 +269,6 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--ds-marine);
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
 }
 
 .attachment-list {
@@ -350,13 +305,6 @@
 
   &.document {
     background: var(--ds-warning-hl);
-
-    mat-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-      color: var(--ds-warning);
-    }
   }
 }
 

@@ -94,10 +94,6 @@
 
     &:hover:not(:disabled) {
       background-color: var(--ds-marine-hl);
-      
-      mat-icon {
-        color: var(--ds-marine);
-      }
     }
 
     &:disabled {
@@ -145,10 +141,6 @@
 
     &:hover:not(:disabled) {
       background-color: var(--ds-marine-hl);
-      
-      mat-icon {
-        color: var(--ds-marine);
-      }
     }
 
     &:disabled {
@@ -325,49 +317,6 @@
   @include mobile-only {
     padding: var(--spacing-2) var(--spacing-3);
     flex-wrap: wrap;
-  }
-}
-
-/* Paginator */
-mat-paginator {
-  background: var(--ds-surface-2);
-  border-top: 1px solid var(--ds-border);
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
-}
-
-/* Material Design Overrides for better integration */
-::ng-deep {
-  .mat-sort-header-arrow {
-    color: var(--ds-marine);
-  }
-
-  .mat-checkbox-checked.mat-accent .mat-checkbox-background {
-    background-color: var(--ds-marine);
-  }
-
-  .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background {
-    background-color: var(--ds-marine);
-  }
-
-  // Responsive paginator adjustments
-  @include mobile-only {
-    .mat-mdc-paginator {
-      font-size: 11px;
-    }
-
-    .mat-mdc-paginator-container {
-      flex-wrap: wrap;
-      min-height: auto;
-      padding: var(--spacing-2);
-    }
-
-    .mat-mdc-paginator-page-size {
-      margin: var(--spacing-2) 0;
-    }
-
-    .mat-mdc-paginator-range-label {
-      margin: var(--spacing-2) var(--spacing-3);
-    }
   }
 }
 
