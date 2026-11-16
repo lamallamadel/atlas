@@ -4,12 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Atlas Immobilier CRM — a full-stack real estate CRM monorepo with a Spring Boot 4.0.3 backend (Java 25), Angular 16 frontend, and PostgreSQL 16 database. Manages property listings (annonces), leads/deals (dossiers), messaging (WhatsApp/email/SMS), appointments, tasks, documents, workflows, and cooperative housing projects.
+Atlas Immobilier CRM — a full-stack real estate CRM monorepo. Services:
+- **`backend/`** — Spring Boot 4.0.3 (Java 25), the primary REST API
+- **`frontend/`** — Angular 16, Pro Space UI + Design System (`src/app/design-system/`)
+- **`ml-service/`** — Python FastAPI service for ML scoring
+- **`brain/`** — Python agent service (`agent/`, `match/`, `nego/`, `fraud/`, `dupli/`, `document/`); see `brain/AGENT_CONTEXT.md`
+- **`infra/`** — docker-compose for PostgreSQL 16, Redis, Keycloak, ELK, Prometheus, Grafana
+- **`terraform/`** — infra-as-code for cloud deploys
+
+Domain: property listings (annonces), leads/deals (dossiers), messaging (WhatsApp/email/SMS), appointments, tasks, documents, workflows, cooperative housing projects.
+
+Agent rules live in `.cursor/rules/*.mdc`; `context-compaction-threshold.mdc` is marked `alwaysApply: true` (compact context when it hits 75% down to ~25%).
 
 ## Build & Run Commands
- 
-**IMPORTANT:** This project requires Java 25. Set JAVA_HOME:
-Or use scripts/use-temurin-25.ps1 to set `JAVA_HOME` before Maven commands.
+
+**IMPORTANT:** This project requires Java 25. Set `JAVA_HOME` to a JDK 25 install, or use `scripts/use-temurin-25.ps1` (Windows) to set it before Maven commands.
 
 **Windows (PowerShell):** Maven utilise `JAVA_HOME` pour compiler ; alignez-le sur votre JDK 25.
 
@@ -63,6 +72,12 @@ npm run e2e:ui        # Interactive Playwright UI mode
 ./atlas status    # Health check all services
 ./atlas logs      # View logs (all | backend | frontend | db)
 ./atlas reset     # Reset database
+
+# Preferred "run everything" entry point (per README)
+./scripts/run-full-test-suite.sh                 # Linux/Mac
+./scripts/run-full-test-suite.sh --backend-only
+./scripts/run-full-test-suite.sh --frontend-only
+.\scripts\run-full-test-suite.ps1                # Windows
 ```
 
 **Windows:** Use `AtlasDevConsole.ps1` — a WPF graphical dashboard that auto-discovers all commands, profiles, and services from the repo.
@@ -84,6 +99,7 @@ docker-compose down
 - **filter/** — Servlet filters (RequestContextFilter for MDC/slow-request logging, CorrelationIdFilter)
 - **config/** — SecurityConfig, CacheConfig, RedisConfig, ElasticsearchConfig, KeycloakAdminConfig, etc.
 - **aspect/** — AOP (audit)
+- **workflow/** — Workflow automation engine: `WorkflowActionDispatcher`, action handlers (`ScheduleActionHandler`, …), and scheduled action execution
 - **exception/** — Global exception handling
 
 ### Key Architectural Patterns
@@ -100,8 +116,13 @@ docker-compose down
 
 ### Database
 - **PostgreSQL 16** in Docker/staging/prod; **H2** for local dev and unit tests
-- **Flyway** migrations in `backend/src/main/resources/db/migration/` (V1–V141+). There is a **duplicate V139** conflict (`V139__Add_reminder_strategy_to_appointment.sql` and `V139__Add_whatsapp_quota_tier_and_cost_tracking.sql`) — new migrations must use V142+. In production the DB may have additional migrations (V100–V107 applied outside this repo); always check before picking a version number: `SELECT version FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5`.
 - Multi-tenant `org_id` on all tables
+- **Flyway migrations are split into three folders** under `backend/src/main/resources/db/`:
+  - **`migration/`** — cross-database base migrations (V1–V148 at time of writing). Must be portable between H2 and PostgreSQL: standard SQL only, no partial indexes, no GIN/GiST, no PL/pgSQL, no `ON CONFLICT`; use the `${json_type}` placeholder for JSON/JSONB columns.
+  - **`migration-postgres/`** — PostgreSQL-only optimizations (V100–V107+): partial indexes, GIN/full-text, PL/pgSQL, upserts.
+  - **`migration-h2/`** — H2-only variants (V200+) for cases where the base migration cannot be made portable. Do NOT put H2-specific DDL in the base `migration/` folder.
+- **Next available version numbers:** V149+ (highest is `V148__Create_scheduled_workflow_action.sql`). V140, V143, V144 are also unused slots but out-of-order migrations are risky — prefer V149+. The old V139 duplicate has been resolved: `V139__Add_whatsapp_quota_tier_and_cost_tracking.sql` stayed, the other was renumbered to `V142__Add_reminder_strategy_to_appointment.sql`.
+- In production the DB may have additional migrations applied outside this repo; always check before picking a version number: `SELECT version FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5`.
 
 ### Spring Profiles
 - `local` — H2, no external deps
@@ -113,9 +134,23 @@ docker-compose down
 ### Frontend Structure (`frontend/src/app/`)
 - **pages/** — Route-level lazy-loaded modules (dashboard, annonces, dossiers, login, search, workflow-admin)
 - **components/** — 80+ reusable components (kanban, calendar, activity timeline, command palette, WhatsApp UI, notifications, filters)
+- **design-system/** — DS primitives (`ds-button`, `ds-card`, `page-header`, `filter-bar`, …), exported via barrel `design-system/index.ts`
 - **services/** — API services, auth, offline mode, theme, notifications, keyboard shortcuts
 - **guards/** — AuthGuard for route protection
 - **interceptors/** — HTTP interceptors (auth token, org-id, correlation-id)
+
+### Frontend — Design System rules (enforced)
+
+- **`@angular/material` imports are forbidden in app code** (lint-enforced; see commit `c2fb0c4`). Use DS primitives from the barrel `src/app/design-system/index.ts` instead of `mat-*`.
+- **SCSS:** use `var(--ds-*)` tokens; no hex colors, no new `var(--at-*)` / `var(--color-*)` outside the DS semantic bridge, no new `src/styles/_atlasia-*.scss` files.
+- **Pro Space (`/pro/...`):** prefer `ds-card` over `mat-card` for new content wrappers.
+- **Verify locally:**
+  ```bash
+  cd frontend
+  npm run lint:ds-colors         # chains ds-scss + ds-css + ds-legacy-vars
+  npm run lint:ds-scss -- --fail # CI-strict mode
+  ```
+- **Plan of record:** `frontend/docs/design-system-migration-plan.md`; detailed rules: `.cursor/rules/design-system-migration.mdc`.
 
 ### Default Ports
 Frontend: 4200 | Backend: 8080 | Keycloak: 8081 | Adminer: 8082 | PostgreSQL: 5432 | Redis: 6379 | Elasticsearch: 9200 | Kibana: 5601 | Prometheus: 9090 | Grafana: 3000 | Nginx: 80/443
@@ -196,7 +231,8 @@ Bundle analysis: `cd frontend && npm run build -- --stats-json && npx webpack-bu
 
 ## Prerequisites
 
-- Java 25 (set `JAVA_HOME` before Maven commands — Windows : `$env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.2'` puis `$env:Path = "$env:JAVA_HOME\bin;$env:Path"`)
-- Maven 3.6+ (wrapper `mvnw` available at project root)
-- Node.js 18+ and npm
-- Docker & Docker Compose (for infrastructure and PostgreSQL E2E tests)
+- **Java 25** (see top of file for `JAVA_HOME` setup)
+- **Maven 3.6+** (wrapper `mvnw` at project root)
+- **Node.js 18+** and npm
+- **Docker & Docker Compose** (for infrastructure and PostgreSQL E2E tests)
+- **Python 3** (only if touching `ml-service/` or `brain/`)
