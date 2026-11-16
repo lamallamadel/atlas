@@ -1,5 +1,3 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -24,13 +22,6 @@ describe('OfflineIndicatorComponent', () => {
         MatProgressBarModule,
         OfflineIndicatorComponent],
       providers: [
-        {
-          provide: MatSnackBar,
-          useValue: {
-            open: () => ({
-              onAction: () => of(null),
-              afterDismissed: () => of(null)}),
-            dismiss: () => {}}},
         OfflineService,
         OfflineQueueService,
         OfflineStorageService,

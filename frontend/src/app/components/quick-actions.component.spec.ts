@@ -1,4 +1,3 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { QuickActionsComponent } from './quick-actions.component';
@@ -66,13 +65,6 @@ describe('QuickActionsComponent', () => {
         NoopAnimationsModule,
         QuickActionsComponent],
       providers: [
-        {
-          provide: MatSnackBar,
-          useValue: {
-            open: () => ({
-              onAction: () => of(null),
-              afterDismissed: () => of(null)}),
-            dismiss: () => {}}},
         { provide: QuickActionsService, useValue: mockQuickActionsService },
         { provide: VoipService, useValue: mockVoipService },
         {

@@ -1,5 +1,3 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ServiceWorkerRegistrationService } from './service-worker-registration.service';
@@ -15,13 +13,6 @@ describe('ServiceWorkerRegistrationService', () => {
     TestBed.configureTestingModule({
       imports: [],
       providers: [
-        {
-          provide: MatSnackBar,
-          useValue: {
-            open: () => ({
-              onAction: () => of(null),
-              afterDismissed: () => of(null)}),
-            dismiss: () => {}}},
         NotificationService,
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()]});

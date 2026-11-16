@@ -1,4 +1,3 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
@@ -57,13 +56,6 @@ describe('WhatsappMessagingUiComponent', () => {
         TextFieldModule,
         WhatsappMessagingUiComponent],
       providers: [
-        {
-          provide: MatSnackBar,
-          useValue: {
-            open: () => ({
-              onAction: () => of(null),
-              afterDismissed: () => of(null)}),
-            dismiss: () => {}}},
         { provide: MessageApiService, useValue: messageApiServiceSpy },
         {
           provide: OutboundMessageApiService,

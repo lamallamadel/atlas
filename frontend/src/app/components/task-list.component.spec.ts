@@ -1,4 +1,3 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TaskListComponent } from './task-list.component';
@@ -23,13 +22,6 @@ describe('TaskListComponent', () => {
         TaskListComponent,
         TaskCardComponent],
       providers: [
-        {
-          provide: MatSnackBar,
-          useValue: {
-            open: () => ({
-              onAction: () => of(null),
-              afterDismissed: () => of(null)}),
-            dismiss: () => {}}},
         {
           provide: TaskApiService,
           useValue: { list: () => of({ content: [], totalElements: 0 }) }},

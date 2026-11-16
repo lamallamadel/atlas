@@ -1,5 +1,3 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from "rxjs";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { CommonModule } from '@angular/common';
@@ -17,8 +15,7 @@ describe('DocumentListComponent', () => {
     schemas: [NO_ERRORS_SCHEMA],
     imports: [CommonModule,
         DocumentListComponent],
-    providers: [
-        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },DocumentApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+    providers: [DocumentApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });
     fixture = TestBed.createComponent(DocumentListComponent);
     component = fixture.componentInstance;

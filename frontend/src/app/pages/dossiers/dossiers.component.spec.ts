@@ -1,4 +1,3 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
 // FE/src/app/pages/dossiers/dossiers.component.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -124,13 +123,6 @@ describe('DossiersComponent', () => {
         NoopAnimationsModule,
         DossiersComponent],
       providers: [
-        {
-          provide: MatSnackBar,
-          useValue: {
-            open: () => ({
-              onAction: () => of(null),
-              afterDismissed: () => of(null)}),
-            dismiss: () => {}}},
         { provide: LOCALE_ID, useValue: 'fr-FR' },
         { provide: DossierApiService, useValue: dossierApiServiceSpy },
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
