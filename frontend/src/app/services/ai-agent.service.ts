@@ -372,13 +372,13 @@ export class AiAgentService {
         switch (type) {
             case 'SEARCH':
                 return [
-                    { label: 'Voir les annonces', icon: 'campaign', handler: () => this.router.navigate(['/annonces']) },
+                    { label: 'Voir les annonces', icon: 'megaphone', handler: () => this.router.navigate(['/annonces']) },
                     { label: 'Voir les dossiers', icon: 'folder', handler: () => this.router.navigate(['/dossiers']) }
                 ];
             case 'CREATE':
                 return [
-                    { label: 'Créer un dossier', icon: 'person_add', handler: () => this.router.navigate(['/dossiers'], { queryParams: { action: 'create' } }) },
-                    { label: 'Créer une annonce', icon: 'add_circle', handler: () => this.router.navigate(['/annonces/new']) }
+                    { label: 'Créer un dossier', icon: 'user', handler: () => this.router.navigate(['/dossiers'], { queryParams: { action: 'create' } }) },
+                    { label: 'Créer une annonce', icon: 'plus', handler: () => this.router.navigate(['/annonces/new']) }
                 ];
             case 'SEND_MESSAGE':
                 return [
@@ -386,7 +386,7 @@ export class AiAgentService {
                 ];
             default:
                 return [
-                    { label: 'Voir le tableau de bord', icon: 'dashboard', handler: () => this.router.navigate(['/dashboard']) },
+                    { label: 'Voir le tableau de bord', icon: 'chart', handler: () => this.router.navigate(['/dashboard']) },
                     { label: 'Recherche globale', icon: 'search', handler: () => this.router.navigate(['/search']) }
                 ];
         }

@@ -10,8 +10,7 @@ import {
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.service';
-import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
+import { DsIconComponent } from '../design-system/icons/ds-icon.component';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 
@@ -38,7 +37,7 @@ import { AsyncPipe } from '@angular/common';
         role="button"
         aria-label="Ouvrir l'assistant IA"
         title="Assistant IA (Alt+A)">
-        <mat-icon>auto_awesome</mat-icon>
+        <ds-icon name="sparkle" [size]="24" class="fab-icon"></ds-icon>
       </div>
     }
     
@@ -53,7 +52,7 @@ import { AsyncPipe } from '@angular/common';
         <div class="ai-panel-header">
           <div class="ai-panel-title-group">
             <div class="ai-panel-avatar">
-              <mat-icon>auto_awesome</mat-icon>
+              <ds-icon name="sparkle" [size]="20"></ds-icon>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <div>
@@ -63,29 +62,30 @@ import { AsyncPipe } from '@angular/common';
                   En ligne
                 </div>
               </div>
-              <mat-icon
-                style="font-size: 16px; height: 16px; width: 16px; color: rgba(255,255,255,0.7); cursor: help;"
+              <ds-icon
+                name="help-circle"
+                [size]="16"
+                class="help-hint"
                 title="Modèle de langage (LLM) spécialisé dans l'immobilier, capable d'exécuter des actions métier via le microservice agent-service.">
-                help_outline
-              </mat-icon>
+              </ds-icon>
             </div>
           </div>
           <div class="ai-panel-actions">
             <button
               type="button"
-              mat-icon-button
+              class="ai-icon-btn"
               (click)="clearConversation()"
               title="Effacer la conversation"
               aria-label="Effacer la conversation">
-              <mat-icon>delete_sweep</mat-icon>
+              <ds-icon name="trash" [size]="20"></ds-icon>
             </button>
             <button
               type="button"
-              mat-icon-button
+              class="ai-icon-btn"
               (click)="closePanel()"
               title="Fermer l'assistant (Esc)"
               aria-label="Fermer l'assistant IA">
-              <mat-icon>close</mat-icon>
+              <ds-icon name="close" [size]="20"></ds-icon>
             </button>
           </div>
         </div>
@@ -93,7 +93,7 @@ import { AsyncPipe } from '@angular/common';
         @if ((messages$ | async)?.length === 0) {
           <div class="ai-panel-welcome">
             <div class="welcome-icon">
-              <mat-icon>auto_awesome</mat-icon>
+              <ds-icon name="sparkle" [size]="40"></ds-icon>
             </div>
             <h3 class="welcome-title">Bonjour ! Je suis Atlas IA</h3>
             <p class="welcome-text">
@@ -127,7 +127,7 @@ import { AsyncPipe } from '@angular/common';
                 <!-- Agent avatar -->
                 @if (msg.role === 'agent' && !msg.isTyping) {
                   <div class="agent-avatar">
-                    <mat-icon>auto_awesome</mat-icon>
+                    <ds-icon name="sparkle" [size]="16"></ds-icon>
                   </div>
                 }
                 <!-- Typing indicator -->
@@ -153,7 +153,7 @@ import { AsyncPipe } from '@angular/common';
                         class="action-chip"
                         (click)="executeAction(action)"
                         type="button">
-                        <mat-icon>{{ action.icon }}</mat-icon>
+                        <ds-icon [name]="$any(action.icon)" [size]="16"></ds-icon>
                         {{ action.label }}
                       </button>
                     }
@@ -182,7 +182,7 @@ import { AsyncPipe } from '@angular/common';
             [disabled]="!inputValue.trim()"
             (click)="submit()"
             aria-label="Envoyer la demande à l'agent">
-            <mat-icon>send</mat-icon>
+            <ds-icon name="send" [size]="20"></ds-icon>
           </button>
         </div>
         <div class="ai-panel-hint">
@@ -216,10 +216,7 @@ import { AsyncPipe } from '@angular/common';
       transform: scale(1.1);
       box-shadow: 0 6px 28px color-mix(in srgb, var(--ds-marine) 55%, transparent);
     }
-    .ai-panel-fab mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
+    .ai-panel-fab .fab-icon {
       animation: rotateStar 8s linear infinite;
     }
     @keyframes fabIn {
@@ -278,10 +275,31 @@ import { AsyncPipe } from '@angular/common';
       color: var(--ds-text-inverse);
       flex-shrink: 0;
     }
-    .ai-panel-avatar mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+    .help-hint {
+      color: rgba(255, 255, 255, 0.7);
+      cursor: help;
+    }
+    .ai-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--ds-text-muted);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .ai-icon-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+      color: var(--ds-text);
+    }
+    .ai-icon-btn:focus-visible {
+      outline: 2px solid var(--ds-marine);
+      outline-offset: 2px;
     }
     .ai-panel-title {
       font-family: 'Urbanist', sans-serif;
@@ -324,10 +342,7 @@ import { AsyncPipe } from '@angular/common';
       text-align: center;
       gap: 8px;
     }
-    .welcome-icon mat-icon {
-      font-size: 40px;
-      width: 40px;
-      height: 40px;
+    .welcome-icon {
       color: var(--ds-primary);
       opacity: 0.85;
     }
@@ -406,11 +421,6 @@ import { AsyncPipe } from '@angular/common';
       flex-shrink: 0;
       margin-bottom: 2px;
     }
-    .agent-avatar mat-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-    }
     .message-bubble {
       max-width: 85%;
       padding: 10px 14px;
@@ -480,11 +490,6 @@ import { AsyncPipe } from '@angular/common';
       background: color-mix(in srgb, var(--ds-marine) 14%, transparent);
       transform: translateY(-1px);
     }
-    .action-chip mat-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-    }
 
     /* ── Input ────────────────────────────────────────────── */
     .ai-panel-input {
@@ -534,11 +539,6 @@ import { AsyncPipe } from '@angular/common';
     }
     .send-btn.active:hover {
       transform: scale(1.08);
-    }
-    .send-btn mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
     }
 
     /* ── Hint ─────────────────────────────────────────────── */
@@ -590,7 +590,7 @@ import { AsyncPipe } from '@angular/common';
       }
     }
   `],
-    imports: [MatIcon, MatIconButton, FormsModule, AsyncPipe]
+    imports: [DsIconComponent, FormsModule, AsyncPipe]
 })
 export class AiAgentPanelComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly conversationEl = viewChild<ElementRef<HTMLDivElement>>('conversationEl');
