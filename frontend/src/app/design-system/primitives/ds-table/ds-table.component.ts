@@ -1,10 +1,12 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, ContentChildren, QueryList, AfterContentInit } from '@angular/core';
+import { CommonModule, NgTemplateOutlet } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { DsSkeletonComponent } from '../ds-skeleton/ds-skeleton.component';
 import { DsButtonComponent } from '../ds-button/ds-button.component';
 import { DsIconComponent } from '../../icons/ds-icon.component';
+import { DsCellDirective } from './ds-cell.directive';
 
-export interface DsColumn<T = Record<string, unknown>> {
+export interface DsColumn<T = Record<string, any>> {
   key: string;
   header: string;
   width?: string;
@@ -18,7 +20,7 @@ export interface DsSortEvent {
   direction: 'asc' | 'desc';
 }
 
-export interface DsRowAction<T = Record<string, unknown>> {
+export interface DsRowAction<T = Record<string, any>> {
   icon?: string;
   label: string;
   action: string;
@@ -29,7 +31,7 @@ export interface DsRowAction<T = Record<string, unknown>> {
 @Component({
   selector: 'ds-table',
   standalone: true,
-  imports: [CommonModule, DsSkeletonComponent, DsButtonComponent, DsIconComponent],
+  imports: [CommonModule, DsSkeletonComponent, DsButtonComponent, DsIconComponent, NgTemplateOutlet],
   template: `
     <div class="ds-table-wrap" [class.ds-table-wrap--bordered]="bordered">
       <table class="ds-table" [attr.aria-label]="label">
@@ -79,17 +81,25 @@ export interface DsRowAction<T = Record<string, unknown>> {
           @if (loading) {
             @for (i of skeletonRows; track i) {
               <tr class="ds-table__row ds-table__row--skeleton">
+                @if (selectableRows) {
+                  <td class="ds-table__td"></td>
+                }
                 @for (col of columns; track col.key) {
                   <td class="ds-table__td">
                     <ds-skeleton variant="text" width="80%"></ds-skeleton>
                   </td>
                 }
+                @if (rowActions.length > 0) {
+                  <td class="ds-table__td"></td>
+                }
               </tr>
             }
           } @else if (rows.length === 0) {
             <tr>
-              <td [attr.colspan]="columns.length" class="ds-table__empty">
-                <span>{{ emptyMessage }}</span>
+              <td [attr.colspan]="columns.length + (selectableRows ? 1 : 0) + (rowActions.length > 0 ? 1 : 0)" class="ds-table__empty">
+                <div style="padding: 48px 0; text-align: center;">
+                  <span style="color: var(--ds-text-faint);">{{ emptyMessage }}</span>
+                </div>
               </td>
             </tr>
           } @else {
@@ -115,8 +125,10 @@ export interface DsRowAction<T = Record<string, unknown>> {
                   <td
                     class="ds-table__td"
                     [style.text-align]="col.align || 'left'">
-                    @if (col.cell) {
-                      <span [innerHTML]="col.cell(row)"></span>
+                    @if (getTemplate(col.key)) {
+                      <ng-container *ngTemplateOutlet="getTemplate(col.key)!; context: { $implicit: row }"></ng-container>
+                    } @else if (col.cell) {
+                      <span [innerHTML]="safeCell(col, row)"></span>
                     } @else {
                       {{ getCellValue(row, col.key) }}
                     }
@@ -124,17 +136,21 @@ export interface DsRowAction<T = Record<string, unknown>> {
                 }
                 @if (rowActions.length > 0) {
                   <td class="ds-table__td ds-table__td--actions">
-                    @for (action of getVisibleActions(row); track action.action) {
-                      <ds-button
-                        variant="icon"
-                        size="sm"
-                        [ariaLabel]="action.ariaLabel || action.label"
-                        (dsClick)="onRowAction(row, action.action, $event)">
-                        @if (action.icon) {
-                          <ds-icon [name]="action.icon"></ds-icon>
-                        }
-                      </ds-button>
-                    }
+                    <div style="display: flex; gap: 4px; justify-content: flex-end;">
+                      @for (action of getVisibleActions(row); track action.action) {
+                        <ds-button
+                          variant="icon"
+                          size="sm"
+                          [ariaLabel]="action.ariaLabel || action.label"
+                          (dsClick)="onRowAction(row, action.action, $event)">
+                          @if (action.icon) {
+                            <ds-icon [name]="action.icon" [size]="20"></ds-icon>
+                          } @else {
+                            <span>{{ action.label }}</span>
+                          }
+                        </ds-button>
+                      }
+                    </div>
                   </td>
                 }
               </tr>
@@ -142,11 +158,28 @@ export interface DsRowAction<T = Record<string, unknown>> {
           }
         </tbody>
       </table>
+
+      @if (showPagination && paginationData) {
+        <div class="ds-table__pagination" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 12px 24px; border-top: 1px solid var(--ds-divider); background: var(--ds-surface-2);">
+          <span style="font-size: 13px; color: var(--ds-text-faint);">
+            {{ (paginationData.number * paginationData.size) + 1 }}-{{ Math.min((paginationData.number + 1) * paginationData.size, paginationData.totalElements) }} sur {{ paginationData.totalElements }}
+          </span>
+          <div style="display: flex; gap: 4px;">
+            <ds-button variant="icon" size="sm" [disabled]="paginationData.first" (dsClick)="paginationChange.emit('previous')">
+              <ds-icon name="chevron-left" [size]="16"></ds-icon>
+            </ds-button>
+            <ds-button variant="icon" size="sm" [disabled]="paginationData.last" (dsClick)="paginationChange.emit('next')">
+              <ds-icon name="chevron-right" [size]="16"></ds-icon>
+            </ds-button>
+          </div>
+        </div>
+      }
     </div>
   `,
   styleUrls: ['./ds-table.component.scss'],
 })
-export class DsTableComponent<T extends Record<string, unknown> = Record<string, unknown>> {
+export class DsTableComponent<T extends Record<string, any> = Record<string, any>> implements AfterContentInit {
+  constructor(private sanitizer: DomSanitizer) {}
   @Input() columns: DsColumn<T>[] = [];
   @Input() rows: T[] = [];
   @Input() loading = false;
@@ -161,11 +194,40 @@ export class DsTableComponent<T extends Record<string, unknown> = Record<string,
   @Input() rowActions: DsRowAction<T>[] = [];
   @Input() selectableRows = false;
   @Input() selectedRows: T[] = [];
+  
+  @Input() showPagination = false;
+  @Input() paginationData?: any;
 
   @Output() sort = new EventEmitter<DsSortEvent>();
   @Output() rowClick = new EventEmitter<T>();
   @Output() rowAction = new EventEmitter<{ action: string; row: T }>();
   @Output() selectionChange = new EventEmitter<T[]>();
+  @Output() paginationChange = new EventEmitter<'next' | 'previous'>();
+
+  @ContentChildren(DsCellDirective) cellTemplates!: QueryList<DsCellDirective>;
+  private templateMap = new Map<string, any>();
+
+  Math = Math;
+
+  ngAfterContentInit(): void {
+    this.updateTemplateMap();
+    this.cellTemplates.changes.subscribe(() => this.updateTemplateMap());
+  }
+
+  private updateTemplateMap(): void {
+    this.templateMap.clear();
+    this.cellTemplates.forEach(directive => {
+      this.templateMap.set(directive.key, directive.template);
+    });
+  }
+
+  getTemplate(key: string): any {
+    return this.templateMap.get(key);
+  }
+
+  safeCell(col: DsColumn<any>, row: any): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(col.cell!(row));
+  }
 
   get skeletonRows(): number[] {
     return Array.from({ length: this.loadingRowCount }, (_, i) => i);

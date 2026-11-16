@@ -1,8 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { NotificationCenterComponent } from './notification-center.component';
 import { NotificationApiService } from '../services/notification-api.service';
@@ -15,8 +13,6 @@ describe('NotificationCenterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
     imports: [RouterTestingModule,
-        MatIconModule,
-        MatButtonModule,
         MatButtonToggleModule,
         NotificationCenterComponent],
     providers: [NotificationApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]

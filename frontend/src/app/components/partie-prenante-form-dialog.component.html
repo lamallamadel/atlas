@@ -1,258 +1,70 @@
-<div @slideIn role="dialog" aria-labelledby="dialog-title" aria-modal="true" class="elegant-dialog">
-  <h2 mat-dialog-title id="dialog-title" class="dialog-title-elegant">
-    <mat-icon>group</mat-icon>
+<ds-dialog-header (close)="onCancel()">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <ds-icon name="user" [size]="24" aria-hidden="true"></ds-icon>
     <span>{{ isEditMode ? 'Modifier' : 'Ajouter' }} une partie prenante</span>
-  </h2>
+  </div>
+</ds-dialog-header>
 
-  <mat-dialog-content class="elegant-dialog-content">
-    <form [formGroup]="partieForm" class="elegant-form partie-form">
-      <div class="form-section-card">
-        <div class="section-header">
-          <mat-icon>badge</mat-icon>
-          <div>
-            <h3 class="section-title">Identité</h3>
-            <p class="section-subtitle">Informations de la partie prenante</p>
-          </div>
-        </div>
+<ds-dialog-content>
+  <form [formGroup]="partieForm" class="ds-form-stack">
+    <ds-select
+      label="Rôle"
+      [options]="roleOptions"
+      formControlName="role"
+      prefixIcon="user"
+      [required]="true">
+    </ds-select>
 
-        <div class="section-body">
-          <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': partieForm.get('role')?.value,
-                 'field-error': partieForm.get('role')?.invalid && partieForm.get('role')?.touched
-               }">
-            <select
-              id="role"
-              formControlName="role"
-              aria-required="true"
-              [attr.aria-invalid]="partieForm.get('role')?.hasError('required') && partieForm.get('role')?.touched">
-              <option value="">Sélectionner un rôle</option>
-              @for (option of roleOptions; track option) {
-                <option [value]="option.value">
-                  {{ option.label }}
-                </option>
-              }
-            </select>
-            <label for="role">Rôle <span class="required-indicator">*</span></label>
-            @if (partieForm.get('role')?.touched) {
-              <div class="validation-icon">
-                @if (partieForm.get('role')?.valid) {
-                  <mat-icon>check_circle</mat-icon>
-                }
-                @if (partieForm.get('role')?.invalid) {
-                  <mat-icon>error</mat-icon>
-                }
-              </div>
-            }
-            @if (!partieForm.get('role')?.touched || partieForm.get('role')?.valid) {
-              <div class="field-helper">
-                <mat-icon>info</mat-icon>
-                <span>Sélectionnez le rôle de la partie prenante</span>
-              </div>
-            }
-            @if (partieForm.get('role')?.invalid && partieForm.get('role')?.touched) {
-              <div class="error-message" role="alert">
-                <mat-icon>error</mat-icon>
-                <span>{{ getErrorMessage('role') }}</span>
-              </div>
-            }
-          </div>
+    <div class="ds-form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <ds-input
+        label="Prénom"
+        formControlName="firstName"
+        placeholder="Jean"
+        [required]="true"
+        [error]="getErrorMessage('firstName')">
+      </ds-input>
 
-          <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': partieForm.get('firstName')?.value,
-                 'field-error': partieForm.get('firstName')?.invalid && partieForm.get('firstName')?.touched,
-                 'field-valid': partieForm.get('firstName')?.valid && partieForm.get('firstName')?.touched
-               }">
-            <input
-              type="text"
-              id="firstName"
-              formControlName="firstName"
-              placeholder=" "
-              class="has-prefix"
-              aria-required="true"
-              [attr.aria-invalid]="partieForm.get('firstName')?.hasError('required') && partieForm.get('firstName')?.touched">
-              <label for="firstName">Prénom <span class="required-indicator">*</span></label>
-              <div class="field-prefix">
-                <mat-icon>person</mat-icon>
-              </div>
-              @if (partieForm.get('firstName')?.touched) {
-                <div class="validation-icon">
-                  @if (partieForm.get('firstName')?.valid) {
-                    <mat-icon>check_circle</mat-icon>
-                  }
-                  @if (partieForm.get('firstName')?.invalid) {
-                    <mat-icon>error</mat-icon>
-                  }
-                </div>
-              }
-              @if (partieForm.get('firstName')?.invalid && partieForm.get('firstName')?.touched) {
-                <div class="error-message" role="alert">
-                  <mat-icon>error</mat-icon>
-                  <span>{{ getErrorMessage('firstName') }}</span>
-                </div>
-              }
-            </div>
+      <ds-input
+        label="Nom"
+        formControlName="lastName"
+        placeholder="Dupont"
+        [required]="true"
+        [error]="getErrorMessage('lastName')">
+      </ds-input>
+    </div>
 
-            <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': partieForm.get('lastName')?.value,
-                 'field-error': partieForm.get('lastName')?.invalid && partieForm.get('lastName')?.touched,
-                 'field-valid': partieForm.get('lastName')?.valid && partieForm.get('lastName')?.touched
-               }">
-              <input
-                type="text"
-                id="lastName"
-                formControlName="lastName"
-                placeholder=" "
-                class="has-prefix"
-                aria-required="true"
-                [attr.aria-invalid]="partieForm.get('lastName')?.hasError('required') && partieForm.get('lastName')?.touched">
-                <label for="lastName">Nom <span class="required-indicator">*</span></label>
-                <div class="field-prefix">
-                  <mat-icon>person</mat-icon>
-                </div>
-                @if (partieForm.get('lastName')?.touched) {
-                  <div class="validation-icon">
-                    @if (partieForm.get('lastName')?.valid) {
-                      <mat-icon>check_circle</mat-icon>
-                    }
-                    @if (partieForm.get('lastName')?.invalid) {
-                      <mat-icon>error</mat-icon>
-                    }
-                  </div>
-                }
-                @if (partieForm.get('lastName')?.invalid && partieForm.get('lastName')?.touched) {
-                  <div class="error-message" role="alert">
-                    <mat-icon>error</mat-icon>
-                    <span>{{ getErrorMessage('lastName') }}</span>
-                  </div>
-                }
-              </div>
-            </div>
-          </div>
+    <ds-input
+      label="Téléphone"
+      formControlName="phone"
+      placeholder="+33 6 12 34 56 78"
+      prefixIcon="phone"
+      [error]="getErrorMessage('phone')">
+    </ds-input>
 
-          <div class="form-section-card">
-            <div class="section-header">
-              <mat-icon>contact_phone</mat-icon>
-              <div>
-                <h3 class="section-title">Contact</h3>
-                <p class="section-subtitle">Coordonnées de la partie prenante</p>
-              </div>
-            </div>
+    <ds-input
+      label="Email"
+      formControlName="email"
+      placeholder="jean.dupont@example.com"
+      prefixIcon="mail"
+      [error]="getErrorMessage('email')">
+    </ds-input>
+  </form>
+</ds-dialog-content>
 
-            <div class="section-body">
-              <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': partieForm.get('phone')?.value,
-                 'field-error': partieForm.get('phone')?.invalid && partieForm.get('phone')?.touched,
-                 'field-valid': partieForm.get('phone')?.valid && partieForm.get('phone')?.value
-               }">
-                <input
-                  type="tel"
-                  id="phone"
-                  formControlName="phone"
-                  placeholder=" "
-                  class="has-prefix"
-                  aria-label="Numéro de téléphone"
-                  [attr.aria-invalid]="partieForm.get('phone')?.invalid && partieForm.get('phone')?.touched">
-                  <label for="phone">Téléphone</label>
-                  <div class="field-prefix">
-                    <mat-icon>phone</mat-icon>
-                  </div>
-                  @if (partieForm.get('phone')?.touched || partieForm.get('phone')?.value) {
-                    <div class="validation-icon">
-                      @if (partieForm.get('phone')?.valid && partieForm.get('phone')?.value) {
-                        <mat-icon>check_circle</mat-icon>
-                      }
-                      @if (partieForm.get('phone')?.invalid && partieForm.get('phone')?.touched) {
-                        <mat-icon>error</mat-icon>
-                      }
-                    </div>
-                  }
-                  @if (!partieForm.get('phone')?.touched || partieForm.get('phone')?.valid) {
-                    <div class="field-helper">
-                      <mat-icon>info</mat-icon>
-                      <span>Format: +33612345678 ou 0612345678</span>
-                    </div>
-                  }
-                  @if (partieForm.get('phone')?.invalid && partieForm.get('phone')?.touched) {
-                    <div class="error-message" role="alert">
-                      <mat-icon>error</mat-icon>
-                      <span>{{ getErrorMessage('phone') }}</span>
-                    </div>
-                  }
-                </div>
-
-                <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': partieForm.get('email')?.value,
-                 'field-error': partieForm.get('email')?.invalid && partieForm.get('email')?.touched,
-                 'field-valid': partieForm.get('email')?.valid && partieForm.get('email')?.value
-               }">
-                  <input
-                    type="email"
-                    id="email"
-                    formControlName="email"
-                    placeholder=" "
-                    class="has-prefix"
-                    aria-label="Adresse email"
-                    [attr.aria-invalid]="partieForm.get('email')?.invalid && partieForm.get('email')?.touched">
-                    <label for="email">Email</label>
-                    <div class="field-prefix">
-                      <mat-icon>email</mat-icon>
-                    </div>
-                    @if (partieForm.get('email')?.touched || partieForm.get('email')?.value) {
-                      <div class="validation-icon">
-                        @if (partieForm.get('email')?.valid && partieForm.get('email')?.value) {
-                          <mat-icon>check_circle</mat-icon>
-                        }
-                        @if (partieForm.get('email')?.invalid && partieForm.get('email')?.touched) {
-                          <mat-icon>error</mat-icon>
-                        }
-                      </div>
-                    }
-                    @if (!partieForm.get('email')?.touched || partieForm.get('email')?.valid) {
-                      <div class="field-helper">
-                        <mat-icon>info</mat-icon>
-                        <span>Format: exemple&#64;domaine.com</span>
-                      </div>
-                    }
-                    @if (partieForm.get('email')?.invalid && partieForm.get('email')?.touched) {
-                      <div class="error-message" role="alert">
-                        <mat-icon>error</mat-icon>
-                        <span>{{ getErrorMessage('email') }}</span>
-                      </div>
-                    }
-                  </div>
-                </div>
-              </div>
-            </form>
-          </mat-dialog-content>
-
-          <mat-dialog-actions align="end" class="elegant-dialog-actions">
-            <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler l'ajout de partie prenante">
-              <mat-icon>close</mat-icon>
-              Annuler
-            </button>
-            <button mat-raised-button
-              color="primary"
-              (click)="onSubmit()"
-              [disabled]="!partieForm.valid || isSubmitting"
-              [attr.aria-busy]="isSubmitting"
-              [attr.aria-label]="isSubmitting ? (isEditMode ? 'Modification en cours' : 'Ajout en cours') : (isEditMode ? 'Modifier la partie prenante' : 'Ajouter la partie prenante')">
-              @if (isSubmitting) {
-                <ds-skeleton variant="circle" width="20px" height="20px" aria-hidden="true"></ds-skeleton>
-              }
-              @if (!isSubmitting) {
-                <mat-icon>{{ isEditMode ? 'save' : 'person_add' }}</mat-icon>
-              }
-              @if (!isSubmitting) {
-                <span>{{ isEditMode ? 'Modifier' : 'Ajouter' }}</span>
-              }
-              @if (isSubmitting) {
-                <span class="sr-only" role="status" aria-live="polite">{{ isEditMode ? 'Modification en cours' : 'Ajout en cours' }}</span>
-              }
-            </button>
-          </mat-dialog-actions>
-        </div>
+<ds-dialog-actions align="end">
+  <ds-button variant="ghost" size="md" (dsClick)="onCancel()" [disabled]="isSubmitting">
+    Annuler
+  </ds-button>
+  <ds-button
+    variant="marine"
+    size="md"
+    (dsClick)="onSubmit()"
+    [disabled]="!partieForm.valid || isSubmitting">
+    @if (isSubmitting) {
+      <span class="spinner-small" style="margin-right: 8px; border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>
+    } @else {
+      <ds-icon name="check" [size]="20" style="margin-right: 8px;"></ds-icon>
+    }
+    <span>{{ isSubmitting ? 'En cours...' : (isEditMode ? 'Enregistrer' : 'Ajouter') }}</span>
+  </ds-button>
+</ds-dialog-actions>

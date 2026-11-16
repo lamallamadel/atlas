@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { MessageFormDialogComponent } from './message-form-dialog.component';
 import { DatetimePickerComponent } from './datetime-picker.component';
-import { MaterialTestingModule } from '../testing/material-testing.module';
 
 describe('MessageFormDialogComponent', () => {
   let component: MessageFormDialogComponent;
@@ -11,15 +10,11 @@ describe('MessageFormDialogComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        MaterialTestingModule,
         MessageFormDialogComponent,
-        DatetimePickerComponent,
-      ],
+        DatetimePickerComponent],
       providers: [
-        { provide: MatDialogRef, useValue: { close: vi.fn() } },
-        { provide: MAT_DIALOG_DATA, useValue: { dossierId: 1 } },
-      ],
-    }).compileComponents();
+        { provide: DialogRef, useValue: { close: vi.fn() } },
+        { provide: DIALOG_DATA, useValue: { dossierId: 1 } }]}).compileComponents();
 
     fixture = TestBed.createComponent(MessageFormDialogComponent);
     component = fixture.componentInstance;

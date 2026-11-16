@@ -1,16 +1,19 @@
 import { Component, OnChanges, SimpleChanges, input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { WhatsAppTemplate, ComponentType, TemplateComponent, ButtonType } from '../models/template.model';
 import { DsBadgeComponent, DsButtonComponent, DsCardComponent, DsIconComponent } from '../../../design-system';
 import { LineBreakPipe } from '../pipes/line-break.pipe';
 
 @Component({
     selector: 'app-template-preview',
+    standalone: true,
     templateUrl: './template-preview.component.html',
     styleUrls: ['./template-preview.component.css'],
-    imports: [DsCardComponent, DsIconComponent, DsButtonComponent, DsBadgeComponent, LineBreakPipe]
+    imports: [CommonModule, DsCardComponent, DsIconComponent, DsButtonComponent, DsBadgeComponent, LineBreakPipe]
 })
 export class TemplatePreviewComponent implements OnChanges {
   readonly template = input<WhatsAppTemplate>();
+  readonly formData = input<any>();
   
   formattedMessage = '';
   headerComponent?: TemplateComponent;

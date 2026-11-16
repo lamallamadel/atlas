@@ -2,10 +2,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from "rxjs";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatDialogModule } from '@angular/material/dialog';
-import {  } from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { DocumentListComponent } from './document-list.component';
@@ -20,10 +16,6 @@ describe('DocumentListComponent', () => {
     TestBed.configureTestingModule({
     schemas: [NO_ERRORS_SCHEMA],
     imports: [CommonModule,
-        MatDialogModule,
-        
-        MatIconModule,
-        MatButtonModule,
         DocumentListComponent],
     providers: [
         { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },DocumentApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]

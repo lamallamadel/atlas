@@ -1,11 +1,9 @@
 import {
   ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+  TestBed} from '@angular/core/testing';
 import { AiAgentPanelComponent } from './ai-agent-panel.component';
 import { AiAgentService, AgentMessage } from '../services/ai-agent.service';
 import { FormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -28,8 +26,7 @@ describe('AiAgentPanelComponent', () => {
       closePanel: vi.fn().mockName('AiAgentService.closePanel'),
       togglePanel: vi.fn().mockName('AiAgentService.togglePanel'),
       clearConversation: vi.fn().mockName('AiAgentService.clearConversation'),
-      processQuery: vi.fn().mockName('AiAgentService.processQuery'),
-    } as Record<string, unknown>;
+      processQuery: vi.fn().mockName('AiAgentService.processQuery')} as Record<string, unknown>;
     // Mock the properties (via bracket notation: Record<> index signature TS4111)
     spy['panelOpen$'] = mockPanelOpen$.asObservable();
     spy['messages$'] = mockMessages$.asObservable();
@@ -40,12 +37,9 @@ describe('AiAgentPanelComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         FormsModule,
-        MatIconModule,
         NoopAnimationsModule,
-        AiAgentPanelComponent,
-      ],
-      providers: [{ provide: AiAgentService, useValue: spy as unknown as AiAgentService }],
-    }).compileComponents();
+        AiAgentPanelComponent],
+      providers: [{ provide: AiAgentService, useValue: spy as unknown as AiAgentService }]}).compileComponents();
 
     fixture = TestBed.createComponent(AiAgentPanelComponent);
     component = fixture.componentInstance;

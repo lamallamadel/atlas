@@ -20,8 +20,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
   selector: 'app-global-search-bar',
   template: '',
   standalone: true,
-  imports: [RouterTestingModule, MaterialTestingModule],
-})
+  imports: [RouterTestingModule, MaterialTestingModule]})
 class GlobalSearchBarStubComponent {}
 
 describe('AppLayoutComponent', () => {
@@ -36,16 +35,13 @@ describe('AppLayoutComponent', () => {
 
   beforeEach(async () => {
     mockAuthService = {
-      logout: vi.fn().mockName('AuthService.logout'),
-    };
+      logout: vi.fn().mockName('AuthService.logout')};
     mockThemeService = {
       toggleTheme: vi.fn().mockName('ThemeService.toggleTheme'),
       getCurrentTheme: vi.fn().mockName('ThemeService.getCurrentTheme'),
-      currentTheme$: of('light'),
-    };
+      currentTheme$: of('light')};
     mockBreakpointObserver = {
-      observe: vi.fn().mockName('BreakpointObserver.observe'),
-    };
+      observe: vi.fn().mockName('BreakpointObserver.observe')};
     mockBreakpointObserver.observe.mockReturnValue(
       of({ matches: false, breakpoints: {} })
     );
@@ -63,17 +59,14 @@ describe('AppLayoutComponent', () => {
         .mockName('KeyboardShortcutService.getShortcutsByCategory'),
       closeShortcutHelp: vi
         .fn()
-        .mockName('KeyboardShortcutService.closeShortcutHelp'),
-    };
+        .mockName('KeyboardShortcutService.closeShortcutHelp')};
     mockKeyboardShortcutService.getPreferences.mockReturnValue({
       keyboardShortcutsEnabled: true,
-      showShortcutHints: true,
-    });
+      showShortcutHints: true});
     mockKeyboardShortcutService.getShortcutsByCategory.mockReturnValue([]);
     (mockKeyboardShortcutService as any).preferences$ = of({
       keyboardShortcutsEnabled: true,
-      showShortcutHints: true,
-    });
+      showShortcutHints: true});
     (mockKeyboardShortcutService as any).shortcutHelpVisible$ = of(false);
     (mockKeyboardShortcutService as any).commandPaletteVisible$ = of(false);
 
@@ -85,23 +78,19 @@ describe('AppLayoutComponent', () => {
       isTourCompleted: vi
         .fn()
         .mockName('OnboardingTourService.isTourCompleted'),
-      resetTour: vi.fn().mockName('OnboardingTourService.resetTour'),
-    };
+      resetTour: vi.fn().mockName('OnboardingTourService.resetTour')};
     mockOnboardingTourService.resetAllTours.mockImplementation(() => {});
     mockTourDefinitionService = {
       getCoreTours: vi.fn().mockName('TourDefinitionService.getCoreTours'),
-      getTour: vi.fn().mockName('TourDefinitionService.getTour'),
-    };
+      getTour: vi.fn().mockName('TourDefinitionService.getTour')};
     mockTourDefinitionService.getCoreTours.mockReturnValue([]);
 
     const mockDossierApiService = {
-      getPendingCount: vi.fn().mockName('DossierApiService.getPendingCount'),
-    };
+      getPendingCount: vi.fn().mockName('DossierApiService.getPendingCount')};
     mockDossierApiService.getPendingCount.mockReturnValue(of(0));
     const mockNotificationApiService = {
       getUnreadCount: vi.fn().mockName('NotificationApiService.getUnreadCount'),
-      list: vi.fn().mockName('NotificationApiService.list'),
-    };
+      list: vi.fn().mockName('NotificationApiService.list')};
     mockNotificationApiService.getUnreadCount.mockReturnValue(of(0));
     (mockNotificationApiService as any).unreadCount$ = of(0);
     mockNotificationApiService.list.mockReturnValue(of([]));
@@ -112,8 +101,7 @@ describe('AppLayoutComponent', () => {
         MaterialTestingModule,
         BrowserAnimationsModule,
         AppLayoutComponent,
-        GlobalSearchBarStubComponent,
-      ],
+        GlobalSearchBarStubComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: ThemeService, useValue: mockThemeService },
@@ -121,17 +109,13 @@ describe('AppLayoutComponent', () => {
         { provide: DossierApiService, useValue: mockDossierApiService },
         {
           provide: NotificationApiService,
-          useValue: mockNotificationApiService,
-        },
+          useValue: mockNotificationApiService},
         {
           provide: KeyboardShortcutService,
-          useValue: mockKeyboardShortcutService,
-        },
+          useValue: mockKeyboardShortcutService},
         { provide: OnboardingTourService, useValue: mockOnboardingTourService },
-        { provide: TourDefinitionService, useValue: mockTourDefinitionService },
-      ],
-      schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
+        { provide: TourDefinitionService, useValue: mockTourDefinitionService }],
+      schemas: [NO_ERRORS_SCHEMA]}).compileComponents();
 
     fixture = TestBed.createComponent(AppLayoutComponent);
     component = fixture.componentInstance;
@@ -140,8 +124,7 @@ describe('AppLayoutComponent', () => {
     const drawerSpy = {
       close: vi.fn().mockName('MatSidenav.close'),
       open: vi.fn().mockName('MatSidenav.open'),
-      toggle: vi.fn().mockName('MatSidenav.toggle'),
-    };
+      toggle: vi.fn().mockName('MatSidenav.toggle')};
     (component as any).drawer = signal(drawerSpy);
 
     fixture.detectChanges();
@@ -184,25 +167,12 @@ describe('AppLayoutComponent', () => {
     });
   });
 
-  it('should close sidenav on mobile when closeSidenavOnMobile is called', () => {
-    mockBreakpointObserver.observe.mockReturnValue(
-      of({ matches: true, breakpoints: {} })
-    );
+  it('should close mobile sidebar when mobileSidebarOpen is set to false', () => {
+    component.mobileSidebarOpen.set(true);
+    expect(component.mobileSidebarOpen()).toBe(true);
 
-    // Re-create component to pick up new observer value
-    const testFixture = TestBed.createComponent(AppLayoutComponent);
-    const testComponent = testFixture.componentInstance;
-    const drawerSpy = {
-      close: vi.fn().mockName('MatSidenav.close'),
-      open: vi.fn().mockName('MatSidenav.open'),
-      toggle: vi.fn().mockName('MatSidenav.toggle'),
-    };
-    (testComponent as any).drawer = signal(drawerSpy);
-
-    testFixture.detectChanges();
-    testComponent.closeSidenavOnMobile();
-
-    expect(drawerSpy.close).toHaveBeenCalled();
+    component.mobileSidebarOpen.set(false);
+    expect(component.mobileSidebarOpen()).toBe(false);
   });
 
   it('should toggle theme when toggleTheme is called', () => {

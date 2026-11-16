@@ -1,19 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { PhotoGalleryComponent, Photo } from './photo-gallery.component';
-import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
+import { DsDialogService } from '../design-system';
 import { of } from 'rxjs';
 
 describe('PhotoGalleryComponent', () => {
   let component: PhotoGalleryComponent;
   let fixture: ComponentFixture<PhotoGalleryComponent>;
-  let mockDialog: AngularVitestPartialMock<MatDialog>;
-  let mockSnackBar: AngularVitestPartialMock<MatSnackBar>;
+  let mockDsDialog: { open: ReturnType<typeof vi.fn> };
 
   const mockPhotos: Photo[] = [
     {
@@ -23,8 +18,7 @@ describe('PhotoGalleryComponent', () => {
       alt: 'Photo 1',
       title: 'Test Photo 1',
       width: 1920,
-      height: 1080,
-    },
+      height: 1080},
     {
       id: 2,
       url: 'https://example.com/photo2.jpg',
@@ -32,8 +26,7 @@ describe('PhotoGalleryComponent', () => {
       alt: 'Photo 2',
       title: 'Test Photo 2',
       width: 1920,
-      height: 1080,
-    },
+      height: 1080},
     {
       id: 3,
       url: 'https://example.com/photo3.jpg',
@@ -41,31 +34,20 @@ describe('PhotoGalleryComponent', () => {
       alt: 'Photo 3',
       title: 'Test Photo 3',
       width: 1920,
-      height: 1080,
-    },
-  ];
+      height: 1080}];
 
   beforeEach(async () => {
-    mockDialog = {
-      open: vi.fn().mockName('MatDialog.open'),
-    };
-    mockSnackBar = {
-      open: vi.fn().mockName('MatSnackBar.open'),
+    mockDsDialog = {
+      open: vi.fn().mockReturnValue({ closed: of(false) })
     };
 
     await TestBed.configureTestingModule({
       imports: [
         DragDropModule,
-        MatIconModule,
-        MatButtonModule,
         NoopAnimationsModule,
-        PhotoGalleryComponent,
-      ],
+        PhotoGalleryComponent],
       providers: [
-        { provide: MatDialog, useValue: mockDialog },
-        { provide: MatSnackBar, useValue: mockSnackBar },
-      ],
-    }).compileComponents();
+        { provide: DsDialogService, useValue: mockDsDialog }]}).compileComponents();
 
     fixture = TestBed.createComponent(PhotoGalleryComponent);
     component = fixture.componentInstance;
@@ -143,18 +125,6 @@ describe('PhotoGalleryComponent', () => {
     expect(component.lightboxZoom).toBe(1);
   });
 
-  it('should reset zoom', () => {
-    component.lightboxZoom = 2;
-    component.lightboxTranslateX = 100;
-    component.lightboxTranslateY = 50;
-
-    component.resetZoom();
-
-    expect(component.lightboxZoom).toBe(1);
-    expect(component.lightboxTranslateX).toBe(0);
-    expect(component.lightboxTranslateY).toBe(0);
-  });
-
   it('should emit photosReordered on drag and drop', () => {
     fixture.componentRef.setInput('photos', mockPhotos);
     fixture.componentRef.setInput('editable', true);
@@ -168,8 +138,7 @@ describe('PhotoGalleryComponent', () => {
       container: {} as unknown,
       previousContainer: {} as unknown,
       isPointerOverContainer: true,
-      distance: { x: 0, y: 0 },
-    } as CdkDragDrop<Photo[]>;
+      distance: { x: 0, y: 0 }} as CdkDragDrop<Photo[]>;
 
     component.onDrop(event);
 
@@ -177,13 +146,7 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should open delete confirmation dialog', () => {
-    const mockDialogRef = {
-      afterClosed: () => of(true),
-    };
-    mockDialog.open.mockReturnValue(
-      mockDialogRef as unknown as MatDialogRef<ConfirmDeleteDialogComponent>
-    );
-
+    mockDsDialog.open.mockReturnValue({ closed: of(true) });
     vi.spyOn(component.photoDeleted, 'emit');
 
     const photo = mockPhotos[0];
@@ -191,7 +154,7 @@ describe('PhotoGalleryComponent', () => {
 
     component.deletePhoto(photo, event);
 
-    expect(mockDialog.open).toHaveBeenCalled();
+    expect(mockDsDialog.open).toHaveBeenCalled();
     expect(component.photoDeleted.emit).toHaveBeenCalledWith(photo);
   });
 
@@ -209,9 +172,8 @@ describe('PhotoGalleryComponent', () => {
     const photo = mockPhotos[0];
     const srcset = component.getSrcset(photo);
 
-    expect(srcset).toContain('320w');
-    expect(srcset).toContain('640w');
-    expect(srcset).toContain('960w');
+    expect(srcset).toContain('300w');
+    expect(srcset).toContain('1200w');
   });
 
   it('should get current photo', () => {

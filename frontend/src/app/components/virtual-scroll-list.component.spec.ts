@@ -12,9 +12,7 @@ describe('VirtualScrollListComponent', () => {
       imports: [
         ScrollingModule,
         VirtualScrollListComponent,
-        LoadingSkeletonComponent,
-      ],
-    });
+        LoadingSkeletonComponent]});
     fixture = TestBed.createComponent(VirtualScrollListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

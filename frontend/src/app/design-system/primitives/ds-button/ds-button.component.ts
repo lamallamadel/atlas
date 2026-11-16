@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatRippleModule } from '@angular/material/core';
+import { DsIconComponent } from '../../icons/ds-icon.component';
 
 export type DsButtonVariant = 'marine' | 'copper' | 'ghost' | 'danger' | 'icon';
 export type DsButtonSize = 'sm' | 'md' | 'lg';
@@ -8,7 +9,7 @@ export type DsButtonSize = 'sm' | 'md' | 'lg';
 @Component({
   selector: 'ds-button',
   standalone: true,
-  imports: [CommonModule, MatRippleModule],
+  imports: [CommonModule, MatRippleModule, DsIconComponent],
   template: `
     <button
       [attr.type]="nativeType"
@@ -24,7 +25,7 @@ export type DsButtonSize = 'sm' | 'md' | 'lg';
         <span class="ds-btn__spinner" aria-hidden="true"></span>
       }
       @if (!loading && prefixIcon) {
-        <span class="ds-btn__icon" aria-hidden="true" [innerHTML]="prefixIcon"></span>
+        <span class="ds-btn__icon" aria-hidden="true"><ds-icon [name]="prefixIcon!" [size]="16"></ds-icon></span>
       }
       <ng-content></ng-content>
     </button>

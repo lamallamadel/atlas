@@ -1,4 +1,4 @@
-<div class="pro-page">
+<div class="pro-page ds-form-stack" style="padding: 32px; max-width: var(--ds-content-wide); margin: 0 auto;">
 
   <!-- ── En-tête ── -->
   <ds-page-header
@@ -8,47 +8,35 @@
     description="Gérez vos leads et transactions immobilières en un coup d'œil.">
     <ng-container slot="actions">
       <!-- Toggle vue liste / kanban -->
-      <div class="dos-view-toggle" role="group" aria-label="Mode d'affichage">
-        <button
-          class="dos-view-btn"
-          [class.dos-view-btn--active]="viewMode === 'list'"
-          (click)="viewMode = 'list'"
-          aria-label="Vue liste"
-          [attr.aria-pressed]="viewMode === 'list'">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <button
-          class="dos-view-btn"
-          [class.dos-view-btn--active]="viewMode === 'kanban'"
-          (click)="viewMode = 'kanban'"
-          aria-label="Vue Kanban"
-          [attr.aria-pressed]="viewMode === 'kanban'">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <rect x="1" y="3" width="4" height="10" rx="1" stroke="currentColor" stroke-width="1.3"/>
-            <rect x="6" y="3" width="4" height="7"  rx="1" stroke="currentColor" stroke-width="1.3"/>
-            <rect x="11" y="3" width="4" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>
-          </svg>
-        </button>
+      <div class="dos-view-toggle" role="group" aria-label="Mode d'affichage" style="display: flex; gap: 4px; background: var(--ds-bg-subtle); padding: 4px; border-radius: var(--ds-radius-md); margin-right: 16px;">
+        <ds-button
+          [variant]="viewMode === 'list' ? 'marine' : 'ghost'"
+          size="sm"
+          (dsClick)="viewMode = 'list'"
+          ariaLabel="Vue liste"
+          style="padding: 0; width: 32px; height: 32px; justify-content: center;">
+          <ds-icon name="plus" [size]="16" style="transform: rotate(45deg);"></ds-icon>
+        </ds-button>
+        <ds-button
+          [variant]="viewMode === 'kanban' ? 'marine' : 'ghost'"
+          size="sm"
+          (dsClick)="viewMode = 'kanban'"
+          ariaLabel="Vue Kanban"
+          style="padding: 0; width: 32px; height: 32px; justify-content: center;">
+          <ds-icon name="chart" [size]="16"></ds-icon>
+        </ds-button>
       </div>
 
-      <ds-button variant="ghost" size="sm" (dsClick)="openImportDialog()" aria-label="Importer">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M8 2v9M5 8l3 3 3-3M3 14h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <ds-button variant="ghost" size="sm" (dsClick)="openImportDialog()" style="margin-right: 8px;">
+        <ds-icon name="upload" [size]="20" style="margin-right: 8px;"></ds-icon>
         Importer
       </ds-button>
-      <ds-button variant="ghost" size="sm" (dsClick)="openExportDialog()" aria-label="Exporter">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M8 11V2M5 5l3-3 3 3M3 14h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <ds-button variant="ghost" size="sm" (dsClick)="openExportDialog()" style="margin-right: 8px;">
+        <ds-icon name="download" [size]="20" style="margin-right: 8px;"></ds-icon>
         Exporter
       </ds-button>
-      <ds-button variant="marine" size="md" (dsClick)="createDossier()" aria-label="Créer un dossier">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
+      <ds-button variant="marine" size="md" (dsClick)="createDossier()">
+        <ds-icon name="plus" [size]="20" style="margin-right: 8px;"></ds-icon>
         Nouveau dossier
       </ds-button>
     </ng-container>
@@ -70,20 +58,16 @@
 
       <!-- Chips filtres actifs -->
       @if (appliedFilters.length) {
-        <div class="dos-active-filters" role="group" aria-label="Filtres actifs">
+        <div class="dos-active-filters" style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;" role="group" aria-label="Filtres actifs">
           @for (f of appliedFilters; track f.key) {
-            <span class="dos-filter-chip">
-              <ds-badge status="info" [showDot]="false" size="sm">{{ f.label }} : {{ f.displayValue }}</ds-badge>
-              <button
-                type="button"
-                class="dos-filter-chip__remove"
-                (click)="removeFilter(f)"
-                [attr.aria-label]="'Supprimer filtre ' + f.label">
-                <ds-icon name="close" [size]="16" ariaLabel="Retirer le filtre"></ds-icon>
-              </button>
-            </span>
+            <ds-badge status="info" [showDot]="false" size="md" style="display: flex; align-items: center; gap: 8px; padding-right: 4px;">
+              {{ f.label }} : {{ f.displayValue }}
+              <ds-button variant="icon" size="sm" (dsClick)="removeFilter(f)" ariaLabel="Retirer le filtre" style="height: 18px; width: 18px;">
+                <ds-icon name="close" [size]="16"></ds-icon>
+              </ds-button>
+            </ds-badge>
           }
-          <button type="button" class="dos-clear-all" (click)="clearFilters()">Tout effacer</button>
+          <ds-button variant="ghost" size="sm" (dsClick)="clearFilters()">Tout effacer</ds-button>
         </div>
       }
     </div>
@@ -92,60 +76,67 @@
   <!-- ── VUE LISTE ── -->
   @if (viewMode === 'list') {
     @if (loading) {
-      <div class="dos-skeleton-list" aria-label="Chargement des dossiers" aria-busy="true">
+      <div class="dos-skeleton-list" style="margin-top: 32px; display: grid; gap: 16px;">
         @for (i of [1,2,3,4,5,6,7,8]; track i) {
-          <ds-skeleton variant="rect" height="68px"></ds-skeleton>
+          <ds-skeleton variant="rect" height="68px" [animate]="true"></ds-skeleton>
         }
       </div>
     }
 
     @if (!loading && error) {
-      <div class="dos-error" role="alert">{{ error }}</div>
+      <div class="ds-alert ds-alert--error" style="margin-top: 32px; background: var(--ds-error-hl); color: var(--ds-error); padding: 16px; border-radius: var(--ds-radius-md);" role="alert">{{ error }}</div>
     }
 
     @if (!loading && !error && dossiers.length === 0) {
-      <ds-empty-state
-        title="Aucun dossier trouvé"
-        description="Ajustez vos filtres ou créez votre premier dossier pour commencer."
-        ctaLabel="Nouveau dossier"
-        (ctaClick)="createDossier()">
-      </ds-empty-state>
+      <div style="margin-top: 64px;">
+        <ds-empty-state
+          title="Aucun dossier trouvé"
+          description="Ajustez vos filtres ou créez votre premier dossier pour commencer.">
+          <ds-button variant="marine" size="md" (dsClick)="createDossier()" style="margin-top: 24px;">
+            <ds-icon name="plus" [size]="20" style="margin-right: 8px;"></ds-icon>
+            Nouveau dossier
+          </ds-button>
+        </ds-empty-state>
+      </div>
     }
 
     @if (!loading && !error && dossiers.length > 0 && !isMobile) {
-      <ds-card class="dos-list-card" elevation="sm" [pad]="false">
+      <ds-card class="dos-list-card" elevation="sm" [pad]="false" style="margin-top: 32px;">
         <div role="region" aria-label="Liste des dossiers">
           <ds-table
             [columns]="dsTableColumns"
-            [rows]="dossiersAsTableRows"
+            [rows]="dossiers"
             [rowActions]="dsTableRowActions"
             [rowClickable]="true"
             [bordered]="true"
             label="Liste des dossiers"
-            [trackBy]="trackByDossierId"
             (rowClick)="onDsTableRowClick($event)"
             (rowAction)="onDsTableRowAction($event)">
           </ds-table>
 
           @if (page) {
-            <div class="dos-pagination" aria-label="Pagination">
-              <span class="dos-pagination__info">
-                {{ page.totalElements }} dossier{{ page.totalElements > 1 ? 's' : '' }} ·
-                Page {{ page.number + 1 }} / {{ page.totalPages }}
+            <div class="dos-pagination" style="padding: 16px 24px; border-top: 1px solid var(--ds-divider); display: flex; justify-content: space-between; align-items: center;" aria-label="Pagination">
+              <span class="dos-pagination__info" style="font-size: 13px; color: var(--ds-text-muted);">
+                <strong>{{ page.totalElements }}</strong> dossier{{ page.totalElements > 1 ? 's' : '' }} ·
+                Page {{ page.number + 1 }} sur {{ page.totalPages }}
               </span>
-              <div class="dos-pagination__btns">
-                <button
-                  type="button"
-                  class="dos-pagination__btn"
+              <div class="dos-pagination__btns" style="display: flex; gap: 8px;">
+                <ds-button
+                  variant="ghost"
+                  size="sm"
                   [disabled]="currentPage === 0"
-                  (click)="previousPage()"
-                  aria-label="Page précédente">←</button>
-                <button
-                  type="button"
-                  class="dos-pagination__btn"
+                  (dsClick)="previousPage()"
+                  ariaLabel="Page précédente">
+                  <ds-icon name="chevron-left" [size]="16"></ds-icon>
+                </ds-button>
+                <ds-button
+                  variant="ghost"
+                  size="sm"
                   [disabled]="page.last"
-                  (click)="nextPage()"
-                  aria-label="Page suivante">→</button>
+                  (dsClick)="nextPage()"
+                  ariaLabel="Page suivante">
+                  <ds-icon name="chevron-right" [size]="16"></ds-icon>
+                </ds-button>
               </div>
             </div>
           }
@@ -156,9 +147,9 @@
 
   <!-- ── VUE KANBAN ── -->
   @if (viewMode === 'kanban') {
-    <div class="dos-kanban-wrap">
+    <div class="dos-kanban-wrap" style="margin-top: 32px;">
       @if (!isMobile) {
-        <div class="dos-kanban-search">
+        <div class="dos-kanban-search" style="margin-bottom: 24px;">
           <ds-filter-bar
             [filters]="[]"
             [showSearch]="true"
@@ -177,7 +168,7 @@
 
   <!-- ── Mobile : cartes ── -->
   @if (isMobile && viewMode === 'list' && !loading && dossiers.length > 0) {
-    <div class="dos-mobile-list" role="list" aria-label="Dossiers mobile">
+    <div class="dos-mobile-list ds-form-stack" style="margin-top: 24px; gap: 12px;" role="list" aria-label="Dossiers mobile">
       @for (d of dossiers; track d.id) {
         <app-mobile-dossier-card
           [dossier]="d"

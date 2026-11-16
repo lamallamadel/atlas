@@ -1,12 +1,32 @@
 import { Component, OnInit, input, output } from '@angular/core';
 import { OutboundMessageApiService, OutboundMessageTemplate, OutboundMessageCreateRequest } from '../../services/outbound-message-api.service';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsInputComponent,
+  DsSkeletonComponent,
+  DsCardComponent
+} from '../../design-system';
 
 @Component({
     selector: 'app-outbound-message-form',
+    standalone: true,
     templateUrl: './outbound-message-form.component.html',
     styleUrls: ['./outbound-message-form.component.css'],
-    imports: [FormsModule]
+    imports: [
+      CommonModule,
+      FormsModule,
+      DsButtonComponent,
+      DsIconComponent,
+      DsSelectComponent,
+      DsInputComponent,
+      DsSkeletonComponent,
+      DsCardComponent
+    ]
 })
 export class OutboundMessageFormComponent implements OnInit {
   readonly dossierId = input.required<number>();
@@ -21,6 +41,13 @@ export class OutboundMessageFormComponent implements OnInit {
   sending = false;
   loadingTemplates = false;
   error: string | null = null;
+
+  get templateOptions(): DsSelectOption[] {
+    return [
+      { value: null, label: 'Message libre (sans modèle)' },
+      ...this.templates.map(t => ({ value: t, label: t.name }))
+    ];
+  }
 
   constructor(private outboundMessageService: OutboundMessageApiService) {}
 
@@ -50,7 +77,8 @@ export class OutboundMessageFormComponent implements OnInit {
     }
   }
 
-  onTemplateSelect(): void {
+  onTemplateSelect(template: OutboundMessageTemplate | null): void {
+    this.selectedTemplate = template;
     if (this.selectedTemplate) {
       this.initializeTemplateVariables();
       this.updateMessagePreview();
@@ -137,7 +165,6 @@ export class OutboundMessageFormComponent implements OnInit {
       next: () => {
         this.sending = false;
         this.resetForm();
-        // TODO: The 'emit' function requires a mandatory void argument
         this.messageSent.emit();
       },
       error: (err) => {

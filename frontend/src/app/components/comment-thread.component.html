@@ -1,7 +1,9 @@
-<div class="comment-thread-container">
-  <div class="comment-sidebar">
-    <div class="sidebar-header">
-      <h3 class="sidebar-title">
+<div class="comment-thread-container ds-form-stack" style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; min-height: 600px;">
+  
+  <!-- Sidebar -->
+  <div class="comment-sidebar ds-card" style="padding: 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); background: var(--ds-bg-subtle); display: flex; flex-direction: column;">
+    <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3 class="sidebar-title" style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
         Discussions
         @if (unresolvedCount > 0) {
           <ds-badge status="warning" size="sm" [showDot]="false" class="unresolved-badge">
@@ -9,215 +11,247 @@
           </ds-badge>
         }
       </h3>
-      <div class="sidebar-actions">
-        <button mat-icon-button type="button" (click)="toggleNewThreadForm()" [attr.title]="'New thread'">
-          <mat-icon>add_comment</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          type="button"
-          (click)="toggleResolvedThreads()"
-          [attr.title]="showResolvedThreads ? 'Hide resolved' : 'Show resolved'">
-          <mat-icon>{{ showResolvedThreads ? 'visibility_off' : 'visibility' }}</mat-icon>
-        </button>
-        <button mat-icon-button type="button" (click)="exportAllThreads()" [attr.title]="'Export all'">
-          <mat-icon>download</mat-icon>
-        </button>
+      <div class="sidebar-actions" style="display: flex; gap: 4px;">
+        <ds-button variant="icon" size="sm" (dsClick)="toggleNewThreadForm()" ariaLabel="New thread">
+          <ds-icon name="plus" size="16"></ds-icon>
+        </ds-button>
+        <ds-button
+          variant="icon"
+          size="sm"
+          (dsClick)="toggleResolvedThreads()"
+          [ariaLabel]="showResolvedThreads ? 'Hide resolved' : 'Show resolved'">
+          <ds-icon [name]="showResolvedThreads ? 'eye-off' : 'eye'" size="16"></ds-icon>
+        </ds-button>
+        <ds-button variant="icon" size="sm" (dsClick)="exportAllThreads()" ariaLabel="Export all">
+          <ds-icon name="download" size="16"></ds-icon>
+        </ds-button>
       </div>
     </div>
 
-    <div *ngIf="showNewThreadForm" class="new-thread-form">
-      <form [formGroup]="newThreadForm" (ngSubmit)="createNewThread()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Title (optional)</mat-label>
-          <input matInput formControlName="title" placeholder="Thread title">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Initial Comment</mat-label>
-          <textarea matInput formControlName="initialComment" rows="3" 
-                    placeholder="Start a discussion..."></textarea>
-        </mat-form-field>
-        <div class="form-actions">
-          <button mat-button type="button" (click)="toggleNewThreadForm()">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" 
-                  [disabled]="newThreadForm.invalid">Create</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="thread-list" *ngIf="!loading">
-      <div *ngIf="visibleThreads.length === 0" class="empty-state">
-        <mat-icon>comment</mat-icon>
-        <p>No discussions yet</p>
-      </div>
-      
-      <div *ngFor="let thread of visibleThreads" 
-           class="thread-item" 
-           [class.selected]="selectedThread?.id === thread.id"
-           [class.resolved]="thread.resolved"
-           (click)="selectThread(thread)"
-           (keydown.enter)="selectThread(thread)"
-           (keydown.space)="selectThread(thread)"
-           tabindex="0"
-           role="button"
-           [attr.aria-label]="'Select thread: ' + (thread.title || 'Untitled Thread')">
-        <div class="thread-header">
-          <div class="thread-title">
-            <mat-icon *ngIf="thread.resolved" class="resolved-icon">check_circle</mat-icon>
-            <strong>{{ thread.title || 'Untitled Thread' }}</strong>
-          </div>
-          <span class="comment-count">{{ thread.comments.length }}</span>
-        </div>
-        <div class="thread-meta">
-          <span class="author">{{ thread.createdBy }}</span>
-          <span class="date">{{ thread.createdAt | date:'short' }}</span>
-        </div>
-        <div class="thread-preview" *ngIf="thread.comments.length > 0">
-          {{ thread.comments[0].content | slice:0:60 }}{{ thread.comments[0].content.length > 60 ? '...' : '' }}
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="loading" class="loading-state">
-      <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
-    </div>
-  </div>
-
-  <div class="comment-main" *ngIf="selectedThread">
-    <div class="thread-detail-header">
-      <div class="thread-info">
-        <h2>{{ selectedThread.title || 'Untitled Thread' }}</h2>
-        <div class="thread-status" *ngIf="selectedThread.resolved">
-          <span
-            [attr.title]="
-              'Résolu par ' + selectedThread.resolvedBy + ' — ' + (selectedThread.resolvedAt | date:'short')
-            ">
-            <ds-badge status="success" size="sm" [showDot]="false">
-              Résolu
-            </ds-badge>
-          </span>
-        </div>
-      </div>
-      <div class="thread-actions">
-        <span class="ct-export-menu-origin" cdkOverlayOrigin #ctExportOrigin="cdkOverlayOrigin">
-          <button
-            type="button"
-            mat-icon-button
-            (click)="toggleExportThreadMenu()"
-            [attr.aria-expanded]="exportThreadMenuOpen"
-            aria-haspopup="menu"
-            aria-controls="ct-thread-export-menu"
-            [attr.title]="'Export'">
-            <mat-icon>download</mat-icon>
-          </button>
-        </span>
-        <ng-template
-          cdkConnectedOverlay
-          [cdkConnectedOverlayOrigin]="ctExportOrigin"
-          [cdkConnectedOverlayOpen]="exportThreadMenuOpen"
-          [cdkConnectedOverlayPositions]="exportThreadMenuPositions"
-          [cdkConnectedOverlayScrollStrategy]="exportThreadMenuScrollStrategy"
-          [cdkConnectedOverlayHasBackdrop]="true"
-          [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
-          (backdropClick)="closeExportThreadMenu()"
-          (detach)="closeExportThreadMenu()"
-          (overlayKeydown)="$event.key === 'Escape' && closeExportThreadMenu()">
-          <div id="ct-thread-export-menu" class="ct-export-menu-dropdown" role="menu">
-            <button
-              type="button"
-              class="ct-export-menu-item"
-              role="menuitem"
-              (click)="exportThread(selectedThread, 'text')">
-              <ds-icon name="edit" [size]="20" aria-hidden="true" />
-              <span>Export as Text</span>
-            </button>
-            <button
-              type="button"
-              class="ct-export-menu-item"
-              role="menuitem"
-              (click)="exportThread(selectedThread, 'csv')">
-              <ds-icon name="table" [size]="20" aria-hidden="true" />
-              <span>Export as CSV</span>
-            </button>
-          </div>
-        </ng-template>
-
-        <button
-          mat-icon-button
-          type="button"
-          *ngIf="!selectedThread.resolved"
-          (click)="resolveThread(selectedThread)"
-          [attr.title]="'Mark as resolved'">
-          <mat-icon>check_circle</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          type="button"
-          *ngIf="selectedThread.resolved"
-          (click)="unresolveThread(selectedThread)"
-          [attr.title]="'Reopen'">
-          <mat-icon>replay</mat-icon>
-        </button>
-        <button mat-icon-button type="button" (click)="deleteThread(selectedThread)" [attr.title]="'Delete thread'">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
-    </div>
-
-    <div class="comments-container ds-thread ds-thread--comments">
-      <div *ngFor="let comment of selectedThread.comments" class="ds-thread__msg ds-thread__msg--inbound">
-        <ds-avatar [name]="comment.createdBy" size="sm" class="ds-thread__avatar"></ds-avatar>
-        <div class="ds-thread__bubble">
-          <div class="ds-thread__comment-head">
-            <strong>{{ comment.createdBy }}</strong>
-            <time [attr.datetime]="comment.createdAt">{{ comment.createdAt | date:'short' }}</time>
-          </div>
-          <div class="ds-thread__text ds-thread__text--rich" [innerHTML]="formatComment(comment.content)"></div>
-          <div class="comment-mentions" *ngIf="comment.mentions.length > 0">
-            <mat-icon>alternate_email</mat-icon>
-            <span *ngFor="let mention of comment.mentions" class="mention-tag">@{{ mention }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="add-comment-section">
-      <form [formGroup]="newCommentForm" (ngSubmit)="addComment()">
-        <mat-form-field appearance="outline" class="full-width comment-input-container">
-          <mat-label>Add a comment</mat-label>
-          <textarea #commentInput matInput formControlName="content" rows="3" 
-                    placeholder="Type @ to mention someone..."
-                    (input)="onCommentInput($event)"></textarea>
-          <div class="mention-dropdown" *ngIf="showMentionDropdown">
-            <div *ngFor="let user of filteredUsers" 
-                 class="mention-item" 
-                 (click)="selectMention(user)"
-                 (keydown.enter)="selectMention(user)"
-                 (keydown.space)="selectMention(user)"
-                 tabindex="0"
-                 role="button"
-                 [attr.aria-label]="'Mention user: ' + user">
-              <mat-icon>account_circle</mat-icon>
-              <span>{{ user }}</span>
+    @if (showNewThreadForm) {
+      <div class="new-thread-form" style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--ds-divider);">
+        <form [formGroup]="newThreadForm" (ngSubmit)="createNewThread()" class="ds-form-stack">
+          <ds-input label="Title (optional)" formControlName="title" placeholder="Thread title"></ds-input>
+          
+          <div class="ds-field">
+            <label class="ds-field__label">Initial Comment</label>
+            <div class="ds-field__wrap">
+              <textarea
+                class="ds-field__input"
+                formControlName="initialComment"
+                rows="3"
+                placeholder="Start a discussion..."
+                style="height: auto; padding: 12px;"></textarea>
             </div>
           </div>
-        </mat-form-field>
-        <div class="form-actions">
-          <button mat-raised-button color="primary" type="submit" 
-                  [disabled]="newCommentForm.invalid">
-            <mat-icon>send</mat-icon>
-            Post Comment
-          </button>
-        </div>
-      </form>
-    </div>
+          
+          <div class="form-actions" style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;">
+            <ds-button variant="ghost" size="sm" (dsClick)="toggleNewThreadForm()">Cancel</ds-button>
+            <ds-button variant="marine" size="sm" type="submit" [disabled]="newThreadForm.invalid">Create</ds-button>
+          </div>
+        </form>
+      </div>
+    }
+
+    @if (!loading) {
+      <div class="thread-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+        @if (visibleThreads.length === 0) {
+          <div class="empty-state" style="padding: 32px 16px; text-align: center; color: var(--ds-text-faint);">
+            <ds-icon name="chat" size="32" style="margin-bottom: 12px; opacity: 0.5;"></ds-icon>
+            <p>No discussions yet</p>
+          </div>
+        }
+        
+        @for (thread of visibleThreads; track thread.id) {
+          <div
+            class="thread-item ds-card"
+            [style.background]="selectedThread?.id === thread.id ? 'var(--ds-primary-subtle)' : 'var(--ds-surface)'"
+            [style.border-color]="selectedThread?.id === thread.id ? 'var(--ds-primary)' : 'var(--ds-border)'"
+            style="padding: 12px; cursor: pointer; transition: all 0.2s ease;"
+            (click)="selectThread(thread)"
+            (keydown.enter)="selectThread(thread)"
+            (keydown.space)="selectThread(thread)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Select thread: ' + (thread.title || 'Untitled Thread')">
+            <div class="thread-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+              <div class="thread-title" style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px;">
+                @if (thread.resolved) {
+                  <ds-icon name="check" size="14" style="color: var(--ds-success);"></ds-icon>
+                }
+                {{ thread.title || 'Untitled Thread' }}
+              </div>
+              <ds-badge status="neutral" [showDot]="false" size="sm">{{ thread.comments.length }}</ds-badge>
+            </div>
+            <div class="thread-meta" style="display: flex; justify-content: space-between; font-size: 11px; color: var(--ds-text-faint); margin-bottom: 8px;">
+              <span class="author">{{ thread.createdBy }}</span>
+              <span class="date">{{ thread.createdAt | date:'short' }}</span>
+            </div>
+            @if (thread.comments.length > 0) {
+              <div class="thread-preview" style="font-size: 12px; color: var(--ds-text-muted); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                {{ thread.comments[0].content }}
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (loading) {
+      <div class="loading-state" style="padding: 32px; text-align: center;">
+        <ds-skeleton variant="circle" width="32px" height="32px" style="margin: 0 auto;"></ds-skeleton>
+      </div>
+    }
   </div>
 
-  <div class="comment-main empty-selection" *ngIf="!selectedThread && !loading">
-    <div class="empty-state-large">
-      <mat-icon>forum</mat-icon>
-      <h3>Select a thread to view comments</h3>
-      <p>Choose a discussion from the sidebar or create a new one</p>
+  <!-- Main Content -->
+  @if (selectedThread) {
+    <div class="comment-main ds-card" style="padding: 24px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); display: flex; flex-direction: column;">
+      <div class="thread-detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--ds-divider);">
+        <div class="thread-info">
+          <h2 style="margin: 0 0 8px; font-size: 18px; font-weight: 700; color: var(--ds-marine);">{{ selectedThread.title || 'Untitled Thread' }}</h2>
+          @if (selectedThread.resolved) {
+            <div class="thread-status">
+              <span
+                [attr.title]="
+                  'Résolu par ' + selectedThread.resolvedBy + ' — ' + (selectedThread.resolvedAt | date:'short')
+                ">
+                <ds-badge status="success" size="sm" [showDot]="false">
+                  Résolu
+                </ds-badge>
+              </span>
+            </div>
+          }
+        </div>
+        <div class="thread-actions" style="display: flex; gap: 8px;">
+          <span class="ct-export-menu-origin" cdkOverlayOrigin #ctExportOrigin="cdkOverlayOrigin">
+            <ds-button
+              variant="icon"
+              size="sm"
+              (dsClick)="toggleExportThreadMenu()"
+              [attr.aria-expanded]="exportThreadMenuOpen"
+              aria-haspopup="menu"
+              aria-controls="ct-thread-export-menu"
+              ariaLabel="Export">
+              <ds-icon name="download" [size]="20"></ds-icon>
+            </ds-button>
+          </span>
+          <ng-template
+            cdkConnectedOverlay
+            [cdkConnectedOverlayOrigin]="ctExportOrigin"
+            [cdkConnectedOverlayOpen]="exportThreadMenuOpen"
+            [cdkConnectedOverlayPositions]="exportThreadMenuPositions"
+            [cdkConnectedOverlayScrollStrategy]="exportThreadMenuScrollStrategy"
+            [cdkConnectedOverlayHasBackdrop]="true"
+            [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
+            (backdropClick)="closeExportThreadMenu()"
+            (detach)="closeExportThreadMenu()"
+            (overlayKeydown)="$event.key === 'Escape' && closeExportThreadMenu()">
+            <div id="ct-thread-export-menu" class="ct-export-menu-dropdown ds-card" style="padding: 8px; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--ds-border);" role="menu">
+              <ds-button variant="ghost" size="sm" (dsClick)="exportThread(selectedThread, 'text')" style="justify-content: flex-start;">
+                <ds-icon name="edit" size="16" style="margin-right: 8px;"></ds-icon>
+                Text
+              </ds-button>
+              <ds-button variant="ghost" size="sm" (dsClick)="exportThread(selectedThread, 'csv')" style="justify-content: flex-start;">
+                <ds-icon name="table" size="16" style="margin-right: 8px;"></ds-icon>
+                CSV
+              </ds-button>
+            </div>
+          </ng-template>
+
+          @if (!selectedThread.resolved) {
+            <ds-button
+              variant="icon"
+              size="sm"
+              (dsClick)="resolveThread(selectedThread)"
+              ariaLabel="Mark as resolved">
+              <ds-icon name="check" [size]="20" style="color: var(--ds-success);"></ds-icon>
+            </ds-button>
+          }
+          @if (selectedThread.resolved) {
+            <ds-button
+              variant="icon"
+              size="sm"
+              (dsClick)="unresolveThread(selectedThread)"
+              ariaLabel="Reopen">
+              <ds-icon name="refresh" [size]="20" style="color: var(--ds-warning);"></ds-icon>
+            </ds-button>
+          }
+          <ds-button variant="icon" size="sm" (dsClick)="deleteThread(selectedThread)" ariaLabel="Delete thread" style="color: var(--ds-error);">
+            <ds-icon name="trash" [size]="20"></ds-icon>
+          </ds-button>
+        </div>
+      </div>
+
+      <div class="comments-container ds-thread ds-thread--comments" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 24px;">
+        @for (comment of selectedThread.comments; track comment) {
+          <div class="ds-thread__msg ds-thread__msg--inbound">
+            <ds-avatar [name]="comment.createdBy" size="sm" class="ds-thread__avatar"></ds-avatar>
+            <div class="ds-thread__bubble">
+              <div class="ds-thread__comment-head">
+                <strong>{{ comment.createdBy }}</strong>
+                <time [attr.datetime]="comment.createdAt">{{ comment.createdAt | date:'short' }}</time>
+              </div>
+              <div class="ds-thread__text ds-thread__text--rich" [innerHTML]="formatComment(comment.content)"></div>
+              @if (comment.mentions.length > 0) {
+                <div class="comment-mentions" style="margin-top: 8px; display: flex; gap: 4px;">
+                  @for (mention of comment.mentions; track mention) {
+                    <ds-badge status="neutral" size="sm" [showDot]="false">@{{ mention }}</ds-badge>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="add-comment-section" style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--ds-divider);">
+        <form [formGroup]="newCommentForm" (ngSubmit)="addComment()" class="ds-form-stack">
+          <div class="ds-field" style="position: relative;">
+            <div class="ds-field__wrap">
+              <textarea
+                #commentInput
+                class="ds-field__input"
+                formControlName="content"
+                rows="3"
+                placeholder="Type @ to mention someone..."
+                (input)="onCommentInput($event)"
+                style="height: auto; padding: 12px; resize: none;"></textarea>
+            </div>
+            
+            @if (showMentionDropdown) {
+              <div class="mention-dropdown ds-card" style="position: absolute; bottom: 100%; left: 0; width: 240px; max-height: 200px; overflow-y: auto; border: 1px solid var(--ds-border); z-index: 10; margin-bottom: 4px; padding: 8px; display: flex; flex-direction: column; gap: 4px;">
+                @for (user of filteredUsers; track user) {
+                  <ds-button
+                    variant="ghost"
+                    size="sm"
+                    (dsClick)="selectMention(user)"
+                    style="justify-content: flex-start; width: 100%;">
+                    <ds-icon name="user" size="14" style="margin-right: 8px;"></ds-icon>
+                    {{ user }}
+                  </ds-button>
+                }
+              </div>
+            }
+          </div>
+          <div class="form-actions" style="display: flex; justify-content: flex-end; margin-top: 12px;">
+            <ds-button variant="marine" size="md" type="submit" [disabled]="newCommentForm.invalid">
+              <ds-icon name="send" [size]="20" style="margin-right: 8px;"></ds-icon>
+              Post Comment
+            </ds-button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
+  }
+
+  @if (!selectedThread && !loading) {
+    <div class="comment-main empty-selection" style="display: flex; align-items: center; justify-content: center; background: var(--ds-bg-subtle); border: 2px dashed var(--ds-divider); border-radius: var(--ds-radius-md);">
+      <ds-empty-state
+        icon="chat"
+        title="Select a thread to view comments"
+        description="Choose a discussion from the sidebar or create a new one">
+      </ds-empty-state>
+    </div>
+  }
 </div>

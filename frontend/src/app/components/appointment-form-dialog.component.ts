@@ -1,15 +1,21 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { AppointmentStatus } from '../services/appointment-api.service';
-import { trigger, transition, style, animate } from '@angular/animations';
-import { FocusTrapDirective } from '../directives/focus-trap.directive';
-import { MatIcon } from '@angular/material/icon';
-import { CdkScrollable } from '@angular/cdk/scrolling';
 import { DatetimePickerComponent } from './datetime-picker.component';
-import { NgClass } from '@angular/common';
-import { MatButton } from '@angular/material/button';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { CommonModule } from '@angular/common';
+import { 
+  DsSkeletonComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsButtonComponent,
+  DsIconComponent,
+  DsCardComponent,
+  DsInputComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
 export interface AppointmentFormData {
   id?: number;
@@ -25,17 +31,23 @@ export interface AppointmentFormData {
 
 @Component({
     selector: 'app-appointment-form-dialog',
+    standalone: true,
     templateUrl: './appointment-form-dialog.component.html',
     styleUrls: ['./appointment-form-dialog.component.css'],
-    animations: [
-        trigger('slideIn', [
-            transition(':enter', [
-                style({ transform: 'translateX(100%)', opacity: 0 }),
-                animate('300ms ease-out', style({ transform: 'translateX(0)', opacity: 1 }))
-            ])
-        ])
-    ],
-    imports: [FocusTrapDirective, MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, DatetimePickerComponent, NgClass, MatDialogActions, MatButton, DsSkeletonComponent]
+    imports: [
+      CommonModule,
+      FormsModule, 
+      ReactiveFormsModule, 
+      DatetimePickerComponent, 
+      DsSelectComponent,
+      DsButtonComponent,
+      DsIconComponent,
+      DsCardComponent,
+      DsInputComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class AppointmentFormDialogComponent implements OnInit {
   appointmentForm!: FormGroup;
@@ -43,13 +55,13 @@ export class AppointmentFormDialogComponent implements OnInit {
   isSubmitting = false;
   AppointmentStatus = AppointmentStatus;
 
-  statusOptions = [
+  statusOptions: DsSelectOption[] = [
     { value: AppointmentStatus.SCHEDULED, label: 'Planifié' },
     { value: AppointmentStatus.COMPLETED, label: 'Terminé' },
     { value: AppointmentStatus.CANCELLED, label: 'Annulé' }
   ];
 
-  localeOptions = [
+  localeOptions: DsSelectOption[] = [
     { value: 'fr_FR', label: 'Français (France)' },
     { value: 'en_US', label: 'English (US)' },
     { value: 'ar_MA', label: 'العربية (المغرب)' },
@@ -59,8 +71,8 @@ export class AppointmentFormDialogComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AppointmentFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AppointmentFormData
+    private dialogRef: DialogRef<AppointmentFormData>,
+    @Inject(DIALOG_DATA) public data: AppointmentFormData
   ) {}
 
   ngOnInit(): void {

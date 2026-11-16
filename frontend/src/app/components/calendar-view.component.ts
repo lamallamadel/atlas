@@ -1,22 +1,30 @@
 import { Component, OnInit, OnDestroy, viewChild } from '@angular/core';
-
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { EventInput, EventChangeArg } from '@fullcalendar/core';
 
 import { AppointmentApiService, AppointmentResponse, AppointmentStatus, AppointmentCreateRequest, AppointmentUpdateRequest } from '../services/appointment-api.service';
 import { CalendarSyncService } from '../services/calendar-sync.service';
-import { MatDialog } from '@angular/material/dialog';
 import { AppointmentFormDialogComponent, AppointmentFormData } from './appointment-form-dialog.component';
 import { Subject, takeUntil } from 'rxjs';
-import { ToastNotificationService } from '../services/toast-notification.service';
+import { NotificationService } from '../services/notification.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { DsCardComponent, DsButtonComponent, DsIconComponent, PageHeaderComponent } from '../design-system';
+
+import { 
+  DsCardComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  PageHeaderComponent, 
+  DsTabsComponent, 
+  DsTab, 
+  DsSelectComponent,
+  DsSelectOption,
+  DsDialogService
+} from '../design-system';
 import { resolveDsToken } from '../design-system/chart-ds-colors';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
 import { CalendarListViewComponent } from './calendar-list-view.component';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
@@ -43,15 +51,15 @@ interface CalendarEvent extends EventInput {
     templateUrl: './calendar-view.component.html',
     styleUrls: ['./calendar-view.component.css'],
     imports: [
+      CommonModule,
+      FormsModule,
       DsCardComponent,
       PageHeaderComponent,
       DsSkeletonComponent,
       DsButtonComponent,
       DsIconComponent,
-      MatFormField,
-      MatLabel,
-      MatSelect,
-      MatOption,
+      DsTabsComponent,
+      DsSelectComponent,
       FullCalendarModule,
       CalendarListViewComponent,
     ],
@@ -62,7 +70,14 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   isMobile = false;
   currentView = 'timeGridWeek';
+  
+  viewTabs: DsTab[] = [
+    { value: 'calendar', label: 'Calendrier' },
+    { value: 'list', label: 'Liste des RDV' }
+  ];
+  activeTab = 'calendar';
   showListView = false;
+
   calendarLoaded = false;
   calendarLoading = false;
 
@@ -127,18 +142,25 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   filterByStatus: AppointmentStatus | null = null;
   availableAssignees: string[] = [];
 
-  readonly statusOptions = [
+  readonly statusOptions: DsSelectOption[] = [
     { value: null, label: 'Tous les statuts' },
     { value: AppointmentStatus.SCHEDULED, label: 'Planifié' },
     { value: AppointmentStatus.COMPLETED, label: 'Terminé' },
     { value: AppointmentStatus.CANCELLED, label: 'Annulé' }
   ];
 
+  get assigneeOptions(): DsSelectOption[] {
+    return [
+      { value: null, label: 'Tous les assignés' },
+      ...this.availableAssignees.map(a => ({ value: a, label: a }))
+    ];
+  }
+
   constructor(
     private appointmentService: AppointmentApiService,
     private calendarSyncService: CalendarSyncService,
-    private dialog: MatDialog,
-    private toastService: ToastNotificationService,
+    private dsDialogService: DsDialogService,
+    private notificationService: NotificationService,
     private breakpointObserver: BreakpointObserver
   ) { }
 
@@ -223,7 +245,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading appointments:', error);
-          this.toastService.error('Erreur lors du chargement des rendez-vous');
+          this.notificationService.error('Erreur lors du chargement des rendez-vous');
           this.isLoading = false;
         }
       });
@@ -239,7 +261,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     this.availableAssignees = Array.from(assignees).sort();
   }
 
-  private updateCalendarEvents(): void {
+  public updateCalendarEvents(): void {
     let filteredAppointments = this.appointments;
 
     if (this.filterByAssignedTo) {
@@ -295,22 +317,22 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   handleDateSelect(selectInfo: any): void {
     const calendarApi = selectInfo.view.calendar;
 
-    const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
+    const dialogRef = this.dsDialogService.open<AppointmentFormData, AppointmentFormData>(AppointmentFormDialogComponent, {
       width: '600px',
       data: {
         dossierId: 0,
         startTime: selectInfo.startStr,
         endTime: selectInfo.endStr,
         status: AppointmentStatus.SCHEDULED
-      } as AppointmentFormData
+      }
     });
 
-    dialogRef.afterClosed()
+    dialogRef.closed
       .pipe(takeUntil(this.destroy$))
       .subscribe(result => {
         if (result) {
           if (result.dossierId === 0) {
-            this.toastService.warning('Veuillez sélectionner un dossier pour créer le rendez-vous');
+            this.notificationService.warning('Veuillez sélectionner un dossier pour créer le rendez-vous');
             calendarApi.unselect();
             return;
           }
@@ -329,7 +351,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
+    const dialogRef = this.dsDialogService.open<AppointmentFormData, AppointmentFormData>(AppointmentFormDialogComponent, {
       width: '600px',
       data: {
         id: appointment.id,
@@ -340,10 +362,10 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
         assignedTo: appointment.assignedTo,
         notes: appointment.notes,
         status: appointment.status
-      } as AppointmentFormData
+      }
     });
 
-    dialogRef.afterClosed()
+    dialogRef.closed
       .pipe(takeUntil(this.destroy$))
       .subscribe(result => {
         if (result) {
@@ -376,7 +398,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
         `RDV #${c.id} (${this.formatTime(c.startTime)} - ${this.formatTime(c.endTime)})`
       ).join(', ');
 
-      this.toastService.warning(`Conflit détecté avec: ${conflictMessages}`);
+      this.notificationService.warning(`Conflit détecté avec: ${conflictMessages}`);
       dropInfo.revert();
       return;
     }
@@ -413,7 +435,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
             this.appointments[idx] = updated;
           }
           this.updateCalendarEvents();
-          this.toastService.success('Rendez-vous déplacé avec succès');
+          this.notificationService.success('Rendez-vous déplacé avec succès');
         },
         error: (error) => {
           console.error('Error updating appointment:', error);
@@ -427,7 +449,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
           }
 
           this.updateCalendarEvents();
-          this.toastService.error('Erreur lors du déplacement du rendez-vous');
+          this.notificationService.error('Erreur lors du déplacement du rendez-vous');
           dropInfo.revert();
         }
       });
@@ -455,7 +477,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     const conflicts = this.detectConflicts(appointmentId, newStart, newEnd, appointment.assignedTo);
 
     if (conflicts.length > 0) {
-      this.toastService.warning('Conflit détecté : redimensionnement impossible');
+      this.notificationService.warning('Conflit détecté : redimensionnement impossible');
       resizeInfo.revert();
       return;
     }
@@ -492,7 +514,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
             this.appointments[idx] = updated;
           }
           this.updateCalendarEvents();
-          this.toastService.success('Rendez-vous modifié avec succès');
+          this.notificationService.success('Rendez-vous modifié avec succès');
         },
         error: (error) => {
           console.error('Error resizing appointment:', error);
@@ -506,7 +528,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
           }
 
           this.updateCalendarEvents();
-          this.toastService.error('Erreur lors de la modification du rendez-vous');
+          this.notificationService.error('Erreur lors de la modification du rendez-vous');
           resizeInfo.revert();
         }
       });
@@ -566,11 +588,11 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
           this.appointments.push(created);
           this.extractAvailableAssignees();
           this.updateCalendarEvents();
-          this.toastService.success('Rendez-vous créé avec succès');
+          this.notificationService.success('Rendez-vous créé avec succès');
         },
         error: (error) => {
           console.error('Error creating appointment:', error);
-          this.toastService.error('Erreur lors de la création du rendez-vous');
+          this.notificationService.error('Erreur lors de la création du rendez-vous');
         }
       });
   }
@@ -599,17 +621,17 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
           }
           this.extractAvailableAssignees();
           this.updateCalendarEvents();
-          this.toastService.success('Rendez-vous mis à jour avec succès');
+          this.notificationService.success('Rendez-vous mis à jour avec succès');
         },
         error: (error) => {
           console.error('Error updating appointment:', error);
-          this.toastService.error('Erreur lors de la mise à jour du rendez-vous');
+          this.notificationService.error('Erreur lors de la mise à jour du rendez-vous');
         }
       });
   }
 
   deleteAppointment(appointmentId: number): void {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    const dialogRef = this.dsDialogService.open<boolean>(ConfirmDeleteDialogComponent, {
       width: '400px',
       data: {
         title: 'Supprimer le rendez-vous',
@@ -617,7 +639,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       }
     });
 
-    dialogRef.afterClosed()
+    dialogRef.closed
       .pipe(takeUntil(this.destroy$))
       .subscribe(confirmed => {
         if (confirmed) {
@@ -628,11 +650,11 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
                 this.appointments = this.appointments.filter(apt => apt.id !== appointmentId);
                 this.extractAvailableAssignees();
                 this.updateCalendarEvents();
-                this.toastService.success('Rendez-vous supprimé avec succès');
+                this.notificationService.success('Rendez-vous supprimé avec succès');
               },
               error: (error) => {
                 console.error('Error deleting appointment:', error);
-                this.toastService.error('Erreur lors de la suppression du rendez-vous');
+                this.notificationService.error('Erreur lors de la suppression du rendez-vous');
               }
             });
         }
@@ -669,7 +691,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       `appointments_${new Date().toISOString().split('T')[0]}.ics`
     );
 
-    this.toastService.success('Calendrier exporté avec succès');
+    this.notificationService.success('Calendrier exporté avec succès');
   }
 
   refreshCalendar(): void {
@@ -686,6 +708,12 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
 
   toggleListView(): void {
     this.showListView = !this.showListView;
+    this.activeTab = this.showListView ? 'list' : 'calendar';
+  }
+
+  onTabChange(tabValue: string): void {
+    this.activeTab = tabValue;
+    this.showListView = tabValue === 'list';
   }
 
   goToToday(): void {

@@ -1,208 +1,111 @@
-<div @slideIn appFocusTrap role="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description" aria-modal="true" class="elegant-dialog">
-  <h2 mat-dialog-title id="dialog-title" class="dialog-title-elegant">
-    <mat-icon>event</mat-icon>
+<ds-dialog-header (close)="onCancel()">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <ds-icon name="calendar" [size]="24" aria-hidden="true"></ds-icon>
     <span>{{ isEditMode ? 'Modifier' : 'Planifier' }} un rendez-vous</span>
-  </h2>
-  <p id="dialog-description" class="sr-only">Formulaire de {{ isEditMode ? 'modification' : 'planification' }} d'un rendez-vous. Complétez les champs ci-dessous et validez.</p>
+  </div>
+</ds-dialog-header>
 
-  <mat-dialog-content class="elegant-dialog-content">
-    <form [formGroup]="appointmentForm" class="elegant-form appointment-form">
-      @if (getFormErrorMessage()) {
-        <div class="form-error-message" role="alert" aria-live="assertive">
-          <mat-icon>error</mat-icon>
-          <span>{{ getFormErrorMessage() }}</span>
+<ds-dialog-content>
+  <form [formGroup]="appointmentForm" class="ds-form-stack">
+    @if (getFormErrorMessage()) {
+      <div class="ds-alert ds-alert--error" role="alert" aria-live="assertive" style="margin-bottom: 24px; display: flex; align-items: center; gap: 12px; background: var(--ds-error-hl); color: var(--ds-error); padding: 12px; border-radius: var(--ds-radius-md);">
+        <ds-icon name="info" [size]="20"></ds-icon>
+        <span>{{ getFormErrorMessage() }}</span>
+      </div>
+    }
+
+    <ds-card [pad]="true" elevation="xs" style="margin-bottom: 24px;">
+      <div class="section-header" style="margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: var(--ds-marine); display: flex; align-items: center; gap: 8px;">
+          <ds-icon name="clock" [size]="20"></ds-icon>
+          Date et heure
+        </h3>
+      </div>
+
+      <div class="ds-form-stack">
+        <app-datetime-picker
+          formControlName="startTime"
+          [required]="true"
+          label="Date et heure de début">
+        </app-datetime-picker>
+
+        <app-datetime-picker
+          formControlName="endTime"
+          [required]="true"
+          label="Date et heure de fin">
+        </app-datetime-picker>
+      </div>
+    </ds-card>
+
+    <ds-card [pad]="true" elevation="xs">
+      <div class="section-header" style="margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: var(--ds-marine); display: flex; align-items: center; gap: 8px;">
+          <ds-icon name="info" [size]="20"></ds-icon>
+          Détails du rendez-vous
+        </h3>
+      </div>
+
+      <div class="ds-form-stack">
+        <ds-input
+          label="Lieu"
+          formControlName="location"
+          placeholder="Adresse complète..."
+          prefixIcon="map-pin">
+        </ds-input>
+
+        <ds-input
+          label="Assigné à"
+          formControlName="assignedTo"
+          placeholder="Nom de l'agent responsable"
+          prefixIcon="user">
+        </ds-input>
+
+        <div class="ds-form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <ds-select
+            label="Statut"
+            [options]="statusOptions"
+            formControlName="status"
+            prefixIcon="filter">
+          </ds-select>
+
+          <ds-select
+            label="Langue du client"
+            [options]="localeOptions"
+            formControlName="locale"
+            prefixIcon="globe">
+          </ds-select>
         </div>
-      }
 
-      <div class="form-section-card">
-        <div class="section-header">
-          <mat-icon>schedule</mat-icon>
-          <div>
-            <h3 class="section-title">Date et heure</h3>
-            <p class="section-subtitle">Définissez la période du rendez-vous</p>
-          </div>
-        </div>
-
-        <div class="section-body">
-          <div class="elegant-form-field has-value">
-            <app-datetime-picker
-              formControlName="startTime"
-              [required]="true"
-              label="Date et heure de début"
-            ></app-datetime-picker>
-            <div class="field-helper">
-              <mat-icon>info</mat-icon>
-              <span>Choisissez la date et l'heure de début du rendez-vous</span>
-            </div>
-          </div>
-
-          <div class="elegant-form-field has-value">
-            <app-datetime-picker
-              formControlName="endTime"
-              [required]="true"
-              label="Date et heure de fin"
-            ></app-datetime-picker>
-            <div class="field-helper">
-              <mat-icon>info</mat-icon>
-              <span>Choisissez la date et l'heure de fin du rendez-vous</span>
-            </div>
+        <div class="ds-field">
+          <label class="ds-field__label">Notes</label>
+          <div class="ds-field__wrap">
+            <textarea
+              class="ds-field__input"
+              formControlName="notes"
+              placeholder="Notes additionnelles..."
+              rows="4"
+              style="height: auto; padding: 12px;"></textarea>
           </div>
         </div>
       </div>
+    </ds-card>
+  </form>
+</ds-dialog-content>
 
-      <div class="form-section-card">
-        <div class="section-header">
-          <mat-icon>info</mat-icon>
-          <div>
-            <h3 class="section-title">Détails du rendez-vous</h3>
-            <p class="section-subtitle">Informations complémentaires</p>
-          </div>
-        </div>
-
-        <div class="section-body">
-          <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': appointmentForm.get('location')?.value
-               }">
-            <input
-              type="text"
-              id="location"
-              formControlName="location"
-              placeholder=" "
-              class="has-prefix"
-              aria-label="Lieu du rendez-vous">
-              <label for="location">Lieu</label>
-              <div class="field-prefix">
-                <mat-icon>place</mat-icon>
-              </div>
-              <div class="field-helper">
-                <mat-icon>info</mat-icon>
-                <span>Adresse complète ou indication du lieu de rendez-vous</span>
-              </div>
-            </div>
-
-            <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': appointmentForm.get('assignedTo')?.value
-               }">
-              <input
-                type="text"
-                id="assignedTo"
-                formControlName="assignedTo"
-                placeholder=" "
-                class="has-prefix"
-                aria-label="Personne assignée au rendez-vous">
-                <label for="assignedTo">Assigné à</label>
-                <div class="field-prefix">
-                  <mat-icon>person</mat-icon>
-                </div>
-                <div class="field-helper">
-                  <mat-icon>info</mat-icon>
-                  <span>Nom de la personne responsable du rendez-vous</span>
-                </div>
-              </div>
-
-              <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': appointmentForm.get('status')?.value,
-                 'field-error': appointmentForm.get('status')?.invalid && appointmentForm.get('status')?.touched
-               }">
-                <select
-                  id="status"
-                  formControlName="status"
-                  aria-required="true"
-                  [attr.aria-invalid]="appointmentForm.get('status')?.hasError('required') && appointmentForm.get('status')?.touched">
-                  <option value="">Sélectionner un statut</option>
-                  @for (option of statusOptions; track option) {
-                    <option [value]="option.value">
-                      {{ option.label }}
-                    </option>
-                  }
-                </select>
-                <label for="status">Statut <span class="required-indicator">*</span></label>
-                @if (appointmentForm.get('status')?.touched) {
-                  <div class="validation-icon">
-                    @if (appointmentForm.get('status')?.valid) {
-                      <mat-icon>check_circle</mat-icon>
-                    }
-                    @if (appointmentForm.get('status')?.invalid) {
-                      <mat-icon>error</mat-icon>
-                    }
-                  </div>
-                }
-                @if (appointmentForm.get('status')?.invalid && appointmentForm.get('status')?.touched) {
-                  <div class="error-message" role="alert">
-                    <mat-icon>error</mat-icon>
-                    <span>{{ getErrorMessage('status') }}</span>
-                  </div>
-                }
-              </div>
-
-              <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': appointmentForm.get('locale')?.value
-               }">
-                <select
-                  id="locale"
-                  formControlName="locale"
-                  aria-label="Langue du client pour les rappels">
-                  @for (option of localeOptions; track option) {
-                    <option [value]="option.value">
-                      {{ option.label }}
-                    </option>
-                  }
-                </select>
-                <label for="locale">Langue du client</label>
-                <div class="field-helper">
-                  <mat-icon>language</mat-icon>
-                  <span>Sélectionnez la langue pour les rappels de rendez-vous</span>
-                </div>
-              </div>
-
-              <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': appointmentForm.get('notes')?.value
-               }">
-                <textarea
-                  id="notes"
-                  formControlName="notes"
-                  placeholder=" "
-                  rows="4"
-                aria-label="Notes additionnelles sur le rendez-vous"></textarea>
-                <label for="notes">Notes</label>
-                <div class="field-helper">
-                  <mat-icon>info</mat-icon>
-                  <span>Ajoutez des informations complémentaires si nécessaire</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
-      </mat-dialog-content>
-
-      <mat-dialog-actions align="end" class="elegant-dialog-actions">
-        <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la planification du rendez-vous">
-          <mat-icon>close</mat-icon>
-          Annuler
-        </button>
-        <button mat-raised-button
-          color="primary"
-          (click)="onSubmit()"
-          [disabled]="!appointmentForm.valid || isSubmitting"
-          [attr.aria-busy]="isSubmitting"
-          [attr.aria-label]="isSubmitting ? (isEditMode ? 'Modification en cours' : 'Planification en cours') : (isEditMode ? 'Modifier le rendez-vous' : 'Planifier le rendez-vous')">
-          @if (isSubmitting) {
-            <ds-skeleton variant="circle" width="20px" height="20px" aria-hidden="true"></ds-skeleton>
-          }
-          @if (!isSubmitting) {
-            <mat-icon>{{ isEditMode ? 'save' : 'event_available' }}</mat-icon>
-          }
-          @if (!isSubmitting) {
-            <span>{{ isEditMode ? 'Modifier' : 'Planifier' }}</span>
-          }
-          @if (isSubmitting) {
-            <span class="sr-only" role="status" aria-live="polite">{{ isEditMode ? 'Modification en cours' : 'Planification en cours' }}</span>
-          }
-        </button>
-      </mat-dialog-actions>
-    </div>
+<ds-dialog-actions align="end">
+  <ds-button variant="ghost" size="md" (dsClick)="onCancel()" [disabled]="isSubmitting">
+    Annuler
+  </ds-button>
+  <ds-button
+    variant="marine"
+    size="md"
+    (dsClick)="onSubmit()"
+    [disabled]="!appointmentForm.valid || isSubmitting">
+    @if (isSubmitting) {
+      <span class="spinner-small" style="margin-right: 8px; border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>
+    } @else {
+      <ds-icon [name]="isEditMode ? 'check' : 'calendar'" [size]="20" style="margin-right: 8px;"></ds-icon>
+    }
+    <span>{{ isSubmitting ? 'En cours...' : (isEditMode ? 'Enregistrer' : 'Planifier') }}</span>
+  </ds-button>
+</ds-dialog-actions>

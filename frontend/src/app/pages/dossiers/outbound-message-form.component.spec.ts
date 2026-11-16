@@ -14,18 +14,14 @@ describe('OutboundMessageFormComponent', () => {
       listTemplates: vi
         .fn()
         .mockName('OutboundMessageApiService.listTemplates'),
-      create: vi.fn().mockName('OutboundMessageApiService.create'),
-    };
+      create: vi.fn().mockName('OutboundMessageApiService.create')};
 
     await TestBed.configureTestingModule({
       imports: [FormsModule, OutboundMessageFormComponent],
       providers: [
         {
           provide: OutboundMessageApiService,
-          useValue: mockOutboundMessageService,
-        },
-      ],
-    }).compileComponents();
+          useValue: mockOutboundMessageService}]}).compileComponents();
 
     fixture = TestBed.createComponent(OutboundMessageFormComponent);
     component = fixture.componentInstance;
@@ -45,9 +41,7 @@ describe('OutboundMessageFormComponent', () => {
         name: 'Salutation',
         content: 'Bonjour {{name}}',
         variables: ['name'],
-        channel: 'WHATSAPP',
-      },
-    ];
+        channel: 'WHATSAPP'}];
 
     mockOutboundMessageService.listTemplates.mockReturnValue(of(mockTemplates));
 
@@ -63,11 +57,9 @@ describe('OutboundMessageFormComponent', () => {
       name: 'Salutation',
       content: 'Bonjour {{name}}',
       variables: ['name'],
-      channel: 'WHATSAPP',
-    };
+      channel: 'WHATSAPP'};
 
-    component.selectedTemplate = template;
-    component.onTemplateSelect();
+    component.onTemplateSelect(template);
 
     expect(component.templateVariables['name']).toBe('John Doe');
     expect(component.messageContent).toContain('Bonjour John Doe');
@@ -79,8 +71,7 @@ describe('OutboundMessageFormComponent', () => {
       name: 'Salutation',
       content: 'Bonjour {{name}}, votre rendez-vous est à {{time}}',
       variables: ['name', 'time'],
-      channel: 'WHATSAPP',
-    };
+      channel: 'WHATSAPP'};
 
     component.selectedTemplate = template;
     component.templateVariables = { name: 'John', time: '14:00' };
@@ -115,8 +106,7 @@ describe('OutboundMessageFormComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 0,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00',
-    };
+      updatedAt: '2024-01-15T10:00:00'};
 
     mockOutboundMessageService.create.mockReturnValue(of(mockResponse));
     vi.spyOn(component.messageSent, 'emit');

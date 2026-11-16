@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatIconModule } from '@angular/material/icon';
 import { FormProgressIndicatorComponent, FormStep } from './form-progress-indicator.component';
 
 describe('FormProgressIndicatorComponent', () => {
@@ -9,7 +8,7 @@ describe('FormProgressIndicatorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [MatProgressBarModule, MatIconModule, FormProgressIndicatorComponent]
+    imports: [MatProgressBarModule, FormProgressIndicatorComponent]
 }).compileComponents();
 
     fixture = TestBed.createComponent(FormProgressIndicatorComponent);
@@ -46,19 +45,6 @@ describe('FormProgressIndicatorComponent', () => {
     expect(component.isStepCompleted(1)).toBe(false);
   });
 
-  it('should return correct step class', () => {
-    fixture.componentRef.setInput('steps', [
-      { label: 'Step 1', completed: true },
-      { label: 'Step 2', completed: false },
-      { label: 'Step 3', completed: false }
-    ]);
-    fixture.componentRef.setInput('currentStep', 1);
-
-    expect(component.getStepClass(0)).toBe('step-completed');
-    expect(component.getStepClass(1)).toBe('step-active');
-    expect(component.getStepClass(2)).toBe('step-pending');
-  });
-
   it('should return correct icon for step', () => {
     fixture.componentRef.setInput('steps', [
       { label: 'Step 1', completed: true },
@@ -66,8 +52,8 @@ describe('FormProgressIndicatorComponent', () => {
       { label: 'Step 3', completed: false }
     ]);
 
-    expect(component.getStepIcon(0)).toBe('check_circle');
+    expect(component.getStepIcon(0)).toBe('check');
     expect(component.getStepIcon(1)).toBe('custom_icon');
-    expect(component.getStepIcon(2)).toBe('radio_button_unchecked');
+    expect(component.getStepIcon(2)).toBe('plus');
   });
 });

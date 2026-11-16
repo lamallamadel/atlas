@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CanDeactivate } from '@angular/router';
-import { Observable } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
+import { Observable, map, of } from 'rxjs';
+import { DsDialogService } from '../design-system';
 import { ConfirmNavigationDialogComponent } from '../components/confirm-navigation-dialog.component';
 
 export interface ComponentCanDeactivate {
@@ -13,8 +13,7 @@ export interface ComponentCanDeactivate {
   providedIn: 'root'
 })
 export class FormUnsavedChangesGuard implements CanDeactivate<ComponentCanDeactivate> {
-  
-  constructor(private dialog: MatDialog) {}
+  private dsDialogService = inject(DsDialogService);
 
   canDeactivate(component: ComponentCanDeactivate): boolean | Observable<boolean> {
     if (component.canDeactivate) {
@@ -25,12 +24,14 @@ export class FormUnsavedChangesGuard implements CanDeactivate<ComponentCanDeacti
     }
 
     if (component.hasUnsavedChanges && component.hasUnsavedChanges()) {
-      const dialogRef = this.dialog.open(ConfirmNavigationDialogComponent, {
+      const dialogRef = this.dsDialogService.open<boolean>(ConfirmNavigationDialogComponent, {
         width: '400px',
         disableClose: true
       });
 
-      return dialogRef.afterClosed();
+      return dialogRef.closed.pipe(
+        map(result => result === true)
+      );
     }
 
     return true;

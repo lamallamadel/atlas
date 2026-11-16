@@ -1,0 +1,116 @@
+<ds-dialog-header (close)="onCancel()">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <ds-icon name="settings" [size]="24" aria-hidden="true"></ds-icon>
+    <span>{{ data?.config ? 'Modifier' : 'Créer' }} une configuration de scoring</span>
+  </div>
+</ds-dialog-header>
+
+<ds-dialog-content>
+  <form [formGroup]="configForm" class="ds-form-stack">
+    <ds-card [pad]="true" elevation="xs" style="margin-bottom: 24px;">
+      <div class="ds-form-stack">
+        <ds-input
+          label="Nom de la configuration"
+          formControlName="configName"
+          placeholder="ex: Configuration standard">
+        </ds-input>
+
+        <ds-checkbox
+          label="Configuration active"
+          formControlName="isActive">
+        </ds-checkbox>
+
+        <ds-input
+          label="Seuil d'auto-qualification"
+          type="number"
+          formControlName="autoQualificationThreshold"
+          hint="Score minimum pour qualifier automatiquement un prospect">
+        </ds-input>
+      </div>
+    </ds-card>
+
+    <ds-tabs [tabs]="tabs" [activeTab]="activeTab" (tabChange)="activeTab = $event" style="margin-bottom: 24px;"></ds-tabs>
+
+    <div class="tab-panels">
+      @if (activeTab === 'source') {
+        <div class="weights-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          @for (source of sourceKeys; track source) {
+            <ds-input
+              [label]="formatLabel(source)"
+              type="number"
+              [formControlName]="'sourceWeight_' + source"
+              min="0" max="30">
+            </ds-input>
+          }
+        </div>
+      }
+
+      @if (activeTab === 'engagement') {
+        <div class="weights-grid" style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+          @for (engagement of engagementKeys; track engagement) {
+            <ds-input
+              [label]="formatLabel(engagement)"
+              type="number"
+              [formControlName]="'engagementWeight_' + engagement"
+              min="0" max="20">
+            </ds-input>
+          }
+        </div>
+      }
+
+      @if (activeTab === 'property') {
+        <div class="weights-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          @for (property of propertyKeys; track property) {
+            <ds-input
+              [label]="formatLabel(property)"
+              type="number"
+              [formControlName]="'propertyWeight_' + property"
+              min="0" max="20">
+            </ds-input>
+          }
+        </div>
+      }
+
+      @if (activeTab === 'timing') {
+        <div class="ds-form-stack">
+          <ds-input
+            label="Poids de la réactivité"
+            type="number"
+            formControlName="responseTimeWeight"
+            min="0" max="30">
+          </ds-input>
+
+          <div class="ds-form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <ds-input
+              label="Réponse rapide (minutes)"
+              type="number"
+              formControlName="fastResponseMinutes">
+            </ds-input>
+
+            <ds-input
+              label="Réponse moyenne (minutes)"
+              type="number"
+              formControlName="mediumResponseMinutes">
+            </ds-input>
+          </div>
+        </div>
+      }
+    </div>
+  </form>
+</ds-dialog-content>
+
+<ds-dialog-actions align="end">
+  <ds-button variant="ghost" size="md" (dsClick)="onCancel()">Annuler</ds-button>
+  <ds-button
+    variant="marine"
+    size="md"
+    (dsClick)="onSave()"
+    [disabled]="!configForm.valid || saving">
+    @if (saving) {
+      <span class="spinner-small" style="margin-right: 8px;"></span>
+    } @else {
+      <ds-icon name="check" [size]="20" style="margin-right: 8px;"></ds-icon>
+    }
+    <span>{{ saving ? 'Enregistrement...' : 'Enregistrer' }}</span>
+  </ds-button>
+</ds-dialog-actions>

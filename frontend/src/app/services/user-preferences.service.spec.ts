@@ -1,19 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+  provideHttpClientTesting} from '@angular/common/http/testing';
 import { UserPreferencesService } from './user-preferences.service';
 import {
-  UserPreferences,
-} from '../models/user-preferences.model';
+  UserPreferences} from '../models/user-preferences.model';
 import { OfflineService, ConnectionStatus } from './offline.service';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 import { vi } from 'vitest';
 
 /** Laisse les callbacks HTTP / RxJS du constructeur se terminer (Vitest n'utilise pas ProxyZone). */
@@ -41,13 +38,11 @@ describe('UserPreferencesService', () => {
       lastOnline: Date;
     }>({
       status: ConnectionStatus.ONLINE,
-      lastOnline: new Date(),
-    });
+      lastOnline: new Date()});
 
     offlineService = {
       isOnline: (): boolean => offlineIsOnline,
-      connectivity$: connectivitySubject.asObservable(),
-    };
+      connectivity$: connectivitySubject.asObservable()};
 
     TestBed.configureTestingModule({
       imports: [],
@@ -55,9 +50,7 @@ describe('UserPreferencesService', () => {
         UserPreferencesService,
         { provide: OfflineService, useValue: offlineService },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
+        provideHttpClientTesting()]});
 
     service = TestBed.inject(UserPreferencesService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -92,8 +85,7 @@ describe('UserPreferencesService', () => {
     it('should load preferences from server on initialization', async () => {
       const mockPreferences: UserPreferences = {
         ui: { theme: 'dark', language: 'fr' },
-        notifications: { emailEnabled: true },
-      } as any;
+        notifications: { emailEnabled: true }} as any;
 
       const req = httpMock.expectOne(API_BASE);
       expect(req.request.method).toBe('GET');
@@ -105,8 +97,7 @@ describe('UserPreferencesService', () => {
 
     it('should load from localStorage if available', async () => {
       const storedPrefs: UserPreferences = {
-        ui: { theme: 'light' },
-      } as any;
+        ui: { theme: 'light' }} as any;
       localStorage.setItem('user_preferences', JSON.stringify(storedPrefs));
 
       const newService = TestBed.inject(UserPreferencesService);
@@ -237,8 +228,7 @@ describe('UserPreferencesService', () => {
 
     it('should merge values with existing category preferences', async () => {
       const initialPrefs = {
-        ui: { theme: 'light', language: 'en' },
-      };
+        ui: { theme: 'light', language: 'en' }};
 
       const req = httpMock.expectOne(API_BASE);
       req.flush(initialPrefs);
@@ -249,8 +239,7 @@ describe('UserPreferencesService', () => {
       const updateReq = httpMock.expectOne(`${API_BASE}/ui`);
       updateReq.flush({
         category: 'ui',
-        preferences: { theme: 'dark', language: 'en' },
-      });
+        preferences: { theme: 'dark', language: 'en' }});
       await stabilize();
       await done;
 
@@ -296,8 +285,7 @@ describe('UserPreferencesService', () => {
       offlineIsOnline = true;
       connectivitySubject.next({
         status: ConnectionStatus.ONLINE,
-        lastOnline: new Date(),
-      });
+        lastOnline: new Date()});
 
       await vi.advanceTimersByTimeAsync(1000);
       await stabilize();
@@ -309,15 +297,13 @@ describe('UserPreferencesService', () => {
       const req2 = httpMock.expectOne(`${API_BASE}/notifications`);
       req2.flush({
         category: 'notifications',
-        preferences: { emailEnabled: true },
-      });
+        preferences: { emailEnabled: true }});
       await stabilize();
 
       const finalReq = httpMock.expectOne(API_BASE);
       finalReq.flush({
         ui: { theme: 'dark' },
-        notifications: { emailEnabled: true },
-      });
+        notifications: { emailEnabled: true }});
       await stabilize();
 
       const pending = JSON.parse(
@@ -351,8 +337,7 @@ describe('UserPreferencesService', () => {
       offlineIsOnline = true;
       connectivitySubject.next({
         status: ConnectionStatus.ONLINE,
-        lastOnline: new Date(),
-      });
+        lastOnline: new Date()});
 
       await vi.advanceTimersByTimeAsync(1000);
       await stabilize();
@@ -535,8 +520,7 @@ describe('UserPreferencesService', () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({
         ui: { theme: 'dark', language: 'fr' },
-        notifications: { emailEnabled: true },
-      });
+        notifications: { emailEnabled: true }});
       await stabilize();
 
       const prefs = await firstValueFrom(service.getPreferencesByCategory('ui'));
@@ -615,8 +599,7 @@ describe('UserPreferencesService', () => {
       await done;
 
       expect(service.getCurrentPreferences()).toEqual({
-        ui: { theme: 'dark' },
-      });
+        ui: { theme: 'dark' }});
     });
   });
 

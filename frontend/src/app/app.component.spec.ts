@@ -11,20 +11,15 @@ import { PrefetchService } from './services/prefetch.service';
 describe('AppComponent', () => {
   beforeEach(async () => {
     const mockThemeService = {
-      getCurrentTheme: vi.fn().mockName('ThemeService.getCurrentTheme'),
-    };
+      getCurrentTheme: vi.fn().mockName('ThemeService.getCurrentTheme')};
     const mockSwService = {
-      register: vi.fn().mockName('ServiceWorkerRegistrationService.register'),
-    };
+      register: vi.fn().mockName('ServiceWorkerRegistrationService.register')};
     const mockQueueService = {
-      processQueue: vi.fn().mockName('OfflineQueueService.processQueue'),
-    };
+      processQueue: vi.fn().mockName('OfflineQueueService.processQueue')};
     const mockLiveAnnouncer = {
-      announce: vi.fn().mockName('LiveAnnouncerService.announce'),
-    };
+      announce: vi.fn().mockName('LiveAnnouncerService.announce')};
     const mockPrefetchService = {
-      init: vi.fn().mockName('PrefetchService.init'),
-    };
+      init: vi.fn().mockName('PrefetchService.init')};
 
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule, AppComponent],
@@ -34,10 +29,8 @@ describe('AppComponent', () => {
         { provide: ServiceWorkerRegistrationService, useValue: mockSwService },
         { provide: OfflineQueueService, useValue: mockQueueService },
         { provide: LiveAnnouncerService, useValue: mockLiveAnnouncer },
-        { provide: PrefetchService, useValue: mockPrefetchService },
-      ],
-      schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
+        { provide: PrefetchService, useValue: mockPrefetchService }],
+      schemas: [NO_ERRORS_SCHEMA]}).compileComponents();
   });
 
   it('should create the app', () => {

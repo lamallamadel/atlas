@@ -2,12 +2,28 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PortailService, Listing, FilterState } from '../../../services/portail.service';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsBadgeComponent
+} from '../../../design-system';
 
 @Component({
     selector: 'app-recherche',
+    standalone: true,
     templateUrl: './recherche.component.html',
     styleUrls: ['./recherche.component.scss'],
-    imports: [FormsModule]
+    imports: [
+      CommonModule,
+      FormsModule,
+      DsButtonComponent,
+      DsIconComponent,
+      DsSelectComponent,
+      DsBadgeComponent
+    ]
 })
 export class RechercheComponent implements OnInit {
 
@@ -20,7 +36,22 @@ export class RechercheComponent implements OnInit {
     surfMin: null, surfMax: null, pieces: 0, sort: 'recent', page: 1
   };
 
-  readonly villes = ['Casablanca', 'Rabat', 'Tanger', 'Marrakech', 'Fès', 'Agadir', 'Meknès', 'Oujda', 'Tétouan', 'Salé'];
+  readonly villeOptions: DsSelectOption[] = [
+    { value: '', label: 'Toutes les villes' },
+    { value: 'Casablanca', label: 'Casablanca' },
+    { value: 'Rabat', label: 'Rabat' },
+    { value: 'Tanger', label: 'Tanger' },
+    { value: 'Marrakech', label: 'Marrakech' },
+    { value: 'Fès', label: 'Fès' },
+    { value: 'Agadir', label: 'Agadir' }
+  ];
+
+  readonly sortOptions: DsSelectOption[] = [
+    { value: 'recent', label: 'Plus récents' },
+    { value: 'price_asc', label: 'Prix croissant' },
+    { value: 'price_desc', label: 'Prix décroissant' }
+  ];
+
   leadModalOpen = false;
   selectedListing: Listing | null = null;
 
@@ -50,7 +81,12 @@ export class RechercheComponent implements OnInit {
 
   setTxFilter(tx: string): void { this.filters.tx = tx; this.filters.page = 1; this.applyFilters(); }
   setPiecesFilter(n: number): void { this.filters.pieces = n; this.filters.page = 1; this.applyFilters(); }
-  setSort(sort: FilterState['sort']): void { this.filters.sort = sort; this.filters.page = 1; this.applyFilters(); }
+  
+  onSortChange(sort: any): void {
+    this.filters.sort = sort;
+    this.filters.page = 1;
+    this.applyFilters();
+  }
 
   resetFilters(): void {
     this.filters = { tx: '', ville: '', prixMin: null, prixMax: null, surfMin: null, surfMax: null, pieces: 0, sort: 'recent', page: 1 };

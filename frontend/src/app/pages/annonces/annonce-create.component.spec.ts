@@ -7,8 +7,6 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 
@@ -16,8 +14,7 @@ import { AnnonceCreateComponent } from './annonce-create.component';
 import { AnnonceApiService } from '../../services/annonce-api.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('AnnonceCreateComponent', () => {
   let component: AnnonceCreateComponent;
@@ -28,8 +25,7 @@ describe('AnnonceCreateComponent', () => {
     const annonceApiServiceSpy = {
       getById: vi.fn().mockName('AnnonceApiService.getById'),
       create: vi.fn().mockName('AnnonceApiService.create'),
-      update: vi.fn().mockName('AnnonceApiService.update'),
-    };
+      update: vi.fn().mockName('AnnonceApiService.update')};
     annonceApiServiceSpy.getById.mockReturnValue(of(undefined as any));
     annonceApiServiceSpy.create.mockReturnValue(of(undefined as any));
     annonceApiServiceSpy.update.mockReturnValue(of(undefined as any));
@@ -43,11 +39,8 @@ describe('AnnonceCreateComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-        MatIconModule,
-        MatButtonModule,
         NoopAnimationsModule,
-        AnnonceCreateComponent,
-      ],
+        AnnonceCreateComponent],
       providers: [
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         {
@@ -55,15 +48,9 @@ describe('AnnonceCreateComponent', () => {
           useValue: {
             snapshot: {
               paramMap: {
-                get: () => null,
-              },
-            },
-          },
-        },
+                get: () => null}}}},
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
 
     annonceApiService = TestBed.inject(
       AnnonceApiService

@@ -1,6 +1,5 @@
-import { Component, OnInit, ElementRef, OnDestroy, viewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, OnDestroy, viewChild, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { SearchApiService, SearchResult } from '../services/search-api.service';
 import { RecentNavigationService, RecentItem } from '../services/recent-navigation.service';
@@ -9,10 +8,13 @@ import { AiAgentService } from '../services/ai-agent.service';
 import { Observable, Subject, debounceTime, distinctUntilChanged, switchMap, of, takeUntil, filter } from 'rxjs';
 import { DossierCreateDialogComponent } from '../pages/dossiers/dossier-create-dialog.component';
 import { FocusTrapDirective } from '../directives/focus-trap.directive';
-import { MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe } from '@angular/common';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { 
+  DsSkeletonComponent, 
+  DsIconComponent, 
+  DsDialogService
+} from '../design-system';
 
 interface CommandItem {
   id: string;
@@ -23,7 +25,6 @@ interface CommandItem {
   category: string;
   keywords?: string[];
   shortcut?: string;
-  /** Score assigned during fuzzy sort (transient, not stored) */
   _score?: number;
 }
 
@@ -34,21 +35,35 @@ interface GroupedItems {
   items: PaletteItem[];
 }
 
-/** Result of a fuzzy match including highlight segments */
 interface FuzzyResult {
   score: number;
-  /** Array of [text, isMatch] tuples for highlight rendering */
   segments: Array<{ text: string; match: boolean }>;
 }
 
 @Component({
     selector: 'app-command-palette',
+    standalone: true,
     templateUrl: './command-palette.component.html',
     styleUrls: ['./command-palette.component.css'],
-    imports: [FocusTrapDirective, MatIcon, FormsModule, DsSkeletonComponent, AsyncPipe]
+    imports: [
+      CommonModule,
+      FocusTrapDirective, 
+      FormsModule, 
+      DsSkeletonComponent, 
+      DsIconComponent, 
+      AsyncPipe
+    ]
 })
 export class CommandPaletteComponent implements OnInit, OnDestroy {
   readonly commandInput = viewChild<ElementRef>('commandInput');
+
+  private router = inject(Router);
+  private dsDialogService = inject(DsDialogService);
+  private keyboardShortcutService = inject(KeyboardShortcutService);
+  private searchApiService = inject(SearchApiService);
+  private recentNavigationService = inject(RecentNavigationService);
+  private themeService = inject(ThemeService);
+  private agentService = inject(AiAgentService);
 
   visible$: Observable<boolean>;
   searchQuery = '';
@@ -58,22 +73,13 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
   selectedIndex = 0;
   isSearching = false;
 
-  /** Map of itemId → highlight segments for the current query */
   highlightMap = new Map<string, Array<{ text: string; match: boolean }>>();
 
   private currentRoute = '';
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
-  constructor(
-    private router: Router,
-    private dialog: MatDialog,
-    private keyboardShortcutService: KeyboardShortcutService,
-    private searchApiService: SearchApiService,
-    private recentNavigationService: RecentNavigationService,
-    private themeService: ThemeService,
-    private agentService: AiAgentService
-  ) {
+  constructor() {
     this.visible$ = this.keyboardShortcutService.commandPaletteVisible$;
   }
 
@@ -100,11 +106,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Route watcher → contextual command injection
-  // ─────────────────────────────────────────────────────────────
   private watchRoute(): void {
-    // Capture initial route
     this.currentRoute = this.router.url;
     this.buildContextualCommands();
 
@@ -117,15 +119,10 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Builds context-sensitive commands based on the current URL.
-   * These appear at the top of the palette as "Actions contextuelles".
-   */
   private buildContextualCommands(): void {
     const route = this.currentRoute;
     const commands: CommandItem[] = [];
 
-    // ── Dossier detail page ──────────────────────────────────
     const dossierMatch = route.match(/\/dossiers\/(\d+)/);
     if (dossierMatch) {
       const id = dossierMatch[1];
@@ -134,7 +131,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
           id: 'ctx-add-note',
           label: 'Ajouter une note',
           description: 'Ajouter une note à ce dossier',
-          icon: 'note_add',
+          icon: 'edit',
           category: 'Actions contextuelles',
           keywords: ['note', 'commentaire'],
           shortcut: 'n',
@@ -144,7 +141,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
           id: 'ctx-schedule-visit',
           label: 'Planifier une visite',
           description: 'Créer un rendez-vous de visite pour ce prospect',
-          icon: 'event',
+          icon: 'calendar',
           category: 'Actions contextuelles',
           keywords: ['rdv', 'visite', 'rendez-vous'],
           action: () => this.router.navigate(['/dossiers', id], { queryParams: { action: 'schedule-visit' } })
@@ -153,7 +150,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
           id: 'ctx-send-message',
           label: 'Envoyer un message',
           description: 'Contacter ce prospect via WhatsApp ou SMS',
-          icon: 'send',
+          icon: 'upload',
           category: 'Actions contextuelles',
           keywords: ['message', 'whatsapp', 'sms', 'envoyer'],
           action: () => this.router.navigate(['/dossiers', id], { queryParams: { action: 'send-message' } })
@@ -162,7 +159,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
           id: 'ctx-change-status',
           label: 'Changer le statut',
           description: 'Modifier le statut du dossier',
-          icon: 'sync_alt',
+          icon: 'refresh',
           category: 'Actions contextuelles',
           keywords: ['statut', 'status', 'changer'],
           action: () => this.router.navigate(['/dossiers', id], { queryParams: { action: 'change-status' } })
@@ -170,7 +167,6 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
       );
     }
 
-    // ── Annonce detail page ──────────────────────────────────
     const annonceMatch = route.match(/\/annonces\/(\d+)/);
     if (annonceMatch) {
       const id = annonceMatch[1];
@@ -188,7 +184,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
           id: 'ctx-create-dossier-for-annonce',
           label: 'Créer un lead pour cette annonce',
           description: 'Ouvrir un nouveau dossier lié à cette annonce',
-          icon: 'person_add',
+          icon: 'plus',
           category: 'Actions contextuelles',
           keywords: ['lead', 'dossier', 'nouveau'],
           action: () => this.openCreateDossierDialog()
@@ -196,14 +192,13 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
       );
     }
 
-    // ── Dossiers list page ───────────────────────────────────
     if (route.startsWith('/dossiers') && !dossierMatch) {
       commands.push(
         {
           id: 'ctx-new-lead',
           label: 'Nouveau lead / dossier',
           description: 'Créer un nouveau prospect immédiatement',
-          icon: 'person_add',
+          icon: 'plus',
           category: 'Actions contextuelles',
           keywords: ['lead', 'nouveau', 'créer', 'prospect'],
           shortcut: 'c',
@@ -221,26 +216,24 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
       );
     }
 
-    // ── Dashboard ────────────────────────────────────────────
     if (route.startsWith('/dashboard')) {
       commands.push({
         id: 'ctx-customize-dashboard',
         label: 'Personnaliser le tableau de bord',
         description: 'Réorganiser les widgets par glisser-déposer',
-        icon: 'dashboard_customize',
+        icon: 'maximize',
         category: 'Actions contextuelles',
         keywords: ['widget', 'dashboard', 'personnaliser'],
         action: () => this.router.navigate(['/dashboard'], { queryParams: { action: 'customize' } })
       });
     }
 
-    // ── Calendar ─────────────────────────────────────────────
     if (route.startsWith('/calendar')) {
       commands.push({
         id: 'ctx-new-appointment',
         label: 'Nouveau rendez-vous',
         description: 'Planifier un rendez-vous directement',
-        icon: 'event_available',
+        icon: 'calendar',
         category: 'Actions contextuelles',
         keywords: ['rdv', 'rendez-vous', 'agenda', 'nouveau'],
         shortcut: 'r',
@@ -253,12 +246,11 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
 
   private initializeGlobalCommands(): void {
     this.globalCommands = [
-      // ── Actions ─────────────────────────────────────────────
       {
         id: 'create-dossier',
         label: 'Créer un nouveau dossier',
         description: 'Ouvrir le formulaire de création de dossier',
-        icon: 'create_new_folder',
+        icon: 'plus',
         category: 'Actions',
         keywords: ['nouveau', 'créer', 'dossier', 'lead', 'prospect'],
         shortcut: 'Ctrl+Shift+D',
@@ -268,29 +260,27 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
         id: 'create-annonce',
         label: 'Créer une nouvelle annonce',
         description: 'Créer une nouvelle annonce immobilière',
-        icon: 'add_circle',
+        icon: 'plus',
         category: 'Actions',
         keywords: ['nouveau', 'créer', 'annonce', 'propriété', 'bien'],
         shortcut: 'Ctrl+Shift+A',
         action: () => this.navigateTo('/annonces/new')
       },
-      // ── Système ─────────────────────────────────────────────
       {
         id: 'toggle-dark-mode',
         label: 'Basculer le mode sombre',
-        description: () => `Mode actuel : ${this.themeService.isDarkTheme() ? 'Sombre 🌙' : 'Clair ☀️'} — cliquez pour basculer`,
-        icon: () => this.themeService.isDarkTheme() ? 'light_mode' : 'dark_mode',
+        description: () => `Mode actuel : ${this.themeService.isDarkTheme() ? 'Sombre 🌙' : 'Clair ☀️'}`,
+        icon: () => this.themeService.isDarkTheme() ? 'sun' : 'moon',
         category: 'Système',
         keywords: ['dark', 'sombre', 'thème', 'mode', 'light', 'clair', 'nuit'],
         shortcut: 'Ctrl+\\',
         action: () => this.themeService.toggleTheme()
       } as unknown as CommandItem,
-      // ── Navigation ──────────────────────────────────────────
       {
         id: 'nav-dashboard',
         label: 'Tableau de bord',
         description: 'Voir le tableau de bord principal',
-        icon: 'dashboard',
+        icon: 'chart',
         category: 'Navigation',
         keywords: ['accueil', 'home', 'dashboard'],
         shortcut: 'g+h',
@@ -300,7 +290,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
         id: 'nav-annonces',
         label: 'Annonces',
         description: 'Liste de toutes les annonces immobilières',
-        icon: 'campaign',
+        icon: 'megaphone',
         category: 'Navigation',
         keywords: ['propriété', 'bien', 'annonce', 'liste'],
         shortcut: 'g+a',
@@ -320,7 +310,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
         id: 'nav-tasks',
         label: 'Tâches',
         description: 'Voir toutes les tâches',
-        icon: 'task',
+        icon: 'tasks',
         category: 'Navigation',
         keywords: ['todo', 'tâches', 'tasks'],
         shortcut: 'g+t',
@@ -330,7 +320,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
         id: 'nav-calendar',
         label: 'Calendrier',
         description: 'Voir le calendrier des rendez-vous',
-        icon: 'calendar_today',
+        icon: 'calendar',
         category: 'Navigation',
         keywords: ['calendar', 'calendrier', 'rendez-vous', 'appointments', 'rdv'],
         shortcut: 'g+c',
@@ -340,7 +330,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
         id: 'nav-reports',
         label: 'Rapports & KPIs',
         description: 'Statistiques et tableaux de bord analytiques',
-        icon: 'insights',
+        icon: 'chart',
         category: 'Navigation',
         keywords: ['statistiques', 'analytics', 'rapports', 'kpi', 'chiffres'],
         shortcut: 'g+r',
@@ -360,12 +350,11 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
         id: 'nav-observability',
         label: 'Observabilité système',
         description: 'Dashboard de monitoring et métriques',
-        icon: 'analytics',
+        icon: 'refresh',
         category: 'Navigation',
         keywords: ['monitoring', 'logs', 'metrics', 'système'],
         action: () => this.navigateTo('/observability')
       },
-      // ── Aide ────────────────────────────────────────────────
       {
         id: 'show-shortcuts',
         label: 'Raccourcis clavier',
@@ -387,9 +376,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
       debounceTime(300),
       distinctUntilChanged(),
       switchMap(query => {
-        if (!query || query.length < 2) {
-          return of(null);
-        }
+        if (!query || query.length < 2) return of(null);
         this.isSearching = true;
         return this.searchApiService.autocomplete(query);
       }),
@@ -402,11 +389,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
 
   onSearchChange(): void {
     this.searchSubject.next(this.searchQuery);
-
-    // Immediate local filtering for responsiveness
-    if (!this.searchQuery || this.searchQuery.length < 2) {
-      this.updateFilteredItems();
-    }
+    if (!this.searchQuery || this.searchQuery.length < 2) this.updateFilteredItems();
   }
 
   private updateFilteredItems(searchResults: SearchResult[] = []): void {
@@ -416,43 +399,32 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
     let items: PaletteItem[] = [];
 
     if (!query) {
-      // No query: contextual first, then recent, then global commands
       const recentItems = this.recentNavigationService.getRecentItems();
       items = [...this.contextualCommands, ...recentItems, ...this.globalCommands];
     } else {
-      // Score + filter contextual commands
       const scoredContextual = this.scoreAndFilter(this.contextualCommands, query);
-      // Score + filter global commands
       const scoredGlobal = this.scoreAndFilter(this.globalCommands, query);
 
-      // Build highlight map for all matched commands
       [...scoredContextual, ...scoredGlobal].forEach(cmd => {
         const result = this.fuzzyScore(query, cmd.label);
-        if (result.score > 0) {
-          this.highlightMap.set(cmd.id, result.segments);
-        }
+        if (result.score > 0) this.highlightMap.set(cmd.id, result.segments);
       });
 
       items = [...scoredContextual, ...scoredGlobal, ...searchResults];
 
-      // ── Agent mode: inject "Ask the agent" when query looks like NL ──
-      const isNaturalLanguage = this.looksLikeNaturalLanguage(this.searchQuery.trim());
-      const hasResults = items.length > 0;
-      if (isNaturalLanguage || !hasResults) {
-        const agentCommand: CommandItem = {
+      if (this.looksLikeNaturalLanguage(this.searchQuery.trim()) || items.length === 0) {
+        items = [{
           id: 'ask-agent',
           label: `Demander à Atlas IA : « ${this.searchQuery.trim()} »`,
           description: 'Analyse en langage naturel — recherche, création, navigation…',
-          icon: 'auto_awesome',
+          icon: 'refresh',
           category: 'Agent IA',
           keywords: [],
           action: () => {
             this.close();
             this.agentService.openPanel(this.searchQuery.trim());
           }
-        };
-        // Always show agent option first
-        items = [agentCommand, ...items];
+        }, ...items];
       }
     }
 
@@ -460,79 +432,45 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
     this.selectedIndex = 0;
   }
 
-  /**
-   * Detects if the query is likely natural language rather than a command keyword.
-   * Heuristics: ≥3 words, OR starts with a known agent verb, OR contains proper nouns.
-   */
   private looksLikeNaturalLanguage(query: string): boolean {
     const wordCount = query.split(/\s+/).length;
     if (wordCount >= 3) return true;
     const agentVerbs = ['trouve', 'crée', 'envoie', 'cherche', 'montre', 'affiche', 'contacte', 'appelle'];
-    const qLower = query.toLowerCase();
-    return agentVerbs.some(v => qLower.startsWith(v));
+    return agentVerbs.some(v => query.toLowerCase().startsWith(v));
   }
 
-  /**
-   * Scores all commands against the query and returns them sorted by relevance desc.
-   * Commands scoring 0 are excluded.
-   */
   private scoreAndFilter(commands: CommandItem[], query: string): CommandItem[] {
     return commands
       .map(cmd => {
         const scores = [
-          this.fuzzyScore(query, cmd.label).score * 3,          // label weighted ×3
-          this.fuzzyScore(query, cmd.description).score * 1.5,  // description ×1.5
+          this.fuzzyScore(query, cmd.label).score * 3,
+          this.fuzzyScore(query, cmd.description).score * 1.5,
           this.fuzzyScore(query, cmd.category).score,
           ...(cmd.keywords || []).map(k => this.fuzzyScore(query, k).score * 2)
         ];
-        const best = Math.max(...scores);
-        return { cmd, score: best };
+        return { cmd, score: Math.max(...scores) };
       })
       .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score)
       .map(({ cmd }) => cmd);
   }
 
-  /**
-   * Returns a relevance score (0 = no match) plus highlight segments.
-   * Scoring:
-   *  - Exact start match  = 100
-   *  - Substring match    = 70 + (proximity to start)
-   *  - Fuzzy char match   = 10 + ratio of chars matched
-   */
-  private fuzzyScore(query: string, text: string): FuzzyResult {
-    if (text == null || typeof text !== 'string') text = '';
+  private fuzzyScore(query: string, text: string | ((...args: unknown[]) => unknown)): FuzzyResult {
+    if (typeof text !== 'string') text = '';
     if (!text || !query) return { score: 0, segments: [{ text: String(text), match: false }] };
 
     const textLower = text.toLowerCase();
     const queryLower = query.toLowerCase();
 
-    // ── Exact start match ────────────────────────────────────
     if (textLower.startsWith(queryLower)) {
-      return {
-        score: 100,
-        segments: [
-          { text: text.slice(0, query.length), match: true },
-          { text: text.slice(query.length), match: false }
-        ]
-      };
+      return { score: 100, segments: [{ text: text.slice(0, query.length), match: true }, { text: text.slice(query.length), match: false }] };
     }
 
-    // ── Substring match ──────────────────────────────────────
     const idx = textLower.indexOf(queryLower);
     if (idx !== -1) {
-      const proximity = Math.max(0, 50 - idx); // higher score if closer to start
-      return {
-        score: 70 + proximity,
-        segments: [
-          { text: text.slice(0, idx), match: false },
-          { text: text.slice(idx, idx + query.length), match: true },
-          { text: text.slice(idx + query.length), match: false }
-        ]
-      };
+      return { score: 70 + Math.max(0, 50 - idx), segments: [{ text: text.slice(0, idx), match: false }, { text: text.slice(idx, idx + query.length), match: true }, { text: text.slice(idx + query.length), match: false }] };
     }
 
-    // ── Fuzzy char match ─────────────────────────────────────
     let qi = 0;
     const segments: Array<{ text: string; match: boolean }> = [];
     let buf = '';
@@ -548,21 +486,16 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
       buf += text[i];
       if (isMatch) qi++;
     }
-    // remaining text after last match char
     if (buf) segments.push({ text: buf, match: lastMatch });
-    if (qi < text.length) {
-      segments.push({ text: text.slice(qi), match: false });
-    }
+    if (qi < text.length) segments.push({ text: text.slice(qi), match: false });
 
     if (qi === queryLower.length) {
-      const ratio = queryLower.length / textLower.length;
-      return { score: 10 + Math.round(ratio * 30), segments };
+      return { score: 10 + Math.round((queryLower.length / textLower.length) * 30), segments };
     }
 
     return { score: 0, segments: [{ text, match: false }] };
   }
 
-  /** Get highlight segments for a given command id (populated after updateFilteredItems) */
   getHighlightSegments(item: PaletteItem): Array<{ text: string; match: boolean }> | null {
     if (!this.searchQuery || !this.isCommandItem(item)) return null;
     return this.highlightMap.get(item.id) || null;
@@ -582,9 +515,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
         break;
       case 'Enter':
         event.preventDefault();
-        if (this.filteredItems[this.selectedIndex]) {
-          this.executeItem(this.filteredItems[this.selectedIndex]);
-        }
+        if (this.filteredItems[this.selectedIndex]) this.executeItem(this.filteredItems[this.selectedIndex]);
         break;
       case 'Escape':
         event.preventDefault();
@@ -596,30 +527,19 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
   scrollToSelected(): void {
     setTimeout(() => {
       const selectedElement = document.querySelector('.command-item.selected');
-      if (selectedElement) {
-        selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
+      if (selectedElement) selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }, 0);
   }
 
   executeItem(item: PaletteItem): void {
-    if (this.isCommandItem(item)) {
-      item.action();
-    } else if (this.isSearchResult(item)) {
-      this.navigateToSearchResult(item);
-    } else if (this.isRecentItem(item)) {
-      this.navigateTo(item.route);
-    }
+    if (this.isCommandItem(item)) item.action();
+    else if (this.isSearchResult(item)) this.navigateToSearchResult(item);
+    else if (this.isRecentItem(item)) this.navigateTo(item.route);
     this.close();
   }
 
-  selectItem(index: number): void {
-    this.selectedIndex = index;
-  }
-
-  close(): void {
-    this.keyboardShortcutService.closeCommandPalette();
-  }
+  selectItem(index: number): void { this.selectedIndex = index; }
+  close(): void { this.keyboardShortcutService.closeCommandPalette(); }
 
   private resetState(): void {
     this.searchQuery = '';
@@ -629,52 +549,31 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
     this.highlightMap.clear();
   }
 
-  private navigateTo(path: string): void {
-    this.router.navigate([path]);
-  }
+  private navigateTo(path: string): void { this.router.navigate([path]); }
 
   private navigateToSearchResult(result: SearchResult): void {
-    if (result.type === 'ANNONCE') {
-      this.navigateTo(`/annonces/${result.id}`);
-    } else if (result.type === 'DOSSIER') {
-      this.navigateTo(`/dossiers/${result.id}`);
-    }
+    if (result.type === 'ANNONCE') this.navigateTo(`/annonces/${result.id}`);
+    else if (result.type === 'DOSSIER') this.navigateTo(`/dossiers/${result.id}`);
   }
 
   private openCreateDossierDialog(): void {
-    this.dialog.open(DossierCreateDialogComponent, {
-      width: '600px',
-      maxWidth: '95vw'
-    });
+    this.dsDialogService.open(DossierCreateDialogComponent, { width: '600px' });
   }
 
   getGroupedItems(): GroupedItems[] {
     const groups = new Map<string, PaletteItem[]>();
-
-    // Fixed category order for clarity
     const ORDER = ['Actions contextuelles', 'Récents', 'Actions', 'Système', 'Navigation', 'Aide', 'Annonces trouvées', 'Dossiers trouvés', 'Autres'];
 
     this.filteredItems.forEach(item => {
       let category = 'Autres';
-
-      if (this.isCommandItem(item)) {
-        category = item.category;
-      } else if (this.isSearchResult(item)) {
-        category = item.type === 'ANNONCE' ? 'Annonces trouvées' : 'Dossiers trouvés';
-      } else if (this.isRecentItem(item)) {
-        category = 'Récents';
-      }
-
-      if (!groups.has(category)) {
-        groups.set(category, []);
-      }
+      if (this.isCommandItem(item)) category = item.category;
+      else if (this.isSearchResult(item)) category = item.type === 'ANNONCE' ? 'Annonces trouvées' : 'Dossiers trouvés';
+      else if (this.isRecentItem(item)) category = 'Récents';
+      if (!groups.has(category)) groups.set(category, []);
       groups.get(category)?.push(item);
     });
 
-    // Sort categories by predefined order
-    return ORDER
-      .filter(cat => groups.has(cat))
-      .map(cat => ({ category: cat, items: groups.get(cat)! }));
+    return ORDER.filter(cat => groups.has(cat)).map(cat => ({ category: cat, items: groups.get(cat)! }));
   }
 
   getItemLabel(item: PaletteItem): string {
@@ -685,27 +584,17 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
   }
 
   getItemDescription(item: PaletteItem): string {
-    if (this.isCommandItem(item)) {
-      // Support dynamic descriptions (functions)
-      return typeof (item as any)._descFn === 'function'
-        ? (item as any)._descFn()
-        : item.description;
-    }
+    if (this.isCommandItem(item)) return typeof (item as any)._descFn === 'function' ? (item as any)._descFn() : item.description;
     if (this.isSearchResult(item)) return item.description || '';
     if (this.isRecentItem(item)) return item.subtitle || '';
     return '';
   }
 
   getItemIcon(item: PaletteItem): string {
-    if (this.isCommandItem(item)) {
-      // Support dynamic icons (functions)
-      return typeof (item as any)._iconFn === 'function'
-        ? (item as any)._iconFn()
-        : item.icon;
-    }
-    if (this.isSearchResult(item)) return item.type === 'ANNONCE' ? 'campaign' : 'folder';
-    if (this.isRecentItem(item)) return item.type === 'annonce' ? 'campaign' : 'folder';
-    return 'help';
+    if (this.isCommandItem(item)) return typeof (item as any)._iconFn === 'function' ? (item as any)._iconFn() : item.icon;
+    if (this.isSearchResult(item)) return item.type === 'ANNONCE' ? 'megaphone' : 'folder';
+    if (this.isRecentItem(item)) return item.type === 'annonce' ? 'megaphone' : 'folder';
+    return 'info';
   }
 
   getItemShortcut(item: PaletteItem): string | undefined {
@@ -713,15 +602,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
     return undefined;
   }
 
-  private isCommandItem(item: PaletteItem): item is CommandItem {
-    return 'action' in item && typeof item.action === 'function';
-  }
-
-  private isSearchResult(item: PaletteItem): item is SearchResult {
-    return 'relevanceScore' in item;
-  }
-
-  private isRecentItem(item: PaletteItem): item is RecentItem {
-    return 'route' in item && 'timestamp' in item;
-  }
+  private isCommandItem(item: PaletteItem): item is CommandItem { return 'action' in item && typeof item.action === 'function'; }
+  private isSearchResult(item: PaletteItem): item is SearchResult { return 'relevanceScore' in item; }
+  private isRecentItem(item: PaletteItem): item is RecentItem { return 'route' in item && 'timestamp' in item; }
 }

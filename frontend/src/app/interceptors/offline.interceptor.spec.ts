@@ -2,7 +2,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import {} from '@angular/material/snack-bar';
 import { OfflineInterceptor } from './offline.interceptor';
 import { OfflineService } from '../services/offline.service';
 import { OfflineQueueService } from '../services/offline-queue.service';
@@ -10,8 +9,7 @@ import { OfflineStorageService } from '../services/offline-storage.service';
 import { NotificationService } from '../services/notification.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('OfflineInterceptor', () => {
   let interceptor: OfflineInterceptor;
@@ -22,8 +20,7 @@ describe('OfflineInterceptor', () => {
       error: vi.fn().mockName('NotificationService.error'),
       info: vi.fn().mockName('NotificationService.info'),
       warning: vi.fn().mockName('NotificationService.warning'),
-      critical: vi.fn().mockName('NotificationService.critical'),
-    };
+      critical: vi.fn().mockName('NotificationService.critical')};
 
     TestBed.configureTestingModule({
       imports: [],
@@ -33,20 +30,15 @@ describe('OfflineInterceptor', () => {
           useValue: {
             open: () => ({
               onAction: () => of(null),
-              afterDismissed: () => of(null),
-            }),
-            dismiss: () => {},
-          },
-        },
+              afterDismissed: () => of(null)}),
+            dismiss: () => {}}},
         OfflineInterceptor,
         OfflineService,
         OfflineQueueService,
         OfflineStorageService,
         { provide: NotificationService, useValue: mockNotificationService },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
+        provideHttpClientTesting()]});
     interceptor = TestBed.inject(OfflineInterceptor);
   });
 

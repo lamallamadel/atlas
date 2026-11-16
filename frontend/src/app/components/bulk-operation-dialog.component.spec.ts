@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { BulkOperationDialogComponent } from './bulk-operation-dialog.component';
-import { MaterialTestingModule } from '../testing/material-testing.module';
 
 describe('BulkOperationDialogComponent', () => {
   let component: BulkOperationDialogComponent;
@@ -9,11 +8,11 @@ describe('BulkOperationDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MaterialTestingModule, BulkOperationDialogComponent],
+      imports: [BulkOperationDialogComponent],
       providers: [
-        { provide: MatDialogRef, useValue: { close: vi.fn() } },
+        { provide: DialogRef, useValue: { close: vi.fn() } },
         {
-          provide: MAT_DIALOG_DATA,
+          provide: DIALOG_DATA,
           useValue: {
             title: 'Test',
             message: 'Test',
@@ -21,11 +20,7 @@ describe('BulkOperationDialogComponent', () => {
             failureCount: 0,
             totalCount: 1,
             errors: [],
-            inProgress: true,
-          },
-        },
-      ],
-    }).compileComponents();
+            inProgress: true}}]}).compileComponents();
 
     fixture = TestBed.createComponent(BulkOperationDialogComponent);
     component = fixture.componentInstance;

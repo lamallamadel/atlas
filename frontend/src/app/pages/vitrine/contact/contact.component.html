@@ -1,50 +1,95 @@
-<section class="at-page-hero"><div class="at-container at-page-hero-content">
-  <p class="at-page-hero-eyebrow">Contact</p>
-  <h1 class="at-page-hero-title">Parlons de votre projet</h1>
-  <p class="at-page-hero-lead">Notre équipe est disponible pour répondre à toutes vos questions. Réponse garantie sous 24h.</p>
-</div></section>
-
-<section class="at-section"><div class="at-container--default" style="margin-inline:auto;padding-inline:clamp(1rem,4vw,3rem)">
-  <div class="ct-layout">
-    @if (!submitted) {
-      <form class="at-card" (ngSubmit)="submit()">
-        <h2 style="font-family:var(--ds-font-display);font-size:var(--ds-text-lg);margin-bottom:var(--ds-space-5);">Nous écrire</h2>
-        <div class="at-form-stack">
-          <div class="at-form-grid-2">
-            <div class="at-form-group"><label class="at-form-label" for="ct-nom">Nom <span class="at-req">*</span></label><input id="ct-nom" class="at-form-input" [(ngModel)]="form.nom" name="nom" placeholder="Votre nom" required/></div>
-            <div class="at-form-group"><label class="at-form-label" for="ct-email">Email <span class="at-req">*</span></label><input id="ct-email" class="at-form-input" type="email" [(ngModel)]="form.email" name="email" placeholder="vous@email.ma" required/></div>
-          </div>
-          <div class="at-form-group"><label class="at-form-label" for="ct-tel">Téléphone</label><input id="ct-tel" class="at-form-input" [(ngModel)]="form.tel" name="tel" placeholder="+212 6xx xxx xxx"/></div>
-          <div class="at-form-group"><label class="at-form-label" for="ct-sujet">Sujet <span class="at-req">*</span></label>
-          <select id="ct-sujet" class="at-form-select" [(ngModel)]="form.sujet" name="sujet" required>
-            <option value="">Sélectionner…</option>
-            <option>Demande commerciale</option><option>Support technique</option><option>Partenariat</option><option>Facturation</option><option>Autre</option>
-          </select>
-        </div>
-        <div class="at-form-group"><label class="at-form-label" for="ct-msg">Message <span class="at-req">*</span></label><textarea id="ct-msg" class="at-form-textarea" [(ngModel)]="form.message" name="message" placeholder="Votre message…" required></textarea></div>
-        <button type="submit" class="at-btn at-btn-primary" [disabled]="!isValid()||submitting" style="width:100%;justify-content:center;">{{submitting ? 'Envoi…' : 'Envoyer'}}</button>
-      </div>
-    </form>
-  }
-
-  @if (submitted) {
-    <div class="at-card" style="text-align:center;padding:var(--ds-space-10)">
-      <div style="width:56px;height:56px;border-radius:50%;background:var(--ds-success-hl);display:flex;align-items:center;justify-content:center;margin:0 auto var(--ds-space-4);">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ds-success)" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      </div>
-      <h3 style="font-family:var(--ds-font-display);">Message envoyé !</h3>
-      <p style="color:var(--ds-text-muted);font-size:var(--ds-text-sm);margin-top:var(--ds-space-3);">Notre équipe vous répondra dans les 24h.</p>
-    </div>
-  }
-
-  <div class="ct-info">
-    <h3 style="font-family:var(--ds-font-display);margin-bottom:var(--ds-space-5);">Informations</h3>
-    <div class="ct-info-items">
-      <div class="ct-info-item"><div class="ct-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><strong>Siège social</strong><br/>Casablanca, Maroc</div></div>
-      <div class="ct-info-item"><div class="ct-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><strong>Email</strong><br/>contact&#64;atlasia.ma</div></div>
-      <div class="ct-info-item"><div class="ct-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><strong>Horaires</strong><br/>Lun–Ven, 9h–18h (GMT+1)</div></div>
-    </div>
-    <a routerLink="/biz/demo" class="at-btn at-btn-primary" style="margin-top:var(--ds-space-6);width:100%;justify-content:center;">Planifier une démo →</a>
+<section class="at-page-hero">
+  <div class="at-container at-page-hero-content">
+    <p class="at-page-hero-eyebrow">Contact</p>
+    <h1 class="at-page-hero-title">Parlons de votre projet</h1>
+    <p class="at-page-hero-lead">Notre équipe est disponible pour répondre à toutes vos questions. Réponse garantie sous 24h.</p>
   </div>
-</div>
-</div></section>
+</section>
+
+<section class="at-section">
+  <div class="at-container--default" style="margin-inline:auto;padding-inline:clamp(1rem,4vw,3rem)">
+    <div class="ct-layout" style="display: grid; grid-template-columns: 1fr 340px; gap: 48px; align-items: flex-start;">
+      @if (!submitted) {
+        <ds-card [pad]="true" elevation="sm">
+          <h2 style="font-family:var(--ds-font-display);font-size:var(--ds-text-lg);margin-bottom:var(--ds-space-5); color: var(--ds-marine);">Nous écrire</h2>
+          <form (ngSubmit)="submit()" class="ds-form-stack">
+            <div class="at-form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <ds-input label="Nom" [(ngModel)]="form.nom" name="nom" placeholder="Votre nom" required="true"></ds-input>
+              <ds-input label="Email" type="email" [(ngModel)]="form.email" name="email" placeholder="vous@email.ma" required="true"></ds-input>
+            </div>
+            
+            <ds-input label="Téléphone" [(ngModel)]="form.tel" name="tel" placeholder="+212 6xx xxx xxx"></ds-input>
+            
+            <ds-select
+              label="Sujet"
+              [options]="sujetOptions"
+              [(ngModel)]="form.sujet"
+              name="sujet"
+              required="true">
+            </ds-select>
+
+            <div class="ds-field">
+              <label class="ds-field__label">Message</label>
+              <div class="ds-field__wrap">
+                <textarea 
+                  class="ds-field__input" 
+                  [(ngModel)]="form.message" 
+                  name="message" 
+                  placeholder="Votre message…" 
+                  rows="6"
+                  style="height: auto; padding: 12px;"
+                  required></textarea>
+              </div>
+            </div>
+
+            <ds-button 
+              variant="marine" 
+              size="lg" 
+              type="submit" 
+              [disabled]="!isValid() || submitting" 
+              style="width: 100%; margin-top: 24px;">
+              @if (submitting) {
+                <ds-skeleton variant="circle" width="20px" height="20px" style="margin-right: 8px;"></ds-skeleton>
+              }
+              <span>{{ submitting ? 'Envoi en cours…' : 'Envoyer le message' }}</span>
+            </ds-button>
+          </form>
+        </ds-card>
+      }
+
+      @if (submitted) {
+        <ds-card [pad]="true" elevation="sm" style="text-align:center; padding: 64px 24px;">
+          <div style="width:64px; height:64px; border-radius:50%; background:var(--ds-success-hl); display:flex; align-items:center; justify-content:center; margin:0 auto 24px;">
+            <ds-icon name="check" [size]="24" style="color: var(--ds-success);"></ds-icon>
+          </div>
+          <h3 style="font-family:var(--ds-font-display); font-size: 24px; color: var(--ds-marine); margin-bottom: 8px;">Message envoyé !</h3>
+          <p style="color:var(--ds-text-muted); font-size:var(--ds-text-base);">Notre équipe a bien reçu votre demande et vous répondra sous 24h.</p>
+          <ds-button variant="ghost" size="md" (dsClick)="submitted = false" style="margin-top: 32px;">Envoyer un autre message</ds-button>
+        </ds-card>
+      }
+
+      <div class="ct-info ds-form-stack">
+        <h3 style="font-family:var(--ds-font-display); margin-bottom: 24px; color: var(--ds-marine);">Informations</h3>
+        <div class="ct-info-items ds-form-stack">
+          <div class="ct-info-item" style="display: flex; gap: 16px;">
+            <div class="ct-info-icon" style="color: var(--ds-primary);"><ds-icon name="map-pin" [size]="20"></ds-icon></div>
+            <div style="font-size: 14px;"><strong style="color: var(--ds-text);">Siège social</strong><br/><span style="color: var(--ds-text-muted);">Casablanca, Maroc</span></div>
+          </div>
+          <div class="ct-info-item" style="display: flex; gap: 16px;">
+            <div class="ct-info-icon" style="color: var(--ds-primary);"><ds-icon name="mail" [size]="20"></ds-icon></div>
+            <div style="font-size: 14px;"><strong style="color: var(--ds-text);">Email</strong><br/><span style="color: var(--ds-text-muted);">contact&#64;atlasia.ma</span></div>
+          </div>
+          <div class="ct-info-item" style="display: flex; gap: 16px;">
+            <div class="ct-info-icon" style="color: var(--ds-primary);"><ds-icon name="clock" [size]="20"></ds-icon></div>
+            <div style="font-size: 14px;"><strong style="color: var(--ds-text);">Horaires</strong><br/><span style="color: var(--ds-text-muted);">Lun–Ven, 9h–18h (GMT+1)</span></div>
+          </div>
+        </div>
+        <a class="ds-btn ds-btn--marine ds-btn--md" style="margin-top: 32px; width: 100%; display: inline-flex; text-decoration: none;" routerLink="/biz/demo">
+          Planifier une démo
+          <ds-icon name="chevron-right" [size]="16" style="margin-left: 8px;"></ds-icon>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+>

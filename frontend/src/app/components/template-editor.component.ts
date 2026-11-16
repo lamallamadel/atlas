@@ -1,11 +1,33 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WhatsAppTemplateRequest, WhatsAppTemplateResponse } from '../services/whatsapp-template-api.service';
+import { CommonModule } from '@angular/common';
+import { 
+  DsCardComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsInputComponent,
+  DsSkeletonComponent
+} from '../design-system';
 
 @Component({
-  selector: 'app-template-editor',
-  templateUrl: './template-editor.component.html',
-  styleUrls: ['./template-editor.component.css']
+    selector: 'app-template-editor',
+    standalone: true,
+    templateUrl: './template-editor.component.html',
+    styleUrls: ['./template-editor.component.css'],
+    imports: [
+      CommonModule,
+      FormsModule,
+      ReactiveFormsModule,
+      DsCardComponent,
+      DsButtonComponent,
+      DsIconComponent,
+      DsSelectComponent,
+      DsInputComponent,
+      DsSkeletonComponent
+    ]
 })
 export class TemplateEditorComponent implements OnInit {
   @Input() template?: WhatsAppTemplateResponse;
@@ -17,26 +39,26 @@ export class TemplateEditorComponent implements OnInit {
   previewText = '';
   previewVariables: { [key: string]: string } = {};
 
-  categories = [
+  readonly categories: DsSelectOption[] = [
     { value: 'MARKETING', label: 'Marketing' },
-    { value: 'UTILITY', label: 'Utility' },
-    { value: 'AUTHENTICATION', label: 'Authentication' },
-    { value: 'TRANSACTIONAL', label: 'Transactional' }
+    { value: 'UTILITY', label: 'Utilitaire' },
+    { value: 'AUTHENTICATION', label: 'Authentification' },
+    { value: 'TRANSACTIONAL', label: 'Transactionnel' }
   ];
 
-  languages = [
-    { value: 'en', label: 'English' },
-    { value: 'es', label: 'Spanish' },
-    { value: 'fr', label: 'French' },
-    { value: 'de', label: 'German' },
-    { value: 'pt', label: 'Portuguese' }
+  readonly languages: DsSelectOption[] = [
+    { value: 'fr', label: 'Français' },
+    { value: 'en', label: 'Anglais' },
+    { value: 'es', label: 'Espagnol' },
+    { value: 'de', label: 'Allemand' },
+    { value: 'pt', label: 'Portugais' }
   ];
 
-  componentTypes = [
-    { value: 'HEADER', label: 'Header' },
-    { value: 'BODY', label: 'Body' },
-    { value: 'FOOTER', label: 'Footer' },
-    { value: 'BUTTON', label: 'Button' }
+  readonly componentTypes: DsSelectOption[] = [
+    { value: 'HEADER', label: 'En-tête' },
+    { value: 'BODY', label: 'Corps du message' },
+    { value: 'FOOTER', label: 'Pied de page' },
+    { value: 'BUTTON', label: 'Bouton' }
   ];
 
   constructor(private fb: FormBuilder) {}
@@ -52,7 +74,7 @@ export class TemplateEditorComponent implements OnInit {
   initForm(): void {
     this.templateForm = this.fb.group({
       name: ['', [Validators.required, Validators.pattern(/^[a-z0-9_]+$/)]],
-      language: ['en', Validators.required],
+      language: ['fr', Validators.required],
       category: ['TRANSACTIONAL', Validators.required],
       description: [''],
       bodyText: ['', Validators.required],
@@ -171,7 +193,7 @@ export class TemplateEditorComponent implements OnInit {
       });
     }
 
-    this.previewText = preview || 'Enter template content to see preview...';
+    this.previewText = preview || 'Saisissez le contenu pour voir l\'aperçu...';
   }
 
   interpolateVariables(text: string): string {

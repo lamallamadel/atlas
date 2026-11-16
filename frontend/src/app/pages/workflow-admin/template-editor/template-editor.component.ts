@@ -1,19 +1,24 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormArray, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
-import { TemplateApiService } from '../services/template-api.service';
-import { WhatsAppTemplate, TemplateStatus, TemplateCategory, ComponentType, TemplateComponent, ButtonType } from '../models/template.model';
-import { MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { DsButtonComponent, DsCardComponent, DsIconComponent } from '../../../design-system';
-import { MatFormField, MatLabel, MatHint, MatError, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { 
+  WhatsAppTemplateApiService, 
+  WhatsAppTemplateRequest, 
+  WhatsAppTemplateResponse
+} from '../../../services/whatsapp-template-api.service';
+import { CdkDropList } from '@angular/cdk/drag-drop';
+import { CommonModule } from '@angular/common';
+import { 
+  DsCardComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsInputComponent,
+  DsCheckboxComponent,
+  DsBadgeComponent
+} from '../../../design-system';
 import { TemplatePreviewComponent } from '../template-preview/template-preview.component';
 
 @Component({
@@ -21,68 +26,62 @@ import { TemplatePreviewComponent } from '../template-preview/template-preview.c
     standalone: true,
     templateUrl: './template-editor.component.html',
     styleUrls: ['./template-editor.component.css'],
-    imports: [MatIconButton, MatIcon, FormsModule, ReactiveFormsModule, DsCardComponent, DsButtonComponent, DsIconComponent, MatFormField, MatLabel, MatInput, MatHint, MatError, MatSelect, MatOption, MatSuffix, CdkDropList, CdkDrag, CdkDragHandle, MatCheckbox, TemplatePreviewComponent]
+    imports: [
+      CommonModule,
+      ReactiveFormsModule, 
+      DsCardComponent, 
+      DsButtonComponent, 
+      DsIconComponent, 
+      CdkDropList, 
+      DsSelectComponent,
+      DsInputComponent,
+      DsCheckboxComponent,
+      TemplatePreviewComponent
+    ]
 })
 export class TemplateEditorComponent implements OnInit, OnDestroy {
-  templateForm!: FormGroup;
-  templateId?: number;
+  templateForm: FormGroup;
+  templateId: number | null = null;
   isEditMode = false;
   isViewMode = false;
-  loading = false;
-  previewTemplate?: WhatsAppTemplate;
-
-  TemplateCategory = TemplateCategory;
-  ComponentType = ComponentType;
-  ButtonType = ButtonType;
   
-  categories = Object.values(TemplateCategory);
-  componentTypes = Object.values(ComponentType);
-  buttonTypes = Object.values(ButtonType);
+  readonly categories: DsSelectOption[] = [
+    { value: 'MARKETING', label: 'Marketing' },
+    { value: 'UTILITY', label: 'Utilitaire' },
+    { value: 'AUTHENTICATION', label: 'Authentification' }
+  ];
+
+  readonly languages: DsSelectOption[] = [
+    { value: 'fr', label: 'Français' },
+    { value: 'en', label: 'Anglais' },
+    { value: 'es', label: 'Espagnol' },
+    { value: 'de', label: 'Allemand' },
+    { value: 'pt', label: 'Portugais' }
+  ];
+
+  readonly buttonTypes: DsSelectOption[] = [
+    { value: 'QUICK_REPLY', label: 'Réponse rapide' },
+    { value: 'URL', label: 'Lien externe' },
+    { value: 'PHONE_NUMBER', label: 'Appel téléphonique' }
+  ];
+
+  readonly variableComponentTypes: DsSelectOption[] = [
+    { value: 'HEADER', label: 'En-tête' },
+    { value: 'BODY', label: 'Corps' }
+  ];
 
   private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
+    private templateService: WhatsAppTemplateApiService,
     private route: ActivatedRoute,
-    private router: Router,
-    private templateService: TemplateApiService,
-    private snackBar: MatSnackBar
-  ) {}
-
-  ngOnInit(): void {
-    this.initForm();
-    
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      if (params['id']) {
-        this.templateId = +params['id'];
-        this.isEditMode = this.router.url.includes('edit');
-        this.isViewMode = !this.isEditMode;
-        this.loadTemplate(this.templateId);
-      } else {
-        const state = window.history.state;
-        if (state?.template) {
-          this.populateForm(state.template);
-        }
-      }
-    });
-
-    this.templateForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.updatePreview();
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  initForm(): void {
+    private router: Router
+  ) {
     this.templateForm = this.fb.group({
       name: ['', [Validators.required, Validators.pattern(/^[a-z0-9_]+$/)]],
-      language: ['en', [Validators.required, Validators.pattern(/^[a-z]{2}(_[A-Z]{2})?$/)]],
-      category: [TemplateCategory.TRANSACTIONAL, Validators.required],
+      language: ['fr', Validators.required],
+      category: ['MARKETING', Validators.required],
       description: [''],
       headerText: [''],
       bodyText: ['', Validators.required],
@@ -92,273 +91,133 @@ export class TemplateEditorComponent implements OnInit, OnDestroy {
     });
   }
 
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    const mode = this.route.snapshot.url[0].path;
+    
+    if (id) {
+      this.templateId = parseInt(id, 10);
+      this.isEditMode = mode === 'edit';
+      this.isViewMode = mode === 'view';
+      this.loadTemplate();
+    }
+
+    if (this.isViewMode) {
+      this.templateForm.disable();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadTemplate(): void {
+    if (!this.templateId) return;
+    
+    this.templateService.getTemplateById(this.templateId).subscribe((template: WhatsAppTemplateResponse) => {
+      this.templateForm.patchValue({
+        name: template.name,
+        language: template.language,
+        category: template.category,
+        description: template.description
+      });
+
+      const header = template.components.find((c: any) => c.type === 'HEADER');
+      if (header) this.templateForm.patchValue({ headerText: header.text });
+
+      const body = template.components.find((c: any) => c.type === 'BODY');
+      if (body) this.templateForm.patchValue({ bodyText: body.text });
+
+      const footer = template.components.find((c: any) => c.type === 'FOOTER');
+      if (footer) this.templateForm.patchValue({ footerText: footer.text });
+
+      const buttonsComp = template.components.find((c: any) => c.type === 'BUTTONS');
+      if (buttonsComp && buttonsComp.buttons) {
+        buttonsComp.buttons.forEach((btn: any) => this.addButton(btn));
+      }
+
+      if (template.variables) {
+        template.variables.forEach((v: any) => this.addVariable(v));
+      }
+    });
+  }
+
   get buttons(): FormArray {
     return this.templateForm.get('buttons') as FormArray;
   }
 
-  get variables(): FormArray {
-    return this.templateForm.get('variables') as FormArray;
-  }
-
-  addButton(): void {
-    const buttonGroup = this.fb.group({
-      type: [ButtonType.QUICK_REPLY, Validators.required],
-      text: ['', Validators.required],
-      url: [''],
-      phoneNumber: ['']
+  addButton(data?: any): void {
+    const btn = this.fb.group({
+      type: [data?.type || 'QUICK_REPLY', Validators.required],
+      text: [data?.text || '', Validators.required],
+      url: [data?.url || ''],
+      phoneNumber: [data?.phoneNumber || '']
     });
-
-    this.buttons.push(buttonGroup);
+    this.buttons.push(btn);
   }
 
   removeButton(index: number): void {
     this.buttons.removeAt(index);
   }
 
-  addVariable(): void {
-    const variableGroup = this.fb.group({
-      variableName: ['', Validators.required],
-      componentType: [ComponentType.BODY, Validators.required],
-      position: [this.variables.length + 1, Validators.required],
-      exampleValue: [''],
-      description: [''],
-      isRequired: [true]
-    });
+  get variables(): FormArray {
+    return this.templateForm.get('variables') as FormArray;
+  }
 
-    this.variables.push(variableGroup);
+  addVariable(data?: any): void {
+    const v = this.fb.group({
+      variableName: [data?.variableName || '', Validators.required],
+      componentType: [data?.componentType || 'BODY', Validators.required],
+      position: [data?.position || this.variables.length + 1],
+      exampleValue: [data?.exampleValue || ''],
+      isRequired: [data?.isRequired ?? true]
+    });
+    this.variables.push(v);
   }
 
   removeVariable(index: number): void {
     this.variables.removeAt(index);
-    this.updateVariablePositions();
   }
 
-  onVariableDrop(event: CdkDragDrop<any[]>): void {
-    const variablesArray = this.variables.controls;
-    moveItemInArray(variablesArray, event.previousIndex, event.currentIndex);
-    this.updateVariablePositions();
-  }
+  saveTemplate(): void {
+    if (this.templateForm.invalid) return;
 
-  updateVariablePositions(): void {
-    this.variables.controls.forEach((control, index) => {
-      control.patchValue({ position: index + 1 });
-    });
-  }
-
-  insertVariablePlaceholder(componentField: string): void {
-    const variableName = prompt('Saisissez un nom de variable (ex. nom_client) :');
-    if (variableName) {
-      const currentValue = this.templateForm.get(componentField)?.value || '';
-      const placeholder = `{{${variableName}}}`;
-      this.templateForm.get(componentField)?.setValue(currentValue + placeholder);
-      
-      const exists = this.variables.controls.some(
-        control => control.get('variableName')?.value === variableName
-      );
-      
-      if (!exists) {
-        const componentType = this.getComponentTypeFromField(componentField);
-        this.variables.push(this.fb.group({
-          variableName: [variableName, Validators.required],
-          componentType: [componentType, Validators.required],
-          position: [this.variables.length + 1, Validators.required],
-          exampleValue: [''],
-          description: [''],
-          isRequired: [true]
-        }));
-      }
-    }
-  }
-
-  getComponentTypeFromField(field: string): ComponentType {
-    if (field === 'headerText') return ComponentType.HEADER;
-    if (field === 'bodyText') return ComponentType.BODY;
-    if (field === 'footerText') return ComponentType.FOOTER;
-    return ComponentType.BODY;
-  }
-
-  loadTemplate(id: number): void {
-    this.loading = true;
-    this.templateService.getTemplateById(id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (template) => {
-          this.populateForm(template);
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Error loading template:', error);
-          this.snackBar.open('Erreur lors du chargement du modèle', 'Fermer', { duration: 5000 });
-          this.loading = false;
-        }
-      });
-  }
-
-  populateForm(template: WhatsAppTemplate): void {
-    this.templateForm.patchValue({
-      name: template.name,
-      language: template.language,
-      category: template.category,
-      description: template.description
-    });
-
-    template.components?.forEach(component => {
-      if (component.type === ComponentType.HEADER && component.text) {
-        this.templateForm.patchValue({ headerText: component.text });
-      } else if (component.type === ComponentType.BODY && component.text) {
-        this.templateForm.patchValue({ bodyText: component.text });
-      } else if (component.type === ComponentType.FOOTER && component.text) {
-        this.templateForm.patchValue({ footerText: component.text });
-      } else if (component.type === ComponentType.BUTTONS && component.buttons) {
-        component.buttons.forEach(button => {
-          this.buttons.push(this.fb.group({
-            type: [button.type],
-            text: [button.text],
-            url: [button.url || ''],
-            phoneNumber: [button.phoneNumber || '']
-          }));
-        });
-      }
-    });
-
-    template.variables?.forEach(variable => {
-      this.variables.push(this.fb.group({
-        variableName: [variable.variableName],
-        componentType: [variable.componentType],
-        position: [variable.position],
-        exampleValue: [variable.exampleValue || ''],
-        description: [variable.description || ''],
-        isRequired: [variable.isRequired]
-      }));
-    });
-
-    if (this.isViewMode) {
-      this.templateForm.disable();
-    }
-
-    this.updatePreview();
-  }
-
-  updatePreview(): void {
-    if (!this.templateForm.valid) return;
-
-    const formValue = this.templateForm.value;
-    const components: TemplateComponent[] = [];
-
-    if (formValue.headerText) {
-      components.push({
-        type: ComponentType.HEADER,
-        text: formValue.headerText
-      });
-    }
-
-    if (formValue.bodyText) {
-      components.push({
-        type: ComponentType.BODY,
-        text: formValue.bodyText
-      });
-    }
-
-    if (formValue.footerText) {
-      components.push({
-        type: ComponentType.FOOTER,
-        text: formValue.footerText
-      });
-    }
-
-    if (formValue.buttons && formValue.buttons.length > 0) {
-      components.push({
-        type: ComponentType.BUTTONS,
-        buttons: formValue.buttons
-      });
-    }
-
-    this.previewTemplate = {
-      name: formValue.name,
-      language: formValue.language,
-      category: formValue.category,
-      status: TemplateStatus.DRAFT,
-      components,
-      variables: formValue.variables,
-      description: formValue.description
-    };
-  }
-
-  onSubmit(): void {
-    if (this.templateForm.invalid) {
-      this.snackBar.open('Veuillez renseigner tous les champs requis', 'Fermer', { duration: 5000 });
-      return;
-    }
-
-    const template = this.buildTemplateFromForm();
-    this.loading = true;
-
+    const request = this.buildRequest();
+    
     if (this.isEditMode && this.templateId) {
-      this.templateService.updateTemplate(this.templateId, template)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.snackBar.open('Modèle mis à jour avec succès', 'Fermer', { duration: 3000 });
-            this.router.navigate(['/workflow-admin/templates']);
-          },
-          error: (error) => {
-            console.error('Error updating template:', error);
-            this.snackBar.open('Erreur lors de la mise à jour du modèle', 'Fermer', { duration: 5000 });
-            this.loading = false;
-          }
-        });
+      this.templateService.updateTemplate(this.templateId, request).subscribe(() => {
+        this.router.navigate(['/workflow-admin/templates']);
+      });
     } else {
-      this.templateService.createTemplate(template)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.snackBar.open('Modèle créé avec succès', 'Fermer', { duration: 3000 });
-            this.router.navigate(['/workflow-admin/templates']);
-          },
-          error: (error) => {
-            console.error('Error creating template:', error);
-            this.snackBar.open('Erreur lors de la création du modèle', 'Fermer', { duration: 5000 });
-            this.loading = false;
-          }
-        });
+      this.templateService.createTemplate(request).subscribe(() => {
+        this.router.navigate(['/workflow-admin/templates']);
+      });
     }
   }
 
-  buildTemplateFromForm(): WhatsAppTemplate {
-    const formValue = this.templateForm.value;
-    const components: TemplateComponent[] = [];
+  private buildRequest(): WhatsAppTemplateRequest {
+    const formValue = this.templateForm.getRawValue();
+    const components: any[] = [];
 
     if (formValue.headerText) {
-      components.push({
-        type: ComponentType.HEADER,
-        text: formValue.headerText
-      });
+      components.push({ type: 'HEADER', format: 'TEXT', text: formValue.headerText });
     }
 
-    components.push({
-      type: ComponentType.BODY,
-      text: formValue.bodyText
-    });
+    components.push({ type: 'BODY', text: formValue.bodyText });
 
     if (formValue.footerText) {
-      components.push({
-        type: ComponentType.FOOTER,
-        text: formValue.footerText
-      });
+      components.push({ type: 'FOOTER', text: formValue.footerText });
     }
 
-    if (formValue.buttons && formValue.buttons.length > 0) {
-      components.push({
-        type: ComponentType.BUTTONS,
-        buttons: formValue.buttons
-      });
+    if (formValue.buttons.length > 0) {
+      components.push({ type: 'BUTTONS', buttons: formValue.buttons });
     }
 
     return {
       name: formValue.name,
       language: formValue.language,
       category: formValue.category,
-      status: TemplateStatus.DRAFT,
       components,
       variables: formValue.variables,
       description: formValue.description

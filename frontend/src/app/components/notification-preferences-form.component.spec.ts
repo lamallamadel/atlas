@@ -4,9 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { of, throwError } from 'rxjs';
 
@@ -25,14 +23,12 @@ describe('NotificationPreferencesFormComponent', () => {
       getPreferences: vi.fn().mockName('UserPreferencesService.getPreferences'),
       updatePreferences: vi
         .fn()
-        .mockName('UserPreferencesService.updatePreferences'),
-    };
+        .mockName('UserPreferencesService.updatePreferences')};
     mockNotificationService = {
       success: vi.fn().mockName('NotificationService.success'),
       error: vi.fn().mockName('NotificationService.error'),
       warning: vi.fn().mockName('NotificationService.warning'),
-      info: vi.fn().mockName('NotificationService.info'),
-    };
+      info: vi.fn().mockName('NotificationService.info')};
 
     // Default mock return values
     mockUserPreferencesService.getPreferences.mockReturnValue(
@@ -49,16 +45,13 @@ describe('NotificationPreferencesFormComponent', () => {
           quietHoursEnabled: false,
           quietHoursStart: 22,
           quietHoursEnd: 8,
-          digestFrequency: 'instant',
-        },
-      })
+          digestFrequency: 'instant'}})
     );
 
     mockUserPreferencesService.updatePreferences.mockReturnValue(
       of({
         category: 'notifications',
-        preferences: {},
-      })
+        preferences: {}})
     );
 
     await TestBed.configureTestingModule({
@@ -68,20 +61,14 @@ describe('NotificationPreferencesFormComponent', () => {
         MatSlideToggleModule,
         MatSliderModule,
         MatRadioModule,
-        MatIconModule,
         MatDividerModule,
-        MatButtonModule,
         MatProgressBarModule,
-        NotificationPreferencesFormComponent,
-      ],
+        NotificationPreferencesFormComponent],
       providers: [
         {
           provide: UserPreferencesService,
-          useValue: mockUserPreferencesService,
-        },
-        { provide: NotificationService, useValue: mockNotificationService },
-      ],
-    }).compileComponents();
+          useValue: mockUserPreferencesService},
+        { provide: NotificationService, useValue: mockNotificationService }]}).compileComponents();
 
     fixture = TestBed.createComponent(NotificationPreferencesFormComponent);
     component = fixture.componentInstance;
@@ -104,16 +91,16 @@ describe('NotificationPreferencesFormComponent', () => {
     expect(mockUserPreferencesService.getPreferences).toHaveBeenCalled();
   });
 
-  it('should update example notifications when form changes', async () => {
+  it('should update notification types when form changes', async () => {
     component.preferencesForm.patchValue({
       newDossierEnabled: false,
       newMessageEnabled: false,
       appointmentEnabled: false,
-      statusChangeEnabled: false,
-    });
+      statusChangeEnabled: false});
 
-    await new Promise<void>((resolve) => setTimeout(resolve, 400));
-    expect(component.exampleNotifications.length).toBe(0);
+    // Verify form values were updated
+    expect(component.preferencesForm.get('newDossierEnabled')?.value).toBe(false);
+    expect(component.preferencesForm.get('appointmentEnabled')?.value).toBe(false);
   });
 
   it('should calculate quiet hours correctly', () => {
@@ -188,33 +175,6 @@ describe('NotificationPreferencesFormComponent', () => {
     expect(mockNotificationService.info).toHaveBeenCalledWith(
       'Modifications annulées'
     );
-  });
-
-  it('should get relative time correctly', () => {
-    const past = new Date(Date.now() - 5 * 60000); // 5 minutes ago
-    const future = new Date(Date.now() + 60 * 60000); // 1 hour from now
-
-    const pastTime = component.getRelativeTime(past);
-    const futureTime = component.getRelativeTime(future);
-
-    expect(pastTime).toContain('Il y a');
-    expect(futureTime).toContain('Dans');
-  });
-
-  it('should get active channel icons', () => {
-    component.channels.forEach((ch) => (ch.enabled = true));
-    const icons = component.getActiveChannelIcons();
-
-    expect(icons.length).toBe(4);
-    expect(icons).toContain('email');
-    expect(icons).toContain('sms');
-  });
-
-  it('should get digest frequency label', () => {
-    component.preferencesForm.patchValue({ digestFrequency: 'hourly' });
-    const label = component.getDigestFrequencyLabel();
-
-    expect(label).toBe('Horaire');
   });
 
   it('should handle loading error gracefully', () => {

@@ -6,6 +6,7 @@ export type SpinnerColor = 'primary' | 'white' | 'neutral';
 
 @Component({
     selector: 'app-spinner',
+    standalone: true,
     templateUrl: './spinner.component.html',
     styleUrls: ['./spinner.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,12 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { DialogRef } from '@angular/cdk/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
@@ -16,21 +14,18 @@ import { AnnonceApiService } from '../../services/annonce-api.service';
 describe('DossierCreateDialogComponent', () => {
   let component: DossierCreateDialogComponent;
   let fixture: ComponentFixture<DossierCreateDialogComponent>;
-  let mockDialogRef: AngularVitestPartialMock<MatDialogRef<DossierCreateDialogComponent>>;
+  let mockDialogRef: AngularVitestPartialMock<DialogRef<DossierCreateDialogComponent>>;
   let mockDossierApiService: AngularVitestPartialMock<DossierApiService>;
   let mockAnnonceApiService: AngularVitestPartialMock<AnnonceApiService>;
 
   beforeEach(async () => {
     mockDialogRef = {
-      close: vi.fn().mockName('MatDialogRef.close'),
-    };
+      close: vi.fn().mockName('DialogRef.close')};
     mockDossierApiService = {
       create: vi.fn().mockName('DossierApiService.create'),
-      checkDuplicates: vi.fn().mockName('DossierApiService.checkDuplicates'),
-    };
+      checkDuplicates: vi.fn().mockName('DossierApiService.checkDuplicates')};
     mockAnnonceApiService = {
-      list: vi.fn().mockName('AnnonceApiService.list'),
-    };
+      list: vi.fn().mockName('AnnonceApiService.list')};
 
     mockAnnonceApiService.list.mockReturnValue(
       of({
@@ -41,29 +36,22 @@ describe('DossierCreateDialogComponent', () => {
         number: 0,
         first: true,
         last: true,
-        empty: true,
-      } as any)
+        empty: true} as any)
     );
 
     await TestBed.configureTestingModule({
       imports: [
         ReactiveFormsModule,
         NoopAnimationsModule,
-        MatDialogModule,
         MatFormFieldModule,
         MatInputModule,
         MatAutocompleteModule,
         MatExpansionModule,
-        MatIconModule,
-        MatButtonModule,
-        DossierCreateDialogComponent,
-      ],
+        DossierCreateDialogComponent],
       providers: [
-        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: DialogRef, useValue: mockDialogRef },
         { provide: DossierApiService, useValue: mockDossierApiService },
-        { provide: AnnonceApiService, useValue: mockAnnonceApiService },
-      ],
-    }).compileComponents();
+        { provide: AnnonceApiService, useValue: mockAnnonceApiService }]}).compileComponents();
 
     fixture = TestBed.createComponent(DossierCreateDialogComponent);
     component = fixture.componentInstance;
@@ -101,14 +89,12 @@ describe('DossierCreateDialogComponent', () => {
       id: 1,
       leadName: 'Test',
       leadPhone: '0612345678',
-      status: 'NEW',
-    } as any;
+      status: 'NEW'} as any;
     mockDossierApiService.create.mockReturnValue(of(mockDossier));
 
     component.dossierForm.patchValue({
       leadName: 'Test',
-      leadPhone: '0612345678',
-    });
+      leadPhone: '0612345678'});
 
     component.onSubmit();
 
@@ -122,8 +108,7 @@ describe('DossierCreateDialogComponent', () => {
 
     component.dossierForm.patchValue({
       leadName: 'Test',
-      leadPhone: '0612345678',
-    });
+      leadPhone: '0612345678'});
 
     component.onSubmit();
 

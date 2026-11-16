@@ -31,10 +31,8 @@ describe('FormValidationAnimationDirective', () => {
       imports: [
         ReactiveFormsModule,
         FormValidationAnimationDirective,
-        TestComponent,
-      ],
-      providers: [provideNoopAnimations()],
-    })
+        TestComponent],
+      providers: [provideNoopAnimations()]})
       .compileComponents();
 
     fixture = TestBed.createComponent(TestComponent);

@@ -1,13 +1,19 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { PartiePrenanteRole } from '../services/dossier-api.service';
-import { trigger, transition, style, animate } from '@angular/animations';
-import { MatIcon } from '@angular/material/icon';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { NgClass } from '@angular/common';
-import { MatButton } from '@angular/material/button';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption, 
+  DsSkeletonComponent,
+  DsInputComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
 export interface PartiePrenanteFormData {
   id?: number;
@@ -20,17 +26,20 @@ export interface PartiePrenanteFormData {
 
 @Component({
     selector: 'app-partie-prenante-form-dialog',
+    standalone: true,
     templateUrl: './partie-prenante-form-dialog.component.html',
     styleUrls: ['./partie-prenante-form-dialog.component.css'],
-    animations: [
-        trigger('slideIn', [
-            transition(':enter', [
-                style({ transform: 'translateX(100%)', opacity: 0 }),
-                animate('300ms ease-out', style({ transform: 'translateX(0)', opacity: 1 }))
-            ])
-        ])
-    ],
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, NgClass, MatDialogActions, MatButton, DsSkeletonComponent]
+    imports: [
+      CommonModule,
+      ReactiveFormsModule, 
+      DsButtonComponent,
+      DsIconComponent,
+      DsSelectComponent,
+      DsInputComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class PartiePrenanteFormDialogComponent implements OnInit {
   partieForm!: FormGroup;
@@ -38,7 +47,7 @@ export class PartiePrenanteFormDialogComponent implements OnInit {
   isSubmitting = false;
   PartiePrenanteRole = PartiePrenanteRole;
 
-  roleOptions = [
+  readonly roleOptions: DsSelectOption[] = [
     { value: PartiePrenanteRole.OWNER, label: 'Propriétaire' },
     { value: PartiePrenanteRole.BUYER, label: 'Acheteur' },
     { value: PartiePrenanteRole.SELLER, label: 'Vendeur' },
@@ -53,8 +62,8 @@ export class PartiePrenanteFormDialogComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<PartiePrenanteFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: PartiePrenanteFormData | null
+    private dialogRef: DialogRef<PartiePrenanteFormData>,
+    @Inject(DIALOG_DATA) public data: PartiePrenanteFormData | null
   ) {}
 
   ngOnInit(): void {

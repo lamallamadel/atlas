@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DeveloperPortalApiService } from '../../services/developer-portal-api.service';
-import { ToastNotificationService } from '../../services/toast-notification.service';
+import { NotificationService } from '../../services/notification.service';
 import {
   ApiKey,
   ApiTier,
@@ -13,16 +13,47 @@ import {
   ApiUsage,
   WebhookDelivery
 } from '../../models/api-marketplace.models';
+import { 
+  DsCardComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsInputComponent,
+  DsSkeletonComponent,
+  DsBadgeComponent,
+  DsTabsComponent,
+  type DsTab,
+  PageHeaderComponent
+} from '../../design-system';
 
 @Component({
   selector: 'app-developer-portal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, 
+    FormsModule,
+    DsCardComponent,
+    DsButtonComponent,
+    DsIconComponent,
+    DsSelectComponent,
+    DsInputComponent,
+    DsSkeletonComponent,
+    DsBadgeComponent,
+    DsTabsComponent,
+    PageHeaderComponent
+  ],
   templateUrl: './developer-portal.component.html',
   styleUrls: ['./developer-portal.component.scss']
 })
 export class DeveloperPortalComponent implements OnInit {
-  activeTab: 'api-keys' | 'webhooks' | 'usage' = 'api-keys';
+  activeTab = 'api-keys';
+  
+  portalTabs: DsTab[] = [
+    { value: 'api-keys', label: 'Clés API' },
+    { value: 'webhooks', label: 'Webhooks' },
+    { value: 'usage',    label: 'Utilisation' }
+  ];
 
   // API Keys
   apiKeys: ApiKey[] = [];
@@ -43,16 +74,24 @@ export class DeveloperPortalComponent implements OnInit {
     url: '',
     eventType: 'dossier.created'
   };
-  webhookEvents = [
-    'dossier.created',
-    'dossier.updated',
-    'dossier.status_changed',
-    'message.received',
-    'message.sent',
-    'appointment.scheduled',
-    'appointment.updated',
-    'appointment.cancelled'
+  
+  readonly webhookEvents: DsSelectOption[] = [
+    { value: 'dossier.created', label: 'Dossier créé' },
+    { value: 'dossier.updated', label: 'Dossier modifié' },
+    { value: 'dossier.status_changed', label: 'Statut dossier changé' },
+    { value: 'message.received', label: 'Message reçu' },
+    { value: 'message.sent', label: 'Message envoyé' },
+    { value: 'appointment.scheduled', label: 'RDV planifié' },
+    { value: 'appointment.updated', label: 'RDV modifié' },
+    { value: 'appointment.cancelled', label: 'RDV annulé' }
   ];
+
+  readonly tierOptions: DsSelectOption[] = [
+    { value: ApiTier.FREE, label: 'Gratuit (Free)' },
+    { value: ApiTier.PRO, label: 'Professionnel (Pro)' },
+    { value: ApiTier.ENTERPRISE, label: 'Entreprise' }
+  ];
+
   webhookDeliveries: WebhookDelivery[] = [];
 
   // Usage
@@ -68,12 +107,16 @@ export class DeveloperPortalComponent implements OnInit {
 
   constructor(
     private developerPortalService: DeveloperPortalApiService,
-    private toast: ToastNotificationService
+    private toast: NotificationService
   ) {}
 
   ngOnInit(): void {
     this.loadApiKeys();
     this.loadWebhooks();
+  }
+
+  onTabChange(tab: string): void {
+    this.activeTab = tab as any;
   }
 
   // API Keys
@@ -230,15 +273,15 @@ export class DeveloperPortalComponent implements OnInit {
   }
 
   toggleWebhookStatus(webhook: WebhookSubscription): void {
-    const newStatus = webhook.status === WebhookStatus.ACTIVE 
+    const next = webhook.status === WebhookStatus.ACTIVE 
       ? WebhookStatus.PAUSED 
       : WebhookStatus.ACTIVE;
 
     this.loading = true;
-    this.developerPortalService.updateWebhookStatus(webhook.id, newStatus).subscribe({
+    this.developerPortalService.updateWebhookStatus(webhook.id, next).subscribe({
       next: () => {
-        webhook.status = newStatus;
-        this.toast.success(`Webhook ${newStatus.toLowerCase()}`);
+        webhook.status = next;
+        this.toast.success(`Webhook ${next.toLowerCase()}`);
         this.loading = false;
       },
       error: () => {
@@ -272,35 +315,6 @@ export class DeveloperPortalComponent implements OnInit {
     navigator.clipboard.writeText(secret).then(() => {
       this.toast.success('Secret copied to clipboard');
     });
-  }
-
-  getTierColor(tier: ApiTier): string {
-    switch (tier) {
-      case ApiTier.FREE: return 'bg-gray-100 text-gray-800';
-      case ApiTier.PRO: return 'bg-blue-100 text-blue-800';
-      case ApiTier.ENTERPRISE: return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  }
-
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'ACTIVE': return 'bg-green-100 text-green-800';
-      case 'PAUSED': return 'bg-yellow-100 text-yellow-800';
-      case 'DISABLED':
-      case 'REVOKED': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  }
-
-  getDeliveryStatusColor(status: string): string {
-    switch (status) {
-      case 'SUCCESS': return 'bg-green-100 text-green-800';
-      case 'PENDING':
-      case 'RETRY': return 'bg-yellow-100 text-yellow-800';
-      case 'FAILED': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
   }
 
   calculateSuccessRate(): number {

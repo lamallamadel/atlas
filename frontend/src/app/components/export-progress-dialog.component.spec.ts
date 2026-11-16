@@ -1,10 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CommonModule } from '@angular/common';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ExportProgressDialogComponent } from './export-progress-dialog.component';
 import { ExportService } from '../services/export.service';
 
@@ -14,18 +9,10 @@ describe('ExportProgressDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [
-        CommonModule,
-        MatDialogModule,
-        MatIconModule,
-        MatButtonModule,
-        MatProgressBarModule,
-        BrowserAnimationsModule,
-        ExportProgressDialogComponent
-    ],
+    imports: [ExportProgressDialogComponent],
     providers: [
-        { provide: MAT_DIALOG_DATA, useValue: { message: 'Test message' } },
-        { provide: MatDialogRef, useValue: { close: () => { } } },
+        { provide: DIALOG_DATA, useValue: { message: 'Test message' } },
+        { provide: DialogRef, useValue: { close: () => {} } },
         ExportService
     ]
 }).compileComponents();

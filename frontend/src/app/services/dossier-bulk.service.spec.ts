@@ -7,22 +7,18 @@ describe('DossierBulkService', () => {
   let service: DossierBulkService;
 
   const mockDossierApiService = {
-    bulkAssign: vi.fn().mockName('DossierApiService.bulkAssign'),
-  };
+    bulkAssign: vi.fn().mockName('DossierApiService.bulkAssign')};
   const mockBulkOperationService = {
     executeBulkOperation: vi
       .fn()
-      .mockName('BulkOperationService.executeBulkOperation'),
-  };
+      .mockName('BulkOperationService.executeBulkOperation')};
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         DossierBulkService,
         { provide: DossierApiService, useValue: mockDossierApiService },
-        { provide: BulkOperationService, useValue: mockBulkOperationService },
-      ],
-    });
+        { provide: BulkOperationService, useValue: mockBulkOperationService }]});
     service = TestBed.inject(DossierBulkService);
   });
 

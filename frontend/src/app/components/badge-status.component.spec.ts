@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatIconModule } from '@angular/material/icon';
 import { BadgeStatusComponent } from './badge-status.component';
 
 describe('BadgeStatusComponent', () => {
@@ -8,8 +7,7 @@ describe('BadgeStatusComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MatIconModule, BadgeStatusComponent],
-    }).compileComponents();
+      imports: [BadgeStatusComponent]}).compileComponents();
 
     fixture = TestBed.createComponent(BadgeStatusComponent);
     component = fixture.componentInstance;
@@ -31,13 +29,13 @@ describe('BadgeStatusComponent', () => {
   it('should return correct status icon for annonce ACTIVE', () => {
     fixture.componentRef.setInput('status', 'ACTIVE');
     fixture.componentRef.setInput('entityType', 'annonce');
-    expect(component.getStatusIcon()).toBe('check_circle');
+    expect(component.getStatusIcon()).toBe('check');
   });
 
   it('should return correct status description for annonce ACTIVE', () => {
     fixture.componentRef.setInput('status', 'ACTIVE');
     fixture.componentRef.setInput('entityType', 'annonce');
-    expect(component.getStatusDescription()).toBe('Annonce active et visible');
+    expect(component.getStatusDescription()).toBe('En ligne');
   });
 
   it('should pulse for ACTIVE annonce status', () => {
@@ -61,7 +59,7 @@ describe('BadgeStatusComponent', () => {
   it('should return correct status icon for dossier NEW', () => {
     fixture.componentRef.setInput('status', 'NEW');
     fixture.componentRef.setInput('entityType', 'dossier');
-    expect(component.getStatusIcon()).toBe('fiber_new');
+    expect(component.getStatusIcon()).toBe('plus');
   });
 
   it('should pulse for NEW dossier status', () => {

@@ -1,56 +1,56 @@
-import { Component } from '@angular/core';
-import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatIcon } from '@angular/material/icon';
-import { MatButton } from '@angular/material/button';
+import { Component, inject } from '@angular/core';
+import { DialogRef } from '@angular/cdk/dialog';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
 @Component({
     selector: 'app-confirm-navigation-dialog',
+    standalone: true,
     template: `
-    <h2 mat-dialog-title>Modifications non enregistrées</h2>
-    <mat-dialog-content>
-      <p>Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter cette page ?</p>
-      <p class="warning-text">
-        <mat-icon class="warning-icon">warning</mat-icon>
-        Vos modifications seront perdues si vous continuez.
-      </p>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancel()" color="primary">
+    <ds-dialog-header (close)="onCancel()">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <ds-icon name="info" [size]="24" style="color: var(--ds-warning);"></ds-icon>
+        <span>Modifications non enregistrées</span>
+      </div>
+    </ds-dialog-header>
+
+    <ds-dialog-content>
+      <div class="ds-form-stack">
+        <p style="margin: 0; color: var(--ds-text);">Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter cette page ?</p>
+        
+        <div style="display: flex; align-items: center; gap: 12px; background: var(--ds-warning-hl); padding: 12px; border-radius: var(--ds-radius-md); border-left: 4px solid var(--ds-warning); margin-top: 16px;">
+          <ds-icon name="info" [size]="20" style="color: var(--ds-warning-dark);"></ds-icon>
+          <span style="font-size: 13px; font-weight: 600; color: var(--ds-warning-dark);">Vos modifications seront perdues si vous continuez.</span>
+        </div>
+      </div>
+    </ds-dialog-content>
+
+    <ds-dialog-actions align="end">
+      <ds-button variant="ghost" size="md" (dsClick)="onCancel()">
         Rester sur la page
-      </button>
-      <button mat-raised-button (click)="onConfirm()" color="warn">
+      </ds-button>
+      <ds-button variant="danger" size="md" (dsClick)="onConfirm()">
         Quitter sans enregistrer
-      </button>
-    </mat-dialog-actions>
+      </ds-button>
+    </ds-dialog-actions>
   `,
-    styles: [`
-    .warning-text {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #f57c00;
-      margin-top: 16px;
-      font-weight: 500;
-    }
-
-    .warning-icon {
-      vertical-align: middle;
-    }
-
-    mat-dialog-content {
-      padding: 16px 0;
-    }
-
-    mat-dialog-actions {
-      padding: 16px 0 0 0;
-    }
-  `],
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatIcon, MatDialogActions, MatButton]
+    imports: [
+      CommonModule,
+      DsButtonComponent, 
+      DsIconComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class ConfirmNavigationDialogComponent {
-  
-  constructor(private dialogRef: MatDialogRef<ConfirmNavigationDialogComponent>) {}
+  private dialogRef = inject(DialogRef<boolean>);
 
   onCancel(): void {
     this.dialogRef.close(false);

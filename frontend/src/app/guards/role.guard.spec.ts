@@ -17,19 +17,15 @@ describe('RoleGuard', () => {
 
   beforeEach(() => {
     const authServiceSpy = {
-      hasRole: vi.fn().mockName('AuthService.hasRole'),
-    };
+      hasRole: vi.fn().mockName('AuthService.hasRole')};
     const routerSpy = {
-      navigate: vi.fn().mockName('Router.navigate'),
-    };
+      navigate: vi.fn().mockName('Router.navigate')};
 
     TestBed.configureTestingModule({
       providers: [
         RoleGuard,
         { provide: AuthService, useValue: authServiceSpy },
-        { provide: Router, useValue: routerSpy },
-      ],
-    });
+        { provide: Router, useValue: routerSpy }]});
 
     guard = TestBed.inject(RoleGuard);
     authService = TestBed.inject(AuthService) as AngularVitestPartialMock<AuthService>;

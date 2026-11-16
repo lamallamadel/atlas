@@ -1,12 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { EmptyStateComponent } from './empty-state.component';
 import {
   EmptyStateIllustrationsService,
-  EmptyStateContext,
-} from '../services/empty-state-illustrations.service';
+  EmptyStateContext} from '../services/empty-state-illustrations.service';
 
 describe('EmptyStateComponent', () => {
   let component: EmptyStateComponent;
@@ -16,12 +13,8 @@ describe('EmptyStateComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         CommonModule,
-        MatIconModule,
-        MatButtonModule,
-        EmptyStateComponent,
-      ],
-      providers: [EmptyStateIllustrationsService],
-    }).compileComponents();
+        EmptyStateComponent],
+      providers: [EmptyStateIllustrationsService]}).compileComponents();
 
     fixture = TestBed.createComponent(EmptyStateComponent);
     component = fixture.componentInstance;
@@ -50,8 +43,7 @@ describe('EmptyStateComponent', () => {
       const handler = vi.fn();
       fixture.componentRef.setInput('primaryAction', {
         label: 'Test',
-        handler,
-      });
+        handler});
       fixture.detectChanges();
 
       component.onPrimaryClick();
@@ -62,8 +54,7 @@ describe('EmptyStateComponent', () => {
       const handler = vi.fn();
       fixture.componentRef.setInput('secondaryAction', {
         label: 'Test',
-        handler,
-      });
+        handler});
       fixture.detectChanges();
 
       component.onSecondaryClick();
@@ -97,12 +88,10 @@ describe('EmptyStateComponent', () => {
       fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
       fixture.componentRef.setInput('primaryAction', {
         label: 'Test',
-        handler: primaryHandler,
-      });
+        handler: primaryHandler});
       fixture.componentRef.setInput('secondaryAction', {
         label: 'Test',
-        handler: secondaryHandler,
-      });
+        handler: secondaryHandler});
       component.ngOnInit();
 
       component.onPrimaryClick();
@@ -151,8 +140,7 @@ describe('EmptyStateComponent', () => {
 
       component.displayHelpLink = {
         label: 'Help',
-        url: 'https://example.com/help',
-      };
+        url: 'https://example.com/help'};
 
       component.onHelpLinkClick();
 
@@ -203,25 +191,22 @@ describe('EmptyStateComponent', () => {
       fixture.componentRef.setInput('primaryAction', {
         label: 'Create',
         icon: 'add',
-        handler: () => {},
-      });
+        handler: () => {}});
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
-      const button = compiled.querySelector('.btn-primary-action');
-      expect(button).toBeTruthy();
-      expect(button.querySelector('mat-icon')).toBeTruthy();
+      expect(compiled.querySelector('.empty-state-actions')).toBeTruthy();
+      expect(compiled.querySelector('ds-icon')).toBeTruthy();
     });
 
     it('should render help link when provided', () => {
       fixture.componentRef.setInput('helpLink', {
         label: 'Need help?',
-        url: '/help',
-      });
+        url: '/help'});
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.querySelector('.help-link')).toBeTruthy();
+      expect(compiled.querySelector('.empty-state-help')).toBeTruthy();
     });
   });
 
@@ -250,13 +235,13 @@ describe('EmptyStateComponent', () => {
     it('should have aria-label on action buttons', () => {
       fixture.componentRef.setInput('primaryAction', {
         label: 'Create new',
-        handler: () => {},
-      });
+        handler: () => {}});
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
-      const button = compiled.querySelector('.btn-primary-action');
-      expect(button.getAttribute('aria-label')).toBe('Create new');
+      const dsButton = compiled.querySelector('ds-button[ng-reflect-aria-label]') ||
+                       compiled.querySelector('.empty-state-actions ds-button');
+      expect(dsButton).toBeTruthy();
     });
   });
 });

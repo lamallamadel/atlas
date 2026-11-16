@@ -29,12 +29,6 @@
       "purpose": "any"
     },
     {
-      "src": "/assets/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
       "src": "/assets/icons/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png",
@@ -76,43 +70,7 @@
     "productivity",
     "lifestyle"
   ],
-  "screenshots": [
-    {
-      "src": "/assets/screenshots/desktop-dashboard.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Tableau de bord principal"
-    },
-    {
-      "src": "/assets/screenshots/desktop-dossiers.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Gestion des dossiers"
-    },
-    {
-      "src": "/assets/screenshots/mobile-dashboard.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Tableau de bord mobile"
-    },
-    {
-      "src": "/assets/screenshots/mobile-dossiers.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Liste des dossiers mobile"
-    },
-    {
-      "src": "/assets/screenshots/mobile-messages.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Messagerie mobile"
-    }
-  ],
+  "screenshots": [],
   "shortcuts": [
     {
       "name": "Nouveau Dossier",

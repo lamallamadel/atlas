@@ -1,9 +1,9 @@
 <ds-card elevation="md" [pad]="false" class="notification-center-shell">
   <div class="notification-center" role="region" aria-labelledby="notification-center-title" aria-live="polite">
-    <div class="notification-header">
-      <div class="header-title">
-        <mat-icon class="header-icon" aria-hidden="true">notifications</mat-icon>
-        <h2 id="notification-center-title">Notifications</h2>
+    <div class="notification-header" style="padding: 16px 24px; border-bottom: 1px solid var(--ds-divider); display: flex; justify-content: space-between; align-items: center;">
+      <div class="header-title" style="display: flex; align-items: center; gap: 12px;">
+        <ds-icon name="bell" [size]="24" style="color: var(--ds-marine);"></ds-icon>
+        <h2 id="notification-center-title" style="margin: 0; font-family: var(--ds-font-display); font-size: 20px; font-weight: 800;">Notifications</h2>
         @if (unreadCount > 0) {
           <ds-badge
             status="error"
@@ -16,6 +16,7 @@
       </div>
       <ds-button
         variant="icon"
+        size="sm"
         [ariaLabel]="'Actualiser les notifications'"
         [disabled]="loading"
         (dsClick)="refresh()">
@@ -23,112 +24,104 @@
       </ds-button>
     </div>
 
-    <div class="notification-filters">
-      <mat-button-toggle-group
-        [value]="selectedType"
-        (change)="onFilterChange($event.value)"
-        aria-label="Filtrer les notifications par type">
-        @for (type of notificationTypes; track type.value) {
-          <mat-button-toggle
-            [value]="type.value"
-            [attr.aria-label]="'Filtrer par ' + type.label">
-            {{ type.label }}
-          </mat-button-toggle>
-        }
-      </mat-button-toggle-group>
+    <div class="notification-filters" style="padding: 12px 24px; background: var(--ds-surface-2);">
+      <ds-tabs 
+        [tabs]="filterTabs" 
+        [activeTab]="selectedType" 
+        (tabChange)="onFilterChange($event)"
+        variant="pills">
+      </ds-tabs>
     </div>
 
-    @if (!loading || (notifications && notifications.length > 0)) {
-      <div class="notification-list" role="list" aria-label="Liste des notifications">
-        @if ((groupedNotifications || []).length === 0 && !loading) {
-          <div class="empty-state" role="status">
-            <mat-icon aria-hidden="true">notifications_none</mat-icon>
-            <p>Aucune notification</p>
-          </div>
-        }
-        @for (group of groupedNotifications; track group.date) {
-          <div class="notification-group">
-            <div class="group-header" role="presentation">
-              <span class="group-date">{{ group.displayDate }}</span>
+    <div class="notification-body" style="max-height: 500px; overflow-y: auto;">
+      @if (!loading || (notifications && notifications.length > 0)) {
+        <div class="notification-list" role="list" aria-label="Liste des notifications">
+          @if ((groupedNotifications || []).length === 0 && !loading) {
+            <div class="empty-state" style="padding: 48px 24px; text-align: center; color: var(--ds-text-faint);">
+              <ds-icon name="bell" [size]="48" style="opacity: 0.1; margin-bottom: 16px;"></ds-icon>
+              <p style="margin: 0; font-weight: 600;">Aucune notification</p>
             </div>
-            @for (notification of group.notifications; track notification.id) {
-              <div
-                class="notification-item"
-                [class.unread]="isUnread(notification)"
-                (click)="onNotificationClick(notification)"
-                role="listitem"
-                tabindex="0"
-                [attr.aria-label]="'Notification: ' + getNotificationTitle(notification) + (isUnread(notification) ? ' - Non lue' : ' - Lue') + ', créée ' + getTimeAgo(notification.createdAt)"
-                (keydown.enter)="onNotificationClick(notification)"
-                (keydown.space)="onNotificationClick(notification)">
-                <div class="notification-icon" aria-hidden="true">
-                  <ds-icon
-                    [name]="getNotificationIcon(notification.type)"
-                    [size]="24"
-                    [class.unread-icon]="isUnread(notification)">
-                  </ds-icon>
-                </div>
-                <div class="notification-content">
-                  <div class="notification-title">
-                    {{ getNotificationTitle(notification) }}
-                  </div>
-                  @if (getNotificationMessage(notification)) {
-                    <div class="notification-message">
-                      {{ getNotificationMessage(notification) }}
-                    </div>
-                  }
-                  <div class="notification-meta">
-                    <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
-                    <ds-badge status="neutral" size="sm" [showDot]="false" class="type-badge">
-                      {{ notification.type }}
-                    </ds-badge>
-                  </div>
-                </div>
-                <div class="notification-actions" role="group" aria-label="Actions de notification">
-                  @if (!isUnread(notification)) {
-                    <ds-button
-                      variant="icon"
-                      [ariaLabel]="'Marquer la notification ' + getNotificationTitle(notification) + ' comme non lue'"
-                      (dsClick)="markAsUnread(notification, $event)">
-                      <mat-icon aria-hidden="true">mark_email_unread</mat-icon>
-                    </ds-button>
-                  }
-                  @if (isUnread(notification)) {
-                    <ds-button
-                      variant="icon"
-                      [ariaLabel]="'Marquer la notification ' + getNotificationTitle(notification) + ' comme lue'"
-                      (dsClick)="markAsRead(notification, $event)">
-                      <mat-icon aria-hidden="true">mark_email_read</mat-icon>
-                    </ds-button>
-                  }
-                </div>
-                @if (isUnread(notification)) {
-                  <div class="unread-indicator" aria-hidden="true"></div>
-                }
+          }
+          @for (group of groupedNotifications; track group.date) {
+            <div class="notification-group">
+              <div class="group-header" role="presentation" style="padding: 12px 24px; background: var(--ds-bg-subtle); border-bottom: 1px solid var(--ds-divider); font-size: 11px; font-weight: 700; color: var(--ds-text-faint); text-transform: uppercase; letter-spacing: 0.05em;">
+                <span class="group-date">{{ group.displayDate }}</span>
               </div>
-            }
-          </div>
-        }
-        @if (hasMore && !loading) {
-          <div class="load-more-container">
-            <ds-button
-              variant="ghost"
-              size="md"
-              [nativeType]="'button'"
-              ariaLabel="Charger plus de notifications"
-              (dsClick)="loadMore()">
-              Charger plus
-            </ds-button>
-          </div>
-        }
-      </div>
-    }
+              @for (notification of group.notifications; track notification.id) {
+                <div
+                  class="notification-item"
+                  [class.unread]="isUnread(notification)"
+                  (click)="onNotificationClick(notification)"
+                  role="listitem"
+                  tabindex="0"
+                  style="padding: 16px 24px; display: flex; gap: 16px; border-bottom: 1px solid var(--ds-divider); cursor: pointer; transition: background 0.2s;"
+                  [attr.aria-label]="'Notification: ' + getNotificationTitle(notification) + (isUnread(notification) ? ' - Non lue' : ' - Lue')"
+                  (keydown.enter)="onNotificationClick(notification)">
+                  
+                  <div class="notification-icon" style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--ds-surface-2); display: flex; align-items: center; justify-content: center;">
+                    <ds-icon
+                      [name]="getNotificationIcon(notification.type)"
+                      [size]="20"
+                      [style.color]="isUnread(notification) ? 'var(--ds-primary)' : 'var(--ds-text-faint)'">
+                    </ds-icon>
+                  </div>
 
-    @if (loading && (notifications || []).length === 0) {
-      <div class="notification-loading" role="status" aria-live="polite">
-        <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
-        <p>Chargement des notifications...</p>
-      </div>
-    }
+                  <div class="notification-content" style="flex: 1; min-width: 0;">
+                    <div class="notification-title" style="font-size: 14px; font-weight: 700; color: var(--ds-text); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      {{ getNotificationTitle(notification) }}
+                    </div>
+                    @if (getNotificationMessage(notification)) {
+                      <div class="notification-message" style="font-size: 13px; color: var(--ds-text-muted); line-height: 1.4; margin-bottom: 8px;">
+                        {{ getNotificationMessage(notification) }}
+                      </div>
+                    }
+                    <div class="notification-meta" style="display: flex; align-items: center; gap: 12px;">
+                      <span class="notification-time" style="font-size: 12px; color: var(--ds-text-faint);">{{ getTimeAgo(notification.createdAt) }}</span>
+                      <ds-badge status="neutral" size="sm" [showDot]="false" class="type-badge">
+                        {{ notification.type }}
+                      </ds-badge>
+                    </div>
+                  </div>
+
+                  <div class="notification-actions" style="display: flex; gap: 4px; align-self: flex-start;">
+                    <ds-button
+                      variant="icon"
+                      size="sm"
+                      [ariaLabel]="isUnread(notification) ? 'Marquer comme lue' : 'Marquer comme non lue'"
+                      (dsClick)="isUnread(notification) ? markAsRead(notification, $event) : markAsUnread(notification, $event)">
+                      <ds-icon [name]="isUnread(notification) ? 'check' : 'refresh'" [size]="16"></ds-icon>
+                    </ds-button>
+                  </div>
+
+                  @if (isUnread(notification)) {
+                    <div class="unread-indicator" style="width: 8px; height: 8px; border-radius: 50%; background: var(--ds-primary); margin-left: 8px; align-self: center;"></div>
+                  }
+                </div>
+              }
+            </div>
+          }
+          @if (hasMore && !loading) {
+            <div class="load-more-container" style="padding: 24px; text-align: center;">
+              <ds-button
+                variant="ghost"
+                size="md"
+                ariaLabel="Charger plus de notifications"
+                (dsClick)="loadMore()">
+                Charger plus
+              </ds-button>
+            </div>
+          }
+        </div>
+      }
+
+      @if (loading && (notifications || []).length === 0) {
+        <div class="notification-loading" style="padding: 48px 24px; text-align: center;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+            <span class="spinner-medium"></span>
+            <p style="font-size: 14px; color: var(--ds-text-faint);">Chargement des notifications...</p>
+          </div>
+        </div>
+      }
+    </div>
   </div>
 </ds-card>

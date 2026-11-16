@@ -1,274 +1,259 @@
-<div class="developer-portal">
-  <div class="header">
-    <h1>Developer Portal</h1>
-    <p>Manage API keys, webhooks, and monitor usage</p>
-  </div>
+<div class="developer-portal ds-form-stack">
+  <ds-page-header
+    eyebrow="Développeurs"
+    titleBefore="Portail"
+    titleAccent="API & Webhooks"
+    description="Gérez vos clés d'accès et intégrez Atlasia avec vos outils externes.">
+  </ds-page-header>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button
-      [class.active]="activeTab === 'api-keys'"
-      (click)="activeTab = 'api-keys'">
-      API Keys
-    </button>
-    <button
-      [class.active]="activeTab === 'webhooks'"
-      (click)="activeTab = 'webhooks'">
-      Webhooks
-    </button>
-    <button
-      [class.active]="activeTab === 'usage'"
-      (click)="activeTab = 'usage'">
-      Usage Analytics
-    </button>
-  </div>
+  <ds-tabs [tabs]="portalTabs" [activeTab]="activeTab" (tabChange)="onTabChange($event)"></ds-tabs>
 
-  <!-- API Keys Tab -->
-  @if (activeTab === 'api-keys') {
-    <div class="tab-content">
-      <div class="section-header">
-        <h2>API Keys</h2>
-        <button class="btn-primary" (click)="openCreateApiKeyDialog()">
-          Create API Key
-        </button>
+  <div class="portal-content" style="margin-top: 32px;">
+    <!-- API Keys Tab -->
+    @if (activeTab === 'api-keys') {
+      <div class="tab-pane ds-form-stack">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 700;">Clés d'API</h2>
+          <ds-button variant="marine" size="md" (dsClick)="openCreateApiKeyDialog()">
+            <ds-icon name="plus" [size]="20"></ds-icon> Créer une clé
+          </ds-button>
+        </div>
+
+        <div class="api-keys-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px;">
+          @for (key of apiKeys; track key.id) {
+            <ds-card [pad]="true" elevation="xs">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--ds-marine);">{{ key.name }}</h3>
+                <div style="display: flex; gap: 8px;">
+                  <ds-badge [status]="key.tier === ApiTier.FREE ? 'neutral' : 'active'" [showDot]="false" size="sm">{{ key.tier }}</ds-badge>
+                  <ds-badge [status]="key.status === 'ACTIVE' ? 'active' : 'lost'" size="sm">{{ key.status }}</ds-badge>
+                </div>
+              </div>
+              
+              <div class="key-details" style="font-size: 13px; color: var(--ds-text-muted); display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Préfixe:</span>
+                  <code style="background: var(--ds-bg-subtle); padding: 2px 6px; border-radius: 4px;">{{ key.keyPrefix }}...</code>
+                </div>
+                @if (key.lastUsedAt) {
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>Dernière utilisation:</span>
+                    <span>{{ key.lastUsedAt | date:'short':'':'fr-FR' }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="key-actions" style="display: flex; gap: 12px; border-top: 1px solid var(--ds-divider); padding-top: 16px;">
+                <ds-button variant="ghost" size="sm" (dsClick)="selectApiKey(key)" style="flex: 1;">Usage</ds-button>
+                <ds-button variant="ghost" size="sm" (dsClick)="revokeApiKey(key.id)" [disabled]="key.status !== 'ACTIVE'" style="flex: 1; color: var(--ds-error);">Révoquer</ds-button>
+              </div>
+            </ds-card>
+          }
+        </div>
       </div>
-      <div class="api-keys-list">
-        @for (key of apiKeys; track key) {
-          <div class="api-key-card">
-            <div class="key-header">
-              <h3>{{ key.name }}</h3>
-              <span [class]="'badge ' + getTierColor(key.tier)">{{ key.tier }}</span>
-              <span [class]="'badge ' + getStatusColor(key.status)">{{ key.status }}</span>
+    }
+
+    <!-- Webhooks Tab -->
+    @if (activeTab === 'webhooks') {
+      <div class="tab-pane ds-form-stack">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 700;">Abonnements Webhooks</h2>
+          <ds-button variant="marine" size="md" (dsClick)="openCreateWebhookDialog()">
+            <ds-icon name="plus" [size]="20"></ds-icon> Ajouter un webhook
+          </ds-button>
+        </div>
+
+        <div class="webhooks-list ds-form-stack">
+          @for (webhook of webhooks; track webhook.id) {
+            <ds-card [pad]="true" elevation="xs" [hover]="true" [interactive]="true" (click)="selectWebhook(webhook)" [style.border-left]="selectedWebhook?.id === webhook.id ? '4px solid var(--ds-primary)' : 'none'">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <ds-icon name="refresh" [size]="20" style="color: var(--ds-marine);"></ds-icon>
+                  <strong style="font-size: 15px;">{{ webhook.name }}</strong>
+                </div>
+                <ds-badge [status]="webhook.status === WebhookStatus.ACTIVE ? 'active' : 'paused'" size="sm">{{ webhook.status }}</ds-badge>
+              </div>
+              <div style="font-size: 13px; color: var(--ds-text-muted); display: grid; grid-template-columns: auto 1fr; gap: 8px 16px;">
+                <span>Événement:</span> <ds-badge status="neutral" [showDot]="false" size="sm">{{ webhook.eventType }}</ds-badge>
+                <span>URL:</span> <code style="word-break: break-all;">{{ webhook.url }}</code>
+              </div>
+            </ds-card>
+          }
+        </div>
+
+        @if (selectedWebhook) {
+          <ds-card [pad]="true" elevation="sm" style="margin-top: 32px; background: var(--ds-bg-subtle);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+              <h3 style="margin: 0; font-size: 16px; font-weight: 700;">Détails : {{ selectedWebhook.name }}</h3>
+              <div style="display: flex; gap: 12px;">
+                <ds-button variant="ghost" size="sm" (dsClick)="toggleWebhookStatus(selectedWebhook)">
+                  {{ selectedWebhook.status === WebhookStatus.ACTIVE ? 'Suspendre' : 'Activer' }}
+                </ds-button>
+                <ds-button variant="ghost" size="sm" (dsClick)="deleteWebhook(selectedWebhook.id)" style="color: var(--ds-error);">Supprimer</ds-button>
+              </div>
             </div>
-            <div class="key-details">
-              <p><strong>Prefix:</strong> {{ key.keyPrefix }}...</p>
-              @if (key.lastUsedAt) {
-                <p><strong>Last Used:</strong> {{ key.lastUsedAt | date:'short' }}</p>
-              }
-              @if (key.expiresAt) {
-                <p><strong>Expires:</strong> {{ key.expiresAt | date:'short' }}</p>
-              }
+
+            <div class="ds-form-stack">
+              <div class="ds-field">
+                <label class="ds-field__label">Secret de signature</label>
+                <div class="ds-field__wrap">
+                  <code class="ds-field__input" style="display: flex; align-items: center; justify-content: space-between; height: 38px; padding: 0 12px;">
+                    {{ selectedWebhook.secret ? selectedWebhook.secret.substring(0, 24) + '...' : 'N/A' }}
+                    @if (selectedWebhook.secret) {
+                      <ds-button variant="icon" size="sm" (dsClick)="copyWebhookSecret(selectedWebhook.secret)" ariaLabel="Copier">
+                        <ds-icon name="plus" [size]="16"></ds-icon>
+                      </ds-button>
+                    }
+                  </code>
+                </div>
+              </div>
+
+              <div class="stats-row" style="display: flex; gap: 24px; margin-top: 16px;">
+                <div style="text-align: center; flex: 1; padding: 12px; background: var(--ds-surface); border-radius: var(--ds-radius-sm);">
+                  <div style="font-size: 11px; text-transform: uppercase; color: var(--ds-text-muted);">Taux de succès</div>
+                  <strong style="font-size: 18px; color: var(--ds-success);">{{ calculateSuccessRate() }}%</strong>
+                </div>
+                <div style="text-align: center; flex: 1; padding: 12px; background: var(--ds-surface); border-radius: var(--ds-radius-sm);">
+                  <div style="font-size: 11px; text-transform: uppercase; color: var(--ds-text-muted);">Livraisons (24h)</div>
+                  <strong style="font-size: 18px; color: var(--ds-marine);">{{ selectedWebhook.successCount + selectedWebhook.failureCount }}</strong>
+                </div>
+              </div>
             </div>
-            <div class="key-actions">
-              <button class="btn-secondary" (click)="selectApiKey(key)">View Usage</button>
-              <button class="btn-danger" (click)="revokeApiKey(key.id)" [disabled]="key.status !== 'ACTIVE'">
-                Revoke
-              </button>
-            </div>
-          </div>
+          </ds-card>
         }
       </div>
-    </div>
-  }
+    }
 
-  <!-- Webhooks Tab -->
-  @if (activeTab === 'webhooks') {
-    <div class="tab-content">
-      <div class="section-header">
-        <h2>Webhook Subscriptions</h2>
-        <button class="btn-primary" (click)="openCreateWebhookDialog()">
-          Create Webhook
-        </button>
-      </div>
-      <div class="webhooks-list">
-        @for (webhook of webhooks; track webhook) {
-          <div class="webhook-card">
-            <div class="webhook-header">
-              <h3>{{ webhook.name }}</h3>
-              <span [class]="'badge ' + getStatusColor(webhook.status)">{{ webhook.status }}</span>
-            </div>
-            <div class="webhook-details">
-              <p><strong>Event:</strong> {{ webhook.eventType }}</p>
-              <p><strong>URL:</strong> {{ webhook.url }}</p>
-              <p><strong>Success Rate:</strong> {{ calculateSuccessRate() }}%</p>
-              @if (webhook.lastSuccessAt) {
-                <p><strong>Last Success:</strong> {{ webhook.lastSuccessAt | date:'short' }}</p>
-              }
-            </div>
-            <div class="webhook-actions">
-              <button class="btn-secondary" (click)="selectWebhook(webhook)">View Deliveries</button>
-              <button class="btn-secondary" (click)="toggleWebhookStatus(webhook)">
-                {{ webhook.status === WebhookStatus.ACTIVE ? 'Pause' : 'Resume' }}
-              </button>
-              <button class="btn-danger" (click)="deleteWebhook(webhook.id)">Delete</button>
-            </div>
-          </div>
-        }
-      </div>
-      <!-- Webhook Details Panel -->
-      @if (selectedWebhook) {
-        <div class="webhook-details-panel">
-          <h3>Webhook Details: {{ selectedWebhook.name }}</h3>
-          <div class="secret-section">
-            <p><strong>Signing Secret:</strong></p>
-            <div class="secret-display">
-              <code>{{ selectedWebhook.secret ? selectedWebhook.secret.substring(0, 20) + '...' : 'N/A' }}</code>
-              @if (selectedWebhook.secret) {
-                <button class="btn-secondary" (click)="copyWebhookSecret(selectedWebhook.secret)">
-                  Copy
-                </button>
-              }
-            </div>
-          </div>
-          <h4>Recent Deliveries</h4>
-          <div class="deliveries-table">
-            <table>
+    <!-- Usage Analytics Tab -->
+    @if (activeTab === 'usage') {
+      <div class="tab-pane ds-form-stack">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 700;">Statistiques d'utilisation</h2>
+          <ds-select
+            [options]="[
+              { value: 7, label: '7 derniers jours' },
+              { value: 30, label: '30 derniers jours' },
+              { value: 90, label: '90 derniers jours' }
+            ]"
+            [(ngModel)]="usageDays"
+            (valueChange)="selectedApiKey && loadApiKeyUsage(selectedApiKey.id)"
+            style="width: 200px;">
+          </ds-select>
+        </div>
+
+        <div class="stats-cards" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 32px;">
+          <ds-card [pad]="true" elevation="xs" style="text-align: center;">
+            <div style="font-size: 12px; color: var(--ds-text-muted); margin-bottom: 8px;">TOTAL REQUÊTES</div>
+            <strong style="font-size: 28px; color: var(--ds-marine);">{{ getTotalRequests() | number }}</strong>
+          </ds-card>
+          <ds-card [pad]="true" elevation="xs" style="text-align: center;">
+            <div style="font-size: 12px; color: var(--ds-text-muted); margin-bottom: 8px;">TAUX DE SUCCÈS</div>
+            <strong style="font-size: 28px; color: var(--ds-success);">{{ getSuccessRate() }}%</strong>
+          </ds-card>
+          <ds-card [pad]="true" elevation="xs" style="text-align: center;">
+            <div style="font-size: 12px; color: var(--ds-text-muted); margin-bottom: 8px;">TEMPS DE RÉPONSE MOY.</div>
+            <strong style="font-size: 28px; color: var(--ds-primary);">{{ getAverageResponseTime() }}ms</strong>
+          </ds-card>
+        </div>
+
+        <ds-card [pad]="false" elevation="sm">
+          <div style="overflow-x: auto;">
+            <table class="report-table" style="width: 100%;">
               <thead>
                 <tr>
-                  <th>Event</th>
-                  <th>Status</th>
-                  <th>Attempts</th>
-                  <th>Response</th>
-                  <th>Last Attempt</th>
+                  <th style="background: var(--ds-surface-offset); padding: 12px 16px; text-align: left; font-weight: 600;">Date</th>
+                  <th style="background: var(--ds-surface-offset); padding: 12px 16px; text-align: left; font-weight: 600;">Endpoint</th>
+                  <th style="background: var(--ds-surface-offset); padding: 12px 16px; text-align: right; font-weight: 600;">Requêtes</th>
+                  <th style="background: var(--ds-surface-offset); padding: 12px 16px; text-align: right; font-weight: 600;">Succès</th>
+                  <th style="background: var(--ds-surface-offset); padding: 12px 16px; text-align: right; font-weight: 600;">Erreurs</th>
                 </tr>
               </thead>
               <tbody>
-                @for (delivery of webhookDeliveries; track delivery) {
+                @for (usage of usageData; track usage.date) {
                   <tr>
-                    <td>{{ delivery.eventType }}</td>
-                    <td><span [class]="'badge ' + getDeliveryStatusColor(delivery.status)">{{ delivery.status }}</span></td>
-                    <td>{{ delivery.attemptCount }}</td>
-                    <td>{{ delivery.responseStatusCode || '-' }}</td>
-                    <td>{{ delivery.lastAttemptAt | date:'short' }}</td>
+                    <td style="padding: 12px 16px; border-top: 1px solid var(--ds-divider);">{{ usage.date | date:'shortDate':'':'fr-FR' }}</td>
+                    <td style="padding: 12px 16px; border-top: 1px solid var(--ds-divider); font-family: var(--ds-font-mono); font-size: 12px;">{{ usage.endpoint }}</td>
+                    <td style="padding: 12px 16px; border-top: 1px solid var(--ds-divider); text-align: right;">{{ usage.requestCount }}</td>
+                    <td style="padding: 12px 16px; border-top: 1px solid var(--ds-divider); text-align: right; color: var(--ds-success);">{{ usage.successCount }}</td>
+                    <td style="padding: 12px 16px; border-top: 1px solid var(--ds-divider); text-align: right; color: var(--ds-error);">{{ usage.errorCount }}</td>
                   </tr>
                 }
               </tbody>
             </table>
           </div>
-        </div>
-      }
-    </div>
-  }
+        </ds-card>
+      </div>
+    }
+  </div>
 
-  <!-- Usage Analytics Tab -->
-  @if (activeTab === 'usage') {
-    <div class="tab-content">
-      <div class="section-header">
-        <h2>Usage Analytics</h2>
-        <select [(ngModel)]="usageDays" (change)="selectedApiKey && loadApiKeyUsage(selectedApiKey.id)">
-          <option [value]="7">Last 7 days</option>
-          <option [value]="30">Last 30 days</option>
-          <option [value]="90">Last 90 days</option>
-        </select>
-      </div>
-      <div class="usage-stats">
-        <div class="stat-card">
-          <h3>Total Requests</h3>
-          <p class="stat-value">{{ getTotalRequests() }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Success Rate</h3>
-          <p class="stat-value">{{ getSuccessRate() }}%</p>
-        </div>
-        <div class="stat-card">
-          <h3>Avg Response Time</h3>
-          <p class="stat-value">{{ getAverageResponseTime() }}ms</p>
-        </div>
-      </div>
-      <div class="usage-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Endpoint</th>
-              <th>Requests</th>
-              <th>Success</th>
-              <th>Errors</th>
-              <th>Avg Time (ms)</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (usage of usageData; track usage) {
-              <tr>
-                <td>{{ usage.date | date:'short' }}</td>
-                <td>{{ usage.endpoint }}</td>
-                <td>{{ usage.requestCount }}</td>
-                <td>{{ usage.successCount }}</td>
-                <td>{{ usage.errorCount }}</td>
-                <td>{{ usage.avgResponseTimeMs | number:'1.0-0' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  <!-- Create API Key Dialog -->
+  <!-- Modal Placeholders (Using simple absolute overlays since specific modal DS component isn't available) -->
   @if (showCreateApiKeyDialog) {
-    <div class="modal-overlay" role="button" tabindex="0" (click)="showCreateApiKeyDialog = false" (keydown.enter)="showCreateApiKeyDialog = false" (keydown.space)="$event.preventDefault(); showCreateApiKeyDialog = false">
-      <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
-        <h2>Create API Key</h2>
+    <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
+      <ds-card [pad]="true" elevation="sm" style="width: 100%; max-width: 500px;">
+        <h2 style="margin: 0 0 24px; font-size: 20px; font-weight: 700;">Créer une clé d'API</h2>
+        
         @if (!newlyCreatedKey) {
-          <div>
-            <div class="form-group">
-              <label for="api-key-name">Name *</label>
-              <input id="api-key-name" type="text" [(ngModel)]="newApiKey.name" placeholder="Production API Key">
+          <div class="ds-form-stack">
+            <ds-input label="Nom de la clé" [(ngModel)]="newApiKey.name" placeholder="Ex: Production App"></ds-input>
+            
+            <ds-select
+              label="Niveau (Tier)"
+              [options]="tierOptions"
+              [(ngModel)]="newApiKey.tier">
+            </ds-select>
+
+            <div class="ds-field">
+              <label class="ds-field__label">Description</label>
+              <div class="ds-field__wrap">
+                <textarea class="ds-field__input" [(ngModel)]="newApiKey.description" rows="3" style="height: auto; padding: 12px;"></textarea>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="api-key-tier">Tier *</label>
-              <select id="api-key-tier" [(ngModel)]="newApiKey.tier">
-                <option [value]="ApiTier.FREE">Free (60 req/min)</option>
-                <option [value]="ApiTier.PRO">Pro (600 req/min)</option>
-                <option [value]="ApiTier.ENTERPRISE">Enterprise (6000 req/min)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="api-key-desc">Description</label>
-              <textarea id="api-key-desc" [(ngModel)]="newApiKey.description" rows="3"></textarea>
-            </div>
-            <div class="modal-actions">
-              <button class="btn-secondary" (click)="showCreateApiKeyDialog = false">Cancel</button>
-              <button class="btn-primary" (click)="createApiKey()" [disabled]="loading">Create</button>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
+              <ds-button variant="ghost" (dsClick)="showCreateApiKeyDialog = false">Annuler</ds-button>
+              <ds-button variant="marine" (dsClick)="createApiKey()" [disabled]="loading">Créer</ds-button>
             </div>
           </div>
         }
         @if (newlyCreatedKey) {
-          <div class="key-created">
-            <div class="alert alert-warning">
-              <strong>⚠️ Important:</strong> Copy this API key now. You won't be able to see it again!
+          <div class="ds-form-stack">
+            <div class="ds-alert ds-alert--warning" style="padding: 16px; background: var(--ds-warning-hl); border-radius: var(--ds-radius-md); margin-bottom: 20px;">
+              <strong>⚠️ Important :</strong> Copiez cette clé maintenant. Pour des raisons de sécurité, vous ne pourrez plus la voir après avoir fermé cette fenêtre !
             </div>
-            <div class="key-display">
-              <code>{{ newlyCreatedKey }}</code>
-              <button class="btn-primary" (click)="copyApiKey(newlyCreatedKey)">Copy to Clipboard</button>
+            <div style="background: var(--ds-bg-subtle); padding: 16px; border-radius: var(--ds-radius-md); font-family: var(--ds-font-mono); margin-bottom: 24px; word-break: break-all;">
+              {{ newlyCreatedKey }}
             </div>
-            <button class="btn-secondary" (click)="showCreateApiKeyDialog = false">Done</button>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+              <ds-button variant="ghost" (dsClick)="copyApiKey(newlyCreatedKey)">Copier</ds-button>
+              <ds-button variant="marine" (dsClick)="showCreateApiKeyDialog = false">Terminé</ds-button>
+            </div>
           </div>
         }
-      </div>
+      </ds-card>
     </div>
   }
 
-  <!-- Create Webhook Dialog -->
   @if (showCreateWebhookDialog) {
-    <div class="modal-overlay" role="button" tabindex="0" (click)="showCreateWebhookDialog = false" (keydown.enter)="showCreateWebhookDialog = false" (keydown.space)="$event.preventDefault(); showCreateWebhookDialog = false">
-      <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
-        <h2>Create Webhook</h2>
-        <div class="form-group">
-          <label for="webhook-name">Name *</label>
-          <input id="webhook-name" type="text" [(ngModel)]="newWebhook.name" placeholder="Production Webhook">
+    <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
+      <ds-card [pad]="true" elevation="sm" style="width: 100%; max-width: 500px;">
+        <h2 style="margin: 0 0 24px; font-size: 20px; font-weight: 700;">Nouveau Webhook</h2>
+        
+        <div class="ds-form-stack">
+          <ds-input label="Nom" [(ngModel)]="newWebhook.name" placeholder="Ex: Notifications Slack"></ds-input>
+          <ds-input label="URL cible" [(ngModel)]="newWebhook.url" placeholder="https://votre-app.com/webhook"></ds-input>
+          
+          <ds-select
+            label="Événement déclencheur"
+            [options]="webhookEvents"
+            [(ngModel)]="newWebhook.eventType">
+          </ds-select>
+
+          <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
+            <ds-button variant="ghost" (dsClick)="showCreateWebhookDialog = false">Annuler</ds-button>
+            <ds-button variant="marine" (dsClick)="createWebhook()" [disabled]="loading">Créer</ds-button>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="webhook-url">URL *</label>
-          <input id="webhook-url" type="url" [(ngModel)]="newWebhook.url" placeholder="https://your-app.com/webhooks">
-        </div>
-        <div class="form-group">
-          <label for="webhook-event">Event Type *</label>
-          <select id="webhook-event" [(ngModel)]="newWebhook.eventType">
-            @for (event of webhookEvents; track event) {
-              <option [value]="event">{{ event }}</option>
-            }
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="webhook-desc">Description</label>
-          <textarea id="webhook-desc" [(ngModel)]="newWebhook.description" rows="3"></textarea>
-        </div>
-        <div class="modal-actions">
-          <button class="btn-secondary" (click)="showCreateWebhookDialog = false">Cancel</button>
-          <button class="btn-primary" (click)="createWebhook()" [disabled]="loading">Create</button>
-        </div>
-      </div>
+      </ds-card>
     </div>
   }
 </div>

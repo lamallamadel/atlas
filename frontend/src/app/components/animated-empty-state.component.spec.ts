@@ -2,13 +2,10 @@ import { Component, input, output } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { AnimatedEmptyStateComponent } from './animated-empty-state.component';
-import { MatIconModule } from '@angular/material/icon';
-
 @Component({
   selector: 'app-lottie-animation',
   template: '',
-  imports: [MatIconModule],
-})
+  imports: []})
 class StubLottieAnimationComponent {
   readonly animationType = input.required<string>();
   readonly width = input.required<number>();
@@ -27,11 +24,8 @@ describe('AnimatedEmptyStateComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         CommonModule,
-        MatIconModule,
         AnimatedEmptyStateComponent,
-        StubLottieAnimationComponent,
-      ],
-    }).compileComponents();
+        StubLottieAnimationComponent]}).compileComponents();
 
     fixture = TestBed.createComponent(AnimatedEmptyStateComponent);
     component = fixture.componentInstance;
@@ -56,8 +50,7 @@ describe('AnimatedEmptyStateComponent', () => {
     const handlerSpy = vi.fn();
     fixture.componentRef.setInput('primaryAction', {
       label: 'Test',
-      handler: handlerSpy,
-    });
+      handler: handlerSpy});
 
     component.onPrimaryClick();
 
@@ -68,8 +61,7 @@ describe('AnimatedEmptyStateComponent', () => {
     const handlerSpy = vi.fn();
     fixture.componentRef.setInput('secondaryAction', {
       label: 'Test',
-      handler: handlerSpy,
-    });
+      handler: handlerSpy});
 
     component.onSecondaryClick();
 
@@ -80,8 +72,7 @@ describe('AnimatedEmptyStateComponent', () => {
     vi.spyOn(window, 'open');
     fixture.componentRef.setInput('helpLink', {
       label: 'Help',
-      url: 'https://example.com',
-    });
+      url: 'https://example.com'});
 
     component.onHelpLinkClick();
 
@@ -105,7 +96,7 @@ describe('AnimatedEmptyStateComponent', () => {
     component.onAnimationError(error);
 
     expect(console.warn).toHaveBeenCalledWith(
-      'Lottie animation failed to load, falling back to static SVG:',
+      'Lottie animation failed:',
       error
     );
   });
@@ -139,8 +130,7 @@ describe('AnimatedEmptyStateComponent', () => {
       icon: 'add',
       handler: () => {
         /* no-op for test */
-      },
-    });
+      }});
     fixture.detectChanges();
 
     expect(component.primaryAction()?.label).toBe('Primary Action');
@@ -159,8 +149,7 @@ describe('AnimatedEmptyStateComponent', () => {
       icon: 'close',
       handler: () => {
         /* no-op for test */
-      },
-    });
+      }});
     fixture.detectChanges();
 
     expect(component.secondaryAction()?.label).toBe('Secondary Action');
@@ -176,8 +165,7 @@ describe('AnimatedEmptyStateComponent', () => {
   it('should render help link when provided', () => {
     fixture.componentRef.setInput('helpLink', {
       label: 'Need help?',
-      url: 'https://help.example.com',
-    });
+      url: 'https://help.example.com'});
     fixture.detectChanges();
 
     expect(component.helpLink()?.label).toBe('Need help?');

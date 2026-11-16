@@ -3,38 +3,30 @@ import { of } from 'rxjs';
 import { KanbanBoardComponent } from './kanban-board.component';
 import {
   DossierApiService,
-  DossierStatus,
-} from '../services/dossier-api.service';
-import { ToastNotificationService } from '../services/toast-notification.service';
+  DossierStatus} from '../services/dossier-api.service';
+import { DsToastService } from '../design-system';
 
 describe('KanbanBoardComponent', () => {
   let component: KanbanBoardComponent;
   let fixture: ComponentFixture<KanbanBoardComponent>;
   let mockDossierService: Pick<DossierApiService, 'patchStatus'>;
-  let mockToastService: Pick<
-    ToastNotificationService,
-    'success' | 'error' | 'warning' | 'info'
-  >;
+  let mockToastService: Pick<DsToastService, 'success' | 'error' | 'warning' | 'info'>;
 
   beforeEach(async () => {
     mockDossierService = {
       patchStatus: () =>
-        of({ id: 1, status: DossierStatus.QUALIFYING, orgId: 'test' } as any),
-    };
+        of({ id: 1, status: DossierStatus.QUALIFYING, orgId: 'test' } as any)};
     mockToastService = {
-      success: (): string => '',
-      error: (): string => '',
-      warning: (): string => '',
-      info: (): string => '',
-    };
+      success: vi.fn().mockReturnValue(''),
+      error: vi.fn().mockReturnValue(''),
+      warning: vi.fn().mockReturnValue(''),
+      info: vi.fn().mockReturnValue('')};
 
     await TestBed.configureTestingModule({
       imports: [KanbanBoardComponent],
       providers: [
         { provide: DossierApiService, useValue: mockDossierService },
-        { provide: ToastNotificationService, useValue: mockToastService },
-      ],
-    }).compileComponents();
+        { provide: DsToastService, useValue: mockToastService }]}).compileComponents();
 
     fixture = TestBed.createComponent(KanbanBoardComponent);
     component = fixture.componentInstance;
@@ -55,28 +47,24 @@ describe('KanbanBoardComponent', () => {
   it('should distribute dossiers to columns', () => {
     fixture.componentRef.setInput('dossiers', [
       { id: 1, status: DossierStatus.NEW, orgId: 'test' } as any,
-      { id: 2, status: DossierStatus.QUALIFIED, orgId: 'test' } as any,
-    ]);
+      { id: 2, status: DossierStatus.QUALIFIED, orgId: 'test' } as any]);
     component.ngOnInit();
 
     const newColumn = component.columns.find((c) => c.id === DossierStatus.NEW);
     const qualifiedColumn = component.columns.find(
-      (c) => c.id === DossierStatus.QUALIFIED,
-    );
+      (c) => c.id === DossierStatus.QUALIFIED);
 
     expect(newColumn?.dossiers.length).toBe(1);
     expect(qualifiedColumn?.dossiers.length).toBe(1);
     expect(
-      component.dsKanbanColumns.find((c) => c.id === DossierStatus.NEW)?.cards.length,
-    ).toBe(1);
+      component.dsKanbanColumns.find((c) => c.id === DossierStatus.NEW)?.cards.length).toBe(1);
   });
 
   it('should validate workflow transitions', () => {
     component.ngOnInit();
     const isAllowed = (component as any).isTransitionAllowed(
       DossierStatus.NEW,
-      DossierStatus.QUALIFYING,
-    );
+      DossierStatus.QUALIFYING);
     expect(isAllowed).toBe(true);
   });
 
@@ -84,8 +72,7 @@ describe('KanbanBoardComponent', () => {
     component.ngOnInit();
     const isAllowed = (component as any).isTransitionAllowed(
       DossierStatus.WON,
-      DossierStatus.NEW,
-    );
+      DossierStatus.NEW);
     expect(isAllowed).toBe(false);
   });
 
@@ -95,14 +82,12 @@ describe('KanbanBoardComponent', () => {
       emitted = d;
     });
     fixture.componentRef.setInput('dossiers', [
-      { id: 1, status: DossierStatus.NEW, orgId: 'test', leadName: 'Test' } as any,
-    ]);
+      { id: 1, status: DossierStatus.NEW, orgId: 'test', leadName: 'Test' } as any]);
     component.ngOnInit();
     component.onKanbanCardClick({
       id: 1,
       title: 'Test',
-      status: DossierStatus.NEW,
-    });
+      status: DossierStatus.NEW});
     expect((emitted as { id: number }).id).toBe(1);
     sub.unsubscribe();
   });
@@ -113,15 +98,12 @@ describe('KanbanBoardComponent', () => {
         id: 1,
         status: DossierStatus.NEW,
         leadName: 'John Doe',
-        orgId: 'test',
-      } as any,
+        orgId: 'test'} as any,
       {
         id: 2,
         status: DossierStatus.NEW,
         leadName: 'Jane Smith',
-        orgId: 'test',
-      } as any,
-    ]);
+        orgId: 'test'} as any]);
     component.ngOnInit();
     fixture.componentRef.setInput('quickFilter', 'john');
     component.ngOnChanges({
@@ -129,15 +111,12 @@ describe('KanbanBoardComponent', () => {
         currentValue: 'john',
         previousValue: '',
         firstChange: false,
-        isFirstChange: () => false,
-      },
-    });
+        isFirstChange: () => false}});
 
     const newColumn = component.filteredColumns.find((c) => c.id === DossierStatus.NEW);
     expect(newColumn?.dossiers.length).toBe(1);
     expect(newColumn?.dossiers[0].leadName).toBe('John Doe');
     expect(
-      component.dsKanbanColumns.find((c) => c.id === DossierStatus.NEW)?.cards.length,
-    ).toBe(1);
+      component.dsKanbanColumns.find((c) => c.id === DossierStatus.NEW)?.cards.length).toBe(1);
   });
 });

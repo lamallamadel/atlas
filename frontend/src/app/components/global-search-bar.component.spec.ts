@@ -13,19 +13,15 @@ describe('GlobalSearchBarComponent', () => {
 
   beforeEach(async () => {
     mockSearchService = {
-      autocomplete: vi.fn().mockName('SearchApiService.autocomplete'),
-    };
+      autocomplete: vi.fn().mockName('SearchApiService.autocomplete')};
     mockRouter = {
-      navigate: vi.fn().mockName('Router.navigate'),
-    };
+      navigate: vi.fn().mockName('Router.navigate')};
 
     await TestBed.configureTestingModule({
       imports: [FormsModule, GlobalSearchBarComponent],
       providers: [
         { provide: SearchApiService, useValue: mockSearchService },
-        { provide: Router, useValue: mockRouter },
-      ],
-    }).compileComponents();
+        { provide: Router, useValue: mockRouter }]}).compileComponents();
 
     fixture = TestBed.createComponent(GlobalSearchBarComponent);
     component = fixture.componentInstance;
@@ -52,8 +48,7 @@ describe('GlobalSearchBarComponent', () => {
   it('should load recent searches from localStorage on init', () => {
     const recentSearches = [
       { query: 'test1', timestamp: Date.now() },
-      { query: 'test2', timestamp: Date.now() - 1000 },
-    ];
+      { query: 'test2', timestamp: Date.now() - 1000 }];
     localStorage.setItem('globalSearchRecent', JSON.stringify(recentSearches));
 
     component.ngOnInit();
@@ -72,12 +67,9 @@ describe('GlobalSearchBarComponent', () => {
           description: '',
           relevanceScore: 1,
           createdAt: '',
-          updatedAt: '',
-        },
-      ],
+          updatedAt: ''}],
       dossiers: [],
-      contacts: [],
-    };
+      contacts: []};
     component.totalHits = 1;
 
     component.clearSearch();
@@ -96,8 +88,7 @@ describe('GlobalSearchBarComponent', () => {
       description: 'Test',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: '',
-    };
+      updatedAt: ''};
 
     component.navigateToResult(result);
 
@@ -112,8 +103,7 @@ describe('GlobalSearchBarComponent', () => {
       description: 'Test',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: '',
-    };
+      updatedAt: ''};
 
     component.navigateToResult(result);
 
@@ -128,8 +118,7 @@ describe('GlobalSearchBarComponent', () => {
       description: 'Test',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: '',
-    };
+      updatedAt: ''};
 
     component.navigateToResult(result);
 
@@ -142,8 +131,7 @@ describe('GlobalSearchBarComponent', () => {
     component.viewAllResults();
 
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/search'], {
-      queryParams: { q: 'test query' },
-    });
+      queryParams: { q: 'test query' }});
   });
 
   it('should save recent search on navigation', () => {
@@ -155,8 +143,7 @@ describe('GlobalSearchBarComponent', () => {
       description: '',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: '',
-    };
+      updatedAt: ''};
 
     component.navigateToResult(result);
 
@@ -170,8 +157,7 @@ describe('GlobalSearchBarComponent', () => {
   it('should remove recent search', () => {
     component.recentSearches = [
       { query: 'test1', timestamp: 1 },
-      { query: 'test2', timestamp: 2 },
-    ];
+      { query: 'test2', timestamp: 2 }];
 
     const event = new Event('click');
     component.removeRecentSearch({ query: 'test1', timestamp: 1 }, event);
@@ -209,8 +195,7 @@ describe('GlobalSearchBarComponent', () => {
         description: '',
         relevanceScore: 1,
         createdAt: '',
-        updatedAt: '',
-      },
+        updatedAt: ''},
       {
         id: 2,
         type: 'dossier',
@@ -218,8 +203,7 @@ describe('GlobalSearchBarComponent', () => {
         description: '',
         relevanceScore: 1,
         createdAt: '',
-        updatedAt: '',
-      },
+        updatedAt: ''},
       {
         id: 3,
         type: 'annonce',
@@ -227,9 +211,7 @@ describe('GlobalSearchBarComponent', () => {
         description: '',
         relevanceScore: 1,
         createdAt: '',
-        updatedAt: '',
-      },
-    ];
+        updatedAt: ''}];
 
     component['groupResults'](results);
 
@@ -247,8 +229,7 @@ describe('GlobalSearchBarComponent', () => {
         description: '',
         relevanceScore: 1,
         createdAt: '',
-        updatedAt: '',
-      },
+        updatedAt: ''},
       {
         id: 2,
         type: 'annonce',
@@ -256,9 +237,7 @@ describe('GlobalSearchBarComponent', () => {
         description: '',
         relevanceScore: 1,
         createdAt: '',
-        updatedAt: '',
-      },
-    ];
+        updatedAt: ''}];
     component.showDropdown = true;
     component.selectedIndex = -1;
 
@@ -276,8 +255,7 @@ describe('GlobalSearchBarComponent', () => {
       description: '',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: '',
-    };
+      updatedAt: ''};
     component.flatResults = [result];
     component.selectedIndex = 0;
     component.showDropdown = true;
@@ -299,9 +277,7 @@ describe('GlobalSearchBarComponent', () => {
         description: '',
         relevanceScore: 1,
         createdAt: '',
-        updatedAt: '',
-      },
-    ];
+        updatedAt: ''}];
 
     const event = new KeyboardEvent('keydown', { key: 'Escape' });
     component.handleKeyboardShortcut(event);

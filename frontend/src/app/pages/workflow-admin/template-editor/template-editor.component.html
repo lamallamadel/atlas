@@ -1,210 +1,175 @@
-<div class="template-editor-container">
-  <div class="editor-header">
-    <ds-button variant="icon" size="sm" ariaLabel="Retour" (dsClick)="cancel()">
-      <ds-icon name="chevron-left" [size]="16"></ds-icon>
-    </ds-button>
-    <h2>{{ isEditMode ? 'Modifier le modèle' : isViewMode ? 'Voir le modèle' : 'Créer un modèle' }}</h2>
-  </div>
+<div class="template-editor ds-form-stack" style="padding: 32px; max-width: var(--ds-content-wide); margin: 0 auto;">
+  
+  <header class="editor-header" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px;">
+    <div>
+      <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: var(--ds-marine);">
+        {{ isViewMode ? 'Détails du modèle' : isEditMode ? 'Modifier le modèle' : 'Nouveau modèle WhatsApp' }}
+      </h1>
+      <p style="margin: 8px 0 0; color: var(--ds-text-muted);">Configurez vos modèles de messages pour l'API WhatsApp Business.</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <ds-button variant="ghost" size="md" (dsClick)="cancel()">Annuler</ds-button>
+      @if (!isViewMode) {
+        <ds-button variant="marine" size="md" (dsClick)="saveTemplate()" [disabled]="templateForm.invalid">
+          <ds-icon name="check" [size]="20" style="margin-right: 8px;"></ds-icon>
+          Enregistrer
+        </ds-button>
+      }
+    </div>
+  </header>
 
-  <div class="editor-content">
-    <div class="form-section">
-      <form [formGroup]="templateForm" (ngSubmit)="onSubmit()">
-        <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
-          <div class="te-card-header">
-            <h3 class="te-card-title">Informations générales</h3>
+  <div class="editor-layout" style="display: grid; grid-template-columns: 1fr 360px; gap: 32px; align-items: flex-start;">
+    
+    <div class="editor-form-pane ds-form-stack">
+      <form [formGroup]="templateForm" class="ds-form-stack">
+        
+        <!-- Basic Info -->
+        <ds-card [pad]="true" elevation="xs">
+          <div class="section-header" style="margin-bottom: 24px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">Identité du modèle</h3>
           </div>
-          <div class="te-card-body">
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Nom du modèle</mat-label>
-                <input matInput formControlName="name" placeholder="ex. confirmation_commande">
-                <mat-hint>Utilisez uniquement des lettres minuscules, chiffres et underscores</mat-hint>
-                @if (templateForm.get('name')?.hasError('required')) {
-                  <mat-error>
-                    Le nom du modèle est requis
-                  </mat-error>
-                }
-                @if (templateForm.get('name')?.hasError('pattern')) {
-                  <mat-error>
-                    Seules les lettres minuscules, chiffres et underscores sont autorisés
-                  </mat-error>
-                }
-              </mat-form-field>
+          <div class="ds-form-stack">
+            <ds-input
+              label="Nom technique"
+              formControlName="name"
+              placeholder="ex. confirmation_commande"
+              [disabled]="isEditMode || isViewMode"
+              [error]="templateForm.get('name')?.invalid && templateForm.get('name')?.touched ? 'Lettres minuscules, chiffres et underscores uniquement' : ''">
+            </ds-input>
+
+            <div class="ds-form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <ds-select
+                label="Langue"
+                [options]="languages"
+                formControlName="language">
+              </ds-select>
+
+              <ds-select
+                label="Catégorie"
+                [options]="categories"
+                formControlName="category">
+              </ds-select>
             </div>
 
-            <div class="form-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Langue</mat-label>
-                <input matInput formControlName="language" placeholder="en">
-                <mat-hint>ISO 639-1 format (e.g., en, fr, en_US)</mat-hint>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Catégorie</mat-label>
-                <mat-select formControlName="category">
-                  @for (cat of categories; track cat) {
-                    <mat-option [value]="cat">
-                      {{ cat }}
-                    </mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
+            <div class="ds-field">
+              <label class="ds-field__label">Description interne</label>
+              <div class="ds-field__wrap">
+                <textarea class="ds-field__input" formControlName="description" rows="2" style="height: auto; padding: 12px;"></textarea>
+              </div>
             </div>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <textarea matInput formControlName="description" rows="2"
-              placeholder="Description interne de ce modèle"></textarea>
-            </mat-form-field>
           </div>
         </ds-card>
 
-        <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
-          <div class="te-card-header">
-            <h3 class="te-card-title">Contenu du modèle</h3>
+        <!-- Content -->
+        <ds-card [pad]="true" elevation="xs" style="margin-top: 24px;">
+          <div class="section-header" style="margin-bottom: 24px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">Contenu du message</h3>
           </div>
-          <div class="te-card-body">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>En-tête (optionnel)</mat-label>
-              <input matInput formControlName="headerText" placeholder="Bienvenue dans notre service !">
-              <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('headerText')"
-                title="Insérer une variable">
-                <ds-icon name="plus" [size]="16"></ds-icon>
-              </button>
-            </mat-form-field>
+          <div class="ds-form-stack">
+            <ds-input
+              label="En-tête (Optionnel)"
+              formControlName="headerText"
+              placeholder="Bienvenue dans notre service !">
+            </ds-input>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Corps *</mat-label>
-              <textarea matInput formControlName="bodyText" rows="5"
-              placeholder="Bonjour, votre commande a été confirmée."></textarea>
-              <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('bodyText')"
-                title="Insérer une variable">
-                <ds-icon name="plus" [size]="16"></ds-icon>
-              </button>
-              <mat-hint>Utilisez des doubles accolades pour les variables</mat-hint>
-              @if (templateForm.get('bodyText')?.hasError('required')) {
-                <mat-error>
-                  Le contenu du message est requis
-                </mat-error>
-              }
-            </mat-form-field>
+            <div class="ds-field">
+              <label class="ds-field__label">Corps du message (Body) *</label>
+              <div class="ds-field__wrap">
+                <textarea 
+                  class="ds-field__input" 
+                  formControlName="bodyText" 
+                  rows="6" 
+                  placeholder="Tapez votre message ici..."
+                  style="height: auto; padding: 12px;"></textarea>
+              </div>
+              <p class="ds-field__hint">Utilisez {{1}}, {{2}} pour insérer des variables dynamiques.</p>
+            </div>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Pied de page (optionnel)</mat-label>
-              <input matInput formControlName="footerText" placeholder="Merci pour votre confiance">
-              <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('footerText')"
-                title="Insérer une variable">
-                <ds-icon name="plus" [size]="16"></ds-icon>
-              </button>
-            </mat-form-field>
+            <ds-input
+              label="Pied de page (Footer)"
+              formControlName="footerText"
+              placeholder="Merci pour votre confiance">
+            </ds-input>
           </div>
         </ds-card>
 
-        <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
-          <div class="te-card-header">
-            <h3 class="te-card-title">Boutons (optionnel)</h3>
-            <ds-button variant="icon" size="sm" ariaLabel="Ajouter bouton" (dsClick)="addButton()" [disabled]="isViewMode">
-              <ds-icon name="plus" [size]="16"></ds-icon>
-            </ds-button>
+        <!-- Buttons -->
+        <ds-card [pad]="true" elevation="xs" style="margin-top: 24px;">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">Boutons d'action</h3>
+            @if (!isViewMode) {
+              <ds-button variant="ghost" size="sm" (dsClick)="addButton()">
+                <ds-icon name="plus" [size]="16" style="margin-right: 8px;"></ds-icon> Ajouter un bouton
+              </ds-button>
+            }
           </div>
-          <div class="te-card-body">
-            <div formArrayName="buttons" class="buttons-list">
-              @for (button of buttons.controls; track button; let i = $index) {
-                <div [formGroupName]="i" class="button-item">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Type</mat-label>
-                    <mat-select formControlName="type">
-                      @for (type of buttonTypes; track type) {
-                        <mat-option [value]="type">
-                          {{ type }}
-                        </mat-option>
-                      }
-                    </mat-select>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline">
-                    <mat-label>Texte du bouton</mat-label>
-                    <input matInput formControlName="text" placeholder="Cliquez ici">
-                  </mat-form-field>
-                  @if (button.get('type')?.value === ButtonType.URL) {
-                    <mat-form-field appearance="outline">
-                      <mat-label>URL</mat-label>
-                      <input matInput formControlName="url" placeholder="https://example.com">
-                    </mat-form-field>
-                  }
-                  @if (button.get('type')?.value === ButtonType.PHONE_NUMBER) {
-                    <mat-form-field appearance="outline">
-                      <mat-label>Numéro de téléphone</mat-label>
-                      <input matInput formControlName="phoneNumber" placeholder="+1234567890">
-                    </mat-form-field>
-                  }
-                  <ds-button variant="icon" size="sm" ariaLabel="Supprimer bouton" (dsClick)="removeButton(i)" [disabled]="isViewMode">
-                    <ds-icon name="trash" [size]="16"></ds-icon>
-                  </ds-button>
+
+          <div formArrayName="buttons" class="buttons-list ds-form-stack" cdkDropList>
+            @for (button of buttons.controls; track button; let i = $index) {
+              <div [formGroupName]="i" class="button-item ds-card" style="padding: 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); background: var(--ds-bg-subtle); display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: flex-end;">
+                <ds-select label="Type" [options]="buttonTypes" formControlName="type"></ds-select>
+                <ds-input label="Texte" formControlName="text" placeholder="Cliquez ici"></ds-input>
+                <ds-button variant="icon" size="md" (dsClick)="removeButton(i)" [disabled]="isViewMode" style="color: var(--ds-error);">
+                  <ds-icon name="trash" [size]="20"></ds-icon>
+                </ds-button>
+              </div>
+            }
+            @if (buttons.length === 0) {
+              <div style="padding: 24px; text-align: center; border: 1px dashed var(--ds-border); border-radius: var(--ds-radius-md); color: var(--ds-text-faint); font-size: 13px;">
+                Aucun bouton configuré
+              </div>
+            }
+          </div>
+        </ds-card>
+
+        <!-- Variables -->
+        <ds-card [pad]="true" elevation="xs" style="margin-top: 24px;">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">Variables et Exemples</h3>
+            @if (!isViewMode) {
+              <ds-button variant="ghost" size="sm" (dsClick)="addVariable()">
+                <ds-icon name="plus" [size]="16" style="margin-right: 8px;"></ds-icon> Déclarer une variable
+              </ds-button>
+            }
+          </div>
+
+          <div formArrayName="variables" class="variables-list ds-form-stack">
+            @for (variable of variables.controls; track variable; let i = $index) {
+              <div [formGroupName]="i" class="variable-item ds-card" style="padding: 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); background: var(--ds-bg-subtle);">
+                <div style="display: grid; grid-template-columns: 1fr 120px 1fr auto; gap: 16px; align-items: flex-end;">
+                  <ds-input label="Nom" formControlName="variableName" placeholder="nom_client"></ds-input>
+                  <ds-select label="Zone" [options]="variableComponentTypes" formControlName="componentType"></ds-select>
+                  <ds-input label="Exemple" formControlName="exampleValue" placeholder="John Doe"></ds-input>
+                  <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
+                    <ds-checkbox formControlName="isRequired" label="Requis"></ds-checkbox>
+                    <ds-button variant="icon" size="sm" (dsClick)="removeVariable(i)" [disabled]="isViewMode" style="color: var(--ds-error);">
+                      <ds-icon name="trash" [size]="16"></ds-icon>
+                    </ds-button>
+                  </div>
                 </div>
-              }
-            </div>
+              </div>
+            }
+            @if (variables.length === 0) {
+              <div style="padding: 24px; text-align: center; border: 1px dashed var(--ds-border); border-radius: var(--ds-radius-md); color: var(--ds-text-faint); font-size: 13px;">
+                Aucune variable déclarée
+              </div>
+            }
           </div>
         </ds-card>
-
-        <ds-card class="te-section-card" [pad]="false" [elevation]="'sm'">
-          <div class="te-card-header">
-            <h3 class="te-card-title">Variables</h3>
-            <ds-button variant="icon" size="sm" ariaLabel="Ajouter variable" (dsClick)="addVariable()" [disabled]="isViewMode">
-              <ds-icon name="plus" [size]="16"></ds-icon>
-            </ds-button>
-          </div>
-          <div class="te-card-body">
-            <div formArrayName="variables" cdkDropList (cdkDropListDropped)="onVariableDrop($event)" class="variables-list">
-              @for (variable of variables.controls; track variable; let i = $index) {
-                <div
-                  [formGroupName]="i"
-                  cdkDrag
-                  class="variable-item">
-                  <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
-                  <mat-form-field appearance="outline">
-                    <mat-label>Nom de variable</mat-label>
-                    <input matInput formControlName="variableName" placeholder="nom_client">
-                  </mat-form-field>
-                  <mat-form-field appearance="outline">
-                    <mat-label>Composant</mat-label>
-                    <mat-select formControlName="componentType">
-                      @for (type of componentTypes; track type) {
-                        <mat-option [value]="type">
-                          {{ type }}
-                        </mat-option>
-                      }
-                    </mat-select>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline">
-                    <mat-label>Valeur d’exemple</mat-label>
-                    <input matInput formControlName="exampleValue" placeholder="John Doe">
-                  </mat-form-field>
-                  <mat-checkbox formControlName="isRequired">Requis</mat-checkbox>
-                  <ds-button variant="icon" size="sm" ariaLabel="Supprimer variable" (dsClick)="removeVariable(i)" [disabled]="isViewMode">
-                    <ds-icon name="trash" [size]="16"></ds-icon>
-                  </ds-button>
-                </div>
-              }
-              @if (variables.length === 0) {
-                <div class="empty-variables">
-                  <p>Aucune variable définie. Ajoutez des variables pour rendre votre modèle dynamique.</p>
-                </div>
-              }
-            </div>
-          </div>
-        </ds-card>
-
-        <div class="form-actions">
-          <ds-button variant="ghost" size="md" (dsClick)="cancel()">Annuler</ds-button>
-          <ds-button variant="marine" size="md" nativeType="submit" [disabled]="loading || isViewMode">
-            {{ isEditMode ? 'Mettre à jour' : 'Créer' }} le modèle
-          </ds-button>
-        </div>
       </form>
     </div>
 
-    <div class="preview-section">
-      <app-template-preview [template]="previewTemplate"></app-template-preview>
+    <!-- Preview Sidebar -->
+    <div class="editor-preview-pane" style="position: sticky; top: 100px;">
+      <h3 style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ds-text-muted); margin-bottom: 16px;">
+        Aperçu WhatsApp
+      </h3>
+      <app-template-preview [formData]="templateForm.value"></app-template-preview>
+      
+      <div class="ds-alert ds-alert--info" style="margin-top: 24px; display: flex; gap: 12px; font-size: 12px; color: var(--ds-text-muted);">
+        <ds-icon name="info" [size]="16"></ds-icon>
+        <p style="margin: 0;">Le rendu final peut varier légèrement selon l'appareil du destinataire (iOS/Android).</p>
+      </div>
     </div>
   </div>
 </div>

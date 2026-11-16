@@ -1,23 +1,26 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
-import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatChip } from '@angular/material/chips';
 import { 
   WhatsAppTemplateApiService, 
   WhatsAppTemplateResponse
 } from '../services/whatsapp-template-api.service';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { 
+  DsCardComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsInputComponent,
+  DsSkeletonComponent,
+  DsBadgeComponent,
+  DsToastService,
+  DsTableComponent,
+  DsColumn,
+  DsRowAction,
+  DsEmptyStateComponent
+} from '../design-system';
 
 @Component({
   selector: 'app-template-library',
@@ -26,43 +29,79 @@ import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-
     CommonModule,
     FormsModule,
     DatePipe,
-    MatFormField,
-    MatLabel,
-    MatInput,
-    MatPrefix,
-    MatSelect,
-    MatOption,
-    MatTable,
-    MatColumnDef,
-    MatHeaderCellDef,
-    MatHeaderCell,
-    MatCellDef,
-    MatCell,
-    MatHeaderRowDef,
-    MatHeaderRow,
-    MatRowDef,
-    MatRow,
-    MatButton,
-    MatIconButton,
-    MatIcon,
-    MatChip,
-    CdkConnectedOverlay,
-    CdkOverlayOrigin,
     DsSkeletonComponent,
+    DsCardComponent,
+    DsButtonComponent,
+    DsIconComponent,
+    DsSelectComponent,
+    DsInputComponent,
+    DsBadgeComponent,
+    DsTableComponent,
+    DsEmptyStateComponent,
+    DsCellDirective
   ],
-  templateUrl: './template-library.component.html',
-  styleUrls: ['./template-library.component.css']
+  template: `
+    <div class="template-library ds-form-stack" style="padding: 32px; max-width: var(--ds-content-wide); margin: 0 auto;">
+      <header style="margin-bottom: 32px;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: var(--ds-marine); font-family: var(--ds-font-display);">Bibliothèque de modèles WhatsApp</h1>
+        <p style="margin: 8px 0 0; color: var(--ds-text-muted);">Gérez vos modèles officiels approuvés par Meta</p>
+      </header>
+
+      <ds-card [pad]="true" elevation="sm">
+        <div class="library-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--ds-marine);">Mes modèles</h2>
+          <ds-button variant="marine" size="md" (dsClick)="createTemplate()">
+            <ds-icon name="plus" [size]="20" style="margin-right: 8px;"></ds-icon>
+            Créer un modèle
+          </ds-button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; align-items: flex-end; margin-bottom: 32px; padding: 20px; background: var(--ds-surface-2); border-radius: var(--ds-radius-md);">
+          <ds-input label="Rechercher" [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" placeholder="Nom..." prefixIcon="search"></ds-input>
+          <ds-select label="Catégorie" [options]="categories" [(ngModel)]="selectedCategory" (valueChange)="applyFilters()"></ds-select>
+          <ds-select label="Statut" [options]="statuses" [(ngModel)]="selectedStatus" (valueChange)="applyFilters()"></ds-select>
+          <ds-select label="Langue" [options]="languages" [(ngModel)]="selectedLanguage" (valueChange)="applyFilters()"></ds-select>
+          <ds-button variant="ghost" size="md" (dsClick)="clearFilters()">Réinitialiser</ds-button>
+        </div>
+
+        <!-- Table -->
+        @if (loading) {
+          <div style="padding: 48px 0;">
+            <ds-skeleton variant="rect" width="100%" height="300px" [animate]="true"></ds-skeleton>
+          </div>
+        }
+
+        @if (!loading) {
+          <ds-table
+            [columns]="dsColumns"
+            [data]="filteredTemplates"
+            [rowActions]="dsRowActions"
+            (rowAction)="onRowAction($event)"
+            emptyTitle="Aucun modèle trouvé"
+            emptyDescription="Ajustez vos filtres ou créez un nouveau modèle de message.">
+            
+            <ng-template dsCell="name" let-t>
+              <span style="font-weight: 700; color: var(--ds-marine);">{{ t.name }}</span>
+            </ng-template>
+
+            <ng-template dsCell="status" let-t>
+              <ds-badge [status]="getStatusBadgeStatus(t.status)" [showDot]="false" size="sm">{{ t.status }}</ds-badge>
+            </ng-template>
+
+            <ng-template dsCell="updatedAt" let-t>
+              {{ t.updatedAt | date:'short' }}
+            </ng-template>
+          </ds-table>
+        }
+      </ds-card>
+    </div>
+    `
 })
 export class TemplateLibraryComponent implements OnInit {
-  private readonly overlay = inject(Overlay);
-
-  /** Menu actions par ligne tableau. */
-  tableRowMenuOpenForId: number | null = null;
-  readonly tableRowMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
-  readonly tableRowMenuPositions: ConnectedPosition[] = [
-    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
-    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
-  ];
+  private templateService = inject(WhatsAppTemplateApiService);
+  private toastService = inject(DsToastService);
+  private router = inject(Router);
 
   templates: WhatsAppTemplateResponse[] = [];
   filteredTemplates: WhatsAppTemplateResponse[] = [];
@@ -73,42 +112,52 @@ export class TemplateLibraryComponent implements OnInit {
   selectedStatus = '';
   selectedLanguage = '';
 
-  categories = [
-    { value: '', label: 'All Categories' },
+  dsColumns: DsColumn<WhatsAppTemplateResponse>[] = [
+    { key: 'name',     header: 'Nom' },
+    { key: 'language', header: 'Langue' },
+    { key: 'category', header: 'Catégorie' },
+    { key: 'status',   header: 'Statut' },
+    { key: 'version',  header: 'v.' },
+    { key: 'updatedAt', header: 'Mise à jour' }
+  ];
+
+  dsRowActions: DsRowAction<WhatsAppTemplateResponse>[] = [
+    { icon: 'edit',    label: 'Modifier',        action: 'edit',    ariaLabel: 'Modifier le modèle' },
+    { icon: 'clock',   label: 'Historique',      action: 'history', ariaLabel: 'Voir les versions' },
+    { icon: 'upload',  label: 'Soumettre',       action: 'submit',  ariaLabel: 'Soumettre pour approbation', show: (t) => this.canSubmitForApproval(t) },
+    { icon: 'refresh', label: 'Vérifier statut', action: 'poll',    ariaLabel: 'Vérifier le statut Meta',     show: (t) => this.canPollStatus(t) },
+    { icon: 'check',   label: 'Activer',         action: 'activate', ariaLabel: 'Activer le modèle',          show: (t) => this.canActivate(t) },
+    { icon: 'refresh', label: 'Pause',           action: 'pause',   ariaLabel: 'Mettre en pause',             show: (t) => this.canPause(t) },
+    { icon: 'trash',   label: 'Supprimer',       action: 'delete',  ariaLabel: 'Supprimer le modèle',         show: (t) => this.canDelete(t) }
+  ];
+
+  readonly categories: DsSelectOption[] = [
+    { value: '', label: 'Toutes catégories' },
     { value: 'MARKETING', label: 'Marketing' },
-    { value: 'UTILITY', label: 'Utility' },
-    { value: 'AUTHENTICATION', label: 'Authentication' },
-    { value: 'TRANSACTIONAL', label: 'Transactional' }
+    { value: 'UTILITY', label: 'Utilitaire' },
+    { value: 'AUTHENTICATION', label: 'Authentification' },
+    { value: 'TRANSACTIONAL', label: 'Transactionnel' }
   ];
 
-  statuses = [
-    { value: '', label: 'All Statuses' },
-    { value: 'DRAFT', label: 'Draft' },
-    { value: 'PENDING', label: 'Pending' },
-    { value: 'APPROVED', label: 'Approved' },
-    { value: 'REJECTED', label: 'Rejected' },
-    { value: 'PAUSED', label: 'Paused' },
-    { value: 'ACTIVE', label: 'Active' },
-    { value: 'INACTIVE', label: 'Inactive' }
+  readonly statuses: DsSelectOption[] = [
+    { value: '', label: 'Tous statuts' },
+    { value: 'DRAFT', label: 'Brouillon' },
+    { value: 'PENDING', label: 'En attente' },
+    { value: 'APPROVED', label: 'Approuvé' },
+    { value: 'REJECTED', label: 'Rejeté' },
+    { value: 'PAUSED', label: 'En pause' },
+    { value: 'ACTIVE', label: 'Actif' },
+    { value: 'INACTIVE', label: 'Inactif' }
   ];
 
-  languages = [
-    { value: '', label: 'All Languages' },
-    { value: 'en', label: 'English' },
-    { value: 'es', label: 'Spanish' },
-    { value: 'fr', label: 'French' },
-    { value: 'de', label: 'German' },
-    { value: 'pt', label: 'Portuguese' }
+  readonly languages: DsSelectOption[] = [
+    { value: '', label: 'Toutes langues' },
+    { value: 'en', label: 'Anglais' },
+    { value: 'es', label: 'Espagnol' },
+    { value: 'fr', label: 'Français' },
+    { value: 'de', label: 'Allemand' },
+    { value: 'pt', label: 'Portugais' }
   ];
-
-  displayedColumns = ['name', 'language', 'category', 'status', 'version', 'updated', 'actions'];
-
-  constructor(
-    private templateService: WhatsAppTemplateApiService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-    private router: Router
-  ) {}
 
   ngOnInit(): void {
     this.loadTemplates();
@@ -124,7 +173,7 @@ export class TemplateLibraryComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading templates', error);
-        this.snackBar.open('Failed to load templates', 'Close', { duration: 3000 });
+        this.toastService.error('Échec du chargement des modèles');
         this.loading = false;
       }
     });
@@ -132,7 +181,6 @@ export class TemplateLibraryComponent implements OnInit {
 
   applyFilters(): void {
     this.loading = true;
-    
     const filters: any = {};
     if (this.selectedCategory) filters.category = this.selectedCategory;
     if (this.selectedStatus) filters.status = this.selectedStatus;
@@ -152,7 +200,7 @@ export class TemplateLibraryComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error searching templates', error);
-        this.snackBar.open('Search failed', 'Close', { duration: 3000 });
+        this.toastService.error('Échec de la recherche');
         this.loading = false;
       }
     });
@@ -170,95 +218,91 @@ export class TemplateLibraryComponent implements OnInit {
     this.router.navigate(['/templates/create']);
   }
 
-  toggleTableRowMenu(templateId: number, event: MouseEvent): void {
-    event.stopPropagation();
-    this.tableRowMenuOpenForId =
-      this.tableRowMenuOpenForId === templateId ? null : templateId;
-  }
-
-  closeTableRowMenu(): void {
-    this.tableRowMenuOpenForId = null;
+  onRowAction(event: { action: string; row: WhatsAppTemplateResponse }): void {
+    const t = event.row;
+    switch (event.action) {
+      case 'edit':     this.editTemplate(t); break;
+      case 'history':  this.viewVersions(t); break;
+      case 'submit':   this.submitForApproval(t); break;
+      case 'poll':     this.pollApprovalStatus(t); break;
+      case 'activate': this.activateTemplate(t); break;
+      case 'pause':    this.pauseTemplate(t); break;
+      case 'delete':   this.deleteTemplate(t); break;
+    }
   }
 
   editTemplate(template: WhatsAppTemplateResponse): void {
-    this.closeTableRowMenu();
     this.router.navigate(['/templates/edit', template.id]);
   }
 
   viewVersions(template: WhatsAppTemplateResponse): void {
-    this.closeTableRowMenu();
     this.router.navigate(['/templates', template.id, 'versions']);
   }
 
   submitForApproval(template: WhatsAppTemplateResponse): void {
-    this.closeTableRowMenu();
-    if (confirm(`Submit template "${template.name}" for approval?`)) {
+    if (confirm(`Soumettre le modèle "${template.name}" pour approbation ?`)) {
       this.templateService.submitForApproval(template.id).subscribe({
         next: (updated) => {
-          this.snackBar.open('Template submitted for approval', 'Close', { duration: 3000 });
+          this.toastService.success('Modèle soumis pour approbation');
           this.updateTemplateInList(updated);
         },
         error: (error) => {
           console.error('Error submitting template', error);
-          this.snackBar.open('Submission failed', 'Close', { duration: 3000 });
+          this.toastService.error('Échec de la soumission');
         }
       });
     }
   }
 
   pollApprovalStatus(template: WhatsAppTemplateResponse): void {
-    this.closeTableRowMenu();
     this.templateService.pollApprovalStatus(template.id).subscribe({
       next: (updated) => {
-        this.snackBar.open(`Status updated: ${updated.status}`, 'Close', { duration: 3000 });
+        this.toastService.success(`Statut mis à jour : ${updated.status}`);
         this.updateTemplateInList(updated);
       },
       error: (error) => {
         console.error('Error polling status', error);
-        this.snackBar.open('Failed to poll status', 'Close', { duration: 3000 });
+        this.toastService.error('Échec de la mise à jour du statut');
       }
     });
   }
 
   activateTemplate(template: WhatsAppTemplateResponse): void {
-    this.closeTableRowMenu();
     this.templateService.activateTemplate(template.id).subscribe({
       next: (updated) => {
-        this.snackBar.open('Template activated', 'Close', { duration: 3000 });
+        this.toastService.success('Modèle activé');
         this.updateTemplateInList(updated);
       },
       error: (error) => {
         console.error('Error activating template', error);
-        this.snackBar.open('Activation failed', 'Close', { duration: 3000 });
+        this.toastService.error('Échec de l\'activation');
       }
     });
   }
 
   pauseTemplate(template: WhatsAppTemplateResponse): void {
-    this.closeTableRowMenu();
     this.templateService.pauseTemplate(template.id).subscribe({
       next: (updated) => {
-        this.snackBar.open('Template paused', 'Close', { duration: 3000 });
+        this.toastService.success('Modèle mis en pause');
         this.updateTemplateInList(updated);
       },
       error: (error) => {
         console.error('Error pausing template', error);
-        this.snackBar.open('Pause failed', 'Close', { duration: 3000 });
+        this.toastService.error('Échec de la mise en pause');
       }
     });
   }
 
   deleteTemplate(template: WhatsAppTemplateResponse): void {
-    this.closeTableRowMenu();
-    if (confirm(`Delete template "${template.name}"? This action cannot be undone.`)) {
+    if (confirm(`Supprimer le modèle "${template.name}" ? Cette action est irréversible.`)) {
       this.templateService.deleteTemplate(template.id).subscribe({
         next: () => {
-          this.snackBar.open('Template deleted', 'Close', { duration: 3000 });
+          this.toastService.success('Modèle supprimé');
           this.removeTemplateFromList(template.id);
         },
         error: (error) => {
           console.error('Error deleting template', error);
-          this.snackBar.open('Deletion failed', 'Close', { duration: 3000 });
+          this.toastService.error('Échec de la suppression');
         }
       });
     }
@@ -277,36 +321,22 @@ export class TemplateLibraryComponent implements OnInit {
     this.applyFilters();
   }
 
-  getStatusColor(status: string): string {
-    const colors: { [key: string]: string } = {
-      'DRAFT': 'gray',
-      'PENDING': 'orange',
-      'APPROVED': 'green',
-      'REJECTED': 'red',
-      'PAUSED': 'yellow',
-      'ACTIVE': 'blue',
-      'INACTIVE': 'gray'
+  getStatusBadgeStatus(status: string): any {
+    const map: Record<string, any> = {
+      'DRAFT': 'draft',
+      'PENDING': 'paused',
+      'APPROVED': 'active',
+      'REJECTED': 'lost',
+      'PAUSED': 'warning',
+      'ACTIVE': 'active',
+      'INACTIVE': 'neutral'
     };
-    return colors[status] || 'gray';
+    return map[status] || 'neutral';
   }
 
-  canSubmitForApproval(template: WhatsAppTemplateResponse): boolean {
-    return template.status === 'DRAFT';
-  }
-
-  canPollStatus(template: WhatsAppTemplateResponse): boolean {
-    return template.status === 'PENDING' && !!template.metaSubmissionId;
-  }
-
-  canActivate(template: WhatsAppTemplateResponse): boolean {
-    return template.status === 'APPROVED' || template.status === 'INACTIVE';
-  }
-
-  canPause(template: WhatsAppTemplateResponse): boolean {
-    return template.status === 'APPROVED' || template.status === 'ACTIVE';
-  }
-
-  canDelete(template: WhatsAppTemplateResponse): boolean {
-    return template.status !== 'ACTIVE';
-  }
+  canSubmitForApproval(template: WhatsAppTemplateResponse): boolean { return template.status === 'DRAFT'; }
+  canPollStatus(template: WhatsAppTemplateResponse): boolean { return template.status === 'PENDING' && !!template.metaSubmissionId; }
+  canActivate(template: WhatsAppTemplateResponse): boolean { return template.status === 'APPROVED' || template.status === 'INACTIVE'; }
+  canPause(template: WhatsAppTemplateResponse): boolean { return template.status === 'APPROVED' || template.status === 'ACTIVE'; }
+  canDelete(template: WhatsAppTemplateResponse): boolean { return template.status !== 'ACTIVE'; }
 }

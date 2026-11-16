@@ -7,8 +7,7 @@ describe('LogoInlineComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LogoInlineComponent],
-    }).compileComponents();
+      imports: [LogoInlineComponent]}).compileComponents();
 
     fixture = TestBed.createComponent(LogoInlineComponent);
     component = fixture.componentInstance;

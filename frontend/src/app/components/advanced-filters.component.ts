@@ -1,14 +1,8 @@
-import { Component, OnInit, input, output } from '@angular/core';
+import { Component, OnInit, input, output, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { debounceTime } from 'rxjs/operators';
-import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
-import { MatInput } from '@angular/material/input';
 import { DsInputComponent } from '../design-system/primitives/ds-input/ds-input.component';
-import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
-import { DsCardComponent } from '../design-system';
+import { DsCardComponent, DsSelectComponent, DsSelectOption } from '../design-system';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 import { DsButtonComponent } from '../design-system/primitives/ds-button/ds-button.component';
 import { DsIconComponent } from '../design-system/icons/ds-icon.component';
@@ -40,11 +34,23 @@ export interface FilterOperator {
 
 @Component({
     selector: 'app-advanced-filters',
+    standalone: true,
     templateUrl: './advanced-filters.component.html',
     styleUrls: ['./advanced-filters.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, DsCardComponent, DsSkeletonComponent, DsButtonComponent, DsIconComponent, DsInputComponent]
+    imports: [
+      FormsModule, 
+      ReactiveFormsModule, 
+      DsCardComponent, 
+      DsSkeletonComponent, 
+      DsButtonComponent, 
+      DsIconComponent, 
+      DsInputComponent,
+      DsSelectComponent
+    ]
 })
 export class AdvancedFiltersComponent implements OnInit {
+  private fb = inject(FormBuilder);
+
   readonly fields = input<FilterField[]>([]);
   readonly initialFilter = input<AdvancedFilter>();
   readonly filterChange = output<AdvancedFilter>();
@@ -101,10 +107,10 @@ export class AdvancedFiltersComponent implements OnInit {
     ]
   };
 
-  constructor(
-    private fb: FormBuilder,
-    private dialog: MatDialog
-  ) {}
+  readonly booleanOptions: DsSelectOption[] = [
+    { value: true, label: 'Vrai' },
+    { value: false, label: 'Faux' }
+  ];
 
   ngOnInit(): void {
     this.initForm();
@@ -220,11 +226,19 @@ export class AdvancedFiltersComponent implements OnInit {
     return fieldConfig?.type || 'text';
   }
 
-  getFieldOptions(index: number): { value: string; label: string }[] {
+  getFieldOptions(index: number): DsSelectOption[] {
     const condition = this.conditions.at(index) as FormGroup;
     const field = condition.get('field')?.value;
     const fieldConfig = this.getFieldConfig(field);
-    return fieldConfig?.options || [];
+    return (fieldConfig?.options || []) as DsSelectOption[];
+  }
+
+  getOperatorOptions(index: number): DsSelectOption[] {
+    return this.getOperators(index).map(op => ({ value: op.value, label: op.label }));
+  }
+
+  getFieldSelectorOptions(): DsSelectOption[] {
+    return this.fields().map(f => ({ value: f.key, label: f.label }));
   }
 
   isMultiSelect(index: number): boolean {

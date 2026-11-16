@@ -3,8 +3,7 @@ import { of, throwError } from 'rxjs';
 import { OutboundMessageListComponent } from './outbound-message-list.component';
 import {
   OutboundMessageApiService,
-  OutboundMessageStatus,
-} from '../../services/outbound-message-api.service';
+  OutboundMessageStatus} from '../../services/outbound-message-api.service';
 
 describe('OutboundMessageListComponent', () => {
   let component: OutboundMessageListComponent;
@@ -13,18 +12,14 @@ describe('OutboundMessageListComponent', () => {
 
   beforeEach(async () => {
     mockOutboundMessageService = {
-      list: vi.fn().mockName('OutboundMessageApiService.list'),
-    };
+      list: vi.fn().mockName('OutboundMessageApiService.list')};
 
     await TestBed.configureTestingModule({
       imports: [OutboundMessageListComponent],
       providers: [
         {
           provide: OutboundMessageApiService,
-          useValue: mockOutboundMessageService,
-        },
-      ],
-    }).compileComponents();
+          useValue: mockOutboundMessageService}]}).compileComponents();
 
     fixture = TestBed.createComponent(OutboundMessageListComponent);
     component = fixture.componentInstance;
@@ -48,17 +43,14 @@ describe('OutboundMessageListComponent', () => {
           channel: 'WHATSAPP',
           attemptCount: 1,
           createdAt: '2024-01-15T10:00:00',
-          updatedAt: '2024-01-15T10:00:00',
-        },
-      ],
+          updatedAt: '2024-01-15T10:00:00'}],
       pageable: {
         sort: { empty: true, sorted: false, unsorted: true },
         offset: 0,
         pageNumber: 0,
         pageSize: 20,
         paged: true,
-        unpaged: false,
-      },
+        unpaged: false},
       last: true,
       totalPages: 1,
       totalElements: 1,
@@ -67,8 +59,7 @@ describe('OutboundMessageListComponent', () => {
       sort: { empty: true, sorted: false, unsorted: true },
       first: true,
       numberOfElements: 1,
-      empty: false,
-    };
+      empty: false};
 
     mockOutboundMessageService.list.mockReturnValue(of(mockResponse));
 
@@ -100,8 +91,7 @@ describe('OutboundMessageListComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 1,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00',
-    };
+      updatedAt: '2024-01-15T10:00:00'};
 
     vi.spyOn(component.retryMessage, 'emit');
     component.onRetry(message);
@@ -135,13 +125,11 @@ describe('OutboundMessageListComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 1,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00',
-    };
+      updatedAt: '2024-01-15T10:00:00'};
 
     const sentMessage = {
       ...failedMessage,
-      status: OutboundMessageStatus.SENT,
-    };
+      status: OutboundMessageStatus.SENT};
 
     expect(component.canRetry(failedMessage)).toBe(true);
     expect(component.canRetry(sentMessage)).toBe(false);

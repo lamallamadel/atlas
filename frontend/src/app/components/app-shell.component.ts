@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ServiceWorkerRegistrationService } from '../services/service-worker-registration.service';
@@ -6,7 +6,7 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
 @Component({
     selector: 'app-shell',
     template: `
-    <div class="app-shell" [class.loading]="isLoading">
+    <div class="app-shell" [class.loading]="isLoading()">
       <!-- Critical app shell content -->
       <div class="app-shell-header">
         <div class="header-skeleton">
@@ -203,7 +203,7 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
   `]
 })
 export class AppShellComponent implements OnInit {
-  isLoading = true;
+  isLoading = signal(true);
 
   constructor(
     private router: Router,
@@ -216,7 +216,7 @@ export class AppShellComponent implements OnInit {
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
         setTimeout(() => {
-          this.isLoading = false;
+          this.isLoading.set(false);
         }, 300);
       });
 

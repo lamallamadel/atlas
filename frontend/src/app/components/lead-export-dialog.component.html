@@ -1,126 +1,90 @@
-<div class="lead-export-dialog">
-  <h2 mat-dialog-title>
-    <mat-icon class="title-icon">download</mat-icon>
-    Exporter des prospects
-  </h2>
+<ds-dialog-header (close)="close()">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <ds-icon name="download" [size]="24" aria-hidden="true"></ds-icon>
+    <span>Exporter les dossiers</span>
+  </div>
+</ds-dialog-header>
 
-  <mat-dialog-content>
-    <div class="export-section">
-      <!-- Column Selection -->
-      <div class="columns-section">
-        <div class="section-header">
-          <h3 class="section-title">Colonnes à exporter</h3>
-          <div class="column-actions">
-            <button mat-button (click)="selectAllColumns()" class="action-btn">
-              <mat-icon>check_box</mat-icon>
-              Tout sélectionner
-            </button>
-            <button mat-button (click)="deselectAllColumns()" class="action-btn">
-              <mat-icon>check_box_outline_blank</mat-icon>
-              Tout désélectionner
-            </button>
-          </div>
+<ds-dialog-content>
+  <div class="ds-form-stack">
+    <ds-card [pad]="true" elevation="xs" style="margin-bottom: 24px;">
+      <h3 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--ds-marine);">Filtres d'export</h3>
+      
+      <div class="ds-form-stack">
+        <ds-select
+          label="Filtrer par statut"
+          [options]="statusOptions"
+          [(ngModel)]="statusFilter"
+          prefixIcon="filter">
+        </ds-select>
+
+        <ds-select
+          label="Filtrer par source"
+          [options]="sourceOptions"
+          [(ngModel)]="sourceFilter"
+          prefixIcon="megaphone">
+        </ds-select>
+
+        <div class="ds-form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <ds-input
+            label="Date de début"
+            type="date"
+            [(ngModel)]="startDate"
+            prefixIcon="calendar">
+          </ds-input>
+
+          <ds-input
+            label="Date de fin"
+            type="date"
+            [(ngModel)]="endDate"
+            prefixIcon="calendar">
+          </ds-input>
         </div>
+      </div>
+    </ds-card>
 
-        <div class="columns-grid">
-          @for (column of columns; track column) {
-            <mat-checkbox
-              [(ngModel)]="column.selected"
-              class="column-checkbox">
-              {{ column.label }}
-            </mat-checkbox>
-          }
-        </div>
-
-        <div class="selection-info">
-          <mat-icon class="info-icon">info</mat-icon>
-          <span>{{ getSelectedColumnsCount() }} colonne(s) sélectionnée(s)</span>
+    <ds-card [pad]="true" elevation="xs">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: var(--ds-marine);">Colonnes à inclure</h3>
+        <div style="display: flex; gap: 12px;">
+          <ds-button variant="ghost" size="sm" (dsClick)="selectAllColumns()">Tout cocher</ds-button>
+          <ds-button variant="ghost" size="sm" (dsClick)="deselectAllColumns()">Tout décocher</ds-button>
         </div>
       </div>
 
-      <mat-divider></mat-divider>
+      <div class="columns-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        @for (col of columns; track col.value) {
+          <ds-checkbox
+            [(ngModel)]="col.selected"
+            [label]="col.label">
+          </ds-checkbox>
+        }
+      </div>
+    </ds-card>
 
-      <!-- Filters -->
-      <div class="filters-section">
-        <h3 class="section-title">Filtres (optionnel)</h3>
-        <p class="section-description">Appliquez des filtres pour exporter uniquement certains prospects</p>
+    @if (isExporting) {
+      <div class="export-status" style="margin-top: 24px; text-align: center;">
+        <ds-progress-bar mode="indeterminate" variant="primary" style="margin-bottom: 12px;"></ds-progress-bar>
+        <p style="margin: 0; font-size: 14px; font-weight: 600;">Préparation de l'export...</p>
+      </div>
+    }
+  </div>
+</ds-dialog-content>
 
-        <div class="filter-grid">
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>Statut</mat-label>
-            <mat-select [(ngModel)]="statusFilter">
-              @for (option of statusOptions; track option) {
-                <mat-option [value]="option.value">
-                  {{ option.label }}
-                </mat-option>
-              }
-            </mat-select>
-            <mat-icon matSuffix>filter_list</mat-icon>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>Source</mat-label>
-            <mat-select [(ngModel)]="sourceFilter">
-              @for (option of sourceOptions; track option) {
-                <mat-option [value]="option.value">
-                  {{ option.label }}
-                </mat-option>
-              }
-            </mat-select>
-            <mat-icon matSuffix>source</mat-icon>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>Date de début</mat-label>
-            <input
-              matInput
-              type="date"
-              [(ngModel)]="startDate"
-              [max]="endDate || null">
-              <mat-icon matSuffix>calendar_today</mat-icon>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Date de fin</mat-label>
-              <input
-                matInput
-                type="date"
-                [(ngModel)]="endDate"
-                [min]="startDate || null">
-                <mat-icon matSuffix>calendar_today</mat-icon>
-              </mat-form-field>
-            </div>
-
-            <div class="filter-info">
-              <mat-icon class="info-icon">info</mat-icon>
-              <span>Les filtres sont appliqués uniquement si renseignés</span>
-            </div>
-          </div>
-
-          <!-- Export Progress -->
-          @if (isExporting) {
-            <div class="export-progress">
-              <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
-              <p class="progress-text">
-                <mat-icon class="progress-icon">cloud_download</mat-icon>
-                Préparation de l'export en cours...
-              </p>
-            </div>
-          }
-        </div>
-      </mat-dialog-content>
-
-      <mat-dialog-actions align="end">
-        <button mat-button (click)="close()" [disabled]="isExporting">
-          Annuler
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="exportLeads()"
-          [disabled]="!canExport()">
-          <mat-icon>download</mat-icon>
-          Exporter {{ getSelectedColumnsCount() > 0 ? '(' + getSelectedColumnsCount() + ' colonnes)' : '' }}
-        </button>
-      </mat-dialog-actions>
-    </div>
+<ds-dialog-actions align="end">
+  <ds-button variant="ghost" size="md" (dsClick)="close()" [disabled]="isExporting">
+    Annuler
+  </ds-button>
+  <ds-button
+    variant="marine"
+    size="md"
+    (dsClick)="exportLeads()"
+    [disabled]="!canExport()">
+    @if (isExporting) {
+      <span class="spinner-small" style="margin-right: 8px; border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>
+    } @else {
+      <ds-icon name="download" [size]="20" style="margin-right: 8px;"></ds-icon>
+    }
+    <span>{{ isExporting ? 'Exportation...' : 'Télécharger le CSV' }}</span>
+  </ds-button>
+</ds-dialog-actions>

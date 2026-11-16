@@ -1,16 +1,13 @@
-<div class="document-upload-container">
+<div class="document-upload-container ds-form-stack">
   <div class="upload-section">
-    <div class="category-selector">
-      <label for="category-select" class="category-label">Catégorie du document :</label>
-      <select
-        id="category-select"
+    <div class="category-selector" style="margin-bottom: 24px;">
+      <ds-select
+        label="Catégorie du document"
+        [options]="categories"
         [(ngModel)]="selectedCategory"
-        class="category-select"
-        [disabled]="isUploading()">
-        @for (cat of categories; track cat) {
-          <option [value]="cat.value">{{ cat.label }}</option>
-        }
-      </select>
+        [disabled]="isUploading()"
+        prefixIcon="folder">
+      </ds-select>
     </div>
 
     <div
@@ -18,92 +15,98 @@
       [class.dragging]="isDragging"
       (dragover)="onDragOver($event)"
       (dragleave)="onDragLeave($event)"
-      (drop)="onDrop($event)">
-      <mat-icon class="upload-icon">cloud_upload</mat-icon>
-      <p class="drop-zone-text">Glissez-déposez vos fichiers ici</p>
-      <p class="drop-zone-subtext">ou</p>
+      (drop)="onDrop($event)"
+      style="border: 2px dashed var(--ds-border); border-radius: var(--ds-radius-lg); padding: 48px; text-align: center; background: var(--ds-bg-subtle); transition: all 0.2s ease;">
+      <ds-icon name="upload" [size]="24" style="color: var(--ds-text-faint); margin-bottom: 16px;"></ds-icon>
+      <p class="drop-zone-text" style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">Glissez-déposez vos fichiers ici</p>
+      <p class="drop-zone-subtext" style="font-size: 14px; color: var(--ds-text-muted); margin-bottom: 24px;">ou cliquez pour parcourir</p>
+      
       <label class="file-input-label">
         <input
           type="file"
           multiple
           (change)="onFileSelected($event)"
           class="file-input"
+          style="display: none;"
           [disabled]="isUploading()"
           accept="application/pdf,image/*,.doc,.docx,.xls,.xlsx,.txt,.csv">
-          <button mat-raised-button color="primary" [disabled]="isUploading()">
+          <ds-button variant="marine" size="md" [disabled]="isUploading()">
+            <ds-icon name="plus" [size]="20"></ds-icon>
             Sélectionner des fichiers
-          </button>
+          </ds-button>
         </label>
       </div>
 
       @if (hasSelectedFiles()) {
-        <div class="selected-files">
-          <h4 class="selected-files-title">Fichiers sélectionnés</h4>
-          <div class="file-list">
+        <div class="selected-files" style="margin-top: 32px;">
+          <h4 class="selected-files-title" style="font-size: 14px; font-weight: 600; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Fichiers sélectionnés</h4>
+          <div class="file-list ds-form-stack" style="margin-bottom: 20px;">
             @for (file of selectedFiles; track file; let i = $index) {
-              <div class="file-item">
-                <mat-icon class="file-icon">{{ getFileIcon(file) }}</mat-icon>
-                <div class="file-info">
-                  <span class="file-name">{{ file.name }}</span>
-                  <span class="file-size">{{ formatFileSize(file.size) }}</span>
+              <div class="file-item ds-card" style="display: flex; align-items: center; gap: 16px; padding: 12px 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); background: var(--ds-surface);">
+                <ds-icon name="tasks" [size]="24" style="color: var(--ds-marine);"></ds-icon>
+                <div class="file-info" style="flex: 1; overflow: hidden;">
+                  <div class="file-name" style="font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ file.name }}</div>
+                  <span class="file-size" style="font-size: 12px; color: var(--ds-text-muted);">{{ formatFileSize(file.size) }}</span>
                 </div>
-                <button
-                  mat-icon-button
-                  (click)="removeFile(i)"
+                <ds-button
+                  variant="icon"
+                  size="md"
+                  (dsClick)="removeFile(i)"
                   [disabled]="isUploading()"
-                  class="remove-btn"
-                  aria-label="Supprimer le fichier">
-                  <mat-icon>close</mat-icon>
-                </button>
+                  ariaLabel="Supprimer le fichier"
+                  style="color: var(--ds-error);">
+                  <ds-icon name="trash" [size]="20"></ds-icon>
+                </ds-button>
               </div>
             }
           </div>
-          <button
-            mat-raised-button
-            color="accent"
-            (click)="uploadFiles()"
+          <ds-button
+            variant="marine"
+            size="lg"
+            (dsClick)="uploadFiles()"
             [disabled]="!hasSelectedFiles() || isUploading()"
-            class="upload-btn">
-            <mat-icon>upload</mat-icon>
+            style="width: 100%;">
+            <ds-icon name="upload" [size]="20"></ds-icon>
             Télécharger {{ selectedFiles.length }} fichier(s)
-          </button>
+          </ds-button>
         </div>
       }
 
       @if (getUploadProgressArray().length > 0) {
-        <div class="upload-progress-list">
-          <h4 class="progress-title">Téléchargements en cours</h4>
-          @for (progress of getUploadProgressArray(); track progress) {
-            <div class="progress-item">
-              <div class="progress-header">
-                <mat-icon class="progress-icon">{{ getFileIcon(progress.file) }}</mat-icon>
-                <span class="progress-filename">{{ progress.file.name }}</span>
-                <span class="progress-percentage">{{ progress.progress }}%</span>
+        <div class="upload-progress-list" style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--ds-divider);">
+          <h4 class="progress-title" style="font-size: 14px; font-weight: 600; margin-bottom: 20px;">Téléchargements en cours</h4>
+          <div class="ds-form-stack">
+            @for (progress of getUploadProgressArray(); track progress) {
+              <div class="progress-item ds-card" style="padding: 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md);">
+                <div class="progress-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <ds-icon name="tasks" [size]="20" style="color: var(--ds-text-muted);"></ds-icon>
+                    <span class="progress-filename" style="font-weight: 500; font-size: 14px;">{{ progress.file.name }}</span>
+                  </div>
+                  <span class="progress-percentage" style="font-weight: 700; font-size: 14px; color: var(--ds-marine);">{{ progress.progress }}%</span>
+                </div>
+                <ds-progress-bar
+                  mode="determinate"
+                  [value]="progress.progress"
+                  [variant]="progress.error ? 'error' : 'primary'">
+                </ds-progress-bar>
+                <div class="progress-status" style="margin-top: 12px; font-size: 12px; display: flex; align-items: center; gap: 8px;">
+                  @if (progress.uploading) {
+                    <ds-skeleton variant="circle" width="14px" height="14px" [animate]="true"></ds-skeleton>
+                    <span class="status-uploading" style="color: var(--ds-primary);">Envoi en cours...</span>
+                  }
+                  @if (progress.completed) {
+                    <ds-icon name="check" [size]="16" style="color: var(--ds-success);"></ds-icon>
+                    <span class="status-completed" style="color: var(--ds-success); font-weight: 600;">Téléchargement terminé</span>
+                  }
+                  @if (progress.error) {
+                    <ds-icon name="info" [size]="16" style="color: var(--ds-error);"></ds-icon>
+                    <span class="status-error" style="color: var(--ds-error); font-weight: 600;">{{ progress.error }}</span>
+                  }
+                </div>
               </div>
-              <mat-progress-bar
-                mode="determinate"
-                [value]="progress.progress"
-                [color]="progress.error ? 'warn' : 'primary'">
-              </mat-progress-bar>
-              <div class="progress-status">
-                @if (progress.uploading) {
-                  <span class="status-uploading">En cours...</span>
-                }
-                @if (progress.completed) {
-                  <span class="status-completed">
-                    <mat-icon class="status-icon">check_circle</mat-icon>
-                    Terminé
-                  </span>
-                }
-                @if (progress.error) {
-                  <span class="status-error">
-                    <mat-icon class="status-icon">error</mat-icon>
-                    {{ progress.error }}
-                  </span>
-                }
-              </div>
-            </div>
-          }
+            }
+          </div>
         </div>
       }
     </div>

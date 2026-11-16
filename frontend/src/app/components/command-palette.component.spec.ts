@@ -1,10 +1,8 @@
 import {
   ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+  TestBed} from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, BehaviorSubject, Subject } from 'rxjs';
@@ -32,56 +30,45 @@ describe('CommandPaletteComponent', () => {
     mockRouter = {
       navigate: vi.fn().mockName('Router.navigate'),
       url: '/',
-      events: of(new NavigationEnd(1, '/', '/')),
-    };
+      events: of(new NavigationEnd(1, '/', '/'))};
     mockDialog = {
-      open: vi.fn().mockName('MatDialog.open'),
-    };
+      open: vi.fn().mockName('MatDialog.open')};
 
     mockKeyboardService = {
       commandPaletteVisible$: visibleSubject.asObservable(),
       closeCommandPalette: vi.fn(),
-      toggleShortcutHelp: vi.fn(),
-    };
+      toggleShortcutHelp: vi.fn()};
 
     mockSearchService = {
-      autocomplete: vi.fn().mockName('SearchApiService.autocomplete'),
-    };
+      autocomplete: vi.fn().mockName('SearchApiService.autocomplete')};
     mockSearchService.autocomplete.mockReturnValue(
       of({
         results: [],
         totalHits: 0,
-        elasticsearchAvailable: true,
-      })
+        elasticsearchAvailable: true})
     );
 
     mockRecentNavService = {
       getRecentItems: vi
         .fn()
-        .mockName('RecentNavigationService.getRecentItems'),
-    };
+        .mockName('RecentNavigationService.getRecentItems')};
     mockRecentNavService.getRecentItems.mockReturnValue([]);
 
     const mockAiAgentService = {
-      openPanel: vi.fn().mockName('AiAgentService.openPanel'),
-    };
+      openPanel: vi.fn().mockName('AiAgentService.openPanel')};
 
     await TestBed.configureTestingModule({
       imports: [
-        MatIconModule,
         FormsModule,
         BrowserAnimationsModule,
-        CommandPaletteComponent,
-      ],
+        CommandPaletteComponent],
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: MatDialog, useValue: mockDialog },
         { provide: KeyboardShortcutService, useValue: mockKeyboardService },
         { provide: SearchApiService, useValue: mockSearchService },
         { provide: RecentNavigationService, useValue: mockRecentNavService },
-        { provide: AiAgentService, useValue: mockAiAgentService },
-      ],
-    }).compileComponents();
+        { provide: AiAgentService, useValue: mockAiAgentService }]}).compileComponents();
 
     fixture = TestBed.createComponent(CommandPaletteComponent);
     component = fixture.componentInstance;
@@ -208,17 +195,15 @@ describe('CommandPaletteComponent', () => {
       description: '',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: '',
-    };
-    expect(component.getItemIcon(searchResult)).toBe('campaign');
+      updatedAt: ''};
+    expect(component.getItemIcon(searchResult)).toBe('megaphone');
 
     const recentItem = {
       id: '1',
       type: 'dossier' as const,
       title: 'Recent',
       route: '/dossiers/1',
-      timestamp: Date.now(),
-    };
+      timestamp: Date.now()};
     expect(component.getItemIcon(recentItem)).toBe('folder');
   });
 
@@ -242,8 +227,7 @@ describe('CommandPaletteComponent', () => {
       description: '',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: '',
-    };
+      updatedAt: ''};
 
     component.executeItem(annonceResult);
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/annonces/1']);
@@ -265,9 +249,7 @@ describe('CommandPaletteComponent', () => {
         type: 'dossier' as const,
         title: 'Recent Dossier',
         route: '/dossiers/1',
-        timestamp: Date.now(),
-      },
-    ];
+        timestamp: Date.now()}];
 
     mockRecentNavService.getRecentItems.mockReturnValue(recentItems);
     component.searchQuery = '';

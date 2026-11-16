@@ -1,10 +1,13 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { dialogSlideUp, shakeX } from '../animations';
-import { FocusTrapDirective } from '../directives/focus-trap.directive';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatButton } from '@angular/material/button';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
 export interface ConfirmDeleteDialogData {
   title: string;
@@ -13,17 +16,24 @@ export interface ConfirmDeleteDialogData {
 
 @Component({
     selector: 'app-confirm-delete-dialog',
+    standalone: true,
     templateUrl: './confirm-delete-dialog.component.html',
     styleUrls: ['./confirm-delete-dialog.component.css'],
-    animations: [dialogSlideUp, shakeX],
-    imports: [FocusTrapDirective, MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton, DsSkeletonComponent]
+    imports: [
+      CommonModule,
+      DsButtonComponent,
+      DsIconComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class ConfirmDeleteDialogComponent {
   isSubmitting = false;
 
   constructor(
-    private dialogRef: MatDialogRef<ConfirmDeleteDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ConfirmDeleteDialogData
+    private dialogRef: DialogRef<boolean>,
+    @Inject(DIALOG_DATA) public data: ConfirmDeleteDialogData
   ) {}
 
   onCancel(): void {

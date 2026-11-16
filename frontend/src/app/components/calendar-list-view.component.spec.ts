@@ -2,10 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatDialogModule } from '@angular/material/dialog';
 import { LayoutModule } from '@angular/cdk/layout';
 import { of } from 'rxjs';
 
@@ -13,9 +11,8 @@ import { CalendarListViewComponent } from './calendar-list-view.component';
 import {
   AppointmentApiService,
   Page,
-  AppointmentResponse,
-} from '../services/appointment-api.service';
-import { ToastNotificationService } from '../services/toast-notification.service';
+  AppointmentResponse} from '../services/appointment-api.service';
+import { NotificationService } from '../services/notification.service';
 
 describe('CalendarListViewComponent', () => {
   let component: CalendarListViewComponent;
@@ -37,11 +34,9 @@ describe('CalendarListViewComponent', () => {
       pageNumber: 0,
       pageSize: 1000,
       paged: true,
-      unpaged: false,
-    },
+      unpaged: false},
     sort: { empty: true, sorted: false, unsorted: true },
-    numberOfElements: 0,
-  };
+    numberOfElements: 0};
 
   beforeEach(async () => {
     listSpy = vi.fn().mockReturnValue(of(emptyPage));
@@ -49,28 +44,20 @@ describe('CalendarListViewComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         NoopAnimationsModule,
-        MatDialogModule,
         LayoutModule,
-        CalendarListViewComponent,
-      ],
+        CalendarListViewComponent],
       providers: [
         {
           provide: AppointmentApiService,
           useValue: {
-            list: listSpy,
-          },
-        },
+            list: listSpy}},
         {
-          provide: ToastNotificationService,
+          provide: NotificationService,
           useValue: {
             error: vi.fn(),
-            success: vi.fn(),
-          },
-        },
+            success: vi.fn()}},
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
 
     fixture = TestBed.createComponent(CalendarListViewComponent);
     component = fixture.componentInstance;

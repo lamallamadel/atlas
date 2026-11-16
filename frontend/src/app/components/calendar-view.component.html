@@ -1,70 +1,59 @@
 <div class="calendar-view-container">
   <ds-page-header
-    title="Calendrier des rendez-vous"
-    subtitle="Gérez vos rendez-vous d'une manière centralisée.">
+    eyebrow="Espace Pro"
+    titleBefore="Calendrier"
+    titleAccent="des rendez-vous"
+    description="Gérez vos rendez-vous d'une manière centralisée.">
   </ds-page-header>
+
   <ds-card class="calendar-card" [pad]="false" [elevation]="'sm'">
     <div class="calendar-card-header">
-        <div class="header-row header-row--actions-only">
-          <div class="header-actions">
-            <ds-button
-              variant="icon"
-              size="sm"
-              [disabled]="isLoading"
-              ariaLabel="Actualiser"
-              [attr.title]="'Actualiser'"
-              (dsClick)="refreshCalendar()">
-              <ds-icon name="refresh" [size]="20" aria-hidden="true" />
-            </ds-button>
-            <ds-button
-              variant="icon"
-              size="sm"
-              [class.header-toggle--active]="showListView"
-              [ariaLabel]="showListView ? 'Afficher le calendrier' : 'Vue liste'"
-              [attr.title]="showListView ? 'Vue calendrier' : 'Vue liste'"
-              (dsClick)="toggleListView()">
-              <ds-icon [name]="showListView ? 'calendar' : 'tasks'" [size]="20" aria-hidden="true" />
-            </ds-button>
-            <ds-button
-              variant="marine"
-              size="md"
-              [disabled]="isLoading"
-              (dsClick)="exportToICal()">
-              <ds-icon name="download" [size]="20" aria-hidden="true" />
-              Exporter iCal
-            </ds-button>
-          </div>
-        </div>
+      <div class="calendar-tabs-wrapper">
+        <ds-tabs [tabs]="viewTabs" [activeTab]="activeTab" (tabChange)="onTabChange($event)"></ds-tabs>
+      </div>
+      
+      <div class="header-actions">
+        <ds-button
+          variant="icon"
+          size="sm"
+          [disabled]="isLoading"
+          ariaLabel="Actualiser"
+          [attr.title]="'Actualiser'"
+          (dsClick)="refreshCalendar()">
+          <ds-icon name="refresh" [size]="20" aria-hidden="true" />
+        </ds-button>
+        <ds-button
+          variant="marine"
+          size="md"
+          [disabled]="isLoading"
+          (dsClick)="exportToICal()">
+          <ds-icon name="download" [size]="20" aria-hidden="true" />
+          Exporter iCal
+        </ds-button>
+      </div>
     </div>
 
     <div class="calendar-card-body">
       <div class="filters-section">
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Filtrer par assigné</mat-label>
-          <mat-select
-            [(value)]="filterByAssignedTo"
-            (selectionChange)="onFilterByAssignedToChange($event.value)">
-            <mat-option [value]="null">Tous les assignés</mat-option>
-            @for (assignee of availableAssignees; track assignee) {
-              <mat-option [value]="assignee">
-                {{ assignee }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <div class="filter-group">
+          <ds-select
+            label="Assigné à"
+            [options]="assigneeOptions"
+            [(ngModel)]="filterByAssignedTo"
+            (ngModelChange)="updateCalendarEvents()"
+            prefixIcon="user">
+          </ds-select>
+        </div>
 
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Filtrer par statut</mat-label>
-          <mat-select
-            [(value)]="filterByStatus"
-            (selectionChange)="onFilterByStatusChange($event.value)">
-            @for (option of statusOptions; track option) {
-              <mat-option [value]="option.value">
-                {{ option.label }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <div class="filter-group">
+          <ds-select
+            label="Statut"
+            [options]="statusOptions"
+            [(ngModel)]="filterByStatus"
+            (ngModelChange)="loadAppointments()"
+            prefixIcon="filter">
+          </ds-select>
+        </div>
       </div>
 
       <div class="legend-section">
@@ -85,7 +74,7 @@
         </div>
       </div>
 
-      @if (!isLoading && !showListView) {
+      @if (!isLoading && activeTab === 'calendar') {
         <div class="calendar-wrapper">
           <full-calendar
             #calendar
@@ -94,7 +83,7 @@
         </div>
       }
 
-      @if (!isLoading && showListView) {
+      @if (!isLoading && activeTab === 'list') {
         <div class="list-view-wrapper">
           <app-calendar-list-view
             [filterByAssignedTo]="filterByAssignedTo"

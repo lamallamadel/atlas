@@ -36,6 +36,13 @@ export class OfflineInterceptor implements HttpInterceptor {
   }
 
   private shouldBypassOfflineHandling(request: HttpRequest<any>): boolean {
+    // Only intercept requests to our own API — bypass external URLs (Keycloak, OIDC, etc.)
+    const isApiRequest = request.url.startsWith('/api') ||
+      request.url.startsWith(window.location.origin + '/api');
+    if (!isApiRequest) {
+      return true;
+    }
+
     const bypassUrls = [
       '/api/v1/ping',
       '/api/v1/observability'

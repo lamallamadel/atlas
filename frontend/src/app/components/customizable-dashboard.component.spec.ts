@@ -5,8 +5,7 @@ import { DashboardCustomizationService } from '../services/dashboard-customizati
 import { of } from 'rxjs';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('CustomizableDashboardComponent', () => {
   let component: CustomizableDashboardComponent;
@@ -44,8 +43,7 @@ describe('CustomizableDashboardComponent', () => {
         .fn()
         .mockName('DashboardCustomizationService.getAvailableTemplates'),
       layout$: of({ widgets: [] }),
-      editMode$: of(false),
-    };
+      editMode$: of(false)};
 
     serviceSpy.getAvailableTemplates.mockReturnValue([
       {
@@ -53,18 +51,14 @@ describe('CustomizableDashboardComponent', () => {
         name: 'Agent Dashboard',
         description: 'For agents',
         role: 'agent',
-        layout: { widgets: [] },
-      },
-    ]);
+        layout: { widgets: [] }}]);
 
     await TestBed.configureTestingModule({
       imports: [CustomizableDashboardComponent],
       providers: [
         { provide: DashboardCustomizationService, useValue: serviceSpy },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
 
     customizationService = TestBed.inject(
       DashboardCustomizationService
@@ -77,8 +71,7 @@ describe('CustomizableDashboardComponent', () => {
     customizationService.getUserPreferences.mockReturnValue(
       of({
         userId: 'test-user',
-        dashboardLayout: { widgets: [] },
-      })
+        dashboardLayout: { widgets: [] }})
     );
   });
 
@@ -107,8 +100,7 @@ describe('CustomizableDashboardComponent', () => {
     customizationService.applyRoleTemplate.mockReturnValue(
       of({
         userId: 'test-user',
-        roleTemplate: 'agent',
-      })
+        roleTemplate: 'agent'})
     );
 
     component.applyTemplate('agent');
@@ -130,8 +122,7 @@ describe('CustomizableDashboardComponent', () => {
     const widgetType = {
       id: 'kpi-conversion',
       name: 'KPI',
-      description: 'Test',
-    };
+      description: 'Test'};
     component.addWidgetToGrid(widgetType);
     expect(customizationService.addWidget).toHaveBeenCalled();
   });

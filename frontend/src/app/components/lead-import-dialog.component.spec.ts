@@ -1,24 +1,11 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
-import {} from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTableModule } from '@angular/material/table';
-import { MatRadioModule } from '@angular/material/radio';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { DialogRef } from '@angular/cdk/dialog';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { LeadImportDialogComponent } from './lead-import-dialog.component';
 import { LeadApiService } from '../services/lead-api.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('LeadImportDialogComponent', () => {
   let component: LeadImportDialogComponent;
@@ -26,36 +13,12 @@ describe('LeadImportDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        CommonModule,
-        FormsModule,
-        MatDialogModule,
-
-        MatIconModule,
-        MatButtonModule,
-        MatProgressBarModule,
-        MatTableModule,
-        MatRadioModule,
-        NoopAnimationsModule,
-        LeadImportDialogComponent,
-      ],
+      imports: [LeadImportDialogComponent],
       providers: [
-        {
-          provide: MatSnackBar,
-          useValue: {
-            open: () => ({
-              onAction: () => of(null),
-              afterDismissed: () => of(null),
-            }),
-            dismiss: () => {},
-          },
-        },
-        { provide: MatDialogRef, useValue: { close: vi.fn() } },
+        { provide: DialogRef, useValue: { close: vi.fn() } },
         LeadApiService,
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
   });
 
   beforeEach(() => {
@@ -100,8 +63,7 @@ describe('LeadImportDialogComponent', () => {
       successCount: 50,
       errorCount: 25,
       skippedCount: 25,
-      validationErrors: [],
-    };
+      validationErrors: []};
     expect(component.getProgressPercentage()).toBe(100);
   });
 });

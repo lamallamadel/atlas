@@ -1,9 +1,8 @@
 <div class="photo-gallery-container">
   @if (!photos() || photos().length === 0) {
-    <div
-      class="empty-state">
-      <mat-icon class="empty-icon">photo_library</mat-icon>
-      <p class="empty-text">Aucune photo disponible</p>
+    <div class="empty-state" style="padding: 64px 24px; text-align: center; background: var(--ds-bg-subtle); border-radius: var(--ds-radius-lg); border: 1px dashed var(--ds-divider);">
+      <ds-icon name="image" [size]="48" style="opacity: 0.1; margin-bottom: 16px;"></ds-icon>
+      <p style="margin: 0; font-weight: 600; color: var(--ds-text-faint);">Aucune photo disponible</p>
     </div>
   }
 
@@ -12,22 +11,21 @@
       class="masonry-grid"
       cdkDropList
       [cdkDropListDisabled]="!editable()"
-      (cdkDropListDropped)="onDrop($event)">
+      (cdkDropListDropped)="onDrop($event)"
+      style="display: flex; gap: 20px;">
       @for (column of masonryColumns(); track $index; let colIndex = $index) {
-        <div
-          class="masonry-column">
+        <div class="masonry-column" style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
           @for (photo of column; track photo; let i = $index) {
             <div
-              class="photo-item"
+              class="photo-item ds-card"
               [class.editable]="editable()"
               cdkDrag
               [cdkDragDisabled]="!editable()"
-              role="button" tabindex="0" (click)="openLightbox(photos().indexOf(photo))" (keydown.enter)="openLightbox(photos().indexOf(photo))" (keydown.space)="$event.preventDefault(); openLightbox(photos().indexOf(photo))">
-              <div class="photo-wrapper">
-                <div
-                  class="photo-placeholder"
-                  [style.background-image]="'url(' + getBlurDataUrl(photo) + ')'">
-                </div>
+              style="padding: 8px; border-radius: var(--ds-radius-md); overflow: hidden; position: relative; cursor: pointer; transition: transform 0.2s;"
+              (click)="openLightbox(photos().indexOf(photo))"
+              (keydown.enter)="openLightbox(photos().indexOf(photo))">
+              
+              <div class="photo-wrapper" style="position: relative; border-radius: 4px; overflow: hidden; background: var(--ds-surface-2);">
                 <img
                   #photoImage
                   class="photo-image"
@@ -35,27 +33,32 @@
                   [attr.srcset]="getSrcset(photo)"
                   [attr.sizes]="getSizes()"
                   [alt]="photo.alt || photo.title || 'Photo'"
-                  loading="lazy" />
-                  <div class="photo-overlay">
-                    <mat-icon class="zoom-icon">zoom_in</mat-icon>
+                  loading="lazy"
+                  style="width: 100%; display: block; object-fit: cover; min-height: 120px;" />
+                  
+                  <div class="photo-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.2); opacity: 0; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s;">
+                    <ds-icon name="maximize" [size]="24" style="color: white;"></ds-icon>
                   </div>
+
                   @if (editable()) {
-                    <button
-                      mat-icon-button
-                      class="delete-btn"
-                      (click)="deletePhoto(photo, $event)"
-                      [attr.aria-label]="'Supprimer ' + (photo.title || 'photo')">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  }
-                  @if (editable()) {
-                    <div class="drag-handle" cdkDragHandle>
-                      <mat-icon>drag_indicator</mat-icon>
+                    <div class="photo-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 8px; opacity: 0; transition: opacity 0.2s;">
+                      <ds-button
+                        variant="icon"
+                        size="sm"
+                        style="background: white; color: var(--ds-error); box-shadow: var(--ds-shadow-sm);"
+                        (dsClick)="deletePhoto(photo, $event)"
+                        [ariaLabel]="'Supprimer photo'">
+                        <ds-icon name="close" [size]="16"></ds-icon>
+                      </ds-button>
+                    </div>
+
+                    <div class="drag-handle" cdkDragHandle style="position: absolute; bottom: 8px; left: 8px; padding: 4px; background: white; border-radius: 4px; cursor: grab; box-shadow: var(--ds-shadow-sm); opacity: 0; transition: opacity 0.2s;">
+                      <ds-icon name="bars-asc" [size]="16" style="color: var(--ds-text-faint);"></ds-icon>
                     </div>
                   }
                 </div>
                 @if (photo.title) {
-                  <div class="photo-title">
+                  <div class="photo-title" style="padding: 8px 4px 4px; font-size: 12px; font-weight: 600; color: var(--ds-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     {{ photo.title }}
                   </div>
                 }
@@ -70,122 +73,68 @@
   @if (lightboxOpen) {
     <div
       class="lightbox-overlay"
-      role="button"
-      tabindex="0"
-      (click)="closeLightbox()"
-      (keydown.enter)="closeLightbox()"
-      (keydown.space)="$event.preventDefault(); closeLightbox()">
-      <div class="lightbox-container" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
-        <button
-          mat-icon-button
-          class="lightbox-close"
-          (click)="closeLightbox()"
-          aria-label="Fermer la lightbox">
-          <mat-icon>close</mat-icon>
-        </button>
-        <div class="lightbox-controls">
-          <button
-            mat-icon-button
-            class="control-btn"
-            (click)="zoomOut()"
-            [disabled]="lightboxZoom <= 0.5"
-            title="Zoom arrière (-)">
-            <mat-icon>zoom_out</mat-icon>
-          </button>
-          <span class="zoom-indicator">{{ (lightboxZoom * 100).toFixed(0) }}%</span>
-          <button
-            mat-icon-button
-            class="control-btn"
-            (click)="zoomIn()"
-            [disabled]="lightboxZoom >= 3"
-            title="Zoom avant (+)">
-            <mat-icon>zoom_in</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            class="control-btn"
-            (click)="resetZoom()"
-            [disabled]="lightboxZoom === 1"
-            title="Réinitialiser le zoom (0)">
-            <mat-icon>fit_screen</mat-icon>
-          </button>
-        </div>
-        @if (currentPhotoIndex > 0) {
-          <button
-            mat-icon-button
-            class="lightbox-nav lightbox-prev"
-            (click)="previousPhoto()"
-            aria-label="Photo précédente">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-        }
-        @if (currentPhotoIndex < photos().length - 1) {
-          <button
-            mat-icon-button
-            class="lightbox-nav lightbox-next"
-            (click)="nextPhoto()"
-            aria-label="Photo suivante">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-        }
-        <div class="lightbox-image-container">
+      role="dialog"
+      aria-modal="true"
+      style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; flex-direction: column;"
+      (click)="closeLightbox()">
+      
+      <!-- Lightbox Header -->
+      <header class="lightbox-header" style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; color: white;">
+        <div class="photo-info">
           @if (getCurrentPhoto(); as currentPhoto) {
-            <img
-              [src]="currentPhoto.url"
-              [alt]="currentPhoto.alt || currentPhoto.title || 'Photo'"
-              class="lightbox-image"
-              [class.zoomed]="lightboxZoom > 1"
-              [class.dragging]="isDragging"
-              [style.transform]="'scale(' + lightboxZoom + ') translate(' + lightboxTranslateX + 'px, ' + lightboxTranslateY + 'px)'"
-              (mousedown)="onLightboxImageMouseDown($event)"
-              draggable="false" />
+            <span style="font-weight: 700; font-size: 14px;">{{ currentPhotoIndex + 1 }} / {{ photos().length }}</span>
+            @if (currentPhoto.title) {
+              <span style="margin-left: 16px; opacity: 0.7;">{{ currentPhoto.title }}</span>
+            }
           }
         </div>
-        @if (getCurrentPhoto(); as currentPhoto) {
-          <div class="lightbox-info">
-            <div class="photo-counter">
-              {{ currentPhotoIndex + 1 }} / {{ photos().length }}
-            </div>
-            @if (currentPhoto.title) {
-              <div class="photo-title-lightbox">
-                {{ currentPhoto.title }}
-              </div>
-            }
+        <div class="lightbox-actions" style="display: flex; gap: 8px;">
+          <ds-button variant="icon" size="md" (dsClick)="zoomOut()" style="color: white;"><ds-icon name="info" [size]="20"></ds-icon></ds-button>
+          <ds-button variant="icon" size="md" (dsClick)="zoomIn()" style="color: white;"><ds-icon name="plus" [size]="20"></ds-icon></ds-button>
+          <ds-button variant="icon" size="md" (dsClick)="closeLightbox()" style="color: white;"><ds-icon name="close" [size]="24"></ds-icon></ds-button>
+        </div>
+      </header>
+
+      <!-- Main Image -->
+      <div class="lightbox-main" style="flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;" (click)="$event.stopPropagation()">
+        @if (currentPhotoIndex > 0) {
+          <ds-button variant="icon" size="lg" (dsClick)="previousPhoto()" style="position: absolute; left: 24px; color: white; background: rgba(255,255,255,0.1);"><ds-icon name="bars-asc" [size]="32" style="transform: rotate(90deg);"></ds-icon></ds-button>
+        }
+        
+        <img
+          [src]="getCurrentPhoto()?.url"
+          class="lightbox-image"
+          [style.transform]="'scale(' + lightboxZoom + ') translate(' + lightboxTranslateX + 'px, ' + lightboxTranslateY + 'px)'"
+          style="max-width: 90%; max-height: 80vh; object-fit: contain; transition: transform 0.2s;" />
+
+        @if (currentPhotoIndex < photos().length - 1) {
+          <ds-button variant="icon" size="lg" (dsClick)="nextPhoto()" style="position: absolute; right: 24px; color: white; background: rgba(255,255,255,0.1);"><ds-icon name="bars-asc" [size]="32" style="transform: rotate(-90deg);"></ds-icon></ds-button>
+        }
+      </div>
+
+      <!-- Thumbnails -->
+      <footer class="lightbox-footer" style="padding: 24px; background: rgba(0,0,0,0.5); overflow-x: auto; display: flex; gap: 12px; justify-content: center;" (click)="$event.stopPropagation()">
+        @for (photo of photos(); track photo; let i = $index) {
+          <div
+            class="thumbnail-item"
+            [style.opacity]="i === currentPhotoIndex ? '1' : '0.4'"
+            [style.border]="i === currentPhotoIndex ? '2px solid var(--ds-primary)' : '2px solid transparent'"
+            style="width: 60px; height: 60px; border-radius: 4px; overflow: hidden; cursor: pointer; transition: all 0.2s;"
+            (click)="goToThumbnail(i)">
+            <img [src]="getThumbnailUrl(photo)" style="width: 100%; height: 100%; object-fit: cover;" />
           </div>
         }
-        <div class="lightbox-thumbnails">
-          <div class="thumbnails-wrapper">
-            @for (photo of photos(); track photo; let i = $index) {
-              <div
-                class="thumbnail-item"
-                role="button"
-                tabindex="0"
-                [class.active]="i === currentPhotoIndex"
-                (click)="goToThumbnail(i)"
-                (keydown.enter)="goToThumbnail(i)"
-                (keydown.space)="$event.preventDefault(); goToThumbnail(i)">
-                <img
-                  [src]="getThumbnailUrl(photo)"
-                  [alt]="photo.alt || photo.title || 'Miniature'"
-                  class="thumbnail-image" />
-                </div>
-              }
-            </div>
-          </div>
-          <div class="lightbox-keyboard-hints">
-            <span class="hint">
-              <kbd>←</kbd> <kbd>→</kbd> Navigation
-            </span>
-            <span class="hint">
-              <kbd>+</kbd> <kbd>-</kbd> Zoom
-            </span>
-            <span class="hint">
-              <kbd>0</kbd> Réinitialiser
-            </span>
-            <span class="hint">
-              <kbd>Esc</kbd> Fermer
-            </span>
-          </div>
-        </div>
-      </div>
-    }
+      </footer>
+    </div>
+  }
+
+<style>
+  .photo-item:hover .photo-overlay,
+  .photo-item:hover .photo-actions,
+  .photo-item:hover .drag-handle {
+    opacity: 1 !important;
+  }
+  .photo-item:hover {
+    transform: translateY(-4px);
+  }
+</style>

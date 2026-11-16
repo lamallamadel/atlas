@@ -14,23 +14,18 @@ describe('PrefetchService', () => {
   beforeEach(() => {
     mockRouter = {
       navigate: vi.fn().mockName('Router.navigate'),
-      events: of(),
-    };
+      events: of()};
     mockDossierApiService = {
-      list: vi.fn().mockName('DossierApiService.list'),
-    };
+      list: vi.fn().mockName('DossierApiService.list')};
     mockAnnonceApiService = {
-      list: vi.fn().mockName('AnnonceApiService.list'),
-    };
+      list: vi.fn().mockName('AnnonceApiService.list')};
 
     TestBed.configureTestingModule({
       providers: [
         PrefetchService,
         { provide: Router, useValue: mockRouter },
         { provide: DossierApiService, useValue: mockDossierApiService },
-        { provide: AnnonceApiService, useValue: mockAnnonceApiService },
-      ],
-    });
+        { provide: AnnonceApiService, useValue: mockAnnonceApiService }]});
     service = TestBed.inject(PrefetchService);
   });
 

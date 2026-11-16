@@ -7,8 +7,6 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -32,26 +30,21 @@ describe('UiPreferencesFormComponent', () => {
       language: 'fr',
       density: 'comfortable',
       defaultRoute: '/dashboard',
-      syncDevices: true,
-    },
-  };
+      syncDevices: true}};
 
   beforeEach(async () => {
     const userPreferencesServiceSpy = {
       getPreferences: vi.fn().mockName('UserPreferencesService.getPreferences'),
       updatePreferences: vi
         .fn()
-        .mockName('UserPreferencesService.updatePreferences'),
-    };
+        .mockName('UserPreferencesService.updatePreferences')};
     const themeServiceSpy = {
-      setTheme: vi.fn().mockName('ThemeService.setTheme'),
-    };
+      setTheme: vi.fn().mockName('ThemeService.setTheme')};
     const notificationServiceSpy = {
       success: vi.fn().mockName('NotificationService.success'),
       error: vi.fn().mockName('NotificationService.error'),
       warning: vi.fn().mockName('NotificationService.warning'),
-      info: vi.fn().mockName('NotificationService.info'),
-    };
+      info: vi.fn().mockName('NotificationService.info')};
 
     await TestBed.configureTestingModule({
       imports: [
@@ -64,21 +57,15 @@ describe('UiPreferencesFormComponent', () => {
         MatButtonToggleModule,
         MatAutocompleteModule,
         MatCheckboxModule,
-        MatIconModule,
-        MatButtonModule,
         MatProgressBarModule,
         MatDividerModule,
-        UiPreferencesFormComponent,
-      ],
+        UiPreferencesFormComponent],
       providers: [
         {
           provide: UserPreferencesService,
-          useValue: userPreferencesServiceSpy,
-        },
+          useValue: userPreferencesServiceSpy},
         { provide: ThemeService, useValue: themeServiceSpy },
-        { provide: NotificationService, useValue: notificationServiceSpy },
-      ],
-    }).compileComponents();
+        { provide: NotificationService, useValue: notificationServiceSpy }]}).compileComponents();
 
     userPreferencesService = TestBed.inject(
       UserPreferencesService
@@ -106,9 +93,6 @@ describe('UiPreferencesFormComponent', () => {
     expect(component.preferencesForm.get('theme')?.value).toBe('light');
     expect(component.preferencesForm.get('language')?.value).toBe('fr');
     expect(component.preferencesForm.get('density')?.value).toBe('comfortable');
-    expect(component.preferencesForm.get('defaultRoute')?.value).toBe(
-      '/dashboard'
-    );
     expect(component.preferencesForm.get('syncDevices')?.value).toBe(true);
   });
 
@@ -121,23 +105,12 @@ describe('UiPreferencesFormComponent', () => {
     component.preferencesForm.patchValue({
       theme: 'dark',
       language: 'en',
-      density: 'compact',
-    });
+      density: 'compact'});
 
     await new Promise<void>((resolve) => setTimeout(resolve, 200));
     expect(component.previewTheme).toBe('dark');
     expect(component.previewLanguage).toBe('en');
     expect(component.previewDensity).toBe('compact');
-  });
-
-  it('should filter routes based on search input', async () => {
-    component.preferencesForm.patchValue({
-      defaultRouteInput: 'dash',
-    });
-
-    await new Promise<void>((resolve) => setTimeout(resolve, 300));
-    expect(component.filteredRoutes.length).toBeGreaterThan(0);
-    expect(component.filteredRoutes[0].path).toBe('/dashboard');
   });
 
   it('should save preferences successfully', () => {
@@ -147,8 +120,7 @@ describe('UiPreferencesFormComponent', () => {
 
     component.preferencesForm.patchValue({
       theme: 'dark',
-      language: 'en',
-    });
+      language: 'en'});
 
     component.onSave();
 
@@ -156,8 +128,7 @@ describe('UiPreferencesFormComponent', () => {
       'ui',
       expect.objectContaining({
         theme: 'dark',
-        language: 'en',
-      })
+        language: 'en'})
     );
     expect(themeService.setTheme).toHaveBeenCalledWith('dark');
     expect(notificationService.success).toHaveBeenCalled();
@@ -178,8 +149,7 @@ describe('UiPreferencesFormComponent', () => {
     const originalValues = { ...component.preferencesForm.value };
 
     component.preferencesForm.patchValue({
-      theme: 'dark',
-    });
+      theme: 'dark'});
 
     component.onCancel();
 
@@ -190,86 +160,37 @@ describe('UiPreferencesFormComponent', () => {
     expect(component.hasUnsavedChanges()).toBe(false);
 
     component.preferencesForm.patchValue({
-      theme: 'dark',
-    });
+      theme: 'dark'});
 
     expect(component.hasUnsavedChanges()).toBe(true);
   });
 
-  it('should generate correct preview classes', () => {
-    component.previewTheme = 'dark';
-    component.previewDensity = 'compact';
-    component.previewLanguage = 'en';
-
-    const classes = component.getPreviewClasses();
-
-    expect(classes).toContain('theme-dark');
-    expect(classes).toContain('density-compact');
-    expect(classes).toContain('lang-en');
-  });
-
-  it('should get correct preview text based on language', () => {
+  it('should get correct preview texts based on language', () => {
     component.previewLanguage = 'fr';
-    let text = component.getPreviewText();
+    let text = component.getPreviewTexts();
     expect(text.welcome).toBe('Bienvenue');
 
     component.previewLanguage = 'en';
-    text = component.getPreviewText();
+    text = component.getPreviewTexts();
     expect(text.welcome).toBe('Welcome');
 
     component.previewLanguage = 'es';
-    text = component.getPreviewText();
+    text = component.getPreviewTexts();
     expect(text.welcome).toBe('Bienvenido');
   });
 
-  it('should handle route selection', () => {
-    const route = { path: '/tasks', label: 'Tâches', icon: 'task' };
-
-    component.onRouteSelected(route);
-
-    expect(component.preferencesForm.get('defaultRoute')?.value).toBe('/tasks');
-    expect(component.preferencesForm.get('defaultRouteInput')?.value).toBe(
-      'Tâches'
-    );
-  });
-
-  it('should display route function correctly', () => {
-    const label = component.displayRouteFn('/dashboard');
-    expect(label).toBe('Tableau de bord');
-
-    const unknownLabel = component.displayRouteFn('/unknown');
-    expect(unknownLabel).toBe('/unknown');
-  });
-
-  it('should show sync notification when sync is enabled', () => {
+  it('should show success notification when saving', () => {
     userPreferencesService.updatePreferences.mockReturnValue(
       of({ category: 'ui', preferences: {} })
     );
 
     component.preferencesForm.patchValue({
-      syncDevices: true,
-    });
+      syncDevices: true});
 
     component.onSave();
 
     expect(notificationService.success).toHaveBeenCalledWith(
-      expect.stringContaining('synchronisées')
+      'Préférences enregistrées avec succès'
     );
-  });
-
-  it('should validate required fields', () => {
-    component.preferencesForm.patchValue({
-      theme: '',
-      language: '',
-      density: '',
-      defaultRoute: '',
-    });
-
-    expect(component.preferencesForm.valid).toBe(false);
-
-    component.onSave();
-
-    expect(notificationService.warning).toHaveBeenCalled();
-    expect(userPreferencesService.updatePreferences).not.toHaveBeenCalled();
   });
 });

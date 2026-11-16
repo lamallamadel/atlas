@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -19,7 +19,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       orgId: ['ORG-001', [Validators.required]],
@@ -55,9 +56,9 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  login(): void {
+  async login(): Promise<void> {
     this.errorMessage = '';
-    
+
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -68,47 +69,65 @@ export class LoginComponent implements OnInit {
     try {
       const orgIdValue = this.loginForm.get('orgId')?.value?.trim() || 'ORG-001';
       const tokenValue = this.loginForm.get('token')?.value?.trim();
-      
+
       localStorage.setItem('org_id', orgIdValue);
       this.authService.login(tokenValue);
-      this.router.navigate(['/dashboard']);
+      const ok = await this.router.navigate(['/dashboard']);
+      if (!ok) {
+        this.errorMessage = 'Erreur de navigation. Veuillez réessayer.';
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
     } catch (error) {
       this.errorMessage = 'Token invalide';
       this.isLoading = false;
+      this.cdr.markForCheck();
     }
   }
 
-  mockOidcLogin(): void {
+  async mockOidcLogin(): Promise<void> {
     this.errorMessage = '';
     this.isLoading = true;
 
     const mockToken = this.generateMockToken();
-    
+
     try {
       const orgIdValue = this.loginForm.get('orgId')?.value?.trim() || 'ORG-001';
       localStorage.setItem('org_id', orgIdValue);
       this.authService.login(mockToken);
-      this.router.navigate(['/dashboard']);
+      const ok = await this.router.navigate(['/dashboard']);
+      if (!ok) {
+        this.errorMessage = 'Erreur de navigation. Veuillez réessayer.';
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
     } catch (error) {
       this.errorMessage = 'Erreur lors de la génération du token';
       this.isLoading = false;
+      this.cdr.markForCheck();
     }
   }
 
-  mockAdminLogin(): void {
+  async mockAdminLogin(): Promise<void> {
     this.errorMessage = '';
     this.isLoading = true;
 
     const mockAdminToken = this.generateMockToken(['ADMIN', 'USER']);
-    
+
     try {
       const orgIdValue = this.loginForm.get('orgId')?.value?.trim() || 'ORG-001';
       localStorage.setItem('org_id', orgIdValue);
       this.authService.login(mockAdminToken);
-      this.router.navigate(['/dashboard']);
+      const ok = await this.router.navigate(['/dashboard']);
+      if (!ok) {
+        this.errorMessage = 'Erreur de navigation. Veuillez réessayer.';
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
     } catch (error) {
       this.errorMessage = 'Erreur lors de la génération du token';
       this.isLoading = false;
+      this.cdr.markForCheck();
     }
   }
 

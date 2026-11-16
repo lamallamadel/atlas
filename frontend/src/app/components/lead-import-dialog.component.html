@@ -1,234 +1,142 @@
-<div class="lead-import-dialog">
-  <h2 mat-dialog-title>
-    <mat-icon class="title-icon">upload_file</mat-icon>
-    Importer des prospects
-  </h2>
+<ds-dialog-header (close)="close()">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <ds-icon name="upload" [size]="24" aria-hidden="true"></ds-icon>
+    <span>Importer des prospects</span>
+  </div>
+</ds-dialog-header>
 
-  <mat-dialog-content>
-    <div class="import-section">
-      <!-- File Upload Zone -->
-      @if (!importResponse) {
-        <div class="upload-zone">
-          <div
-            class="drop-zone"
-            [class.dragging]="isDragging"
-            [class.has-file]="selectedFile"
-            (dragover)="onDragOver($event)"
-            (dragleave)="onDragLeave($event)"
-            (drop)="onDrop($event)">
-            @if (!selectedFile) {
-              <div class="drop-zone-empty">
-                <mat-icon class="upload-icon">cloud_upload</mat-icon>
-                <p class="drop-zone-text">Glissez-déposez votre fichier CSV ici</p>
-                <p class="drop-zone-subtext">ou</p>
-                <label class="file-input-label">
-                  <input
-                    type="file"
-                    accept=".csv"
-                    (change)="onFileSelected($event)"
-                    class="file-input"
-                    [disabled]="isUploading">
-                    <button mat-raised-button color="primary" [disabled]="isUploading">
-                      <mat-icon>folder_open</mat-icon>
-                      Sélectionner un fichier
-                    </button>
-                  </label>
-                  <p class="file-hint">Format: CSV (name, phone, source requis) • Taille max: 10 Mo</p>
-                </div>
-              }
-              @if (selectedFile) {
-                <div class="drop-zone-file">
-                  <mat-icon class="file-icon">description</mat-icon>
-                  <div class="file-info">
-                    <span class="file-name">{{ selectedFile.name }}</span>
-                    <span class="file-size">{{ formatFileSize(selectedFile.size) }}</span>
-                  </div>
-                  <button
-                    mat-icon-button
-                    (click)="removeFile()"
-                    [disabled]="isUploading"
-                    class="remove-btn"
-                    aria-label="Supprimer le fichier">
-                    <mat-icon>close</mat-icon>
-                  </button>
-                </div>
-              }
-            </div>
-            <!-- Duplicate Strategy Selection -->
-            @if (selectedFile) {
-              <div class="strategy-section">
-                <h3 class="strategy-title">Stratégie de gestion des doublons</h3>
-                <p class="strategy-description">Choisissez comment gérer les prospects avec un numéro de téléphone existant</p>
-                <mat-radio-group [(ngModel)]="duplicateStrategy" class="strategy-options">
-                  <mat-radio-button value="SKIP" class="strategy-option">
-                    <div class="option-content">
-                      <span class="option-label">Ignorer</span>
-                      <span class="option-description">Les doublons seront ignorés et comptabilisés</span>
-                    </div>
-                  </mat-radio-button>
-                  <mat-radio-button value="OVERWRITE" class="strategy-option">
-                    <div class="option-content">
-                      <span class="option-label">Écraser</span>
-                      <span class="option-description">Les données existantes seront mises à jour</span>
-                    </div>
-                  </mat-radio-button>
-                  <mat-radio-button value="CREATE_NEW" class="strategy-option">
-                    <div class="option-content">
-                      <span class="option-label">Créer nouveau</span>
-                      <span class="option-description">Créer de nouveaux enregistrements (doublons autorisés)</span>
-                    </div>
-                  </mat-radio-button>
-                </mat-radio-group>
-              </div>
-            }
+<ds-dialog-content>
+  <div class="ds-form-stack">
+    @if (!importResponse) {
+      <div 
+        class="drop-zone"
+        [class.is-dragging]="isDragging"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()">
+        
+        <input 
+          #fileInput 
+          type="file" 
+          accept=".csv" 
+          style="display: none;" 
+          (change)="onFileSelected($event)">
+
+        @if (!selectedFile) {
+          <div class="drop-zone-content">
+            <ds-icon name="upload" [size]="24" style="opacity: 0.3; margin-bottom: 12px;"></ds-icon>
+            <p style="margin: 0; font-weight: 600;">Glissez un fichier CSV ici</p>
+            <p style="margin: 4px 0 0; font-size: 12px; color: var(--ds-text-faint);">ou cliquez pour parcourir</p>
           </div>
-        }
-
-        <!-- Import Progress (during upload) -->
-        @if (isUploading) {
-          <div class="progress-section">
-            <div class="progress-header">
-              <h3 class="progress-title">Import en cours...</h3>
-              <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
-            </div>
-            <mat-progress-bar
-              mode="indeterminate"
-              color="primary">
-            </mat-progress-bar>
-            <div class="progress-message">
-              <mat-icon class="progress-icon">hourglass_empty</mat-icon>
-              <span>Traitement du fichier et validation des données...</span>
-            </div>
-          </div>
-        }
-
-        <!-- Import Results -->
-        @if (importResponse && !isUploading) {
-          <div class="results-section">
-            <div class="results-header">
-              @if (importResponse.errorCount === 0) {
-                <mat-icon class="results-icon success">check_circle</mat-icon>
-              }
-              @if (importResponse.errorCount > 0) {
-                <mat-icon class="results-icon warning">warning</mat-icon>
-              }
-              <h3 class="results-title">Import terminé</h3>
-            </div>
-            <div class="results-stats">
-              <div class="stat-card success">
-                <mat-icon class="stat-icon">check_circle</mat-icon>
-                <div class="stat-content">
-                  <span class="stat-value">{{ importResponse.successCount }}</span>
-                  <span class="stat-label">Réussi(s)</span>
-                </div>
-              </div>
-              @if (importResponse.errorCount > 0) {
-                <div class="stat-card error">
-                  <mat-icon class="stat-icon">error</mat-icon>
-                  <div class="stat-content">
-                    <span class="stat-value">{{ importResponse.errorCount }}</span>
-                    <span class="stat-label">Erreur(s)</span>
-                  </div>
-                </div>
-              }
-              @if (importResponse.skippedCount > 0) {
-                <div class="stat-card warning">
-                  <mat-icon class="stat-icon">skip_next</mat-icon>
-                  <div class="stat-content">
-                    <span class="stat-value">{{ importResponse.skippedCount }}</span>
-                    <span class="stat-label">Ignoré(s)</span>
-                  </div>
-                </div>
-              }
-              <div class="stat-card info">
-                <mat-icon class="stat-icon">list</mat-icon>
-                <div class="stat-content">
-                  <span class="stat-value">{{ importResponse.totalRows }}</span>
-                  <span class="stat-label">Total</span>
-                </div>
-              </div>
-            </div>
-            <mat-progress-bar
-              mode="determinate"
-              [value]="getProgressPercentage()"
-              [color]="importResponse.errorCount > 0 ? 'warn' : 'primary'"
-              class="results-progress">
-            </mat-progress-bar>
-          </div>
-        }
-
-        <!-- Error Report Table -->
-        @if (errors.length > 0) {
-          <div class="error-section">
-            <button
-              mat-button
-              (click)="toggleErrorsView()"
-              class="error-toggle">
-              <mat-icon>{{ showErrors ? 'expand_less' : 'expand_more' }}</mat-icon>
-              Afficher le rapport d'erreurs ({{ errors.length }})
-            </button>
-            @if (showErrors) {
-              <div class="error-table-container">
-                <table mat-table [dataSource]="errors" class="errors-table">
-                  <ng-container matColumnDef="row">
-                    <th mat-header-cell *matHeaderCellDef>Ligne</th>
-                    <td mat-cell *matCellDef="let error">{{ error.row }}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="field">
-                    <th mat-header-cell *matHeaderCellDef>Champ</th>
-                    <td mat-cell *matCellDef="let error">
-                      <span class="field-badge">{{ error.field }}</span>
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="message">
-                    <th mat-header-cell *matHeaderCellDef>Raison</th>
-                    <td mat-cell *matCellDef="let error" class="error-message">
-                      <mat-icon class="error-icon">error_outline</mat-icon>
-                      {{ error.message }}
-                    </td>
-                  </ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['row', 'field', 'message']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['row', 'field', 'message'];" class="error-row"></tr>
-                </table>
-              </div>
-            }
-            @if (showErrors) {
-              <div class="error-actions">
-                <p class="error-hint">
-                  <mat-icon class="hint-icon">info</mat-icon>
-                  Corrigez les erreurs dans votre fichier CSV et réessayez l'import.
-                </p>
-              </div>
-            }
+        } @else {
+          <div class="selected-file-info">
+            <ds-icon name="folder" [size]="24" style="color: var(--ds-marine); margin-bottom: 12px;"></ds-icon>
+            <p style="margin: 0; font-weight: 700;">{{ selectedFile.name }}</p>
+            <p style="margin: 4px 0 0; font-size: 12px; color: var(--ds-text-faint);">{{ formatFileSize(selectedFile.size) }}</p>
+            <ds-button 
+              variant="ghost" 
+              size="sm" 
+              (dsClick)="removeFile(); $event.stopPropagation()"
+              style="margin-top: 12px; color: var(--ds-error);">
+              <ds-icon name="trash" [size]="16" style="margin-right: 8px;"></ds-icon>
+              Retirer le fichier
+            </ds-button>
           </div>
         }
       </div>
-    </mat-dialog-content>
 
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="close()" [disabled]="!canClose()">
-        {{ importResponse ? 'Fermer' : 'Annuler' }}
-      </button>
-      @if (!importResponse) {
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="startImport()"
-          [disabled]="!canStartImport()"
-          >
-          <mat-icon>upload</mat-icon>
-          Démarrer l'import
-        </button>
+      <ds-card [pad]="true" elevation="xs">
+        <h3 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--ds-marine);">Stratégie de doublons</h3>
+        <ds-radio-group
+          [options]="strategyOptions"
+          [(ngModel)]="duplicateStrategy">
+        </ds-radio-group>
+      </ds-card>
+
+      @if (isUploading) {
+        <div class="upload-status" style="margin-top: 24px; text-align: center;">
+          <ds-progress-bar mode="indeterminate" variant="primary" style="margin-bottom: 12px;"></ds-progress-bar>
+          <p style="margin: 0; font-size: 14px; font-weight: 600;">Import en cours...</p>
+          <p style="margin: 4px 0 0; font-size: 12px; color: var(--ds-text-faint);">Veuillez ne pas fermer cette fenêtre</p>
+        </div>
       }
-      @if (importResponse) {
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="removeFile()"
-          >
-          <mat-icon>replay</mat-icon>
-          Nouvel import
-        </button>
-      }
-    </mat-dialog-actions>
+    } @else {
+      <div class="import-results">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <div class="success-icon" style="width: 48px; height: 48px; background: var(--ds-success-hl); color: var(--ds-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+            <ds-icon name="check" [size]="24"></ds-icon>
+          </div>
+          <h3 style="margin: 0; font-size: 20px; font-family: var(--ds-font-display);">Import terminé</h3>
+          <p style="margin: 8px 0 0; color: var(--ds-text-muted);">{{ importResponse.totalRows }} lignes traitées</p>
+        </div>
+
+        <div class="results-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px;">
+          <ds-card [pad]="true" elevation="xs" style="text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: var(--ds-success);">{{ importResponse.successCount }}</div>
+            <div style="font-size: 12px; color: var(--ds-text-faint); font-weight: 600;">RÉUSSIS</div>
+          </ds-card>
+          <ds-card [pad]="true" elevation="xs" style="text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: var(--ds-error);">{{ importResponse.errorCount }}</div>
+            <div style="font-size: 12px; color: var(--ds-text-faint); font-weight: 600;">ERREURS</div>
+          </ds-card>
+          <ds-card [pad]="true" elevation="xs" style="text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: var(--ds-warning);">{{ importResponse.skippedCount }}</div>
+            <div style="font-size: 12px; color: var(--ds-text-faint); font-weight: 600;">IGNORÉS</div>
+          </ds-card>
+        </div>
+
+        @if (errors.length > 0) {
+          <ds-button variant="ghost" size="md" (dsClick)="toggleErrorsView()" style="width: 100%;">
+            {{ showErrors ? 'Masquer les erreurs' : 'Voir le détail des ' + errors.length + ' erreur(s)' }}
+            <ds-icon [name]="showErrors ? 'chevron-up' : 'chevron-down'" [size]="20" style="margin-left: 8px;"></ds-icon>
+          </ds-button>
+
+          @if (showErrors) {
+            <div class="errors-list" style="margin-top: 16px; max-height: 200px; overflow-y: auto; border: 1px solid var(--ds-divider); border-radius: var(--ds-radius-md);">
+              <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead style="position: sticky; top: 0; background: var(--ds-surface-2); border-bottom: 1px solid var(--ds-divider);">
+                  <tr>
+                    <th style="padding: 10px; text-align: left; font-weight: 600;">Ligne</th>
+                    <th style="padding: 10px; text-align: left; font-weight: 600;">Champ</th>
+                    <th style="padding: 10px; text-align: left; font-weight: 600;">Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (err of errors; track err) {
+                    <tr style="border-bottom: 1px solid var(--ds-divider);">
+                      <td style="padding: 10px;">{{ err.row }}</td>
+                      <td style="padding: 10px;"><code>{{ err.field }}</code></td>
+                      <td style="padding: 10px; color: var(--ds-error);">{{ err.message }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+      </div>
+    }
   </div>
+</ds-dialog-content>
+
+<ds-dialog-actions align="end">
+  <ds-button variant="ghost" size="md" (dsClick)="close()" [disabled]="!canClose()">
+    {{ importResponse ? 'Fermer' : 'Annuler' }}
+  </ds-button>
+  
+  @if (!importResponse) {
+    <ds-button
+      variant="marine"
+      size="md"
+      (dsClick)="startImport()"
+      [disabled]="!canStartImport()">
+      @if (isUploading) {
+        <span class="spinner-small" style="margin-right: 8px; border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>
+      } @else {
+        <ds-icon name="check" [size]="20" style="margin-right: 8px;"></ds-icon>
+      }
+      <span>{{ isUploading ? 'Import en cours...' : 'Lancer l\'import' }}</span>
+    </ds-button>
+  }
+</ds-dialog-actions>

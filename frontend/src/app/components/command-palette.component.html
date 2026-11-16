@@ -1,150 +1,91 @@
 @if (visible$ | async) {
-  <div class="command-palette-overlay"
-    (click)="close()"
-    (keydown.escape)="close()"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="command-palette-title"
-    aria-describedby="command-palette-description"
-    tabindex="-1">
-    <div class="command-palette glass-card-elevated"
-      appFocusTrap
-      (click)="$event.stopPropagation()"
-      (keydown)="$event.stopPropagation()"
-      role="document">
-      <!-- Header -->
-      <div class="command-header">
-        <h2 id="command-palette-title" class="visually-hidden">Palette de commandes</h2>
-        <p id="command-palette-description" class="visually-hidden">
-          Tapez pour rechercher des commandes, annonces ou dossiers. Utilisez les flèches haut et bas pour naviguer, Entrée pour sélectionner, Échap pour fermer.
-        </p>
-        <div class="command-search">
-          <mat-icon class="search-icon" aria-hidden="true">search</mat-icon>
-          <input
-            #commandInput
-            type="text"
-            class="command-input"
-            placeholder="Tapez une commande, un nom de client, 'note', 'rdv'..."
-            [(ngModel)]="searchQuery"
-            (input)="onSearchChange()"
-            (keydown)="onKeyDown($event)"
-            autocomplete="off"
-            aria-label="Recherche de commandes"
-            aria-autocomplete="list"
-            aria-controls="command-list"
-            [attr.aria-activedescendant]="'command-item-' + selectedIndex"
-            />
-            @if (isSearching) {
-              <ds-skeleton
-                variant="circle"
-                width="18px"
-                height="18px"
-                class="search-spinner"
-                aria-label="Recherche en cours">
-              </ds-skeleton>
-            }
-            <div class="shortcut-badge">
-              <kbd>Ctrl</kbd><span class="kbd-sep">+</span><kbd>K</kbd>
-            </div>
-          </div>
-        </div>
-        <!-- Results -->
+  <div class="command-palette-overlay" (click)="close()" role="dialog" aria-modal="true">
+    <div class="command-palette-modal ds-card" (click)="$event.stopPropagation()" appFocusTrap elevation="md">
+      <!-- Search Input -->
+      <div class="palette-header" style="display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--ds-divider);">
+        <ds-icon name="search" [size]="20" style="color: var(--ds-text-muted); margin-right: 16px;" aria-hidden="true"></ds-icon>
+        <input 
+          #commandInput
+          type="text" 
+          class="palette-input" 
+          placeholder="Taper pour chercher ou demander à l'IA (Ctrl+\\ pour le mode sombre)..." 
+          [(ngModel)]="searchQuery" 
+          (ngModelChange)="onSearchChange()"
+          (keydown)="onKeyDown($event)"
+          spellcheck="false"
+          autocomplete="off"
+          style="flex: 1; border: none; background: transparent; font-size: 16px; color: var(--ds-text); outline: none;">
+        
+        @if (isSearching) {
+          <ds-skeleton variant="circle" width="16px" height="16px" [animate]="true"></ds-skeleton>
+        } @else if (searchQuery) {
+          <kbd class="palette-esc" style="font-size: 10px; padding: 2px 6px; background: var(--ds-bg-subtle); border-radius: 4px; color: var(--ds-text-muted);">ESC</kbd>
+        }
+      </div>
+
+      <!-- Results List -->
+      <div class="palette-body" style="max-height: 450px; overflow-y: auto; padding: 8px 0;">
         @if (filteredItems.length > 0) {
-          <div class="command-list"
-            id="command-list"
-            role="listbox">
-            @for (group of getGroupedItems(); track group) {
-              <div class="command-category" role="presentation">
-                <span class="category-label">{{ group.category }}</span>
-                <span class="category-count">{{ group.items.length }}</span>
-              </div>
-              @for (item of group.items; track item) {
-                <div
-                  class="command-item"
-                  [class.selected]="filteredItems.indexOf(item) === selectedIndex"
-                  [id]="'command-item-' + filteredItems.indexOf(item)"
-                  (click)="executeItem(item)"
-                  (keydown.enter)="executeItem(item)"
-                  (mouseenter)="selectItem(filteredItems.indexOf(item))"
-                  role="option"
-                  [attr.aria-selected]="filteredItems.indexOf(item) === selectedIndex"
-                  tabindex="-1"
-                  >
-                  <div class="command-content">
-                    <div class="command-icon-wrap">
-                      <mat-icon class="command-icon" aria-hidden="true">{{ getItemIcon(item) }}</mat-icon>
-                    </div>
-                    <div class="command-details">
-                      <!-- Label: with highlight segments if available, plain text otherwise -->
-                      <div class="command-label">
-                        @if (getHighlightSegments(item); as segs) {
-                          @for (seg of segs; track seg) {
-                            @if (seg.match) {
-                              <mark class="highlight">{{ seg.text }}</mark>
-                            }
-                            @if (!seg.match) {
-                              <span>{{ seg.text }}</span>
-                            }
-                          }
-                        } @else {
-                          {{ getItemLabel(item) }}
-                        }
-                      </div>
-                      @if (getItemDescription(item)) {
-                        <div class="command-description">
-                          {{ getItemDescription(item) }}
-                        </div>
+          @for (group of getGroupedItems(); track group.category) {
+            <div class="group-header" style="padding: 12px 20px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ds-text-muted); letter-spacing: 1px;">
+              {{ group.category }}
+            </div>
+            
+            @for (item of group.items; track item; let i = $index) {
+              <div 
+                class="command-item" 
+                [class.selected]="filteredItems.indexOf(item) === selectedIndex"
+                (mouseenter)="selectItem(filteredItems.indexOf(item))"
+                (click)="executeItem(item)"
+                style="display: flex; align-items: center; gap: 16px; padding: 10px 20px; cursor: pointer; transition: all 0.1s ease;">
+                
+                <div class="item-icon" style="display: flex; align-items: center; justify-content: center; width: 28px; color: var(--ds-text-muted);">
+                  <ds-icon [name]="getItemIcon(item)" [size]="20"></ds-icon>
+                </div>
+
+                <div class="item-content" style="flex: 1; min-width: 0;">
+                  <div class="item-label" style="font-weight: 600; font-size: 14px; color: var(--ds-text);">
+                    @if (getHighlightSegments(item); as segments) {
+                      @for (seg of segments; track seg) {
+                        <span [style.color]="seg.match ? 'var(--ds-primary)' : 'inherit'" [style.text-decoration]="seg.match ? 'underline' : 'none'">{{ seg.text }}</span>
                       }
-                    </div>
-                    @if (getItemShortcut(item)) {
-                      <div class="command-shortcut" [attr.aria-label]="'Raccourci: ' + getItemShortcut(item)">
-                        <kbd>{{ getItemShortcut(item) }}</kbd>
-                      </div>
+                    } @else {
+                      {{ getItemLabel(item) }}
                     }
                   </div>
+                  <div class="item-description" style="font-size: 12px; color: var(--ds-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    {{ getItemDescription(item) }}
+                  </div>
                 </div>
-              }
+
+                @if (getItemShortcut(item); as shortcut) {
+                  <div class="item-shortcut" style="font-size: 11px; font-family: var(--ds-font-mono); color: var(--ds-text-faint); background: var(--ds-bg-subtle); padding: 2px 6px; border-radius: 4px;">
+                    {{ shortcut }}
+                  </div>
+                }
+              </div>
             }
+          }
+        } @else {
+          <div class="no-results" style="padding: 48px 24px; text-align: center; color: var(--ds-text-faint);">
+            <ds-icon name="search" [size]="24" style="opacity: 0.1; margin-bottom: 16px;"></ds-icon>
+            <p style="font-size: 14px;">Aucun résultat pour "{{ searchQuery }}"</p>
           </div>
         }
-        <!-- Empty State -->
-        @if (filteredItems.length === 0 && !isSearching) {
-          <div class="command-empty" role="status" aria-live="polite">
-            <mat-icon aria-hidden="true">manage_search</mat-icon>
-            @if (searchQuery) {
-              <p>Aucun résultat pour <strong>"{{ searchQuery }}"</strong></p>
-            }
-            @if (!searchQuery) {
-              <p>Commencez à taper pour rechercher...</p>
-            }
-            @if (searchQuery) {
-              <p class="empty-hint">
-                Essayez : <em>"prosp"</em>, <em>"facture"</em>, <em>"rdv"</em>
-              </p>
-            }
-          </div>
-        }
-        <!-- Loading State -->
-        @if (isSearching && searchQuery.length >= 2) {
-          <div class="command-loading" role="status" aria-live="polite">
-            <ds-skeleton variant="circle" width="32px" height="32px" aria-label="Recherche en cours"></ds-skeleton>
-            <p>Recherche en cours dans la base...</p>
-          </div>
-        }
-        <!-- Footer -->
-        <div class="command-footer">
-          <div class="footer-shortcuts">
-            <span class="footer-shortcut">
-              <kbd>↑</kbd><kbd>↓</kbd> naviguer
-            </span>
-            <span class="footer-shortcut">
-              <kbd>↵</kbd> sélectionner
-            </span>
-            <span class="footer-shortcut">
-              <kbd>Esc</kbd> fermer
-            </span>
-          </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="palette-footer" style="padding: 12px 20px; background: var(--ds-bg-subtle); border-top: 1px solid var(--ds-divider); display: flex; gap: 24px; font-size: 11px; color: var(--ds-text-faint);">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <kbd style="padding: 2px 4px; background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: 3px;">ENTER</kbd> pour sélectionner
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <kbd style="padding: 2px 4px; background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: 3px;">↑↓</kbd> pour naviguer
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <kbd style="padding: 2px 4px; background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: 3px;">ESC</kbd> pour fermer
         </div>
       </div>
     </div>
-  }
+  </div>
+}

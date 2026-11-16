@@ -1,587 +1,183 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
-import type { ActionButtonConfig } from '../../components/empty-state-actions.types';
-import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
-import { DateFormatPipe } from '../../pipes/date-format.pipe';
-import { PriceFormatPipe } from '../../pipes/price-format.pipe';
-import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
-import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
-import { ExportProgressDialogComponent } from '../../components/export-progress-dialog.component';
-import { ExportService, ColumnDef } from '../../services/export.service';
+import { FilterPresetService } from '../../services/filter-preset.service';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
-// Design System
-import { PageHeaderComponent }    from '../../design-system/patterns/page-header/page-header.component';
-import { FilterBarComponent, DsFilterOption } from '../../design-system/patterns/filter-bar/filter-bar.component';
-import { DsButtonComponent }      from '../../design-system/primitives/ds-button/ds-button.component';
-import { DsBadgeComponent, DsBadgeStatus } from '../../design-system/primitives/ds-badge/ds-badge.component';
-import { DsEmptyStateComponent }  from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
-import { DsSkeletonComponent }    from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
-import { DsCardComponent } from '../../design-system/primitives/ds-card/ds-card.component';
-import { DsTableComponent, DsColumn, DsRowAction } from '../../design-system/primitives/ds-table/ds-table.component';
-import { DsIconComponent } from '../../design-system/icons/ds-icon.component';
-import { DS_CHART_FALLBACK_HEX } from '../../design-system/chart-ds-colors';
-
-interface AppliedFilter {
-  key: string;
-  label: string;
-  value: string;
-  displayValue: string;
-}
+import { DecimalPipe, CommonModule } from '@angular/common';
+import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
+import { 
+  PageHeaderComponent, 
+  FilterBarComponent, 
+  DsFilterOption,
+  DsButtonComponent, 
+  DsBadgeComponent, 
+  DsBadgeStatus,
+  DsEmptyStateComponent, 
+  DsSkeletonComponent,
+  DsCardComponent, 
+  DsTableComponent, 
+  DsColumn, 
+  DsRowAction,
+  DsIconComponent,
+  DsSelectComponent, 
+  DsSelectOption, 
+  DsToastService,
+  DsDialogService
+} from '../../design-system';
 
 @Component({
     selector: 'app-annonces',
+    standalone: true,
     templateUrl: './annonces.component.html',
     styleUrls: ['./annonces.component.scss'],
     animations: [listStaggerAnimation, itemAnimation],
     imports: [
+      CommonModule,
       FormsModule, DecimalPipe,
-      // Design System (nouveau template)
       PageHeaderComponent, FilterBarComponent,
       DsButtonComponent, DsBadgeComponent, DsEmptyStateComponent, DsSkeletonComponent,
-      DsCardComponent, DsTableComponent, DsIconComponent,
+      DsCardComponent, DsTableComponent, DsIconComponent, DsSelectComponent,
     ]
 })
 export class AnnoncesComponent implements OnInit {
+  private annonceApiService = inject(AnnonceApiService);
+  private router = inject(Router);
+  private toastService = inject(DsToastService);
+  private dsDialogService = inject(DsDialogService);
+  private breakpointObserver = inject(BreakpointObserver);
+
   annonces: AnnonceResponse[] = [];
   page: Page<AnnonceResponse> | null = null;
   loading = false;
   error: string | null = null;
 
-  searchQuery = '';
+  viewMode: 'cards' | 'list' = 'cards';
   selectedStatus: AnnonceStatus | '' = '';
-  selectedCity = '';
-  selectedType = '';
+  searchQuery = '';
   currentPage = 0;
   pageSize = 10;
-
-  availableCities: string[] = [];
-  availableTypes = ['SALE', 'RENT', 'LEASE', 'EXCHANGE'];
-
-  AnnonceStatus = AnnonceStatus;
-  readonly AnnonceType = { SALE: 'SALE', RENTAL: 'RENTAL', COMMERCIAL: 'COMMERCIAL' } as const;
-
   filterPanelExpanded = false;
-  appliedFilters: AppliedFilter[] = [];
   isMobile = false;
-
-  /* ── Vue ── */
-  viewMode: 'cards' | 'list' = 'cards';
+  
+  selectedCity = '';
+  selectedType = '';
   minPrice: number | null = null;
   maxPrice: number | null = null;
+  appliedFilters: any[] = [];
 
-  /* ── DS filter options ── */
   readonly statusFilters: DsFilterOption[] = [
-    { value: 'DRAFT',     label: 'Brouillons' },
-    { value: 'ACTIVE',    label: 'Actives' },
-    { value: 'PAUSED',    label: 'En pause' },
-    { value: 'PUBLISHED', label: 'Publiées' },
-    { value: 'ARCHIVED',  label: 'Archivées' },
+    { value: 'DRAFT', label: 'Brouillons' },
+    { value: 'PUBLISHED', label: 'Publiés' },
+    { value: 'ACTIVE', label: 'Actifs' },
+    { value: 'PAUSED', label: 'En pause' },
+    { value: 'ARCHIVED', label: 'Archivés' }
   ];
 
-  getAnnonceBadgeStatus(status: string): DsBadgeStatus {
-    const map: Record<string, DsBadgeStatus> = {
-      DRAFT: 'draft', ACTIVE: 'active', PAUSED: 'paused',
-      PUBLISHED: 'active', ARCHIVED: 'archived',
-    };
-    return (map[status] as DsBadgeStatus) ?? 'neutral';
-  }
+  readonly cityOptions: DsSelectOption[] = [
+    { value: '', label: 'Toutes les villes' },
+    { value: 'Paris', label: 'Paris' },
+    { value: 'Lyon', label: 'Lyon' },
+    { value: 'Marseille', label: 'Marseille' }
+  ];
 
-  readonly dsTableRowActions: DsRowAction<Record<string, unknown>>[] = [
+  readonly typeOptions: DsSelectOption[] = [
+    { value: '', label: 'Tous les types' },
+    { value: 'SALE', label: 'Vente' },
+    { value: 'RENT', label: 'Location' }
+  ];
+
+  dsTableColumns: DsColumn<any>[] = [
+    { key: 'id', header: 'ID', width: '80px' },
+    { key: 'title', header: 'Titre' },
+    { key: 'city', header: 'Ville' },
+    { key: 'price', header: 'Prix' },
+    { key: 'status', header: 'Statut' }
+  ];
+
+  dsTableRowActions: DsRowAction<any>[] = [
+    { icon: 'eye', label: 'Voir', action: 'view', ariaLabel: 'Voir l\'annonce' },
     { icon: 'edit', label: 'Modifier', action: 'edit', ariaLabel: 'Modifier l\'annonce' }
   ];
 
-  dsTableColumns: DsColumn<Record<string, unknown>>[] = [];
-
-  get annoncesAsTableRows(): Record<string, unknown>[] {
-    return this.annonces as unknown as Record<string, unknown>[];
-  }
-
-  trackByAnnonceId = (_index: number, row: Record<string, unknown>): number =>
-    this.annonceFromRow(row).id;
-
-  onDsTableRowClick(row: Record<string, unknown>): void {
-    this.goToAnnonce(this.annonceFromRow(row).id);
-  }
-
-  onDsTableRowAction(event: { action: string; row: Record<string, unknown> }): void {
-    const a = this.annonceFromRow(event.row);
-    if (event.action === 'edit') {
-      this.editAnnonce(a.id);
-    }
-  }
-
-  private buildDsTableColumns(): DsColumn<Record<string, unknown>>[] {
-    return [
-      {
-        key: 'photo',
-        header: 'Photo',
-        width: '72px',
-        sortable: false,
-        cell: (row) => this.renderThumbCell(this.annonceFromRow(row))
-      },
-      {
-        key: 'title',
-        header: 'Titre',
-        sortable: false,
-        cell: (row) =>
-          `<span class="ann-ds-title">${this.escapeHtml(this.annonceFromRow(row).title || '—')}</span>`
-      },
-      {
-        key: 'city',
-        header: 'Ville',
-        width: '130px',
-        sortable: false,
-        cell: (row) =>
-          `<span class="ann-ds-city">${this.escapeHtml(this.annonceFromRow(row).city || '—')}</span>`
-      },
-      {
-        key: 'price',
-        header: 'Prix',
-        width: '110px',
-        sortable: false,
-        cell: (row) => {
-          const a = this.annonceFromRow(row);
-          const price =
-            a.price === undefined || a.price === null
-              ? '—'
-              : this.priceFormatPipe.transform(a.price, a.currency || 'EUR');
-          return `<span class="ann-ds-price">${this.escapeHtml(price)}</span>`;
-        }
-      },
-      {
-        key: 'status',
-        header: 'Statut',
-        width: '120px',
-        sortable: false,
-        cell: (row) => {
-          const a = this.annonceFromRow(row);
-          const badgeClass = this.getStatusBadgeClass(a.status);
-          const label = this.escapeHtml(this.getStatusLabel(a.status));
-          return `<span class="${badgeClass}">${label}</span>`;
-        }
-      },
-      {
-        key: 'createdAt',
-        header: 'Créé le',
-        width: '110px',
-        sortable: false,
-        cell: (row) => {
-          const a = this.annonceFromRow(row);
-          const d = this.dateFormatPipe.transform(a.createdAt) || '—';
-          return `<span class="ann-ds-date">${this.escapeHtml(d)}</span>`;
-        }
-      }
-    ];
-  }
-
-  private renderThumbCell(a: AnnonceResponse): string {
-    const url = this.safePhotoUrl(a.photos?.[0]);
-    const alt = this.escapeHtml(a.title || '');
-    if (!url) {
-      return `<span class="ann-ds-thumb ann-ds-thumb--empty" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="9" r="2" stroke="currentColor" stroke-width="1.2"/></svg></span>`;
-    }
-    return `<span class="ann-ds-thumb"><img class="ann-ds-thumb-img" src="${this.escapeAttr(url)}" alt="${alt}" loading="lazy" decoding="async"/></span>`;
-  }
-
-  private safePhotoUrl(url: string | undefined): string | null {
-    if (!url || typeof url !== 'string') {
-      return null;
-    }
-    const t = url.trim();
-    if (/^https?:\/\//i.test(t) || t.startsWith('/') || t.startsWith('./')) {
-      return t;
-    }
-    return null;
-  }
-
-  private escapeAttr(value: string): string {
-    return (value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;')
-      .replace(/</g, '&lt;');
-  }
-
-  private escapeHtml(value: string): string {
-    return (value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
-  private annonceFromRow(row: Record<string, unknown>): AnnonceResponse {
-    return row as unknown as AnnonceResponse;
-  }
-
-  onStatusChange(value: string): void {
-    this.selectedStatus = value as AnnonceStatus | '';
-    this.applyFilters();
-  }
-
-  onSearchChange(value: string): void {
-    this.searchQuery = value;
-    this.applyFilters();
-  }
-
-  goToAnnonce(id: number): void {
-    this.router.navigate(['/pro/annonces', id]);
-  }
-
-  countByStatus(status: string): number {
-    return this.annonces.filter(a => a.status === status).length;
-  }
-
-  resetFilters(): void {
-    this.selectedStatus = '';
-    this.selectedCity = '';
-    this.selectedType = '';
-    this.minPrice = null;
-    this.maxPrice = null;
-    this.searchQuery = '';
-    this.appliedFilters = [];
-    this.applyFilters();
-  }
-  savedPresets: FilterPreset[] = [];
-  showPresetMenu = false;
-
-  private dateFormatPipe = new DateFormatPipe();
-  private priceFormatPipe = new PriceFormatPipe();
-  private readonly FILTER_CONTEXT = 'annonces';
-
-  columns: ColumnConfig[] = [
-    { key: 'id', header: 'ID', sortable: true, type: 'number' },
-    {
-      key: 'title',
-      header: 'Titre',
-      sortable: true,
-      type: 'custom',
-      format: (value: unknown, row: unknown) => {
-        const annonce = row as AnnonceResponse;
-        const title = `<strong>${value}</strong>`;
-        const description = annonce.description
-          ? `<div class="description-preview">${annonce.description.length > 50 ? annonce.description.substring(0, 50) + '...' : annonce.description}</div>`
-          : '';
-        return title + description;
-      }
-    },
-    {
-      key: 'category',
-      header: 'Catégorie',
-      sortable: true,
-      format: (value: unknown) => (value as string) || '-'
-    },
-    {
-      key: 'city',
-      header: 'Ville',
-      sortable: true,
-      format: (value: unknown) => (value as string) || '-'
-    },
-    {
-      key: 'price',
-      header: 'Prix',
-      sortable: true,
-      type: 'custom',
-      format: (value: unknown, row: unknown) => {
-        const annonce = row as AnnonceResponse;
-        if (annonce.price === undefined) return '-';
-        return this.priceFormatPipe.transform(annonce.price, annonce.currency || 'EUR');
-      }
-    },
-    {
-      key: 'status',
-      header: 'Statut',
-      sortable: true,
-      type: 'custom',
-      format: (value: unknown) => {
-        const status = value as AnnonceStatus;
-        const badgeClass = this.getStatusBadgeClass(status);
-        const label = this.getStatusLabel(status);
-        return `<span class="${badgeClass}">${label}</span>`;
-      }
-    },
-    {
-      key: 'fraudStatut',
-      header: 'Antifraude',
-      sortable: true,
-      type: 'custom',
-      format: (value: unknown) => {
-        const status = value as string;
-        if (!status) return '<span class="text-gray-400">-</span>';
-        let badgeClass = 'ds-badge ds-badge--md ds-badge--no-dot';
-        if (status === 'SAIN') badgeClass += ' ds-badge--success';
-        else if (status === 'SUSPECT') badgeClass += ' ds-badge--warning';
-        else if (status === 'FRAUDULEUX') badgeClass += ' ds-badge--error';
-
-        const tooltipText = "Évaluation combinée basée sur la détection d\\'anomalies de prix par le modèle ML de fraud-service et l\\'analyse sémantique TF-IDF des textes similaires par dupli-service.";
-
-        return `<span class="${badgeClass}" title="${tooltipText}" style="cursor:help;">${status}</span>`;
-      }
-    },
-    {
-      key: 'createdAt',
-      header: 'Créé le',
-      sortable: true,
-      type: 'custom',
-      format: (value: unknown) => this.dateFormatPipe.transform(value as string)
-    },
-    {
-      key: 'updatedAt',
-      header: 'Modifié le',
-      sortable: true,
-      type: 'custom',
-      format: (value: unknown) => this.dateFormatPipe.transform(value as string)
-    }
-  ];
-
-  actions: RowAction[] = [
-    { icon: 'edit', tooltip: 'Modifier', action: 'edit', color: 'primary' }
-  ];
-
-  get emptyStateContext(): EmptyStateContext {
-    return this.appliedFilters.length > 0
-      ? EmptyStateContext.NO_ANNONCES_FILTERED
-      : EmptyStateContext.NO_ANNONCES;
-  }
-
-  get isNewUser(): boolean {
-    return this.annonces.length === 0 && this.appliedFilters.length === 0 && this.page?.totalElements === 0;
-  }
-
-  get emptyStatePrimaryAction(): ActionButtonConfig {
-    return {
-      label: 'Créer une annonce',
-      handler: () => this.createAnnonce()
-    };
-  }
-
-  get emptyStateSecondaryAction(): ActionButtonConfig {
-    return this.appliedFilters.length > 0
-      ? {
-        label: 'Réinitialiser les filtres',
-        handler: () => this.resetFilters()
-      }
-      : {
-        label: 'Parcourir les modèles',
-        handler: () => console.log('Browse templates')
-      };
-  }
-
-  constructor(
-    private annonceApiService: AnnonceApiService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private filterPresetService: FilterPresetService,
-    private bottomSheet: MatBottomSheet,
-    private breakpointObserver: BreakpointObserver,
-    private exportService: ExportService,
-    private dialog: MatDialog
-  ) { }
+  get annoncesAsTableRows(): any[] { return this.annonces; }
 
   ngOnInit(): void {
-    this.dsTableColumns = this.buildDsTableColumns();
-    this.loadCities();
-    this.loadSavedPresets();
-
+    this.loadAnnonces();
     this.breakpointObserver.observe([Breakpoints.Handset])
-      .subscribe(result => {
-        this.isMobile = result.matches;
-      });
-
-    this.route.queryParams.subscribe(params => {
-      if (params['status']) {
-        this.selectedStatus = params['status'] as AnnonceStatus;
-      }
-      this.loadAnnonces();
-      this.updateAppliedFilters();
-    });
-  }
-
-  loadCities(): void {
-    this.annonceApiService.getDistinctCities().subscribe({
-      next: (cities) => {
-        this.availableCities = cities;
-      },
-      error: (err) => {
-        console.error('Error loading cities:', err);
-      }
-    });
-  }
-
-  loadSavedPresets(): void {
-    this.savedPresets = this.filterPresetService.getPresetsLocally(this.FILTER_CONTEXT);
+      .subscribe(result => { this.isMobile = result.matches; });
   }
 
   loadAnnonces(): void {
     this.loading = true;
-    this.error = null;
-
-    const params: {
-      page: number;
-      size: number;
-      q?: string;
-      status?: AnnonceStatus;
-      city?: string;
-      type?: string;
-    } = {
+    this.annonceApiService.list({
       page: this.currentPage,
-      size: this.pageSize
-    };
-
-    if (this.searchQuery.trim()) {
-      params.q = this.searchQuery.trim();
-    }
-
-    if (this.selectedStatus) {
-      params.status = this.selectedStatus;
-    }
-
-    if (this.selectedCity) {
-      params.city = this.selectedCity;
-    }
-
-    if (this.selectedType) {
-      params.type = this.selectedType;
-    }
-
-    this.annonceApiService.list(params).subscribe({
+      size: this.pageSize,
+      q: this.searchQuery || undefined,
+      status: this.selectedStatus || undefined
+    }).subscribe({
       next: (response) => {
         this.page = response;
         this.annonces = response.content;
         this.loading = false;
       },
-      error: (err) => {
-        this.error = 'Échec du chargement des annonces. Veuillez réessayer.';
+      error: () => {
+        this.error = 'Erreur lors du chargement des annonces';
         this.loading = false;
-        console.error('Error loading annonces:', err);
+        this.toastService.error(this.error!);
       }
     });
   }
 
-  applyFilters(): void {
-    this.currentPage = 0;
-    this.updateAppliedFilters();
+  onStatusChange(status: any): void {
+    this.selectedStatus = status;
     this.loadAnnonces();
   }
 
-  updateAppliedFilters(): void {
-    this.appliedFilters = [];
-
-    if (this.searchQuery.trim()) {
-      this.appliedFilters.push({
-        key: 'searchQuery',
-        label: 'Recherche',
-        value: this.searchQuery,
-        displayValue: this.searchQuery
-      });
-    }
-
-    if (this.selectedStatus) {
-      this.appliedFilters.push({
-        key: 'selectedStatus',
-        label: 'Statut',
-        value: this.selectedStatus,
-        displayValue: this.getStatusLabel(this.selectedStatus)
-      });
-    }
-
-    if (this.selectedCity) {
-      this.appliedFilters.push({
-        key: 'selectedCity',
-        label: 'Ville',
-        value: this.selectedCity,
-        displayValue: this.selectedCity
-      });
-    }
-
-    if (this.selectedType) {
-      this.appliedFilters.push({
-        key: 'selectedType',
-        label: 'Type',
-        value: this.selectedType,
-        displayValue: this.selectedType
-      });
-    }
+  onSearchChange(query: string): void {
+    this.searchQuery = query;
+    this.loadAnnonces();
   }
 
-  removeFilter(filter: AppliedFilter): void {
-    switch (filter.key) {
-      case 'searchQuery':
-        this.searchQuery = '';
-        break;
-      case 'selectedStatus':
-        this.selectedStatus = '';
-        break;
-      case 'selectedCity':
-        this.selectedCity = '';
-        break;
-      case 'selectedType':
-        this.selectedType = '';
-        break;
+  applyFilters(): void {
+    this.loadAnnonces();
+  }
+
+  toggleFilters(): void {
+    if (this.isMobile) {
+      this.openMobileFilters();
+    } else {
+      this.filterPanelExpanded = !this.filterPanelExpanded;
     }
-    this.applyFilters();
   }
 
   openMobileFilters(): void {
-    const filterConfig: FilterConfig[] = [
-      {
-        key: 'searchQuery',
-        label: 'Recherche',
-        type: 'text',
-        placeholder: 'Rechercher des annonces...'
-      },
-      {
-        key: 'selectedStatus',
-        label: 'Statut',
-        type: 'select',
-        options: [
-          { value: AnnonceStatus.DRAFT, label: 'Brouillon' },
-          { value: AnnonceStatus.PUBLISHED, label: 'Publié' },
-          { value: AnnonceStatus.ACTIVE, label: 'Actif' },
-          { value: AnnonceStatus.PAUSED, label: 'En pause' },
-          { value: AnnonceStatus.ARCHIVED, label: 'Archivé' }
-        ]
-      },
-      {
-        key: 'selectedCity',
-        label: 'Ville',
-        type: 'select',
-        options: this.availableCities.map(city => ({ value: city, label: city }))
-      },
-      {
-        key: 'selectedType',
-        label: 'Type',
-        type: 'select',
-        options: this.availableTypes.map(type => ({ value: type, label: type }))
-      }
-    ];
-
-    const sheetRef = this.bottomSheet.open(MobileFilterSheetComponent, {
+    const dialogRef = this.dsDialogService.open<any>(MobileFilterSheetComponent, {
+      panelClass: 'ds-dialog-panel--bottom-sheet',
       data: {
         filters: {
-          searchQuery: this.searchQuery,
-          selectedStatus: this.selectedStatus,
-          selectedCity: this.selectedCity,
-          selectedType: this.selectedType
+          city: this.selectedCity,
+          type: this.selectedType,
+          minPrice: this.minPrice,
+          maxPrice: this.maxPrice
         },
-        config: filterConfig
+        config: [
+          { key: 'city', label: 'Ville', type: 'select', options: this.cityOptions },
+          { key: 'type', label: 'Type', type: 'select', options: this.typeOptions },
+          { key: 'minPrice', label: 'Prix min', type: 'text', placeholder: '0' },
+          { key: 'maxPrice', label: 'Prix max', type: 'text', placeholder: 'Sans limite' }
+        ] as FilterConfig[]
       }
     });
 
-    sheetRef.afterDismissed().subscribe(result => {
+    dialogRef.closed.subscribe(result => {
       if (result?.action === 'apply') {
-        this.searchQuery = result.filters.searchQuery || '';
-        this.selectedStatus = result.filters.selectedStatus || '';
-        this.selectedCity = result.filters.selectedCity || '';
-        this.selectedType = result.filters.selectedType || '';
+        this.selectedCity = result.filters.city;
+        this.selectedType = result.filters.type;
+        this.minPrice = result.filters.minPrice;
+        this.maxPrice = result.filters.maxPrice;
         this.applyFilters();
       } else if (result?.action === 'reset') {
         this.resetFilters();
@@ -589,216 +185,40 @@ export class AnnoncesComponent implements OnInit {
     });
   }
 
-  saveCurrentFilters(): void {
-    const name = prompt('Nom du preset de filtres:');
-    if (!name) return;
-
-    const filters = {
-      searchQuery: this.searchQuery,
-      selectedStatus: this.selectedStatus,
-      selectedCity: this.selectedCity,
-      selectedType: this.selectedType
-    };
-
-    this.filterPresetService.savePresetLocally(this.FILTER_CONTEXT, name, filters);
-    this.loadSavedPresets();
-  }
-
-  loadPreset(preset: FilterPreset): void {
-    const filters = preset.filterConfig;
-    this.searchQuery = (filters['searchQuery'] as string) || '';
-    this.selectedStatus = (filters['selectedStatus'] as AnnonceStatus) || '';
-    this.selectedCity = (filters['selectedCity'] as string) || '';
-    this.selectedType = (filters['selectedType'] as string) || '';
+  resetFilters(): void {
+    this.selectedCity = '';
+    this.selectedType = '';
+    this.minPrice = null;
+    this.maxPrice = null;
     this.applyFilters();
-    this.showPresetMenu = false;
   }
 
-  deletePreset(preset: FilterPreset, event: Event): void {
-    event.stopPropagation();
-    if (confirm(`Supprimer le preset "${preset.name}" ?`)) {
-      this.filterPresetService.deletePresetLocally(this.FILTER_CONTEXT, preset.name);
-      this.loadSavedPresets();
-    }
+  removeFilter(filter: any): void { /* ... */ }
+
+  createAnnonce(): void { this.router.navigate(['/annonces/new']); }
+  goToAnnonce(id: number): void { this.router.navigate(['/annonces', id]); }
+
+  onDsTableRowClick(row: any): void { this.goToAnnonce(row.id); }
+  onDsTableRowAction(event: { action: string; row: any }): void {
+    if (event.action === 'view') this.goToAnnonce(event.row.id);
+    if (event.action === 'edit') this.router.navigate(['/annonces', event.row.id, 'edit']);
   }
 
-  togglePresetMenu(): void {
-    this.showPresetMenu = !this.showPresetMenu;
-  }
-
-  onSearch(): void {
-    this.currentPage = 0;
-    this.loadAnnonces();
-  }
-
-  goToPage(page: number): void {
-    this.currentPage = page;
-    this.loadAnnonces();
-  }
-
-  previousPage(): void {
-    if (this.currentPage > 0) {
-      this.currentPage--;
-      this.loadAnnonces();
-    }
-  }
-
-  nextPage(): void {
-    if (this.page && !this.page.last) {
-      this.currentPage++;
-      this.loadAnnonces();
-    }
-  }
-
-  createAnnonce(): void {
-    this.router.navigate(['/annonces/new']);
-  }
-
-  onRowAction(event: { action: string; row: unknown }): void {
-    const annonce = event.row as AnnonceResponse;
-    if (event.action === 'edit') {
-      this.editAnnonce(annonce.id);
-    }
-  }
-
-  editAnnonce(id: number): void {
-    this.router.navigate(['/annonces', id, 'edit']);
-  }
-
-  getStatusBadgeClass(status: AnnonceStatus): string {
-    const variant = this.annonceStatusToDsBadge(status);
-    return `ds-badge ds-badge--md ds-badge--no-dot ds-badge--${variant}`;
-  }
-
-  private annonceStatusToDsBadge(status: AnnonceStatus): DsBadgeStatus {
+  getAnnonceBadgeStatus(status: string): DsBadgeStatus {
     switch (status) {
-      case AnnonceStatus.PUBLISHED:
-      case AnnonceStatus.ACTIVE:
-        return 'active';
-      case AnnonceStatus.PAUSED:
-        return 'paused';
-      case AnnonceStatus.DRAFT:
-        return 'draft';
-      case AnnonceStatus.ARCHIVED:
-        return 'archived';
-      default:
-        return 'neutral';
+      case 'ACTIVE': return 'active';
+      case 'DRAFT': return 'draft';
+      case 'PAUSED': return 'paused';
+      case 'ARCHIVED': return 'archived';
+      default: return 'neutral';
     }
   }
 
-  getStatusLabel(status: AnnonceStatus): string {
-    switch (status) {
-      case AnnonceStatus.PUBLISHED:
-        return 'Actif';
-      case AnnonceStatus.DRAFT:
-        return 'Brouillon';
-      case AnnonceStatus.ARCHIVED:
-        return 'Archivé';
-      default:
-        return status;
-    }
+  countByStatus(status: string): number {
+    return this.annonces.filter(a => a.status === status).length;
   }
 
-  getPageNumbers(): number[] {
-    if (!this.page) return [];
-    const totalPages = this.page.totalPages;
-    const current = this.currentPage;
-    const pages: number[] = [];
-
-    if (totalPages <= 7) {
-      for (let i = 0; i < totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (current <= 3) {
-        for (let i = 0; i < 5; i++) pages.push(i);
-        pages.push(-1);
-        pages.push(totalPages - 1);
-      } else if (current >= totalPages - 4) {
-        pages.push(0);
-        pages.push(-1);
-        for (let i = totalPages - 5; i < totalPages; i++) pages.push(i);
-      } else {
-        pages.push(0);
-        pages.push(-1);
-        for (let i = current - 1; i <= current + 1; i++) pages.push(i);
-        pages.push(-1);
-        pages.push(totalPages - 1);
-      }
-    }
-
-    return pages;
-  }
-
-  trackByCity(index: number, city: string): string {
-    return city;
-  }
-
-  trackByType(index: number, type: string): string {
-    return type;
-  }
-
-  trackByPreset(index: number, preset: FilterPreset): string {
-    return preset.name;
-  }
-
-  trackByFilter(index: number, filter: AppliedFilter): string {
-    return filter.key;
-  }
-
-  trackByPageNum(index: number, pageNum: number): number {
-    return pageNum;
-  }
-
-  onExportRequest(event: { format: 'pdf' | 'excel' | 'print'; data: unknown[] }): void {
-    const exportColumns: ColumnDef[] = [
-      { key: 'id', header: 'ID', width: 20 },
-      { key: 'title', header: 'Titre', width: 80 },
-      { key: 'category', header: 'Catégorie', width: 40 },
-      { key: 'city', header: 'Ville', width: 40 },
-      { key: 'price', header: 'Prix', width: 30 },
-      { key: 'status', header: 'Statut', width: 30 },
-      { key: 'createdAt', header: 'Créé le', width: 35 },
-      { key: 'updatedAt', header: 'Modifié le', width: 35 }
-    ];
-
-    const dataToExport = event.data.map(item => {
-      const annonce = item as AnnonceResponse;
-      return {
-        id: annonce.id,
-        title: annonce.title || '',
-        category: annonce.category || '-',
-        city: annonce.city || '-',
-        price: annonce.price !== undefined
-          ? this.priceFormatPipe.transform(annonce.price, annonce.currency || 'EUR')
-          : '-',
-        status: this.getStatusLabel(annonce.status),
-        createdAt: this.dateFormatPipe.transform(annonce.createdAt),
-        updatedAt: this.dateFormatPipe.transform(annonce.updatedAt)
-      };
-    });
-
-    const exportConfig = {
-      title: 'Liste des Annonces',
-      filename: 'annonces',
-      primaryColor: DS_CHART_FALLBACK_HEX['--ds-marine'],
-      secondaryColor: DS_CHART_FALLBACK_HEX['--ds-primary'],
-    };
-
-    this.dialog.open(ExportProgressDialogComponent, {
-      width: '500px',
-      disableClose: true,
-      data: { message: 'Préparation de l\'export...' }
-    });
-
-    const exportPromise = event.format === 'pdf'
-      ? this.exportService.exportToPDF(dataToExport, exportColumns, exportConfig)
-      : event.format === 'excel'
-        ? this.exportService.exportToExcel(dataToExport, exportColumns, exportConfig)
-        : this.exportService.printTable(dataToExport, exportColumns, exportConfig);
-
-    exportPromise.catch(error => {
-      console.error('Export error:', error);
-    });
-  }
+  trackByAnnonceId(index: number, a: AnnonceResponse): number { return a.id; }
+  previousPage(): void { if (this.currentPage > 0) { this.currentPage--; this.loadAnnonces(); } }
+  nextPage(): void { if (this.page && !this.page.last) { this.currentPage++; this.loadAnnonces(); } }
 }

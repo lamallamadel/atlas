@@ -1,211 +1,158 @@
-<div class="report-builder-container">
-  <ds-card class="builder-card" [pad]="false" [elevation]="'sm'">
-    <div class="rb-card-header">
-      <h2 class="rb-card-title">Custom Report Builder</h2>
-      <p class="rb-card-subtitle">Drag and drop dimensions and metrics to create your custom report</p>
-    </div>
+<div class="report-builder ds-form-stack" style="padding: 32px; max-width: var(--ds-content-wide); margin: 0 auto;">
+  <header style="margin-bottom: 32px;">
+    <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: var(--ds-marine); font-family: var(--ds-font-display);">Constructeur de rapports</h1>
+    <p style="margin: 8px 0 0; color: var(--ds-text-muted);">Composez vos propres indicateurs et exportez-les</p>
+  </header>
 
-    <div class="rb-card-body">
-      <div class="builder-grid">
-        <div class="available-section">
-          <h3>Available Dimensions</h3>
-          <div
-            cdkDropList
-            #dimensionsList="cdkDropList"
-            [cdkDropListData]="availableDimensions"
-            [cdkDropListConnectedTo]="[selectedDimensionsList]"
-            (cdkDropListDropped)="dropDimension($event)"
-            class="drop-zone">
-            @for (dimension of availableDimensions; track dimension) {
-              <div
-                class="drag-item"
-                cdkDrag>
-                <mat-icon>drag_indicator</mat-icon>
-                <div class="item-content">
-                  <strong>{{ dimension.label }}</strong>
-                  <small>{{ dimension.description }}</small>
+  <div class="builder-layout" style="display: grid; grid-template-columns: 1fr 400px; gap: 24px;">
+    <div class="main-canvas ds-form-stack">
+      <ds-card [pad]="true" elevation="sm">
+        <h3 style="margin: 0 0 24px; font-size: 18px; font-weight: 700; color: var(--ds-marine);">Dimensions & Métriques</h3>
+        
+        <div class="drag-drop-zones ds-form-stack" style="gap: 24px;">
+          <div class="zone-container">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: var(--ds-text-faint); text-transform: uppercase; margin-bottom: 12px;">Dimensions (Regrouper par)</label>
+            <div 
+              cdkDropList 
+              #dimensionList="cdkDropList"
+              [cdkDropListData]="selectedDimensions"
+              (cdkDropListDropped)="dropDimension($event)"
+              class="drop-zone"
+              style="min-height: 60px; background: var(--ds-surface-2); border: 2px dashed var(--ds-divider); border-radius: var(--ds-radius-md); padding: 12px; display: flex; flex-wrap: wrap; gap: 8px;">
+              @for (dim of selectedDimensions; track dim.id) {
+                <div cdkDrag class="drag-chip" style="background: var(--ds-marine); color: white; padding: 6px 12px; border-radius: var(--ds-radius-pill); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: move;">
+                  {{ dim.label }}
+                  <ds-icon name="close" [size]="16" (click)="removeDimension(dim)" style="cursor: pointer;"></ds-icon>
                 </div>
-              </div>
-            }
-            @if (availableDimensions.length === 0) {
-              <div class="empty-message">
-                All dimensions are in use
-              </div>
-            }
+              }
+              @if (selectedDimensions.length === 0) {
+                <span style="color: var(--ds-text-faint); font-size: 13px; align-self: center;">Glissez des dimensions ici</span>
+              }
+            </div>
           </div>
 
-          <h3 class="mt-4">Available Metrics</h3>
-          <div
-            cdkDropList
-            #metricsList="cdkDropList"
-            [cdkDropListData]="availableMetrics"
-            [cdkDropListConnectedTo]="[selectedMetricsList]"
-            (cdkDropListDropped)="dropMetric($event)"
-            class="drop-zone">
-            @for (metric of availableMetrics; track metric) {
-              <div
-                class="drag-item"
-                cdkDrag>
-                <mat-icon>drag_indicator</mat-icon>
-                <div class="item-content">
-                  <strong>{{ metric.label }}</strong>
-                  <small>{{ metric.description }} ({{ metric.aggregation }})</small>
+          <div class="zone-container">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: var(--ds-text-faint); text-transform: uppercase; margin-bottom: 12px;">Métriques (Calculer)</label>
+            <div 
+              cdkDropList 
+              #metricList="cdkDropList"
+              [cdkDropListData]="selectedMetrics"
+              (cdkDropListDropped)="dropMetric($event)"
+              class="drop-zone"
+              style="min-height: 60px; background: var(--ds-surface-2); border: 2px dashed var(--ds-divider); border-radius: var(--ds-radius-md); padding: 12px; display: flex; flex-wrap: wrap; gap: 8px;">
+              @for (metric of selectedMetrics; track metric.id) {
+                <div cdkDrag class="drag-chip" style="background: var(--ds-primary); color: white; padding: 6px 12px; border-radius: var(--ds-radius-pill); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: move;">
+                  {{ metric.label }}
+                  <ds-icon name="close" [size]="16" (click)="removeMetric(metric)" style="cursor: pointer;"></ds-icon>
                 </div>
-              </div>
-            }
-            @if (availableMetrics.length === 0) {
-              <div class="empty-message">
-                All metrics are in use
-              </div>
-            }
+              }
+              @if (selectedMetrics.length === 0) {
+                <span style="color: var(--ds-text-faint); font-size: 13px; align-self: center;">Glissez des métriques ici</span>
+              }
+            </div>
           </div>
         </div>
 
-        <div class="selected-section">
-          <h3>Selected Dimensions</h3>
-          <div
-            cdkDropList
-            #selectedDimensionsList="cdkDropList"
-            [cdkDropListData]="selectedDimensions"
-            [cdkDropListConnectedTo]="[dimensionsList]"
-            (cdkDropListDropped)="dropDimension($event)"
-            class="drop-zone selected-zone">
-            @for (dimension of selectedDimensions; track dimension) {
-              <div
-                class="drag-item selected-item"
-                cdkDrag>
-                <mat-icon>drag_indicator</mat-icon>
-                <div class="item-content">
-                  <strong>{{ dimension.label }}</strong>
-                </div>
-                <button mat-icon-button (click)="removeDimension(dimension)" color="warn">
-                  <mat-icon>close</mat-icon>
-                </button>
-              </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--ds-divider);">
+          <ds-button variant="ghost" size="md" (dsClick)="resetReport()">Réinitialiser</ds-button>
+          <ds-button variant="marine" size="md" (dsClick)="generateReport()" [disabled]="selectedDimensions.length === 0 || selectedMetrics.length === 0 || loading">
+            @if (loading) {
+              <span class="spinner-small" style="margin-right: 8px;"></span>
+            } @else {
+              <ds-icon name="refresh" [size]="20" style="margin-right: 8px;"></ds-icon>
             }
-            @if (selectedDimensions.length === 0) {
-              <div class="empty-message">
-                Drag dimensions here
-              </div>
-            }
-          </div>
-
-          <h3 class="mt-4">Selected Metrics</h3>
-          <div
-            cdkDropList
-            #selectedMetricsList="cdkDropList"
-            [cdkDropListData]="selectedMetrics"
-            [cdkDropListConnectedTo]="[metricsList]"
-            (cdkDropListDropped)="dropMetric($event)"
-            class="drop-zone selected-zone">
-            @for (metric of selectedMetrics; track metric) {
-              <div
-                class="drag-item selected-item"
-                cdkDrag>
-                <mat-icon>drag_indicator</mat-icon>
-                <div class="item-content">
-                  <strong>{{ metric.label }}</strong>
-                </div>
-                <button mat-icon-button (click)="removeMetric(metric)" color="warn">
-                  <mat-icon>close</mat-icon>
-                </button>
-              </div>
-            }
-            @if (selectedMetrics.length === 0) {
-              <div class="empty-message">
-                Drag metrics here
-              </div>
-            }
-          </div>
+            Générer le rapport
+          </ds-button>
         </div>
-      </div>
+      </ds-card>
 
-      @if (!reportGenerated) {
-        <div class="actions-section">
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="generateReport()"
-            [disabled]="loading || selectedDimensions.length === 0 || selectedMetrics.length === 0">
-            <mat-icon>assessment</mat-icon>
-            Generate Report
-          </button>
-          <button mat-button (click)="resetReport()">
-            <mat-icon>refresh</mat-icon>
-            Reset
-          </button>
-        </div>
+      @if (reportGenerated) {
+        <ds-card [pad]="false" elevation="sm" style="margin-top: 24px;">
+          <div style="padding: 24px; border-bottom: 1px solid var(--ds-divider); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--ds-marine);">Aperçu des données</h3>
+          </div>
+          
+          <div style="padding: 24px;">
+            <ds-table
+              [columns]="dsColumns"
+              [rows]="reportData"
+              [bordered]="true"
+              emptyMessage="Aucun résultat pour cette combinaison.">
+              
+              @for (metric of selectedMetrics; track metric.id) {
+                <ng-template [dsCell]="metric.id" let-row>
+                  @if (metric.id.includes('Value')) {
+                    <span style="font-weight: 700; color: var(--ds-marine);">{{ row[metric.id] | currency:'EUR' }}</span>
+                  } @else if (metric.id.includes('Rate')) {
+                    <span style="font-weight: 700;">{{ row[metric.id] | percent:'1.1-1' }}</span>
+                  } @else {
+                    <span style="font-weight: 600;">{{ row[metric.id] | number }}</span>
+                  }
+                </ng-template>
+              }
+            </ds-table>
+          </div>
+        </ds-card>
       }
     </div>
-  </ds-card>
 
-  @if (reportGenerated) {
-    <ds-card class="results-card" [pad]="false" [elevation]="'sm'">
-      <div class="rb-card-header">
-        <h2 class="rb-card-title">Report Results</h2>
-      </div>
-      <div class="rb-card-body">
-        <div class="export-controls">
-          <mat-form-field appearance="outline">
-            <mat-label>Report Title</mat-label>
-            <input matInput [(ngModel)]="reportTitle">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Subtitle (Optional)</mat-label>
-            <input matInput [(ngModel)]="reportSubtitle">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Export Format</mat-label>
-            <mat-select [(ngModel)]="exportFormat">
-              <mat-option value="pdf">PDF</mat-option>
-              <mat-option value="csv">CSV</mat-option>
-              <mat-option value="excel">Excel</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <button mat-raised-button color="accent" (click)="exportReport()">
-            <mat-icon>download</mat-icon>
-            Export Report
-          </button>
-          <button mat-button (click)="resetReport()">
-            <mat-icon>edit</mat-icon>
-            Create New Report
-          </button>
+    <aside class="sidebar ds-form-stack">
+      <ds-card [pad]="true" elevation="sm">
+        <h3 style="margin: 0 0 20px; font-size: 15px; font-weight: 700; color: var(--ds-marine);">Configuration de l'export</h3>
+        
+        <div class="ds-form-stack">
+          <ds-input label="Titre du rapport" [(ngModel)]="reportTitle"></ds-input>
+          <ds-input label="Sous-titre" [(ngModel)]="reportSubtitle" placeholder="ex. Période Q1 2024"></ds-input>
+          <ds-select label="Format d'export" [options]="exportFormatOptions" [(ngModel)]="exportFormat"></ds-select>
+          
+          <ds-button variant="marine" size="md" (dsClick)="exportReport()" [disabled]="!reportGenerated || reportData.length === 0" style="margin-top: 16px;">
+            <ds-icon name="download" [size]="20" style="margin-right: 8px;"></ds-icon>
+            Télécharger le rapport
+          </ds-button>
         </div>
-        <div class="table-container">
-          <table mat-table [dataSource]="reportData" class="report-table">
-            @for (dimension of selectedDimensions; track dimension) {
-              <ng-container [matColumnDef]="dimension.id">
-                <th mat-header-cell *matHeaderCellDef>{{ dimension.label }}</th>
-                <td mat-cell *matCellDef="let row">{{ row[dimension.id] }}</td>
-              </ng-container>
-            }
-            @for (metric of selectedMetrics; track metric) {
-              <ng-container [matColumnDef]="metric.id">
-                <th mat-header-cell *matHeaderCellDef>{{ metric.label }}</th>
-                <td mat-cell *matCellDef="let row">
-                  @if (metric.id.includes('Rate')) {
-                    <span>{{ (row[metric.id] * 100).toFixed(2) }}%</span>
-                  }
-                  @if (metric.id.includes('Value')) {
-                    <span>{{ row[metric.id] | currency:'EUR':'symbol':'1.0-0' }}</span>
-                  }
-                  @if (!metric.id.includes('Rate') && !metric.id.includes('Value')) {
-                    <span>{{ row[metric.id] | number:'1.0-2' }}</span>
-                  }
-                </td>
-              </ng-container>
-            }
-            <tr mat-header-row *matHeaderRowDef="getDisplayedColumns()"></tr>
-            <tr mat-row *matRowDef="let row; columns: getDisplayedColumns()"></tr>
-          </table>
-        </div>
-      </div>
-    </ds-card>
-  }
+      </ds-card>
 
-  @if (loading) {
-    <div class="loading-overlay">
-      <ds-skeleton variant="circle" width="48px" height="48px"></ds-skeleton>
-    </div>
-  }
+      <ds-card [pad]="true" elevation="xs" style="background: var(--ds-surface-2);">
+        <h4 style="margin: 0 0 16px; font-size: 13px; font-weight: 700; color: var(--ds-text-faint); text-transform: uppercase;">Éléments disponibles</h4>
+        
+        <div class="available-items ds-form-stack" style="gap: 16px;">
+          <div class="item-group">
+            <h5 style="margin: 0 0 12px; font-size: 12px; font-weight: 600; color: var(--ds-text-muted);">Dimensions</h5>
+            <div 
+              cdkDropList 
+              #availableDimList="cdkDropList"
+              [cdkDropListData]="availableDimensions"
+              [cdkDropListConnectedTo]="[dimensionList]"
+              class="available-list"
+              style="display: flex; flex-direction: column; gap: 8px;">
+              @for (dim of availableDimensions; track dim.id) {
+                <div cdkDrag class="available-chip" style="background: var(--ds-surface); border: 1px solid var(--ds-divider); padding: 8px 12px; border-radius: var(--ds-radius-md); font-size: 13px; cursor: move; display: flex; align-items: center; gap: 8px;">
+                  <ds-icon name="plus" [size]="16" style="opacity: 0.3;"></ds-icon>
+                  {{ dim.label }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="item-group">
+            <h5 style="margin: 0 0 12px; font-size: 12px; font-weight: 600; color: var(--ds-text-muted);">Métriques</h5>
+            <div 
+              cdkDropList 
+              #availableMetricList="cdkDropList"
+              [cdkDropListData]="availableMetrics"
+              [cdkDropListConnectedTo]="[metricList]"
+              class="available-list"
+              style="display: flex; flex-direction: column; gap: 8px;">
+              @for (metric of availableMetrics; track metric.id) {
+                <div cdkDrag class="available-chip" style="background: var(--ds-surface); border: 1px solid var(--ds-divider); padding: 8px 12px; border-radius: var(--ds-radius-md); font-size: 13px; cursor: move; display: flex; align-items: center; gap: 8px;">
+                  <ds-icon name="plus" [size]="16" style="opacity: 0.3;"></ds-icon>
+                  {{ metric.label }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </ds-card>
+    </aside>
+  </div>
 </div>

@@ -1,70 +1,64 @@
-<div class="empty-state-container" role="status" aria-live="polite">
-  <div class="empty-state-content">
-    <!-- Illustration with fade-in animation -->
+<div class="empty-state-container ds-form-stack" role="status" aria-live="polite" style="text-align: center; padding: 48px 24px;">
+  <div class="empty-state-content ds-form-stack" style="align-items: center;">
+    <!-- Illustration -->
     @if (displayIllustration) {
-      <div class="empty-state-illustration" aria-hidden="true">
+      <div class="empty-state-illustration" style="margin-bottom: 32px;" aria-hidden="true">
         <div [innerHTML]="displayIllustration"></div>
       </div>
     }
 
-    <!-- Fallback icon if no illustration provided -->
+    <!-- Fallback icon -->
     @if (!displayIllustration) {
-      <div class="empty-state-icon" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
+      <div class="empty-state-icon" style="margin-bottom: 24px; color: var(--ds-text-faint); opacity: 0.3;" aria-hidden="true">
+        <ds-icon name="info" [size]="64"></ds-icon>
       </div>
     }
 
-    <!-- Title with fade-in animation -->
-    <h3 class="empty-state-title">{{ displayTitle }}</h3>
+    <!-- Title -->
+    <h3 class="empty-state-title" style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700; color: var(--ds-marine);">{{ displayTitle }}</h3>
 
-    <!-- Message with fade-in animation -->
+    <!-- Message -->
     @if (displayMessage) {
-      <p class="empty-state-message">{{ displayMessage }}</p>
+      <p class="empty-state-message" style="margin: 0 0 32px 0; color: var(--ds-text-muted); line-height: 1.5; max-width: 440px; margin-left: auto; margin-right: auto;">{{ displayMessage }}</p>
     }
 
-    <!-- Action buttons with fade-in animation -->
+    <!-- Action buttons -->
     @if (displayPrimaryAction || displaySecondaryAction) {
-      <div class="empty-state-actions">
+      <div class="empty-state-actions" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
         @if (displayPrimaryAction) {
-          <button
-            class="btn-primary-action"
-            (click)="onPrimaryClick()"
-            [attr.aria-label]="displayPrimaryAction.label">
+          <ds-button
+            variant="marine"
+            size="md"
+            (dsClick)="onPrimaryClick()"
+            [ariaLabel]="displayPrimaryAction.label">
             @if (displayPrimaryAction.icon) {
-              <mat-icon class="btn-icon">{{ displayPrimaryAction.icon }}</mat-icon>
+              <ds-icon [name]="displayPrimaryAction.icon" [size]="20" style="margin-right: 8px;"></ds-icon>
             }
             <span>{{ displayPrimaryAction.label }}</span>
-          </button>
+          </ds-button>
         }
         @if (displaySecondaryAction) {
-          <button
-            class="btn-secondary-action"
-            (click)="onSecondaryClick()"
-            [attr.aria-label]="displaySecondaryAction.label">
+          <ds-button
+            variant="ghost"
+            size="md"
+            (dsClick)="onSecondaryClick()"
+            [ariaLabel]="displaySecondaryAction.label">
             @if (displaySecondaryAction.icon) {
-              <mat-icon class="btn-icon">{{ displaySecondaryAction.icon }}</mat-icon>
+              <ds-icon [name]="displaySecondaryAction.icon" [size]="20" style="margin-right: 8px;"></ds-icon>
             }
             <span>{{ displaySecondaryAction.label }}</span>
-          </button>
+          </ds-button>
         }
       </div>
     }
 
-    <!-- Help link with fade-in animation -->
+    <!-- Help link -->
     @if (displayHelpLink) {
-      <div class="empty-state-help">
-        <a
-          href="javascript:void(0)"
-          class="help-link"
-          (click)="onHelpLinkClick()"
-          [attr.aria-label]="displayHelpLink.label">
-          <mat-icon class="help-icon">help_outline</mat-icon>
+      <div class="empty-state-help" style="margin-top: 32px;">
+        <ds-button variant="ghost" size="sm" (dsClick)="onHelpLinkClick()" style="color: var(--ds-primary);">
+          <ds-icon name="info" [size]="16" style="margin-right: 8px;"></ds-icon>
           <span>{{ displayHelpLink.label }}</span>
-        </a>
+        </ds-button>
       </div>
     }
   </div>

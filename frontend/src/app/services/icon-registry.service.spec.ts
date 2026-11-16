@@ -1,13 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+  provideHttpClientTesting} from '@angular/common/http/testing';
 import { IconRegistryService } from './icon-registry.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('IconRegistryService', () => {
   let service: IconRegistryService;
@@ -30,9 +28,7 @@ describe('IconRegistryService', () => {
       providers: [
         IconRegistryService,
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
+        provideHttpClientTesting()]});
     service = TestBed.inject(IconRegistryService);
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -174,8 +170,7 @@ describe('IconRegistryService', () => {
     service.loadIcons().subscribe({
       error: (error) => {
         expect(error).toBeTruthy();
-      },
-    });
+      }});
 
     const req = httpMock.expectOne('/assets/icons/real-estate-icons.svg');
     req.error(new ErrorEvent('Network error'));

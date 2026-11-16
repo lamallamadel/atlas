@@ -33,23 +33,19 @@ describe('AuthService', () => {
       hasValidAccessToken: vi.fn().mockName('OAuthService.hasValidAccessToken'),
       getAccessToken: vi.fn().mockName('OAuthService.getAccessToken'),
       initCodeFlow: vi.fn().mockName('OAuthService.initCodeFlow'),
-      logOut: vi.fn().mockName('OAuthService.logOut'),
-    };
+      logOut: vi.fn().mockName('OAuthService.logOut')};
     oauthService.hasValidAccessToken.mockReturnValue(false);
     oauthService.getAccessToken.mockReturnValue('');
     oauthService.loadDiscoveryDocumentAndTryLogin.mockResolvedValue(undefined);
 
     router = {
-      navigate: vi.fn().mockName('Router.navigate'),
-    };
+      navigate: vi.fn().mockName('Router.navigate')};
 
     TestBed.configureTestingModule({
       providers: [
         AuthService,
         { provide: OAuthService, useValue: oauthService },
-        { provide: Router, useValue: router },
-      ],
-    });
+        { provide: Router, useValue: router }]});
 
     service = TestBed.inject(AuthService);
   });
@@ -62,8 +58,7 @@ describe('AuthService', () => {
     const token = buildJwt({
       sub: 'u1',
       roles: ['USER'],
-      exp: Math.floor(Date.now() / 1000) + 3600,
-    });
+      exp: Math.floor(Date.now() / 1000) + 3600});
     service.login(token);
 
     expect(service.getToken()).toBe(token);
@@ -74,8 +69,7 @@ describe('AuthService', () => {
     const token = buildJwt({
       sub: 'u1',
       roles: ['ADMIN', 'USER'],
-      exp: Math.floor(Date.now() / 1000) + 3600,
-    });
+      exp: Math.floor(Date.now() / 1000) + 3600});
     service.login(token);
 
     expect(service.getUserRoles()).toEqual(['ADMIN', 'USER']);
@@ -95,16 +89,14 @@ describe('AuthService', () => {
     const token = buildJwt({
       sub: 'u1',
       roles: ['USER'],
-      exp: Math.floor(Date.now() / 1000) + 3600,
-    });
+      exp: Math.floor(Date.now() / 1000) + 3600});
     service.login(token);
 
     service.logout();
 
     expect(localStorage.getItem('auth_token')).toBeNull();
     expect(router.navigate).toHaveBeenCalledWith(['/login'], {
-      replaceUrl: true,
-    });
+      replaceUrl: true});
     expect(oauthService.logOut).toHaveBeenCalled();
   });
 });

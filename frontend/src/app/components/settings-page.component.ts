@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { fadeIn } from '../animations/animations';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -7,40 +8,55 @@ import { ThemeService } from '../services/theme.service';
 import { NotificationService } from '../services/notification.service';
 import { AuthService } from '../services/auth.service';
 import { DEFAULT_PREFERENCES } from '../models/user-preferences.model';
-import { MatIcon } from '@angular/material/icon';
-import { MatProgressBar } from '@angular/material/progress-bar';
-import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
-import { DsCardComponent, DsButtonComponent, DsIconComponent } from '../design-system';
-import { MatFormField, MatLabel, MatPrefix, MatHint } from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { MatDivider } from '@angular/material/list';
-import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
-import { MatInput } from '@angular/material/input';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
-
-interface TabConfig {
-  label: string;
-  value: string;
-  icon: string;
-  visible: boolean;
-}
+import { 
+  DsCardComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption, 
+  DsInputComponent, 
+  DsCheckboxComponent,
+  DsSkeletonComponent,
+  DsTabsComponent,
+  DsTab,
+  DsSwitchComponent,
+  DsRadioGroupComponent,
+  DsRadioOption
+} from '../design-system';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-settings-page',
+    standalone: true,
     templateUrl: './settings-page.component.html',
     styleUrls: ['./settings-page.component.css'],
-    imports: [MatIcon, MatProgressBar, MatTabGroup, MatTab, MatTabLabel, FormsModule, ReactiveFormsModule, DsCardComponent, DsButtonComponent, DsIconComponent, DsSkeletonComponent, MatFormField, MatLabel, MatSelect, MatOption, MatPrefix, MatHint, MatCheckbox, MatSlideToggle, MatDivider, MatButtonToggleGroup, MatButtonToggle, MatInput]
+    animations: [fadeIn],
+    imports: [
+      CommonModule,
+      FormsModule, 
+      ReactiveFormsModule, 
+      DsCardComponent, 
+      DsButtonComponent, 
+      DsIconComponent, 
+      DsSkeletonComponent, 
+      DsSelectComponent,
+      DsInputComponent,
+      DsTabsComponent,
+      DsSwitchComponent,
+      DsRadioGroupComponent
+    ]
 })
 export class SettingsPageComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private fb = inject(FormBuilder);
+  private userPreferencesService = inject(UserPreferencesService);
+  private themeService = inject(ThemeService);
+  private notificationService = inject(NotificationService);
+  private authService = inject(AuthService);
   
-  selectedTabIndex = 0;
-  tabs: TabConfig[] = [];
+  selectedTab = signal('preferences');
+  tabs: DsTab[] = [];
   
-  // Forms for each category
   preferencesForm!: FormGroup;
   notificationsForm!: FormGroup;
   appearanceForm!: FormGroup;
@@ -48,73 +64,55 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
   integrationsForm!: FormGroup;
   systemForm!: FormGroup;
   
-  // Loading states
   loading = false;
   saving = false;
   
-  // User role checks
   isAdmin = false;
   isSuperAdmin = false;
   
-  // Preview state
   previewTheme: 'light' | 'dark' = 'light';
   previewDateFormat = 'dd/MM/yyyy';
   previewTimeFormat = 'HH:mm';
   previewSampleDate = new Date();
   
-  // Original values for reset
   private originalValues: any = {};
   
-  // Available options
-  themes = [
-    { value: 'light', label: 'Clair', icon: 'light_mode' },
-    { value: 'dark', label: 'Sombre', icon: 'dark_mode' }
-  ];
-  
-  languages = [
+  languages: DsSelectOption[] = [
     { value: 'fr', label: 'Français' },
     { value: 'en', label: 'English' },
     { value: 'es', label: 'Español' }
   ];
   
-  densities = [
-    { value: 'compact', label: 'Compact', description: 'Maximum de contenu à l\'écran' },
-    { value: 'normal', label: 'Normal', description: 'Équilibre entre contenu et espacement' },
-    { value: 'comfortable', label: 'Confortable', description: 'Plus d\'espacement, moins de contenu' }
+  densities: DsSelectOption[] = [
+    { value: 'compact', label: 'Compact' },
+    { value: 'normal', label: 'Normal' },
+    { value: 'comfortable', label: 'Confortable' }
   ];
   
-  dateFormats = [
-    { value: 'dd/MM/yyyy', label: '31/12/2024', example: '31/12/2024' },
-    { value: 'MM/dd/yyyy', label: '12/31/2024', example: '12/31/2024' },
-    { value: 'yyyy-MM-dd', label: '2024-12-31', example: '2024-12-31' },
-    { value: 'd MMMM yyyy', label: '31 décembre 2024', example: '31 décembre 2024' }
+  dateFormats: DsSelectOption[] = [
+    { value: 'dd/MM/yyyy', label: '31/12/2024' },
+    { value: 'MM/dd/yyyy', label: '12/31/2024' },
+    { value: 'yyyy-MM-dd', label: '2024-12-31' },
+    { value: 'd MMMM yyyy', label: '31 décembre 2024' }
   ];
   
-  timeFormats = [
-    { value: 'HH:mm', label: '23:59 (24h)', example: '23:59' },
-    { value: 'hh:mm a', label: '11:59 PM (12h)', example: '11:59 PM' }
+  timeFormats: DsSelectOption[] = [
+    { value: 'HH:mm', label: '23:59 (24h)' },
+    { value: 'hh:mm a', label: '11:59 PM (12h)' }
   ];
   
-  timezones = [
+  timezones: DsSelectOption[] = [
     { value: 'Europe/Paris', label: 'Europe/Paris (GMT+1)' },
     { value: 'Europe/London', label: 'Europe/London (GMT+0)' },
     { value: 'America/New_York', label: 'America/New_York (GMT-5)' },
     { value: 'America/Los_Angeles', label: 'America/Los_Angeles (GMT-8)' }
   ];
   
-  currencies = [
-    { value: 'EUR', label: 'Euro (€)', symbol: '€' },
-    { value: 'USD', label: 'Dollar ($)', symbol: '$' },
-    { value: 'GBP', label: 'Livre (£)', symbol: '£' }
+  currencies: DsSelectOption[] = [
+    { value: 'EUR', label: 'Euro (€)' },
+    { value: 'USD', label: 'Dollar ($)' },
+    { value: 'GBP', label: 'Livre (£)' }
   ];
-
-  constructor(
-    private fb: FormBuilder,
-    private userPreferencesService: UserPreferencesService,
-    private themeService: ThemeService,
-    private notificationService: NotificationService,
-    private authService: AuthService
-  ) {}
 
   ngOnInit(): void {
     this.checkUserRoles();
@@ -137,13 +135,17 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
   private initializeTabs(): void {
     this.tabs = [
-      { label: 'Préférences', value: 'preferences', icon: 'tune', visible: true },
-      { label: 'Notifications', value: 'notifications', icon: 'notifications', visible: true },
-      { label: 'Apparence', value: 'appearance', icon: 'palette', visible: true },
-      { label: 'Raccourcis', value: 'shortcuts', icon: 'keyboard', visible: true },
-      { label: 'Intégrations', value: 'integrations', icon: 'extension', visible: this.isAdmin },
-      { label: 'Système', value: 'system', icon: 'settings', visible: this.isSuperAdmin }
-    ].filter(tab => tab.visible);
+      { label: 'Préférences', value: 'preferences' },
+      { label: 'Notifications', value: 'notifications' },
+      { label: 'Apparence', value: 'appearance' },
+      { label: 'Raccourcis', value: 'shortcuts' },
+      { label: 'Intégrations', value: 'integrations' },
+      { label: 'Système', value: 'system' }
+    ].filter(tab => {
+      if (tab.value === 'integrations') return this.isAdmin;
+      if (tab.value === 'system') return this.isSuperAdmin;
+      return true;
+    });
   }
 
   private initializeForms(): void {
@@ -491,14 +493,14 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  onTabChange(index: number): void {
-    this.selectedTabIndex = index;
+  onTabChange(value: string): void {
+    this.selectedTab.set(value);
   }
 
   getDensityDescription(): string {
     const densityValue = this.preferencesForm.get('density')?.value;
     const density = this.densities.find(d => d.value === densityValue);
-    return density?.description || '';
+    return density?.label || '';
   }
 
   getFormControlValue(form: FormGroup, controlName: string): boolean {

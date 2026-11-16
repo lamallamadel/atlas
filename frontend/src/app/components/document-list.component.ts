@@ -1,21 +1,39 @@
-import { Component, OnInit, input } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, OnInit, input, inject } from '@angular/core';
 import { DocumentApiService, DocumentResponse } from '../services/document-api.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { DocumentPreviewDialogComponent } from './document-preview-dialog.component';
 import { DocumentUploadComponent } from './document-upload.component';
 import { LoadingSkeletonComponent } from './loading-skeleton.component';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsBadgeComponent,
+  DsCardComponent,
+  DsToastService,
+  DsDialogService
+} from '../design-system';
 
 @Component({
     selector: 'app-document-list',
+    standalone: true,
     templateUrl: './document-list.component.html',
     styleUrls: ['./document-list.component.css'],
-    imports: [DocumentUploadComponent, LoadingSkeletonComponent, MatButton, MatIcon, MatIconButton]
+    imports: [
+      CommonModule,
+      DocumentUploadComponent, 
+      LoadingSkeletonComponent, 
+      DsButtonComponent, 
+      DsIconComponent,
+      DsBadgeComponent,
+      DsCardComponent
+    ]
 })
 export class DocumentListComponent implements OnInit {
+  private documentApiService = inject(DocumentApiService);
+  private dsDialogService = inject(DsDialogService);
+  private toastService = inject(DsToastService);
+
   readonly dossierId = input.required<number>();
 
   readonly documentAiAnalysisHint =
@@ -25,21 +43,13 @@ export class DocumentListComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  constructor(
-    private documentApiService: DocumentApiService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) { }
-
   ngOnInit(): void {
     this.loadDocuments();
   }
 
   loadDocuments(): void {
     const dossierId = this.dossierId();
-    if (!dossierId) {
-      return;
-    }
+    if (!dossierId) return;
 
     this.loading = true;
     this.error = null;
@@ -64,17 +74,13 @@ export class DocumentListComponent implements OnInit {
 
   previewDocument(document: DocumentResponse): void {
     if (this.documentApiService.isPreviewable(document.contentType)) {
-      this.dialog.open(DocumentPreviewDialogComponent, {
+      this.dsDialogService.open(DocumentPreviewDialogComponent, {
         width: '90vw',
         maxWidth: '1200px',
-        height: '90vh',
-        panelClass: 'document-preview-dialog',
         data: { document }
       });
     } else {
-      this.snackBar.open('Aperçu non disponible pour ce type de fichier', 'Fermer', {
-        duration: 3000
-      });
+      this.toastService.warning('Aperçu non disponible pour ce type de fichier');
     }
   }
 
@@ -88,24 +94,17 @@ export class DocumentListComponent implements OnInit {
           link.download = doc.fileName;
           link.click();
           window.URL.revokeObjectURL(url);
-
-          this.snackBar.open('Téléchargement démarré', 'Fermer', {
-            duration: 2000,
-            panelClass: ['success-snackbar']
-          });
+          this.toastService.success('Téléchargement démarré');
         },
         error: (err) => {
-          this.snackBar.open('Échec du téléchargement', 'Fermer', {
-            duration: 3000,
-            panelClass: ['error-snackbar']
-          });
+          this.toastService.error('Échec du téléchargement');
           console.error('Error downloading document:', err);
         }
       });
   }
 
   deleteDocument(document: DocumentResponse): void {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    const dialogRef = this.dsDialogService.open<boolean>(ConfirmDeleteDialogComponent, {
       width: '400px',
       data: {
         title: 'Supprimer le document',
@@ -113,22 +112,16 @@ export class DocumentListComponent implements OnInit {
       }
     });
 
-    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+    dialogRef.closed.subscribe((confirmed: boolean | undefined) => {
       if (confirmed) {
         this.documentApiService.delete(document.id)
           .subscribe({
             next: () => {
               this.documents = this.documents.filter(d => d.id !== document.id);
-              this.snackBar.open('Document supprimé avec succès', 'Fermer', {
-                duration: 3000,
-                panelClass: ['success-snackbar']
-              });
+              this.toastService.success('Document supprimé avec succès');
             },
             error: (err) => {
-              this.snackBar.open('Échec de la suppression', 'Fermer', {
-                duration: 3000,
-                panelClass: ['error-snackbar']
-              });
+              this.toastService.error('Échec de la suppression');
               console.error('Error deleting document:', err);
             }
           });
@@ -157,7 +150,6 @@ export class DocumentListComponent implements OnInit {
 
   getCategoryLabel(category?: string): string {
     if (!category) return '—';
-
     const labels: Record<string, string> = {
       'Contract': 'Contrat',
       'Invoice': 'Facture',
@@ -165,22 +157,19 @@ export class DocumentListComponent implements OnInit {
       'Photo': 'Photo',
       'Other': 'Autre'
     };
-
     return labels[category] || category;
   }
 
-  getCategoryBadgeClass(category?: string): string {
-    if (!category) return 'category-badge';
-
-    const classes: Record<string, string> = {
-      'Contract': 'category-badge category-contract',
-      'Invoice': 'category-badge category-invoice',
-      'ID': 'category-badge category-id',
-      'Photo': 'category-badge category-photo',
-      'Other': 'category-badge category-other'
+  getCategoryBadgeStatus(category?: string): any {
+    if (!category) return 'neutral';
+    const map: Record<string, any> = {
+      'Contract': 'active',
+      'Invoice': 'warning',
+      'ID': 'info',
+      'Photo': 'success',
+      'Other': 'neutral'
     };
-
-    return classes[category] || 'category-badge';
+    return map[category] || 'neutral';
   }
 
   isPreviewable(document: DocumentResponse): boolean {
@@ -200,10 +189,10 @@ export class DocumentListComponent implements OnInit {
     return null;
   }
 
-  getAiStatusClass(contentType: string | undefined): string {
+  getAiStatusBadgeStatus(contentType: string | undefined): any {
     const status = this.getAiStatusText(contentType);
-    if (status === 'VALIDE') return 'ai-badge ai-valide';
-    if (status === 'INVALIDE') return 'ai-badge ai-invalide';
-    return 'ai-badge';
+    if (status === 'VALIDE') return 'success';
+    if (status === 'INVALIDE') return 'error';
+    return 'neutral';
   }
 }

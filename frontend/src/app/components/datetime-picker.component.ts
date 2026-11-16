@@ -7,13 +7,11 @@ import {
 } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, FormBuilder, FormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
+import { CommonModule } from '@angular/common';
 
 /**
- * Mat-styled Date+Time field that outputs the same string format as native
- * <input type="datetime-local">: YYYY-MM-DDTHH:mm
+ * Atlasia V2 styled Date+Time field using native HTML5 inputs.
+ * Outputs the same string format as native <input type="datetime-local">: YYYY-MM-DDTHH:mm
  */
 @Component({
     selector: 'app-datetime-picker',
@@ -32,15 +30,13 @@ import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular
         }
     ],
     standalone: true,
-    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker]
+    imports: [CommonModule, FormsModule, ReactiveFormsModule]
 })
 export class DatetimePickerComponent
   implements ControlValueAccessor, Validator, OnInit, OnDestroy
 {
   readonly label = input('Date et heure');
   readonly required = input(false);
-  readonly datePlaceholder = input('jj/mm/aaaa');
-  readonly timePlaceholder = input('hh:mm');
 
   form!: FormGroup;
 
@@ -54,13 +50,8 @@ export class DatetimePickerComponent
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      date: [null, this.required() ? [Validators.required] : []],
-      time: [
-        '',
-        this.required()
-          ? [Validators.required, DatetimePickerComponent.timeValidator]
-          : [DatetimePickerComponent.timeValidator]
-      ]
+      date: ['', this.required() ? [Validators.required] : []],
+      time: ['', this.required() ? [Validators.required] : []]
     });
 
     this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
@@ -87,15 +78,26 @@ export class DatetimePickerComponent
     }
 
     if (!value) {
-      this.form.setValue({ date: null, time: '' }, { emitEvent: false });
+      this.form.setValue({ date: '', time: '' }, { emitEvent: false });
       return;
     }
 
-    const parsed = this.parseIncoming(value);
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) {
+      this.form.setValue({ date: '', time: '' }, { emitEvent: false });
+      return;
+    }
+
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+
     this.form.setValue(
       {
-        date: parsed?.date ?? null,
-        time: parsed?.time ?? ''
+        date: `${yyyy}-${mm}-${dd}`,
+        time: `${hh}:${min}`
       },
       { emitEvent: false }
     );
@@ -122,9 +124,6 @@ export class DatetimePickerComponent
     if (this.required() && (!dateCtrl?.value || !timeCtrl?.value)) {
       return { required: true };
     }
-    if (timeCtrl?.hasError('invalidTime')) {
-      return { invalidTime: true };
-    }
     return null;
   }
 
@@ -133,53 +132,15 @@ export class DatetimePickerComponent
     if (this.form) this.form.markAllAsTouched();
   }
 
-  get showRequiredError(): boolean {
-    if (!this.form) return false;
-    return (
-      this.form.touched &&
-      this.required() &&
-      (!this.form.get('date')?.value || !this.form.get('time')?.value)
-    );
-  }
-
-  get showInvalidTimeError(): boolean {
-    if (!this.form) return false;
-    return this.form.touched && !!this.form.get('time')?.hasError('invalidTime');
-  }
-
   private buildLocalDateTimeString(): string {
     if (!this.form) return '';
-    const date: Date | null = this.form.get('date')?.value ?? null;
-    const time: string = this.form.get('time')?.value ?? '';
+    const date: string = this.form.get('date')?.value || '';
+    const time: string = this.form.get('time')?.value || '';
 
-    if (!date || !time || !DatetimePickerComponent.isValidTime(time)) {
+    if (!date || !time) {
       return '';
     }
 
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const [hh, min] = time.split(':');
-    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-  }
-
-  private parseIncoming(value: string): { date: Date; time: string } | null {
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return null;
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return { date: d, time: `${hours}:${minutes}` };
-  }
-
-  static timeValidator(control: AbstractControl): ValidationErrors | null {
-    const v = (control.value ?? '').toString().trim();
-    if (!v) return null;
-    return DatetimePickerComponent.isValidTime(v) ? null : { invalidTime: true };
-  }
-
-  static isValidTime(v: string): boolean {
-    if (!/^\d{2}:\d{2}$/.test(v)) return false;
-    const [hh, mm] = v.split(':').map(Number);
-    return hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59;
+    return `${date}T${time}`;
   }
 }

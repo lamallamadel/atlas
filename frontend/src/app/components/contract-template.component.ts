@@ -1,15 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DsCardComponent } from '../design-system';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { 
+  DsCardComponent, 
+  DsToastService, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsInputComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsEmptyStateComponent,
+  DsSkeletonComponent,
+  DsTableComponent,
+  DsColumn,
+  DsRowAction
+} from '../design-system';
 import { ESignatureApiService } from '../services/esignature-api.service';
 import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.models';
 
@@ -20,220 +25,149 @@ import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.m
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    DatePipe,
     DsCardComponent,
-    MatButtonModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatTableModule,
-    MatIconModule,
-    MatDialogModule,
-    MatSnackBarModule,
+    DsButtonComponent,
+    DsIconComponent,
+    DsInputComponent,
+    DsSelectComponent,
+    DsEmptyStateComponent,
+    DsSkeletonComponent,
+    DsTableComponent,
+    DsCellDirective
   ],
   template: `
-    <div class="contract-template-container">
+    <div class="contract-template-container ds-form-stack" style="padding: 32px; max-width: var(--ds-content-wide); margin: 0 auto;">
+      <header style="margin-bottom: 32px;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: var(--ds-marine); font-family: var(--ds-font-display);">Modèles de contrats</h1>
+        <p style="margin: 8px 0 0; color: var(--ds-text-muted);">Gérez les modèles PDF pour les signatures électroniques</p>
+      </header>
+
       <ds-card [pad]="false" [elevation]="'sm'">
-        <div class="ct-card-header">
-          <h3 class="ct-card-title">Contract Templates</h3>
-          <p class="ct-card-subtitle">Manage PDF contract templates for electronic signatures</p>
-        </div>
-        <div class="ct-card-body">
+        <div class="ct-card-header" style="padding: 24px 24px 0; display: flex; justify-content: space-between; align-items: center;">
+          <h3 class="ct-card-title" style="margin: 0; font-size: 18px; font-weight: 700; color: var(--ds-marine);">Bibliothèque</h3>
           @if (!showForm) {
-            <div class="upload-section">
-              <button mat-raised-button color="primary" (click)="showForm = true">
-                <mat-icon>add</mat-icon>
-                Upload New Template
-              </button>
-            </div>
+            <ds-button variant="marine" size="md" (dsClick)="showForm = true">
+              <ds-icon name="plus" [size]="20" style="margin-right: 8px;"></ds-icon>
+              Nouveau modèle
+            </ds-button>
           }
-    
+        </div>
+        
+        <div class="ct-card-body" style="padding: 24px;">
           @if (showForm) {
-            <form [formGroup]="templateForm" (ngSubmit)="uploadTemplate()" class="template-form">
-              <mat-form-field appearance="outline">
-                <mat-label>Template Name</mat-label>
-                <input matInput formControlName="templateName" required>
-                @if (templateForm.get('templateName')?.hasError('required')) {
-                  <mat-error>
-                    Template name is required
-                  </mat-error>
-                }
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Template Type</mat-label>
-                <mat-select formControlName="templateType" required>
-                  <mat-option value="MANDATE">Mandate Agreement</mat-option>
-                  <mat-option value="PURCHASE_AGREEMENT">Purchase Agreement</mat-option>
-                  <mat-option value="LISTING_AGREEMENT">Listing Agreement</mat-option>
-                  <mat-option value="LEASE_AGREEMENT">Lease Agreement</mat-option>
-                  <mat-option value="OTHER">Other</mat-option>
-                </mat-select>
-                @if (templateForm.get('templateType')?.hasError('required')) {
-                  <mat-error>
-                    Template type is required
-                  </mat-error>
-                }
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Description</mat-label>
-                <textarea matInput formControlName="description" rows="3"></textarea>
-              </mat-form-field>
-              <div class="file-upload">
-                <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf" hidden>
-                <button mat-raised-button type="button" (click)="fileInput.click()">
-                  <mat-icon>upload_file</mat-icon>
-                  Choose PDF File
-                </button>
-                @if (selectedFile) {
-                  <span class="file-name">{{ selectedFile.name }}</span>
-                }
+            <form [formGroup]="templateForm" (ngSubmit)="uploadTemplate()" class="template-form ds-form-stack" style="max-width: 600px;">
+              <ds-input label="Nom du modèle" formControlName="templateName" required="true" placeholder="ex. Compromis de vente V1"></ds-input>
+              
+              <ds-select
+                label="Type de modèle"
+                [options]="templateTypeOptions"
+                formControlName="templateType"
+                required="true">
+              </ds-select>
+              
+              <div class="ds-field">
+                <label class="ds-field__label">Description</label>
+                <div class="ds-field__wrap">
+                  <textarea class="ds-field__input" formControlName="description" rows="3" style="height: auto; padding: 12px;"></textarea>
+                </div>
               </div>
-              <div class="form-actions">
-                <button mat-button type="button" (click)="cancelUpload()">Cancel</button>
-                <button mat-raised-button color="primary" type="submit" [disabled]="!templateForm.valid || !selectedFile || uploading">
-                  {{ uploading ? 'Uploading...' : 'Upload Template' }}
-                </button>
+
+              <div class="file-upload-area" style="margin: 24px 0;">
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf" hidden>
+                <div style="display: flex; gap: 16px; align-items: center;">
+                  <ds-button variant="ghost" size="md" type="button" (dsClick)="fileInput.click()">
+                    <ds-icon name="folder" [size]="20" style="margin-right: 8px;"></ds-icon>
+                    Choisir un fichier PDF
+                  </ds-button>
+                  @if (selectedFile) {
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ds-primary); font-weight: 600;">
+                      <ds-icon name="check" [size]="16"></ds-icon>
+                      {{ selectedFile.name }}
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="form-actions" style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 24px; border-top: 1px solid var(--ds-divider);">
+                <ds-button variant="ghost" size="md" type="button" (dsClick)="cancelUpload()">Annuler</ds-button>
+                <ds-button variant="marine" size="md" type="submit" [disabled]="!templateForm.valid || !selectedFile || uploading">
+                  @if (uploading) {
+                    <ds-skeleton variant="circle" width="20px" height="20px" [animate]="true" style="margin-right: 8px;"></ds-skeleton>
+                  } @else {
+                    <ds-icon name="upload" [size]="20" style="margin-right: 8px;"></ds-icon>
+                  }
+                  {{ uploading ? 'Envoi...' : 'Télécharger le modèle' }}
+                </ds-button>
               </div>
             </form>
           }
     
           @if (!showForm) {
             <div class="templates-list">
-              <table mat-table [dataSource]="templates" class="templates-table">
-                <ng-container matColumnDef="templateName">
-                  <th mat-header-cell *matHeaderCellDef>Name</th>
-                  <td mat-cell *matCellDef="let template">{{ template.templateName }}</td>
-                </ng-container>
-                <ng-container matColumnDef="templateType">
-                  <th mat-header-cell *matHeaderCellDef>Type</th>
-                  <td mat-cell *matCellDef="let template">{{ template.templateType }}</td>
-                </ng-container>
-                <ng-container matColumnDef="fileName">
-                  <th mat-header-cell *matHeaderCellDef>File</th>
-                  <td mat-cell *matCellDef="let template">{{ template.fileName }}</td>
-                </ng-container>
-                <ng-container matColumnDef="fileSize">
-                  <th mat-header-cell *matHeaderCellDef>Size</th>
-                  <td mat-cell *matCellDef="let template">{{ formatFileSize(template.fileSize) }}</td>
-                </ng-container>
-                <ng-container matColumnDef="createdAt">
-                  <th mat-header-cell *matHeaderCellDef>Created</th>
-                  <td mat-cell *matCellDef="let template">{{ template.createdAt | date:'short' }}</td>
-                </ng-container>
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
-                  <td mat-cell *matCellDef="let template">
-                    <button type="button" mat-icon-button color="warn" (click)="deleteTemplate(template.id)" title="Delete">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-              </table>
-              @if (templates.length === 0) {
-                <div class="empty-state">
-                  <mat-icon>description</mat-icon>
-                  <p>No templates uploaded yet</p>
-                </div>
-              }
+              <ds-table
+                [columns]="dsColumns"
+                [data]="templates"
+                [rowActions]="dsRowActions"
+                (rowAction)="onRowAction($event)"
+                emptyTitle="Aucun modèle de contrat"
+                emptyDescription="Téléchargez votre premier modèle PDF pour commencer les signatures.">
+                
+                <ng-template dsCell="templateName" let-template>
+                  <span style="font-weight: 600;">{{ template.templateName }}</span>
+                </ng-template>
+
+                <ng-template dsCell="fileName" let-template>
+                  <span style="font-family: var(--ds-font-mono); font-size: 12px;">{{ template.fileName }}</span>
+                </ng-template>
+
+                <ng-template dsCell="fileSize" let-template>
+                  {{ formatFileSize(template.fileSize) }}
+                </ng-template>
+
+                <ng-template dsCell="createdAt" let-template>
+                  {{ template.createdAt | date:'short' }}
+                </ng-template>
+              </ds-table>
             </div>
           }
         </div>
       </ds-card>
     </div>
-    `,
-  styles: [`
-    .contract-template-container {
-      padding: 24px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .ct-card-header {
-      padding: 16px 16px 0;
-    }
-
-    .ct-card-title {
-      margin: 0 0 8px;
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .ct-card-subtitle {
-      margin: 0;
-      font-size: 14px;
-      color: var(--ds-text-muted);
-    }
-
-    .ct-card-body {
-      padding: 0 16px 16px;
-    }
-
-    .template-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin: 24px 0;
-    }
-
-    .file-upload {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin: 16px 0;
-    }
-
-    .file-name {
-      color: #666;
-      font-size: 14px;
-    }
-
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .upload-section {
-      margin: 24px 0;
-    }
-
-    .templates-table {
-      width: 100%;
-      margin-top: 24px;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 48px;
-      color: #999;
-    }
-
-    .empty-state mat-icon {
-      font-size: 64px;
-      width: 64px;
-      height: 64px;
-    }
-
-    mat-form-field {
-      width: 100%;
-    }
-  `]
+    `
 })
 export class ContractTemplateComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private eSignatureService = inject(ESignatureApiService);
+  private toastService = inject(DsToastService);
+
   templateForm: FormGroup;
   templates: ContractTemplate[] = [];
   selectedFile: File | null = null;
   uploading = false;
   showForm = false;
-  displayedColumns = ['templateName', 'templateType', 'fileName', 'fileSize', 'createdAt', 'actions'];
 
-  constructor(
-    private fb: FormBuilder,
-    private eSignatureService: ESignatureApiService,
-    private snackBar: MatSnackBar
-  ) {
+  dsColumns: DsColumn<ContractTemplate>[] = [
+    { key: 'templateName', header: 'Nom' },
+    { key: 'templateType', header: 'Type' },
+    { key: 'fileName',     header: 'Fichier' },
+    { key: 'fileSize',     header: 'Taille' },
+    { key: 'createdAt',    header: 'Créé le' }
+  ];
+
+  dsRowActions: DsRowAction<ContractTemplate>[] = [
+    { icon: 'trash', label: 'Supprimer', action: 'delete', ariaLabel: 'Supprimer le modèle' }
+  ];
+
+  readonly templateTypeOptions: DsSelectOption[] = [
+    { value: 'MANDATE', label: 'Mandat de vente/location' },
+    { value: 'PURCHASE_AGREEMENT', label: 'Compromis de vente' },
+    { value: 'LISTING_AGREEMENT', label: 'Mandat de recherche' },
+    { value: 'LEASE_AGREEMENT', label: 'Contrat de bail' },
+    { value: 'OTHER', label: 'Autre document' }
+  ];
+
+  constructor() {
     this.templateForm = this.fb.group({
       templateName: ['', Validators.required],
       templateType: ['', Validators.required],
@@ -251,7 +185,7 @@ export class ContractTemplateComponent implements OnInit {
         this.templates = templates;
       },
       error: (error) => {
-        this.snackBar.open('Failed to load templates', 'Close', { duration: 3000 });
+        this.toastService.error('Échec du chargement des modèles');
         console.error('Error loading templates:', error);
       }
     });
@@ -262,7 +196,7 @@ export class ContractTemplateComponent implements OnInit {
     if (file && file.type === 'application/pdf') {
       this.selectedFile = file;
     } else {
-      this.snackBar.open('Please select a PDF file', 'Close', { duration: 3000 });
+      this.toastService.warning('Veuillez sélectionner un fichier PDF');
     }
   }
 
@@ -273,12 +207,12 @@ export class ContractTemplateComponent implements OnInit {
 
       this.eSignatureService.uploadTemplate(this.selectedFile, template).subscribe({
         next: () => {
-          this.snackBar.open('Template uploaded successfully', 'Close', { duration: 3000 });
+          this.toastService.success('Modèle téléchargé avec succès');
           this.cancelUpload();
           this.loadTemplates();
         },
         error: (error) => {
-          this.snackBar.open('Failed to upload template', 'Close', { duration: 3000 });
+          this.toastService.error('Échec du téléchargement');
           console.error('Error uploading template:', error);
           this.uploading = false;
         }
@@ -293,17 +227,23 @@ export class ContractTemplateComponent implements OnInit {
     this.uploading = false;
   }
 
+  onRowAction(event: { action: string; row: ContractTemplate }): void {
+    if (event.action === 'delete') {
+      this.deleteTemplate(event.row.id);
+    }
+  }
+
   deleteTemplate(id: number | undefined): void {
     if (!id) return;
 
-    if (confirm('Are you sure you want to delete this template?')) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce modèle ?')) {
       this.eSignatureService.deleteTemplate(id).subscribe({
         next: () => {
-          this.snackBar.open('Template deleted successfully', 'Close', { duration: 3000 });
+          this.toastService.success('Modèle supprimé avec succès');
           this.loadTemplates();
         },
         error: (error) => {
-          this.snackBar.open('Failed to delete template', 'Close', { duration: 3000 });
+          this.toastService.error('Échec de la suppression');
           console.error('Error deleting template:', error);
         }
       });
@@ -311,7 +251,7 @@ export class ContractTemplateComponent implements OnInit {
   }
 
   formatFileSize(bytes: number | undefined): string {
-    if (!bytes) return 'N/A';
+    if (!bytes) return '—';
     const kb = bytes / 1024;
     const mb = kb / 1024;
     return mb > 1 ? `${mb.toFixed(2)} MB` : `${kb.toFixed(2)} KB`;

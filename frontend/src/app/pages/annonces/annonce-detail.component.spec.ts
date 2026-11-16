@@ -8,14 +8,12 @@ import { AnnonceDetailComponent } from './annonce-detail.component';
 import {
   AnnonceApiService,
   AnnonceResponse,
-  AnnonceStatus,
-} from '../../services/annonce-api.service';
+  AnnonceStatus} from '../../services/annonce-api.service';
 import { RecentNavigationService } from '../../services/recent-navigation.service';
 
 @Component({
   selector: 'app-badge-status',
-  template: '',
-})
+  template: ''})
 class BadgeStatusStubComponent {
   readonly status = input<any>();
   readonly entityType = input<any>();
@@ -61,43 +59,33 @@ describe('AnnonceDetailComponent', () => {
     createdAt: '2024-01-01T10:00:00Z',
     updatedAt: '2024-01-02T10:00:00Z',
     createdBy: 'user1',
-    updatedBy: 'user1',
-  };
+    updatedBy: 'user1'};
 
   beforeEach(async () => {
     mockAnnonceApiService = {
-      getById: vi.fn().mockName('AnnonceApiService.getById'),
-    };
+      getById: vi.fn().mockName('AnnonceApiService.getById')};
     mockRouter = {
       navigate: vi.fn().mockName('Router.navigate'),
-      events: EMPTY,
-    };
+      events: EMPTY};
     mockActivatedRoute = {
       snapshot: {
         paramMap: {
-          get: vi.fn().mockReturnValue('1'),
-        },
-      },
-    };
+          get: vi.fn().mockReturnValue('1')}}};
 
     const mockRecentNavService = {
-      addRecentItem: vi.fn().mockName('RecentNavigationService.addRecentItem'),
-    };
+      addRecentItem: vi.fn().mockName('RecentNavigationService.addRecentItem')};
 
     await TestBed.configureTestingModule({
       imports: [
         AnnonceDetailComponent,
         BadgeStatusStubComponent,
         DateFormatPipeStub,
-        PriceFormatPipeStub,
-      ],
+        PriceFormatPipeStub],
       providers: [
         { provide: AnnonceApiService, useValue: mockAnnonceApiService },
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: RecentNavigationService, useValue: mockRecentNavService },
-      ],
-    }).compileComponents();
+        { provide: RecentNavigationService, useValue: mockRecentNavService }]}).compileComponents();
 
     fixture = TestBed.createComponent(AnnonceDetailComponent);
     component = fixture.componentInstance;

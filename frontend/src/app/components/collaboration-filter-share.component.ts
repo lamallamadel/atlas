@@ -1,264 +1,104 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CollaborationService, SharedFilterPreset } from '../services/collaboration.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { DsToastService, DsButtonComponent, DsIconComponent, DsInputComponent, DsCardComponent } from '../design-system';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-collaboration-filter-share',
+    standalone: true,
     template: `
-    <div class="filter-share-container">
-      <h3 class="section-header">
-        <span class="header-icon">🔍</span>
-        Shared Filter Presets
+    <ds-card class="filter-share-container" [pad]="true" elevation="sm">
+      <h3 class="section-header" style="display: flex; align-items: center; gap: 12px; margin: 0 0 24px 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">
+        <ds-icon name="filter" [size]="20"></ds-icon>
+        Presets de filtres partagés
       </h3>
     
-      <div class="filter-list">
-        @for (filter of sharedFilters; track filter) {
+      <div class="filter-list ds-form-stack" style="margin-bottom: 24px;">
+        @for (filter of sharedFilters; track filter.id) {
           <div
-            class="filter-item"
+            class="filter-item ds-card"
             role="button"
             tabindex="0"
+            style="display: flex; gap: 16px; padding: 12px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-sm); align-items: center; cursor: pointer; transition: all 0.2s ease;"
             (click)="applyFilter(filter)"
-            (keydown.enter)="applyFilter(filter)"
-            (keydown.space)="$event.preventDefault(); applyFilter(filter)">
-            <div class="filter-icon">
-              <span>📊</span>
+            (keydown.enter)="applyFilter(filter)">
+            <div class="filter-icon" style="width: 36px; height: 36px; background: var(--ds-bg-subtle); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--ds-marine);">
+              <ds-icon name="chart" [size]="20"></ds-icon>
             </div>
-            <div class="filter-content">
-              <div class="filter-name">{{ filter.name }}</div>
-              <div class="filter-meta">
-                <span class="shared-by">Shared by {{ filter.sharedByUsername }}</span>
+            <div class="filter-content" style="flex: 1; min-width: 0;">
+              <div class="filter-name" style="font-weight: 700; font-size: 14px;">{{ filter.name }}</div>
+              <div class="filter-meta" style="display: flex; gap: 12px; font-size: 11px; color: var(--ds-text-faint);">
+                <span class="shared-by">Par {{ filter.sharedByUsername }}</span>
                 <span class="shared-time">{{ formatTimestamp(filter.sharedAt) }}</span>
               </div>
               @if (filter.description) {
-                <div class="filter-description">
+                <div class="filter-description" style="font-size: 12px; color: var(--ds-text-muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                   {{ filter.description }}
                 </div>
               }
             </div>
-            <button class="apply-btn" (click)="applyFilter(filter); $event.stopPropagation()">
-              Apply
-            </button>
+            <ds-button variant="ghost" size="sm" (dsClick)="applyFilter(filter); $event.stopPropagation()">
+              Appliquer
+            </ds-button>
           </div>
         }
     
         @if (sharedFilters.length === 0) {
-          <div class="no-filters">
-            <span class="empty-icon">🔍</span>
-            <p>No shared filter presets</p>
+          <div class="no-filters" style="text-align: center; padding: 32px; color: var(--ds-text-faint);">
+            <ds-icon name="search" [size]="24" style="opacity: 0.3; margin-bottom: 12px;"></ds-icon>
+            <p style="font-size: 13px;">Aucun preset partagé</p>
           </div>
         }
       </div>
     
-      <div class="share-section">
-        <h4>Share Current Filters</h4>
-        <div class="share-form">
-          <input type="text"
+      <div class="share-section ds-form-stack" style="border-top: 1px solid var(--ds-divider); padding-top: 24px;">
+        <h4 style="margin: 0 0 16px 0; font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--ds-text-muted); letter-spacing: 0.5px;">Partager mes filtres</h4>
+        <div class="share-form ds-form-stack">
+          <ds-input
+            label="Nom du preset"
             [(ngModel)]="newFilterName"
-            placeholder="Filter preset name"
-            class="filter-input">
-            <textarea [(ngModel)]="newFilterDescription"
-              placeholder="Description (optional)"
-              class="filter-textarea"
-            rows="2"></textarea>
-            <button class="share-btn"
-              (click)="shareCurrentFilters()"
-              [disabled]="!newFilterName">
-              <span class="btn-icon">📤</span>
-              Share with Team
-            </button>
+            placeholder="ex. Prospects chauds Paris">
+          </ds-input>
+          
+          <div class="ds-field">
+            <label class="ds-field__label">Description (optionnel)</label>
+            <div class="ds-field__wrap">
+              <textarea 
+                [(ngModel)]="newFilterDescription"
+                class="ds-field__input"
+                placeholder="Description..."
+                rows="2"
+                style="height: auto; padding: 12px;"></textarea>
+            </div>
           </div>
+
+          <ds-button 
+            variant="marine" 
+            size="md"
+            (dsClick)="shareCurrentFilters()"
+            [disabled]="!newFilterName.trim()"
+            style="width: 100%;">
+            <ds-icon name="upload" [size]="20" style="margin-right: 8px;"></ds-icon>
+            Partager avec l'équipe
+          </ds-button>
         </div>
       </div>
+    </ds-card>
     `,
-    styles: [`
-    .filter-share-container {
-      background: var(--ds-surface);
-      border-radius: var(--ds-radius-md);
-      padding: var(--ds-space-4);
-      box-shadow: var(--ds-shadow-sm);
-    }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      gap: var(--ds-space-2);
-      margin: 0 0 var(--ds-space-4) 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--ds-text);
-    }
-
-    .header-icon {
-      font-size: 20px;
-    }
-
-    .filter-list {
-      margin-bottom: var(--ds-space-6);
-    }
-
-    .filter-item {
-      display: flex;
-      gap: var(--ds-space-3);
-      padding: var(--ds-space-3);
-      border: 1px solid var(--ds-divider);
-      border-radius: var(--ds-radius-sm);
-      margin-bottom: var(--ds-space-2);
-      cursor: pointer;
-      transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
-      align-items: center;
-    }
-
-    .filter-item:hover {
-      border-color: var(--ds-marine);
-      box-shadow: var(--ds-shadow-sm);
-    }
-
-    .filter-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--ds-marine-hl);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      font-size: 20px;
-    }
-
-    .filter-content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .filter-name {
-      font-weight: 600;
-      font-size: 14px;
-      color: var(--ds-text);
-      margin-bottom: var(--ds-space-1);
-    }
-
-    .filter-meta {
-      display: flex;
-      gap: var(--ds-space-3);
-      font-size: 12px;
-      color: var(--ds-text-muted);
-      margin-bottom: var(--ds-space-1);
-    }
-
-    .filter-description {
-      font-size: 12px;
-      color: var(--ds-text-muted);
-      margin-top: var(--ds-space-1);
-    }
-
-    .apply-btn {
-      padding: 6px var(--ds-space-4);
-      background: var(--ds-marine);
-      color: var(--ds-text-inverse);
-      border: none;
-      border-radius: var(--ds-radius-sm);
-      font-weight: 500;
-      cursor: pointer;
-      transition: background var(--ds-transition-fast);
-    }
-
-    .apply-btn:hover {
-      background: var(--ds-marine-light);
-    }
-
-    .no-filters {
-      text-align: center;
-      padding: var(--ds-space-8);
-      color: var(--ds-text-faint);
-    }
-
-    .empty-icon {
-      font-size: 48px;
-      display: block;
-      margin-bottom: var(--ds-space-2);
-    }
-
-    .share-section {
-      border-top: 1px solid var(--ds-divider);
-      padding-top: var(--ds-space-4);
-    }
-
-    .share-section h4 {
-      margin: 0 0 var(--ds-space-3) 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ds-text);
-    }
-
-    .share-form {
-      display: flex;
-      flex-direction: column;
-      gap: var(--ds-space-2);
-    }
-
-    .filter-input,
-    .filter-textarea {
-      padding: var(--ds-space-2) var(--ds-space-3);
-      border: 1px solid var(--ds-divider);
-      border-radius: var(--ds-radius-sm);
-      font-size: 14px;
-      font-family: inherit;
-      background: var(--ds-surface);
-      color: var(--ds-text);
-    }
-
-    .filter-input:focus,
-    .filter-textarea:focus {
-      outline: none;
-      border-color: var(--ds-marine);
-    }
-
-    .share-btn {
-      padding: 10px var(--ds-space-4);
-      background: var(--ds-success);
-      color: var(--ds-text-inverse);
-      border: none;
-      border-radius: var(--ds-radius-sm);
-      font-weight: 500;
-      cursor: pointer;
-      transition: filter var(--ds-transition-fast);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .share-btn:hover:not(:disabled) {
-      filter: brightness(0.92);
-    }
-
-    .share-btn:disabled {
-      background: var(--ds-surface-dynamic);
-      color: var(--ds-text-faint);
-      cursor: not-allowed;
-      filter: none;
-    }
-
-    .btn-icon {
-      font-size: 16px;
-    }
-  `],
-    imports: [FormsModule]
+    imports: [CommonModule, FormsModule, DsIconComponent, DsButtonComponent, DsInputComponent, DsCardComponent]
 })
 export class CollaborationFilterShareComponent implements OnInit, OnDestroy {
+  private collaborationService = inject(CollaborationService);
+  private toastService = inject(DsToastService);
+
   sharedFilters: SharedFilterPreset[] = [];
   newFilterName = '';
   newFilterDescription = '';
 
   private subscriptions: Subscription[] = [];
   private currentFilters: any = {};
-
-  constructor(
-    private collaborationService: CollaborationService,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     this.subscriptions.push(
@@ -270,27 +110,20 @@ export class CollaborationFilterShareComponent implements OnInit, OnDestroy {
 
   private addSharedFilter(filter: SharedFilterPreset): void {
     const existingIndex = this.sharedFilters.findIndex(f => f.id === filter.id);
-    
     if (existingIndex >= 0) {
       this.sharedFilters[existingIndex] = filter;
     } else {
       this.sharedFilters.unshift(filter);
     }
 
-    this.snackBar.open(`New filter preset shared: ${filter.name}`, 'View', {
-      duration: 5000,
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
+    this.toastService.info(`Nouveau preset partagé : ${filter.name}`, {
+      label: 'Voir',
+      handler: () => this.applyFilter(filter)
     });
   }
 
   applyFilter(filter: SharedFilterPreset): void {
-    console.log('Applying filter:', filter);
-    this.snackBar.open(`Applied filter: ${filter.name}`, 'Close', {
-      duration: 3000,
-      horizontalPosition: 'center',
-      verticalPosition: 'top'
-    });
+    this.toastService.success(`Filtre "${filter.name}" appliqué`);
   }
 
   setCurrentFilters(filters: any): void {
@@ -299,9 +132,7 @@ export class CollaborationFilterShareComponent implements OnInit, OnDestroy {
 
   shareCurrentFilters(): void {
     if (!this.newFilterName.trim()) {
-      this.snackBar.open('Please enter a filter name', 'Close', {
-        duration: 3000
-      });
+      this.toastService.warning('Veuillez entrer un nom pour le preset');
       return;
     }
 
@@ -311,40 +142,24 @@ export class CollaborationFilterShareComponent implements OnInit, OnDestroy {
       description: this.newFilterDescription,
       filters: this.currentFilters,
       sharedBy: 'current-user',
-      sharedByUsername: 'Current User',
+      sharedByUsername: 'Moi',
       sharedAt: new Date()
     };
 
     this.collaborationService.shareFilterPreset(filterPreset);
-
-    this.snackBar.open(`Filter preset "${this.newFilterName}" shared with team`, 'Close', {
-      duration: 3000,
-      horizontalPosition: 'center',
-      verticalPosition: 'top'
-    });
+    this.toastService.success(`Preset "${this.newFilterName}" partagé`);
 
     this.newFilterName = '';
     this.newFilterDescription = '';
   }
 
   formatTimestamp(timestamp: Date): string {
-    const now = new Date();
-    const diff = now.getTime() - new Date(timestamp).getTime();
-    const minutes = Math.floor(diff / 60000);
+    const minutes = Math.floor((Date.now() - new Date(timestamp).getTime()) / 60000);
+    if (minutes < 1) return 'À l\'instant';
+    if (minutes < 60) return `Il y a ${minutes}m`;
     const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (minutes < 1) {
-      return 'Just now';
-    } else if (minutes < 60) {
-      return `${minutes}m ago`;
-    } else if (hours < 24) {
-      return `${hours}h ago`;
-    } else if (days < 7) {
-      return `${days}d ago`;
-    } else {
-      return new Date(timestamp).toLocaleDateString();
-    }
+    if (hours < 24) return `Il y a ${hours}h`;
+    return new Date(timestamp).toLocaleDateString('fr-FR');
   }
 
   ngOnDestroy(): void {

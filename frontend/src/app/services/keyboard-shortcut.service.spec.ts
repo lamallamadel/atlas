@@ -9,15 +9,12 @@ describe('KeyboardShortcutService', () => {
   beforeEach(() => {
     localStorage.clear();
     const routerMock = {
-      navigate: vi.fn().mockName('Router.navigate'),
-    };
+      navigate: vi.fn().mockName('Router.navigate')};
 
     TestBed.configureTestingModule({
       providers: [
         KeyboardShortcutService,
-        { provide: Router, useValue: routerMock },
-      ],
-    });
+        { provide: Router, useValue: routerMock }]});
 
     service = TestBed.inject(KeyboardShortcutService);
     routerSpy = TestBed.inject(Router) as AngularVitestPartialMock<Router>;
@@ -36,8 +33,7 @@ describe('KeyboardShortcutService', () => {
   it('should save and load preferences', () => {
     const newPrefs = {
       keyboardShortcutsEnabled: false,
-      showShortcutHints: false,
-    };
+      showShortcutHints: false};
 
     service.savePreferences(newPrefs);
     const loaded = service.getPreferences();

@@ -3,8 +3,7 @@ import {
   Router,
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
-  UrlTree,
-} from '@angular/router';
+  UrlTree} from '@angular/router';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from '../services/auth.service';
 
@@ -19,20 +18,16 @@ describe('AuthGuard', () => {
 
   beforeEach(() => {
     const authServiceSpy = {
-      isAuthenticated: vi.fn().mockName('AuthService.isAuthenticated'),
-    };
+      isAuthenticated: vi.fn().mockName('AuthService.isAuthenticated')};
     const routerSpy = {
       navigate: vi.fn().mockName('Router.navigate'),
-      createUrlTree: vi.fn().mockName('Router.createUrlTree'),
-    };
+      createUrlTree: vi.fn().mockName('Router.createUrlTree')};
 
     TestBed.configureTestingModule({
       providers: [
         AuthGuard,
         { provide: AuthService, useValue: authServiceSpy },
-        { provide: Router, useValue: routerSpy },
-      ],
-    });
+        { provide: Router, useValue: routerSpy }]});
 
     guard = TestBed.inject(AuthGuard);
     authService = TestBed.inject(AuthService) as AngularVitestPartialMock<AuthService>;

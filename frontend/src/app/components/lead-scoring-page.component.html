@@ -1,0 +1,65 @@
+<div class="lead-scoring-page ds-form-stack">
+  <ds-page-header
+    eyebrow="Intelligence Artificielle"
+    titleBefore="Scoring &"
+    titleAccent="Qualification"
+    description="Système automatisé de scoring et de gestion des priorités des prospects.">
+    <ng-container slot="actions">
+      <ds-button variant="marine" size="md" (dsClick)="openConfigDialog()">
+        <ds-icon name="settings" [size]="20" style="margin-right: 8px;"></ds-icon>
+        Configurer les règles
+      </ds-button>
+    </ng-container>
+  </ds-page-header>
+
+  <ds-tabs [tabs]="tabs" [activeTab]="activeTab" (tabChange)="activeTab = $event" style="margin-bottom: 24px;"></ds-tabs>
+
+  <div class="tab-content">
+    @if (activeTab === 'queue') {
+      <app-lead-priority-queue></app-lead-priority-queue>
+    }
+
+    @if (activeTab === 'about') {
+      <div class="about-content ds-form-stack">
+        <ds-card [pad]="true" elevation="sm">
+          <h2 style="font-family: var(--ds-font-display); font-size: 24px; margin-bottom: 16px;">Fonctionnement du Scoring</h2>
+          <p style="line-height: 1.6; color: var(--ds-text-muted);">
+            Le système de scoring évalue automatiquement chaque prospect en fonction de plusieurs facteurs clés pour identifier les opportunités les plus prometteuses.
+          </p>
+
+          <div class="scoring-factors" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 32px 0;">
+            <ds-card [pad]="true" elevation="xs" style="background: var(--ds-surface-2); border-left: 4px solid var(--ds-marine);">
+              <ds-icon name="megaphone" [size]="32" style="color: var(--ds-marine); margin-bottom: 16px;"></ds-icon>
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Score de Source</h3>
+              <p style="font-size: 13px; color: var(--ds-text-faint);">Poids attribué selon la provenance (recommandation, web, réseaux sociaux, etc.)</p>
+            </ds-card>
+
+            <ds-card [pad]="true" elevation="xs" style="background: var(--ds-surface-2); border-left: 4px solid var(--ds-primary);">
+              <ds-icon name="clock" [size]="32" style="color: var(--ds-primary); margin-bottom: 16px;"></ds-icon>
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Réactivité</h3>
+              <p style="font-size: 13px; color: var(--ds-text-faint);">Les temps de réponse rapides sont récompensés par un score plus élevé.</p>
+            </ds-card>
+
+            <ds-card [pad]="true" elevation="xs" style="background: var(--ds-surface-2); border-left: 4px solid var(--ds-success);">
+              <ds-icon name="mail" [size]="32" style="color: var(--ds-success); margin-bottom: 16px;"></ds-icon>
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Engagement</h3>
+              <p style="font-size: 13px; color: var(--ds-text-faint);">Basé sur les échanges de messages et les rendez-vous planifiés.</p>
+            </ds-card>
+
+            <ds-card [pad]="true" elevation="xs" style="background: var(--ds-surface-2); border-left: 40px solid var(--ds-copper); border-left-width: 4px;">
+              <ds-icon name="home" [size]="32" style="color: var(--ds-copper); margin-bottom: 16px;"></ds-icon>
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Match Immobilier</h3>
+              <p style="font-size: 13px; color: var(--ds-text-faint);">Qualité des informations du bien et critères de correspondance.</p>
+            </ds-card>
+          </div>
+
+          <h3 style="font-size: 18px; font-weight: 700; margin: 32px 0 12px; color: var(--ds-marine);">Auto-Qualification</h3>
+          <p style="line-height: 1.6; color: var(--ds-text-muted);">
+            Les prospects atteignant le seuil de score configuré sont automatiquement déplacés vers le statut de "Qualification". 
+            Cela garantit que les leads prioritaires sont identifiés et traités sans délai.
+          </p>
+        </ds-card>
+      </div>
+    }
+  </div>
+</div>

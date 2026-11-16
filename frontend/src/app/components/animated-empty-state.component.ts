@@ -1,14 +1,16 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import type { ActionButtonConfig, HelpLinkConfig } from './empty-state-actions.types';
 import { LottieAnimationType, LottieAnimationComponent } from './lottie-animation.component';
-import { MatIcon } from '@angular/material/icon';
+import { DsButtonComponent, DsIconComponent } from '../design-system';
 
 @Component({
     selector: 'app-animated-empty-state',
+    standalone: true,
     templateUrl: './animated-empty-state.component.html',
     styleUrls: ['./animated-empty-state.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [LottieAnimationComponent, MatIcon]
+    imports: [CommonModule, LottieAnimationComponent, DsButtonComponent, DsIconComponent]
 })
 export class AnimatedEmptyStateComponent {
   readonly title = input('');
@@ -23,27 +25,19 @@ export class AnimatedEmptyStateComponent {
   readonly helpLink = input<HelpLinkConfig>();
 
   onPrimaryClick(): void {
-    const primaryAction = this.primaryAction();
-    if (primaryAction) {
-      primaryAction.handler();
-    }
+    this.primaryAction()?.handler();
   }
 
   onSecondaryClick(): void {
-    const secondaryAction = this.secondaryAction();
-    if (secondaryAction) {
-      secondaryAction.handler();
-    }
+    this.secondaryAction()?.handler();
   }
 
   onHelpLinkClick(): void {
     const helpLink = this.helpLink();
-    if (helpLink) {
-      window.open(helpLink.url, '_blank');
-    }
+    if (helpLink) window.open(helpLink.url, '_blank');
   }
 
   onAnimationError(error: Error): void {
-    console.warn('Lottie animation failed to load, falling back to static SVG:', error);
+    console.warn('Lottie animation failed:', error);
   }
 }

@@ -1,7 +1,6 @@
 import {
   ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+  TestBed} from '@angular/core/testing';
 import { SpinnerComponent } from './spinner.component';
 
 describe('SpinnerComponent', () => {
@@ -12,8 +11,7 @@ describe('SpinnerComponent', () => {
     vi.useFakeTimers();
 
     await TestBed.configureTestingModule({
-      imports: [SpinnerComponent],
-    }).compileComponents();
+      imports: [SpinnerComponent]}).compileComponents();
 
     fixture = TestBed.createComponent(SpinnerComponent);
     component = fixture.componentInstance;

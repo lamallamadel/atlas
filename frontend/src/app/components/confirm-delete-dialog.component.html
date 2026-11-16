@@ -1,27 +1,28 @@
-<div @dialogSlideUp appFocusTrap role="alertdialog" aria-labelledby="dialog-title" aria-describedby="dialog-message" aria-modal="true">
-  <h2 mat-dialog-title id="dialog-title">{{ data.title }}</h2>
+<ds-dialog-header (close)="onCancel()">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <ds-icon name="trash" [size]="24" style="color: var(--ds-error);"></ds-icon>
+    <span>{{ data.title }}</span>
+  </div>
+</ds-dialog-header>
 
-  <mat-dialog-content>
-    <p id="dialog-message">{{ data.message }}</p>
-  </mat-dialog-content>
+<ds-dialog-content>
+  <p id="dialog-message" style="margin: 0;">{{ data.message }}</p>
+</ds-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la suppression">Annuler</button>
-    <button mat-raised-button
-      color="warn"
-      (click)="onConfirm()"
-      [disabled]="isSubmitting"
-      [attr.aria-busy]="isSubmitting"
-      [attr.aria-label]="isSubmitting ? 'Suppression en cours' : 'Confirmer la suppression'">
-      @if (isSubmitting) {
-        <ds-skeleton variant="circle" width="20px" height="20px" aria-hidden="true"></ds-skeleton>
-      }
-      @if (!isSubmitting) {
-        <span>Supprimer</span>
-      }
-      @if (isSubmitting) {
-        <span class="sr-only" role="status" aria-live="polite">Suppression en cours</span>
-      }
-    </button>
-  </mat-dialog-actions>
-</div>
+<ds-dialog-actions align="end">
+  <ds-button variant="ghost" size="md" (dsClick)="onCancel()" [disabled]="isSubmitting">
+    Annuler
+  </ds-button>
+  <ds-button
+    variant="danger"
+    size="md"
+    (dsClick)="onConfirm()"
+    [disabled]="isSubmitting">
+    @if (isSubmitting) {
+      <span class="spinner-small" style="margin-right: 8px; border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>
+    } @else {
+      <ds-icon name="trash" [size]="20" style="margin-right: 8px;"></ds-icon>
+    }
+    <span>{{ isSubmitting ? 'Suppression...' : 'Supprimer' }}</span>
+  </ds-button>
+</ds-dialog-actions>

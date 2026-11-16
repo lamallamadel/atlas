@@ -5,8 +5,7 @@ import { OAuthService } from 'angular-oauth2-oidc';
 import { OnboardingTourService } from './onboarding-tour.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('OnboardingTourService', () => {
   let service: OnboardingTourService;
@@ -17,10 +16,7 @@ describe('OnboardingTourService', () => {
       navigate: vi.fn().mockName('Router.navigate'),
       events: {
         pipe: vi.fn().mockReturnValue({
-          subscribe: vi.fn(),
-        }),
-      },
-    };
+          subscribe: vi.fn()})}};
     const mockOAuthService = {
       initCodeFlow: vi.fn().mockName('OAuthService.initCodeFlow'),
       loadDiscoveryDocumentAndTryLogin: vi
@@ -30,8 +26,7 @@ describe('OnboardingTourService', () => {
       configure: vi.fn().mockName('OAuthService.configure'),
       setStorage: vi.fn().mockName('OAuthService.setStorage'),
       logOut: vi.fn().mockName('OAuthService.logOut'),
-      getAccessToken: vi.fn().mockName('OAuthService.getAccessToken'),
-    };
+      getAccessToken: vi.fn().mockName('OAuthService.getAccessToken')};
 
     TestBed.configureTestingModule({
       imports: [],
@@ -40,9 +35,7 @@ describe('OnboardingTourService', () => {
         { provide: Router, useValue: routerSpy },
         { provide: OAuthService, useValue: mockOAuthService },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
+        provideHttpClientTesting()]});
 
     service = TestBed.inject(OnboardingTourService);
     mockRouter = TestBed.inject(Router) as AngularVitestPartialMock<Router>;
@@ -70,8 +63,7 @@ describe('OnboardingTourService', () => {
     localStorage.setItem(
       'onboarding_tour_progress',
       JSON.stringify({
-        'test-tour': { completed: true },
-      })
+        'test-tour': { completed: true }})
     );
 
     service.resetTour('test-tour');
@@ -83,14 +75,12 @@ describe('OnboardingTourService', () => {
       'onboarding_tour_progress',
       JSON.stringify({
         tour1: { completed: true },
-        tour2: { completed: true },
-      })
+        tour2: { completed: true }})
     );
     localStorage.setItem(
       'onboarding_tour_analytics',
       JSON.stringify([
-        { tourId: 'tour1', action: 'completed', timestamp: '2024-01-01' },
-      ])
+        { tourId: 'tour1', action: 'completed', timestamp: '2024-01-01' }])
     );
 
     service.resetAllTours();
@@ -102,8 +92,7 @@ describe('OnboardingTourService', () => {
 
   it('should get analytics', () => {
     const mockAnalytics = [
-      { tourId: 'tour1', action: 'started' as const, timestamp: '2024-01-01' },
-    ];
+      { tourId: 'tour1', action: 'started' as const, timestamp: '2024-01-01' }];
     localStorage.setItem(
       'onboarding_tour_analytics',
       JSON.stringify(mockAnalytics)

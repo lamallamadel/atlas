@@ -1,32 +1,26 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 
 import { AppointmentFormDialogComponent } from './appointment-form-dialog.component';
 import { DatetimePickerComponent } from './datetime-picker.component';
 import { AppointmentStatus } from '../services/appointment-api.service';
-import { MaterialTestingModule } from '../testing/material-testing.module';
 
 describe('AppointmentFormDialogComponent', () => {
   let component: AppointmentFormDialogComponent;
   let fixture: ComponentFixture<AppointmentFormDialogComponent>;
-  let mockDialogRef: AngularVitestPartialMock<MatDialogRef<AppointmentFormDialogComponent>>;
+  let mockDialogRef: { close: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     mockDialogRef = {
-      close: vi.fn().mockName('MatDialogRef.close'),
-    };
+      close: vi.fn().mockName('DialogRef.close')};
 
     await TestBed.configureTestingModule({
       imports: [
-        MaterialTestingModule,
         AppointmentFormDialogComponent,
-        DatetimePickerComponent,
-      ],
+        DatetimePickerComponent],
       providers: [
-        { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: MAT_DIALOG_DATA, useValue: { dossierId: 1 } },
-      ],
-    }).compileComponents();
+        { provide: DialogRef, useValue: mockDialogRef },
+        { provide: DIALOG_DATA, useValue: { dossierId: 1 } }]}).compileComponents();
 
     fixture = TestBed.createComponent(AppointmentFormDialogComponent);
     component = fixture.componentInstance;

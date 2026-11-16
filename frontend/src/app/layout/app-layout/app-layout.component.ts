@@ -1,7 +1,6 @@
-import { Component, OnInit, HostListener, viewChild, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, inject, signal } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
-import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { DossierApiService } from '../../services/dossier-api.service';
@@ -9,9 +8,9 @@ import { NotificationApiService } from '../../services/notification-api.service'
 import { KeyboardShortcutService } from '../../services/keyboard-shortcut.service';
 import { OnboardingTourService } from '../../services/onboarding-tour.service';
 import { TourDefinitionService } from '../../services/tour-definition.service';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
-import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Observable, Subscription } from 'rxjs';
+import { map, shareReplay, take } from 'rxjs/operators';
+import { RouterOutlet, Router, RouterLink, RouterLinkActive, NavigationEnd, ChildrenOutletContexts } from '@angular/router';
 import { routeFadeSlideAnimation } from '../../animations/route-animations';
 import { KeyboardShortcutsComponent } from '../../components/keyboard-shortcuts.component';
 import { CommandPaletteComponent } from '../../components/command-palette.component';
@@ -23,34 +22,65 @@ import { NotificationCenterComponent } from '../../components/notification-cente
 import { MaintainScrollDirective } from '../../directives/maintain-scroll.directive';
 import { MobileBottomNavigationComponent } from '../../components/mobile-bottom-navigation.component';
 import { PwaInstallPromptComponent } from '../../components/pwa-install-prompt.component';
-import { AppShellComponent } from '../../components/app-shell.component';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-layout',
+    standalone: true,
     templateUrl: './app-layout.component.html',
     styleUrls: ['./app-layout.component.scss'],
     animations: [routeFadeSlideAnimation],
-    imports: [KeyboardShortcutsComponent, CommandPaletteComponent, AiAgentPanelComponent, MatSidenavContainer, MatSidenav, RouterLink, RouterLinkActive, MatSidenavContent, DsButtonComponent, DsIconComponent, GlobalSearchBarComponent, ApiStatusIndicatorComponent, NotificationCenterComponent, MaintainScrollDirective, RouterOutlet, MobileBottomNavigationComponent, PwaInstallPromptComponent, AppShellComponent, AsyncPipe, CdkConnectedOverlay, CdkOverlayOrigin]
+    imports: [
+      CommonModule,
+      KeyboardShortcutsComponent, 
+      CommandPaletteComponent, 
+      AiAgentPanelComponent, 
+      RouterLink, 
+      RouterLinkActive, 
+      DsButtonComponent, 
+      DsIconComponent, 
+      GlobalSearchBarComponent, 
+      ApiStatusIndicatorComponent, 
+      NotificationCenterComponent, 
+      MaintainScrollDirective, 
+      RouterOutlet, 
+      MobileBottomNavigationComponent,
+      PwaInstallPromptComponent,
+      AsyncPipe,
+      CdkConnectedOverlay, 
+      CdkOverlayOrigin
+    ]
 })
-export class AppLayoutComponent implements OnInit {
+export class AppLayoutComponent implements OnInit, OnDestroy {
   private readonly overlay = inject(Overlay);
+  private breakpointObserver = inject(BreakpointObserver);
+  private authService = inject(AuthService);
+  public themeService = inject(ThemeService);
+  private dossierApiService = inject(DossierApiService);
+  private notificationApiService = inject(NotificationApiService);
+  private keyboardShortcutService = inject(KeyboardShortcutService);
+  private onboardingTourService = inject(OnboardingTourService);
+  private tourDefinitionService = inject(TourDefinitionService);
+  private router = inject(Router);
+  private contexts = inject(ChildrenOutletContexts);
 
-  readonly drawer = viewChild.required<MatSidenav>('drawer');
+  sidebarOpen = signal(true);
+  mobileSidebarOpen = signal(false);
 
-  /** Panneau « Aide » (remplace `mat-menu` pour cette entrée). */
   helpPanelOpen = false;
-  /** Panneaux toolbar (notifications, utilisateur, sous-menu guides). */
   notificationMenuOpen = false;
   userMenuOpen = false;
-  /** Sous-menu « Guides interactifs » (overlay latéral, sans backdrop). */
   toursSubmenuOpen = false;
 
-  readonly toolbarDropdownScrollStrategy = this.overlay.scrollStrategies.reposition();
+  readonly userMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
+  readonly notificationMenuScrollStrategy = this.overlay.scrollStrategies.reposition();
+  readonly helpPanelScrollStrategy = this.overlay.scrollStrategies.reposition();
+
   readonly toolbarDropdownPositions: ConnectedPosition[] = [
     { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 8 },
     { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -8 }
   ];
+
   isHandset$: Observable<boolean>;
   isMobile$: Observable<boolean>;
   isDarkTheme$: Observable<boolean>;
@@ -58,17 +88,9 @@ export class AppLayoutComponent implements OnInit {
   unreadNotificationCount$: Observable<number>;
   tourCompletionPercentage = 0;
 
-  constructor(
-    private breakpointObserver: BreakpointObserver,
-    private authService: AuthService,
-    public themeService: ThemeService,
-    private dossierApiService: DossierApiService,
-    private notificationApiService: NotificationApiService,
-    private keyboardShortcutService: KeyboardShortcutService,
-    private onboardingTourService: OnboardingTourService,
-    private tourDefinitionService: TourDefinitionService,
-    private router: Router
-  ) {
+  private subscriptions = new Subscription();
+
+  constructor() {
     this.isHandset$ = this.breakpointObserver.observe([Breakpoints.Handset])
       .pipe(
         map(result => result.matches),
@@ -90,31 +112,53 @@ export class AppLayoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isHandset$.subscribe(isHandset => {
-      const drawer = this.drawer();
-      if (drawer) {
-        if (isHandset) {
-          drawer.mode = 'over';
-          drawer.close();
-        } else {
-          drawer.mode = 'side';
-          drawer.open();
+    this.subscriptions.add(
+      this.isHandset$.subscribe(isHandset => {
+        this.sidebarOpen.set(!isHandset);
+        if (!isHandset) {
+          this.mobileSidebarOpen.set(false);
         }
-      }
-    });
+      })
+    );
+
+    this.subscriptions.add(
+      this.router.events.subscribe(event => {
+        if (event instanceof NavigationEnd) {
+          this.mobileSidebarOpen.set(false);
+        }
+      })
+    );
     
     this.updateTourProgress();
   }
 
-  toggleUserMenu(): void {
-    const next = !this.userMenuOpen;
-    if (next) {
-      this.closeHelpPanel();
-      this.closeNotificationMenu();
-    } else {
-      this.toursSubmenuOpen = false;
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  toggleSidebar(): void {
+    this.isHandset$.pipe(take(1)).subscribe(isHandset => {
+      if (isHandset) {
+        this.mobileSidebarOpen.update(v => !v);
+      } else {
+        this.sidebarOpen.update(v => !v);
+      }
+    });
+  }
+
+  closeMobileSidebar(): void {
+    this.mobileSidebarOpen.set(false);
+  }
+
+  toggleUserMenu(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
     }
-    this.userMenuOpen = next;
+    const next = !this.userMenuOpen;
+    this.closeAllMenus();
+    if (next) {
+      this.userMenuOpen = true;
+    }
   }
 
   closeUserMenu(): void {
@@ -126,17 +170,25 @@ export class AppLayoutComponent implements OnInit {
     this.toursSubmenuOpen = !this.toursSubmenuOpen;
   }
 
-  toggleNotificationMenu(): void {
-    const next = !this.notificationMenuOpen;
-    if (next) {
-      this.closeHelpPanel();
-      this.closeUserMenu();
+  toggleNotificationMenu(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
     }
-    this.notificationMenuOpen = next;
+    const next = !this.notificationMenuOpen;
+    this.closeAllMenus();
+    if (next) {
+      this.notificationMenuOpen = true;
+    }
   }
 
   closeNotificationMenu(): void {
     this.notificationMenuOpen = false;
+  }
+
+  closeAllMenus(): void {
+    this.closeUserMenu();
+    this.closeNotificationMenu();
+    this.closeHelpPanel();
   }
 
   logout(): void {
@@ -144,37 +196,32 @@ export class AppLayoutComponent implements OnInit {
     this.authService.logout();
   }
 
-  closeSidenavOnMobile(): void {
-    this.isHandset$.subscribe(isHandset => {
-      const drawer = this.drawer();
-      if (isHandset && drawer) {
-        drawer.close();
-      }
-    }).unsubscribe();
-  }
-
   toggleTheme(): void {
+    this.closeAllMenus();
     this.themeService.toggleTheme();
   }
 
   showKeyboardShortcuts(): void {
+    this.closeAllMenus();
     this.keyboardShortcutService.toggleShortcutHelp();
   }
 
-  toggleHelpPanel(): void {
-    const next = !this.helpPanelOpen;
-    if (next) {
-      this.closeNotificationMenu();
-      this.closeUserMenu();
+  toggleHelpPanel(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
     }
-    this.helpPanelOpen = next;
+    const next = !this.helpPanelOpen;
+    this.closeAllMenus();
+    if (next) {
+      this.helpPanelOpen = true;
+    }
   }
 
   closeHelpPanel(): void {
     this.helpPanelOpen = false;
   }
 
-  startTourFromHelp(tourId: 'dossier-creation' | 'dossier-detail' | 'message-creation' | 'workflow-status'): void {
+  startTourFromHelp(tourId: any): void {
     this.closeHelpPanel();
     this.startTour(tourId);
   }
@@ -188,7 +235,7 @@ export class AppLayoutComponent implements OnInit {
     this.closeHelpPanel();
   }
 
-  startTour(tourId: 'dossier-creation' | 'dossier-detail' | 'message-creation' | 'workflow-status'): void {
+  startTour(tourId: any): void {
     const currentUrl = this.router.url;
     
     if (tourId === 'dossier-creation' && !currentUrl.includes('/dossiers/create')) {
@@ -253,8 +300,8 @@ export class AppLayoutComponent implements OnInit {
     }
   }
 
-  prepareRoute(outlet: RouterOutlet) {
-    return outlet?.activatedRouteData?.['animation'];
+  getRouteAnimationData() {
+    return this.contexts.getContext('primary')?.route?.snapshot?.data?.['animation'];
   }
 
   @HostListener('window:keydown', ['$event'])

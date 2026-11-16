@@ -134,3 +134,66 @@
   --mdc-outlined-text-field-focus-outline-color: var(--ds-marine);
   --mat-sidenav-content-background-color: var(--ds-bg);
 }
+
+/* ================================================================
+   ATLASIA DESIGN SYSTEM V2 — Classes Typographiques
+   ================================================================ */
+
+/* The signature italic-copper accent run inside a heading */
+.accent {
+  font-style: italic;
+  color: var(--ds-primary);
+  font-weight: 500;
+}
+
+/* ── Eyebrow — small, uppercase, +1.4px tracking ── */
+.eyebrow {
+  font-family: var(--ds-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ds-text-muted);
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+/* ── Body ── */
+.body {
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-base);
+  line-height: 1.55;
+  color: var(--ds-text);
+}
+
+.body-muted {
+  color: var(--ds-text-muted);
+}
+
+.caption {
+  font-size: 12.5px;
+  color: var(--ds-text-muted);
+  line-height: 1.45;
+}
+
+.faint {
+  font-size: 11.5px;
+  color: var(--ds-text-faint);
+}
+
+.code, code {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  background: var(--ds-surface-offset);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--ds-text);
+}
+
+/* ── Field label — same recipe as eyebrow but shorter tracking ── */
+.field-label {
+  font-family: var(--ds-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ds-text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}

@@ -4,9 +4,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import {  } from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DocumentUploadComponent } from './document-upload.component';
 import { DocumentApiService } from '../services/document-api.service';
@@ -21,8 +18,6 @@ describe('DocumentUploadComponent', () => {
     imports: [CommonModule,
         FormsModule,
         
-        MatIconModule,
-        MatButtonModule,
         MatProgressBarModule, DocumentUploadComponent],
     providers: [
         { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },DocumentApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]

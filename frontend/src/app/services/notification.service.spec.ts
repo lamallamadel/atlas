@@ -1,63 +1,34 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
-import { CommonModule } from '@angular/common';
 import {
   HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
-import {} from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+  provideHttpClientTesting} from '@angular/common/http/testing';
 import { NotificationService } from './notification.service';
 import { ThemeService } from './theme.service';
-import { EnhancedSnackbarComponent } from '../components/enhanced-snackbar.component';
+import { DsToastService } from '../design-system';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('NotificationService', () => {
   let service: NotificationService;
   let httpMock: HttpTestingController;
-  let themeService: ThemeService;
+  let mockToastService: Pick<DsToastService, 'show' | 'dismissAll'>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        CommonModule,
+    mockToastService = {
+      show: vi.fn().mockReturnValue('mock-toast-id'),
+      dismissAll: vi.fn()
+    };
 
-        MatIconModule,
-        MatButtonModule,
-        BrowserAnimationsModule,
-        EnhancedSnackbarComponent,
-      ],
+    TestBed.configureTestingModule({
       providers: [
-        {
-          provide: MatSnackBar,
-          useValue: {
-            open: () => ({
-              onAction: () => of(null),
-              afterDismissed: () => of(null),
-            }),
-            openFromComponent: () => ({
-              onAction: () => of(null),
-              afterDismissed: () => of(null),
-              dismiss: () => {},
-            }),
-            dismiss: () => {},
-          },
-        },
+        { provide: DsToastService, useValue: mockToastService },
         NotificationService,
         ThemeService,
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
+        provideHttpClientTesting()]});
     service = TestBed.inject(NotificationService);
     httpMock = TestBed.inject(HttpTestingController);
-    themeService = TestBed.inject(ThemeService);
   });
 
   afterEach(() => {
@@ -76,8 +47,7 @@ describe('NotificationService', () => {
       type: 'success',
       action: undefined,
       onAction: undefined,
-      priority: 'normal',
-    });
+      priority: 'normal'});
   });
 
   it('should show error notification and log to backend', () => {
@@ -89,8 +59,7 @@ describe('NotificationService', () => {
       type: 'error',
       action: 'Fermer',
       onAction: undefined,
-      priority: 'high',
-    });
+      priority: 'high'});
 
     const req = httpMock.expectOne('/api/v1/observability/client-errors');
     expect(req.request.method).toBe('POST');
@@ -103,21 +72,23 @@ describe('NotificationService', () => {
     httpMock.expectNone('/api/v1/observability/client-errors');
   });
 
-  it('should prioritize critical notifications', () => {
-    service.info('Info 1');
-    service.info('Info 2');
+  it('should show critical notification with high duration', () => {
+    const spy = vi.spyOn(service as any, 'show');
     service.critical('Critical message');
 
-    expect(service.getQueueLength()).toBeGreaterThan(0);
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({
+      message: 'Critical message',
+      type: 'error',
+      priority: 'critical'
+    }));
 
     httpMock.expectOne('/api/v1/observability/client-errors').flush({});
   });
 
-  it('should clear queue', () => {
+  it('should clear queue via dismissAll', () => {
     service.info('Info 1');
-    service.info('Info 2');
     service.clearQueue();
-    expect(service.getQueueLength()).toBe(0);
+    expect(mockToastService.dismissAll).toHaveBeenCalled();
   });
 
   it('should provide convenience methods', () => {

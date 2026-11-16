@@ -25,10 +25,8 @@ describe('ReportsDashboardComponent', () => {
         MatNativeDateModule,
         BrowserAnimationsModule,
         NgChartsModule,
-        ReportsDashboardComponent,
-      ],
-      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
-    });
+        ReportsDashboardComponent],
+      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]});
     fixture = TestBed.createComponent(ReportsDashboardComponent);
     component = fixture.componentInstance;
   });

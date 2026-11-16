@@ -1,10 +1,16 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentApiService, DocumentResponse } from '../services/document-api.service';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSkeletonComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
 export interface DocumentPreviewDialogData {
   document: DocumentResponse;
@@ -12,9 +18,18 @@ export interface DocumentPreviewDialogData {
 
 @Component({
     selector: 'app-document-preview-dialog',
+    standalone: true,
     templateUrl: './document-preview-dialog.component.html',
     styleUrls: ['./document-preview-dialog.component.css'],
-    imports: [MatIconButton, MatIcon, MatButton, DsSkeletonComponent]
+    imports: [
+      CommonModule,
+      DsButtonComponent, 
+      DsIconComponent, 
+      DsSkeletonComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class DocumentPreviewDialogComponent implements OnInit {
   previewUrl: SafeResourceUrl | null = null;
@@ -24,8 +39,8 @@ export class DocumentPreviewDialogComponent implements OnInit {
   isPdf = false;
 
   constructor(
-    public dialogRef: MatDialogRef<DocumentPreviewDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DocumentPreviewDialogData,
+    public dialogRef: DialogRef<any>,
+    @Inject(DIALOG_DATA) public data: DocumentPreviewDialogData,
     private documentApiService: DocumentApiService,
     private sanitizer: DomSanitizer
   ) {}

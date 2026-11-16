@@ -1,41 +1,37 @@
 <div class="reports-dashboard-container">
-  <header class="header">
-    <h1>Analytics Dashboard</h1>
-
-    <div class="header-controls">
+  <ds-page-header
+    eyebrow="Espace Pro"
+    titleBefore="Tableau de bord"
+    titleAccent="Analytique"
+    description="Suivez vos performances et l'évolution de vos dossiers.">
+    
+    <div slot="actions" class="header-controls">
       <div class="date-filter" role="group" aria-label="Date range selector">
-        <mat-form-field appearance="outline" class="date-field">
-          <mat-label>From Date</mat-label>
+        <label class="obs-date-field">
+          <span class="obs-date-field__label">Du</span>
           <input
-            matInput
-            [matDatepicker]="fromPicker"
-            [ngModel]="parseDate(dateFrom)"
-            (ngModelChange)="dateFrom = formatDate($event)"
-            aria-label="Start date for filter" />
-          <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
-          <mat-datepicker #fromPicker></mat-datepicker>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="date-field">
-          <mat-label>To Date</mat-label>
+            type="date"
+            class="obs-date-input"
+            [(ngModel)]="dateFrom"
+            (change)="applyDateFilter()" />
+        </label>
+        <label class="obs-date-field">
+          <span class="obs-date-field__label">Au</span>
           <input
-            matInput
-            [matDatepicker]="toPicker"
-            [ngModel]="parseDate(dateTo)"
-            (ngModelChange)="dateTo = formatDate($event)"
-            aria-label="End date for filter" />
-          <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
-          <mat-datepicker #toPicker></mat-datepicker>
-        </mat-form-field>
+            type="date"
+            class="obs-date-input"
+            [(ngModel)]="dateTo"
+            (change)="applyDateFilter()" />
+        </label>
 
         <ds-button
           class="apply-filter-btn"
           variant="marine"
           size="md"
-          ariaLabel="Apply date filter"
+          ariaLabel="Appliquer le filtre"
           (dsClick)="applyDateFilter()">
           <ds-icon name="filter" [size]="16" />
-          Apply
+          Filtrer
         </ds-button>
       </div>
 
@@ -43,7 +39,7 @@
         <ds-button
           variant="ghost"
           size="md"
-          ariaLabel="Export to CSV"
+          ariaLabel="Exporter en CSV"
           [disabled]="loading || !analyticsData || exportingCSV || exportingPDF"
           (dsClick)="exportToCSV()">
           @if (!exportingCSV) {
@@ -52,25 +48,25 @@
           @if (exportingCSV) {
             <ds-skeleton variant="circle" width="20px" height="20px" style="display: inline-block" />
           }
-          <span [style.margin-left.px]="exportingCSV ? 8 : 0">{{ exportingCSV ? 'Exporting...' : 'Export CSV' }}</span>
+          <span [style.margin-left.px]="exportingCSV ? 8 : 0">{{ exportingCSV ? 'Export en cours...' : 'CSV' }}</span>
         </ds-button>
         <ds-button
           variant="ghost"
           size="md"
-          ariaLabel="Export to PDF"
+          ariaLabel="Exporter en PDF"
           [disabled]="loading || !analyticsData || exportingPDF || exportingCSV"
           (dsClick)="exportToPDF()">
           @if (!exportingPDF) {
-            <ds-icon name="file-pdf" [size]="16" />
+            <ds-icon name="download" [size]="16" />
           }
           @if (exportingPDF) {
             <ds-skeleton variant="circle" width="20px" height="20px" style="display: inline-block" />
           }
-          <span [style.margin-left.px]="exportingPDF ? 8 : 0">{{ exportingPDF ? 'Exporting...' : 'Export PDF' }}</span>
+          <span [style.margin-left.px]="exportingPDF ? 8 : 0">{{ exportingPDF ? 'Export en cours...' : 'PDF' }}</span>
         </ds-button>
       </div>
     </div>
-  </header>
+  </ds-page-header>
 
   @if (loading) {
     <div class="loading-container">
@@ -93,57 +89,53 @@
   @if (!loading && !error) {
     <main class="dashboard-content">
       <section class="kpi-cards" aria-label="Key performance indicators" role="list">
-        <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Average response time: ' + (kpiReport?.averageResponseTimeHours?.toFixed(2) || 0) + ' hours'">
+        <ds-card [pad]="true" elevation="xs" class="kpi-card" role="listitem" [attr.aria-label]="'Average response time: ' + (kpiReport?.averageResponseTimeHours?.toFixed(2) || 0) + ' hours'">
           <div class="rpt-card-header">
             <ds-icon class="kpi-icon kpi-icon--marine" name="clock" [size]="24" />
             <div class="rpt-card-title">
               <h3>Avg Response Time</h3>
             </div>
           </div>
-          <div class="rpt-card-body">
-            <div class="kpi-value" aria-live="polite">{{ kpiReport?.averageResponseTimeHours?.toFixed(2) || 0 }}</div>
-            <div class="kpi-unit" aria-hidden="true">hours</div>
-          </div>
+          <div class="kpi-value" aria-live="polite">{{ kpiReport?.averageResponseTimeHours?.toFixed(2) || 0 }}</div>
+          <div class="kpi-unit" aria-hidden="true">hours</div>
         </ds-card>
-        <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Appointment show rate: ' + (kpiReport?.appointmentShowRate?.toFixed(1) || 0) + ' percent'">
+
+        <ds-card [pad]="true" elevation="xs" class="kpi-card" role="listitem" [attr.aria-label]="'Appointment show rate: ' + (kpiReport?.appointmentShowRate?.toFixed(1) || 0) + ' percent'">
           <div class="rpt-card-header">
             <ds-icon class="kpi-icon kpi-icon--primary" name="calendar" [size]="24" />
             <div class="rpt-card-title">
               <h3>Appointment Show Rate</h3>
             </div>
           </div>
-          <div class="rpt-card-body">
-            <div class="kpi-value" aria-live="polite">{{ kpiReport?.appointmentShowRate?.toFixed(1) || 0 }}%</div>
-            <div class="kpi-unit" aria-hidden="true">completed</div>
-          </div>
+          <div class="kpi-value" aria-live="polite">{{ kpiReport?.appointmentShowRate?.toFixed(1) || 0 }}%</div>
+          <div class="kpi-unit" aria-hidden="true">completed</div>
         </ds-card>
-        <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Pipeline velocity: ' + (kpiReport?.pipelineVelocityDays?.toFixed(1) || 0) + ' days to close'">
+
+        <ds-card [pad]="true" elevation="xs" class="kpi-card" role="listitem" [attr.aria-label]="'Pipeline velocity: ' + (kpiReport?.pipelineVelocityDays?.toFixed(1) || 0) + ' days to close'">
           <div class="rpt-card-header">
             <ds-icon class="kpi-icon kpi-icon--warning" name="gauge" [size]="24" />
             <div class="rpt-card-title">
               <h3>Pipeline Velocity</h3>
             </div>
           </div>
-          <div class="rpt-card-body">
-            <div class="kpi-value" aria-live="polite">{{ kpiReport?.pipelineVelocityDays?.toFixed(1) || 0 }}</div>
-            <div class="kpi-unit" aria-hidden="true">days to close</div>
-          </div>
+          <div class="kpi-value" aria-live="polite">{{ kpiReport?.pipelineVelocityDays?.toFixed(1) || 0 }}</div>
+          <div class="kpi-unit" aria-hidden="true">days to close</div>
         </ds-card>
-        <ds-card [pad]="false" [elevation]="'xs'" class="kpi-card" role="listitem" [attr.aria-label]="'Overall conversion rate: ' + (pipelineSummary?.overallConversionRate?.toFixed(1) || 0) + ' percent'">
+
+        <ds-card [pad]="true" elevation="xs" class="kpi-card" role="listitem" [attr.aria-label]="'Overall conversion rate: ' + (pipelineSummary?.overallConversionRate?.toFixed(1) || 0) + ' percent'">
           <div class="rpt-card-header">
             <ds-icon class="kpi-icon kpi-icon--success" name="trending-up" [size]="24" />
             <div class="rpt-card-title">
               <h3>Overall Conversion</h3>
             </div>
           </div>
-          <div class="rpt-card-body">
-            <div class="kpi-value" aria-live="polite">{{ pipelineSummary?.overallConversionRate?.toFixed(1) || 0 }}%</div>
-            <div class="kpi-unit" aria-hidden="true">win rate</div>
-          </div>
+          <div class="kpi-value" aria-live="polite">{{ pipelineSummary?.overallConversionRate?.toFixed(1) || 0 }}%</div>
+          <div class="kpi-unit" aria-hidden="true">win rate</div>
         </ds-card>
       </section>
+
       <div class="charts-grid">
-        <ds-card [pad]="false" [elevation]="'xs'" class="chart-card clickable"
+        <ds-card [pad]="true" elevation="xs" [hover]="true" [interactive]="true" class="chart-card"
           [attr.title]="'Click on a stage to view filtered dossiers'">
           <div class="rpt-card-header">
             <div class="rpt-card-title">
@@ -176,19 +168,18 @@
               </div>
             </ng-template>
           </div>
-          <div class="rpt-card-body">
-            <div class="chart-container">
-              <canvas
-                #conversionFunnelCanvas
-                baseChart
-                [data]="conversionFunnelChartData"
-                [options]="conversionFunnelChartOptions"
-                [type]="conversionFunnelChartType">
-              </canvas>
-            </div>
+          <div class="chart-container">
+            <canvas
+              #conversionFunnelCanvas
+              baseChart
+              [data]="conversionFunnelChartData"
+              [options]="conversionFunnelChartOptions"
+              [type]="conversionFunnelChartType">
+            </canvas>
           </div>
         </ds-card>
-        <ds-card [pad]="false" [elevation]="'xs'" class="chart-card">
+
+        <ds-card [pad]="true" elevation="xs" class="chart-card">
           <div class="rpt-card-header">
             <div class="rpt-card-title">
               <ds-icon class="chart-icon" name="users" [size]="20" />
@@ -220,19 +211,18 @@
               </div>
             </ng-template>
           </div>
-          <div class="rpt-card-body">
-            <div class="chart-container">
-              <canvas
-                #agentPerformanceCanvas
-                baseChart
-                [data]="agentPerformanceChartData"
-                [options]="agentPerformanceChartOptions"
-                [type]="agentPerformanceChartType">
-              </canvas>
-            </div>
+          <div class="chart-container">
+            <canvas
+              #agentPerformanceCanvas
+              baseChart
+              [data]="agentPerformanceChartData"
+              [options]="agentPerformanceChartOptions"
+              [type]="agentPerformanceChartType">
+            </canvas>
           </div>
         </ds-card>
-        <ds-card [pad]="false" [elevation]="'xs'" class="chart-card chart-card-wide">
+
+        <ds-card [pad]="true" elevation="xs" class="chart-card chart-card-wide">
           <div class="rpt-card-header">
             <div class="rpt-card-title">
               <ds-icon class="chart-icon" name="chart" [size]="20" />
@@ -264,19 +254,18 @@
               </div>
             </ng-template>
           </div>
-          <div class="rpt-card-body">
-            <div class="chart-container">
-              <canvas
-                #revenueForecastCanvas
-                baseChart
-                [data]="revenueForecastChartData"
-                [options]="revenueForecastChartOptions"
-                [type]="revenueForecastChartType">
-              </canvas>
-            </div>
+          <div class="chart-container">
+            <canvas
+              #revenueForecastCanvas
+              baseChart
+              [data]="revenueForecastChartData"
+              [options]="revenueForecastChartOptions"
+              [type]="revenueForecastChartType">
+            </canvas>
           </div>
         </ds-card>
-        <ds-card [pad]="false" [elevation]="'xs'" class="chart-card clickable"
+
+        <ds-card [pad]="true" elevation="xs" [hover]="true" [interactive]="true" class="chart-card"
           [attr.title]="'Click on a source to view filtered dossiers'">
           <div class="rpt-card-header">
             <div class="rpt-card-title">
@@ -309,28 +298,27 @@
               </div>
             </ng-template>
           </div>
-          <div class="rpt-card-body">
-            <div class="chart-container">
-              <canvas
-                #leadSourceCanvas
-                baseChart
-                [data]="leadSourceChartData"
-                [options]="leadSourceChartOptions"
-                [type]="leadSourceChartType">
-              </canvas>
-            </div>
+          <div class="chart-container">
+            <canvas
+              #leadSourceCanvas
+              baseChart
+              [data]="leadSourceChartData"
+              [options]="leadSourceChartOptions"
+              [type]="leadSourceChartType">
+            </canvas>
           </div>
         </ds-card>
       </div>
+
       <div class="detailed-metrics">
-        <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card">
+        <ds-card [pad]="true" elevation="xs" class="metrics-card">
           <div class="rpt-card-header">
             <div class="rpt-card-title">
               <ds-icon class="chart-icon" name="bars-asc" [size]="20" />
               Agent Performance Details
             </div>
           </div>
-          <div class="rpt-card-body rpt-table-body">
+          <div class="rpt-table-body">
             <ds-table
               [columns]="agentDetailColumns"
               [rows]="agentDetailRows"
@@ -341,14 +329,15 @@
             </ds-table>
           </div>
         </ds-card>
-        <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card">
+
+        <ds-card [pad]="true" elevation="xs" class="metrics-card">
           <div class="rpt-card-header">
             <div class="rpt-card-title">
               <ds-icon class="chart-icon" name="search" [size]="20" />
               Lead Sources Breakdown
             </div>
           </div>
-          <div class="rpt-card-body rpt-table-body">
+          <div class="rpt-table-body">
             <ds-table
               [columns]="leadSourceColumns"
               [rows]="leadSourceRows"
@@ -361,14 +350,15 @@
             </ds-table>
           </div>
         </ds-card>
-        <ds-card [pad]="false" [elevation]="'xs'" class="metrics-card chart-card-wide">
+
+        <ds-card [pad]="true" elevation="xs" class="metrics-card chart-card-wide">
           <div class="rpt-card-header">
             <div class="rpt-card-title">
               <ds-icon class="chart-icon" name="chart" [size]="20" />
               Conversion Funnel Metrics
             </div>
           </div>
-          <div class="rpt-card-body rpt-table-body">
+          <div class="rpt-table-body">
             <ds-table
               [columns]="funnelColumns"
               [rows]="funnelRows"

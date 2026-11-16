@@ -1,43 +1,35 @@
-<div class="datetime-wrapper" [formGroup]="form" (blur)="markTouched()">
-  <div class="datetime-label">
-    <span>{{ label() }}</span>
-    @if (required()) {
-      <span class="required" aria-label="obligatoire">*</span>
-    }
-  </div>
-
-  <div class="datetime-row">
-    <mat-form-field appearance="outline" class="date-part">
-      <mat-label>Date</mat-label>
-      <input
-        matInput
-        [matDatepicker]="picker"
-        formControlName="date"
-        [placeholder]="datePlaceholder()"
-        (blur)="markTouched()"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="time-part">
-        <mat-label>Heure</mat-label>
-        <input
-          matInput
-          type="time"
-          formControlName="time"
-          [placeholder]="timePlaceholder()"
-          (blur)="markTouched()"
-          />
-        </mat-form-field>
-      </div>
-
-      <div class="datetime-errors" aria-live="polite">
-        @if (showRequiredError) {
-          <div class="datetime-error">Ce champ est requis</div>
-        }
-        @if (showInvalidTimeError) {
-          <div class="datetime-error">Heure invalide (format HH:mm)</div>
-        }
+<div class="datetime-wrapper ds-form-stack" [formGroup]="form">
+  <div class="datetime-row" style="display: flex; gap: 12px; align-items: flex-end;">
+    <div class="ds-field" style="flex: 2;">
+      @if (label()) {
+        <label class="ds-field__label">{{ label() }} @if (required()) { <span style="color: var(--ds-error);">*</span> }</label>
+      }
+      <div class="ds-field__wrap">
+        <input 
+          type="date" 
+          class="ds-field__input" 
+          formControlName="date"
+          (blur)="markTouched()" />
       </div>
     </div>
+
+    <div class="ds-field" style="flex: 1;">
+      <label class="ds-field__label">Heure</label>
+      <div class="ds-field__wrap">
+        <input 
+          type="time" 
+          class="ds-field__input" 
+          formControlName="time"
+          (blur)="markTouched()" />
+      </div>
+    </div>
+  </div>
+
+  @if (form.touched && form.invalid) {
+    <div class="datetime-errors" style="margin-top: 4px; font-size: 12px; color: var(--ds-error);" aria-live="polite">
+      @if (form.errors?.['required'] || form.get('date')?.errors?.['required'] || form.get('time')?.errors?.['required']) {
+        <div class="datetime-error">Ce champ est requis (date et heure)</div>
+      }
+    </div>
+  }
+</div>

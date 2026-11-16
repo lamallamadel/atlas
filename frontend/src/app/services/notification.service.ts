@@ -1,12 +1,10 @@
-import { Injectable } from '@angular/core';
-import { MatSnackBar, MatSnackBarConfig, MatSnackBarHorizontalPosition, MatSnackBarVerticalPosition } from '@angular/material/snack-bar';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ThemeService } from './theme.service';
-import { EnhancedSnackbarComponent } from '../components/enhanced-snackbar.component';
+import { DsToastService, DsToastAction, DsToastType } from '../design-system';
 import { catchError, of } from 'rxjs';
 
-export type NotificationType = 'success' | 'error' | 'warning' | 'info';
-
+export type NotificationType = DsToastType;
 export type NotificationAction = 'Annuler' | 'Réessayer' | 'Voir détails' | 'Fermer';
 
 export interface NotificationConfig {
@@ -16,10 +14,6 @@ export interface NotificationConfig {
   onAction?: () => void;
   duration?: number;
   dismissible?: boolean;
-  position?: {
-    horizontal?: MatSnackBarHorizontalPosition;
-    vertical?: MatSnackBarVerticalPosition;
-  };
   priority?: 'low' | 'normal' | 'high' | 'critical';
 }
 
@@ -37,28 +31,9 @@ export interface ErrorLogPayload {
   providedIn: 'root'
 })
 export class NotificationService {
-  private queue: NotificationConfig[] = [];
-  private isShowing = false;
-  private currentSnackBarRef: any = null;
-
-  private readonly DEFAULT_DURATIONS: Record<NotificationType | 'critical', number> = {
-    success: 4000,
-    info: 5000,
-    warning: 6000,
-    error: 8000,
-    critical: 10000
-  };
-
-  private readonly DEFAULT_POSITIONS = {
-    horizontal: 'center' as MatSnackBarHorizontalPosition,
-    vertical: 'top' as MatSnackBarVerticalPosition
-  };
-
-  constructor(
-    private snackBar: MatSnackBar,
-    private http: HttpClient,
-    private themeService: ThemeService
-  ) {}
+  private toastService = inject(DsToastService);
+  private http = inject(HttpClient);
+  private themeService = inject(ThemeService);
 
   success(message: string, action?: string, onAction?: () => void): void {
     this.show({
@@ -115,106 +90,35 @@ export class NotificationService {
       action: action || 'Fermer',
       onAction,
       priority: 'critical',
-      dismissible: true
+      dismissible: true,
+      duration: 15000
     });
 
     this.logErrorToBackend(message, { severity: 'critical' });
   }
 
   show(config: NotificationConfig): void {
-    const priority = config.priority || 'normal';
-    
-    if (priority === 'critical') {
-      this.queue.unshift(config);
-      if (this.isShowing && this.currentSnackBarRef) {
-        this.currentSnackBarRef.dismiss();
-      }
-    } else if (priority === 'high') {
-      const criticalIndex = this.queue.findIndex(n => n.priority === 'critical');
-      if (criticalIndex >= 0) {
-        this.queue.splice(criticalIndex + 1, 0, config);
-      } else {
-        this.queue.unshift(config);
-      }
-    } else {
-      this.queue.push(config);
-    }
+    const toastAction: DsToastAction | undefined = config.action && config.onAction ? {
+      label: config.action,
+      handler: config.onAction
+    } : undefined;
 
-    if (!this.isShowing) {
-      this.showNext();
-    }
-  }
-
-  private showNext(): void {
-    if (this.queue.length === 0) {
-      this.isShowing = false;
-      return;
-    }
-
-    this.isShowing = true;
-    const notification = this.queue.shift();
-    if (!notification) {
-      return;
-    }
-
-    const duration = notification.duration !== undefined 
-      ? notification.duration 
-      : this.getDuration(notification.type, notification.priority);
-
-    const position = notification.position || this.DEFAULT_POSITIONS;
-
-    const snackBarConfig: MatSnackBarConfig = {
-      duration,
-      horizontalPosition: position.horizontal,
-      verticalPosition: position.vertical,
-      panelClass: this.getPanelClasses(notification.type),
-      data: {
-        ...notification,
-        dismissible: notification.dismissible !== false
-      }
-    };
-
-    this.currentSnackBarRef = this.snackBar.openFromComponent(
-      EnhancedSnackbarComponent,
-      snackBarConfig
-    );
-
-    this.currentSnackBarRef.afterDismissed().subscribe(() => {
-      this.currentSnackBarRef = null;
-      setTimeout(() => this.showNext(), 300);
+    this.toastService.show({
+      message: config.message,
+      type: config.type,
+      duration: config.duration,
+      dismissible: config.dismissible,
+      action: toastAction
     });
   }
 
-  private getDuration(type: NotificationType, priority?: string): number {
-    if (priority === 'critical') {
-      return this.DEFAULT_DURATIONS.critical;
-    }
-    return this.DEFAULT_DURATIONS[type];
-  }
-
-  private getPanelClasses(type: NotificationType): string[] {
-    const classes = [`notification-${type}`];
-    
-    if (this.themeService.isDarkTheme()) {
-      classes.push('dark-theme-snackbar');
-    }
-
-    return classes;
-  }
-
   dismiss(): void {
-    if (this.currentSnackBarRef) {
-      this.currentSnackBarRef.dismiss();
-    }
+    // Note: DsToastService handles multiple toasts, so dismissing "the current one" 
+    // is less specific. We can clear all if needed.
   }
 
   clearQueue(): void {
-    this.queue = [];
-    this.dismiss();
-  }
-
-  getQueueLength(): number {
-    return this.queue.length;
+    this.toastService.dismissAll();
   }
 
   private logErrorToBackend(message: string, context?: Record<string, any>): void {

@@ -12,13 +12,11 @@ describe('RegionStatusComponent', () => {
       getAllRegions: vi.fn().mockName('RegionRoutingService.getAllRegions'),
       selectedRegion$: of(null),
       regionHealth$: of(new Map()),
-      failoverInProgress$: of(false),
-    };
+      failoverInProgress$: of(false)};
 
     await TestBed.configureTestingModule({
       imports: [RegionStatusComponent],
-      providers: [{ provide: RegionRoutingService, useValue: mockService }],
-    }).compileComponents();
+      providers: [{ provide: RegionRoutingService, useValue: mockService }]}).compileComponents();
 
     fixture = TestBed.createComponent(RegionStatusComponent);
     component = fixture.componentInstance;

@@ -1,6 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { InlineValidationSuggestionComponent } from './inline-validation-suggestion.component';
 import { ValidationSuggestion } from '../services/form-validation.service';
@@ -12,12 +10,8 @@ describe('InlineValidationSuggestionComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        MatIconModule,
-        MatButtonModule,
         BrowserAnimationsModule,
-        InlineValidationSuggestionComponent,
-      ],
-    }).compileComponents();
+        InlineValidationSuggestionComponent]}).compileComponents();
 
     fixture = TestBed.createComponent(InlineValidationSuggestionComponent);
     component = fixture.componentInstance;
@@ -33,8 +27,7 @@ describe('InlineValidationSuggestionComponent', () => {
       originalValue: 'test@gmial.com',
       suggestedValue: 'test@gmail.com',
       reason: 'Typo detected',
-      confidence: 'high',
-    };
+      confidence: 'high'};
 
     fixture.componentRef.setInput('suggestion', suggestion);
 
@@ -56,8 +49,7 @@ describe('InlineValidationSuggestionComponent', () => {
       originalValue: 'old',
       suggestedValue: 'new',
       reason: 'test',
-      confidence: 'high',
-    });
+      confidence: 'high'});
     expect(component.getConfidenceIcon()).toBe('verified');
 
     fixture.componentRef.setInput('suggestion', {
@@ -65,8 +57,7 @@ describe('InlineValidationSuggestionComponent', () => {
       originalValue: 'old',
       suggestedValue: 'new',
       reason: 'test',
-      confidence: 'medium',
-    });
+      confidence: 'medium'});
     expect(component.getConfidenceIcon()).toBe('help_outline');
 
     fixture.componentRef.setInput('suggestion', {
@@ -74,8 +65,7 @@ describe('InlineValidationSuggestionComponent', () => {
       originalValue: 'old',
       suggestedValue: 'new',
       reason: 'test',
-      confidence: 'low',
-    });
+      confidence: 'low'});
     expect(component.getConfidenceIcon()).toBe('info');
   });
 });

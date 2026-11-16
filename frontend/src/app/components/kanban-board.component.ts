@@ -1,15 +1,16 @@
-import { Component, OnInit, OnChanges, SimpleChanges, input, output } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, input, output, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { DossierResponse, DossierStatus, DossierApiService } from '../services/dossier-api.service';
-import { ToastNotificationService } from '../services/toast-notification.service';
 import {
   KanbanColumnComponent,
+  DsSkeletonComponent,
+  DsToastService,
   type DsBadgeStatus,
   type DsKanbanCard,
   type DsKanbanColumn,
   type DsKanbanDropEvent,
 } from '../design-system';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface KanbanColumn {
   id: DossierStatus;
@@ -23,9 +24,12 @@ interface KanbanColumn {
   standalone: true,
   templateUrl: './kanban-board.component.html',
   styleUrls: ['./kanban-board.component.css'],
-  imports: [KanbanColumnComponent, DsSkeletonComponent],
+  imports: [CommonModule, KanbanColumnComponent, DsSkeletonComponent],
 })
 export class KanbanBoardComponent implements OnInit, OnChanges {
+  private dossierApiService = inject(DossierApiService);
+  private toastService = inject(DsToastService);
+
   readonly dossiers = input<DossierResponse[]>([]);
   readonly loading = input(false);
   readonly quickFilter = input('');
@@ -34,7 +38,6 @@ export class KanbanBoardComponent implements OnInit, OnChanges {
 
   columns: KanbanColumn[] = [];
   filteredColumns: KanbanColumn[] = [];
-  /** Colonnes branchées sur `ds-kanban-column` (cartes dérivées des dossiers filtrés). */
   dsKanbanColumns: DsKanbanColumn[] = [];
 
   private readonly workflowTransitions: Record<DossierStatus, DossierStatus[]> = {
@@ -45,11 +48,6 @@ export class KanbanBoardComponent implements OnInit, OnChanges {
     [DossierStatus.WON]: [],
     [DossierStatus.LOST]: [DossierStatus.NEW, DossierStatus.QUALIFYING],
   };
-
-  constructor(
-    private dossierApiService: DossierApiService,
-    private toastService: ToastNotificationService,
-  ) {}
 
   ngOnInit(): void {
     this.initializeColumns();
@@ -67,42 +65,12 @@ export class KanbanBoardComponent implements OnInit, OnChanges {
 
   private initializeColumns(): void {
     this.columns = [
-      {
-        id: DossierStatus.NEW,
-        title: 'Nouveau',
-        dossiers: [],
-        allowedTransitions: this.workflowTransitions[DossierStatus.NEW],
-      },
-      {
-        id: DossierStatus.QUALIFYING,
-        title: 'Qualification',
-        dossiers: [],
-        allowedTransitions: this.workflowTransitions[DossierStatus.QUALIFYING],
-      },
-      {
-        id: DossierStatus.QUALIFIED,
-        title: 'Qualifié',
-        dossiers: [],
-        allowedTransitions: this.workflowTransitions[DossierStatus.QUALIFIED],
-      },
-      {
-        id: DossierStatus.APPOINTMENT,
-        title: 'Rendez-vous',
-        dossiers: [],
-        allowedTransitions: this.workflowTransitions[DossierStatus.APPOINTMENT],
-      },
-      {
-        id: DossierStatus.WON,
-        title: 'Gagné',
-        dossiers: [],
-        allowedTransitions: this.workflowTransitions[DossierStatus.WON],
-      },
-      {
-        id: DossierStatus.LOST,
-        title: 'Perdu',
-        dossiers: [],
-        allowedTransitions: this.workflowTransitions[DossierStatus.LOST],
-      },
+      { id: DossierStatus.NEW, title: 'Nouveau', dossiers: [], allowedTransitions: this.workflowTransitions[DossierStatus.NEW] },
+      { id: DossierStatus.QUALIFYING, title: 'Qualification', dossiers: [], allowedTransitions: this.workflowTransitions[DossierStatus.QUALIFYING] },
+      { id: DossierStatus.QUALIFIED, title: 'Qualifié', dossiers: [], allowedTransitions: this.workflowTransitions[DossierStatus.QUALIFIED] },
+      { id: DossierStatus.APPOINTMENT, title: 'Rendez-vous', dossiers: [], allowedTransitions: this.workflowTransitions[DossierStatus.APPOINTMENT] },
+      { id: DossierStatus.WON, title: 'Gagné', dossiers: [], allowedTransitions: this.workflowTransitions[DossierStatus.WON] },
+      { id: DossierStatus.LOST, title: 'Perdu', dossiers: [], allowedTransitions: this.workflowTransitions[DossierStatus.LOST] },
     ];
   }
 
@@ -142,55 +110,36 @@ export class KanbanBoardComponent implements OnInit, OnChanges {
     }));
   }
 
-  private columnDsColor(
-    id: DossierStatus,
-  ): NonNullable<DsKanbanColumn['color']> {
+  private columnDsColor(id: DossierStatus): NonNullable<DsKanbanColumn['color']> {
     switch (id) {
-      case DossierStatus.NEW:
-        return 'warning';
+      case DossierStatus.NEW: return 'warning';
       case DossierStatus.QUALIFYING:
-      case DossierStatus.APPOINTMENT:
-        return 'marine';
+      case DossierStatus.APPOINTMENT: return 'marine';
       case DossierStatus.QUALIFIED:
-        return 'success';
-      case DossierStatus.WON:
-        return 'success';
-      case DossierStatus.LOST:
-        return 'error';
-      default:
-        return 'neutral';
+      case DossierStatus.WON: return 'success';
+      case DossierStatus.LOST: return 'error';
+      default: return 'neutral';
     }
   }
 
   private dossierBadgeStatus(status: DossierStatus): DsBadgeStatus {
     switch (status) {
-      case DossierStatus.NEW:
-        return 'new';
-      case DossierStatus.QUALIFYING:
-        return 'qualification';
-      case DossierStatus.QUALIFIED:
-        return 'info';
-      case DossierStatus.APPOINTMENT:
-        return 'rdv';
-      case DossierStatus.WON:
-        return 'won';
-      case DossierStatus.LOST:
-        return 'lost';
-      default:
-        return 'neutral';
+      case DossierStatus.NEW: return 'new';
+      case DossierStatus.QUALIFYING: return 'qualification';
+      case DossierStatus.QUALIFIED: return 'info';
+      case DossierStatus.APPOINTMENT: return 'rdv';
+      case DossierStatus.WON: return 'won';
+      case DossierStatus.LOST: return 'lost';
+      default: return 'neutral';
     }
   }
 
   private dossierToKanbanCard(d: DossierResponse): DsKanbanCard {
     const subtitleParts = [d.leadPhone, d.annonceTitle].filter(Boolean) as string[];
     const tags: string[] = [];
-    if (d.score !== null && d.score !== undefined) {
-      tags.push(`Score ${d.score}`);
-    }
+    if (d.score !== null && d.score !== undefined) tags.push(`Score ${d.score}`);
     const src = d.leadSource || d.source;
-    if (src) {
-      tags.push(String(src));
-    }
+    if (src) tags.push(String(src));
     const updated = d.updatedAt ? new Date(d.updatedAt) : null;
     return {
       id: d.id,
@@ -199,35 +148,23 @@ export class KanbanBoardComponent implements OnInit, OnChanges {
       status: d.status,
       badge: `#${d.id}`,
       badgeStatus: this.dossierBadgeStatus(d.status),
-      dueDate: updated
-        ? updated.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-        : undefined,
+      dueDate: updated ? updated.toLocaleDateString('fr-FR') : undefined,
       tags: tags.length ? tags : undefined,
       meta: { dossierId: String(d.id) },
     };
   }
 
-  get kanbanConnectedLists(): string[] {
-    return this.dsKanbanColumns.map((c) => 'dsk-' + c.id);
-  }
+  get kanbanConnectedLists(): string[] { return this.dsKanbanColumns.map((c) => 'dsk-' + c.id); }
 
   async onKanbanCardDropped(ev: DsKanbanDropEvent): Promise<void> {
-    if (ev.fromColumn === ev.toColumn) {
-      return;
-    }
-
+    if (ev.fromColumn === ev.toColumn) return;
     const from = ev.fromColumn as DossierStatus;
     const to = ev.toColumn as DossierStatus;
     const dossier = this.dossiers().find((d) => d.id === Number(ev.card.id));
-    if (!dossier) {
-      this.syncDsKanbanColumns();
-      return;
-    }
+    if (!dossier) { this.syncDsKanbanColumns(); return; }
 
     if (!this.isTransitionAllowed(from, to)) {
-      this.toastService.warning(
-        `Transition non autorisée : de « ${this.columnTitle(from)} » vers « ${this.columnTitle(to)} »`,
-      );
+      this.toastService.warning(`Transition non autorisée : de « ${this.columnTitle(from)} » vers « ${this.columnTitle(to)} »`);
       this.syncDsKanbanColumns();
       return;
     }
@@ -244,26 +181,17 @@ export class KanbanBoardComponent implements OnInit, OnChanges {
       console.error('Failed to update dossier status:', error);
       dossier.status = previousStatus;
       this.distributeDosiersToColumns();
-      this.toastService.error('Échec de la mise à jour du statut. Veuillez réessayer.');
+      this.toastService.error('Échec de la mise à jour du statut');
     }
   }
 
-  private columnTitle(status: DossierStatus): string {
-    return this.columns.find((c) => c.id === status)?.title ?? status;
-  }
-
-  private isTransitionAllowed(from: DossierStatus, to: DossierStatus): boolean {
-    return this.workflowTransitions[from]?.includes(to) || false;
-  }
+  private columnTitle(status: DossierStatus): string { return this.columns.find((c) => c.id === status)?.title ?? status; }
+  private isTransitionAllowed(from: DossierStatus, to: DossierStatus): boolean { return this.workflowTransitions[from]?.includes(to) || false; }
 
   onKanbanCardClick(card: DsKanbanCard): void {
     const dossier = this.dossiers().find((d) => d.id === Number(card.id));
-    if (dossier) {
-      this.dossierClick.emit(dossier);
-    }
+    if (dossier) this.dossierClick.emit(dossier);
   }
 
-  trackByColumnId(index: number, column: DsKanbanColumn): DossierStatus {
-    return column.id as DossierStatus;
-  }
+  trackByColumnId(index: number, column: DsKanbanColumn): DossierStatus { return column.id as DossierStatus; }
 }

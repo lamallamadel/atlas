@@ -1,81 +1,83 @@
-<div class="message-input-container" [class.offline]="!isOnline()">
+<div class="message-input-container ds-form-stack" [class.offline]="!isOnline()" style="padding: 16px; background: var(--ds-surface); border-top: 1px solid var(--ds-border);">
+  
   <!-- Queue indicator -->
   @if (queuedMessagesCount() > 0) {
-    <div class="queue-indicator">
-      <mat-icon>schedule</mat-icon>
+    <div class="queue-indicator ds-alert ds-alert--info" style="margin-bottom: 12px; padding: 8px 12px; font-size: 12px; display: flex; align-items: center; gap: 8px;">
+      <ds-icon name="clock" [size]="16"></ds-icon>
       <span>{{ queuedMessagesCount() }} message(s) en file d'attente</span>
     </div>
   }
 
   <!-- Template chip (if selected) -->
   @if (selectedTemplate) {
-    <div class="template-chip-container">
-      <mat-chip-listbox>
-        <mat-chip class="template-chip">
-          <mat-icon matChipAvatar>description</mat-icon>
-          <span>{{ selectedTemplate.name }}</span>
-          <button matChipRemove (click)="removeTemplate()">
-            <mat-icon>cancel</mat-icon>
-          </button>
-        </mat-chip>
-      </mat-chip-listbox>
+    <div class="template-chip-container" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+      <ds-filter-chip
+        [active]="true"
+        (click)="openTemplateSelector()">
+        Modèle : {{ selectedTemplate.name }}
+      </ds-filter-chip>
+      <ds-button variant="icon" size="sm" (dsClick)="removeTemplate()" style="color: var(--ds-error);">
+        <ds-icon name="close" [size]="16"></ds-icon>
+      </ds-button>
     </div>
   }
 
   <!-- Template variables form -->
   @if (selectedTemplate && selectedTemplate.variables.length > 0) {
-    <div class="template-variables">
-      @for (variable of selectedTemplate.variables; track variable) {
-        <div class="variable-input">
-          <mat-form-field appearance="outline" class="variable-field">
-            <mat-label>{{ variable }}</mat-label>
-            <input
-              matInput
-              [(ngModel)]="templateVariables[variable]"
-              (ngModelChange)="onVariableChange()"
-              [placeholder]="'Valeur pour ' + variable">
-            </mat-form-field>
-          </div>
+    <ds-card [pad]="true" elevation="xs" style="margin-bottom: 12px; background: var(--ds-bg-subtle);">
+      <div class="template-variables" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+        @for (variable of selectedTemplate.variables; track variable) {
+          <ds-input
+            [label]="variable"
+            [(ngModel)]="templateVariables[variable]"
+            (ngModelChange)="onVariableChange()"
+            [placeholder]="'Valeur pour ' + variable">
+          </ds-input>
         }
       </div>
-    }
+    </ds-card>
+  }
 
-    <!-- Message input area -->
-    <div class="input-wrapper">
-      <button
-        mat-icon-button
-        type="button"
-        class="template-button"
-        [disabled]="disabled()"
-        (click)="openTemplateSelector()"
-        [attr.title]="selectedTemplate ? 'Modifier le modèle' : 'Sélectionner un modèle'">
-        <mat-icon>{{ selectedTemplate ? 'edit' : 'insert_drive_file' }}</mat-icon>
-      </button>
+  <!-- Message input area -->
+  <div class="input-wrapper" style="display: flex; gap: 12px; align-items: flex-end;">
+    <ds-button
+      variant="ghost"
+      size="md"
+      (dsClick)="openTemplateSelector()"
+      [disabled]="disabled()"
+      [title]="selectedTemplate ? 'Modifier le modèle' : 'Sélectionner un modèle'">
+      <ds-icon [name]="selectedTemplate ? 'edit' : 'folder'" [size]="20"></ds-icon>
+    </ds-button>
 
-      <textarea
-        #messageInput
-        class="message-textarea"
-        [placeholder]="getPlaceholder()"
-        [(ngModel)]="messageContent"
-        [disabled]="disabled() || selectedTemplate !== null"
-        (input)="autoGrow($event)"
-        (keydown.enter)="onEnterKey($any($event))"
-        rows="1"
-      maxlength="4096"></textarea>
-
-      <button
-        mat-fab
-        color="primary"
-        class="send-button"
-        [disabled]="!canSend()"
-        (click)="onSend()"
-        [class.sending]="sending()">
-        @if (!sending()) {
-          <mat-icon>send</mat-icon>
-        }
-        @if (sending()) {
-          <ds-skeleton variant="circle" width="24px" height="24px"></ds-skeleton>
-        }
-      </button>
+    <div class="ds-field" style="flex: 1; margin: 0;">
+      <div class="ds-field__wrap">
+        <textarea
+          #messageInput
+          class="ds-field__input"
+          [placeholder]="getPlaceholder()"
+          [(ngModel)]="messageContent"
+          [disabled]="disabled() || selectedTemplate !== null"
+          (input)="autoGrow($event)"
+          (keydown.enter)="onEnterKey($any($event))"
+          rows="1"
+          style="height: auto; min-height: 38px; max-height: 200px; padding: 10px 12px; resize: none;"
+          maxlength="4096"></textarea>
+      </div>
     </div>
+
+    <ds-button
+      variant="marine"
+      size="md"
+      [disabled]="!canSend()"
+      (dsClick)="onSend()"
+      [class.sending]="sending()"
+      style="padding: 0; min-width: 44px; width: 44px; height: 44px; border-radius: 50%; justify-content: center;">
+      @if (!sending()) {
+        <ds-icon name="send" [size]="20"></ds-icon>
+      }
+      @if (sending()) {
+        <ds-skeleton variant="circle" width="20px" height="20px" [animate]="true"></ds-skeleton>
+      }
+    </ds-button>
   </div>
+</div>

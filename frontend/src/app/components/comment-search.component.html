@@ -1,69 +1,82 @@
-<div class="comment-search-container">
-  <div class="search-header">
-    <h3>Search Comments</h3>
+<div class="comment-search-container ds-form-stack">
+  <div class="search-header" style="margin-bottom: 24px;">
+    <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--ds-marine);">Recherche dans les commentaires</h3>
   </div>
 
-  <form [formGroup]="searchForm" (ngSubmit)="search()" class="search-form">
-    <mat-form-field appearance="outline" class="search-input">
-      <mat-label>Search in comments</mat-label>
-      <input matInput formControlName="query" placeholder="Enter search terms...">
+  <form [formGroup]="searchForm" (ngSubmit)="search()" class="search-form" style="display: flex; gap: 12px; align-items: flex-end;">
+    <div style="flex: 1; position: relative;">
+      <ds-input
+        formControlName="query"
+        placeholder="Rechercher des termes..."
+        prefixIcon="search">
+      </ds-input>
       @if (searchForm.value.query) {
-        <button mat-icon-button matSuffix type="button" (click)="clearSearch()"
-          >
-          <mat-icon>clear</mat-icon>
-        </button>
+        <ds-button
+          variant="icon"
+          size="sm"
+          (dsClick)="clearSearch()"
+          style="position: absolute; right: 8px; top: 8px; z-index: 2;">
+          <ds-icon name="close" size="16"></ds-icon>
+        </ds-button>
       }
-    </mat-form-field>
-    <button mat-raised-button color="primary" type="submit" [disabled]="!searchForm.value.query || searching">
-      <mat-icon>search</mat-icon>
-      Search
-    </button>
+    </div>
+    
+    <ds-button variant="marine" size="md" type="submit" [disabled]="!searchForm.value.query || searching">
+      <ds-icon name="search" size="20" style="margin-right: 8px;"></ds-icon>
+      Rechercher
+    </ds-button>
   </form>
 
   @if (searching) {
-    <div class="loading-state">
-      <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
-      <p>Searching...</p>
+    <div class="loading-state" style="padding: 48px; text-align: center;">
+      <ds-skeleton variant="circle" width="40px" height="40px" style="margin-bottom: 16px;"></ds-skeleton>
+      <p style="color: var(--ds-text-muted);">Recherche en cours...</p>
     </div>
   }
 
   @if (!searching && searchResults.length === 0 && searchForm.value.query) {
-    <div class="no-results">
-      <mat-icon>search_off</mat-icon>
-      <p>No comments found matching "{{ searchForm.value.query }}"</p>
+    <div class="no-results" style="padding: 48px; text-align: center; background: var(--ds-bg-subtle); border-radius: var(--ds-radius-lg); border: 2px dashed var(--ds-border); margin-top: 24px;">
+      <ds-icon name="search" [size]="24" style="opacity: 0.3; margin-bottom: 16px;"></ds-icon>
+      <p style="font-weight: 600; color: var(--ds-text-muted);">Aucun commentaire trouvé pour "{{ searchForm.value.query }}"</p>
     </div>
   }
 
   @if (searchResults.length > 0) {
-    <div class="search-results">
-      <div class="results-header">
-        <h4>Found {{ searchResults.length }} result(s)</h4>
+    <div class="search-results" style="margin-top: 32px;">
+      <div class="results-header" style="margin-bottom: 24px;">
+        <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--ds-text-muted); text-transform: uppercase;">{{ searchResults.length }} résultat(s) trouvé(s)</h4>
       </div>
-      @for (result of searchResults; track result) {
-        <div class="result-item">
-          <div class="result-header">
-            <div class="result-meta">
-              <mat-chip class="entity-chip">{{ result.entityType }}</mat-chip>
-              <span class="entity-id">#{{ result.entityId }}</span>
-              @if (result.threadTitle) {
-                <span class="thread-title">{{ result.threadTitle }}</span>
-              }
+      
+      <div class="results-list ds-form-stack">
+        @for (result of searchResults; track result) {
+          <div class="result-item ds-card" style="padding: 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); background: var(--ds-surface);">
+            <div class="result-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div class="result-meta" style="display: flex; gap: 8px; align-items: center;">
+                <ds-badge status="neutral" [showDot]="false" size="sm">{{ result.entityType }}</ds-badge>
+                <span class="entity-id" style="font-family: var(--ds-font-mono); font-size: 12px; color: var(--ds-text-muted);">#{{ result.entityId }}</span>
+                @if (result.threadTitle) {
+                  <span class="thread-title" style="font-size: 13px; font-weight: 500;">{{ result.threadTitle }}</span>
+                }
+              </div>
+              <span class="result-date" style="font-size: 12px; color: var(--ds-text-faint);">{{ result.createdAt | date:'short' }}</span>
             </div>
-            <span class="result-date">{{ result.createdAt | date:'short' }}</span>
+            
+            <div class="result-content" [innerHTML]="highlightQuery(result.content, searchForm.value.query)" style="font-size: 14px; line-height: 1.5; color: var(--ds-text); margin-bottom: 16px;"></div>
+            
+            <div class="result-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--ds-divider);">
+              <span class="result-author" style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ds-text-muted);">
+                <ds-icon name="user" size="16"></ds-icon>
+                {{ result.createdBy }}
+              </span>
+              <a [routerLink]="['/', result.entityType.toLowerCase(), result.entityId]" class="view-link" style="display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ds-primary);">
+                Voir la conversation
+                <ds-icon name="chevron-right" size="16"></ds-icon>
+              </a>
+            </div>
           </div>
-          <div class="result-content" [innerHTML]="highlightQuery(result.content, searchForm.value.query)"></div>
-          <div class="result-footer">
-            <span class="result-author">
-              <mat-icon>account_circle</mat-icon>
-              {{ result.createdBy }}
-            </span>
-            <a [routerLink]="['/', result.entityType.toLowerCase(), result.entityId]" class="view-link">
-              View Thread
-              <mat-icon>arrow_forward</mat-icon>
-            </a>
-          </div>
-        </div>
-      }
+        }
+      </div>
     </div>
   }
 </div>
+iv>

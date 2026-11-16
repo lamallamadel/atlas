@@ -22,17 +22,10 @@ export class HttpAuthInterceptor implements HttpInterceptor {
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-
-      // Tenant header is mandatory for backend calls. If the user did not select one yet,
-      // keep a deterministic default to avoid 400 Bad Request on endpoints like /ping.
-      if (!orgId) {
-        headers['X-Org-Id'] = this.DEFAULT_ORG_ID;
-      }
     }
 
-    if (orgId) {
-      headers['X-Org-Id'] = orgId;
-    }
+    // X-Org-Id is required by the backend for all /api/ calls (including public endpoints).
+    headers['X-Org-Id'] = orgId || this.DEFAULT_ORG_ID;
 
     if (Object.keys(headers).length > 0) {
       const modifiedReq = req.clone({ setHeaders: headers });

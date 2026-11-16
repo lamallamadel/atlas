@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, isDevMode } from '@angular/core';
 import { Router, RouterOutlet, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { routeFadeInAnimation } from './animations/route-animations';
@@ -14,9 +14,9 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { Capacitor } from '@capacitor/core';
 import { OfflineIndicatorComponent } from './components/offline-indicator.component';
-import { ProgressBarComponent } from './components/progress-bar.component';
-import { NotificationToastComponent } from './components/notification-toast.component';
+import { DsProgressBarComponent, DsToastContainerComponent } from './design-system';
 import { TourLauncherComponent } from './components/tour-launcher.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-root',
@@ -33,37 +33,44 @@ import { TourLauncherComponent } from './components/tour-launcher.component';
     ],
     standalone: true,
     imports: [
+        CommonModule,
         RouterOutlet,
         OfflineIndicatorComponent,
-        ProgressBarComponent,
-        NotificationToastComponent,
+        DsProgressBarComponent,
+        DsToastContainerComponent,
         TourLauncherComponent,
     ]
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'Atlasia Pro';
-  isNavigating = false;
-  showLoadingOverlay = false;
-  private loadingTimeout: any;
+  isNavigating = signal(false);
+  navigationProgress = signal(0);
+  private progressInterval: any;
   private subscriptions = new Subscription();
   public isNativePlatform = Capacitor.isNativePlatform();
 
-  constructor(
-    private router: Router,
-    private themeService: ThemeService,
-    private swService: ServiceWorkerRegistrationService,
-    private queueService: OfflineQueueService,
-    private liveAnnouncer: LiveAnnouncerService,
-    private prefetchService: PrefetchService,
-    private navigationService: NavigationService,
-    private nativeAppInit: NativeAppInitService,
-    private platformService: NativePlatformService
-  ) {}
+  private router = inject(Router);
+  private themeService = inject(ThemeService);
+  private swService = inject(ServiceWorkerRegistrationService);
+  private queueService = inject(OfflineQueueService);
+  private liveAnnouncer = inject(LiveAnnouncerService);
+  private prefetchService = inject(PrefetchService);
+  private navigationService = inject(NavigationService);
+  private nativeAppInit = inject(NativeAppInitService);
+  private platformService = inject(NativePlatformService);
 
   async ngOnInit(): Promise<void> {
-    this.swService.register();
+    if (isDevMode()) {
+      // In dev mode, unregister any existing Service Worker to avoid stale intercepts.
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(r => r.unregister());
+        });
+      }
+    } else {
+      this.swService.register();
+    }
 
-    // Initialize native app features if running on native platform
     if (this.isNativePlatform) {
       await this.nativeAppInit.initialize();
     }
@@ -76,10 +83,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.router.events.pipe(
         filter(event => event instanceof NavigationStart)
       ).subscribe(() => {
-        this.isNavigating = true;
-        this.loadingTimeout = setTimeout(() => {
-          this.showLoadingOverlay = true;
-        }, 300);
+        this.startNavigationProgress();
       })
     );
 
@@ -91,20 +95,45 @@ export class AppComponent implements OnInit, OnDestroy {
           event instanceof NavigationError
         )
       ).subscribe(() => {
-        this.isNavigating = false;
-        clearTimeout(this.loadingTimeout);
-        this.showLoadingOverlay = false;
+        this.completeNavigationProgress();
       })
     );
   }
 
+  private startNavigationProgress(): void {
+    this.isNavigating.set(true);
+    this.navigationProgress.set(0);
+    this.clearProgressInterval();
+
+    this.progressInterval = setInterval(() => {
+      if (this.navigationProgress() < 90) {
+        const increment = Math.random() * 5;
+        this.navigationProgress.set(Math.min(this.navigationProgress() + increment, 90));
+      }
+    }, 150);
+  }
+
+  private completeNavigationProgress(): void {
+    this.clearProgressInterval();
+    this.navigationProgress.set(100);
+
+    setTimeout(() => {
+      this.isNavigating.set(false);
+      this.navigationProgress.set(0);
+    }, 300);
+  }
+
+  private clearProgressInterval(): void {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = undefined;
+    }
+  }
+
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
-    if (this.loadingTimeout) {
-      clearTimeout(this.loadingTimeout);
-    }
+    this.clearProgressInterval();
     
-    // Clean up native platform listeners
     if (this.isNativePlatform) {
       this.platformService.removeAllListeners();
     }

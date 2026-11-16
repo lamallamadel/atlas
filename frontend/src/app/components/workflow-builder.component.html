@@ -1,199 +1,219 @@
 <div class="workflow-builder-container">
-  <ds-card class="workflow-header" [pad]="false" [elevation]="'sm'">
+  <ds-card class="workflow-header" [pad]="true" elevation="sm">
     <div class="wb-card-header">
-      <h3 class="wb-card-title">Workflow Builder</h3>
-      <p class="wb-card-subtitle">Design and customize workflows with drag-and-drop editor</p>
+      <h3 class="wb-card-title" style="margin: 0; font-size: 20px; font-weight: 700; color: var(--ds-marine);">Workflow Builder</h3>
+      <p class="wb-card-subtitle" style="margin: 4px 0 0; color: var(--ds-text-muted);">Design and customize workflows with drag-and-drop editor</p>
     </div>
-    <div class="wb-card-body">
-      <form [formGroup]="workflowForm" class="workflow-form">
-        <mat-form-field appearance="outline">
-          <mat-label>Workflow Name</mat-label>
-          <input matInput formControlName="name" placeholder="e.g., Sales Lead Workflow">
-        </mat-form-field>
+    <div class="wb-card-body" style="margin-top: 24px;">
+      <form [formGroup]="workflowForm" class="workflow-form ds-form-stack">
+        <ds-input label="Workflow Name" formControlName="name" placeholder="e.g., Sales Lead Workflow"></ds-input>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" rows="2"></textarea>
-        </mat-form-field>
+        <div class="ds-field">
+          <label class="ds-field__label">Description</label>
+          <div class="ds-field__wrap">
+            <textarea class="ds-field__input" formControlName="description" rows="2" style="height: auto; padding: 12px;"></textarea>
+          </div>
+        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Case Type</mat-label>
-          <mat-select formControlName="caseType">
-            @for (type of caseTypes; track type) {
-              <mat-option [value]="type">{{ type }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <ds-select
+          label="Case Type"
+          [options]="caseTypes"
+          formControlName="caseType">
+        </ds-select>
       </form>
 
-      <div class="action-buttons">
-        <button mat-raised-button color="primary" (click)="saveWorkflow()" [disabled]="!workflowForm.valid || states.length === 0">
-          <mat-icon>save</mat-icon> Save Workflow
-        </button>
-        <button mat-raised-button color="accent" (click)="publishWorkflow()" [disabled]="!workflow || workflow.isPublished">
-          <mat-icon>publish</mat-icon> Publish
-        </button>
-        <button mat-raised-button (click)="activateWorkflow()" [disabled]="!workflow || !workflow.isPublished">
-          <mat-icon>play_arrow</mat-icon> Activate
-        </button>
+      <div class="action-buttons" style="display: flex; gap: 12px; margin-top: 24px;">
+        <ds-button variant="marine" size="md" (dsClick)="saveWorkflow()" [disabled]="!workflowForm.valid || states.length === 0">
+          <ds-icon name="check" [size]="20" style="margin-right: 8px;"></ds-icon> Save Workflow
+        </ds-button>
+        <ds-button variant="ghost" size="md" (dsClick)="publishWorkflow()" [disabled]="!workflow || workflow.isPublished">
+          <ds-icon name="upload" [size]="20" style="margin-right: 8px;"></ds-icon> Publish
+        </ds-button>
+        <ds-button variant="ghost" size="md" (dsClick)="activateWorkflow()" [disabled]="!workflow || !workflow.isPublished">
+          <ds-icon name="refresh" [size]="20" style="margin-right: 8px;"></ds-icon> Activate
+        </ds-button>
       </div>
     </div>
   </ds-card>
 
-  <div class="builder-layout">
-    <ds-card class="canvas-card" [pad]="false" [elevation]="'sm'">
-      <div class="wb-card-header wb-card-header-compact">
-        <h3 class="wb-card-title">Visual Editor</h3>
+  <div class="builder-layout" style="display: grid; grid-template-columns: 1fr 350px; gap: 24px; margin-top: 24px;">
+    <ds-card class="canvas-card" [pad]="true" elevation="sm">
+      <div class="wb-card-header wb-card-header-compact" style="margin-bottom: 16px;">
+        <h3 class="wb-card-title" style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">Visual Editor</h3>
       </div>
       <div class="wb-card-body wb-card-body-fill">
-        <svg #svgCanvas class="workflow-canvas" width="100%" height="600"></svg>
+        <svg #svgCanvas class="workflow-canvas" width="100%" height="600" style="background: var(--ds-bg-subtle); border-radius: var(--ds-radius-md);"></svg>
       </div>
     </ds-card>
 
-    <ds-card class="sidebar-card" [pad]="false" [elevation]="'sm'">
-      <div class="wb-card-header wb-card-header-compact">
-        <h3 class="wb-card-title">Properties</h3>
+    <ds-card class="sidebar-card" [pad]="true" elevation="sm">
+      <div class="wb-card-header wb-card-header-compact" style="margin-bottom: 16px;">
+        <h3 class="wb-card-title" style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">Properties</h3>
       </div>
       <div class="wb-card-body wb-card-body-fill">
-        <mat-tab-group>
-          <mat-tab label="States">
-            <div class="tab-content">
-              <button mat-raised-button color="primary" (click)="isAddingState = true" class="add-button">
-                <mat-icon>add_circle</mat-icon> Add State
-              </button>
+        <ds-tabs [tabs]="propertyTabs" [activeTab]="activeTab" (tabChange)="activeTab = $event"></ds-tabs>
+
+        <div class="tab-panels" style="margin-top: 24px;">
+          @if (activeTab === 'states') {
+            <div class="tab-content ds-form-stack">
+              <ds-button variant="marine" size="sm" (dsClick)="isAddingState = true" style="margin-bottom: 16px;">
+                <ds-icon name="plus" [size]="16" style="margin-right: 8px;"></ds-icon> Add State
+              </ds-button>
 
               @if (isAddingState) {
-                <div class="form-section">
-                  <h3>New State</h3>
-                  <form [formGroup]="stateForm">
-                    <mat-form-field appearance="outline">
-                      <mat-label>State Code</mat-label>
-                      <input matInput formControlName="stateCode" placeholder="e.g., NEW">
-                    </mat-form-field>
-                    <mat-form-field appearance="outline">
-                      <mat-label>State Name</mat-label>
-                      <input matInput formControlName="stateName" placeholder="e.g., New Lead">
-                    </mat-form-field>
-                    <mat-form-field appearance="outline">
-                      <mat-label>State Type</mat-label>
-                      <mat-select formControlName="stateType">
-                        @for (type of stateTypes; track type) {
-                          <mat-option [value]="type">{{ type | titlecase }}</mat-option>
-                        }
-                      </mat-select>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline">
-                      <mat-label>Color</mat-label>
-                      <mat-select formControlName="color">
-                        @for (color of stateColors; track color) {
-                          <mat-option [value]="color">
-                            <span [style.color]="color">● {{ color }}</span>
-                          </mat-option>
-                        }
-                      </mat-select>
-                    </mat-form-field>
-                    <div class="form-actions">
-                      <button mat-raised-button color="primary" (click)="addState()">Add</button>
-                      <button mat-button (click)="isAddingState = false">Cancel</button>
+                <div class="form-section ds-form-stack" style="background: var(--ds-surface-2); padding: 16px; border-radius: var(--ds-radius-md); margin-bottom: 24px; border: 1px solid var(--ds-divider);">
+                  <h4 style="margin: 0 0 16px; font-size: 14px; font-weight: 700;">New State</h4>
+                  <form [formGroup]="stateForm" class="ds-form-stack">
+                    <ds-input label="State Code" formControlName="stateCode" placeholder="e.g., NEW"></ds-input>
+                    <ds-input label="State Name" formControlName="stateName" placeholder="e.g., New Lead"></ds-input>
+                    
+                    <ds-select
+                      label="State Type"
+                      [options]="stateTypes"
+                      formControlName="stateType">
+                    </ds-select>
+
+                    <div class="ds-field">
+                      <label class="ds-field__label">Color</label>
+                      <div class="ds-field__wrap">
+                        <select class="ds-field__input" formControlName="color" style="height: 38px;">
+                          @for (color of stateColors; track color) {
+                            <option [value]="color" [style.color]="color">● {{ color }}</option>
+                          }
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="form-actions" style="display: flex; gap: 8px; margin-top: 24px;">
+                      <ds-button variant="marine" size="sm" (dsClick)="addState()">Add</ds-button>
+                      <ds-button variant="ghost" size="sm" (dsClick)="isAddingState = false">Cancel</ds-button>
                     </div>
                   </form>
                 </div>
               }
 
-              @if (states.length > 0) {
-                <mat-list>
-                  @for (state of states; track state) {
-                    <mat-list-item [class.selected]="selectedState?.stateCode === state.stateCode">
-                      <span matListItemTitle>
-                        <span [style.color]="state.color">●</span> {{ state.stateName }}
-                      </span>
-                      <span matListItemLine>{{ state.stateCode }} ({{ state.stateType }})</span>
-                      <button mat-icon-button matListItemMeta (click)="startAddingTransition(state.stateCode)">
-                        <mat-icon>arrow_forward</mat-icon>
-                      </button>
-                      <button mat-icon-button matListItemMeta (click)="deleteState(state.stateCode)">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </mat-list-item>
-                  }
-                </mat-list>
-              }
+              <div class="ds-list" style="display: flex; flex-direction: column; gap: 8px;">
+                @for (state of states; track state.stateCode) {
+                  <div
+                    class="ds-list-item"
+                    [style.border-left-color]="state.color"
+                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--ds-surface); border: 1px solid var(--ds-divider); border-left-width: 4px; border-radius: var(--ds-radius-md);"
+                    [class.is-selected]="selectedState?.stateCode === state.stateCode">
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-weight: 700; font-size: 14px;">{{ state.stateName }}</div>
+                      <div style="font-size: 11px; color: var(--ds-text-faint);">{{ state.stateCode }} • {{ state.stateType }}</div>
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                      <ds-button variant="icon" size="sm" (dsClick)="startAddingTransition(state.stateCode)" title="Add transition from here">
+                        <ds-icon name="plus" [size]="16"></ds-icon>
+                      </ds-button>
+                      <ds-button variant="icon" size="sm" (dsClick)="deleteState(state.stateCode)" style="color: var(--ds-error);">
+                        <ds-icon name="trash" [size] = "16"></ds-icon>
+                      </ds-button>
+                    </div>
+                  </div>
+                }
+                @if (states.length === 0) {
+                  <p style="font-size: 13px; color: var(--ds-text-faint); font-style: italic; text-align: center; padding: 24px 0;">No states defined</p>
+                }
+              </div>
             </div>
-          </mat-tab>
+          }
 
-          <mat-tab label="Transitions">
-            <div class="tab-content">
-              <button mat-raised-button color="primary" (click)="isAddingTransition = true" class="add-button">
-                <mat-icon>add_circle</mat-icon> Add Transition
-              </button>
+          @if (activeTab === 'transitions') {
+            <div class="tab-content ds-form-stack">
+              <ds-button variant="marine" size="sm" (dsClick)="isAddingTransition = true" style="margin-bottom: 16px;">
+                <ds-icon name="plus" [size]="16" style="margin-right: 8px;"></ds-icon> Add Transition
+              </ds-button>
 
               @if (isAddingTransition) {
-                <div class="form-section">
-                  <h3>New Transition</h3>
-                  <form [formGroup]="transitionForm">
-                    <mat-form-field appearance="outline">
-                      <mat-label>From State</mat-label>
-                      <mat-select formControlName="fromState">
-                        @for (state of states; track state) {
-                          <mat-option [value]="state.stateCode">{{ state.stateName }}</mat-option>
-                        }
-                      </mat-select>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline">
-                      <mat-label>To State</mat-label>
-                      <mat-select formControlName="toState">
-                        @for (state of states; track state) {
-                          <mat-option [value]="state.stateCode">{{ state.stateName }}</mat-option>
-                        }
-                      </mat-select>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline">
-                      <mat-label>Label</mat-label>
-                      <input matInput formControlName="label" placeholder="e.g., Qualify Lead">
-                    </mat-form-field>
-                    <mat-form-field appearance="outline">
-                      <mat-label>Required Fields (comma-separated)</mat-label>
-                      <input matInput formControlName="requiredFields" placeholder="e.g., leadName, leadPhone">
-                    </mat-form-field>
-                    <mat-form-field appearance="outline">
-                      <mat-label>Allowed Roles (comma-separated)</mat-label>
-                      <input matInput formControlName="allowedRoles">
-                    </mat-form-field>
-                    <div class="form-actions">
-                      <button mat-raised-button color="primary" (click)="addTransition()">Add</button>
-                      <button mat-button (click)="isAddingTransition = false; transitionSourceState = null">Cancel</button>
+                <div class="form-section ds-form-stack" style="background: var(--ds-surface-2); padding: 16px; border-radius: var(--ds-radius-md); margin-bottom: 24px; border: 1px solid var(--ds-divider);">
+                  <h4 style="margin: 0 0 16px; font-size: 14px; font-weight: 700;">New Transition</h4>
+                  <form [formGroup]="transitionForm" class="ds-form-stack">
+                    <ds-select
+                      label="From State"
+                      [options]="stateOptions"
+                      formControlName="fromState">
+                    </ds-select>
+
+                    <ds-select
+                      label="To State"
+                      [options]="stateOptions"
+                      formControlName="toState">
+                    </ds-select>
+
+                    <ds-input label="Label" formControlName="label" placeholder="e.g., Qualify Lead"></ds-input>
+                    <ds-input label="Required Fields" formControlName="requiredFields" placeholder="e.g., leadName, leadPhone"></ds-input>
+                    <ds-input label="Allowed Roles" formControlName="allowedRoles"></ds-input>
+                    
+                    <div class="form-actions" style="display: flex; gap: 8px; margin-top: 24px;">
+                      <ds-button variant="marine" size="sm" (dsClick)="addTransition()">Add</ds-button>
+                      <ds-button variant="ghost" size="sm" (dsClick)="isAddingTransition = false; transitionSourceState = null">Cancel</ds-button>
                     </div>
                   </form>
                 </div>
               }
 
-              @if (transitions.length > 0) {
-                <mat-list>
-                  @for (transition of transitions; track transition) {
-                    <mat-list-item>
-                      <span matListItemTitle>{{ transition.label }}</span>
-                      <span matListItemLine>{{ transition.fromState }} → {{ transition.toState }}</span>
-                      <button mat-icon-button matListItemMeta (click)="deleteTransition(transition.fromState, transition.toState)">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </mat-list-item>
-                  }
-                </mat-list>
+              <div class="ds-list" style="display: flex; flex-direction: column; gap: 8px;">
+                @for (transition of transitions; track transition.fromState + '-' + transition.toState) {
+                  <div
+                    class="ds-list-item"
+                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--ds-surface); border: 1px solid var(--ds-divider); border-radius: var(--ds-radius-md);">
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-weight: 700; font-size: 14px;">{{ transition.label }}</div>
+                      <div style="font-size: 11px; color: var(--ds-text-faint);">{{ transition.fromState }} → {{ transition.toState }}</div>
+                    </div>
+                    <ds-button variant="icon" size="sm" (dsClick)="deleteTransition(transition.fromState, transition.toState)" style="color: var(--ds-error);">
+                      <ds-icon name="trash" [size]="16"></ds-icon>
+                    </ds-button>
+                  </div>
+                }
+                @if (transitions.length === 0) {
+                  <p style="font-size: 13px; color: var(--ds-text-faint); font-style: italic; text-align: center; padding: 24px 0;">No transitions defined</p>
+                }
+              </div>
+            </div>
+          }
+
+          @if (activeTab === 'details') {
+            <div class="tab-content ds-form-stack">
+              @if (selectedState) {
+                <div class="state-details ds-form-stack">
+                  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                    <div [style.background]="selectedState.color" style="width: 12px; height: 12px; border-radius: 50%;"></div>
+                    <h4 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--ds-marine);">{{ selectedState.stateName }}</h4>
+                  </div>
+                  
+                  <ds-card [pad]="true" elevation="xs" style="background: var(--ds-surface-2);">
+                    <div class="detail-row" style="margin-bottom: 12px;">
+                      <div style="font-size: 11px; font-weight: 700; color: var(--ds-text-faint); text-transform: uppercase;">Code</div>
+                      <div style="font-weight: 600;">{{ selectedState.stateCode }}</div>
+                    </div>
+                    <div class="detail-row" style="margin-bottom: 12px;">
+                      <div style="font-size: 11px; font-weight: 700; color: var(--ds-text-faint); text-transform: uppercase;">Type</div>
+                      <div>{{ selectedState.stateType }}</div>
+                    </div>
+                    <div class="detail-row">
+                      <div style="font-size: 11px; font-weight: 700; color: var(--ds-text-faint); text-transform: uppercase;">Description</div>
+                      <div style="font-size: 13px; line-height: 1.5;">{{ selectedState.description || 'Aucune description' }}</div>
+                    </div>
+                  </ds-card>
+
+                  <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                    <ds-button variant="danger" size="sm" (dsClick)="deleteState(selectedState.stateCode)">
+                      <ds-icon name="trash" [size]="16" style="margin-right: 8px;"></ds-icon> Delete State
+                    </ds-button>
+                  </div>
+                </div>
+              } @else {
+                <div style="text-align: center; padding: 48px 0; color: var(--ds-text-faint);">
+                  <ds-icon name="info" [size]="32" style="opacity: 0.2; margin-bottom: 16px;"></ds-icon>
+                  <p>Sélectionnez un état sur le graphe pour voir ses détails</p>
+                </div>
               }
             </div>
-          </mat-tab>
-
-          @if (selectedState) {
-            <mat-tab label="Details">
-              <div class="tab-content">
-                <h3>{{ selectedState.stateName }}</h3>
-                <p><strong>Code:</strong> {{ selectedState.stateCode }}</p>
-                <p><strong>Type:</strong> {{ selectedState.stateType }}</p>
-                <p><strong>Description:</strong> {{ selectedState.description || 'N/A' }}</p>
-              </div>
-            </mat-tab>
           }
-        </mat-tab-group>
+        </div>
       </div>
     </ds-card>
   </div>

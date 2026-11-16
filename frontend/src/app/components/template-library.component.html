@@ -1,186 +1,50 @@
-<div class="template-library-container">
-  <div class="header">
-    <h1>WhatsApp Template Library</h1>
-    <button mat-raised-button color="primary" (click)="createTemplate()">
-      <mat-icon>add</mat-icon> Create Template
-    </button>
-  </div>
-
-  <div class="filters-section">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Search templates</mat-label>
-      <input matInput [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" placeholder="Search by name or description">
-      <mat-icon matPrefix>search</mat-icon>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Category</mat-label>
-      <mat-select [(ngModel)]="selectedCategory" (selectionChange)="applyFilters()">
-        @for (cat of categories; track cat) {
-          <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Status</mat-label>
-      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilters()">
-        @for (status of statuses; track status) {
-          <mat-option [value]="status.value">{{ status.label }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Language</mat-label>
-      <mat-select [(ngModel)]="selectedLanguage" (selectionChange)="applyFilters()">
-        @for (lang of languages; track lang) {
-          <mat-option [value]="lang.value">{{ lang.label }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-
-    <button mat-stroked-button (click)="clearFilters()">Clear Filters</button>
-  </div>
-
-  @if (!loading) {
-    <div class="table-container">
-      <table mat-table [dataSource]="filteredTemplates" class="templates-table">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Template Name</th>
-          <td mat-cell *matCellDef="let template">
-            <div class="template-name">
-              <strong>{{ template.name }}</strong>
-              @if (template.description) {
-                <span class="template-description">
-                  {{ template.description }}
-                </span>
-              }
-            </div>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="language">
-          <th mat-header-cell *matHeaderCellDef>Language</th>
-          <td mat-cell *matCellDef="let template">
-            <mat-chip>{{ template.language }}</mat-chip>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="category">
-          <th mat-header-cell *matHeaderCellDef>Category</th>
-          <td mat-cell *matCellDef="let template">{{ template.category }}</td>
-        </ng-container>
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let template">
-            <mat-chip [style.background-color]="getStatusColor(template.status)"
-              [style.color]="'white'">
-              {{ template.status }}
-            </mat-chip>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="version">
-          <th mat-header-cell *matHeaderCellDef>Version</th>
-          <td mat-cell *matCellDef="let template">
-            <button mat-button (click)="viewVersions(template)">
-              v{{ template.currentVersion }}
-              <mat-icon>history</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="updated">
-          <th mat-header-cell *matHeaderCellDef>Last Updated</th>
-          <td mat-cell *matCellDef="let template">
-            {{ template.updatedAt | date:'short' }}
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let template">
-            <span class="app-tpl-table-menu-origin" cdkOverlayOrigin #appTplRowMenuOrigin="cdkOverlayOrigin">
-              <button
-                mat-icon-button
-                type="button"
-                (click)="toggleTableRowMenu(template.id, $event)"
-                [attr.aria-expanded]="tableRowMenuOpenForId === template.id"
-                aria-haspopup="menu"
-                [attr.aria-controls]="'app-tpl-row-menu-' + template.id"
-                aria-label="Template actions">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-            </span>
-            <ng-template
-              cdkConnectedOverlay
-              [cdkConnectedOverlayOrigin]="appTplRowMenuOrigin"
-              [cdkConnectedOverlayOpen]="tableRowMenuOpenForId === template.id"
-              [cdkConnectedOverlayPositions]="tableRowMenuPositions"
-              [cdkConnectedOverlayScrollStrategy]="tableRowMenuScrollStrategy"
-              [cdkConnectedOverlayHasBackdrop]="true"
-              [cdkConnectedOverlayBackdropClass]="'ds-menu-backdrop'"
-              (backdropClick)="closeTableRowMenu()"
-              (detach)="closeTableRowMenu()"
-              (overlayKeydown)="$event.key === 'Escape' && closeTableRowMenu()">
-              <div [id]="'app-tpl-row-menu-' + template.id" class="app-tpl-table-menu-dropdown" role="menu">
-                <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="editTemplate(template)">
-                  <mat-icon>edit</mat-icon>
-                  <span>Edit</span>
-                </button>
-                <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="viewVersions(template)">
-                  <mat-icon>history</mat-icon>
-                  <span>View Versions</span>
-                </button>
-                @if (canSubmitForApproval(template)) {
-                  <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="submitForApproval(template)">
-                    <mat-icon>send</mat-icon>
-                    <span>Submit for Approval</span>
-                  </button>
-                }
-                @if (canPollStatus(template)) {
-                  <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="pollApprovalStatus(template)">
-                    <mat-icon>refresh</mat-icon>
-                    <span>Check Approval Status</span>
-                  </button>
-                }
-                @if (canActivate(template)) {
-                  <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="activateTemplate(template)">
-                    <mat-icon>play_arrow</mat-icon>
-                    <span>Activate</span>
-                  </button>
-                }
-                @if (canPause(template)) {
-                  <button type="button" class="app-tpl-table-menu-item" role="menuitem" (click)="pauseTemplate(template)">
-                    <mat-icon>pause</mat-icon>
-                    <span>Pause</span>
-                  </button>
-                }
-                @if (canDelete(template)) {
-                  <button type="button" class="app-tpl-table-menu-item app-tpl-table-menu-item--danger" role="menuitem" (click)="deleteTemplate(template)">
-                    <mat-icon color="warn">delete</mat-icon>
-                    <span>Delete</span>
-                  </button>
-                }
-              </div>
-            </ng-template>
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-      @if (filteredTemplates.length === 0) {
-        <div class="no-results">
-          <mat-icon>inbox</mat-icon>
-          <p>No templates found</p>
-          <button mat-raised-button color="primary" (click)="createTemplate()">
-            Create Your First Template
-          </button>
-        </div>
-      }
+<div class="template-library ds-form-stack" style="padding: 24px;">
+  <ds-card [pad]="true" elevation="sm">
+    <div class="library-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: var(--ds-marine);">Bibliothèque de modèles</h2>
+      <ds-button variant="marine" size="md" (dsClick)="createTemplate()">
+        <ds-icon name="plus" [size]="16" style="margin-right: 8px;"></ds-icon>
+        Créer un modèle
+      </ds-button>
     </div>
-  }
 
-  @if (loading) {
-    <div class="loading-state">
-      <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
-      <p>Loading templates...</p>
+    <!-- Filters -->
+    <div class="filters-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: flex-end; margin-bottom: 32px; padding: 20px; background: var(--ds-bg-subtle); border-radius: var(--ds-radius-md);">
+      <ds-input label="Rechercher" [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" placeholder="Nom du modèle..." prefixIcon="search"></ds-input>
+      <ds-select label="Catégorie" [options]="categories" [(ngModel)]="selectedCategory" (ngModelChange)="applyFilters()"></ds-select>
+      <ds-select label="Statut" [options]="statuses" [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters()"></ds-select>
+      <ds-select label="Langue" [options]="languages" [(ngModel)]="selectedLanguage" (ngModelChange)="applyFilters()"></ds-select>
+      <ds-button variant="ghost" size="md" (dsClick)="clearFilters()">Effacer</ds-button>
     </div>
-  }
+
+    <!-- Table -->
+    @if (loading) {
+      <div style="padding: 48px 0;">
+        <ds-skeleton variant="rect" width="100%" height="300px" [animate]="true"></ds-skeleton>
+      </div>
+    }
+
+    @if (!loading) {
+      <ds-table
+        [columns]="dsColumns"
+        [rows]="filteredTemplates"
+        [rowActions]="dsRowActions"
+        (rowAction)="onRowAction($event)"
+        emptyTitle="Aucun modèle trouvé"
+        emptyDescription="Ajustez vos filtres ou créez un nouveau modèle.">
+        
+        <ng-template dsCell="name" let-t>
+          <span style="font-weight: 700; color: var(--ds-marine);">{{ t.name }}</span>
+        </ng-template>
+
+        <ng-template dsCell="status" let-t>
+          <ds-badge [status]="getStatusBadgeStatus(t.status)" [showDot]="false" size="sm">{{ t.status }}</ds-badge>
+        </ng-template>
+
+        <ng-template dsCell="updatedAt" let-t>
+          {{ t.updatedAt | date:'short' }}
+        </ng-template>
+      </ds-table>
+    }
+  </ds-card>
 </div>

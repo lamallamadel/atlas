@@ -1,67 +1,67 @@
 @if (visible$ | async) {
   <div class="keyboard-shortcuts-overlay" (click)="close()" (keydown.escape)="close()" role="dialog" aria-modal="true" tabindex="-1">
-    <div class="shortcuts-modal" (click)="$event.stopPropagation()" (keydown.escape)="close()" role="document" tabindex="0">
-      <div class="shortcuts-header">
-        <h2>Raccourcis clavier</h2>
-        <button mat-icon-button class="close-button" (click)="close()" aria-label="Fermer">
-          <mat-icon>close</mat-icon>
-        </button>
+    <ds-card class="shortcuts-modal" [pad]="true" elevation="md" (click)="$event.stopPropagation()" (keydown.escape)="close()" role="document" tabindex="0">
+      <div class="shortcuts-header ds-form-stack" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--ds-marine);">Raccourcis clavier</h2>
+        <ds-button variant="icon" size="sm" (dsClick)="close()" ariaLabel="Fermer">
+          <ds-icon name="close" [size]="20"></ds-icon>
+        </ds-button>
       </div>
-      <div class="shortcuts-content">
-        <div class="preferences-section">
-          <mat-checkbox
+      <div class="shortcuts-content ds-form-stack">
+        <div class="preferences-section" style="display: flex; gap: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--ds-divider); margin-bottom: 24px;">
+          <ds-checkbox
             [checked]="preferences.keyboardShortcutsEnabled"
-            (change)="toggleShortcutsEnabled()">
-            Activer les raccourcis clavier
-          </mat-checkbox>
-          <mat-checkbox
+            (checkedChange)="toggleShortcutsEnabled()"
+            label="Activer les raccourcis clavier">
+          </ds-checkbox>
+          <ds-checkbox
             [checked]="preferences.showShortcutHints"
-            (change)="toggleShortcutHints()">
-            Afficher les indices de raccourcis
-          </mat-checkbox>
+            (checkedChange)="toggleShortcutHints()"
+            label="Afficher les indices de raccourcis">
+          </ds-checkbox>
         </div>
-        <div class="shortcuts-grid">
-          <div class="shortcuts-column">
-            <h3>Navigation</h3>
+        <div class="shortcuts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px;">
+          <div class="shortcuts-column ds-form-stack">
+            <h3 style="font-size: 14px; font-weight: 600; text-transform: uppercase; color: var(--ds-text-muted); margin-bottom: 16px;">Navigation</h3>
             @for (shortcut of navigationShortcuts; track shortcut) {
-              <div class="shortcut-item">
+              <div class="shortcut-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div class="shortcut-description" style="font-size: 13px; color: var(--ds-text);">{{ shortcut.description }}</div>
                 <div class="shortcut-keys">
-                  <kbd class="key">{{ formatKey(shortcut.key) }}</kbd>
+                  <kbd class="key ds-code">{{ formatKey(shortcut.key) }}</kbd>
                 </div>
-                <div class="shortcut-description">{{ shortcut.description }}</div>
               </div>
             }
           </div>
-          <div class="shortcuts-column">
-            <h3>Actions</h3>
+          <div class="shortcuts-column ds-form-stack">
+            <h3 style="font-size: 14px; font-weight: 600; text-transform: uppercase; color: var(--ds-text-muted); margin-bottom: 16px;">Actions</h3>
             @for (shortcut of actionShortcuts; track shortcut) {
-              <div class="shortcut-item">
+              <div class="shortcut-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div class="shortcut-description" style="font-size: 13px; color: var(--ds-text);">{{ shortcut.description }}</div>
                 <div class="shortcut-keys">
-                  <kbd class="key">{{ formatKey(shortcut.key) }}</kbd>
+                  <kbd class="key ds-code">{{ formatKey(shortcut.key) }}</kbd>
                 </div>
-                <div class="shortcut-description">{{ shortcut.description }}</div>
               </div>
             }
           </div>
-          <div class="shortcuts-column">
-            <h3>Navigation dans les listes</h3>
+          <div class="shortcuts-column ds-form-stack">
+            <h3 style="font-size: 14px; font-weight: 600; text-transform: uppercase; color: var(--ds-text-muted); margin-bottom: 16px;">Navigation dans les listes</h3>
             @for (shortcut of listShortcuts; track shortcut) {
-              <div class="shortcut-item">
+              <div class="shortcut-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div class="shortcut-description" style="font-size: 13px; color: var(--ds-text);">{{ shortcut.description }}</div>
                 <div class="shortcut-keys">
-                  <kbd class="key">{{ formatKey(shortcut.key) }}</kbd>
+                  <kbd class="key ds-code">{{ formatKey(shortcut.key) }}</kbd>
                 </div>
-                <div class="shortcut-description">{{ shortcut.description }}</div>
               </div>
             }
           </div>
         </div>
       </div>
-      <div class="shortcuts-footer">
-        <p class="footer-tip">
-          <mat-icon class="tip-icon">info</mat-icon>
-          Appuyez sur <kbd class="key">?</kbd> à tout moment pour afficher cette aide
+      <div class="shortcuts-footer" style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--ds-divider);">
+        <p class="footer-tip" style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ds-text-faint); margin: 0;">
+          <ds-icon name="info" [size]="16"></ds-icon>
+          Appuyez sur <kbd class="key ds-code">?</kbd> à tout moment pour afficher cette aide
         </p>
       </div>
-    </div>
+    </ds-card>
   </div>
 }

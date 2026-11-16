@@ -1,35 +1,29 @@
-<div class="notification-preferences-form" [formGroup]="preferencesForm">
+<div class="notification-preferences-form ds-form-stack" [formGroup]="preferencesForm">
   @if (loading) {
-    <mat-progress-bar mode="indeterminate" class="loading-bar"></mat-progress-bar>
+    <ds-progress-bar mode="indeterminate" variant="primary" style="margin-bottom: 24px;"></ds-progress-bar>
   }
 
   <!-- Channels Section -->
-  <ds-card class="preferences-card" [pad]="false" [elevation]="'sm'">
-    <div class="pref-card-header">
-      <h3 class="pref-card-title">
-        <mat-icon>settings_input_antenna</mat-icon>
+  <ds-card class="preferences-card" [pad]="true" elevation="xs">
+    <div class="pref-card-header" style="margin-bottom: 24px;">
+      <h3 class="pref-card-title" style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 12px; color: var(--ds-marine);">
+        <ds-icon name="megaphone" [size]="20"></ds-icon>
         Canaux de notification
       </h3>
-      <p class="pref-card-subtitle">
+      <p class="pref-card-subtitle" style="margin: 4px 0 0; font-size: 13px; color: var(--ds-text-muted);">
         Choisissez comment recevoir vos notifications ({{ getEnabledChannelsCount() }}/{{ channels.length }} actifs)
       </p>
     </div>
     <div class="pref-card-body">
-      <div class="channels-grid">
-        @for (channel of channels; track channel) {
-          <div class="channel-item">
-            <div class="channel-info">
-              <mat-icon [class.channel-icon-active]="channel.enabled">{{ channel.icon }}</mat-icon>
-              <div class="channel-text">
-                <strong>{{ channel.label }}</strong>
-                <p class="channel-description">{{ channel.description }}</p>
-              </div>
-            </div>
-            <mat-slide-toggle
+      <div class="channels-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        @for (channel of channels; track channel.id) {
+          <div class="channel-item ds-card" style="padding: 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); display: flex; justify-content: space-between; align-items: center; background: var(--ds-surface);">
+            <ds-switch
               [formControlName]="channel.id + 'Enabled'"
-              color="primary"
-              [attr.aria-label]="'Activer ' + channel.label">
-            </mat-slide-toggle>
+              [label]="channel.label"
+              [description]="channel.description">
+            </ds-switch>
+            <ds-icon [name]="channel.icon" [size]="24" style="opacity: 0.2;"></ds-icon>
           </div>
         }
       </div>
@@ -37,32 +31,26 @@
   </ds-card>
 
   <!-- Notification Types Section -->
-  <ds-card class="preferences-card" [pad]="false" [elevation]="'sm'">
-    <div class="pref-card-header">
-      <h3 class="pref-card-title">
-        <mat-icon>filter_list</mat-icon>
+  <ds-card class="preferences-card" [pad]="true" elevation="xs">
+    <div class="pref-card-header" style="margin-bottom: 24px;">
+      <h3 class="pref-card-title" style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 12px; color: var(--ds-marine);">
+        <ds-icon name="filter" [size]="20"></ds-icon>
         Types de notification
       </h3>
-      <p class="pref-card-subtitle">
+      <p class="pref-card-subtitle" style="margin: 4px 0 0; font-size: 13px; color: var(--ds-text-muted);">
         Sélectionnez les événements pour lesquels vous souhaitez être notifié ({{ getEnabledTypesCount() }}/{{ notificationTypes.length }} actifs)
       </p>
     </div>
     <div class="pref-card-body">
-      <div class="types-grid">
-        @for (type of notificationTypes; track type) {
-          <div class="type-item">
-            <div class="type-info">
-              <mat-icon [class.type-icon-active]="type.enabled">{{ type.icon }}</mat-icon>
-              <div class="type-text">
-                <strong>{{ type.label }}</strong>
-                <p class="type-description">{{ type.description }}</p>
-              </div>
-            </div>
-            <mat-slide-toggle
+      <div class="types-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        @for (type of notificationTypes; track type.id) {
+          <div class="type-item ds-card" style="padding: 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); display: flex; justify-content: space-between; align-items: center; background: var(--ds-surface);">
+            <ds-switch
               [formControlName]="type.id + 'Enabled'"
-              color="primary"
-              [attr.aria-label]="'Activer ' + type.label">
-            </mat-slide-toggle>
+              [label]="type.label"
+              [description]="type.description">
+            </ds-switch>
+            <ds-icon [name]="type.icon" [size]="24" style="opacity: 0.2;"></ds-icon>
           </div>
         }
       </div>
@@ -70,227 +58,96 @@
   </ds-card>
 
   <!-- Quiet Hours Section -->
-  <ds-card class="preferences-card" [pad]="false" [elevation]="'sm'">
-    <div class="pref-card-header">
-      <h3 class="pref-card-title">
-        <mat-icon>bedtime</mat-icon>
+  <ds-card class="preferences-card" [pad]="true" elevation="xs">
+    <div class="pref-card-header" style="margin-bottom: 24px;">
+      <h3 class="pref-card-title" style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 12px; color: var(--ds-marine);">
+        <ds-icon name="moon" [size]="20"></ds-icon>
         Heures de silence
       </h3>
-      <p class="pref-card-subtitle">
+      <p class="pref-card-subtitle" style="margin: 4px 0 0; font-size: 13px; color: var(--ds-text-muted);">
         Définissez une plage horaire pendant laquelle vous ne souhaitez pas recevoir de notifications
       </p>
     </div>
-    <div class="pref-card-body">
-      <div class="quiet-hours-toggle">
-        <div class="toggle-info">
-          <strong>Activer les heures de silence</strong>
-          @if (quietHoursEnabled && !isQuietHoursActive()) {
-            <p class="quiet-status">
-              <mat-icon>schedule</mat-icon>
-              Silencieux de {{ getQuietHoursDisplay() }}
-            </p>
-          }
-          @if (quietHoursEnabled && isQuietHoursActive()) {
-            <p class="quiet-status active">
-              <mat-icon>bedtime</mat-icon>
-              Mode silencieux actif
-            </p>
-          }
-        </div>
-        <mat-slide-toggle
+    <div class="pref-card-body ds-form-stack">
+      <div class="quiet-hours-toggle ds-card" style="padding: 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); background: var(--ds-surface-2); display: flex; justify-content: space-between; align-items: center;">
+        <ds-switch
           formControlName="quietHoursEnabled"
-          color="primary"
-          aria-label="Activer les heures de silence">
-        </mat-slide-toggle>
+          label="Activer les heures de silence"
+          [description]="isQuietHoursActive() ? 'Mode silencieux actif' : 'Désactivé'">
+        </ds-switch>
+        @if (preferencesForm.get('quietHoursEnabled')?.value) {
+          <ds-badge status="active" size="sm" [showDot]="true">{{ getQuietHoursDisplay() }}</ds-badge>
+        }
       </div>
 
-      @if (quietHoursEnabled) {
-        <div class="quiet-hours-config" [@slideDown]>
-          <div class="slider-section">
-            <label class="slider-label" for="quietHoursStartSlider">
-              <mat-icon>wb_twilight</mat-icon>
-              Début du silence : <strong>{{ formatQuietHoursLabel(quietHoursStart) }}</strong>
-            </label>
-            <mat-slider
-              class="quiet-hours-slider"
-              [min]="0"
-              [max]="23"
-              [step]="1"
-              [discrete]="true"
-              [showTickMarks]="true"
-              color="primary">
-              <input id="quietHoursStartSlider" matSliderThumb formControlName="quietHoursStart">
-            </mat-slider>
+      @if (preferencesForm.get('quietHoursEnabled')?.value) {
+        <div class="quiet-hours-config ds-form-stack" style="margin-top: 24px; padding: 24px; border: 1px solid var(--ds-divider); border-radius: var(--ds-radius-md); background: var(--ds-bg-subtle);" [@slideDown]>
+          <div class="ds-form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <ds-select
+              label="Début du silence"
+              [options]="hourOptions"
+              formControlName="quietHoursStart"
+              prefixIcon="sun">
+            </ds-select>
+            
+            <ds-select
+              label="Fin du silence"
+              [options]="hourOptions"
+              formControlName="quietHoursEnd"
+              prefixIcon="moon">
+            </ds-select>
           </div>
-          <div class="slider-section">
-            <label class="slider-label" for="quietHoursEndSlider">
-              <mat-icon>wb_sunny</mat-icon>
-              Fin du silence : <strong>{{ formatQuietHoursLabel(quietHoursEnd) }}</strong>
-            </label>
-            <mat-slider
-              class="quiet-hours-slider"
-              [min]="0"
-              [max]="23"
-              [step]="1"
-              [discrete]="true"
-              [showTickMarks]="true"
-              color="primary">
-              <input id="quietHoursEndSlider" matSliderThumb formControlName="quietHoursEnd">
-            </mat-slider>
+          
+          <div class="ds-alert ds-alert--info" style="margin-top: 24px; display: flex; gap: 12px; align-items: center; background: var(--ds-primary-hl); color: var(--ds-primary-dark); padding: 12px; border-radius: var(--ds-radius-md);">
+            <ds-icon name="info" [size]="20"></ds-icon>
+            <span style="font-size: 13px;">Les notifications seront suspendues entre <strong>{{ formatQuietHoursLabel(preferencesForm.get('quietHoursStart')?.value) }}</strong> et <strong>{{ formatQuietHoursLabel(preferencesForm.get('quietHoursEnd')?.value) }}</strong>.</span>
           </div>
-          <mat-hint class="quiet-hours-hint">
-            <mat-icon>info</mat-icon>
-            Les notifications seront suspendues de {{ getQuietHoursDisplay() }}
-          </mat-hint>
         </div>
       }
     </div>
   </ds-card>
 
   <!-- Digest Frequency Section -->
-  <ds-card class="preferences-card" [pad]="false" [elevation]="'sm'">
-    <div class="pref-card-header">
-      <h3 class="pref-card-title">
-        <mat-icon>schedule_send</mat-icon>
+  <ds-card class="preferences-card" [pad]="true" elevation="xs">
+    <div class="pref-card-header" style="margin-bottom: 24px;">
+      <h3 class="pref-card-title" style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 12px; color: var(--ds-marine);">
+        <ds-icon name="refresh" [size]="20"></ds-icon>
         Fréquence de groupement
       </h3>
-      <p class="pref-card-subtitle">
+      <p class="pref-card-subtitle" style="margin: 4px 0 0; font-size: 13px; color: var(--ds-text-muted);">
         Choisissez la fréquence à laquelle vous souhaitez recevoir vos notifications
       </p>
     </div>
     <div class="pref-card-body">
-      <mat-radio-group formControlName="digestFrequency" class="digest-frequency-group">
-        @for (freq of digestFrequencies; track freq) {
-          <mat-radio-button
-            [value]="freq.value"
-            class="digest-frequency-option">
-            <div class="frequency-content">
-              <div class="frequency-header">
-                <mat-icon>{{ freq.icon }}</mat-icon>
-                <strong>{{ freq.label }}</strong>
-              </div>
-              <p class="frequency-description">{{ freq.description }}</p>
-            </div>
-          </mat-radio-button>
-        }
-      </mat-radio-group>
-    </div>
-  </ds-card>
-
-  <!-- Preview Section -->
-  <ds-card class="preferences-card preview-card" [pad]="false" [elevation]="'sm'">
-    <div class="pref-card-header">
-      <h3 class="pref-card-title">
-        <mat-icon>visibility</mat-icon>
-        Aperçu des notifications
-      </h3>
-      <p class="pref-card-subtitle">
-        Voici comment vos notifications apparaîtront avec les paramètres actuels
-      </p>
-    </div>
-    <div class="pref-card-body">
-      <div class="preview-summary">
-        <div class="summary-item">
-          <mat-icon>settings_input_antenna</mat-icon>
-          <div>
-            <strong>{{ getEnabledChannelsCount() }}</strong>
-            <span>canaux actifs</span>
-          </div>
-        </div>
-        <div class="summary-item">
-          <mat-icon>filter_list</mat-icon>
-          <div>
-            <strong>{{ getEnabledTypesCount() }}</strong>
-            <span>types activés</span>
-          </div>
-        </div>
-        <div class="summary-item">
-          <mat-icon>{{ getDigestFrequencyIcon() }}</mat-icon>
-          <div>
-            <strong>{{ getDigestFrequencyLabel() }}</strong>
-            <span>fréquence</span>
-          </div>
-        </div>
-        @if (quietHoursEnabled) {
-          <div class="summary-item">
-            <mat-icon [class.active]="isQuietHoursActive()">bedtime</mat-icon>
-            <div>
-              <strong>{{ getQuietHoursDisplay() }}</strong>
-              <span>heures de silence</span>
-            </div>
-          </div>
-        }
-      </div>
-
-      <mat-divider class="preview-divider"></mat-divider>
-
-      @if (exampleNotifications.length > 0) {
-        <div class="preview-notifications">
-          <h4 class="preview-title">
-            <mat-icon>notifications</mat-icon>
-            Exemples de notifications
-          </h4>
-          <div class="notification-examples">
-            @for (notification of exampleNotifications; track notification) {
-              <div class="notification-example">
-                <div class="notification-icon">
-                  <mat-icon [class]="'notification-icon-' + notification.type">{{ notification.icon }}</mat-icon>
-                </div>
-                <div class="notification-content">
-                  <div class="notification-header">
-                    <strong>{{ notification.title }}</strong>
-                    <span class="notification-time">{{ getRelativeTime(notification.timestamp) }}</span>
-                  </div>
-                  <p class="notification-message">{{ notification.message }}</p>
-                  <div class="notification-channels">
-                    @for (icon of getActiveChannelIcons(); track icon) {
-                      <mat-icon class="channel-badge">{{ icon }}</mat-icon>
-                    }
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-      }
-
-      @if (exampleNotifications.length === 0) {
-        <div class="no-notifications">
-          <mat-icon>notifications_off</mat-icon>
-          <p>Aucune notification ne sera affichée avec ces paramètres</p>
-          <p class="hint-text">Activez au moins un type de notification pour voir des exemples</p>
-        </div>
-      }
+      <ds-radio-group 
+        formControlName="digestFrequency" 
+        [options]="frequencyOptions"
+        [inline]="true">
+      </ds-radio-group>
     </div>
   </ds-card>
 
   <!-- Action Buttons -->
-  <div class="form-actions">
-    <button
-      mat-button
-      (click)="onCancel()"
+  <div class="form-actions" style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--ds-divider);">
+    <ds-button
+      variant="ghost"
+      size="md"
+      (dsClick)="onCancel()"
       [disabled]="!hasUnsavedChanges() || loading || saving">
-      <mat-icon>cancel</mat-icon>
       Annuler
-    </button>
+    </ds-button>
 
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="onSave()"
+    <ds-button
+      variant="marine"
+      size="md"
+      (dsClick)="onSave()"
       [disabled]="!hasUnsavedChanges() || !preferencesForm.valid || loading || saving">
       @if (saving) {
-        <ds-skeleton variant="circle" width="20px" height="20px" class="button-spinner"></ds-skeleton>
+        <span class="spinner-small" style="margin-right: 8px;"></span>
+      } @else {
+        <ds-icon name="check" [size]="20" style="margin-right: 8px;"></ds-icon>
       }
-      @if (!saving) {
-        <mat-icon>save</mat-icon>
-      }
-      @if (!saving) {
-        <span>Enregistrer</span>
-      }
-      @if (saving) {
-        <span>Enregistrement...</span>
-      }
-    </button>
+      <span>{{ saving ? 'Enregistrement...' : 'Enregistrer les préférences' }}</span>
+    </ds-button>
   </div>
 </div>

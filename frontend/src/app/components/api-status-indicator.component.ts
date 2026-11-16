@@ -2,15 +2,27 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { PingService } from '../services/ping.service';
 import { Subject, takeUntil } from 'rxjs';
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
-import { MatButton } from '@angular/material/button';
-import { DatePipe } from '@angular/common';
-import { DsIconComponent } from '../design-system/icons/ds-icon.component';
+import { CommonModule, DatePipe } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsCardComponent
+} from '../design-system';
 
 @Component({
     selector: 'app-api-status-indicator',
+    standalone: true,
     templateUrl: './api-status-indicator.component.html',
     styleUrls: ['./api-status-indicator.component.css'],
-    imports: [MatButton, CdkConnectedOverlay, CdkOverlayOrigin, DsIconComponent, DatePipe]
+    imports: [
+      CommonModule,
+      CdkConnectedOverlay, 
+      CdkOverlayOrigin, 
+      DsButtonComponent, 
+      DsIconComponent, 
+      DsCardComponent,
+      DatePipe
+    ]
 })
 export class ApiStatusIndicatorComponent implements OnInit, OnDestroy {
   private readonly overlay = inject(Overlay);
@@ -88,12 +100,12 @@ export class ApiStatusIndicatorComponent implements OnInit, OnDestroy {
     return `status-${this.apiStatus}`;
   }
 
-  statusMenuIcon(): 'check' | 'alert-circle' | 'refresh' {
+  statusMenuIcon(): string {
     switch (this.apiStatus) {
       case 'connected':
         return 'check';
       case 'disconnected':
-        return 'alert-circle';
+        return 'info';
       default:
         return 'refresh';
     }

@@ -5,7 +5,8 @@
   [pulse]="shouldPulse()"
   [attr.title]="getStatusDescription()"
   role="status"
-  [attr.aria-label]="getStatusLabel() + ': ' + getStatusDescription()">
-  <mat-icon class="app-badge-status__icon" aria-hidden="true">{{ getStatusIcon() }}</mat-icon>
+  [attr.aria-label]="getStatusLabel() + ': ' + getStatusDescription()"
+  style="display: flex; align-items: center; gap: 6px;">
+  <ds-icon [name]="getStatusIcon()" [size]="16" aria-hidden="true"></ds-icon>
   <span class="app-badge-status__label">{{ getStatusLabel() }}</span>
 </ds-badge>

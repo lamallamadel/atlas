@@ -1,15 +1,12 @@
 import {
   ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+  TestBed} from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -39,20 +36,16 @@ describe('SettingsPageComponent', () => {
         .mockName('UserPreferencesService.updatePreferences'),
       resetToDefaults: vi
         .fn()
-        .mockName('UserPreferencesService.resetToDefaults'),
-    };
+        .mockName('UserPreferencesService.resetToDefaults')};
     mockThemeService = {
-      setTheme: vi.fn().mockName('ThemeService.setTheme'),
-    };
+      setTheme: vi.fn().mockName('ThemeService.setTheme')};
     mockNotificationService = {
       success: vi.fn().mockName('NotificationService.success'),
       error: vi.fn().mockName('NotificationService.error'),
       warning: vi.fn().mockName('NotificationService.warning'),
-      info: vi.fn().mockName('NotificationService.info'),
-    };
+      info: vi.fn().mockName('NotificationService.info')};
     mockAuthService = {
-      getUserRoles: vi.fn().mockName('AuthService.getUserRoles'),
-    };
+      getUserRoles: vi.fn().mockName('AuthService.getUserRoles')};
 
     mockUserPreferencesService.getPreferences.mockReturnValue(
       of(DEFAULT_PREFERENCES)
@@ -74,24 +67,18 @@ describe('SettingsPageComponent', () => {
         MatSelectModule,
         MatCheckboxModule,
         MatSlideToggleModule,
-        MatButtonModule,
-        MatIconModule,
         MatInputModule,
         MatButtonToggleModule,
         MatProgressBarModule,
         MatDividerModule,
-        SettingsPageComponent,
-      ],
+        SettingsPageComponent],
       providers: [
         {
           provide: UserPreferencesService,
-          useValue: mockUserPreferencesService,
-        },
+          useValue: mockUserPreferencesService},
         { provide: ThemeService, useValue: mockThemeService },
         { provide: NotificationService, useValue: mockNotificationService },
-        { provide: AuthService, useValue: mockAuthService },
-      ],
-    }).compileComponents();
+        { provide: AuthService, useValue: mockAuthService }]}).compileComponents();
 
     fixture = TestBed.createComponent(SettingsPageComponent);
     component = fixture.componentInstance;
@@ -225,9 +212,9 @@ describe('SettingsPageComponent', () => {
   });
 
   it('should handle tab changes', () => {
-    component.onTabChange(1);
+    component.onTabChange('notifications');
 
-    expect(component.selectedTabIndex).toBe(1);
+    expect(component.selectedTab()).toBe('notifications');
   });
 
   it('should not save if forms are invalid', () => {

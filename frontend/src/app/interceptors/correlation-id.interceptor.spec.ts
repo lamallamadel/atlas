@@ -1,64 +1,56 @@
 import { TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+  provideHttpClientTesting} from '@angular/common/http/testing';
 import {
   HttpClient,
   HTTP_INTERCEPTORS,
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CorrelationIdInterceptor } from './correlation-id.interceptor';
 import { AuthService } from '../services/auth.service';
-import { ToastNotificationService } from '../services/toast-notification.service';
+import { NotificationService } from '../services/notification.service';
 
 describe('CorrelationIdInterceptor', () => {
   let httpMock: HttpTestingController;
   let httpClient: HttpClient;
   let router: AngularVitestPartialMock<Router>;
-  let toastService: AngularVitestPartialMock<ToastNotificationService>;
+  let toastService: AngularVitestPartialMock<NotificationService>;
   let authServiceSpy: AngularVitestPartialMock<AuthService>;
 
   beforeEach(() => {
     const routerSpy = {
-      navigate: vi.fn().mockName('Router.navigate'),
-    };
+      navigate: vi.fn().mockName('Router.navigate')};
     const toastServiceSpy = {
-      success: vi.fn().mockName('ToastNotificationService.success'),
-      error: vi.fn().mockName('ToastNotificationService.error'),
-      warning: vi.fn().mockName('ToastNotificationService.warning'),
-      info: vi.fn().mockName('ToastNotificationService.info'),
-    };
+      success: vi.fn().mockName('NotificationService.success'),
+      error: vi.fn().mockName('NotificationService.error'),
+      warning: vi.fn().mockName('NotificationService.warning'),
+      info: vi.fn().mockName('NotificationService.info')};
     const authSpy = {
       handleSessionExpired: vi
         .fn()
-        .mockName('AuthService.handleSessionExpired'),
-    };
+        .mockName('AuthService.handleSessionExpired')};
 
     TestBed.configureTestingModule({
       imports: [],
       providers: [
         { provide: Router, useValue: routerSpy },
-        { provide: ToastNotificationService, useValue: toastServiceSpy },
+        { provide: NotificationService, useValue: toastServiceSpy },
         { provide: AuthService, useValue: authSpy },
         {
           provide: HTTP_INTERCEPTORS,
           useClass: CorrelationIdInterceptor,
-          multi: true,
-        },
+          multi: true},
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
+        provideHttpClientTesting()]});
 
     httpMock = TestBed.inject(HttpTestingController);
     httpClient = TestBed.inject(HttpClient);
     router = TestBed.inject(Router) as AngularVitestPartialMock<Router>;
     toastService = TestBed.inject(
-      ToastNotificationService
-    ) as AngularVitestPartialMock<ToastNotificationService>;
+      NotificationService
+    ) as AngularVitestPartialMock<NotificationService>;
     authServiceSpy = TestBed.inject(AuthService) as AngularVitestPartialMock<AuthService>;
   });
 
@@ -91,8 +83,7 @@ describe('CorrelationIdInterceptor', () => {
         next: () => expect.fail('should have failed with 401 error'),
         error: (error) => {
           expect(error.status).toBe(401);
-        },
-      });
+        }});
 
       const req = httpMock.expectOne('/api/test');
       req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
@@ -100,10 +91,9 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(toastService.error).toHaveBeenCalledWith(
         'Session expirée. Veuillez vous reconnecter.',
-        expect.objectContaining({
-          label: 'Reconnecter',
-          handler: expect.any(Function),
-        })
+        'Reconnecter',
+        expect.any(Function),
+        false
       );
     });
 
@@ -112,8 +102,7 @@ describe('CorrelationIdInterceptor', () => {
         next: () => expect.fail('should have failed with 403 error'),
         error: (error) => {
           expect(error.status).toBe(403);
-        },
-      });
+        }});
 
       const req = httpMock.expectOne('/api/admin');
       req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
@@ -121,7 +110,9 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(toastService.error).toHaveBeenCalledWith(
         "Accès refusé. Vous n'avez pas les droits nécessaires.",
-        'Fermer'
+        'Fermer',
+        undefined,
+        false
       );
     });
 
@@ -130,8 +121,7 @@ describe('CorrelationIdInterceptor', () => {
         next: () => expect.fail('should have failed with 400 error'),
         error: (error) => {
           expect(error.status).toBe(400);
-        },
-      });
+        }});
 
       const req = httpMock.expectOne('/api/data');
       req.flush(
@@ -140,7 +130,7 @@ describe('CorrelationIdInterceptor', () => {
       );
       httpMock.verify();
 
-      expect(toastService.error).toHaveBeenCalledWith('Invalid data', 'Fermer');
+      expect(toastService.error).toHaveBeenCalledWith('Invalid data', 'Fermer', undefined, false);
     });
 
     it('should handle 404 Not Found error', () => {
@@ -148,8 +138,7 @@ describe('CorrelationIdInterceptor', () => {
         next: () => expect.fail('should have failed with 404 error'),
         error: (error) => {
           expect(error.status).toBe(404);
-        },
-      });
+        }});
 
       const req = httpMock.expectOne('/api/item/999');
       req.flush(
@@ -160,7 +149,9 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(toastService.error).toHaveBeenCalledWith(
         'Resource not found',
-        'Fermer'
+        'Fermer',
+        undefined,
+        false
       );
     });
 
@@ -169,8 +160,7 @@ describe('CorrelationIdInterceptor', () => {
         next: () => expect.fail('should have failed with 409 error'),
         error: (error) => {
           expect(error.status).toBe(409);
-        },
-      });
+        }});
 
       const req = httpMock.expectOne('/api/resource');
       req.flush(
@@ -181,10 +171,9 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(toastService.warning).toHaveBeenCalledWith(
         'Resource already exists',
-        expect.objectContaining({
-          label: 'Réessayer',
-          handler: expect.any(Function),
-        })
+        'Réessayer',
+        expect.any(Function),
+        false
       );
     });
 
@@ -193,8 +182,7 @@ describe('CorrelationIdInterceptor', () => {
         next: () => expect.fail('should have failed with 500 error'),
         error: (error) => {
           expect(error.status).toBe(500);
-        },
-      });
+        }});
 
       const req = httpMock.expectOne('/api/test');
       req.flush(
@@ -205,10 +193,9 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(toastService.error).toHaveBeenCalledWith(
         'Internal error occurred',
-        expect.objectContaining({
-          label: 'Réessayer',
-          handler: expect.any(Function),
-        })
+        'Réessayer',
+        expect.any(Function),
+        false
       );
     });
 
@@ -217,8 +204,7 @@ describe('CorrelationIdInterceptor', () => {
         next: () => expect.fail('should have failed with network error'),
         error: (error) => {
           expect(error.status).toBe(0);
-        },
-      });
+        }});
 
       const req = httpMock.expectOne('/api/test');
       req.error(new ErrorEvent('Network error'), { status: 0 });
@@ -226,10 +212,9 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(toastService.error).toHaveBeenCalledWith(
         'Impossible de contacter le serveur. Vérifiez votre connexion.',
-        expect.objectContaining({
-          label: 'Réessayer',
-          handler: expect.any(Function),
-        })
+        'Réessayer',
+        expect.any(Function),
+        false
       );
     });
   });

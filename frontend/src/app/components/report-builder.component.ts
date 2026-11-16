@@ -1,19 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag } from '@angular/cdk/drag-drop';
 import { ReportApiService, CustomReportDefinition, ReportColumn } from '../services/report-api.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { DsCardComponent } from '../design-system';
-import { MatIcon } from '@angular/material/icon';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
-import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { DecimalPipe, CurrencyPipe } from '@angular/common';
+import { DecimalPipe, CurrencyPipe, CommonModule } from '@angular/common';
 import { DS_CHART_FALLBACK_HEX } from '../design-system/chart-ds-colors';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { 
+  DsCardComponent, 
+  DsSkeletonComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsInputComponent,
+  DsToastService,
+  DsTableComponent,
+  DsColumn
+} from '../design-system';
 
 interface DimensionOption {
   id: string;
@@ -30,11 +32,29 @@ interface MetricOption {
 
 @Component({
     selector: 'app-report-builder',
+    standalone: true,
     templateUrl: './report-builder.component.html',
     styleUrls: ['./report-builder.component.scss'],
-    imports: [DsCardComponent, DsSkeletonComponent, CdkDropList, CdkDrag, MatIcon, MatIconButton, MatButton, MatFormField, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DecimalPipe, CurrencyPipe]
+    imports: [
+      CommonModule,
+      DsCardComponent, 
+      DsSkeletonComponent, 
+      CdkDropList, 
+      CdkDrag, 
+      FormsModule, 
+      DecimalPipe, 
+      CurrencyPipe,
+      DsButtonComponent,
+      DsIconComponent,
+      DsSelectComponent,
+      DsInputComponent,
+      DsTableComponent
+    ]
 })
 export class ReportBuilderComponent {
+  private reportApiService = inject(ReportApiService);
+  private toastService = inject(DsToastService);
+
   availableDimensions: DimensionOption[] = [
     { id: 'date', label: 'Date', description: 'Group by date' },
     { id: 'status', label: 'Status', description: 'Group by dossier status' },
@@ -57,6 +77,7 @@ export class ReportBuilderComponent {
   selectedMetrics: MetricOption[] = [];
 
   reportData: any[] = [];
+  dsColumns: DsColumn<any>[] = [];
   loading = false;
   reportGenerated = false;
 
@@ -64,10 +85,11 @@ export class ReportBuilderComponent {
   reportTitle = 'Custom Report';
   reportSubtitle = '';
 
-  constructor(
-    private reportApiService: ReportApiService,
-    private snackBar: MatSnackBar
-  ) {}
+  readonly exportFormatOptions: DsSelectOption[] = [
+    { value: 'csv', label: 'CSV' },
+    { value: 'excel', label: 'Excel (.xlsx)' },
+    { value: 'pdf', label: 'PDF' }
+  ];
 
   dropDimension(event: CdkDragDrop<DimensionOption[]>): void {
     if (event.previousContainer === event.container) {
@@ -113,7 +135,7 @@ export class ReportBuilderComponent {
 
   generateReport(): void {
     if (this.selectedDimensions.length === 0 || this.selectedMetrics.length === 0) {
-      this.snackBar.open('Please select at least one dimension and one metric', 'Close', { duration: 3000 });
+      this.toastService.warning('Veuillez sélectionner au moins une dimension et une métrique');
       return;
     }
 
@@ -124,25 +146,41 @@ export class ReportBuilderComponent {
       groupBy: this.selectedDimensions.map(d => d.id)
     };
 
+    this.updateDsColumns();
+
     this.reportApiService.generateCustomReport(definition).subscribe({
       next: (data) => {
         this.reportData = data.results || [];
         this.reportGenerated = true;
         this.loading = false;
-        this.snackBar.open('Report generated successfully', 'Close', { duration: 3000 });
+        this.toastService.success('Rapport généré avec succès');
       },
       error: (error) => {
         console.error('Error generating report', error);
         this.loading = false;
-        this.snackBar.open('Error generating report', 'Close', { duration: 3000 });
+        this.toastService.error('Erreur lors de la génération du rapport');
         this.generateMockData();
       }
     });
   }
 
+  private updateDsColumns(): void {
+    this.dsColumns = [
+      ...this.selectedDimensions.map(d => ({
+        key: d.id,
+        header: d.label
+      })),
+      ...this.selectedMetrics.map(m => ({
+        key: m.id,
+        header: m.label,
+        align: 'right' as const
+      }))
+    ];
+  }
+
   async exportReport(): Promise<void> {
     if (!this.reportGenerated || this.reportData.length === 0) {
-      this.snackBar.open('Please generate a report first', 'Close', { duration: 3000 });
+      this.toastService.warning('Veuillez d\'abord générer un rapport');
       return;
     }
 
@@ -163,18 +201,10 @@ export class ReportBuilderComponent {
     try {
       switch (this.exportFormat) {
         case 'csv':
-          await this.reportApiService.exportToCSV(
-            this.reportData, 
-            columns, 
-            `${this.reportTitle.replace(/\s+/g, '_')}.csv`
-          );
+          await this.reportApiService.exportToCSV(this.reportData, columns, `${this.reportTitle.replace(/\s+/g, '_')}.csv`);
           break;
         case 'excel':
-          await this.reportApiService.exportToExcel(
-            this.reportData, 
-            columns, 
-            `${this.reportTitle.replace(/\s+/g, '_')}.xlsx`
-          );
+          await this.reportApiService.exportToExcel(this.reportData, columns, `${this.reportTitle.replace(/\s+/g, '_')}.xlsx`);
           break;
         case 'pdf':
           await this.reportApiService.exportToPDF(
@@ -184,7 +214,7 @@ export class ReportBuilderComponent {
               title: this.reportTitle,
               subtitle: this.reportSubtitle || `Generated on ${new Date().toLocaleDateString('fr-FR')}`,
               branding: {
-                companyName: 'CRM System',
+                companyName: 'Atlasia CRM',
                 primaryColor: DS_CHART_FALLBACK_HEX['--ds-marine'],
               }
             },
@@ -192,10 +222,10 @@ export class ReportBuilderComponent {
           );
           break;
       }
-      this.snackBar.open('Report exported successfully', 'Close', { duration: 3000 });
+      this.toastService.success('Rapport exporté avec succès');
     } catch (error) {
       console.error('Error exporting report', error);
-      this.snackBar.open('Error exporting report', 'Close', { duration: 3000 });
+      this.toastService.error('Erreur lors de l\'export du rapport');
     }
   }
 
@@ -205,44 +235,27 @@ export class ReportBuilderComponent {
       const row: any = {};
       this.selectedDimensions.forEach(dim => {
         switch (dim.id) {
-          case 'date':
-            row[dim.id] = new Date(2024, 0, i + 1).toISOString().split('T')[0];
-            break;
-          case 'status':
-            row[dim.id] = ['NEW', 'QUALIFIED', 'APPOINTMENT', 'WON'][i % 4];
-            break;
-          case 'source':
-            row[dim.id] = ['WEBSITE', 'REFERRAL', 'PHONE'][i % 3];
-            break;
-          case 'agent':
-            row[dim.id] = `Agent ${i % 3 + 1}`;
-            break;
-          default:
-            row[dim.id] = `Value ${i}`;
+          case 'date': row[dim.id] = new Date(2024, 0, i + 1).toISOString().split('T')[0]; break;
+          case 'status': row[dim.id] = ['NEW', 'QUALIFIED', 'APPOINTMENT', 'WON'][i % 4]; break;
+          case 'source': row[dim.id] = ['WEBSITE', 'REFERRAL', 'PHONE'][i % 3]; break;
+          case 'agent': row[dim.id] = `Agent ${i % 3 + 1}`; break;
+          default: row[dim.id] = `Value ${i}`;
         }
       });
       this.selectedMetrics.forEach(metric => {
         switch (metric.id) {
-          case 'dossierCount':
-            row[metric.id] = Math.floor(Math.random() * 50) + 10;
-            break;
-          case 'conversionRate':
-            row[metric.id] = Math.random() * 0.5 + 0.2;
-            break;
-          case 'totalValue':
-            row[metric.id] = Math.floor(Math.random() * 500000) + 100000;
-            break;
-          case 'avgResponseTime':
-            row[metric.id] = Math.random() * 24 + 1;
-            break;
-          default:
-            row[metric.id] = Math.floor(Math.random() * 100);
+          case 'dossierCount': row[metric.id] = Math.floor(Math.random() * 50) + 10; break;
+          case 'conversionRate': row[metric.id] = Math.random() * 0.5 + 0.2; break;
+          case 'totalValue': row[metric.id] = Math.floor(Math.random() * 500000) + 100000; break;
+          case 'avgResponseTime': row[metric.id] = Math.random() * 24 + 1; break;
+          default: row[metric.id] = Math.floor(Math.random() * 100);
         }
       });
       mockData.push(row);
     }
     this.reportData = mockData;
     this.reportGenerated = true;
+    this.updateDsColumns();
   }
 
   resetReport(): void {
@@ -252,12 +265,5 @@ export class ReportBuilderComponent {
     this.selectedMetrics = [];
     this.reportData = [];
     this.reportGenerated = false;
-  }
-
-  getDisplayedColumns(): string[] {
-    return [
-      ...this.selectedDimensions.map(d => d.id),
-      ...this.selectedMetrics.map(m => m.id)
-    ];
   }
 }

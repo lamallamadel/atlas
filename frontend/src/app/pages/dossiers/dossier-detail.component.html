@@ -1,890 +1,220 @@
-<div class="page-container">
-  <div class="page-content">
-    @if (loading) {
-      <app-loading-skeleton variant="detail" [rows]="15"></app-loading-skeleton>
-    }
+<ds-entity-detail-layout [rightSlot]="true">
+  <!-- Breadcrumb -->
+  <div slot="breadcrumb" style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+    <a href="javascript:void(0)" (click)="goBack()" style="color: var(--ds-text-faint); text-decoration: none;">Dossiers</a>
+    <ds-icon name="chevron-right" [size]="16" style="color: var(--ds-divider);"></ds-icon>
+    <span style="color: var(--ds-marine); font-weight: 600;">{{ dossier?.leadName || 'Détails' }}</span>
+  </div>
 
-    @if (error && !loading) {
-      <div class="error-state">
-        <p class="error-message">{{ error }}</p>
-        <button class="btn-retry" (click)="loadDossier()">Réessayer</button>
-      </div>
-    }
+  <!-- Topbar -->
+  <div slot="topbar" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <h1 style="margin: 0; font-family: var(--ds-font-display); font-size: 24px; font-weight: 800; color: var(--ds-marine);">
+        {{ dossier?.leadName || 'Dossier #' + dossier?.id }}
+      </h1>
+      <ds-badge [status]="dossier?.status === 'WON' ? 'success' : dossier?.status === 'LOST' ? 'error' : 'active'">
+        {{ dossier?.status }}
+      </ds-badge>
+    </div>
 
-    @if (!loading && !error && dossier) {
-      <ds-entity-detail-layout [rightSlot]="false" class="dd-layout">
-        <a class="link-back" slot="breadcrumb" (click)="goBack()" (keydown.enter)="goBack()"
-          (keydown.space)="$event.preventDefault(); goBack()" tabindex="0" role="button"
-          aria-label="Retourner à la liste des dossiers">
-          <span class="arrow-left" aria-hidden="true">←</span>
-          Retour aux dossiers
-        </a>
-        <div class="dd-topbar" slot="topbar">
-          <div class="title-and-badge">
-            <h1 class="dossier-title">
-              Dossier #{{ dossier.id }} — {{ dossier.leadName || 'Sans nom' }}/{{ (dossier.leadPhone | phoneFormat) ||
-              'Sans téléphone' }}
-            </h1>
-            <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
-          </div>
-          <button type="button" class="btn-change-status-secondary status-change-button" (click)="toggleStatusChange()"
-            aria-label="Ouvrir le formulaire de changement de statut du dossier" (keydown.enter)="toggleStatusChange()"
-            (keydown.space)="$event.preventDefault(); toggleStatusChange()">
-            Changer statut
-          </button>
+    <div style="display: flex; gap: 12px;">
+      <ds-button variant="ghost" size="md" (dsClick)="generateContract()" [disabled]="generatingContract || loading">
+        <ds-icon name="edit" [size]="20" style="margin-right: 8px;"></ds-icon>
+        Générer compromis
+      </ds-button>
+      <ds-button variant="marine" size="md" (dsClick)="openMessageDialog()" [disabled]="loading">
+        <ds-icon name="mail" [size]="20" style="margin-right: 8px;"></ds-icon>
+        Nouveau message
+      </ds-button>
+    </div>
+  </div>
+
+  <!-- Left Sidebar (Essentials) -->
+  <div slot="left" class="ds-form-stack" style="gap: 20px;">
+    <ds-card [pad]="true" elevation="xs">
+      <h3 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--ds-marine);">Score IA</h3>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="font-size: 32px; font-weight: 800; color: var(--ds-primary);">{{ getScoreDisplay() }}</div>
+        <div style="flex: 1;">
+          <ds-progress-bar [value]="85" variant="primary"></ds-progress-bar>
         </div>
-        <div class="dd-left-stack" slot="left">
-          @if (collaborationEnabled) {
-            <div class="collaboration-section">
-              <app-collaboration-presence [dossierId]="dossier.id"></app-collaboration-presence>
-            </div>
-          }
-          <ds-card class="dd-meta-card" [pad]="false" [elevation]="'xs'">
-            <div class="info-section-header">
-              <h3 class="info-section-title">Résumé</h3>
-            </div>
-            <div class="info-section-body dd-meta-body">
-              <div class="header-line-2">
-                <div class="metadata-item">
-                  <span class="metadata-label">Téléphone du prospect :</span>
-                  <span class="metadata-value">{{ (dossier.leadPhone | phoneFormat) || '—' }}</span>
-                </div>
-                <div class="metadata-item">
-                  <span class="metadata-label">Source du prospect :</span>
-                  <span class="metadata-value">{{ dossier.source || '—' }}</span>
-                </div>
-                @if (dossier.annonceId) {
-                  <div class="metadata-item">
-                    <span class="metadata-label">Annonce liée :</span>
-                    <span class="metadata-value">#{{ dossier.annonceId }}</span>
-                  </div>
-                }
-                <div class="metadata-item">
-                  <span class="metadata-label">Créé le :</span>
-                  <span class="metadata-value">{{ formatDate(dossier.createdAt) }}</span>
-                </div>
+      </div>
+    </ds-card>
+
+    <ds-card [pad]="true" elevation="xs">
+      <h3 style="margin: 0 0 16px; font-size: 14px; font-weight: 700; color: var(--ds-marine);">Coordonnées</h3>
+      <div class="ds-form-stack" style="gap: 12px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--ds-text-faint); text-transform: uppercase;">Téléphone</span>
+          <span style="font-weight: 600; font-size: 14px;">{{ dossier?.leadPhone || '—' }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--ds-text-faint); text-transform: uppercase;">Source</span>
+          <span style="font-weight: 600; font-size: 14px;">{{ dossier?.leadSource || '—' }}</span>
+        </div>
+      </div>
+    </ds-card>
+  </div>
+
+  <!-- Center Content (Tabs) -->
+  <div slot="center" class="ds-form-stack">
+    <ds-tabs [tabs]="dossierTabs" [activeTab]="activeTab" (tabChange)="activeTab = $event" style="margin-bottom: 24px;"></ds-tabs>
+
+    @if (loading) {
+      <div style="padding: 48px 0;">
+        <ds-skeleton variant="rect" width="100%" height="400px" [animate]="true"></ds-skeleton>
+      </div>
+    } @else {
+      <div class="tab-panels">
+        @if (activeTab === 'informations') {
+          <ds-card [pad]="true" elevation="sm">
+            <h2 style="margin: 0 0 24px; font-size: 18px; font-weight: 700; color: var(--ds-marine);">Notes du dossier</h2>
+            <div class="ds-field">
+              <div class="ds-field__wrap">
+                <textarea
+                  class="ds-field__input"
+                  [ngModel]="dossier?.notes" (ngModelChange)="dossier && (dossier.notes = $event)"
+                  (input)="onNotesInput($event)"
+                  placeholder="Prenez vos notes ici..."
+                  rows="12"
+                  style="height: auto; padding: 16px; line-height: 1.6;"></textarea>
               </div>
             </div>
           </ds-card>
-        </div>
-        <div class="dd-center-stack" slot="center">
-        @if (dossier.existingOpenDossierId) {
-          <div class="warning-message">
-            <strong>ℹ️ Doublon détecté :</strong>
-            un dossier ouvert existe déjà (#{{ dossier.existingOpenDossierId }}).
-            <a class="link" [routerLink]="['/pro/dossiers', dossier.existingOpenDossierId]">Ouvrir</a>
-          </div>
         }
-        <!-- Coach Virtuel Nudging Alert -->
-        @if (getVirtualCoachNudge()) {
-          <div class="coach-virtuel-card slide-in-top">
-            <div class="coach-icon-container">
-              <span class="coach-icon">💡</span>
+
+        @if (activeTab === 'parties') {
+          <div class="ds-form-stack">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+              <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--ds-marine);">Parties prenantes</h2>
+              <ds-button variant="ghost" size="sm" (dsClick)="openPartiePrenanteDialog()">
+                <ds-icon name="plus" [size]="16" style="margin-right: 8px;"></ds-icon> Ajouter
+              </ds-button>
             </div>
-            <div class="coach-content">
-              <div class="coach-header-row">
-                <h4 class="coach-title">Coach Virtuel Atlas</h4>
-                <mat-icon
-                  class="explainer-icon"
-                  [attr.title]="'Ce conseil est généré dynamiquement par l\'algorithme d\'analyse comportementale de l\'IA, basé sur la fréquence d\'ouverture des emails et les consultations récentes de la propriété liées à ce dossier.'">
-                  help_outline
-                </mat-icon>
-              </div>
-              <p class="coach-message">{{ getVirtualCoachNudge() }}</p>
-            </div>
-          </div>
-        }
-        @if (showStatusChange) {
-          <div class="status-change-section">
-            @if (successMessage) {
-              <div class="success-message">
-                {{ successMessage }}
-              </div>
-            }
-            @if (statusError) {
-              <div class="error-message">
-                {{ statusError }}
-              </div>
-            }
-            @if (isStatusChangeDisabled()) {
-              <div class="warning-message">
-                <strong>⚠️ Statut terminal :</strong> {{ getStatusChangeTooltip() }}
-              </div>
-            }
-            <div class="status-change-form">
-              <div class="form-group">
-                <label for="status-select" class="form-label">Nouveau statut :</label>
-                <select id="status-select" class="form-select" [(ngModel)]="selectedStatus"
-                  [disabled]="updatingStatus || isStatusChangeDisabled()" [title]="getStatusChangeTooltip()">
-                  @for (status of getAvailableStatusOptions(); track status) {
-                    <option [value]="status">
-                      {{ status === DossierStatus.NEW ? 'Nouveau' :
-                      status === DossierStatus.QUALIFYING ? 'Qualification' :
-                      status === DossierStatus.QUALIFIED ? 'Qualifié' :
-                      status === DossierStatus.APPOINTMENT ? 'Rendez-vous' :
-                      status === DossierStatus.WON ? 'Gagné' :
-                      status === DossierStatus.LOST ? 'Perdu' : status }}
-                    </option>
-                  }
-                </select>
-              </div>
-              <button class="btn-update-status update-status-button" (click)="updateStatus()"
-                [disabled]="updatingStatus || !selectedStatus || isStatusChangeDisabled()"
-                aria-label="Enregistrer le nouveau statut du dossier" (keydown.enter)="updateStatus()"
-                (keydown.space)="$event.preventDefault(); updateStatus()">
-                @if (updatingStatus) {
-                  <span class="spinner-small"></span>
-                }
-                @if (!updatingStatus) {
-                  <span>Mettre à jour le statut</span>
-                }
-                @if (updatingStatus) {
-                  <span>Mise à jour...</span>
-                }
-              </button>
-              <button class="btn-cancel" (click)="toggleStatusChange()" [disabled]="updatingStatus"
-                aria-label="Annuler le changement de statut" (keydown.enter)="toggleStatusChange()"
-                (keydown.space)="$event.preventDefault(); toggleStatusChange()">
-                Annuler
-              </button>
-            </div>
-          </div>
-        }
-        <ds-tabs [tabs]="dossierTabs" [activeTab]="activeTab" variant="underline" (tabChange)="activeTab = $event"></ds-tabs>
-        <div class="tab-content-host">
-          @if (activeTab === 'informations') {
-            <div class="tab-content">
-              <!-- Section Essentiel -->
-              <ds-card class="info-section-essential" [pad]="false" [elevation]="'xs'">
-                <div class="info-section-header">
-                  <h3 class="info-section-title">Essentiel</h3>
-                </div>
-                <div class="info-section-body">
-                  <div class="essential-grid">
-                    <div class="essential-item">
-                      <span class="essential-label">Statut</span>
-                      <div class="essential-value">
-                        <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
-                      </div>
-                    </div>
-                    <div class="essential-item">
-                      <span class="essential-label">Téléphone du prospect</span>
-                      <span class="essential-value">{{ (dossier.leadPhone | phoneFormat) || '—' }}</span>
-                    </div>
-                    <div class="essential-item">
-                      <span class="essential-label">Source du prospect / Annonce</span>
-                      <span class="essential-value">
-                        {{ dossier.source || '—' }}
-                        @if (dossier.annonceId) {
-                          <span class="essential-annonce-ref"> / #{{ dossier.annonceId }}</span>
-                        }
-                      </span>
-                    </div>
-                    <div class="essential-item">
-                      <span class="essential-label">Score</span>
-                      <span class="essential-value">{{ getScoreDisplay() }}</span>
-                    </div>
-                    @if (hasEmptyFields()) {
-                      <div class="essential-item">
-                        <span class="essential-label">Non renseigné</span>
-                        <span class="essential-value essential-empty">{{ getEmptyFieldsList() }}</span>
-                      </div>
-                    }
-                  </div>
-                </div>
-              </ds-card>
-              <!-- Grid 2 colonnes pour Prospect et Annonce -->
-              <div class="sections-container">
-                <ds-card class="info-section" [pad]="false" [elevation]="'xs'">
-                  <div class="info-section-header">
-                    <h3 class="info-section-title">Prospect</h3>
-                  </div>
-                  <div class="info-section-body">
-                    @if (isLeadEmpty()) {
-                      <div class="lead-empty-state">
-                        <p class="lead-empty-message">Informations du prospect non renseignées</p>
-                        @if (!showLeadForm) {
-                          <button class="btn-add-lead" (click)="toggleLeadForm()"
-                            aria-label="Ouvrir le formulaire pour ajouter les informations de contact du prospect"
-                            (keydown.enter)="toggleLeadForm()" (keydown.space)="$event.preventDefault(); toggleLeadForm()">
-                            Ajouter les informations du prospect
-                          </button>
-                        }
-                        @if (showLeadForm) {
-                          <div class="lead-form-section">
-                            @if (leadSuccessMessage) {
-                              <div class="success-message">
-                                {{ leadSuccessMessage }}
-                              </div>
-                            }
-                            @if (leadError) {
-                              <div class="error-message">
-                                {{ leadError }}
-                              </div>
-                            }
-                            <div class="lead-form">
-                              <div class="form-group">
-                                <label for="lead-name" class="form-label">Nom du prospect :</label>
-                                <input id="lead-name" type="text" class="form-input" [(ngModel)]="leadFormName"
-                                  [disabled]="updatingLead" placeholder="Saisir le nom complet du prospect"
-                                  aria-label="Nom du prospect" />
-                                </div>
-                                <div class="form-group">
-                                  <label for="lead-phone" class="form-label">Téléphone du prospect :</label>
-                                  <input id="lead-phone" type="text" class="form-input" [(ngModel)]="leadFormPhone"
-                                    [disabled]="updatingLead" placeholder="Saisir le numéro de téléphone du prospect"
-                                    aria-label="Téléphone du prospect" />
-                                  </div>
-                                  <div class="form-actions">
-                                    <button class="btn-update-lead" (click)="updateLead()"
-                                      [disabled]="updatingLead || !leadFormName || !leadFormPhone"
-                                      aria-label="Enregistrer les informations du prospect" (keydown.enter)="updateLead()"
-                                      (keydown.space)="$event.preventDefault(); updateLead()">
-                                      @if (updatingLead) {
-                                        <span class="spinner-small"></span>
-                                      }
-                                      @if (!updatingLead) {
-                                        <span>Enregistrer</span>
-                                      }
-                                      @if (updatingLead) {
-                                        <span>Enregistrement...</span>
-                                      }
-                                    </button>
-                                    <button class="btn-cancel" (click)="toggleLeadForm()" [disabled]="updatingLead"
-                                      aria-label="Annuler la saisie des informations du prospect"
-                                      (keydown.enter)="toggleLeadForm()"
-                                      (keydown.space)="$event.preventDefault(); toggleLeadForm()">
-                                      Annuler
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            }
-                          </div>
-                        }
-                        @if (!isLeadEmpty()) {
-                          <div class="field-group">
-                            @if (dossier.leadName) {
-                              <div class="field-row">
-                                <span class="field-label">Nom du prospect :</span>
-                                <span class="field-value">{{ dossier.leadName }}</span>
-                              </div>
-                            }
-                            @if (dossier.leadPhone) {
-                              <div class="field-row">
-                                <span class="field-label">Téléphone du prospect :</span>
-                                <span class="field-value">{{ dossier.leadPhone }}</span>
-                              </div>
-                            }
-                            @if (dossier.leadSource) {
-                              <div class="field-row">
-                                <span class="field-label">Source du prospect :</span>
-                                <span class="field-value">{{ dossier.leadSource }}</span>
-                              </div>
-                            }
-                          </div>
-                        }
-                      </div>
-                    </ds-card>
-                    <ds-card class="info-section" [pad]="false" [elevation]="'xs'">
-                      <div class="info-section-header">
-                        <h3 class="info-section-title">Annonce liée</h3>
-                      </div>
-                      <div class="info-section-body">
-                        @if (dossier.annonceId) {
-                          <div class="field-group">
-                            <div class="field-row">
-                              <span class="field-label">Identifiant de l'annonce :</span>
-                              <span class="field-value">#{{ dossier.annonceId }}</span>
-                            </div>
-                          </div>
-                        }
-                        @if (!dossier.annonceId) {
-                          <div class="empty-state-small">
-                            <p class="empty-state-text">Aucune annonce liée à ce dossier</p>
-                          </div>
-                        }
-                      </div>
-                    </ds-card>
-                  </div>
-                  <!-- Accordéon Détails système -->
-                  <mat-expansion-panel class="system-details-section">
-                    <mat-expansion-panel-header tabindex="0" role="button"
-                      aria-label="Afficher ou masquer les détails système du dossier">
-                      <mat-panel-title>
-                        Détails système
-                      </mat-panel-title>
-                    </mat-expansion-panel-header>
-                    <div class="system-details-content">
-                      <div class="field-row">
-                        <span class="field-label">Créé le :</span>
-                        <span class="field-value">{{ formatDate(dossier.createdAt) }}</span>
-                      </div>
-                      @if (dossier.createdBy) {
-                        <div class="field-row">
-                          <span class="field-label">Créé par :</span>
-                          <span class="field-value">{{ dossier.createdBy }}</span>
-                        </div>
-                      }
-                      <div class="field-row">
-                        <span class="field-label">Modifié le :</span>
-                        <span class="field-value">{{ formatDate(dossier.updatedAt) }}</span>
-                      </div>
-                      @if (dossier.updatedBy) {
-                        <div class="field-row">
-                          <span class="field-label">Modifié par :</span>
-                          <span class="field-value">{{ dossier.updatedBy }}</span>
-                        </div>
-                      }
-                      <div class="field-row">
-                        <span class="field-label">ID Dossier :</span>
-                        <span class="field-value">{{ dossier.id }}</span>
-                      </div>
-                      <div class="field-row">
-                        <span class="field-label">Date de création (ISO) :</span>
-                        <span class="field-value">{{ dossier.createdAt }}</span>
-                      </div>
-                      <div class="field-row">
-                        <span class="field-label">Date de modification (ISO) :</span>
-                        <span class="field-value">{{ dossier.updatedAt }}</span>
-                      </div>
-                    </div>
-                  </mat-expansion-panel>
-                </div>
-          }
-          @if (activeTab === 'parties') {
-                <div class="tab-content">
-                  @if (!dossier.parties || dossier.parties.length === 0) {
-                    <ds-empty-state
-                      title="Aucune partie prenante enregistrée"
-                      description="Ajoutez propriétaire, acheteur, notaire, etc."
-                      ctaLabel="Ajouter une partie prenante"
-                      (ctaClick)="togglePartieForm()" />
-                  }
-                  @if (dossier.parties && dossier.parties.length > 0) {
-                    <div>
-                      <div class="tab-header-actions">
-                        <button class="btn-add add-partie-button" (click)="togglePartieForm()"
-                          aria-label="Ouvrir le formulaire pour ajouter une nouvelle partie prenante au dossier"
-                          (keydown.enter)="togglePartieForm()" (keydown.space)="$event.preventDefault(); togglePartieForm()">
-                          <span class="btn-icon" aria-hidden="true">+</span>
-                          Ajouter une partie prenante
-                        </button>
-                      </div>
-                      <div class="data-table-wrapper">
-                        <table class="data-table parties-table" role="table" aria-label="Liste des parties prenantes">
-                          <thead>
-                            <tr>
-                              <th scope="col">Rôle</th>
-                              <th scope="col">Prénom</th>
-                              <th scope="col">Nom</th>
-                              <th scope="col">Téléphone</th>
-                              <th scope="col">Email</th>
-                              <th scope="col" class="actions-column">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            @for (partie of dossier.parties; track partie) {
-                              <tr>
-                                <td>
-                                  <span class="role-badge" [class]="getRoleBadgeClass(partie.role)">
-                                    {{ getRoleLabel(partie.role) }}
-                                  </span>
-                                </td>
-                                <td>{{ partie.firstName || '—' }}</td>
-                                <td>{{ partie.lastName || '—' }}</td>
-                                <td>{{ partie.phone || '—' }}</td>
-                                <td>{{ partie.email || '—' }}</td>
-                                <td class="actions-column">
-                                  <div class="action-buttons">
-                                    <button class="btn-icon-action btn-edit" type="button" (click)="editPartie(partie)"
-                                      [attr.title]="'Modifier ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
-                                      [attr.aria-label]="'Modifier la partie prenante ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
-                                      (keydown.enter)="editPartie(partie)"
-                                      (keydown.space)="$event.preventDefault(); editPartie(partie)">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" aria-hidden="true">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                      </svg>
-                                    </button>
-                                    <button class="btn-icon-action btn-delete" type="button" (click)="deletePartie(partie)"
-                                      [attr.title]="'Supprimer ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
-                                      [attr.aria-label]="'Supprimer la partie prenante ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
-                                      (keydown.enter)="deletePartie(partie)"
-                                      (keydown.space)="$event.preventDefault(); deletePartie(partie)">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" aria-hidden="true">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                        </path>
-                                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                                      </svg>
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            }
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  }
-                </div>
-          }
-          @if (activeTab === 'messages') {
-                <div class="tab-content">
-                  <div class="tab-header-actions">
-                    <button class="btn-add" (click)="openMessageDialog()"
-                      aria-label="Ouvrir le formulaire pour créer un nouveau message" (keydown.enter)="openMessageDialog()"
-                      (keydown.space)="$event.preventDefault(); openMessageDialog()">
-                      <span class="btn-icon" aria-hidden="true">+</span>
-                      Nouveau message
-                    </button>
-                  </div>
-                  @if (loadingMessages) {
-                    <app-loading-skeleton variant="list" [rows]="5"></app-loading-skeleton>
-                  }
-                  @if (!loadingMessages) {
-                    @if (getMessagesSorted().length === 0) {
-                      <ds-empty-state
-                        title="Aucun message"
-                        description="Les échanges multicanal apparaîtront ici.">
-                      </ds-empty-state>
-                    }
-                    @if (getMessagesSorted().length > 0) {
-                      <ds-card class="messages-thread-card" [pad]="true" [elevation]="'xs'">
-                        <ds-messaging-thread
-                          [messages]="getMessagesForDsThread()"
-                          [showAvatars]="true"
-                          ariaLabel="Fil des messages du dossier">
-                        </ds-messaging-thread>
-                      </ds-card>
-                    }
-                  }
-                </div>
-          }
-          @if (activeTab === 'whatsapp') {
-                <div class="tab-content whatsapp-tab">
-                  <!-- Mobile-optimized messaging interface -->
-                  @if (dossier) {
-                    <app-whatsapp-messaging-container [dossierId]="dossier.id"
-                      [consentGranted]="isWhatsAppConsentGranted()" [leadName]="dossier.leadName"
-                      [templates]="whatsappTemplates">
-                    </app-whatsapp-messaging-container>
-                  }
-                  <!-- Fallback: consent warning if not granted -->
-                  @if (!isWhatsAppConsentGranted()) {
-                    <div class="consent-warning-overlay">
-                      <mat-icon class="warning-icon">warning</mat-icon>
-                      <h3>Consentement WhatsApp requis</h3>
-                      <p>Le consentement WhatsApp n'est pas accordé pour ce dossier.</p>
-                      <a mat-raised-button color="primary" [routerLink]="[]" fragment="consentements">
-                        Gérer les consentements
-                      </a>
-                    </div>
-                  }
-                </div>
-          }
-          @if (activeTab === 'messages-sortants') {
-                <div class="tab-content">
-                  @if (dossier) {
-                    <app-messaging-tab [dossierId]="dossier.id" [recipientPhone]="dossier.leadPhone"
-                      [leadName]="dossier.leadName">
-                    </app-messaging-tab>
-                  }
-                </div>
-          }
-          @if (activeTab === 'rendezvous') {
-                <div class="tab-content appointments-section">
-                  <div class="tab-header-actions">
-                    <button class="btn-add" (click)="openAppointmentDialog()"
-                      aria-label="Ouvrir le formulaire pour planifier un nouveau rendez-vous"
-                      (keydown.enter)="openAppointmentDialog()"
-                      (keydown.space)="$event.preventDefault(); openAppointmentDialog()">
-                      <span class="btn-icon" aria-hidden="true">+</span>
-                      Planifier un rendez-vous
-                    </button>
-                  </div>
-                  @if (loadingAppointments) {
-                    <app-loading-skeleton variant="table" [rows]="5"
-                    [columns]="6"></app-loading-skeleton>
-                  }
-                  @if (!loadingAppointments) {
-                    <div class="data-table-wrapper">
-                      @if (appointments.length > 0) {
-                        <table class="data-table" role="table" aria-label="Liste des rendez-vous">
-                          <thead>
-                            <tr>
-                              <th scope="col">Date et heure</th>
-                              <th scope="col">Lieu</th>
-                              <th scope="col">Assigné à</th>
-                              <th scope="col">Statut</th>
-                              <th scope="col">Notes</th>
-                              <th scope="col">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            @for (appointment of appointments; track appointment) {
-                              <tr>
-                                <td>
-                                  <div class="appointment-datetime">
-                                    <div class="datetime-start">{{ formatAppointmentDateTime(appointment.startTime) }}</div>
-                                    <div class="datetime-end">→ {{ formatAppointmentDateTime(appointment.endTime) }}</div>
-                                  </div>
-                                </td>
-                                <td>{{ appointment.location || '—' }}</td>
-                                <td>{{ appointment.assignedTo || '—' }}</td>
-                                <td>
-                                  <span [class]="getAppointmentStatusBadgeClass(appointment.status)">
-                                    {{ getAppointmentStatusLabel(appointment.status) }}
-                                  </span>
-                                </td>
-                                <td>{{ appointment.notes || '—' }}</td>
-                                <td>
-                                  <div class="action-buttons">
-                                    <button class="btn-edit" (click)="editAppointment(appointment)"
-                                      [attr.aria-label]="'Modifier le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime)"
-                                      (keydown.enter)="editAppointment(appointment)"
-                                      (keydown.space)="$event.preventDefault(); editAppointment(appointment)">
-                                      Modifier
-                                    </button>
-                                    @if (appointment.status === 'SCHEDULED') {
-                                      <button class="btn-complete" (click)="completeAppointment(appointment)"
-                                        [attr.aria-label]="'Marquer le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime) + ' comme terminé'"
-                                        (keydown.enter)="completeAppointment(appointment)"
-                                        (keydown.space)="$event.preventDefault(); completeAppointment(appointment)">
-                                        Terminer
-                                      </button>
-                                    }
-                                    <button class="btn-delete" (click)="deleteAppointment(appointment)"
-                                      [attr.aria-label]="'Supprimer le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime)"
-                                      (keydown.enter)="deleteAppointment(appointment)"
-                                      (keydown.space)="$event.preventDefault(); deleteAppointment(appointment)">
-                                      Supprimer
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            }
-                          </tbody>
-                        </table>
-                      }
-                      @if (appointments.length === 0) {
-                        <p class="empty-message">
-                          Aucun rendez-vous planifié.
-                        </p>
-                      }
-                    </div>
-                  }
-                </div>
-          }
-          @if (activeTab === 'consentements') {
-                <div class="tab-content consentements-section">
-                  @if (consentementsLoading) {
-                    <app-loading-skeleton variant="card" [rows]="2"
-                    aria-label="Chargement des consentements"></app-loading-skeleton>
-                  }
-                  @if (!consentementsLoading) {
-                    <div>
-                      <div class="consent-cards-grid">
-                        @for (group of consentementGroups; track group) {
-                          <div class="consent-card">
-                            <div class="consent-card-header">
-                              <span class="consent-channel-icon">
-                                {{ group.channel === ConsentementChannel.EMAIL ? '📧' : '📱' }}
-                              </span>
-                              <h3 class="consent-channel-title">{{ getChannelLabel(group.channel) }}</h3>
-                            </div>
-                            <div class="consent-card-body">
-                              @if (group.current) {
-                                <div class="consent-current-status">
-                                  <div class="consent-status-row">
-                                    <span class="consent-label">Statut actuel :</span>
-                                    <span [class]="getConsentementStatusBadgeClass(group.current.status)">
-                                      {{ getConsentementStatusLabel(group.current.status) }}
-                                    </span>
-                                  </div>
-                                  <div class="consent-date-row">
-                                    <span class="consent-date-label">
-                                      {{ group.current.status === ConsentementStatus.GRANTED ? 'Accordé le' :
-                                      group.current.status === ConsentementStatus.REVOKED ? 'Révoqué le' :
-                                      'Modifié le' }} :
-                                    </span>
-                                    <span class="consent-date-value">{{ getConsentDate(group.current) }}</span>
-                                  </div>
-                                </div>
-                              }
-                              @if (!group.current) {
-                                <div class="consent-no-status">
-                                  <span class="consent-no-status-text">Aucun consentement enregistré</span>
-                                </div>
-                              }
-                              <div class="consent-actions">
-                                <button class="consent-btn consent-btn-granted"
-                                  [class.active]="group.current?.status === ConsentementStatus.GRANTED"
-                                  (click)="toggleConsentement(group, ConsentementStatus.GRANTED)"
-                                  [disabled]="group.current?.status === ConsentementStatus.GRANTED"
-                                  [attr.aria-label]="'Accorder le consentement pour ' + getChannelLabel(group.channel)"
-                                  [attr.aria-pressed]="group.current?.status === ConsentementStatus.GRANTED"
-                                  (keydown.enter)="toggleConsentement(group, ConsentementStatus.GRANTED)"
-                                  (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.GRANTED)">
-                                  Accorder
-                                </button>
-                                <button class="consent-btn consent-btn-denied"
-                                  [class.active]="group.current?.status === ConsentementStatus.DENIED"
-                                  (click)="toggleConsentement(group, ConsentementStatus.DENIED)"
-                                  [disabled]="group.current?.status === ConsentementStatus.DENIED"
-                                  [attr.aria-label]="'Refuser le consentement pour ' + getChannelLabel(group.channel)"
-                                  [attr.aria-pressed]="group.current?.status === ConsentementStatus.DENIED"
-                                  (keydown.enter)="toggleConsentement(group, ConsentementStatus.DENIED)"
-                                  (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.DENIED)">
-                                  Refuser
-                                </button>
-                                <button class="consent-btn consent-btn-revoked"
-                                  [class.active]="group.current?.status === ConsentementStatus.REVOKED"
-                                  (click)="toggleConsentement(group, ConsentementStatus.REVOKED)"
-                                  [disabled]="group.current?.status === ConsentementStatus.REVOKED"
-                                  [attr.aria-label]="'Révoquer le consentement pour ' + getChannelLabel(group.channel)"
-                                  [attr.aria-pressed]="group.current?.status === ConsentementStatus.REVOKED"
-                                  (keydown.enter)="toggleConsentement(group, ConsentementStatus.REVOKED)"
-                                  (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.REVOKED)">
-                                  Révoquer
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        }
-                      </div>
-                      <mat-expansion-panel class="consent-history-section">
-                        <mat-expansion-panel-header tabindex="0" role="button"
-                          aria-label="Afficher ou masquer l'historique complet des consentements">
-                          <mat-panel-title>
-                            Historique des consentements
-                          </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <div class="consent-history-content">
-                          @if (getConsentementsHistory().length === 0) {
-                            <div class="empty-message">
-                              Aucun historique de consentement.
-                            </div>
-                          }
-                          @if (getConsentementsHistory().length > 0) {
-                            <div class="data-table-wrapper">
-                              <table class="data-table" role="table" aria-label="Historique des consentements">
-                                <thead>
-                                  <tr>
-                                    <th scope="col">Canal</th>
-                                    <th scope="col">Statut</th>
-                                    <th scope="col">Date</th>
-                                    <th scope="col">Utilisateur</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  @for (consent of getConsentementsHistory(); track consent) {
-                                    <tr>
-                                      <td>
-                                        <span [class]="getChannelBadgeClass(consent.channel)">
-                                          {{ getChannelLabel(consent.channel) }}
-                                        </span>
-                                      </td>
-                                      <td>
-                                        <span [class]="getConsentementStatusBadgeClass(consent.status)">
-                                          {{ getConsentementStatusLabel(consent.status) }}
-                                        </span>
-                                      </td>
-                                      <td>{{ formatDate(consent.updatedAt) }}</td>
-                                      <td>{{ getUserFromMeta(consent) }}</td>
-                                    </tr>
-                                  }
-                                </tbody>
-                              </table>
-                            </div>
-                          }
-                        </div>
-                      </mat-expansion-panel>
-                    </div>
-                  }
-                </div>
-          }
-          @if (activeTab === 'documents') {
-                <div class="tab-content">
-                  <div class="tab-header-actions" style="margin-bottom: 20px;">
-                    <button class="btn-add" (click)="generateContract()" [disabled]="generatingContract"
-                      aria-label="Générer un compromis IA">
-                      @if (generatingContract) {
-                        <span class="btn-icon" aria-hidden="true" class="spinner-small"></span>
-                      }
-                      @if (!generatingContract) {
-                        <span class="btn-icon" aria-hidden="true">✨</span>
-                      }
-                      {{ generatingContract ? 'Génération en cours...' : 'Générer le compromis (IA Atlas)' }}
-                    </button>
-                  </div>
-                  @if (contractGeneratedSuccess) {
-                    <div class="success-message slide-in-top" style="margin-bottom: 20px;">
-                      {{ contractGeneratedSuccess }}
-                      @if (contractText) {
-                        <div
-                          style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; color: var(--text-color); font-size: 0.9em; line-height: 1.5; border-left: 4px solid var(--accent-color);">
-                          {{ contractText }}
-                        </div>
-                      }
-                    </div>
-                  }
-                  @if (contractGeneratedError) {
-                    <div class="error-message slide-in-top" style="margin-bottom: 20px;">
-                      {{ contractGeneratedError }}
-                    </div>
-                  }
-                  <app-document-list [dossierId]="dossier.id"></app-document-list>
-                </div>
-          }
-          @if (activeTab === 'chronologie') {
-                <div class="tab-content">
-                  <app-activity-timeline [dossierId]="dossier.id"></app-activity-timeline>
-                </div>
-          }
-          @if (activeTab === 'historique') {
-                <div class="tab-content">
-                  <div class="audit-filters">
-                    <div class="filter-group">
-                      <label for="entity-type-filter" class="filter-label">Type d'entité :</label>
-                      <select id="entity-type-filter" class="filter-select" [(ngModel)]="auditFilterEntityType"
-                        (change)="onAuditFilterChange()">
-                        <option value="">Tous</option>
-                        <option [value]="AuditEntityType.ANNONCE">Annonce</option>
-                        <option [value]="AuditEntityType.DOSSIER">Dossier</option>
-                        <option [value]="AuditEntityType.MESSAGE">Message</option>
-                        <option [value]="AuditEntityType.PARTIE_PRENANTE">PartiePrenante</option>
-                        <option [value]="AuditEntityType.CONSENTEMENT">Consentement</option>
-                      </select>
-                    </div>
-                    <div class="filter-group">
-                      <label for="action-filter" class="filter-label">Action :</label>
-                      <select id="action-filter" class="filter-select" [(ngModel)]="auditFilterAction"
-                        (change)="onAuditFilterChange()">
-                        <option value="">Toutes</option>
-                        <option [value]="AuditAction.CREATED">Création</option>
-                        <option [value]="AuditAction.UPDATED">Modification</option>
-                        <option [value]="AuditAction.DELETED">Suppression</option>
-                      </select>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+              @for (p of dossier?.parties; track p.id) {
+                <ds-card [pad]="true" elevation="xs" [hover]="true">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <ds-badge [status]="getRoleBadgeClass(p.role) === 'role-buyer' ? 'active' : 'neutral'" size="sm">
+                      {{ getRoleLabel(p.role) }}
+                    </ds-badge>
+                    <div style="display: flex; gap: 4px;">
+                      <ds-button variant="icon" size="sm" (dsClick)="editPartie(p)"><ds-icon name="edit" [size]="16"></ds-icon></ds-button>
+                      <ds-button variant="icon" size="sm" (dsClick)="deletePartie(p)" style="color: var(--ds-error);"><ds-icon name="trash" [size]="16"></ds-icon></ds-button>
                     </div>
                   </div>
-                  @if (auditEventsLoading) {
-                    <app-loading-skeleton variant="table" [rows]="8"
-                    [columns]="6"></app-loading-skeleton>
-                  }
-                  @if (!auditEventsLoading) {
-                    <div>
-                      @if (auditEvents.length > 0) {
-                        <div class="data-table-wrapper">
-                          <table class="data-table audit-table" role="table" aria-label="Historique des événements d'audit">
-                            <thead>
-                              <tr>
-                                <th scope="col">Date et heure</th>
-                                <th scope="col">Action</th>
-                                <th scope="col">Type d'entité</th>
-                                <th scope="col">Identifiant de l'entité</th>
-                                <th scope="col">Utilisateur</th>
-                                <th scope="col">Changements</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              @for (event of auditEvents; track event) {
-                                <tr>
-                                  <td class="audit-date">{{ formatDate(event.createdAt) }}</td>
-                                  <td>
-                                    <span class="audit-action-badge">{{ getAuditActionLabel(event.action) }}</span>
-                                  </td>
-                                  <td>{{ getAuditEntityTypeLabel(event.entityType) }}</td>
-                                  <td>{{ event.entityId }}</td>
-                                  <td>{{ event.userId || '—' }}</td>
-                                  <td class="audit-changes">
-                                    @if (parseDiffChanges(event.diff).length === 0) {
-                                      <div class="no-changes">
-                                        Aucun changement
-                                      </div>
-                                    }
-                                    @if (parseDiffChanges(event.diff).length > 0) {
-                                      <div class="changes-list">
-                                        @for (change of parseDiffChanges(event.diff); track change) {
-                                          <div class="change-item">
-                                            <span class="change-field">{{ change.field }}</span>:
-                                            @if (change.oldValue !== null) {
-                                              <span class="change-old">{{
-                                              formatDiffValue(change.oldValue) }}</span>
-                                            }
-                                            @if (change.oldValue !== null) {
-                                              <span class="change-arrow">→</span>
-                                            }
-                                            <span class="change-new">{{ formatDiffValue(change.newValue) }}</span>
-                                          </div>
-                                        }
-                                      </div>
-                                    }
-                                  </td>
-                                </tr>
-                              }
-                            </tbody>
-                          </table>
-                          <mat-paginator #auditPaginator [length]="auditTotalElements" [pageSize]="auditPageSize"
-                            [pageIndex]="auditPageIndex" [pageSizeOptions]="[5, 10, 25, 50]" (page)="onAuditPageChange($event)"
-                            showFirstLastButtons>
-                          </mat-paginator>
-                        </div>
-                      }
-                      @if (auditEvents.length === 0) {
-                        <div class="empty-message">
-                          Aucun événement d'audit disponible.
-                        </div>
-                      }
-                    </div>
-                  }
-                </div>
-          }
-              <!-- Real-time Collaboration Tab -->
-              @if (collaborationEnabled) {
-          @if (activeTab === 'collaboration') {
-                  <div class="tab-content">
-                    <div class="collaboration-grid">
-                      <!-- Activity Stream -->
-                      <div class="collaboration-panel">
-                        <app-collaboration-activity-stream [dossierId]="dossier.id"></app-collaboration-activity-stream>
-                      </div>
-                      <!-- Shared Notes with Live Cursors -->
-                      <div class="collaboration-panel">
-                        <ds-card class="collab-notes-card" [pad]="false" [elevation]="'xs'">
-                          <div class="info-section-header">
-                            <h3 class="info-section-title">📝 Shared Notes</h3>
-                          </div>
-                          <div class="info-section-body">
-                            <textarea
-                              [(ngModel)]="dossier.notes"
-                              (input)="onNotesInput($event)"
-                              placeholder="Add shared notes here..."
-                              class="shared-notes-textarea"
-                              rows="10">
-                            </textarea>
-                            <app-collaboration-cursor fieldName="notes"></app-collaboration-cursor>
-                          </div>
-                        </ds-card>
-                      </div>
-                      <!-- Filter Presets -->
-                      <div class="collaboration-panel full-width">
-                        <app-collaboration-filter-share></app-collaboration-filter-share>
-                      </div>
-                    </div>
+                  <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px;">{{ p.firstName }} {{ p.lastName }}</div>
+                  <div class="ds-form-stack" style="gap: 4px; font-size: 13px; color: var(--ds-text-muted);">
+                    @if (p.phone) { <div style="display: flex; align-items: center; gap: 8px;"><ds-icon name="phone" [size]="16"></ds-icon> {{ p.phone }}</div> }
+                    @if (p.email) { <div style="display: flex; align-items: center; gap: 8px;"><ds-icon name="mail" [size]="16"></ds-icon> {{ p.email }}</div> }
                   </div>
-            }
+                </ds-card>
               }
-        </div>
-        </div>
-      </ds-entity-detail-layout>
-      <app-quick-actions [dossier]="dossier"></app-quick-actions>
+            </div>
+          </div>
+        }
+
+        @if (activeTab === 'historique') {
+          <div class="ds-form-stack">
+            <div class="historique-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap;">
+              <div style="display: flex; gap: 16px; flex: 1; min-width: 300px;">
+                <ds-select
+                  label="Filtrer par type"
+                  [options]="[
+                    { value: '', label: 'Tous les types' },
+                    { value: AuditEntityType.DOSSIER, label: 'Dossier' },
+                    { value: AuditEntityType.ANNONCE, label: 'Annonce' },
+                    { value: AuditEntityType.MESSAGE, label: 'Message' },
+                    { value: AuditEntityType.PARTIE_PRENANTE, label: 'Partie Prenante' },
+                    { value: AuditEntityType.CONSENTEMENT, label: 'Consentement' }
+                  ]"
+                  [(ngModel)]="auditFilterEntityType"
+                  (valueChange)="onAuditFilterChange()"
+                  style="flex: 1;">
+                </ds-select>
+                <ds-select
+                  label="Filtrer par action"
+                  [options]="[
+                    { value: '', label: 'Toutes les actions' },
+                    { value: AuditAction.CREATED, label: 'Création' },
+                    { value: AuditAction.UPDATED, label: 'Mise à jour' },
+                    { value: AuditAction.DELETED, label: 'Suppression' }
+                  ]"
+                  [(ngModel)]="auditFilterAction"
+                  (valueChange)="onAuditFilterChange()"
+                  style="flex: 1;">
+                </ds-select>
+              </div>
+            </div>
+
+            @if (auditEventsLoading) {
+              <div style="padding: 48px 0;">
+                <ds-skeleton variant="rect" width="100%" height="400px" [animate]="true"></ds-skeleton>
+              </div>
+            }
+
+            @if (!auditEventsLoading && auditEvents.length > 0) {
+              <ds-table
+                [columns]="dsAuditColumns"
+                [rows]="auditEvents"
+                [showPagination]="true"
+                [paginationData]="auditPaginationData"
+                (paginationChange)="onAuditPageChange($event)">
+                
+                <ng-template dsCell="createdAt" let-event>
+                  <span style="font-size: 13px; font-weight: 500;">{{ event.createdAt | date:'short' }}</span>
+                </ng-template>
+
+                <ng-template dsCell="action" let-event>
+                  <ds-badge [status]="event.action === 'CREATED' ? 'success' : event.action === 'DELETED' ? 'error' : 'info'" size="sm" [showDot]="false">
+                    {{ getAuditActionLabel(event.action) }}
+                  </ds-badge>
+                </ng-template>
+
+                <ng-template dsCell="entityType" let-event>
+                  <span style="font-size: 13px; color: var(--ds-text-muted);">{{ getAuditEntityTypeLabel(event.entityType) }}</span>
+                </ng-template>
+
+                <ng-template dsCell="diff" let-event>
+                  @if (parseDiffChanges(event.diff).length === 0) {
+                    <span style="font-size: 12px; font-style: italic; color: var(--ds-text-faint);">Aucun changement</span>
+                  }
+                  @if (parseDiffChanges(event.diff).length > 0) {
+                    <div class="changes-list" style="display: flex; flex-direction: column; gap: 4px;">
+                      @for (change of parseDiffChanges(event.diff); track change) {
+                        <div class="change-item" style="font-size: 12px; line-height: 1.4;">
+                          <span style="font-weight: 700; color: var(--ds-marine);">{{ change.field }}</span>:
+                          @if (change.oldValue !== null) {
+                            <span style="color: var(--ds-error); text-decoration: line-through; opacity: 0.6;">{{ formatDiffValue(change.oldValue) }}</span>
+                            <span style="margin: 0 4px; color: var(--ds-text-faint);">→</span>
+                          }
+                          <span style="color: var(--ds-success); font-weight: 600;">{{ formatDiffValue(change.newValue) }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </ng-template>
+              </ds-table>
+            }
+
+            @if (!auditEventsLoading && auditEvents.length === 0) {
+              <div style="padding: 64px 0;">
+                <ds-empty-state
+                  icon="clock"
+                  title="Aucun événement d'audit"
+                  description="Les actions effectuées sur ce dossier apparaîtront ici.">
+                </ds-empty-state>
+              </div>
+            }
+          </div>
+        }
+      </div>
     }
-    </div>
   </div>
+
+  <!-- Right Sidebar -->
+  <div slot="right">
+    <app-quick-actions [dossier]="dossier!"></app-quick-actions>
+  </div>
+</ds-entity-detail-layout>

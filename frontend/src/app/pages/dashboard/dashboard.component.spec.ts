@@ -7,13 +7,11 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Observable, of } from 'rxjs';
 import {
   DashboardKpiService,
-  TrendsResponse,
-} from '../../services/dashboard-kpi.service';
+  TrendsResponse} from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -35,34 +33,27 @@ describe('DashboardComponent', () => {
           annoncesActives: {
             currentValue: 10,
             previousValue: 8,
-            percentageChange: 25,
-          },
+            percentageChange: 25},
           dossiersATraiter: {
             currentValue: 5,
             previousValue: 5,
-            percentageChange: 0,
-          },
-        });
+            percentageChange: 0}});
       },
       getRecentDossiers: (_filter?: string): Observable<DossierResponse[]> => {
         getRecentDossiersCallCount++;
         return of([]);
-      },
-    };
+      }};
 
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
         NoopAnimationsModule,
-        DashboardComponent,
-      ],
+        DashboardComponent],
       providers: [
         { provide: DashboardKpiService, useValue: mockDashboardKpiService },
         { provide: MatDialog, useValue: { open: (): void => {} } },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
 
     fixture = TestBed.createComponent(DashboardComponent);
     component = fixture.componentInstance;

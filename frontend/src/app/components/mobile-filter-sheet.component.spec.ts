@@ -1,30 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import {
-  MatBottomSheetRef,
-  MAT_BOTTOM_SHEET_DATA,
-} from '@angular/material/bottom-sheet';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { MobileFilterSheetComponent } from './mobile-filter-sheet.component';
 
 describe('MobileFilterSheetComponent', () => {
   let component: MobileFilterSheetComponent;
   let fixture: ComponentFixture<MobileFilterSheetComponent>;
-  let bottomSheetRef: AngularVitestPartialMock<
-    MatBottomSheetRef<MobileFilterSheetComponent>
-  >;
+  let dialogRefSpy: { close: ReturnType<typeof vi.fn> };
 
   const mockData = {
     filters: {
       status: 'ACTIVE',
-      city: 'Paris',
-    },
+      city: 'Paris'},
     config: [
       {
         key: 'status',
@@ -32,43 +18,21 @@ describe('MobileFilterSheetComponent', () => {
         type: 'select' as const,
         options: [
           { value: 'ACTIVE', label: 'Active' },
-          { value: 'INACTIVE', label: 'Inactive' },
-        ],
-      },
+          { value: 'INACTIVE', label: 'Inactive' }]},
       {
         key: 'city',
         label: 'City',
         type: 'text' as const,
-        placeholder: 'Enter city',
-      },
-    ],
-  };
+        placeholder: 'Enter city'}]};
 
   beforeEach(async () => {
-    const bottomSheetRefSpy = {
-      dismiss: vi.fn().mockName('MatBottomSheetRef.dismiss'),
-    };
+    dialogRefSpy = { close: vi.fn().mockName('DialogRef.close') };
 
     await TestBed.configureTestingModule({
-      imports: [
-        FormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatIconModule,
-        MatButtonModule,
-        NoopAnimationsModule,
-        MobileFilterSheetComponent,
-      ],
+      imports: [MobileFilterSheetComponent],
       providers: [
-        { provide: MatBottomSheetRef, useValue: bottomSheetRefSpy },
-        { provide: MAT_BOTTOM_SHEET_DATA, useValue: mockData },
-      ],
-    }).compileComponents();
-
-    bottomSheetRef = TestBed.inject(MatBottomSheetRef) as AngularVitestPartialMock<
-      MatBottomSheetRef<MobileFilterSheetComponent>
-    >;
+        { provide: DialogRef, useValue: dialogRefSpy },
+        { provide: DIALOG_DATA, useValue: mockData }]}).compileComponents();
     fixture = TestBed.createComponent(MobileFilterSheetComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -85,19 +49,18 @@ describe('MobileFilterSheetComponent', () => {
 
   it('should call dismiss with apply action when apply is clicked', () => {
     component.apply();
-    expect(bottomSheetRef.dismiss).toHaveBeenCalledWith({
+    expect(dialogRefSpy.close).toHaveBeenCalledWith({
       action: 'apply',
-      filters: component.filters,
-    });
+      filters: component.filters});
   });
 
   it('should call dismiss with reset action when reset is clicked', () => {
     component.reset();
-    expect(bottomSheetRef.dismiss).toHaveBeenCalledWith({ action: 'reset' });
+    expect(dialogRefSpy.close).toHaveBeenCalledWith({ action: 'reset' });
   });
 
   it('should call dismiss with cancel action when close is clicked', () => {
     component.close();
-    expect(bottomSheetRef.dismiss).toHaveBeenCalledWith({ action: 'cancel' });
+    expect(dialogRefSpy.close).toHaveBeenCalledWith({ action: 'cancel' });
   });
 });

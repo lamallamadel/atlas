@@ -1,193 +1,67 @@
-<div @slideIn role="dialog" aria-labelledby="dialog-title" aria-modal="true" class="elegant-dialog">
-  <h2 mat-dialog-title id="dialog-title" class="dialog-title-elegant">
-    <mat-icon>message</mat-icon>
-    <span>Nouveau message</span>
-  </h2>
+<ds-dialog-header (close)="onCancel()">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <ds-icon name="mail" [size]="24" aria-hidden="true"></ds-icon>
+    <span>Enregistrer un message</span>
+  </div>
+</ds-dialog-header>
 
-  <mat-dialog-content class="elegant-dialog-content">
-    <form [formGroup]="messageForm" class="elegant-form message-form">
-      <div class="form-section-card">
-        <div class="section-header">
-          <mat-icon>settings</mat-icon>
-          <div>
-            <h3 class="section-title">Configuration du message</h3>
-            <p class="section-subtitle">Type et direction du message</p>
-          </div>
-        </div>
+<ds-dialog-content>
+  <form [formGroup]="messageForm" class="ds-form-stack">
+    <div class="ds-form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <ds-select
+        label="Canal"
+        [options]="channelOptions"
+        formControlName="channel"
+        prefixIcon="megaphone"
+        [required]="true">
+      </ds-select>
 
-        <div class="section-body">
-          <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': messageForm.get('channel')?.value,
-                 'field-error': messageForm.get('channel')?.invalid && messageForm.get('channel')?.touched
-               }">
-            <select
-              id="channel"
-              formControlName="channel"
-              aria-required="true"
-              [attr.aria-invalid]="messageForm.get('channel')?.hasError('required') && messageForm.get('channel')?.touched">
-              <option value="">Sélectionner un canal</option>
-              @for (option of channelOptions; track option) {
-                <option [value]="option.value">
-                  {{ option.label }}
-                </option>
-              }
-            </select>
-            <label for="channel">Canal <span class="required-indicator">*</span></label>
-            @if (messageForm.get('channel')?.touched) {
-              <div class="validation-icon">
-                @if (messageForm.get('channel')?.valid) {
-                  <mat-icon>check_circle</mat-icon>
-                }
-                @if (messageForm.get('channel')?.invalid) {
-                  <mat-icon>error</mat-icon>
-                }
-              </div>
-            }
-            @if (!messageForm.get('channel')?.touched || messageForm.get('channel')?.valid) {
-              <div class="field-helper">
-                <mat-icon>info</mat-icon>
-                <span>Choisissez le canal de communication</span>
-              </div>
-            }
-            @if (messageForm.get('channel')?.invalid && messageForm.get('channel')?.touched) {
-              <div class="error-message" role="alert">
-                <mat-icon>error</mat-icon>
-                <span>{{ getErrorMessage('channel') }}</span>
-              </div>
-            }
-          </div>
+      <ds-select
+        label="Direction"
+        [options]="directionOptions"
+        formControlName="direction"
+        prefixIcon="refresh"
+        [required]="true">
+      </ds-select>
+    </div>
 
-          <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': messageForm.get('direction')?.value,
-                 'field-error': messageForm.get('direction')?.invalid && messageForm.get('direction')?.touched
-               }">
-            <select
-              id="direction"
-              formControlName="direction"
-              aria-required="true"
-              [attr.aria-invalid]="messageForm.get('direction')?.hasError('required') && messageForm.get('direction')?.touched">
-              <option value="">Sélectionner une direction</option>
-              @for (option of directionOptions; track option) {
-                <option [value]="option.value">
-                  {{ option.label }}
-                </option>
-              }
-            </select>
-            <label for="direction">Direction <span class="required-indicator">*</span></label>
-            @if (messageForm.get('direction')?.touched) {
-              <div class="validation-icon">
-                @if (messageForm.get('direction')?.valid) {
-                  <mat-icon>check_circle</mat-icon>
-                }
-                @if (messageForm.get('direction')?.invalid) {
-                  <mat-icon>error</mat-icon>
-                }
-              </div>
-            }
-            @if (!messageForm.get('direction')?.touched || messageForm.get('direction')?.valid) {
-              <div class="field-helper">
-                <mat-icon>info</mat-icon>
-                <span>Sens du message (entrant ou sortant)</span>
-              </div>
-            }
-            @if (messageForm.get('direction')?.invalid && messageForm.get('direction')?.touched) {
-              <div class="error-message" role="alert">
-                <mat-icon>error</mat-icon>
-                <span>{{ getErrorMessage('direction') }}</span>
-              </div>
-            }
-          </div>
-        </div>
+    <app-datetime-picker
+      formControlName="timestamp"
+      [required]="true"
+      label="Date et heure du message">
+    </app-datetime-picker>
+
+    <div class="ds-field">
+      <label class="ds-field__label">Contenu du message</label>
+      <div class="ds-field__wrap">
+        <textarea
+          class="ds-field__input"
+          formControlName="content"
+          placeholder="Écrivez le contenu du message ici..."
+          rows="6"
+          style="height: auto; padding: 12px;"></textarea>
       </div>
-
-      <div class="form-section-card">
-        <div class="section-header">
-          <mat-icon>edit</mat-icon>
-          <div>
-            <h3 class="section-title">Contenu</h3>
-            <p class="section-subtitle">Rédigez votre message</p>
-          </div>
-        </div>
-
-        <div class="section-body">
-          <div class="elegant-form-field"
-               [ngClass]="{
-                 'has-value': messageForm.get('content')?.value,
-                 'field-error': messageForm.get('content')?.invalid && messageForm.get('content')?.touched
-               }">
-            <textarea
-              id="content"
-              formControlName="content"
-              placeholder=" "
-              rows="5"
-              aria-required="true"
-            [attr.aria-invalid]="messageForm.get('content')?.hasError('required') && messageForm.get('content')?.touched"></textarea>
-            <label for="content">Contenu <span class="required-indicator">*</span></label>
-            @if (messageForm.get('content')?.touched) {
-              <div class="validation-icon">
-                @if (messageForm.get('content')?.valid) {
-                  <mat-icon>check_circle</mat-icon>
-                }
-                @if (messageForm.get('content')?.invalid) {
-                  <mat-icon>error</mat-icon>
-                }
-              </div>
-            }
-            @if (!messageForm.get('content')?.touched || messageForm.get('content')?.valid) {
-              <div class="field-helper">
-                <mat-icon>info</mat-icon>
-                <span>Saisissez le contenu de votre message</span>
-              </div>
-            }
-            @if (messageForm.get('content')?.invalid && messageForm.get('content')?.touched) {
-              <div class="error-message" role="alert">
-                <mat-icon>error</mat-icon>
-                <span>{{ getErrorMessage('content') }}</span>
-              </div>
-            }
-          </div>
-
-          <div class="elegant-form-field has-value">
-            <app-datetime-picker
-              formControlName="timestamp"
-              [required]="true"
-              label="Date et heure"
-            ></app-datetime-picker>
-            <div class="field-helper">
-              <mat-icon>info</mat-icon>
-              <span>Date et heure d'envoi du message</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </form>
-  </mat-dialog-content>
-
-  <mat-dialog-actions align="end" class="elegant-dialog-actions">
-    <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la création du message">
-      <mat-icon>close</mat-icon>
-      Annuler
-    </button>
-    <button mat-raised-button
-      color="primary"
-      (click)="onSubmit()"
-      [disabled]="!messageForm.valid || isSubmitting"
-      [attr.aria-busy]="isSubmitting"
-      [attr.aria-label]="isSubmitting ? 'Création en cours' : 'Créer le message'">
-      @if (isSubmitting) {
-        <ds-skeleton variant="circle" width="20px" height="20px" aria-hidden="true"></ds-skeleton>
+      @if (getErrorMessage('content')) {
+        <span class="ds-field__error">{{ getErrorMessage('content') }}</span>
       }
-      @if (!isSubmitting) {
-        <mat-icon>send</mat-icon>
-      }
-      @if (!isSubmitting) {
-        <span>Créer</span>
-      }
-      @if (isSubmitting) {
-        <span class="sr-only" role="status" aria-live="polite">Création en cours</span>
-      }
-    </button>
-  </mat-dialog-actions>
-</div>
+    </div>
+  </form>
+</ds-dialog-content>
+
+<ds-dialog-actions align="end">
+  <ds-button variant="ghost" size="md" (dsClick)="onCancel()" [disabled]="isSubmitting">
+    Annuler
+  </ds-button>
+  <ds-button
+    variant="marine"
+    size="md"
+    (dsClick)="onSubmit()"
+    [disabled]="!messageForm.valid || isSubmitting">
+    @if (isSubmitting) {
+      <span class="spinner-small" style="margin-right: 8px; border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>
+    } @else {
+      <ds-icon name="check" [size]="20" style="margin-right: 8px;"></ds-icon>
+    }
+    <span>{{ isSubmitting ? 'En cours...' : 'Enregistrer' }}</span>
+  </ds-button>
+</ds-dialog-actions>

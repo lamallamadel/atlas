@@ -1,15 +1,22 @@
-import { Component, Inject, OnInit } from '@angular/core';
-
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { CommonModule } from '@angular/common';
 import { ESignatureApiService } from '../services/esignature-api.service';
 import { SignatureRequestCreate, ContractTemplate } from '../models/esignature.models';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsInputComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsCardComponent,
+  DsToastService,
+  DsSkeletonComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
 export interface SignatureRequestDialogData {
   dossierId: number;
@@ -21,172 +28,137 @@ export interface SignatureRequestDialogData {
   selector: 'app-signature-request-dialog',
   standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatIconModule,
-    MatSnackBarModule
-],
+    DsButtonComponent,
+    DsIconComponent,
+    DsInputComponent,
+    DsSelectComponent,
+    DsCardComponent,
+    DsSkeletonComponent,
+    DsDialogHeaderComponent,
+    DsDialogContentComponent,
+    DsDialogActionsComponent
+  ],
   template: `
-    <h2 mat-dialog-title>Request Electronic Signature</h2>
-    <mat-dialog-content>
-      <form [formGroup]="requestForm" class="signature-request-form">
-        <mat-form-field appearance="outline">
-          <mat-label>Contract Template</mat-label>
-          <mat-select formControlName="templateId">
-            @for (template of templates; track template) {
-              <mat-option [value]="template.id">
-                {{ template.templateName }} ({{ template.templateType }})
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+    <ds-dialog-header (close)="onCancel()">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <ds-icon name="edit" [size]="24" style="color: var(--ds-marine);"></ds-icon>
+        <span>Demande de signature électronique</span>
+      </div>
+    </ds-dialog-header>
+
+    <ds-dialog-content>
+      <form [formGroup]="requestForm" class="signature-request-form ds-form-stack">
+        <ds-select
+          label="Modèle de contrat"
+          [options]="templateOptions"
+          formControlName="templateId">
+        </ds-select>
     
-        <mat-form-field appearance="outline">
-          <mat-label>Email Subject</mat-label>
-          <input matInput formControlName="subject" required>
-          @if (requestForm.get('subject')?.hasError('required')) {
-            <mat-error>
-              Subject is required
-            </mat-error>
-          }
-        </mat-form-field>
+        <ds-input
+          label="Sujet de l'email"
+          formControlName="subject"
+          placeholder="ex. Signature requise pour votre contrat..."
+          required="true"
+          [error]="getFieldError('subject')">
+        </ds-input>
     
-        <mat-form-field appearance="outline">
-          <mat-label>Email Message</mat-label>
-          <textarea matInput formControlName="emailMessage" rows="4"></textarea>
-        </mat-form-field>
+        <div class="ds-field">
+          <label class="ds-field__label">Message de l'email</label>
+          <div class="ds-field__wrap">
+            <textarea 
+              class="ds-field__input" 
+              formControlName="emailMessage" 
+              rows="4"
+              style="height: auto; padding: 12px;"></textarea>
+          </div>
+        </div>
     
-        <div class="signers-section">
-          <div class="section-header">
-            <h3>Signers</h3>
-            <button mat-mini-fab color="primary" type="button" (click)="addSigner()">
-              <mat-icon>add</mat-icon>
-            </button>
+        <div class="signers-section ds-form-stack" style="margin: 24px 0;">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: var(--ds-marine);">Signataires</h3>
+            <ds-button variant="ghost" size="sm" type="button" (dsClick)="addSigner()">
+              <ds-icon name="plus" [size]="16" style="margin-right: 8px;"></ds-icon>
+              Ajouter
+            </ds-button>
           </div>
     
-          <div formArrayName="signers" class="signers-list">
+          <div formArrayName="signers" class="signers-list ds-form-stack" style="gap: 16px;">
             @for (signer of signers.controls; track signer; let i = $index) {
-              <div [formGroupName]="i" class="signer-item">
-                <mat-form-field appearance="outline">
-                  <mat-label>Name</mat-label>
-                  <input matInput formControlName="name" required>
-                </mat-form-field>
-                <mat-form-field appearance="outline">
-                  <mat-label>Email</mat-label>
-                  <input matInput type="email" formControlName="email" required>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="routing-order">
-                  <mat-label>Order</mat-label>
-                  <input matInput type="number" formControlName="routingOrder" min="1">
-                </mat-form-field>
-                @if (signers.length > 1) {
-                  <button mat-icon-button color="warn" type="button" (click)="removeSigner(i)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                }
-              </div>
+              <ds-card [formGroupName]="i" class="signer-item" [pad]="true" elevation="xs" style="background: var(--ds-surface-2);">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 80px auto; gap: 16px; align-items: flex-end;">
+                  <ds-input label="Nom" formControlName="name" required="true"></ds-input>
+                  <ds-input label="Email" type="email" formControlName="email" required="true"></ds-input>
+                  <ds-input label="Ordre" type="number" formControlName="routingOrder" min="1"></ds-input>
+                  
+                  @if (signers.length > 1) {
+                    <ds-button variant="icon" size="md" (dsClick)="removeSigner(i)" style="color: var(--ds-error);">
+                      <ds-icon name="trash" [size]="20"></ds-icon>
+                    </ds-button>
+                  }
+                </div>
+              </ds-card>
             }
           </div>
         </div>
     
-        <mat-form-field appearance="outline">
-          <mat-label>Expiration (days)</mat-label>
-          <input matInput type="number" formControlName="expirationDays" min="1" max="365">
-          <mat-hint>Days until signature request expires (default: 30)</mat-hint>
-        </mat-form-field>
+        <ds-input
+          label="Expiration (jours)"
+          type="number"
+          formControlName="expirationDays"
+          min="1"
+          max="365"
+          hint="Délai avant expiration (par défaut : 30 jours)">
+        </ds-input>
       </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-raised-button color="primary" (click)="onCreate()" [disabled]="!requestForm.valid || creating">
-        {{ creating ? 'Creating...' : 'Create & Send' }}
-      </button>
-    </mat-dialog-actions>
+    </ds-dialog-content>
+
+    <ds-dialog-actions align="end">
+      <ds-button variant="ghost" size="md" (dsClick)="onCancel()">Annuler</ds-button>
+      <ds-button 
+        variant="marine" 
+        size="md" 
+        (dsClick)="onCreate()" 
+        [disabled]="!requestForm.valid || creating">
+        @if (creating) {
+          <span class="spinner-small" style="margin-right: 8px; border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></span>
+        } @else {
+          <ds-icon name="send" [size]="20" style="margin-right: 8px;"></ds-icon>
+        }
+        <span>{{ creating ? 'Création...' : 'Créer & Envoyer' }}</span>
+      </ds-button>
+    </ds-dialog-actions>
     `,
   styles: [`
     .signature-request-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
       min-width: 600px;
-      padding: 16px 0;
     }
-
-    .signers-section {
-      margin: 16px 0;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .section-header h3 {
-      margin: 0;
-    }
-
-    .signers-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .signer-item {
-      display: grid;
-      grid-template-columns: 1fr 1fr 100px auto;
-      gap: 12px;
-      align-items: start;
-      padding: 16px;
-      background: #f5f5f5;
-      border-radius: 8px;
-    }
-
-    .routing-order {
-      width: 80px;
-    }
-
-    mat-form-field {
-      width: 100%;
-    }
-
-    mat-dialog-content {
-      overflow-y: auto;
-      max-height: 70vh;
+    @media (max-width: 768px) {
+      .signature-request-form {
+        min-width: 100%;
+      }
     }
   `]
 })
 export class SignatureRequestDialogComponent implements OnInit {
-  requestForm: FormGroup;
+  private fb = inject(FormBuilder);
+  private eSignatureService = inject(ESignatureApiService);
+  private toastService = inject(DsToastService);
+  private dialogRef = inject(DialogRef<boolean>);
+  
+  public data: SignatureRequestDialogData = inject(DIALOG_DATA);
+
+  requestForm!: FormGroup;
   templates: ContractTemplate[] = [];
+  templateOptions: DsSelectOption[] = [];
   creating = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<SignatureRequestDialogComponent>,
-    private eSignatureService: ESignatureApiService,
-    private snackBar: MatSnackBar,
-    @Inject(MAT_DIALOG_DATA) public data: SignatureRequestDialogData
-  ) {
-    this.requestForm = this.fb.group({
-      templateId: [null],
-      subject: ['Signature Required for Real Estate Contract', Validators.required],
-      emailMessage: ['Please review and sign the attached contract.'],
-      signers: this.fb.array([]),
-      expirationDays: [30, [Validators.min(1), Validators.max(365)]]
-    });
-  }
-
   ngOnInit(): void {
+    this.initForm();
     this.loadTemplates();
-    this.addSigner();
-
+    
     if (this.data.leadName && this.data.leadEmail) {
       this.signers.at(0).patchValue({
         name: this.data.leadName,
@@ -194,6 +166,17 @@ export class SignatureRequestDialogComponent implements OnInit {
         routingOrder: 1
       });
     }
+  }
+
+  private initForm(): void {
+    this.requestForm = this.fb.group({
+      templateId: [null],
+      subject: ['Signature requise pour votre contrat immobilier', Validators.required],
+      emailMessage: ['Bonjour, veuillez consulter et signer électroniquement le contrat ci-joint.'],
+      signers: this.fb.array([]),
+      expirationDays: [30, [Validators.min(1), Validators.max(365)]]
+    });
+    this.addSigner();
   }
 
   get signers(): FormArray {
@@ -204,12 +187,16 @@ export class SignatureRequestDialogComponent implements OnInit {
     this.eSignatureService.getActiveTemplates().subscribe({
       next: (templates) => {
         this.templates = templates;
+        this.templateOptions = templates.map(t => ({
+          value: t.id,
+          label: `${t.templateName} (${t.templateType})`
+        }));
         if (templates.length > 0) {
           this.requestForm.patchValue({ templateId: templates[0].id });
         }
       },
       error: (error) => {
-        this.snackBar.open('Failed to load templates', 'Close', { duration: 3000 });
+        this.toastService.error('Échec du chargement des modèles');
         console.error('Error loading templates:', error);
       }
     });
@@ -243,18 +230,18 @@ export class SignatureRequestDialogComponent implements OnInit {
         next: (signatureRequest) => {
           this.eSignatureService.sendSignatureRequest(signatureRequest.id!).subscribe({
             next: () => {
-              this.snackBar.open('Signature request sent successfully', 'Close', { duration: 3000 });
+              this.toastService.success('Demande de signature envoyée avec succès');
               this.dialogRef.close(true);
             },
             error: (error) => {
-              this.snackBar.open('Failed to send signature request', 'Close', { duration: 3000 });
+              this.toastService.error('Échec de l\'envoi de la demande');
               console.error('Error sending signature request:', error);
               this.creating = false;
             }
           });
         },
         error: (error) => {
-          this.snackBar.open('Failed to create signature request', 'Close', { duration: 3000 });
+          this.toastService.error('Échec de la création de la demande');
           console.error('Error creating signature request:', error);
           this.creating = false;
         }
@@ -264,5 +251,11 @@ export class SignatureRequestDialogComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close(false);
+  }
+
+  getFieldError(fieldName: string): string {
+    const field = this.requestForm.get(fieldName);
+    if (field?.hasError('required')) return 'Ce champ est requis';
+    return '';
   }
 }

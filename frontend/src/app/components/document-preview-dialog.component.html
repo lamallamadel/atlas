@@ -1,53 +1,56 @@
-<div class="preview-dialog-container">
-  <div class="preview-header">
-    <div class="header-info">
-      <h2 class="document-title">{{ data.document.fileName }}</h2>
-      <span class="document-size">{{ formatFileSize(data.document.fileSize) }}</span>
-    </div>
-    <div class="header-actions">
-      <button type="button" mat-icon-button title="Télécharger" (click)="download()">
-        <mat-icon>download</mat-icon>
-      </button>
-      <button type="button" mat-icon-button title="Fermer" (click)="close()">
-        <mat-icon>close</mat-icon>
-      </button>
+<ds-dialog-header (close)="close()">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <ds-icon [name]="isImage ? 'image' : 'folder'" [size]="24" aria-hidden="true"></ds-icon>
+    <div style="display: flex; flex-direction: column;">
+      <span style="line-height: 1.2;">{{ data.document.fileName }}</span>
+      <span style="font-size: 12px; color: var(--ds-text-faint); font-weight: normal;">{{ formatFileSize(data.document.fileSize) }} • {{ data.document.contentType }}</span>
     </div>
   </div>
+</ds-dialog-header>
 
-  <div class="preview-content">
+<ds-dialog-content>
+  <div class="preview-container" style="min-height: 400px; display: flex; align-items: center; justify-content: center; background: var(--ds-bg); border-radius: var(--ds-radius-md); overflow: hidden; position: relative;">
     @if (loading) {
-      <div class="loading-container">
-        <ds-skeleton variant="circle" width="50px" height="50px"></ds-skeleton>
-        <p class="loading-text">Chargement de l'aperçu...</p>
+      <div style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;">
+        <ds-skeleton variant="rect" width="100%" height="100%" [animate]="true"></ds-skeleton>
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+          <span class="spinner-medium" style="margin-bottom: 12px;"></span>
+          <p style="font-size: 14px; color: var(--ds-text-muted);">Chargement de l'aperçu...</p>
+        </div>
       </div>
     }
 
-    @if (error && !loading) {
-      <div class="error-container">
-        <mat-icon class="error-icon">error_outline</mat-icon>
-        <p class="error-text">{{ error }}</p>
-        <button mat-raised-button color="primary" (click)="loadPreview()">
-          Réessayer
-        </button>
+    @if (error) {
+      <div style="text-align: center; padding: 48px;">
+        <ds-icon name="info" [size]="24" style="color: var(--ds-error); opacity: 0.3; margin-bottom: 16px;"></ds-icon>
+        <p style="color: var(--ds-error); font-weight: 600;">{{ error }}</p>
+        <ds-button variant="ghost" size="sm" (dsClick)="loadPreview()" style="margin-top: 16px;">Réessayer</ds-button>
       </div>
     }
 
     @if (!loading && !error && previewUrl) {
-      <div class="preview-wrapper">
-        @if (isImage) {
-          <img
-            [src]="previewUrl"
-            [alt]="data.document.fileName"
-            class="preview-image">
-        }
-        @if (isPdf) {
-          <iframe
-            [src]="previewUrl"
-            class="preview-iframe"
-            frameborder="0">
-          </iframe>
-        }
-      </div>
+      @if (isImage) {
+        <img [src]="previewUrl" [alt]="data.document.fileName" style="max-width: 100%; max-height: 70vh; object-fit: contain; box-shadow: var(--ds-shadow-lg);">
+      } @else if (isPdf) {
+        <iframe [src]="previewUrl" style="width: 100%; height: 70vh; border: none;"></iframe>
+      } @else {
+        <div style="text-align: center; padding: 48px;">
+          <ds-icon [name]="'folder'" [size]="24" style="opacity: 0.2; margin-bottom: 16px;"></ds-icon>
+          <p>Aperçu non disponible pour ce type de fichier.</p>
+          <ds-button variant="marine" size="md" (dsClick)="download()" style="margin-top: 16px;">
+            <ds-icon name="download" [size]="20" style="margin-right: 8px;"></ds-icon>
+            Télécharger le fichier
+          </ds-button>
+        </div>
+      }
     }
   </div>
-</div>
+</ds-dialog-content>
+
+<ds-dialog-actions align="end">
+  <ds-button variant="ghost" size="md" (dsClick)="close()">Fermer</ds-button>
+  <ds-button variant="marine" size="md" (dsClick)="download()">
+    <ds-icon name="download" [size]="20" style="margin-right: 8px;"></ds-icon>
+    Télécharger
+  </ds-button>
+</ds-dialog-actions>

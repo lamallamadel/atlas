@@ -2,9 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { KeyboardShortcutsComponent } from './keyboard-shortcuts.component';
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { Router } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 
 describe('KeyboardShortcutsComponent', () => {
@@ -14,22 +12,16 @@ describe('KeyboardShortcutsComponent', () => {
 
   beforeEach(async () => {
     const routerMock = {
-      navigate: vi.fn().mockName('Router.navigate'),
-    };
+      navigate: vi.fn().mockName('Router.navigate')};
 
     await TestBed.configureTestingModule({
       imports: [
         CommonModule,
-        MatIconModule,
         MatCheckboxModule,
-        MatButtonModule,
-        KeyboardShortcutsComponent,
-      ],
+        KeyboardShortcutsComponent],
       providers: [
         KeyboardShortcutService,
-        { provide: Router, useValue: routerMock },
-      ],
-    }).compileComponents();
+        { provide: Router, useValue: routerMock }]}).compileComponents();
 
     fixture = TestBed.createComponent(KeyboardShortcutsComponent);
     component = fixture.componentInstance;

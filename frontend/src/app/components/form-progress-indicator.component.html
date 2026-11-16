@@ -1,44 +1,58 @@
-<div class="elegant-stepper-wrapper">
-  <!-- Percentage Progress Bar (Optional) -->
+<div class="elegant-stepper-wrapper ds-form-stack" style="gap: 24px;">
+  <!-- Percentage Progress Bar -->
   @if (showPercentage()) {
     <div class="progress-bar-wrapper">
-      <div class="progress-bar-container">
-        <div class="progress-bar-fill" [style.width.%]="progressPercentage"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ds-text-muted); letter-spacing: 0.5px;">Progression globale</span>
+        <span style="font-size: 13px; font-weight: 700; color: var(--ds-marine);">{{ progressPercentage }}%</span>
       </div>
-      <div class="progress-percentage">{{ progressPercentage }}% complété</div>
+      <ds-progress-bar
+        mode="determinate"
+        [value]="progressPercentage"
+        variant="primary">
+      </ds-progress-bar>
     </div>
   }
 
-  <!-- Horizontal Stepper with Connecting Lines -->
-  <div class="elegant-stepper">
-    <div class="stepper-line">
-      <div class="stepper-line-progress" [style.width.%]="getLineProgress()"></div>
-    </div>
+  <!-- Horizontal Stepper -->
+  <div class="elegant-stepper" style="position: relative; display: flex; justify-content: space-between; padding-top: 10px;">
+    <!-- Background line -->
+    <div class="stepper-line-bg" style="position: absolute; top: 30px; left: 40px; right: 40px; height: 2px; background: var(--ds-divider); z-index: 1;"></div>
+    <!-- Progress line -->
+    <div class="stepper-line-progress" [style.width.%]="getLineProgress()" style="position: absolute; top: 30px; left: 40px; width: 0; max-width: calc(100% - 80px); height: 2px; background: var(--ds-primary); z-index: 2; transition: width 0.3s ease;"></div>
 
-    @for (step of steps(); track step; let i = $index) {
+    @for (step of steps(); track step.label; let i = $index) {
       <div
         class="stepper-step"
-         [ngClass]="{
-           'step-active': i === currentStep(),
-           'step-completed': isStepCompleted(i),
-           'step-error': step.error,
-           'step-pending': !isStepCompleted(i) && i !== currentStep()
-         }">
-        <div class="step-circle">
+        style="position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 80px;"
+        [class.step-active]="i === currentStep()"
+        [class.step-completed]="isStepCompleted(i)"
+        [class.step-error]="step.error">
+        
+        <div class="step-circle" 
+          [style.background]="i === currentStep() ? 'var(--ds-marine)' : isStepCompleted(i) ? 'var(--ds-primary)' : 'var(--ds-surface)'"
+          [style.color]="(i === currentStep() || isStepCompleted(i)) ? 'white' : 'var(--ds-text-muted)'"
+          [style.border-color]="i === currentStep() ? 'var(--ds-marine)' : isStepCompleted(i) ? 'var(--ds-primary)' : 'var(--ds-border)'"
+          style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+          
           @if (isStepCompleted(i) && !step.error) {
-            <mat-icon>check</mat-icon>
-          }
-          @if (step.error) {
-            <mat-icon>error</mat-icon>
-          }
-          @if (!isStepCompleted(i) && !step.error) {
-            <span>{{ i + 1 }}</span>
+            <ds-icon name="check" [size]="20"></ds-icon>
+          } @else if (step.error) {
+            <ds-icon name="info" [size]="20" style="color: var(--ds-error);"></ds-icon>
+          } @else {
+            <span style="font-size: 14px; font-weight: 700;">{{ i + 1 }}</span>
           }
         </div>
-        <div class="step-label">{{ step.label }}</div>
-        @if (step.optional) {
-          <div class="step-description">(optionnel)</div>
-        }
+        
+        <div class="step-label-container" style="text-align: center;">
+          <div class="step-label" 
+            [style.color]="i === currentStep() ? 'var(--ds-marine)' : 'var(--ds-text-muted)'"
+            [style.font-weight]="i === currentStep() ? '700' : '500'"
+            style="font-size: 12px; white-space: nowrap;">{{ step.label }}</div>
+          @if (step.optional) {
+            <div class="step-optional" style="font-size: 10px; color: var(--ds-text-faint); font-style: italic;">(optionnel)</div>
+          }
+        </div>
       </div>
     }
   </div>

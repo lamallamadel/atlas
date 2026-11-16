@@ -41,48 +41,45 @@
               <input id="d-tel" class="at-form-input" [(ngModel)]="form.tel" name="tel" placeholder="+212 6xx xxx xxx" required/>
             </div>
             <div class="at-form-group">
-              <label class="at-form-label" for="d-ville">Ville</label>
-              <select id="d-ville" class="at-form-select" [(ngModel)]="form.ville" name="ville">
-                <option value="">Sélectionner…</option>
-                @for (v of villes; track v) {
-                  <option [value]="v">{{v}}</option>
-                }
-              </select>
+              <ds-select
+                label="Ville"
+                [options]="villes"
+                [(ngModel)]="form.ville"
+                name="ville"
+                placeholder="Sélectionner…">
+              </ds-select>
             </div>
           </div>
           <div style="height:1px;background:var(--ds-divider);margin-block:var(--ds-space-6);"></div>
           <h2 class="demo-form-title">Votre activité</h2>
           <div class="at-form-stack">
             <div class="at-form-group">
-              <label class="at-form-label" for="d-actor">Type d'acteur <span class="at-req">*</span></label>
-              <select id="d-actor" class="at-form-select" [(ngModel)]="form.actorType" name="actorType" required>
-                <option value="">Sélectionner…</option>
-                <option value="agence">Agence immobilière</option>
-                <option value="promoteur">Promoteur immobilier</option>
-                <option value="agent">Agent indépendant</option>
-                <option value="reseau">Réseau d'agences</option>
-                <option value="autre">Autre</option>
-              </select>
+              <ds-select
+                label="Type d'acteur"
+                [options]="actorTypes"
+                [(ngModel)]="form.actorType"
+                name="actorType"
+                placeholder="Sélectionner…"
+                required>
+              </ds-select>
             </div>
             <div class="at-form-grid-2">
               <div class="at-form-group">
-                <label class="at-form-label" for="d-team">Taille d'équipe</label>
-                <select id="d-team" class="at-form-select" [(ngModel)]="form.teamSize" name="teamSize">
-                  <option value="">Sélectionner…</option>
-                  <option>1–3 personnes</option>
-                  <option>4–10 personnes</option>
-                  <option>11–30 personnes</option>
-                  <option>30+ personnes</option>
-                </select>
+                <ds-select
+                  label="Taille d'équipe"
+                  [options]="teamSizes"
+                  [(ngModel)]="form.teamSize"
+                  name="teamSize"
+                  placeholder="Sélectionner…">
+                </ds-select>
               </div>
               <div class="at-form-group">
-                <label class="at-form-label" for="d-plan">Plan souhaité</label>
-                <select id="d-plan" class="at-form-select" [(ngModel)]="form.desiredPlan" name="desiredPlan">
-                  <option value="">Je ne sais pas encore</option>
-                  <option>Starter</option>
-                  <option>Pro</option>
-                  <option>Enterprise</option>
-                </select>
+                <ds-select
+                  label="Plan souhaité"
+                  [options]="desiredPlans"
+                  [(ngModel)]="form.desiredPlan"
+                  name="desiredPlan">
+                </ds-select>
               </div>
             </div>
           </div>

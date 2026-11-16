@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
-import { MatIcon } from '@angular/material/icon';
-import { MatDivider } from '@angular/material/list';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { CommonModule } from '@angular/common';
+import { DsIconComponent } from '../design-system';
 
 export interface MobileAction {
   icon: string;
@@ -21,6 +21,7 @@ export interface MobileActionSheetData {
 
 @Component({
     selector: 'app-mobile-action-sheet',
+    standalone: true,
     template: `
     <div class="mobile-action-sheet">
       @if (data.title || data.subtitle) {
@@ -46,11 +47,11 @@ export interface MobileActionSheetData {
             [disabled]="action.disabled"
             (click)="onActionClick(action)"
             [attr.aria-label]="action.label">
-            <mat-icon class="action-icon" aria-hidden="true">{{ action.icon }}</mat-icon>
+            <ds-icon class="action-icon" [name]="action.icon" [size]="24" aria-hidden="true"></ds-icon>
             <span class="action-label">{{ action.label }}</span>
           </button>
           @if (action.divider && !last) {
-            <mat-divider></mat-divider>
+            <div class="action-sheet-divider"></div>
           }
         }
       </div>
@@ -70,7 +71,6 @@ export interface MobileActionSheetData {
       display: flex;
       flex-direction: column;
       background: var(--ds-surface);
-      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
       max-height: 80vh;
       overflow: hidden;
     }
@@ -79,8 +79,8 @@ export interface MobileActionSheetData {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: var(--spacing-4) var(--spacing-6) var(--spacing-2);
-      border-bottom: var(--border-width-1) solid var(--ds-divider);
+      padding: var(--ds-space-4) var(--ds-space-6) var(--ds-space-2);
+      border-bottom: 1px solid var(--ds-divider);
       position: relative;
     }
 
@@ -88,21 +88,21 @@ export interface MobileActionSheetData {
       width: 40px;
       height: 4px;
       background: var(--ds-border);
-      border-radius: var(--radius-full);
-      margin-bottom: var(--spacing-3);
+      border-radius: var(--ds-radius-pill);
+      margin-bottom: var(--ds-space-3);
     }
 
     .action-sheet-title {
-      margin: 0 0 var(--spacing-1) 0;
-      font-size: var(--font-size-lg);
-      font-weight: var(--font-weight-semibold);
+      margin: 0 0 var(--ds-space-1) 0;
+      font-size: var(--ds-text-lg);
+      font-weight: 600;
       color: var(--ds-text);
       text-align: center;
     }
 
     .action-sheet-subtitle {
       margin: 0;
-      font-size: var(--font-size-sm);
+      font-size: var(--ds-text-sm);
       color: var(--ds-text-muted);
       text-align: center;
     }
@@ -110,24 +110,24 @@ export interface MobileActionSheetData {
     .action-sheet-content {
       flex: 1;
       overflow-y: auto;
-      padding: var(--spacing-2) 0;
+      padding: var(--ds-space-2) 0;
       -webkit-overflow-scrolling: touch;
     }
 
     .action-sheet-item {
       display: flex;
       align-items: center;
-      gap: var(--spacing-4);
+      gap: var(--ds-space-4);
       width: 100%;
-      padding: var(--spacing-4) var(--spacing-6);
+      padding: var(--ds-space-4) var(--ds-space-6);
       border: none;
       background: var(--ds-surface);
       color: var(--ds-text);
-      font-size: var(--font-size-base);
-      font-weight: var(--font-weight-medium);
+      font-size: var(--ds-text-base);
+      font-weight: 500;
       text-align: left;
       cursor: pointer;
-      transition: background-color var(--duration-fast) var(--ease-out);
+      transition: background-color 150ms ease;
       min-height: 56px;
     }
 
@@ -145,9 +145,6 @@ export interface MobileActionSheetData {
     }
 
     .action-icon {
-      width: 24px;
-      height: 24px;
-      font-size: 24px;
       flex-shrink: 0;
     }
 
@@ -156,85 +153,55 @@ export interface MobileActionSheetData {
       line-height: 1.5;
     }
 
-    .action-primary {
-      color: var(--ds-marine);
-    }
+    .action-primary { color: var(--ds-marine); }
+    .action-accent { color: var(--ds-primary); }
+    .action-warn { color: var(--ds-error); }
+    .action-success { color: var(--ds-success); }
 
-    .action-primary .action-icon {
-      color: var(--ds-marine);
-    }
-
-    .action-accent {
-      color: var(--ds-primary-hover);
-    }
-
-    .action-accent .action-icon {
-      color: var(--ds-primary-hover);
-    }
-
-    .action-warn {
-      color: var(--ds-error);
-    }
-
-    .action-warn .action-icon {
-      color: var(--ds-error);
-    }
-
-    .action-success {
-      color: var(--ds-success);
-    }
-
-    .action-success .action-icon {
-      color: var(--ds-success);
+    .action-sheet-divider {
+      height: 1px;
+      background: var(--ds-divider);
+      margin: 0 var(--ds-space-6);
     }
 
     .action-sheet-footer {
-      padding: var(--spacing-3) var(--spacing-4);
-      border-top: var(--border-width-1) solid var(--ds-divider);
+      padding: var(--ds-space-3) var(--ds-space-4);
+      border-top: 1px solid var(--ds-divider);
       background: var(--ds-surface-2);
     }
 
     .action-sheet-cancel {
       width: 100%;
-      padding: var(--spacing-4);
+      padding: var(--ds-space-4);
       border: none;
       background: var(--ds-surface);
       color: var(--ds-text-muted);
-      font-size: var(--font-size-base);
-      font-weight: var(--font-weight-semibold);
-      border-radius: var(--radius-lg);
+      font-size: var(--ds-text-base);
+      font-weight: 600;
+      border-radius: var(--ds-radius-lg);
       cursor: pointer;
-      transition: background-color var(--duration-fast) var(--ease-out);
+      transition: background-color 150ms ease;
       min-height: 48px;
     }
 
-    .action-sheet-cancel:hover {
-      background: var(--ds-bg);
-    }
-
-    .action-sheet-cancel:active {
-      background: var(--ds-divider);
-    }
-
-    ::ng-deep .mat-divider {
-      margin: 0 var(--spacing-6);
-    }
+    .action-sheet-cancel:hover { background: var(--ds-bg); }
+    .action-sheet-cancel:active { background: var(--ds-divider); }
   `],
-    imports: [MatIcon, MatDivider]
+    imports: [CommonModule, DsIconComponent]
 })
 export class MobileActionSheetComponent {
   constructor(
-    @Inject(MAT_BOTTOM_SHEET_DATA) public data: MobileActionSheetData,
-    private bottomSheetRef: MatBottomSheetRef<MobileActionSheetComponent>
+    @Inject(DIALOG_DATA) public data: MobileActionSheetData,
+    private dialogRef: DialogRef<string | null>
   ) {}
 
   onActionClick(action: MobileAction): void {
     if (!action.disabled) {
-      this.bottomSheetRef.dismiss(action.action);
+      this.dialogRef.close(action.action);
     }
   }
 
   onCancel(): void {
-    this.bottomSheetRef.dismiss(null);
+    this.dialogRef.close(null);
   }
 }

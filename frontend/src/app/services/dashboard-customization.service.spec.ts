@@ -1,18 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+  provideHttpClientTesting} from '@angular/common/http/testing';
 import {
   DashboardCustomizationService,
   DashboardLayout,
   UserPreferences,
-  WidgetConfig,
-} from './dashboard-customization.service';
+  WidgetConfig} from './dashboard-customization.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('DashboardCustomizationService', () => {
   let service: DashboardCustomizationService;
@@ -24,9 +21,7 @@ describe('DashboardCustomizationService', () => {
       providers: [
         DashboardCustomizationService,
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
+        provideHttpClientTesting()]});
     service = TestBed.inject(DashboardCustomizationService);
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -43,8 +38,7 @@ describe('DashboardCustomizationService', () => {
     const mockPreferences: UserPreferences = {
       userId: 'user-123',
       dashboardLayout: { widgets: [] },
-      theme: 'dark',
-    };
+      theme: 'dark'};
 
     service.getUserPreferences('user-123').subscribe((prefs) => {
       expect(prefs).toEqual(mockPreferences);
@@ -57,8 +51,7 @@ describe('DashboardCustomizationService', () => {
 
   it('should update dashboard layout', () => {
     const layout: DashboardLayout = {
-      widgets: [{ id: '1', type: 'kpi', x: 0, y: 0, cols: 4, rows: 3 }],
-    };
+      widgets: [{ id: '1', type: 'kpi', x: 0, y: 0, cols: 4, rows: 3 }]};
 
     service.updateDashboardLayout('user-123', layout).subscribe();
 
@@ -87,8 +80,7 @@ describe('DashboardCustomizationService', () => {
       x: 0,
       y: 0,
       cols: 4,
-      rows: 3,
-    };
+      rows: 3};
 
     service.addWidget(widget);
 
@@ -106,8 +98,7 @@ describe('DashboardCustomizationService', () => {
       x: 0,
       y: 0,
       cols: 4,
-      rows: 3,
-    };
+      rows: 3};
     service.addWidget(widget);
 
     // addWidget generates a new ID, so retrieve it

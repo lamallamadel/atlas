@@ -14,12 +14,9 @@ import {
   LeadSourceData,
   ConversionFunnel
 } from '../services/reporting-api.service';
-import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
 import { FormsModule } from '@angular/forms';
 import { LoadingSkeletonComponent } from './loading-skeleton.component';
-import { DsCardComponent, type DsColumn } from '../design-system';
+import { DsCardComponent, PageHeaderComponent, type DsColumn } from '../design-system';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 import { DsButtonComponent } from '../design-system/primitives/ds-button/ds-button.component';
 import { DsIconComponent } from '../design-system/icons/ds-icon.component';
@@ -31,17 +28,11 @@ import { NgChartsModule } from 'ng2-charts';
     templateUrl: './reports-dashboard.component.html',
     styleUrls: ['./reports-dashboard.component.css'],
     imports: [
-      MatFormField,
-      MatLabel,
-      MatInput,
-      MatDatepickerInput,
       FormsModule,
-      MatDatepickerToggle,
-      MatSuffix,
-      MatDatepicker,
       DsSkeletonComponent,
       LoadingSkeletonComponent,
       DsCardComponent,
+      PageHeaderComponent,
       DsButtonComponent,
       DsIconComponent,
       DsTableComponent,
@@ -78,8 +69,6 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
   error: string | null = null;
   exportingPDF = false;
   exportingCSV = false;
-  chartjsLoaded = false;
-  chartjsLoading = false;
 
   dateFrom = '';
   dateTo = '';
@@ -88,18 +77,16 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
   leadSourceColumns: DsColumn<Record<string, unknown>>[] = [];
   funnelColumns: DsColumn<Record<string, unknown>>[] = [];
 
+  agentDetailRows: Record<string, unknown>[] = [];
+  leadSourceRows: Record<string, unknown>[] = [];
+  funnelRows: Record<string, unknown>[] = [];
+
   readonly trackByAgentDetail = (_i: number, row: Record<string, unknown>) =>
     String(row['agentName'] ?? _i);
   readonly trackByLeadSourceRow = (_i: number, row: Record<string, unknown>) =>
     String(row['source'] ?? _i);
   readonly trackByFunnelRow = (_i: number, row: Record<string, unknown>) =>
     String(row['stage'] ?? _i);
-
-  // Chart instances
-  private conversionFunnelChart: any = null;
-  private agentPerformanceChart: any = null;
-  private revenueForecastChart: any = null;
-  private leadSourceChart: any = null;
 
   conversionFunnelChartData: any = {
     labels: [],
@@ -318,18 +305,6 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
     this.loadReports();
   }
 
-  get agentDetailRows(): Record<string, unknown>[] {
-    return (this.analyticsData?.agentPerformance ?? []) as unknown as Record<string, unknown>[];
-  }
-
-  get leadSourceRows(): Record<string, unknown>[] {
-    return (this.analyticsData?.leadSources ?? []) as unknown as Record<string, unknown>[];
-  }
-
-  get funnelRows(): Record<string, unknown>[] {
-    return (this.analyticsData?.conversionFunnel ?? []) as unknown as Record<string, unknown>[];
-  }
-
   onLeadSourceRowClick(row: Record<string, unknown>): void {
     this.drillDownToSource(String(row['source'] ?? ''));
   }
@@ -436,89 +411,11 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
   }
 
   async ngAfterViewInit(): Promise<void> {
-    await this.loadChartJs();
-  }
-
-  private async loadChartJs(): Promise<void> {
-    if (this.chartjsLoaded || this.chartjsLoading) {
-      return;
-    }
-
-    this.chartjsLoading = true;
-
     try {
       const { Chart, registerables } = await import('chart.js');
       Chart.register(...registerables);
-      this.chartjsLoaded = true;
-      this.chartjsLoading = false;
-
-      // If data already loaded, render charts
-      if (this.analyticsData) {
-        this.renderAllCharts();
-      }
     } catch (error) {
       console.error('Failed to load Chart.js:', error);
-      this.chartjsLoading = false;
-    }
-  }
-
-  private async renderAllCharts(): Promise<void> {
-    if (!this.chartjsLoaded || !this.analyticsData) {
-      return;
-    }
-
-    const { Chart } = await import('chart.js');
-
-    // Render conversion funnel chart
-    const conversionFunnelCanvas = this.conversionFunnelCanvas();
-    if (conversionFunnelCanvas && this.analyticsData.conversionFunnel.length > 0) {
-      if (this.conversionFunnelChart) {
-        this.conversionFunnelChart.destroy();
-      }
-      this.conversionFunnelChart = new Chart(conversionFunnelCanvas.nativeElement, {
-        type: this.conversionFunnelChartType as any,
-        data: this.conversionFunnelChartData,
-        options: this.conversionFunnelChartOptions
-      });
-    }
-
-    // Render agent performance chart
-    const agentPerformanceCanvas = this.agentPerformanceCanvas();
-    if (agentPerformanceCanvas && this.analyticsData.agentPerformance.length > 0) {
-      if (this.agentPerformanceChart) {
-        this.agentPerformanceChart.destroy();
-      }
-      this.agentPerformanceChart = new Chart(agentPerformanceCanvas.nativeElement, {
-        type: this.agentPerformanceChartType as any,
-        data: this.agentPerformanceChartData,
-        options: this.agentPerformanceChartOptions
-      });
-    }
-
-    // Render revenue forecast chart
-    const revenueForecastCanvas = this.revenueForecastCanvas();
-    if (revenueForecastCanvas && this.analyticsData.revenueForecast.length > 0) {
-      if (this.revenueForecastChart) {
-        this.revenueForecastChart.destroy();
-      }
-      this.revenueForecastChart = new Chart(revenueForecastCanvas.nativeElement, {
-        type: this.revenueForecastChartType as any,
-        data: this.revenueForecastChartData,
-        options: this.revenueForecastChartOptions
-      });
-    }
-
-    // Render lead source chart
-    const leadSourceCanvas = this.leadSourceCanvas();
-    if (leadSourceCanvas && this.analyticsData.leadSources.length > 0) {
-      if (this.leadSourceChart) {
-        this.leadSourceChart.destroy();
-      }
-      this.leadSourceChart = new Chart(leadSourceCanvas.nativeElement, {
-        type: this.leadSourceChartType as any,
-        data: this.leadSourceChartData,
-        options: this.leadSourceChartOptions
-      });
     }
   }
 
@@ -537,11 +434,14 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
         catchError(err => { console.error('Analytics data error:', err); return of(null); })
       )
     }).subscribe({
-      next: async ({ kpi, pipeline, analytics }) => {
+      next: ({ kpi, pipeline, analytics }) => {
         this.kpiReport = kpi;
         this.pipelineSummary = pipeline;
         if (analytics) {
           this.analyticsData = analytics;
+          this.agentDetailRows = analytics.agentPerformance as unknown as Record<string, unknown>[];
+          this.leadSourceRows = analytics.leadSources as unknown as Record<string, unknown>[];
+          this.funnelRows = analytics.conversionFunnel as unknown as Record<string, unknown>[];
           this.updateConversionFunnelChart(analytics.conversionFunnel);
           this.updateAgentPerformanceChart(analytics.agentPerformance);
           this.updateRevenueForecastChart(analytics.revenueForecast);
@@ -552,11 +452,6 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
         }
 
         this.loading = false;
-
-        // Render charts if Chart.js already loaded
-        if (this.chartjsLoaded) {
-          await this.renderAllCharts();
-        }
       },
       error: (err) => {
         console.error('Reports load error:', err);
@@ -568,20 +463,6 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
 
   applyDateFilter(): void {
     this.loadReports();
-  }
-
-  parseDate(value: string): Date | null {
-    if (!value) {
-      return null;
-    }
-
-    const parts = value.split('-').map(v => Number(v));
-    if (parts.length !== 3 || parts.some(n => Number.isNaN(n))) {
-      const fallback = new Date(value);
-      return Number.isNaN(fallback.getTime()) ? null : fallback;
-    }
-    const [year, month, day] = parts;
-    return new Date(year, month - 1, day);
   }
 
   private updateConversionFunnelChart(data: ConversionFunnel[]): void {

@@ -7,9 +7,11 @@ import {
   ChangeDetectorRef,
   input,
   output,
-  viewChild
+  viewChild,
+  inject
 } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
+import { DsIconComponent } from '../design-system';
+import { CommonModule } from '@angular/common';
 
 export type LottieAnimationType = 'search-empty' | 'success' | 'error' | 'upload' | 'maintenance';
 
@@ -21,12 +23,15 @@ export interface LottieOptions {
 
 @Component({
     selector: 'app-lottie-animation',
+    standalone: true,
     templateUrl: './lottie-animation.component.html',
     styleUrls: ['./lottie-animation.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [MatIcon]
+    imports: [CommonModule, DsIconComponent]
 })
 export class LottieAnimationComponent implements OnInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+
   readonly animationType = input.required<LottieAnimationType>();
   readonly width = input(200);
   readonly height = input(200);
@@ -48,8 +53,6 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
   lottieInstance: any = null;
   private destroyed = false;
 
-  constructor(private cdr: ChangeDetectorRef) {}
-
   ngOnInit(): void {
     this.loadAnimation();
   }
@@ -61,7 +64,6 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
 
   private async loadAnimation(): Promise<void> {
     try {
-      // Dynamically import lottie-web only when needed
       const lottie = await import('lottie-web/build/player/lottie_light');
       
       if (this.destroyed) return;
@@ -87,14 +89,12 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
       
       this.lottieInstance.addEventListener('complete', () => {
         if (!this.destroyed) {
-          // TODO: The 'emit' function requires a mandatory void argument
           this.animationComplete.emit();
         }
       });
       
       this.lottieInstance.addEventListener('loopComplete', () => {
         if (!this.destroyed) {
-          // TODO: The 'emit' function requires a mandatory void argument
           this.loopComplete.emit();
         }
       });
@@ -117,7 +117,6 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
   }
 
   private async loadAnimationData(): Promise<any> {
-    // Import animation JSON files dynamically
     const animationType = this.animationType();
     switch (animationType) {
       case 'search-empty':
@@ -173,7 +172,6 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
   setSpeed(speed: number): void {
     if (this.lottieInstance && !this.useFallback) {
       this.lottieInstance.setSpeed(speed);
-      
       this.cdr.markForCheck();
     }
   }
@@ -206,12 +204,12 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
   getFallbackIcon(): string {
     const icons: Record<LottieAnimationType, string> = {
       'search-empty': 'search',
-      'success': 'check_circle',
-      'error': 'error',
-      'upload': 'cloud_upload',
-      'maintenance': 'build'
+      'success': 'check',
+      'error': 'info',
+      'upload': 'upload',
+      'maintenance': 'settings'
     };
-    return icons[this.animationType()] || 'help_outline';
+    return icons[this.animationType()] || 'help-circle';
   }
 
   getFallbackColor(): string {

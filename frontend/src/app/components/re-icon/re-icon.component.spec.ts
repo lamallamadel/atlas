@@ -5,8 +5,7 @@ import { IconRegistryService } from '../../services/icon-registry.service';
 import { of } from 'rxjs';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('ReIconComponent', () => {
   let component: ReIconComponent;
@@ -17,17 +16,14 @@ describe('ReIconComponent', () => {
     const iconRegistrySpy = {
       isLoaded: vi.fn().mockName('IconRegistryService.isLoaded'),
       getIconSync: vi.fn().mockName('IconRegistryService.getIconSync'),
-      getIcon: vi.fn().mockName('IconRegistryService.getIcon'),
-    };
+      getIcon: vi.fn().mockName('IconRegistryService.getIcon')};
 
     await TestBed.configureTestingModule({
       imports: [ReIconComponent],
       providers: [
         { provide: IconRegistryService, useValue: iconRegistrySpy },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
 
     iconRegistryService = TestBed.inject(
       IconRegistryService

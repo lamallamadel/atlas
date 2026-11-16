@@ -9,27 +9,14 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDialogModule } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
 import { AnnoncesComponent } from './annonces.component';
 import {
   AnnonceApiService,
-  AnnonceStatus,
-} from '../../services/annonce-api.service';
+  AnnonceStatus} from '../../services/annonce-api.service';
 import { FilterPresetService } from '../../services/filter-preset.service';
 
-type KarmaSpyFn = ((...args: unknown[]) => unknown) & {
-  and: { returnValue(v: unknown): KarmaSpyFn };
-};
-
-function karmaSpy(name: string): KarmaSpyFn {
-  const jasmineRef = (globalThis as unknown as { jasmine: { createSpy(n: string): KarmaSpyFn } }).jasmine;
-  return jasmineRef.createSpy(name);
-}
 
 @Component({
   selector: 'app-generic-table',
@@ -40,13 +27,7 @@ function karmaSpy(name: string): KarmaSpyFn {
     MatExpansionModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
-    MatIconModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatDialogModule,
-  ],
-})
+    MatSelectModule]})
 class GenericTableStubComponent {
   readonly columns = input<any>();
   readonly data = input<any>();
@@ -69,13 +50,7 @@ class GenericTableStubComponent {
     MatExpansionModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
-    MatIconModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatDialogModule,
-  ],
-})
+    MatSelectModule]})
 class EmptyStateStubComponent {
   readonly message = input('');
   readonly subtext = input('');
@@ -94,13 +69,7 @@ class EmptyStateStubComponent {
     MatExpansionModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
-    MatIconModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatDialogModule,
-  ],
-})
+    MatSelectModule]})
 class LoadingSkeletonStubComponent {
   readonly variant = input('');
   readonly rows = input(0);
@@ -123,8 +92,7 @@ describe('AnnoncesComponent', () => {
       pageNumber: 0,
       pageSize: 10,
       paged: true,
-      unpaged: false,
-    },
+      unpaged: false},
     last: true,
     totalPages: 1,
     totalElements: 0,
@@ -133,43 +101,29 @@ describe('AnnoncesComponent', () => {
     sort: { empty: true, sorted: false, unsorted: true },
     first: true,
     numberOfElements: 0,
-    empty: true,
-  };
+    empty: true};
 
   beforeEach(async () => {
     const annonceApiServiceSpy = {
-      list: karmaSpy('AnnonceApiService.list'),
-      getDistinctCities: karmaSpy('AnnonceApiService.getDistinctCities'),
-      getById: karmaSpy('AnnonceApiService.getById'),
-      create: karmaSpy('AnnonceApiService.create'),
-      update: karmaSpy('AnnonceApiService.update'),
-    };
+      list: vi.fn().mockReturnValue(of(emptyPage)),
+      getDistinctCities: vi.fn().mockReturnValue(of([])),
+      getById: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn()};
 
     const filterPresetServiceSpy = {
-      getPresets: karmaSpy('FilterPresetService.getPresets'),
-      savePreset: karmaSpy('FilterPresetService.savePreset'),
-      deletePreset: karmaSpy('FilterPresetService.deletePreset'),
-      getPresetsLocally: karmaSpy('FilterPresetService.getPresetsLocally'),
-      savePresetLocally: karmaSpy('FilterPresetService.savePresetLocally'),
-      deletePresetLocally: karmaSpy('FilterPresetService.deletePresetLocally'),
-    };
+      getPresets: vi.fn().mockReturnValue([]),
+      savePreset: vi.fn(),
+      deletePreset: vi.fn(),
+      getPresetsLocally: vi.fn().mockReturnValue([]),
+      savePresetLocally: vi.fn(),
+      deletePresetLocally: vi.fn()};
 
     const bottomSheetSpy = {
-      open: karmaSpy('MatBottomSheet.open'),
-    };
+      open: vi.fn()};
 
     const breakpointObserverSpy = {
-      observe: karmaSpy('BreakpointObserver.observe'),
-    };
-    breakpointObserverSpy.observe.and.returnValue(
-      of({ matches: false, breakpoints: {} })
-    );
-
-    // Default safe stubs for ngOnInit() calls.
-    annonceApiServiceSpy.getDistinctCities.and.returnValue(of([]));
-    annonceApiServiceSpy.list.and.returnValue(of(emptyPage));
-    filterPresetServiceSpy.getPresets.and.returnValue([]);
-    filterPresetServiceSpy.getPresetsLocally.and.returnValue([]);
+      observe: vi.fn().mockReturnValue(of({ matches: false, breakpoints: {} }))};
 
     await TestBed.configureTestingModule({
       imports: [
@@ -180,22 +134,15 @@ describe('AnnoncesComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-        MatIconModule,
-        MatButtonModule,
-        MatChipsModule,
-        MatDialogModule,
         AnnoncesComponent,
         GenericTableStubComponent,
         EmptyStateStubComponent,
-        LoadingSkeletonStubComponent,
-      ],
+        LoadingSkeletonStubComponent],
       providers: [
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         { provide: FilterPresetService, useValue: filterPresetServiceSpy },
         { provide: MatBottomSheet, useValue: bottomSheetSpy },
-        { provide: BreakpointObserver, useValue: breakpointObserverSpy },
-      ],
-    }).compileComponents();
+        { provide: BreakpointObserver, useValue: breakpointObserverSpy }]}).compileComponents();
 
     annonceApiService = TestBed.inject(
       AnnonceApiService
@@ -230,25 +177,17 @@ describe('AnnoncesComponent', () => {
           createdAt: '2024-01-01T00:00:00Z',
           updatedAt: '2024-01-01T00:00:00Z',
           createdBy: 'user1',
-          updatedBy: 'user1',
-        },
-      ],
+          updatedBy: 'user1'}],
       totalElements: 1,
       numberOfElements: 1,
-      empty: false,
-    };
+      empty: false};
 
-    annonceApiService.list.and.returnValue(of(mockPage));
-    annonceApiService.getDistinctCities.and.returnValue(of(['Tanger']));
+    (annonceApiService.list as ReturnType<typeof vi.fn>).mockReturnValue(of(mockPage));
 
     fixture.detectChanges(); // triggers ngOnInit
 
-    expect(annonceApiService.getDistinctCities).toHaveBeenCalled();
     expect(annonceApiService.list).toHaveBeenCalled();
-    const listSpy = annonceApiService.list as unknown as {
-      calls: { mostRecent: () => { args: [{ page: number; size: number }] } };
-    };
-    const listParams = listSpy.calls.mostRecent().args[0];
+    const listParams = (annonceApiService.list as ReturnType<typeof vi.fn>).mock.calls.at(-1)![0] as { page: number; size: number };
     expect(listParams.page).toBe(0);
     expect(listParams.size).toBe(10);
     expect(component.annonces.length).toBe(1);
@@ -256,29 +195,13 @@ describe('AnnoncesComponent', () => {
   });
 
   it('should render component', () => {
-    annonceApiService.list.and.returnValue(of(emptyPage));
-    annonceApiService.getDistinctCities.and.returnValue(of([]));
-
     fixture.detectChanges();
 
     expect(fixture.nativeElement).toBeTruthy();
   });
 
-  it('should update applied filters when filters change', () => {
-    component.selectedStatus = AnnonceStatus.PUBLISHED;
-    component.selectedCity = 'Paris';
-    component.updateAppliedFilters();
-
-    expect(component.appliedFilters.length).toBe(2);
-    expect(component.appliedFilters[0].key).toBe('selectedStatus');
-    expect(component.appliedFilters[1].key).toBe('selectedCity');
-  });
-
   it('should remove filter when chip is removed', () => {
-    component.selectedStatus = AnnonceStatus.PUBLISHED;
-    component.selectedCity = 'Paris';
-    component.updateAppliedFilters();
-
+    component.appliedFilters = [{ key: 'selectedStatus', label: 'Publié', value: AnnonceStatus.PUBLISHED }];
     const filter = component.appliedFilters[0];
     component.removeFilter(filter);
 

@@ -1,14 +1,22 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, Inject, OnInit, inject } from '@angular/core';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { AdvancedFilter, FilterField, AdvancedFiltersComponent } from './advanced-filters.component';
 import { FilterPreset, FilterPresetRequest, FilterPresetService } from '../services/filter-preset.service';
 import { DossierFilterApiService, DossierFilterRequest } from '../services/dossier-filter-api.service';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { DsButtonComponent } from '../design-system/primitives/ds-button/ds-button.component';
-import { DsIconComponent } from '../design-system/icons/ds-icon.component';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsToastService,
+  DsInputComponent,
+  DsCardComponent,
+  DsCheckboxComponent,
+  DsBadgeComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 import { FormsModule } from '@angular/forms';
-import { DsInputComponent } from '../design-system/primitives/ds-input/ds-input.component';
+import { CommonModule } from '@angular/common';
 
 export interface AdvancedFiltersDialogData {
   filterType: string;
@@ -18,11 +26,32 @@ export interface AdvancedFiltersDialogData {
 
 @Component({
     selector: 'app-advanced-filters-dialog',
+    standalone: true,
     templateUrl: './advanced-filters-dialog.component.html',
     styleUrls: ['./advanced-filters-dialog.component.css'],
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, DsButtonComponent, DsIconComponent, AdvancedFiltersComponent, MatDialogActions, FormsModule, DsInputComponent]
+    imports: [
+      CommonModule,
+      FormsModule, 
+      DsButtonComponent, 
+      DsIconComponent, 
+      AdvancedFiltersComponent, 
+      DsInputComponent,
+      DsCardComponent,
+      DsCheckboxComponent,
+      DsBadgeComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class AdvancedFiltersDialogComponent implements OnInit {
+  private filterPresetService = inject(FilterPresetService);
+  private dossierFilterApi = inject(DossierFilterApiService);
+  private toastService = inject(DsToastService);
+  
+  public dialogRef = inject(DialogRef<any>);
+  public data: AdvancedFiltersDialogData = inject(DIALOG_DATA);
+
   predefinedPresets: FilterPreset[] = [];
   userPresets: FilterPreset[] = [];
   currentFilter?: AdvancedFilter;
@@ -32,15 +61,6 @@ export class AdvancedFiltersDialogComponent implements OnInit {
   presetName = '';
   presetDescription = '';
   sharePreset = false;
-
-  constructor(
-    public dialogRef: MatDialogRef<AdvancedFiltersDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AdvancedFiltersDialogData,
-    private filterPresetService: FilterPresetService,
-    private dossierFilterApi: DossierFilterApiService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
-  ) {}
 
   ngOnInit(): void {
     this.loadPresets();
@@ -88,7 +108,7 @@ export class AdvancedFiltersDialogComponent implements OnInit {
       error: (err) => {
         console.error('Error counting dossiers:', err);
         this.countLoading = false;
-        this.snackBar.open('Erreur lors du comptage des résultats', 'Fermer', { duration: 3000 });
+        this.toastService.error('Erreur lors du comptage des résultats');
       }
     });
   }
@@ -119,7 +139,7 @@ export class AdvancedFiltersDialogComponent implements OnInit {
 
   savePreset(): void {
     if (!this.presetName.trim() || !this.currentFilter) {
-      this.snackBar.open('Veuillez entrer un nom pour le preset', 'Fermer', { duration: 3000 });
+      this.toastService.warning('Veuillez entrer un nom pour le preset');
       return;
     }
 
@@ -136,13 +156,13 @@ export class AdvancedFiltersDialogComponent implements OnInit {
 
     this.filterPresetService.create(request).subscribe({
       next: () => {
-        this.snackBar.open('Preset sauvegardé avec succès', 'Fermer', { duration: 3000 });
+        this.toastService.success('Preset sauvegardé avec succès');
         this.closeSaveDialog();
         this.loadPresets();
       },
       error: (err) => {
         console.error('Error saving preset:', err);
-        this.snackBar.open('Erreur lors de la sauvegarde du preset', 'Fermer', { duration: 3000 });
+        this.toastService.error('Erreur lors de la sauvegarde du preset');
       }
     });
   }
@@ -153,12 +173,12 @@ export class AdvancedFiltersDialogComponent implements OnInit {
     if (confirm(`Supprimer le preset "${preset.name}" ?`)) {
       this.filterPresetService.delete(preset.id).subscribe({
         next: () => {
-          this.snackBar.open('Preset supprimé avec succès', 'Fermer', { duration: 3000 });
+          this.toastService.success('Preset supprimé avec succès');
           this.loadPresets();
         },
         error: (err) => {
           console.error('Error deleting preset:', err);
-          this.snackBar.open('Erreur lors de la suppression du preset', 'Fermer', { duration: 3000 });
+          this.toastService.error('Erreur lors de la suppression du preset');
         }
       });
     }

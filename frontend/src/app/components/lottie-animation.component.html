@@ -63,14 +63,14 @@
             (click)="toggle()"
             [attr.aria-label]="isPaused ? 'Play animation' : 'Pause animation'"
             type="button">
-            <mat-icon>{{ isPaused ? 'play_arrow' : 'pause' }}</mat-icon>
+            <ds-icon [name]="isPaused ? 'play' : 'pause'" [size]="16"></ds-icon>
           </button>
           <button
             class="control-btn"
             (click)="stop()"
             aria-label="Stop animation"
             type="button">
-            <mat-icon>stop</mat-icon>
+            <ds-icon name="x" [size]="16"></ds-icon>
           </button>
           <div class="speed-control">
             <label for="speed-slider" class="sr-only">Animation speed</label>

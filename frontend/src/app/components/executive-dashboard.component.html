@@ -1,30 +1,25 @@
-<div class="executive-dashboard">
-  <div class="dashboard-header">
-    <h1>Executive Dashboard</h1>
-    <button mat-raised-button color="primary" (click)="refreshDashboard()" [disabled]="loading">
-      <mat-icon>refresh</mat-icon>
-      Refresh
-    </button>
+<div class="executive-dashboard ds-form-stack" style="padding: 32px; max-width: var(--ds-content-wide); margin: 0 auto;">
+  <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: var(--ds-marine);">Tableau de bord exécutif</h1>
+    <ds-button variant="marine" size="md" (dsClick)="refreshDashboard()" [disabled]="loading">
+      <ds-icon name="refresh" [size]="20" style="margin-right: 8px;"></ds-icon>
+      Actualiser
+    </ds-button>
   </div>
 
   @if (!loading) {
-    <div class="kpi-grid">
+    <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px;">
       @for (kpi of kpis; track kpi) {
-        <ds-card class="kpi-card" [pad]="false" [elevation]="'sm'">
-          <div class="kpi-content">
-            <div class="kpi-icon" [style.background-color]="kpi.color">
-              <mat-icon>{{ kpi.icon }}</mat-icon>
+        <ds-card class="kpi-card" [pad]="true" elevation="sm">
+          <div class="kpi-content" style="display: flex; gap: 16px; align-items: center;">
+            <div class="kpi-icon" [style.background-color]="kpi.color" style="width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
+              <ds-icon [name]="kpi.icon" [size]="24"></ds-icon>
             </div>
-            <div class="kpi-details">
-              <div class="kpi-label">{{ kpi.label }}</div>
-              <div class="kpi-value">{{ kpi.value }}</div>
-              <div class="kpi-change" [class.positive]="kpi.trend === 'up'" [class.negative]="kpi.trend === 'down'">
-                @if (kpi.trend === 'up') {
-                  <mat-icon>arrow_upward</mat-icon>
-                }
-                @if (kpi.trend === 'down') {
-                  <mat-icon>arrow_downward</mat-icon>
-                }
+            <div class="kpi-details" style="flex: 1;">
+              <div class="kpi-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ds-text-muted); letter-spacing: 0.5px;">{{ kpi.label }}</div>
+              <div class="kpi-value" style="font-size: 20px; font-weight: 800; color: var(--ds-marine);">{{ kpi.value }}</div>
+              <div class="kpi-change" [style.color]="kpi.trend === 'up' ? 'var(--ds-success)' : 'var(--ds-error)'" style="font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+                <ds-icon [name]="kpi.trend === 'up' ? 'check' : 'info'" [size]="16"></ds-icon>
                 <span>{{ kpi.change >= 0 ? '+' : '' }}{{ kpi.change }}%</span>
               </div>
             </div>
@@ -35,11 +30,11 @@
   }
 
   @if (!loading) {
-    <div class="charts-grid">
-      <ds-card class="chart-card forecast-card" [pad]="false" [elevation]="'sm'">
-        <div class="exec-card-header">
-          <h3 class="exec-card-title">Revenue Forecast</h3>
-          <p class="exec-card-subtitle">Predictive analysis for the next 30 days</p>
+    <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 32px;">
+      <ds-card class="chart-card forecast-card" [pad]="true" elevation="sm">
+        <div class="exec-card-header" style="margin-bottom: 24px;">
+          <h3 class="exec-card-title" style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">Revenue Forecast</h3>
+          <p class="exec-card-subtitle" style="margin: 4px 0 0; font-size: 13px; color: var(--ds-text-muted);">Predictive analysis for the next 30 days</p>
         </div>
         <div class="exec-card-body">
           <canvas
@@ -50,10 +45,11 @@
           </canvas>
         </div>
       </ds-card>
-      <ds-card class="chart-card" [pad]="false" [elevation]="'sm'">
-        <div class="exec-card-header">
-          <h3 class="exec-card-title">Team Performance Heatmap</h3>
-          <p class="exec-card-subtitle">Conversion rate and response scores by agent</p>
+
+      <ds-card class="chart-card" [pad]="true" elevation="sm">
+        <div class="exec-card-header" style="margin-bottom: 24px;">
+          <h3 class="exec-card-title" style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">Team Performance</h3>
+          <p class="exec-card-subtitle" style="margin: 4px 0 0; font-size: 13px; color: var(--ds-text-muted);">Conversion rate and response scores</p>
         </div>
         <div class="exec-card-body">
           <canvas
@@ -64,10 +60,11 @@
           </canvas>
         </div>
       </ds-card>
-      <ds-card class="chart-card" [pad]="false" [elevation]="'sm'">
-        <div class="exec-card-header">
-          <h3 class="exec-card-title">Market Trends</h3>
-          <p class="exec-card-subtitle">Property value trends and predictions</p>
+
+      <ds-card class="chart-card" [pad]="true" elevation="sm">
+        <div class="exec-card-header" style="margin-bottom: 24px;">
+          <h3 class="exec-card-title" style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine);">Market Trends</h3>
+          <p class="exec-card-subtitle" style="margin: 4px 0 0; font-size: 13px; color: var(--ds-text-muted);">Property value trends and predictions</p>
         </div>
         <div class="exec-card-body">
           <canvas
@@ -78,43 +75,36 @@
           </canvas>
         </div>
       </ds-card>
-      <ds-card class="insights-card" [pad]="false" [elevation]="'sm'">
-        <div class="exec-card-header">
-          <h3 class="exec-card-title exec-card-title--icon">
-            <mat-icon>lightbulb</mat-icon>
-            Key Insights
+
+      <ds-card class="insights-card" [pad]="true" elevation="sm">
+        <div class="exec-card-header" style="margin-bottom: 24px;">
+          <h3 class="exec-card-title" style="margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-marine); display: flex; align-items: center; gap: 12px;">
+            <ds-icon name="plus" [size]="20" style="color: var(--ds-copper);"></ds-icon>
+            Points clés
           </h3>
         </div>
-        <div class="exec-card-body exec-card-body--insights">
-          <div class="insight-item">
-            <mat-icon color="primary">trending_up</mat-icon>
+        <div class="exec-card-body ds-form-stack" style="gap: 16px;">
+          <div class="insight-item" style="display: flex; gap: 16px; align-items: flex-start;">
+            <ds-icon name="chart" [size]="20" style="color: var(--ds-primary); margin-top: 2px;"></ds-icon>
             <div class="insight-text">
-              <strong>Strong Pipeline Growth</strong>
-              <p>Pipeline value increased by 8.3% this quarter, indicating healthy deal flow.</p>
+              <strong style="display: block; font-size: 14px; margin-bottom: 4px;">Croissance forte du pipeline</strong>
+              <p style="margin: 0; font-size: 13px; color: var(--ds-text-muted); line-height: 1.4;">La valeur du pipeline a augmenté de 8,3 % ce trimestre.</p>
             </div>
           </div>
-          <mat-divider></mat-divider>
-          <div class="insight-item">
-            <mat-icon color="warn">warning</mat-icon>
+          <div class="layout-divider" style="height: 1px; background: var(--ds-divider); margin: 8px 0;"></div>
+          <div class="insight-item" style="display: flex; gap: 16px; align-items: flex-start;">
+            <ds-icon name="info" [size]="20" style="color: var(--ds-warning); margin-top: 2px;"></ds-icon>
             <div class="insight-text">
-              <strong>Win Rate Decline</strong>
-              <p>Win rate decreased by 2.1%. Consider reviewing qualification criteria and sales processes.</p>
+              <strong style="display: block; font-size: 14px; margin-bottom: 4px;">Baisse du taux de conversion</strong>
+              <p style="margin: 0; font-size: 13px; color: var(--ds-text-muted); line-height: 1.4;">Baisse de 2,1 %. Révisez les critères de qualification.</p>
             </div>
           </div>
-          <mat-divider></mat-divider>
-          <div class="insight-item">
-            <mat-icon color="accent">people</mat-icon>
+          <div class="layout-divider" style="height: 1px; background: var(--ds-divider); margin: 8px 0;"></div>
+          <div class="insight-item" style="display: flex; gap: 16px; align-items: flex-start;">
+            <ds-icon name="users" [size]="20" style="color: var(--ds-marine); margin-top: 2px;"></ds-icon>
             <div class="insight-text">
-              <strong>Team Performance</strong>
-              <p>Agent 5 shows exceptional conversion rate (95%). Consider sharing best practices.</p>
-            </div>
-          </div>
-          <mat-divider></mat-divider>
-          <div class="insight-item">
-            <mat-icon color="primary">schedule</mat-icon>
-            <div class="insight-text">
-              <strong>Faster Deal Cycles</strong>
-              <p>Average deal time improved by 6.4%, indicating more efficient sales process.</p>
+              <strong style="display: block; font-size: 14px; margin-bottom: 4px;">Performance équipe</strong>
+              <p style="margin: 0; font-size: 13px; color: var(--ds-text-muted); line-height: 1.4;">L'agent 5 affiche un taux exceptionnel de 95 %.</p>
             </div>
           </div>
         </div>
@@ -123,8 +113,9 @@
   }
 
   @if (loading) {
-    <div class="loading-overlay">
-      <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
+    <div class="loading-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 0; gap: 16px; color: var(--ds-text-muted);">
+      <ds-skeleton variant="circle" width="48px" height="48px" [animate]="true"></ds-skeleton>
+      <p>Chargement des données analytiques...</p>
     </div>
   }
 </div>

@@ -5,8 +5,7 @@ import { DashboardKpiService } from '../services/dashboard-kpi.service';
 import { of, throwError } from 'rxjs';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('KpiWidgetComponent', () => {
   let component: KpiWidgetComponent;
@@ -15,17 +14,14 @@ describe('KpiWidgetComponent', () => {
 
   beforeEach(async () => {
     const kpiServiceSpy = {
-      getKPI: vi.fn().mockName('DashboardKpiService.getKPI'),
-    };
+      getKPI: vi.fn().mockName('DashboardKpiService.getKPI')};
 
     await TestBed.configureTestingModule({
       imports: [KpiWidgetComponent],
       providers: [
         { provide: DashboardKpiService, useValue: kpiServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
 
     kpiService = TestBed.inject(
       DashboardKpiService
@@ -42,8 +38,7 @@ describe('KpiWidgetComponent', () => {
       x: 0,
       y: 0,
       cols: 4,
-      rows: 3,
-    });
+      rows: 3});
   });
 
   it('should create', () => {
@@ -54,8 +49,7 @@ describe('KpiWidgetComponent', () => {
     const mockKpiData = {
       value: 85,
       label: 'Conversion Rate',
-      changePercent: 5.2,
-    };
+      changePercent: 5.2};
 
     kpiService.getKPI.mockReturnValue(of(mockKpiData));
     fixture.detectChanges();

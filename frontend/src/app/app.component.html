@@ -1,14 +1,18 @@
 <app-offline-indicator></app-offline-indicator>
 <app-tour-launcher></app-tour-launcher>
-<app-progress-bar [isNavigating]="isNavigating"></app-progress-bar>
-<app-notification-toast></app-notification-toast>
-@if (showLoadingOverlay) {
-  <div
-    class="loading-overlay"
-    [@fadeInOut]>
-    <div class="loading-backdrop"></div>
+
+@if (isNavigating()) {
+  <div class="navigation-loader" style="position: fixed; top: 0; left: 0; right: 0; z-index: 10001;">
+    <ds-progress-bar
+      [value]="navigationProgress()"
+      mode="determinate"
+      variant="primary">
+    </ds-progress-bar>
   </div>
 }
+
+<ds-toast-container></ds-toast-container>
+
 <div [@routeFadeInAnimation]="getRouteAnimation()" class="page-transition-wrapper">
   <router-outlet #outlet="outlet"></router-outlet>
 </div>

@@ -1,47 +1,46 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { DsCardComponent } from '../design-system';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { TourDefinitionService, TourDefinition } from '../services/tour-definition.service';
 import { OnboardingTourService } from '../services/onboarding-tour.service';
-import { UserPreferencesService } from '../services/user-preferences.service';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { Subject } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import {
+  DsCardComponent,
+  DsButtonComponent,
+  DsIconComponent,
+  DsProgressBarComponent,
+  DsSkeletonComponent,
+  DsBadgeComponent,
+  DsToastService
+} from '../design-system';
 
 @Component({
-    selector: 'app-tour-progress',
-    standalone: true,
-    imports: [
-        CommonModule,
-        MatButtonModule,
-        DsCardComponent,
-        MatChipsModule,
-        MatIconModule,
-        MatProgressBarModule,
-        DsSkeletonComponent,
-    ],
-    templateUrl: './tour-progress.component.html',
-    styleUrls: ['./tour-progress.component.css'],
+  selector: 'app-tour-progress',
+  standalone: true,
+  templateUrl: './tour-progress.component.html',
+  styleUrls: ['./tour-progress.component.css'],
+  imports: [
+    CommonModule, 
+    DsCardComponent, 
+    DsButtonComponent, 
+    DsIconComponent, 
+    DsProgressBarComponent,
+    DsSkeletonComponent,
+    DsBadgeComponent
+  ]
 })
 export class TourProgressComponent implements OnInit, OnDestroy {
-  tours: TourDefinition[] = [];
-  completionPercentage = 0;
-  completedCount = 0;
-  totalCount = 0;
-  isLoading = true;
-  
-  private destroy$ = new Subject<void>();
+  private tourDefinitionService = inject(TourDefinitionService);
+  private onboardingTourService = inject(OnboardingTourService);
+  private toastService = inject(DsToastService);
 
-  constructor(
-    private tourDefinitionService: TourDefinitionService,
-    private onboardingTourService: OnboardingTourService,
-    private userPreferencesService: UserPreferencesService,
-    private router: Router
-  ) {}
+  tours: TourDefinition[] = [];
+  completedTours: string[] = [];
+  isLoading = false;
+  totalCount = 0;
+  completedCount = 0;
+  completionPercentage = 0;
+
+  private destroy$ = new Subject<void>();
 
   ngOnInit(): void {
     this.loadTours();
@@ -54,59 +53,48 @@ export class TourProgressComponent implements OnInit, OnDestroy {
 
   loadTours(): void {
     this.isLoading = true;
-    this.tours = this.tourDefinitionService.getCoreTours();
+    this.tours = this.tourDefinitionService.getAllTours();
+    this.completedTours = this.tours
+      .filter(t => this.onboardingTourService.isTourCompleted(t.id))
+      .map(t => t.id);
+
     this.totalCount = this.tours.length;
-    
-    this.updateProgress();
+    this.completedCount = this.completedTours.length;
+    this.completionPercentage = this.totalCount > 0 ? Math.round((this.completedCount / this.totalCount) * 100) : 0;
+
     this.isLoading = false;
   }
 
-  updateProgress(): void {
-    this.completedCount = this.tours.filter(tour => 
-      this.onboardingTourService.isTourCompleted(tour.id)
-    ).length;
-    
-    this.completionPercentage = this.totalCount > 0 
-      ? Math.round((this.completedCount / this.totalCount) * 100)
-      : 0;
-  }
-
   isTourCompleted(tourId: string): boolean {
-    return this.onboardingTourService.isTourCompleted(tourId);
+    return this.completedTours.includes(tourId);
   }
 
   startTour(tour: TourDefinition): void {
-    if (tour.requiredRoute && !this.router.url.includes(tour.requiredRoute)) {
-      this.router.navigate([tour.requiredRoute]).then(() => {
-        setTimeout(() => {
-          this.onboardingTourService.startManualTour(tour.id as any);
-        }, 500);
-      });
-    } else {
-      this.onboardingTourService.startManualTour(tour.id as any);
-    }
+    this.onboardingTourService.startManualTour('dossier-creation');
   }
 
-  resetTour(tour: TourDefinition, event: Event): void {
+  resetTour(tour: TourDefinition, event: MouseEvent): void {
     event.stopPropagation();
-    if (confirm(`Êtes-vous sûr de vouloir réinitialiser le guide "${tour.name}" ?`)) {
+    if (confirm(`Voulez-vous vraiment réinitialiser le guide "${tour.name}" ?`)) {
       this.onboardingTourService.resetTour(tour.id);
-      this.updateProgress();
+      this.loadTours();
+      this.toastService.success('Guide réinitialisé');
     }
   }
 
   resetAllTours(): void {
-    if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les guides interactifs ?')) {
+    if (confirm('Voulez-vous vraiment réinitialiser TOUS les guides ?')) {
       this.onboardingTourService.resetAllTours();
-      this.updateProgress();
+      this.loadTours();
+      this.toastService.success('Tous les guides ont été réinitialisés');
     }
   }
 
   getStatusIcon(tour: TourDefinition): string {
-    return this.isTourCompleted(tour.id) ? 'check_circle' : 'radio_button_unchecked';
+    return this.isTourCompleted(tour.id) ? 'check' : 'plus';
   }
 
-  getStatusColor(tour: TourDefinition): string {
-    return this.isTourCompleted(tour.id) ? 'primary' : 'accent';
+  getStatusBadgeStatus(tour: TourDefinition): string {
+    return this.isTourCompleted(tour.id) ? 'success' : 'neutral';
   }
 }

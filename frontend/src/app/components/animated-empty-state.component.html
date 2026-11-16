@@ -1,7 +1,7 @@
-<div class="animated-empty-state-container" role="status" aria-live="polite">
-  <div class="animated-empty-state-content">
+<div class="animated-empty-state-container ds-form-stack" role="status" aria-live="polite" style="text-align: center; padding: 48px 24px;">
+  <div class="animated-empty-state-content ds-form-stack" style="align-items: center;">
     <!-- Lottie Animation -->
-    <div class="animated-empty-state-animation">
+    <div class="animated-empty-state-animation" style="margin-bottom: 24px;">
       <app-lottie-animation
         [animationType]="animationType()"
         [width]="animationWidth()"
@@ -14,52 +14,50 @@
     </div>
 
     <!-- Title -->
-    <h3 class="animated-empty-state-title">{{ title() }}</h3>
+    <h3 class="animated-empty-state-title" style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700; color: var(--ds-marine);">{{ title() }}</h3>
 
     <!-- Message -->
     @if (message()) {
-      <p class="animated-empty-state-message">{{ message() }}</p>
+      <p class="animated-empty-state-message" style="margin: 0 0 32px 0; color: var(--ds-text-muted); line-height: 1.5; max-width: 400px; margin-left: auto; margin-right: auto;">{{ message() }}</p>
     }
 
     <!-- Action buttons -->
     @if (primaryAction() || secondaryAction()) {
-      <div class="animated-empty-state-actions">
+      <div class="animated-empty-state-actions" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
         @if (primaryAction(); as primary) {
-          <button
-            class="btn-primary-action"
-            (click)="onPrimaryClick()"
-            [attr.aria-label]="primary.label">
+          <ds-button
+            variant="marine"
+            size="md"
+            (dsClick)="onPrimaryClick()"
+            [ariaLabel]="primary.label">
             @if (primary.icon) {
-              <mat-icon class="btn-icon">{{ primary.icon }}</mat-icon>
+              <ds-icon [name]="primary.icon" [size]="20" style="margin-right: 8px;"></ds-icon>
             }
             <span>{{ primary.label }}</span>
-          </button>
+          </ds-button>
         }
         @if (secondaryAction(); as secondary) {
-          <button
-            class="btn-secondary-action"
-            (click)="onSecondaryClick()"
-            [attr.aria-label]="secondary.label">
+          <ds-button
+            variant="ghost"
+            size="md"
+            (dsClick)="onSecondaryClick()"
+            [ariaLabel]="secondary.label">
             @if (secondary.icon) {
-              <mat-icon class="btn-icon">{{ secondary.icon }}</mat-icon>
+              <ds-icon [name]="secondary.icon" [size]="20" style="margin-right: 8px;"></ds-icon>
             }
             <span>{{ secondary.label }}</span>
-          </button>
+          </ds-button>
         }
       </div>
     }
 
     <!-- Help link -->
     @if (helpLink(); as help) {
-      <div class="animated-empty-state-help">
-        <a
-          href="javascript:void(0)"
-          class="help-link"
-          (click)="onHelpLinkClick()"
-          [attr.aria-label]="help.label">
-          <mat-icon class="help-icon">help_outline</mat-icon>
+      <div class="animated-empty-state-help" style="margin-top: 32px;">
+        <ds-button variant="ghost" size="sm" (dsClick)="onHelpLinkClick()" style="color: var(--ds-primary);">
+          <ds-icon name="info" [size]="16" style="margin-right: 8px;"></ds-icon>
           <span>{{ help.label }}</span>
-        </a>
+        </ds-button>
       </div>
     }
   </div>

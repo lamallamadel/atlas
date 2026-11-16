@@ -18,32 +18,32 @@
 
     <!-- Ville -->
     <div class="sr-filter-group">
-      <label class="sr-filter-label" for="f-ville">Ville</label>
-      <select class="at-form-select" id="f-ville" [(ngModel)]="filters.ville" (change)="applyFilters()">
-        <option value="">Toutes les villes</option>
-        @for (v of villes; track v) {
-          <option [value]="v">{{v}}</option>
-        }
-      </select>
+      <ds-select
+        label="Ville"
+        [options]="villeOptions"
+        [(ngModel)]="filters.ville"
+        (valueChange)="applyFilters()"
+        prefixIcon="map-pin">
+      </ds-select>
     </div>
 
     <!-- Prix -->
     <div class="sr-filter-group">
-      <p class="sr-filter-label">Prix</p>
-      <div class="sr-range-row">
-        <input class="at-form-input" type="number" placeholder="Min" [(ngModel)]="filters.prixMin" (change)="applyFilters()"/>
+      <p class="sr-filter-label">Prix (MAD)</p>
+      <div class="sr-range-row" style="display: flex; gap: 8px; align-items: center;">
+        <input class="at-form-input" style="flex: 1; height: 38px; border: 1px solid var(--ds-border); border-radius: 4px; padding: 0 12px; font-size: 13px;" type="number" placeholder="Min" [(ngModel)]="filters.prixMin" (change)="applyFilters()"/>
         <span style="color:var(--ds-text-faint);font-size:0.8rem;">—</span>
-        <input class="at-form-input" type="number" placeholder="Max" [(ngModel)]="filters.prixMax" (change)="applyFilters()"/>
+        <input class="at-form-input" style="flex: 1; height: 38px; border: 1px solid var(--ds-border); border-radius: 4px; padding: 0 12px; font-size: 13px;" type="number" placeholder="Max" [(ngModel)]="filters.prixMax" (change)="applyFilters()"/>
       </div>
     </div>
 
     <!-- Surface -->
     <div class="sr-filter-group">
       <p class="sr-filter-label">Surface (m²)</p>
-      <div class="sr-range-row">
-        <input class="at-form-input" type="number" placeholder="Min" [(ngModel)]="filters.surfMin" (change)="applyFilters()"/>
+      <div class="sr-range-row" style="display: flex; gap: 8px; align-items: center;">
+        <input class="at-form-input" style="flex: 1; height: 38px; border: 1px solid var(--ds-border); border-radius: 4px; padding: 0 12px; font-size: 13px;" type="number" placeholder="Min" [(ngModel)]="filters.surfMin" (change)="applyFilters()"/>
         <span style="color:var(--ds-text-faint);font-size:0.8rem;">—</span>
-        <input class="at-form-input" type="number" placeholder="Max" [(ngModel)]="filters.surfMax" (change)="applyFilters()"/>
+        <input class="at-form-input" style="flex: 1; height: 38px; border: 1px solid var(--ds-border); border-radius: 4px; padding: 0 12px; font-size: 13px;" type="number" placeholder="Max" [(ngModel)]="filters.surfMax" (change)="applyFilters()"/>
       </div>
     </div>
 
@@ -63,65 +63,62 @@
   <!-- RESULTS -->
   <main class="sr-results">
     <!-- Header -->
-    <div class="sr-results-header">
-      <p class="sr-count">
-        <strong>{{totalCount}}</strong> {{totalCount <= 1 ? 'annonce trouvée' : 'annonces trouvées'}}
+    <div class="sr-results-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <p class="sr-count" style="margin: 0; font-size: 14px;">
+        <strong style="color: var(--ds-marine);">{{totalCount}}</strong> {{totalCount <= 1 ? 'annonce trouvée' : 'annonces trouvées'}}
       </p>
-      <div class="sr-sort">
-        <label class="sr-filter-label" for="sr-sort-sel">Trier par</label>
-        <select class="at-form-select" id="sr-sort-sel" [(ngModel)]="filters.sort" (change)="setSort(filters.sort)">
-          <option value="recent">Plus récent</option>
-          <option value="prix-asc">Prix croissant</option>
-          <option value="prix-desc">Prix décroissant</option>
-          <option value="surface-desc">Plus grande surface</option>
-        </select>
+      <div class="sr-sort" style="width: 220px;">
+        <ds-select
+          label="Trier par"
+          [options]="sortOptions"
+          [(ngModel)]="filters.sort"
+          (valueChange)="onSortChange($event)">
+        </ds-select>
       </div>
     </div>
 
     <!-- Empty state -->
     @if (displayedListings.length === 0) {
-      <div class="at-empty-state">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <p class="at-empty-state-title">Aucune annonce trouvée</p>
-        <p class="at-empty-state-desc">Essayez de modifier vos critères de recherche.</p>
-        <button class="at-btn at-btn-primary" style="margin-top:1rem;" (click)="resetFilters()">Réinitialiser les filtres</button>
+      <div class="at-empty-state" style="padding: 64px; text-align: center; background: var(--ds-bg-subtle); border-radius: var(--ds-radius-lg); border: 2px dashed var(--ds-border);">
+        <ds-icon name="search" [size]="24" style="opacity: 0.3; margin-bottom: 16px;"></ds-icon>
+        <p class="at-empty-state-title" style="font-size: 18px; font-weight: 700; color: var(--ds-marine); margin-bottom: 8px;">Aucune annonce trouvée</p>
+        <p class="at-empty-state-desc" style="color: var(--ds-text-muted); margin-bottom: 24px;">Essayez de modifier vos critères de recherche.</p>
+        <ds-button variant="marine" (dsClick)="resetFilters()">Réinitialiser les filtres</ds-button>
       </div>
     }
 
     <!-- Listing grid -->
     @if (displayedListings.length > 0) {
       <div class="sr-grid">
-        @for (listing of displayedListings; track listing) {
+        @for (listing of displayedListings; track listing.id) {
           <article
             class="sr-listing-card"
             (click)="navigateToDetail(listing)"
             role="button" tabindex="0"
-            (keydown.enter)="navigateToDetail(listing)">
-            <div class="sr-listing-img">
-              <img [src]="listing.imgs && listing.imgs.length > 0 ? listing.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="listing.title" loading="lazy" width="360" height="220"/>
-              <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
+            (keydown.enter)="navigateToDetail(listing)"
+            style="cursor: pointer;">
+            <div class="sr-listing-img" style="position: relative; border-radius: var(--ds-radius-md); overflow: hidden;">
+              <img [src]="listing.imgs && listing.imgs.length > 0 ? listing.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="listing.title" loading="lazy" width="360" height="220" style="width: 100%; object-fit: cover; transition: transform 0.3s ease;"/>
+              <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'" style="position: absolute; top: 12px; left: 12px;">
                 {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
               </span>
               @if (listing.verified) {
-                <div class="ph-badges">
-                  <span class="at-badge-trust">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    Vérifié
-                  </span>
+                <div class="ph-badges" style="position: absolute; top: 12px; right: 12px;">
+                  <ds-badge status="active" size="sm">Vérifié</ds-badge>
                 </div>
               }
             </div>
-            <div class="ph-listing-body">
-              <div class="ph-price">{{formatPrice(listing.price, listing.tx)}}</div>
-              <div class="ph-title">{{listing.title}}</div>
-              <div class="ph-location">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <div class="ph-listing-body" style="padding: 16px 0;">
+              <div class="ph-price" style="font-size: 18px; font-weight: 700; color: var(--ds-marine); margin-bottom: 4px;">{{formatPrice(listing.price, listing.tx)}}</div>
+              <div class="ph-title" style="font-size: 15px; font-weight: 600; color: var(--ds-text); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{listing.title}}</div>
+              <div class="ph-location" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ds-text-muted); margin-bottom: 12px;">
+                <ds-icon name="map-pin" [size]="16"></ds-icon>
                 {{listing.zone}}, {{listing.city}}
               </div>
-              <div class="ph-meta">
-                <span class="ph-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>{{listing.surface}} m²</span>
-                <span class="ph-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M2 11l1 9h18l1-9H2z"/></svg>{{listing.pieces}} pièces</span>
-                <span class="ph-meta-date">{{listing.agent.agency}}</span>
+              <div class="ph-meta" style="display: flex; gap: 16px; font-size: 12px; color: var(--ds-text-faint);">
+                <span class="ph-meta-item" style="display: flex; align-items: center; gap: 4px;"><ds-icon name="maximize" [size]="16"></ds-icon>{{listing.surface}} m²</span>
+                <span class="ph-meta-item" style="display: flex; align-items: center; gap: 4px;"><ds-icon name="grid" [size]="16"></ds-icon>{{listing.pieces}} pièces</span>
+                <span class="ph-meta-date" style="margin-left: auto;">{{listing.agent.agency}}</span>
               </div>
             </div>
           </article>
@@ -131,16 +128,24 @@
 
     <!-- Pagination -->
     @if (totalPages > 1) {
-      <nav class="at-pagination" aria-label="Pagination des résultats">
-        <button class="at-page-btn" (click)="goToPage(filters.page - 1)" [disabled]="filters.page <= 1" aria-label="Page précédente">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
+      <nav class="at-pagination" aria-label="Pagination des résultats" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 48px;">
+        <ds-button variant="ghost" size="sm" (dsClick)="goToPage(filters.page - 1)" [disabled]="filters.page <= 1" ariaLabel="Page précédente">
+          <ds-icon name="chevron-left" [size]="16"></ds-icon>
+        </ds-button>
+        
         @for (p of getPageNumbers(); track p) {
-          <button class="at-page-btn" [class.active]="p===filters.page" (click)="goToPage(p)">{{p}}</button>
+          <ds-button 
+            [variant]="p === filters.page ? 'marine' : 'ghost'" 
+            size="sm" 
+            (dsClick)="goToPage(p)"
+            style="min-width: 36px; padding: 0;">
+            {{p}}
+          </ds-button>
         }
-        <button class="at-page-btn" (click)="goToPage(filters.page + 1)" [disabled]="filters.page >= totalPages" aria-label="Page suivante">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
+        
+        <ds-button variant="ghost" size="sm" (dsClick)="goToPage(filters.page + 1)" [disabled]="filters.page >= totalPages" ariaLabel="Page suivante">
+          <ds-icon name="chevron-right" [size]="16"></ds-icon>
+        </ds-button>
       </nav>
     }
 

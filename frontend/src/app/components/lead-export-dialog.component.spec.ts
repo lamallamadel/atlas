@@ -1,27 +1,12 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
-import {} from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { DialogRef } from '@angular/cdk/dialog';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LeadExportDialogComponent } from './lead-export-dialog.component';
 import { LeadApiService } from '../services/lead-api.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('LeadExportDialogComponent', () => {
   let component: LeadExportDialogComponent;
@@ -29,39 +14,12 @@ describe('LeadExportDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        CommonModule,
-        FormsModule,
-        BrowserAnimationsModule,
-        MatDialogModule,
-
-        MatIconModule,
-        MatButtonModule,
-        MatCheckboxModule,
-        MatDividerModule,
-        MatFormFieldModule,
-        MatSelectModule,
-        MatInputModule,
-        MatProgressBarModule,
-        LeadExportDialogComponent,
-      ],
+      imports: [LeadExportDialogComponent],
       providers: [
-        {
-          provide: MatSnackBar,
-          useValue: {
-            open: () => ({
-              onAction: () => of(null),
-              afterDismissed: () => of(null),
-            }),
-            dismiss: () => {},
-          },
-        },
-        { provide: MatDialogRef, useValue: { close: vi.fn() } },
+        { provide: DialogRef, useValue: { close: vi.fn() } },
         LeadApiService,
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
   });
 
   beforeEach(() => {

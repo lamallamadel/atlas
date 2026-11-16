@@ -1,209 +1,66 @@
-import { Component, OnInit, Inject } from '@angular/core';
-
+import { Component, OnInit, Inject, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatSliderModule } from '@angular/material/slider';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatIconModule } from '@angular/material/icon';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { LeadScoringApiService, LeadScoringConfig } from '../services/lead-scoring-api.service';
-import { ToastNotificationService } from '../services/toast-notification.service';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsInputComponent, 
+  DsSelectComponent, 
+  DsCardComponent,
+  DsToastService,
+  DsTabsComponent,
+  DsTab,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent,
+  DsCheckboxComponent
+} from '../design-system';
 
 @Component({
   selector: 'app-lead-scoring-config-dialog',
   standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSlideToggleModule,
-    MatSliderModule,
-    MatTabsModule,
-    MatIconModule
-],
-  template: `
-    <h2 mat-dialog-title>
-      <mat-icon>settings</mat-icon>
-      {{ data?.config ? 'Edit' : 'Create' }} Lead Scoring Configuration
-    </h2>
-    
-    <mat-dialog-content>
-      <form [formGroup]="configForm">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Configuration Name</mat-label>
-          <input matInput formControlName="configName" placeholder="Default Configuration">
-        </mat-form-field>
-    
-        <mat-slide-toggle formControlName="isActive" class="full-width">
-          Active Configuration
-        </mat-slide-toggle>
-    
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Auto-Qualification Threshold</mat-label>
-          <input matInput type="number" formControlName="autoQualificationThreshold" min="0" max="100">
-          <mat-hint>Minimum score to auto-qualify leads</mat-hint>
-        </mat-form-field>
-    
-        <mat-tab-group>
-          <mat-tab label="Source Weights">
-            <div class="tab-content">
-              @for (source of sourceKeys; track source) {
-                <div class="weight-item">
-                  <label [attr.for]="'sourceWeight_' + source">{{ formatLabel(source) }}</label>
-                  <mat-slider min="0" max="30" step="1" discrete>
-                    <input [id]="'sourceWeight_' + source" matSliderThumb [formControlName]="'sourceWeight_' + source">
-                  </mat-slider>
-                  <span class="weight-value">{{ configForm.get('sourceWeight_' + source)?.value }}</span>
-                </div>
-              }
-            </div>
-          </mat-tab>
-    
-          <mat-tab label="Engagement Weights">
-            <div class="tab-content">
-              @for (engagement of engagementKeys; track engagement) {
-                <div class="weight-item">
-                  <label [attr.for]="'engagementWeight_' + engagement">{{ formatLabel(engagement) }}</label>
-                  <mat-slider min="0" max="20" step="1" discrete>
-                    <input [id]="'engagementWeight_' + engagement" matSliderThumb [formControlName]="'engagementWeight_' + engagement">
-                  </mat-slider>
-                  <span class="weight-value">{{ configForm.get('engagementWeight_' + engagement)?.value }}</span>
-                </div>
-              }
-            </div>
-          </mat-tab>
-    
-          <mat-tab label="Property Match Weights">
-            <div class="tab-content">
-              @for (property of propertyKeys; track property) {
-                <div class="weight-item">
-                  <label [attr.for]="'propertyWeight_' + property">{{ formatLabel(property) }}</label>
-                  <mat-slider min="0" max="20" step="1" discrete>
-                    <input [id]="'propertyWeight_' + property" matSliderThumb [formControlName]="'propertyWeight_' + property">
-                  </mat-slider>
-                  <span class="weight-value">{{ configForm.get('propertyWeight_' + property)?.value }}</span>
-                </div>
-              }
-            </div>
-          </mat-tab>
-    
-          <mat-tab label="Response Time">
-            <div class="tab-content">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Response Time Weight</mat-label>
-                <input matInput type="number" formControlName="responseTimeWeight" min="0" max="30">
-              </mat-form-field>
-    
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Fast Response (minutes)</mat-label>
-                <input matInput type="number" formControlName="fastResponseMinutes" min="1">
-                <mat-hint>Response within this time gets full weight</mat-hint>
-              </mat-form-field>
-    
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Medium Response (minutes)</mat-label>
-                <input matInput type="number" formControlName="mediumResponseMinutes" min="1">
-                <mat-hint>Response within this time gets half weight</mat-hint>
-              </mat-form-field>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
-      </form>
-    </mat-dialog-content>
-    
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-raised-button color="primary" (click)="onSave()" [disabled]="!configForm.valid || saving">
-        {{ saving ? 'Saving...' : 'Save' }}
-      </button>
-    </mat-dialog-actions>
-    `,
-  styles: [`
-    h2 {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    mat-dialog-content {
-      min-width: 600px;
-      max-height: 600px;
-    }
-
-    .full-width {
-      width: 100%;
-      margin-bottom: 16px;
-    }
-
-    .tab-content {
-      padding: 20px 0;
-    }
-
-    .weight-item {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .weight-item label {
-      flex: 0 0 200px;
-      font-weight: 500;
-    }
-
-    .weight-item mat-slider {
-      flex: 1;
-    }
-
-    .weight-value {
-      flex: 0 0 40px;
-      text-align: right;
-      font-weight: 600;
-      color: #3498db;
-    }
-
-    @media (max-width: 768px) {
-      mat-dialog-content {
-        min-width: auto;
-        max-width: 90vw;
-      }
-
-      .weight-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .weight-item label {
-        flex: none;
-      }
-
-      .weight-item mat-slider {
-        width: 100%;
-      }
-    }
-  `]
+    DsButtonComponent,
+    DsIconComponent,
+    DsInputComponent,
+    DsSelectComponent,
+    DsCardComponent,
+    DsTabsComponent,
+    DsDialogHeaderComponent,
+    DsDialogContentComponent,
+    DsDialogActionsComponent,
+    DsCheckboxComponent
+  ],
+  templateUrl: './lead-scoring-config-dialog.component.html',
+  styleUrls: ['./lead-scoring-config-dialog.component.css']
 })
 export class LeadScoringConfigDialogComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private leadScoringApi = inject(LeadScoringApiService);
+  private toastService = inject(DsToastService);
+  private dialogRef = inject(DialogRef<LeadScoringConfig>);
+  
+  public data: { config?: LeadScoringConfig } = inject(DIALOG_DATA);
+
   configForm!: FormGroup;
   saving = false;
+  activeTab = 'source';
+
+  readonly tabs: DsTab[] = [
+    { value: 'source', label: 'Sources' },
+    { value: 'engagement', label: 'Engagement' },
+    { value: 'property', label: 'Biens' },
+    { value: 'timing', label: 'Réactivité' }
+  ];
 
   sourceKeys = ['referral', 'web', 'social_media', 'email', 'phone', 'walk_in', 'mobile', 'unknown'];
   engagementKeys = ['inboundMessage', 'outboundMessage', 'appointment'];
   propertyKeys = ['noProperty', 'hasProperty', 'hasPrice', 'hasPhotos'];
-
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<LeadScoringConfigDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { config?: LeadScoringConfig },
-    private leadScoringApi: LeadScoringApiService,
-    private toastService: ToastNotificationService
-  ) { }
 
   ngOnInit(): void {
     this.initForm();
@@ -213,7 +70,7 @@ export class LeadScoringConfigDialogComponent implements OnInit {
     const config = this.data?.config;
 
     const formConfig: any = {
-      configName: [config?.configName || 'Default Configuration', Validators.required],
+      configName: [config?.configName || 'Configuration par défaut', Validators.required],
       isActive: [config?.isActive !== undefined ? config.isActive : true],
       autoQualificationThreshold: [config?.autoQualificationThreshold || 70, [Validators.required, Validators.min(0), Validators.max(100)]],
       responseTimeWeight: [config?.responseTimeWeight || 20, [Validators.required, Validators.min(0), Validators.max(30)]],
@@ -304,12 +161,12 @@ export class LeadScoringConfigDialogComponent implements OnInit {
 
       saveOperation.subscribe({
         next: (result) => {
-          this.toastService.success('Configuration saved successfully');
+          this.toastService.success('Configuration enregistrée');
           this.dialogRef.close(result);
         },
         error: (error) => {
           console.error('Error saving configuration:', error);
-          this.toastService.error('Failed to save configuration');
+          this.toastService.error('Échec de l\'enregistrement');
           this.saving = false;
         }
       });

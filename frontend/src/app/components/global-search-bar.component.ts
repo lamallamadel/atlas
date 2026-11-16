@@ -5,6 +5,7 @@ import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/
 import { Subject, of, Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { UpperCasePipe } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
 import { DsInputComponent } from '../design-system/primitives/ds-input/ds-input.component';
 
@@ -15,8 +16,8 @@ interface GroupedResults {
 }
 
 interface EnhancedSearchResult extends SearchResult {
-  highlightedTitle?: string;
-  highlightedDescription?: string;
+  highlightedTitle?: SafeHtml;
+  highlightedDescription?: SafeHtml;
   preview?: any;
 }
 
@@ -34,9 +35,7 @@ interface RecentSearch {
 export class GlobalSearchBarComponent implements OnInit, OnDestroy {
   readonly searchInput = viewChild.required(DsInputComponent);
 
-  /** Icône loupe (alignée sur le pattern filter-bar). */
-  readonly searchPrefixIcon =
-    '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M14 14l-2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  readonly searchPrefixIcon = 'search';
 
   searchQuery = '';
   groupedResults: GroupedResults = {
@@ -61,7 +60,8 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
 
   constructor(
     private searchService: SearchApiService,
-    private router: Router
+    private router: Router,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
@@ -279,11 +279,10 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
     return score;
   }
 
-  private highlightText(text: string, query: string): string {
-    if (!query || !text) return text;
-    
+  private highlightText(text: string, query: string): SafeHtml {
+    if (!query || !text) return this.sanitizer.bypassSecurityTrustHtml(text);
     const regex = new RegExp(`(${this.escapeRegex(query)})`, 'gi');
-    return text.replace(regex, '<mark>$1</mark>');
+    return this.sanitizer.bypassSecurityTrustHtml(text.replace(regex, '<mark>$1</mark>'));
   }
 
   private escapeRegex(str: string): string {

@@ -1,13 +1,17 @@
-import { Component, ElementRef, input, output, viewChild } from '@angular/core';
-import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { Component, ElementRef, input, output, viewChild, inject } from '@angular/core';
 import { TemplateSelectionSheetComponent } from './template-selection-sheet.component';
-import { MatIcon } from '@angular/material/icon';
-import { MatChipListbox, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsInputComponent,
+  DsSkeletonComponent,
+  DsFilterChipComponent,
+  DsCardComponent,
+  DsBadgeComponent,
+  DsDialogService
+} from '../design-system';
 
 export interface WhatsAppTemplate {
   id: string;
@@ -25,11 +29,23 @@ export interface MessageSendRequest {
 
 @Component({
     selector: 'app-whatsapp-message-input',
+    standalone: true,
     templateUrl: './whatsapp-message-input.component.html',
     styleUrls: ['./whatsapp-message-input.component.css'],
-    imports: [MatIcon, MatChipListbox, MatChip, MatChipAvatar, MatChipRemove, MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatFabButton, DsSkeletonComponent]
+    imports: [
+      CommonModule, 
+      FormsModule,
+      DsButtonComponent,
+      DsIconComponent,
+      DsInputComponent,
+      DsSkeletonComponent,
+      DsFilterChipComponent,
+      DsCardComponent
+    ]
 })
 export class WhatsappMessageInputComponent {
+  private dsDialogService = inject(DsDialogService);
+
   readonly templates = input<WhatsAppTemplate[]>([]);
   readonly disabled = input(false);
   readonly sending = input(false);
@@ -43,19 +59,16 @@ export class WhatsappMessageInputComponent {
   selectedTemplate: WhatsAppTemplate | null = null;
   templateVariables: Record<string, string> = {};
 
-  constructor(private bottomSheet: MatBottomSheet) {}
-
   openTemplateSelector(): void {
-    const sheetRef = this.bottomSheet.open(TemplateSelectionSheetComponent, {
+    const dialogRef = this.dsDialogService.open<any>(TemplateSelectionSheetComponent, {
+      panelClass: 'ds-dialog-panel--bottom-sheet',
       data: { 
         templates: this.templates(),
         currentTemplate: this.selectedTemplate
-      },
-      panelClass: 'template-bottom-sheet',
-      backdropClass: 'template-bottom-sheet-backdrop'
+      }
     });
 
-    sheetRef.afterDismissed().subscribe((result: { template: WhatsAppTemplate | null }) => {
+    dialogRef.closed.subscribe((result: { template: WhatsAppTemplate | null } | undefined) => {
       if (result) {
         this.onTemplateSelected(result.template);
       }

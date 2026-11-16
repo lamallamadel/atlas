@@ -29,27 +29,23 @@
           class="condition-row">
           <div class="condition-content">
             <!-- Field Selector -->
-            <mat-form-field appearance="outline" class="field-selector">
-              <mat-label>Champ</mat-label>
-              <mat-select formControlName="field" (selectionChange)="onFieldChange(i)">
-                @for (field of fields(); track field) {
-                  <mat-option [value]="field.key">
-                    {{ field.label }}
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+            <ds-select
+              class="field-selector"
+              label="Champ"
+              [options]="getFieldSelectorOptions()"
+              formControlName="field"
+              (ngModelChange)="onFieldChange(i)">
+            </ds-select>
+
             <!-- Operator Selector -->
-            <mat-form-field appearance="outline" class="operator-selector">
-              <mat-label>Opérateur</mat-label>
-              <mat-select formControlName="operator" (selectionChange)="onOperatorChange(i)">
-                @for (op of getOperators(i); track op) {
-                  <mat-option [value]="op.value">
-                    {{ op.label }}
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+            <ds-select
+              class="operator-selector"
+              label="Opérateur"
+              [options]="getOperatorOptions(i)"
+              formControlName="operator"
+              (ngModelChange)="onOperatorChange(i)">
+            </ds-select>
+
             <!-- Value Input (conditional) -->
             @if (requiresValue(i)) {
               <div class="value-input">
@@ -71,50 +67,50 @@
                     formControlName="value">
                   </ds-input>
                 }
-                <!-- Date Input -->
+                <!-- Date Input (Native) -->
                 @if (getFieldType(i) === 'date') {
-                  <mat-form-field appearance="outline" class="value-field">
-                    <mat-label>Date</mat-label>
-                    <input matInput [matDatepicker]="picker" formControlName="value">
-                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-datepicker #picker></mat-datepicker>
-                  </mat-form-field>
+                  <div class="ds-field value-field">
+                    <label class="ds-field__label">Date</label>
+                    <div class="ds-field__wrap">
+                      <input 
+                        type="date" 
+                        class="ds-field__input" 
+                        formControlName="value" />
+                    </div>
+                  </div>
                 }
                 <!-- Select Input (Single) -->
                 @if (getFieldType(i) === 'select' && !isMultiSelect(i)) {
-                  <mat-form-field appearance="outline" class="value-field">
-                    <mat-label>Valeur</mat-label>
-                    <mat-select formControlName="value">
-                      @for (option of getFieldOptions(i); track option) {
-                        <mat-option [value]="option.value">
-                          {{ option.label }}
-                        </mat-option>
-                      }
-                    </mat-select>
-                  </mat-form-field>
+                  <ds-select
+                    class="value-field"
+                    label="Valeur"
+                    [options]="getFieldOptions(i)"
+                    formControlName="value"
+                    placeholder="Sélectionner…">
+                  </ds-select>
                 }
-                <!-- Select Input (Multiple) -->
+                <!-- Select Input (Multiple - fallback to native for now as ds-select is single) -->
                 @if (getFieldType(i) === 'select' && isMultiSelect(i)) {
-                  <mat-form-field appearance="outline" class="value-field">
-                    <mat-label>Valeurs</mat-label>
-                    <mat-select formControlName="value" multiple>
-                      @for (option of getFieldOptions(i); track option) {
-                        <mat-option [value]="option.value">
-                          {{ option.label }}
-                        </mat-option>
-                      }
-                    </mat-select>
-                  </mat-form-field>
+                  <div class="ds-field value-field">
+                    <label class="ds-field__label">Valeurs (multi)</label>
+                    <div class="ds-field__wrap">
+                      <select multiple class="ds-field__input" formControlName="value" style="height: auto; min-height: 42px; padding: 8px;">
+                        @for (option of getFieldOptions(i); track option.value) {
+                          <option [value]="option.value">{{ option.label }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
                 }
                 <!-- Boolean Input -->
                 @if (getFieldType(i) === 'boolean') {
-                  <mat-form-field appearance="outline" class="value-field">
-                    <mat-label>Valeur</mat-label>
-                    <mat-select formControlName="value">
-                      <mat-option [value]="true">Vrai</mat-option>
-                      <mat-option [value]="false">Faux</mat-option>
-                    </mat-select>
-                  </mat-form-field>
+                  <ds-select
+                    class="value-field"
+                    label="Valeur"
+                    [options]="booleanOptions"
+                    formControlName="value"
+                    placeholder="Sélectionner…">
+                  </ds-select>
                 }
               </div>
             }
@@ -149,7 +145,7 @@
     <!-- Result Count -->
     @if (resultCount !== null || countLoading) {
       <div class="result-count-section">
-        <ds-card class="count-card" [pad]="true" [elevation]="'xs'">
+        <ds-card class="count-card" [pad]="true" elevation="xs">
             <div class="count-content">
               @if (!countLoading) {
                 <ds-icon name="filter" [size]="24" class="count-icon"></ds-icon>

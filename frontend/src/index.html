@@ -50,5 +50,15 @@
     <p>Cette application nécessite JavaScript pour fonctionner. Veuillez activer JavaScript dans votre navigateur.</p>
   </noscript>
   <app-root></app-root>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('ServiceWorker unregistered to clear cache.');
+        }
+      });
+    }
+  </script>
 </body>
 </html>

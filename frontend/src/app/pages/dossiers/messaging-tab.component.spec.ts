@@ -1,56 +1,49 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
 import { MessagingTabComponent } from './messaging-tab.component';
 import { OutboundMessageFormComponent } from './outbound-message-form.component';
 import { OutboundMessageListComponent } from './outbound-message-list.component';
 import {
   OutboundMessageApiService,
-  OutboundMessageStatus,
-} from '../../services/outbound-message-api.service';
+  OutboundMessageStatus} from '../../services/outbound-message-api.service';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
 import { MaterialTestingModule } from '../../testing/material-testing.module';
+import { DsDialogService, DsToastService } from '../../design-system';
 
 describe('MessagingTabComponent', () => {
   let component: MessagingTabComponent;
   let fixture: ComponentFixture<MessagingTabComponent>;
-  let mockDialog: AngularVitestPartialMock<MatDialog>;
-  let mockSnackBar: AngularVitestPartialMock<MatSnackBar>;
+  let mockDsDialog: AngularVitestPartialMock<DsDialogService>;
+  let mockToastService: AngularVitestPartialMock<DsToastService>;
   let mockOutboundMessageService: AngularVitestPartialMock<OutboundMessageApiService>;
 
   beforeEach(async () => {
-    mockDialog = {
-      open: vi.fn().mockName('MatDialog.open'),
-    };
-    mockSnackBar = {
-      open: vi.fn().mockName('MatSnackBar.open'),
-    };
+    mockDsDialog = {
+      open: vi.fn().mockName('DsDialogService.open')};
+    mockToastService = {
+      success: vi.fn().mockName('DsToastService.success'),
+      error: vi.fn().mockName('DsToastService.error'),
+      info: vi.fn().mockName('DsToastService.info')};
     mockOutboundMessageService = {
       retry: vi.fn().mockName('OutboundMessageApiService.retry'),
       listTemplates: vi
         .fn()
         .mockName('OutboundMessageApiService.listTemplates'),
       create: vi.fn().mockName('OutboundMessageApiService.create'),
-      list: vi.fn().mockName('OutboundMessageApiService.list'),
-    };
+      list: vi.fn().mockName('OutboundMessageApiService.list')};
 
     await TestBed.configureTestingModule({
       imports: [
         MaterialTestingModule,
         MessagingTabComponent,
         OutboundMessageFormComponent,
-        OutboundMessageListComponent,
-      ],
+        OutboundMessageListComponent],
       providers: [
-        { provide: MatDialog, useValue: mockDialog },
-        { provide: MatSnackBar, useValue: mockSnackBar },
+        { provide: DsDialogService, useValue: mockDsDialog },
+        { provide: DsToastService, useValue: mockToastService },
         {
           provide: OutboundMessageApiService,
-          useValue: mockOutboundMessageService,
-        },
-      ],
-    }).compileComponents();
+          useValue: mockOutboundMessageService}]}).compileComponents();
 
     fixture = TestBed.createComponent(MessagingTabComponent);
     component = fixture.componentInstance;
@@ -64,14 +57,7 @@ describe('MessagingTabComponent', () => {
   it('should show success message when message is sent', () => {
     component.onMessageSent();
 
-    expect(mockSnackBar.open).toHaveBeenCalledWith(
-      'Message envoyé avec succès',
-      'Fermer',
-      expect.objectContaining({
-        duration: 3000,
-        panelClass: ['success-snackbar'],
-      })
-    );
+    expect(mockToastService.success).toHaveBeenCalledWith('Message envoyé avec succès');
   });
 
   it('should open confirmation dialog on retry', () => {
@@ -85,25 +71,18 @@ describe('MessagingTabComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 1,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00',
-    };
+      updatedAt: '2024-01-15T10:00:00'};
 
-    const dialogRefSpy = {
-      afterClosed: vi.fn().mockName('MatDialogRef.afterClosed'),
-    };
-    dialogRefSpy.afterClosed.mockReturnValue(of(false));
-    mockDialog.open.mockReturnValue(dialogRefSpy);
+    mockDsDialog.open.mockReturnValue({ closed: of(false) });
 
     component.onRetryMessage(message);
 
-    expect(mockDialog.open).toHaveBeenCalledWith(
+    expect(mockDsDialog.open).toHaveBeenCalledWith(
       ConfirmDeleteDialogComponent,
       expect.objectContaining({
         width: '400px',
         data: expect.objectContaining({
-          title: "Réessayer l'envoi",
-        }),
-      })
+          title: "Réessayer l'envoi"})})
     );
   });
 
@@ -118,32 +97,20 @@ describe('MessagingTabComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 1,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00',
-    };
+      updatedAt: '2024-01-15T10:00:00'};
 
-    const dialogRefSpy = {
-      afterClosed: vi.fn().mockName('MatDialogRef.afterClosed'),
-    };
-    dialogRefSpy.afterClosed.mockReturnValue(of(true));
-    mockDialog.open.mockReturnValue(dialogRefSpy);
+    mockDsDialog.open.mockReturnValue({ closed: of(true) });
 
     const updatedMessage = {
       ...message,
       status: OutboundMessageStatus.QUEUED,
-      attemptCount: 2,
-    };
+      attemptCount: 2};
     mockOutboundMessageService.retry.mockReturnValue(of(updatedMessage));
 
     component.onRetryMessage(message);
 
     expect(mockOutboundMessageService.retry).toHaveBeenCalledWith(1);
-    expect(mockSnackBar.open).toHaveBeenCalledWith(
-      'Message en cours de renvoi...',
-      'Fermer',
-      expect.objectContaining({
-        panelClass: ['success-snackbar'],
-      })
-    );
+    expect(mockToastService.info).toHaveBeenCalledWith('Message en cours de renvoi...');
   });
 
   it('should show error message when retry fails', () => {
@@ -157,14 +124,9 @@ describe('MessagingTabComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 1,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00',
-    };
+      updatedAt: '2024-01-15T10:00:00'};
 
-    const dialogRefSpy = {
-      afterClosed: vi.fn().mockName('MatDialogRef.afterClosed'),
-    };
-    dialogRefSpy.afterClosed.mockReturnValue(of(true));
-    mockDialog.open.mockReturnValue(dialogRefSpy);
+    mockDsDialog.open.mockReturnValue({ closed: of(true) });
 
     mockOutboundMessageService.retry.mockReturnValue(
       throwError(() => ({ error: { message: 'Retry failed' } }))
@@ -172,12 +134,6 @@ describe('MessagingTabComponent', () => {
 
     component.onRetryMessage(message);
 
-    expect(mockSnackBar.open).toHaveBeenCalledWith(
-      'Retry failed',
-      'Fermer',
-      expect.objectContaining({
-        panelClass: ['error-snackbar'],
-      })
-    );
+    expect(mockToastService.error).toHaveBeenCalledWith('Retry failed');
   });
 });

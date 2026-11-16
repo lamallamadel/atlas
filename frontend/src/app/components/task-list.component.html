@@ -51,21 +51,13 @@
           (tabChange)="onAssignmentSegmentChange($event)">
         </ds-tabs>
 
-        <mat-form-field appearance="outline" class="task-status-field" subscriptSizing="dynamic">
-          <mat-label>Statut</mat-label>
-          <mat-select [(ngModel)]="statusFilter" (selectionChange)="onStatusFilterChange()">
-            <mat-option [value]="StatusFilter.ALL">Toutes</mat-option>
-            <mat-option [value]="StatusFilter.OVERDUE">
-              En retard ({{ overdueCount }})
-            </mat-option>
-            <mat-option [value]="StatusFilter.UPCOMING">
-              À venir ({{ upcomingCount }})
-            </mat-option>
-            <mat-option [value]="StatusFilter.COMPLETED">
-              Terminées ({{ completedCount }})
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+        <ds-select
+          label="Statut"
+          [options]="statusFilterOptions"
+          [(ngModel)]="statusFilter"
+          (ngModelChange)="onStatusFilterChange()"
+          prefixIcon="filter">
+        </ds-select>
       </div>
 
       <div class="task-toolbar__right">

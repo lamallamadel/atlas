@@ -1,15 +1,22 @@
-import { Component } from '@angular/core';
-import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, inject } from '@angular/core';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { LeadApiService } from '../services/lead-api.service';
-import { MatIcon } from '@angular/material/icon';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 import { FormsModule } from '@angular/forms';
-import { MatProgressBar } from '@angular/material/progress-bar';
-import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsRadioGroupComponent, 
+  DsRadioOption,
+  DsSkeletonComponent,
+  DsCardComponent,
+  DsBadgeComponent,
+  DsProgressBarComponent,
+  DsToastService,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
 export interface LeadImportError {
   row: number;
@@ -28,11 +35,26 @@ export interface LeadImportResponse {
 
 @Component({
     selector: 'app-lead-import-dialog',
+    standalone: true,
     templateUrl: './lead-import-dialog.component.html',
     styleUrls: ['./lead-import-dialog.component.css'],
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatButton, MatIconButton, MatRadioGroup, FormsModule, MatRadioButton, DsSkeletonComponent, MatProgressBar, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions]
+    imports: [
+      CommonModule,
+      FormsModule, 
+      DsButtonComponent,
+      DsIconComponent,
+      DsRadioGroupComponent,
+      DsCardComponent,
+      DsProgressBarComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class LeadImportDialogComponent {
+  private leadApiService = inject(LeadApiService);
+  private toastService = inject(DsToastService);
+
   selectedFile: File | null = null;
   duplicateStrategy: 'SKIP' | 'OVERWRITE' | 'CREATE_NEW' = 'SKIP';
   isDragging = false;
@@ -42,10 +64,14 @@ export class LeadImportDialogComponent {
   errors: LeadImportError[] = [];
   showErrors = false;
 
+  readonly strategyOptions: DsRadioOption[] = [
+    { value: 'SKIP', label: 'Ignorer les doublons', description: 'Ne pas importer si un prospect avec le même téléphone existe.' },
+    { value: 'OVERWRITE', label: 'Écraser les doublons', description: 'Mettre à jour les informations du prospect existant.' },
+    { value: 'CREATE_NEW', label: 'Créer de nouveaux prospects', description: 'Importer même si un doublon potentiel est détecté.' }
+  ];
+
   constructor(
-    public dialogRef: MatDialogRef<LeadImportDialogComponent>,
-    private leadApiService: LeadApiService,
-    private snackBar: MatSnackBar
+    public dialogRef: DialogRef<any>
   ) {}
 
   onFileSelected(event: Event): void {
@@ -79,18 +105,12 @@ export class LeadImportDialogComponent {
 
   private validateAndSetFile(file: File): void {
     if (!file.name.toLowerCase().endsWith('.csv')) {
-      this.snackBar.open('Seuls les fichiers CSV sont acceptés', 'Fermer', {
-        duration: 3000,
-        panelClass: ['error-snackbar']
-      });
+      this.toastService.error('Seuls les fichiers CSV sont acceptés');
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      this.snackBar.open('Le fichier ne doit pas dépasser 10 Mo', 'Fermer', {
-        duration: 3000,
-        panelClass: ['error-snackbar']
-      });
+      this.toastService.error('Le fichier ne doit pas dépasser 10 Mo');
       return;
     }
 
@@ -106,7 +126,7 @@ export class LeadImportDialogComponent {
 
   startImport(): void {
     if (!this.selectedFile) {
-      this.snackBar.open('Veuillez sélectionner un fichier', 'Fermer', { duration: 3000 });
+      this.toastService.warning('Veuillez sélectionner un fichier');
       return;
     }
 
@@ -123,26 +143,19 @@ export class LeadImportDialogComponent {
           this.errors = response.validationErrors || [];
           
           if (response.errorCount > 0 || response.skippedCount > 0) {
-            this.snackBar.open(
-              `Import terminé: ${response.successCount} réussi(s), ${response.errorCount} erreur(s), ${response.skippedCount} ignoré(s)`,
-              'Fermer',
-              { duration: 5000, panelClass: ['warning-snackbar'] }
+            this.toastService.warning(
+              `Import terminé: ${response.successCount} réussi(s), ${response.errorCount} erreur(s), ${response.skippedCount} ignoré(s)`
             );
           } else {
-            this.snackBar.open(
-              `Import terminé avec succès: ${response.successCount} prospect(s) importé(s)`,
-              'Fermer',
-              { duration: 5000, panelClass: ['success-snackbar'] }
+            this.toastService.success(
+              `Import terminé avec succès: ${response.successCount} prospect(s) importé(s)`
             );
           }
         },
         error: (err) => {
           this.isUploading = false;
           const message = err.error?.message || 'Échec de l\'import';
-          this.snackBar.open(message, 'Fermer', {
-            duration: 5000,
-            panelClass: ['error-snackbar']
-          });
+          this.toastService.error(message);
         }
       });
   }

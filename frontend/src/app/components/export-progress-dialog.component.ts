@@ -1,11 +1,18 @@
-import { Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { Component, Inject, OnDestroy, inject } from '@angular/core';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ExportService, ExportProgress } from '../services/export.service';
 import { Subscription } from 'rxjs';
-import { MatIcon } from '@angular/material/icon';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatProgressBar } from '@angular/material/progress-bar';
-import { MatButton } from '@angular/material/button';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsProgressBarComponent,
+  DsProgressBarVariant,
+  DsCardComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
 export interface ExportProgressDialogData {
   message: string;
@@ -13,132 +20,73 @@ export interface ExportProgressDialogData {
 
 @Component({
     selector: 'app-export-progress-dialog',
+    standalone: true,
     template: `
-    <div class="export-progress-dialog">
-      <h2 mat-dialog-title>
-        <mat-icon class="title-icon">{{getTitleIcon()}}</mat-icon>
-        {{ getTitle() }}
-      </h2>
+    <ds-dialog-header (close)="close()">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <ds-icon [name]="getTitleIcon()" [size]="24" [style.color]="getIconColor()"></ds-icon>
+        <span>{{ getTitle() }}</span>
+      </div>
+    </ds-dialog-header>
+
+    <ds-dialog-content>
+      <div class="progress-container ds-form-stack">
+        <ds-progress-bar
+          mode="determinate"
+          [value]="progress?.progress || 0"
+          [variant]="getProgressVariant()">
+        </ds-progress-bar>
     
-      <mat-dialog-content>
-        <div class="progress-container">
-          <mat-progress-bar
-            mode="determinate"
-            [value]="progress?.progress || 0"
-            [color]="getProgressColor()">
-          </mat-progress-bar>
+        <div class="progress-message" style="display: flex; align-items: center; gap: 12px; margin-top: 16px;">
+          @if (progress?.stage === 'complete') {
+            <ds-icon name="check" [size]="20" style="color: var(--ds-success);"></ds-icon>
+          }
+          @if (progress?.stage === 'error') {
+            <ds-icon name="info" [size]="20" style="color: var(--ds-error);"></ds-icon>
+          }
+          <span style="font-size: 14px; color: var(--ds-text);">{{ progress?.message || data.message }}</span>
+        </div>
     
-          <div class="progress-message">
-            @if (progress?.stage === 'complete') {
-              <mat-icon class="success-icon">check_circle</mat-icon>
-            }
-            @if (progress?.stage === 'error') {
-              <mat-icon class="error-icon">error</mat-icon>
-            }
-            <span>{{ progress?.message || data.message }}</span>
-          </div>
-    
-          @if (progress && progress.error) {
-            <div class="error-details">
+        @if (progress && progress.error) {
+          <ds-card [pad]="true" elevation="xs" style="margin-top: 16px; background: var(--ds-error-hl); border: 1px solid var(--ds-error);">
+            <div style="font-size: 13px; color: var(--ds-error); font-weight: 500;">
               {{ progress.error }}
             </div>
-          }
-        </div>
-      </mat-dialog-content>
-    
-      <mat-dialog-actions align="end">
-        <button
-          mat-button
-          (click)="close()"
-          [disabled]="progress?.stage === 'preparing' || progress?.stage === 'generating'">
-          {{ progress?.stage === 'complete' ? 'Fermer' : 'Annuler' }}
-        </button>
-      </mat-dialog-actions>
-    </div>
+          </ds-card>
+        }
+      </div>
+    </ds-dialog-content>
+
+    <ds-dialog-actions align="end">
+      <ds-button
+        variant="ghost"
+        size="md"
+        (dsClick)="close()"
+        [disabled]="progress?.stage === 'preparing' || progress?.stage === 'generating'">
+        {{ progress?.stage === 'complete' ? 'Fermer' : 'Annuler' }}
+      </ds-button>
+    </ds-dialog-actions>
     `,
-    styles: [`
-    .export-progress-dialog {
-      min-width: 400px;
-      max-width: 500px;
-    }
-
-    h2 {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 0;
-      padding: 16px 24px;
-      color: var(--ds-marine);
-    }
-
-    .title-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
-    }
-
-    mat-dialog-content {
-      padding: 24px;
-      min-height: 120px;
-    }
-
-    .progress-container {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    mat-progress-bar {
-      height: 8px;
-      border-radius: 4px;
-    }
-
-    .progress-message {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: #333;
-    }
-
-    .success-icon {
-      color: #4caf50;
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-
-    .error-icon {
-      color: #e74c3c;
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-
-    .error-details {
-      padding: 12px;
-      background-color: #ffebee;
-      border-left: 4px solid #e74c3c;
-      border-radius: 4px;
-      font-size: 13px;
-      color: #c62828;
-    }
-
-    mat-dialog-actions {
-      padding: 16px 24px;
-      border-top: 1px solid #e0e0e0;
-    }
-  `],
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatProgressBar, MatDialogActions, MatButton]
+    imports: [
+      CommonModule,
+      DsButtonComponent, 
+      DsIconComponent, 
+      DsProgressBarComponent,
+      DsCardComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class ExportProgressDialogComponent implements OnDestroy {
+  private exportService = inject(ExportService);
+  
   progress: ExportProgress | null = null;
   private progressSubscription: Subscription;
 
   constructor(
-    public dialogRef: MatDialogRef<ExportProgressDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ExportProgressDialogData,
-    private exportService: ExportService
+    public dialogRef: DialogRef<any>,
+    @Inject(DIALOG_DATA) public data: ExportProgressDialogData
   ) {
     this.progressSubscription = this.exportService.progress$.subscribe(
       progress => {
@@ -163,46 +111,42 @@ export class ExportProgressDialogComponent implements OnDestroy {
     if (!this.progress) return 'Export en cours...';
     
     switch (this.progress.stage) {
-      case 'preparing':
-        return 'Préparation...';
-      case 'generating':
-        return 'Génération...';
-      case 'complete':
-        return 'Export terminé !';
-      case 'error':
-        return 'Erreur d\'export';
-      default:
-        return 'Export en cours...';
+      case 'preparing': return 'Préparation...';
+      case 'generating': return 'Génération...';
+      case 'complete': return 'Export terminé !';
+      case 'error': return 'Erreur d\'export';
+      default: return 'Export en cours...';
     }
   }
 
   getTitleIcon(): string {
-    if (!this.progress) return 'cloud_upload';
+    if (!this.progress) return 'upload';
     
     switch (this.progress.stage) {
-      case 'preparing':
-        return 'hourglass_empty';
-      case 'generating':
-        return 'sync';
-      case 'complete':
-        return 'check_circle';
-      case 'error':
-        return 'error';
-      default:
-        return 'cloud_upload';
+      case 'preparing': return 'clock';
+      case 'generating': return 'refresh';
+      case 'complete': return 'check';
+      case 'error': return 'info';
+      default: return 'upload';
     }
   }
 
-  getProgressColor(): 'primary' | 'accent' | 'warn' {
+  getIconColor(): string {
+    if (!this.progress) return 'var(--ds-marine)';
+    switch (this.progress.stage) {
+      case 'complete': return 'var(--ds-success)';
+      case 'error': return 'var(--ds-error)';
+      default: return 'var(--ds-marine)';
+    }
+  }
+
+  getProgressVariant(): DsProgressBarVariant {
     if (!this.progress) return 'primary';
     
     switch (this.progress.stage) {
-      case 'error':
-        return 'warn';
-      case 'complete':
-        return 'accent';
-      default:
-        return 'primary';
+      case 'error': return 'error';
+      case 'complete': return 'success';
+      default: return 'primary';
     }
   }
 }

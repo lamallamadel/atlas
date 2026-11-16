@@ -1,17 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AnalyticsApiService, CustomQuery } from '../services/analytics-api.service';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
-import { MatChipsModule } from '@angular/material/chips';
-import { DsCardComponent } from '../design-system';
+import { 
+  DsCardComponent, 
+  DsSelectComponent, 
+  DsInputComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsCheckboxComponent, 
+  DsBadgeComponent, 
+  DsSelectOption, 
+  DsToastService,
+  DsTableComponent,
+  DsColumn,
+  DsRowAction
+} from '../design-system';
 
 @Component({
   selector: 'app-custom-query-builder',
@@ -20,218 +24,155 @@ import { DsCardComponent } from '../design-system';
     CommonModule,
     FormsModule,
     DsCardComponent,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatTableModule,
-    MatChipsModule,
+    DsSelectComponent,
+    DsInputComponent,
+    DsButtonComponent,
+    DsIconComponent,
+    DsCheckboxComponent,
+    DsBadgeComponent,
+    DsTableComponent,
+    DsCellDirective
   ],
   template: `
-    <div class="custom-query-builder">
+    <div class="custom-query-builder ds-form-stack" style="padding: 32px; max-width: var(--ds-content-wide); margin: 0 auto;">
+      <header style="margin-bottom: 32px;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: var(--ds-marine); font-family: var(--ds-font-display);">Constructeur de requêtes SQL</h1>
+        <p style="margin: 8px 0 0; color: var(--ds-text-muted);">Créez et exécutez des requêtes personnalisées sur vos données</p>
+      </header>
+
       <ds-card [pad]="false" [elevation]="'sm'">
-        <div class="cq-card-header">
-          <h3 class="cq-card-title">Custom SQL Query Builder</h3>
-          <button mat-raised-button color="primary" (click)="createNewQuery()">
-            <mat-icon>add</mat-icon>
-            New Query
-          </button>
+        <div class="cq-card-header" style="padding: 24px 24px 0; display: flex; justify-content: space-between; align-items: center;">
+          <h3 class="cq-card-title" style="margin: 0; font-size: 18px; font-weight: 700; color: var(--ds-marine);">Requêtes enregistrées</h3>
+          <ds-button variant="marine" (dsClick)="createNewQuery()">
+            <ds-icon name="plus" [size]="20" style="margin-right: 8px;"></ds-icon>
+            Nouvelle requête
+          </ds-button>
         </div>
-        <div class="cq-card-body">
+        
+        <div class="cq-card-body" style="padding: 24px;">
           @if (!editingQuery) {
-            <div class="query-list">
-              <mat-form-field appearance="outline" class="filter-field">
-                <mat-label>Filter by Category</mat-label>
-                <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onCategoryChange()">
-                  <mat-option value="">All</mat-option>
-                  <mat-option value="leads">Leads</mat-option>
-                  <mat-option value="sales">Sales</mat-option>
-                  <mat-option value="agents">Agents</mat-option>
-                  <mat-option value="properties">Properties</mat-option>
-                </mat-select>
-              </mat-form-field>
-              <table mat-table [dataSource]="queries" class="queries-table">
-                <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef>Name</th>
-                  <td mat-cell *matCellDef="let query">{{query.name}}</td>
-                </ng-container>
-                <ng-container matColumnDef="category">
-                  <th mat-header-cell *matHeaderCellDef>Category</th>
-                  <td mat-cell *matCellDef="let query">{{query.category}}</td>
-                </ng-container>
-                <ng-container matColumnDef="isApproved">
-                  <th mat-header-cell *matHeaderCellDef>Status</th>
-                  <td mat-cell *matCellDef="let query">
-                    <mat-chip [color]="query.isApproved ? 'primary' : 'warn'" selected>
-                      {{query.isApproved ? 'Approved' : 'Pending'}}
-                    </mat-chip>
-                  </td>
-                </ng-container>
-                <ng-container matColumnDef="executionCount">
-                  <th mat-header-cell *matHeaderCellDef>Executions</th>
-                  <td mat-cell *matCellDef="let query">{{query.executionCount || 0}}</td>
-                </ng-container>
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
-                  <td mat-cell *matCellDef="let query">
-                    <button type="button" mat-icon-button (click)="editQuery(query)" title="Edit">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button type="button" mat-icon-button (click)="executeQuery(query)"
-                      [disabled]="!query.isApproved" title="Execute">
-                      <mat-icon>play_arrow</mat-icon>
-                    </button>
-                    <button type="button" mat-icon-button (click)="deleteQuery(query)" title="Delete" color="warn">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-              </table>
+            <div class="query-list ds-form-stack">
+              <div class="filter-field" style="max-width: 300px;">
+                <ds-select
+                  label="Filtrer par catégorie"
+                  [options]="categoryOptions"
+                  [(ngModel)]="selectedCategory"
+                  (valueChange)="onCategoryChange()">
+                </ds-select>
+              </div>
+
+              <ds-table
+                [columns]="dsColumns"
+                [data]="queries"
+                [rowActions]="dsRowActions"
+                (rowAction)="onRowAction($event)"
+                emptyTitle="Aucune requête trouvée"
+                emptyDescription="Créez votre première requête personnalisée pour explorer vos données.">
+                
+                <ng-template dsCell="isApproved" let-query>
+                  <ds-badge [status]="query.isApproved ? 'active' : 'warning'" size="sm" [showDot]="false">
+                    {{query.isApproved ? 'Approuvée' : 'En attente'}}
+                  </ds-badge>
+                </ng-template>
+
+                <ng-template dsCell="executionCount" let-query>
+                  {{query.executionCount || 0}}
+                </ng-template>
+              </ds-table>
             </div>
           }
     
           @if (editingQuery) {
-            <div class="query-editor">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Query Name</mat-label>
-                <input matInput [(ngModel)]="editingQuery.name" required>
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Description</mat-label>
-                <textarea matInput [(ngModel)]="editingQuery.description" rows="2"></textarea>
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Category</mat-label>
-                <mat-select [(ngModel)]="editingQuery.category">
-                  <mat-option value="leads">Leads</mat-option>
-                  <mat-option value="sales">Sales</mat-option>
-                  <mat-option value="agents">Agents</mat-option>
-                  <mat-option value="properties">Properties</mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>SQL Query</mat-label>
-                <textarea matInput [(ngModel)]="editingQuery.sqlQuery"
-                  rows="10"
-                  placeholder="SELECT * FROM dossier WHERE ..."
-                class="sql-editor"></textarea>
-                <mat-hint>Only SELECT queries are allowed</mat-hint>
-              </mat-form-field>
-              <mat-checkbox [(ngModel)]="editingQuery.isPublic">
-                Make this query public
-              </mat-checkbox>
-              <div class="editor-actions">
-                <button mat-raised-button (click)="cancelEdit()">Cancel</button>
-                <button mat-raised-button color="primary" (click)="saveQuery()">Save</button>
+            <div class="query-editor ds-form-stack" style="max-width: 800px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--ds-divider);">
+              <ds-input label="Nom de la requête" [(ngModel)]="editingQuery.name" required="true" placeholder="ex. Liste des prospects par ville"></ds-input>
+              
+              <div class="ds-field">
+                <label class="ds-field__label">Description</label>
+                <div class="ds-field__wrap">
+                  <textarea class="ds-field__input" [(ngModel)]="editingQuery.description" rows="2" style="height: auto; padding: 12px;"></textarea>
+                </div>
+              </div>
+
+              <ds-select
+                label="Catégorie"
+                [options]="categoryOptions.slice(1)"
+                [(ngModel)]="editingQuery.category">
+              </ds-select>
+
+              <div class="ds-field">
+                <label class="ds-field__label">Requête SQL</label>
+                <div class="ds-field__wrap">
+                  <textarea class="ds-field__input sql-editor" [(ngModel)]="editingQuery.sqlQuery"
+                    rows="10"
+                    placeholder="SELECT * FROM dossier WHERE ..."
+                    style="height: auto; padding: 12px; font-family: var(--ds-font-mono); font-size: 13px;"></textarea>
+                </div>
+                <p class="ds-field__hint">Seules les requêtes SELECT sont autorisées</p>
+              </div>
+
+              <ds-checkbox [(ngModel)]="editingQuery.isPublic" label="Rendre cette requête publique pour l'équipe"></ds-checkbox>
+
+              <div class="editor-actions" style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--ds-divider);">
+                <ds-button variant="ghost" size="md" (dsClick)="cancelEdit()">Annuler</ds-button>
+                <ds-button variant="marine" size="md" (dsClick)="saveQuery()" [disabled]="!editingQuery.name || !editingQuery.sqlQuery">
+                  Enregistrer la requête
+                </ds-button>
               </div>
             </div>
           }
     
           @if (queryResults) {
-            <div class="query-results">
-              <h3>Query Results</h3>
-              <table mat-table [dataSource]="queryResults" class="results-table">
-                @for (col of resultColumns; track col) {
-                  <ng-container [matColumnDef]="col">
-                    <th mat-header-cell *matHeaderCellDef>{{col}}</th>
-                    <td mat-cell *matCellDef="let row">{{row[col]}}</td>
-                  </ng-container>
-                }
-                <tr mat-header-row *matHeaderRowDef="resultColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: resultColumns;"></tr>
-              </table>
-              <button mat-raised-button (click)="exportResults()" class="export-btn">
-                <mat-icon>download</mat-icon>
-                Export to CSV
-              </button>
+            <div class="query-results ds-form-stack" style="margin-top: 48px; padding-top: 32px; border-top: 2px solid var(--ds-divider);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--ds-marine);">Résultats de la requête</h3>
+                <ds-button variant="ghost" size="sm" (dsClick)="exportResults()">
+                  <ds-icon name="download" [size]="16" style="margin-right: 8px;"></ds-icon>
+                  Exporter en CSV
+                </ds-button>
+              </div>
+
+              <ds-table
+                [columns]="resultDsColumns"
+                [data]="queryResults"
+                [showTableHeader]="true">
+              </ds-table>
             </div>
           }
         </div>
       </ds-card>
     </div>
-    `,
-  styles: [`
-    .custom-query-builder {
-      padding: 20px;
-    }
-
-    .cq-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding: 16px 16px 0;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .cq-card-title {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .cq-card-body {
-      padding: 0 16px 16px;
-    }
-
-    .filter-field {
-      width: 200px;
-      margin-bottom: 20px;
-    }
-
-    .queries-table, .results-table {
-      width: 100%;
-      margin-top: 20px;
-    }
-
-    .full-width {
-      width: 100%;
-      margin-bottom: 16px;
-    }
-
-    .sql-editor {
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-    }
-
-    .editor-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-      margin-top: 20px;
-    }
-
-    .query-results {
-      margin-top: 30px;
-    }
-
-    .export-btn {
-      margin-top: 16px;
-    }
-
-    mat-chip {
-      font-size: 12px;
-    }
-  `]
+    `
 })
 export class CustomQueryBuilderComponent implements OnInit {
+  private analyticsService = inject(AnalyticsApiService);
+  private toastService = inject(DsToastService);
+
   queries: CustomQuery[] = [];
   editingQuery: CustomQuery | null = null;
   selectedCategory = '';
   queryResults: any[] | null = null;
-  resultColumns: string[] = [];
+  resultDsColumns: DsColumn<any>[] = [];
   
-  displayedColumns = ['name', 'category', 'isApproved', 'executionCount', 'actions'];
+  dsColumns: DsColumn<CustomQuery>[] = [
+    { key: 'name',           header: 'Nom' },
+    { key: 'category',       header: 'Catégorie' },
+    { key: 'isApproved',     header: 'Statut' },
+    { key: 'executionCount', header: 'Exécutions' }
+  ];
 
-  constructor(
-    private analyticsService: AnalyticsApiService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
+  dsRowActions: DsRowAction<CustomQuery>[] = [
+    { icon: 'edit',  label: 'Modifier',  action: 'edit',    ariaLabel: 'Modifier la requête' },
+    { icon: 'chart', label: 'Exécuter', action: 'execute', ariaLabel: 'Exécuter la requête' },
+    { icon: 'trash', label: 'Supprimer', action: 'delete',  ariaLabel: 'Supprimer la requête' }
+  ];
+
+  readonly categoryOptions: DsSelectOption[] = [
+    { value: '', label: 'Toutes les catégories' },
+    { value: 'leads', label: 'Prospects' },
+    { value: 'sales', label: 'Ventes' },
+    { value: 'agents', label: 'Agents' },
+    { value: 'properties', label: 'Biens' }
+  ];
 
   ngOnInit(): void {
     this.loadQueries();
@@ -243,7 +184,7 @@ export class CustomQueryBuilderComponent implements OnInit {
         this.queries = response.content || [];
       },
       error: () => {
-        this.snackBar.open('Failed to load queries', 'Close', { duration: 3000 });
+        this.toastService.error('Échec du chargement des requêtes');
       }
     });
   }
@@ -271,12 +212,12 @@ export class CustomQueryBuilderComponent implements OnInit {
 
     saveOperation.subscribe({
       next: () => {
-        this.snackBar.open('Query saved successfully', 'Close', { duration: 3000 });
+        this.toastService.success('Requête enregistrée avec succès');
         this.editingQuery = null;
         this.loadQueries();
       },
       error: (error) => {
-        this.snackBar.open(error.error?.message || 'Failed to save query', 'Close', { duration: 3000 });
+        this.toastService.error(error.error?.message || 'Échec de l\'enregistrement');
       }
     });
   }
@@ -292,27 +233,39 @@ export class CustomQueryBuilderComponent implements OnInit {
       next: (results) => {
         this.queryResults = results;
         if (results.length > 0) {
-          this.resultColumns = Object.keys(results[0]);
+          const keys = Object.keys(results[0]);
+          this.resultDsColumns = keys.map(key => ({
+            key,
+            header: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')
+          }));
         }
-        this.snackBar.open('Query executed successfully', 'Close', { duration: 3000 });
+        this.toastService.success('Requête exécutée avec succès');
       },
       error: (error) => {
-        this.snackBar.open(error.error?.message || 'Query execution failed', 'Close', { duration: 3000 });
+        this.toastService.error(error.error?.message || 'Échec de l\'exécution');
       }
     });
+  }
+
+  onRowAction(event: { action: string; row: CustomQuery }): void {
+    switch (event.action) {
+      case 'edit':    this.editQuery(event.row); break;
+      case 'execute': this.executeQuery(event.row); break;
+      case 'delete':  this.deleteQuery(event.row); break;
+    }
   }
 
   deleteQuery(query: CustomQuery): void {
     if (!query.id) return;
 
-    if (confirm(`Are you sure you want to delete "${query.name}"?`)) {
+    if (confirm(`Voulez-vous vraiment supprimer la requête "${query.name}" ?`)) {
       this.analyticsService.deleteCustomQuery(query.id).subscribe({
         next: () => {
-          this.snackBar.open('Query deleted successfully', 'Close', { duration: 3000 });
+          this.toastService.success('Requête supprimée');
           this.loadQueries();
         },
         error: () => {
-          this.snackBar.open('Failed to delete query', 'Close', { duration: 3000 });
+          this.toastService.error('Échec de la suppression');
         }
       });
     }
@@ -338,27 +291,23 @@ export class CustomQueryBuilderComponent implements OnInit {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'query-results.csv';
+    a.download = `query_results_${new Date().getTime()}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   }
 
   private convertToCSV(data: any[]): string {
     if (data.length === 0) return '';
-
     const headers = Object.keys(data[0]);
     const csvRows = [];
-
     csvRows.push(headers.join(','));
-
     for (const row of data) {
       const values = headers.map(header => {
         const value = row[header];
-        return typeof value === 'string' ? `"${value}"` : value;
+        return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
       });
       csvRows.push(values.join(','));
     }
-
     return csvRows.join('\n');
   }
 }

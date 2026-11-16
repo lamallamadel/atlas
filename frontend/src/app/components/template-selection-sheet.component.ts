@@ -1,12 +1,18 @@
 import { Component, Inject } from '@angular/core';
-import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { WhatsAppTemplate } from './whatsapp-message-input.component';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatSelectionList, MatListOption } from '@angular/material/list';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsInputComponent,
+  DsCardComponent,
+  DsBadgeComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
 export interface TemplateSelectionData {
   templates: WhatsAppTemplate[];
@@ -15,17 +21,26 @@ export interface TemplateSelectionData {
 
 @Component({
     selector: 'app-template-selection-sheet',
+    standalone: true,
     templateUrl: './template-selection-sheet.component.html',
     styleUrls: ['./template-selection-sheet.component.css'],
-    imports: [MatIconButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatPrefix, MatSuffix, MatSelectionList, MatListOption, MatButton]
+    imports: [
+      CommonModule, 
+      FormsModule,
+      DsButtonComponent,
+      DsIconComponent,
+      DsInputComponent,
+      DsCardComponent,
+      DsBadgeComponent
+    ]
 })
 export class TemplateSelectionSheetComponent {
   searchQuery = '';
   selectedTemplate: WhatsAppTemplate | null = null;
 
   constructor(
-    private bottomSheetRef: MatBottomSheetRef<TemplateSelectionSheetComponent>,
-    @Inject(MAT_BOTTOM_SHEET_DATA) public data: TemplateSelectionData
+    private dialogRef: DialogRef<any>,
+    @Inject(DIALOG_DATA) public data: TemplateSelectionData
   ) {
     this.selectedTemplate = data.currentTemplate;
   }
@@ -48,15 +63,15 @@ export class TemplateSelectionSheetComponent {
   }
 
   apply(): void {
-    this.bottomSheetRef.dismiss({ template: this.selectedTemplate });
+    this.dialogRef.close({ template: this.selectedTemplate });
   }
 
   clear(): void {
-    this.bottomSheetRef.dismiss({ template: null });
+    this.dialogRef.close({ template: null });
   }
 
   cancel(): void {
-    this.bottomSheetRef.dismiss();
+    this.dialogRef.close();
   }
 
   getVariablesText(variables: string[]): string {

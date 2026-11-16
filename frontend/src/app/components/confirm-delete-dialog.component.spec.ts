@@ -1,29 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
-import { MaterialTestingModule } from '../testing/material-testing.module';
 
 describe('ConfirmDeleteDialogComponent', () => {
   let component: ConfirmDeleteDialogComponent;
   let fixture: ComponentFixture<ConfirmDeleteDialogComponent>;
   const dialogRef = {
-    close: vi.fn().mockName('MatDialogRef.close'),
-  };
+    close: vi.fn().mockName('DialogRef.close')};
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MaterialTestingModule, ConfirmDeleteDialogComponent],
+      imports: [ConfirmDeleteDialogComponent],
       providers: [
-        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: DialogRef, useValue: dialogRef },
         {
-          provide: MAT_DIALOG_DATA,
+          provide: DIALOG_DATA,
           useValue: {
             title: 'Supprimer ?',
-            message: 'Confirmer suppression ?',
-          },
-        },
-      ],
-    }).compileComponents();
+            message: 'Confirmer suppression ?'}}]}).compileComponents();
 
     fixture = TestBed.createComponent(ConfirmDeleteDialogComponent);
     component = fixture.componentInstance;

@@ -1,7 +1,5 @@
-import { Component, OnInit, OnDestroy, AfterViewChecked, ChangeDetectorRef, HostListener, input, output, viewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewChecked, ChangeDetectorRef, HostListener, input, output, viewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
 import { Subject, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -24,14 +22,20 @@ import {
   ConsentementResponse 
 } from '../services/consentement-api.service';
 import { TemplateSelectionSheetComponent } from './template-selection-sheet.component';
-import { MatIcon } from '@angular/material/icon';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { MatChipListbox, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
-import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { 
+  DsButtonComponent,
+  DsIconComponent,
+  DsInputComponent,
+  DsSkeletonComponent,
+  DsFilterChipComponent,
+  DsCardComponent,
+  DsBadgeComponent,
+  DsAvatarComponent,
+  DsEmptyStateComponent,
+  DsToastService,
+  DsDialogService
+} from '../design-system';
 
 export interface MessageAttachment {
   file: File;
@@ -47,33 +51,36 @@ export interface MessageAttachment {
     styleUrls: ['./whatsapp-messaging-ui.component.scss'],
     imports: [
       CommonModule,
-      MatIcon,
-      MatIconButton,
-      DsSkeletonComponent,
+      FormsModule,
       CdkVirtualScrollViewport,
       CdkFixedSizeVirtualScroll,
       CdkVirtualForOf,
-      MatChipListbox,
-      MatChip,
-      MatChipAvatar,
-      MatChipRemove,
-      MatFormField,
-      MatLabel,
-      MatInput,
-      FormsModule,
-      MatSuffix,
-      CdkTextareaAutosize,
-      MatFabButton,
+      DsButtonComponent,
+      DsIconComponent,
+      DsInputComponent,
+      DsSkeletonComponent,
+      DsFilterChipComponent,
+      DsCardComponent,
+      DsBadgeComponent,
+      DsAvatarComponent,
+      DsEmptyStateComponent
     ],
 })
 export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterViewChecked {
+  private messageApiService = inject(MessageApiService);
+  private outboundMessageApiService = inject(OutboundMessageApiService);
+  private consentementApiService = inject(ConsentementApiService);
+  private dsDialogService = inject(DsDialogService);
+  private toastService = inject(DsToastService);
+  private cdr = inject(ChangeDetectorRef);
+
   readonly dossierId = input.required<number>();
   readonly recipientPhone = input<string>();
   readonly recipientName = input<string>();
   readonly messageActionEvent = output<{
     type: string;
     message: MessageResponse;
-}>();
+  }>();
 
   readonly viewport = viewChild(CdkVirtualScrollViewport);
   readonly messageInputRef = viewChild<any>('messageInput');
@@ -114,15 +121,6 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
   isSwiping = false;
   startX = 0;
 
-  constructor(
-    private messageApiService: MessageApiService,
-    private outboundMessageApiService: OutboundMessageApiService,
-    private consentementApiService: ConsentementApiService,
-    private bottomSheet: MatBottomSheet,
-    private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef
-  ) {}
-
   ngOnInit(): void {
     this.checkMobileView();
     this.setupOnlineStatusMonitoring();
@@ -153,13 +151,13 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
   @HostListener('window:online')
   onOnline(): void {
     this.isOnline = true;
-    this.showSnackbar('✓ Connexion rétablie', 'success');
+    this.toastService.success('Connexion rétablie');
   }
 
   @HostListener('window:offline')
   onOffline(): void {
     this.isOnline = false;
-    this.showSnackbar('⚠️ Mode hors ligne', 'warning');
+    this.toastService.warning('Mode hors ligne');
   }
 
   private checkMobileView(): void {
@@ -184,9 +182,7 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
       m.deliveryStatus === MessageDeliveryStatus.SENT
     );
 
-    if (pendingMessages.length === 0) {
-      return;
-    }
+    if (pendingMessages.length === 0) return;
 
     pendingMessages.forEach(message => {
       this.messageApiService.getById(message.id).subscribe({
@@ -248,44 +244,27 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
       error: (err) => {
         console.error('Error loading messages:', err);
         this.loading = false;
-        this.showSnackbar('Erreur lors du chargement des messages', 'error');
+        this.toastService.error('Erreur lors du chargement des messages');
       }
     });
   }
 
   openTemplateSelector(): void {
-    const sheetOrDialog = this.isMobile ? 
-      this.bottomSheet.open(TemplateSelectionSheetComponent, {
-        data: { 
-          templates: this.templates,
-          currentTemplate: this.selectedTemplate
-        },
-        panelClass: 'template-bottom-sheet',
-        backdropClass: 'template-bottom-sheet-backdrop'
-      }) : 
-      this.bottomSheet.open(TemplateSelectionSheetComponent, {
-        data: { 
-          templates: this.templates,
-          currentTemplate: this.selectedTemplate
-        },
-        panelClass: 'template-bottom-sheet-desktop',
-      });
+    const dialogRef = this.dsDialogService.open<any>(TemplateSelectionSheetComponent, {
+      panelClass: this.isMobile ? 'ds-dialog-panel--bottom-sheet' : 'template-selection-dialog',
+      data: { templates: this.templates, currentTemplate: this.selectedTemplate }
+    });
 
-    sheetOrDialog.afterDismissed().subscribe((result: any) => {
-      if (result) {
-        this.onTemplateSelected(result.template);
-      }
+    dialogRef.closed.subscribe((result: any) => {
+      if (result) this.onTemplateSelected(result.template);
     });
   }
 
   onTemplateSelected(template: OutboundMessageTemplate | null): void {
     this.selectedTemplate = template;
-    
     if (template) {
       this.templateVariables = {};
-      template.variables.forEach(variable => {
-        this.templateVariables[variable] = '';
-      });
+      template.variables.forEach(variable => { this.templateVariables[variable] = ''; });
       this.updateMessagePreview();
     } else {
       this.messageContent = '';
@@ -298,10 +277,7 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
   }
 
   updateMessagePreview(): void {
-    if (!this.selectedTemplate) {
-      return;
-    }
-
+    if (!this.selectedTemplate) return;
     let preview = this.selectedTemplate.content;
     this.selectedTemplate.variables.forEach(variable => {
       const value = this.templateVariables[variable] || `{{${variable}}}`;
@@ -318,59 +294,41 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
 
   onFileSelected(event: any): void {
     const files: FileList = event.target.files;
-    
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      
       if (this.attachments.length >= 10) {
-        this.showSnackbar('Maximum 10 fichiers autorisés', 'error');
+        this.toastService.error('Maximum 10 fichiers autorisés');
         break;
       }
-
       const attachment = this.validateAndCreateAttachment(file);
       if (attachment) {
         this.attachments.push(attachment);
-        
-        if (attachment.type === 'image') {
-          this.generateImagePreview(attachment);
-        }
+        if (attachment.type === 'image') this.generateImagePreview(attachment);
       }
     }
-    
     const fileInput = this.fileInput();
-    if (fileInput) {
-      fileInput.nativeElement.value = '';
-    }
+    if (fileInput) fileInput.nativeElement.value = '';
   }
 
   private validateAndCreateAttachment(file: File): MessageAttachment | null {
     const isImage = this.allowedImageTypes.includes(file.type);
     const isDocument = this.allowedDocumentTypes.includes(file.type);
-    
     if (!isImage && !isDocument) {
-      this.showSnackbar(`Type de fichier non supporté: ${file.name}`, 'error');
+      this.toastService.error(`Type de fichier non supporté: ${file.name}`);
       return null;
     }
-    
     const maxSize = isImage ? this.maxImageSize : this.maxFileSize;
     if (file.size > maxSize) {
       const maxSizeMB = (maxSize / (1024 * 1024)).toFixed(1);
-      this.showSnackbar(`${file.name} dépasse la taille maximale de ${maxSizeMB}MB`, 'error');
+      this.toastService.error(`${file.name} dépasse ${maxSizeMB}MB`);
       return null;
     }
-    
-    return {
-      file,
-      type: isImage ? 'image' : 'document'
-    };
+    return { file, type: isImage ? 'image' : 'document' };
   }
 
   private generateImagePreview(attachment: MessageAttachment): void {
     const reader = new FileReader();
-    reader.onload = (e: any) => {
-      attachment.preview = e.target.result;
-      this.cdr.detectChanges();
-    };
+    reader.onload = (e: any) => { attachment.preview = e.target.result; this.cdr.detectChanges(); };
     reader.readAsDataURL(attachment.file);
   }
 
@@ -392,37 +350,16 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
   }
 
   canSend(): boolean {
-    if (!this.hasValidConsent) {
-      return false;
-    }
-
-    if (!this.messageContent || this.messageContent.trim() === '') {
-      return false;
-    }
-
-    if (this.sending || !this.isOnline) {
-      return false;
-    }
-
+    if (!this.hasValidConsent || !this.messageContent?.trim() || this.sending || !this.isOnline) return false;
     if (this.selectedTemplate) {
-      const hasEmptyVariables = this.selectedTemplate.variables.some(
-        variable => !this.templateVariables[variable] || this.templateVariables[variable].trim() === ''
-      );
-      if (hasEmptyVariables) {
-        return false;
-      }
+      return !this.selectedTemplate.variables.some(v => !this.templateVariables[v]?.trim());
     }
-
     return true;
   }
 
   sendMessage(): void {
-    if (!this.canSend()) {
-      return;
-    }
-
+    if (!this.canSend()) return;
     this.sending = true;
-
     const request: MessageCreateRequest = {
       dossierId: this.dossierId(),
       channel: MessageChannel.WHATSAPP,
@@ -439,12 +376,11 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
         this.shouldScrollToBottom = true;
         this.sending = false;
         this.resetInput();
-        this.showSnackbar('Message envoyé', 'success');
+        this.toastService.success('Message envoyé');
       },
       error: (err) => {
         this.sending = false;
-        const errorMessage = err.error?.message || 'Échec de l\'envoi du message';
-        this.showSnackbar(errorMessage, 'error');
+        this.toastService.error(err.error?.message || 'Échec de l\'envoi');
         console.error('Error sending message:', err);
       }
     });
@@ -455,39 +391,25 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
     this.selectedTemplate = null;
     this.templateVariables = {};
     this.attachments = [];
-    
     const messageInputRef = this.messageInputRef();
-    if (messageInputRef) {
-      const textarea = messageInputRef.nativeElement;
-      textarea.style.height = 'auto';
-    }
+    if (messageInputRef) messageInputRef.nativeElement.style.height = 'auto';
   }
 
   scrollToBottom(): void {
     const viewport = this.viewport();
-    if (viewport) {
-      viewport.scrollToIndex(this.messages.length - 1, 'smooth');
-    }
+    if (viewport) viewport.scrollToIndex(this.messages.length - 1, 'smooth');
   }
 
   onTouchStart(event: TouchEvent, message: MessageResponse): void {
-    if (message.direction !== MessageDirection.OUTBOUND) {
-      return;
-    }
-
+    if (message.direction !== MessageDirection.OUTBOUND) return;
     this.isSwiping = true;
     this.startX = event.touches[0].clientX;
     this.swipedMessageId = message.id;
   }
 
   onTouchMove(event: TouchEvent, message: MessageResponse): void {
-    if (!this.isSwiping || this.swipedMessageId !== message.id) {
-      return;
-    }
-
-    const currentX = event.touches[0].clientX;
-    const diffX = currentX - this.startX;
-
+    if (!this.isSwiping || this.swipedMessageId !== message.id) return;
+    const diffX = event.touches[0].clientX - this.startX;
     if (diffX < 0 && diffX > -150) {
       this.swipeOffset = diffX;
       event.preventDefault();
@@ -495,178 +417,93 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
   }
 
   onTouchEnd(event: TouchEvent, message: MessageResponse): void {
-    if (!this.isSwiping || this.swipedMessageId !== message.id) {
-      return;
-    }
-
+    if (!this.isSwiping || this.swipedMessageId !== message.id) return;
     this.isSwiping = false;
     this.swipeOffset = 0;
     this.swipedMessageId = null;
   }
 
   retryMessage(message: MessageResponse, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
-    
+    if (event) event.stopPropagation();
     this.messageApiService.retry(message.id).subscribe({
       next: (updatedMessage) => {
         const index = this.messages.findIndex(m => m.id === message.id);
-        if (index !== -1) {
-          this.messages[index] = updatedMessage;
-        }
-        this.showSnackbar('Message en cours de renvoi...', 'info');
+        if (index !== -1) this.messages[index] = updatedMessage;
+        this.toastService.info('Message en cours de renvoi...');
       },
       error: (err) => {
-        const errorMessage = err.error?.message || 'Échec du renvoi du message';
-        this.showSnackbar(errorMessage, 'error');
+        this.toastService.error(err.error?.message || 'Échec du renvoi');
         console.error('Error retrying message:', err);
       }
     });
   }
 
   copyMessage(message: MessageResponse, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
+    if (event) event.stopPropagation();
     navigator.clipboard.writeText(message.content);
-    this.showSnackbar('Message copié', 'success');
+    this.toastService.success('Message copié');
   }
 
   formatTimestamp(timestamp: string): string {
     const date = new Date(timestamp);
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) {
-      return 'À l\'instant';
-    } else if (diffMins < 60) {
-      return `${diffMins} min`;
-    } else if (diffHours < 24) {
-      return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    } else if (diffDays < 7) {
-      return date.toLocaleDateString('fr-FR', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
-    } else {
-      return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    }
+    const diffMins = Math.floor((now.getTime() - date.getTime()) / 60000);
+    if (diffMins < 1) return 'À l\'instant';
+    if (diffMins < 60) return `${diffMins} min`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return date.toLocaleDateString('fr-FR', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
   getDeliveryStatusIcon(status?: MessageDeliveryStatus): string {
     switch (status) {
-      case MessageDeliveryStatus.PENDING: return 'schedule';
-      case MessageDeliveryStatus.SENT: return 'done';
-      case MessageDeliveryStatus.DELIVERED: return 'done_all';
-      case MessageDeliveryStatus.FAILED: return 'error';
-      case MessageDeliveryStatus.READ: return 'done_all';
-      default: return '';
-    }
-  }
-
-  getDeliveryStatusClass(status?: MessageDeliveryStatus): string {
-    switch (status) {
-      case MessageDeliveryStatus.PENDING: return 'status-pending';
-      case MessageDeliveryStatus.SENT: return 'status-sent';
-      case MessageDeliveryStatus.DELIVERED: return 'status-delivered';
-      case MessageDeliveryStatus.FAILED: return 'status-failed';
-      case MessageDeliveryStatus.READ: return 'status-read';
+      case MessageDeliveryStatus.PENDING: return 'clock';
+      case MessageDeliveryStatus.SENT: 
+      case MessageDeliveryStatus.DELIVERED: 
+      case MessageDeliveryStatus.READ: return 'check';
+      case MessageDeliveryStatus.FAILED: return 'close';
       default: return '';
     }
   }
 
   showDateDivider(index: number): boolean {
-    if (index === 0) {
-      return true;
-    }
-
-    const currentDate = new Date(this.messages[index].timestamp);
-    const previousDate = new Date(this.messages[index - 1].timestamp);
-
-    return currentDate.toDateString() !== previousDate.toDateString();
+    if (index === 0) return true;
+    return new Date(this.messages[index].timestamp).toDateString() !== new Date(this.messages[index - 1].timestamp).toDateString();
   }
 
   getDateDividerText(timestamp: string): string {
     const date = new Date(timestamp);
     const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return 'Aujourd\'hui';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Hier';
-    } else {
-      return date.toLocaleDateString('fr-FR', { 
-        weekday: 'long', 
-        day: 'numeric', 
-        month: 'long',
-        year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
-      });
-    }
+    if (date.toDateString() === today.toDateString()) return 'Aujourd\'hui';
+    const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) return 'Hier';
+    return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined });
   }
 
   getSwipeTransform(messageId: number): string {
-    if (this.swipedMessageId === messageId && this.isSwiping) {
-      return `translateX(${this.swipeOffset}px)`;
-    }
-    return 'translateX(0)';
+    return (this.swipedMessageId === messageId && this.isSwiping) ? `translateX(${this.swipeOffset}px)` : 'translateX(0)';
   }
 
-  trackByMessageId(index: number, message: MessageResponse): number {
-    return message.id;
-  }
+  trackByMessageId(index: number, message: MessageResponse): number { return message.id; }
 
   getPlaceholder(): string {
-    if (!this.hasValidConsent && this.consentChecked) {
-      return 'Consentement WhatsApp requis';
-    }
-    if (!this.isOnline) {
-      return 'Mode hors ligne';
-    }
-    if (this.selectedTemplate) {
-      return 'Remplissez les variables du modèle';
-    }
+    if (!this.hasValidConsent && this.consentChecked) return 'Consentement WhatsApp requis';
+    if (!this.isOnline) return 'Mode hors ligne';
+    if (this.selectedTemplate) return 'Remplissez les variables';
     return 'Tapez un message...';
   }
 
-  private showSnackbar(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {
-    this.snackBar.open(message, 'Fermer', {
-      duration: type === 'error' ? 5000 : 3000,
-      panelClass: [`${type}-snackbar`],
-      horizontalPosition: 'center',
-      verticalPosition: this.isMobile ? 'bottom' : 'top'
-    });
-  }
-
   getConsentWarningMessage(): string {
-    if (!this.consentChecked) {
-      return 'Vérification du consentement...';
-    }
-    if (!this.consent) {
-      return '⚠️ Aucun consentement WhatsApp enregistré. Veuillez obtenir le consentement avant d\'envoyer des messages.';
-    }
-    if (this.consent.status === ConsentementStatus.DENIED) {
-      return '⚠️ Le contact a refusé de recevoir des messages WhatsApp.';
-    }
-    if (this.consent.status === ConsentementStatus.REVOKED) {
-      return '⚠️ Le consentement WhatsApp a été révoqué par le contact.';
-    }
-    if (this.consent.status === ConsentementStatus.EXPIRED) {
-      return '⚠️ Le consentement WhatsApp a expiré. Veuillez le renouveler.';
-    }
+    if (!this.consentChecked) return 'Vérification...';
+    if (!this.consent) return '⚠️ Aucun consentement WhatsApp enregistré.';
+    if (this.consent.status === ConsentementStatus.DENIED) return '⚠️ Le contact a refusé WhatsApp.';
+    if (this.consent.status === ConsentementStatus.REVOKED) return '⚠️ Consentement révoqué.';
+    if (this.consent.status === ConsentementStatus.EXPIRED) return '⚠️ Consentement expiré.';
     return '';
   }
 
-  getAttachmentIcon(attachment: MessageAttachment): string {
-    return attachment.type === 'image' ? 'image' : 'description';
-  }
-
-  getAttachmentSize(attachment: MessageAttachment): string {
-    const bytes = attachment.file.size;
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  }
+  getAttachmentIcon(attachment: MessageAttachment): string { return attachment.type === 'image' ? 'image' : 'folder'; }
+  getAttachmentSize(attachment: MessageAttachment): string { return (attachment.file.size / 1024).toFixed(1) + ' KB'; }
 }

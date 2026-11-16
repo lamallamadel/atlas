@@ -1,9 +1,10 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
 import {
   DsBadgeComponent,
   type DsBadgeStatus,
 } from '../design-system/primitives/ds-badge/ds-badge.component';
+import { DsIconComponent } from '../design-system/icons/ds-icon.component';
 
 export type EntityType = 'annonce' | 'dossier' | 'property';
 
@@ -16,17 +17,15 @@ interface StatusConfig {
   icon: string;
   description: string;
   isPulse?: boolean;
-  variant?: 'success-sold' | 'success-rented' | 'success-signed' | 'success' | 
-            'warning-attention' | 'warning-urgent' | 'warning-critical' | 
-            'danger-soft' | 'danger' | 'neutral' | 'neutral-warmth' | 'info';
 }
 
 @Component({
   selector: 'app-badge-status',
+  standalone: true,
   templateUrl: './badge-status.component.html',
   styleUrls: ['./badge-status.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DsBadgeComponent, MatIcon],
+  imports: [CommonModule, DsBadgeComponent, DsIconComponent],
 })
 export class BadgeStatusComponent {
   readonly status = input.required<string>();
@@ -56,7 +55,7 @@ export class BadgeStatusComponent {
     } else if (entityType === 'property') {
       return this.getPropertyStatusConfig(this.status() as PropertyStatusType);
     }
-    return { label: this.status(), icon: 'circle', description: '' };
+    return { label: this.status(), icon: 'info', description: '' };
   }
 
   getStatusLabel(): string {
@@ -77,36 +76,24 @@ export class BadgeStatusComponent {
 
   private mapAnnonceToDs(status: AnnonceStatusType): DsBadgeStatus {
     switch (status) {
-      case 'DRAFT':
-        return 'draft';
+      case 'DRAFT': return 'draft';
       case 'PUBLISHED':
-      case 'ACTIVE':
-        return 'active';
-      case 'PAUSED':
-        return 'paused';
-      case 'ARCHIVED':
-        return 'archived';
-      default:
-        return 'neutral';
+      case 'ACTIVE': return 'active';
+      case 'PAUSED': return 'paused';
+      case 'ARCHIVED': return 'archived';
+      default: return 'neutral';
     }
   }
 
   private mapDossierToDs(status: DossierStatusType): DsBadgeStatus {
     switch (status) {
-      case 'NEW':
-        return 'new';
-      case 'QUALIFYING':
-        return 'qualification';
-      case 'QUALIFIED':
-        return 'success';
-      case 'APPOINTMENT':
-        return 'rdv';
-      case 'WON':
-        return 'won';
-      case 'LOST':
-        return 'lost';
-      default:
-        return 'neutral';
+      case 'NEW': return 'new';
+      case 'QUALIFYING': return 'qualification';
+      case 'QUALIFIED': return 'success';
+      case 'APPOINTMENT': return 'rdv';
+      case 'WON': return 'won';
+      case 'LOST': return 'lost';
+      default: return 'neutral';
     }
   }
 
@@ -114,181 +101,48 @@ export class BadgeStatusComponent {
     switch (status) {
       case 'SOLD':
       case 'RENTED':
-      case 'SIGNED':
-        return 'success';
-      case 'AVAILABLE':
-        return 'active';
+      case 'SIGNED': return 'success';
+      case 'AVAILABLE': return 'active';
       case 'PENDING':
-        return 'warning';
-      case 'RESERVED':
-        return 'warning';
-      case 'WITHDRAWN':
-        return 'archived';
-      default:
-        return 'neutral';
+      case 'RESERVED': return 'warning';
+      case 'WITHDRAWN': return 'archived';
+      default: return 'neutral';
     }
   }
 
   private getAnnonceStatusConfig(status: AnnonceStatusType): StatusConfig {
     switch (status) {
-      case 'DRAFT':
-        return {
-          label: 'Brouillon',
-          icon: 'edit',
-          description: 'Annonce en cours de rédaction',
-          variant: 'neutral'
-        };
-      case 'PUBLISHED':
-        return {
-          label: 'Publié',
-          icon: 'check_circle',
-          description: 'Annonce publiée et visible',
-          isPulse: true,
-          variant: 'success'
-        };
-      case 'ACTIVE':
-        return {
-          label: 'Actif',
-          icon: 'check_circle',
-          description: 'Annonce active et visible',
-          isPulse: true,
-          variant: 'success'
-        };
-      case 'PAUSED':
-        return {
-          label: 'En pause',
-          icon: 'pause_circle',
-          description: 'Annonce temporairement suspendue',
-          variant: 'warning-urgent'
-        };
-      case 'ARCHIVED':
-        return {
-          label: 'Archivé',
-          icon: 'archive',
-          description: 'Annonce archivée',
-          variant: 'neutral-warmth'
-        };
-      default:
-        return {
-          label: status,
-          icon: 'circle',
-          description: ''
-        };
+      case 'DRAFT': return { label: 'Brouillon', icon: 'edit', description: 'En rédaction' };
+      case 'PUBLISHED': return { label: 'Publié', icon: 'check', description: 'Public', isPulse: true };
+      case 'ACTIVE': return { label: 'Actif', icon: 'check', description: 'En ligne', isPulse: true };
+      case 'PAUSED': return { label: 'En pause', icon: 'refresh', description: 'Suspendu' };
+      case 'ARCHIVED': return { label: 'Archivé', icon: 'clock', description: 'Archivé' };
+      default: return { label: status, icon: 'info', description: '' };
     }
   }
 
   private getDossierStatusConfig(status: DossierStatusType): StatusConfig {
     switch (status) {
-      case 'NEW':
-        return {
-          label: 'Nouveau',
-          icon: 'fiber_new',
-          description: 'Nouveau dossier créé',
-          isPulse: true,
-          variant: 'info'
-        };
-      case 'QUALIFYING':
-        return {
-          label: 'Qualification',
-          icon: 'schedule',
-          description: 'Dossier en cours de qualification',
-          isPulse: true,
-          variant: 'warning-attention'
-        };
-      case 'QUALIFIED':
-        return {
-          label: 'Qualifié',
-          icon: 'verified',
-          description: 'Dossier qualifié et prêt',
-          variant: 'success'
-        };
-      case 'APPOINTMENT':
-        return {
-          label: 'Rendez-vous',
-          icon: 'event',
-          description: 'Rendez-vous programmé',
-          variant: 'info'
-        };
-      case 'WON':
-        return {
-          label: 'Gagné',
-          icon: 'check_circle',
-          description: 'Dossier gagné avec succès',
-          variant: 'success'
-        };
-      case 'LOST':
-        return {
-          label: 'Perdu',
-          icon: 'cancel',
-          description: 'Dossier perdu ou annulé',
-          variant: 'danger-soft'
-        };
-      default:
-        return {
-          label: status,
-          icon: 'circle',
-          description: ''
-        };
+      case 'NEW': return { label: 'Nouveau', icon: 'plus', description: 'Nouveau lead', isPulse: true };
+      case 'QUALIFYING': return { label: 'Qualification', icon: 'clock', description: 'En cours', isPulse: true };
+      case 'QUALIFIED': return { label: 'Qualifié', icon: 'check', description: 'Prêt' };
+      case 'APPOINTMENT': return { label: 'Rendez-vous', icon: 'calendar', description: 'Visite' };
+      case 'WON': return { label: 'Gagné', icon: 'check', description: 'Converti' };
+      case 'LOST': return { label: 'Perdu', icon: 'close', description: 'Abandonné' };
+      default: return { label: status, icon: 'info', description: '' };
     }
   }
 
   private getPropertyStatusConfig(status: PropertyStatusType): StatusConfig {
     switch (status) {
-      case 'SOLD':
-        return {
-          label: 'Vendu',
-          icon: 'sell',
-          description: 'Bien vendu avec succès',
-          variant: 'success-sold'
-        };
-      case 'RENTED':
-        return {
-          label: 'Loué',
-          icon: 'key',
-          description: 'Bien loué avec succès',
-          variant: 'success-rented'
-        };
-      case 'SIGNED':
-        return {
-          label: 'Signé',
-          icon: 'done_all',
-          description: 'Contrat signé',
-          variant: 'success-signed'
-        };
-      case 'AVAILABLE':
-        return {
-          label: 'Disponible',
-          icon: 'home',
-          description: 'Bien disponible à la vente/location',
-          variant: 'success'
-        };
-      case 'PENDING':
-        return {
-          label: 'En attente',
-          icon: 'pending',
-          description: 'En attente de validation',
-          variant: 'warning-attention'
-        };
-      case 'RESERVED':
-        return {
-          label: 'Réservé',
-          icon: 'lock_clock',
-          description: 'Bien réservé par un client',
-          variant: 'warning-urgent'
-        };
-      case 'WITHDRAWN':
-        return {
-          label: 'Retiré',
-          icon: 'block',
-          description: 'Bien retiré du marché',
-          variant: 'neutral-warmth'
-        };
-      default:
-        return {
-          label: status,
-          icon: 'circle',
-          description: ''
-        };
+      case 'SOLD': return { label: 'Vendu', icon: 'check', description: 'Vendu' };
+      case 'RENTED': return { label: 'Loué', icon: 'check', description: 'Loué' };
+      case 'SIGNED': return { label: 'Signé', icon: 'check', description: 'Signé' };
+      case 'AVAILABLE': return { label: 'Disponible', icon: 'home', description: 'Libre' };
+      case 'PENDING': return { label: 'En attente', icon: 'clock', description: 'Validation' };
+      case 'RESERVED': return { label: 'Réservé', icon: 'lock', description: 'Réservé' };
+      case 'WITHDRAWN': return { label: 'Retiré', icon: 'close', description: 'Sorti' };
+      default: return { label: status, icon: 'info', description: '' };
     }
   }
 }

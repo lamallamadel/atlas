@@ -4,8 +4,7 @@ import {
   dsFunnelBarColors,
   dsRgba,
   resolveDsToken,
-  DS_CHART_FALLBACK_HEX,
-} from './chart-ds-colors';
+  DS_CHART_FALLBACK_HEX} from './chart-ds-colors';
 
 describe('chart-ds-colors', () => {
   it('resolveDsToken uses fallback when var absent', () => {

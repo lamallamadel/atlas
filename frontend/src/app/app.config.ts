@@ -13,7 +13,6 @@ import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { NgChartsModule } from 'ng2-charts';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 export function initAuth(authService: AuthService): () => Promise<void> {
   return () => authService.init();
@@ -34,7 +33,6 @@ export const appConfig: ApplicationConfig = {
       OAuthModule.forRoot(),
       MatNativeDateModule,
       MatDialogModule,
-      MatSnackBarModule,
       NgChartsModule,
       FullCalendarModule
     ),

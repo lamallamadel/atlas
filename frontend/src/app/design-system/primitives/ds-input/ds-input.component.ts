@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { DsIconComponent } from '../../icons/ds-icon.component';
 
 @Component({
   selector: 'ds-input',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DsIconComponent],
   providers: [{
     provide: NG_VALUE_ACCESSOR,
     useExisting: forwardRef(() => DsInputComponent),
@@ -18,7 +19,9 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
       }
       <div class="ds-field__wrap">
         @if (prefixIcon) {
-          <span class="ds-field__prefix" aria-hidden="true" [innerHTML]="prefixIcon"></span>
+          <span class="ds-field__prefix" aria-hidden="true">
+            <ds-icon [name]="prefixIcon" [size]="16"></ds-icon>
+          </span>
         }
         <input
           #nativeInput

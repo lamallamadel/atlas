@@ -1,9 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { DocumentPreviewDialogComponent } from './document-preview-dialog.component';
 import { DocumentApiService } from '../services/document-api.service';
 import { of } from 'rxjs';
@@ -14,27 +10,19 @@ describe('DocumentPreviewDialogComponent', () => {
 
   beforeEach(() => {
     const mockDialogRef = {
-      close: vi.fn().mockName('MatDialogRef.close'),
-    };
+      close: vi.fn().mockName('MatDialogRef.close')};
     const mockDocumentApiService = {
       download: vi.fn().mockName('DocumentApiService.download'),
-      formatFileSize: vi.fn().mockName('DocumentApiService.formatFileSize'),
-    };
+      formatFileSize: vi.fn().mockName('DocumentApiService.formatFileSize')};
     mockDocumentApiService.download.mockReturnValue(of(new Blob()));
     mockDocumentApiService.formatFileSize.mockReturnValue('1 KB');
 
     TestBed.configureTestingModule({
-      imports: [
-        CommonModule,
-        MatDialogModule,
-        MatButtonModule,
-        MatIconModule,
-        DocumentPreviewDialogComponent,
-      ],
+      imports: [DocumentPreviewDialogComponent],
       providers: [
-        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: DialogRef, useValue: mockDialogRef },
         {
-          provide: MAT_DIALOG_DATA,
+          provide: DIALOG_DATA,
           useValue: {
             document: {
               id: 1,
@@ -42,13 +30,8 @@ describe('DocumentPreviewDialogComponent', () => {
               contentType: 'application/pdf',
               fileSize: 1024,
               uploadedAt: '2024-01-01T00:00:00Z',
-              uploadedBy: 'test-user',
-            },
-          },
-        },
-        { provide: DocumentApiService, useValue: mockDocumentApiService },
-      ],
-    });
+              uploadedBy: 'test-user'}}},
+        { provide: DocumentApiService, useValue: mockDocumentApiService }]});
     fixture = TestBed.createComponent(DocumentPreviewDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

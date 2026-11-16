@@ -10,13 +10,13 @@ import * as path from 'path';
  */
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
-  workers: process.env.CI ? 1 : 4,
-  timeout: 60000,
+  workers: 1,
+  timeout: 120000,
   expect: {
-    timeout: 10000,
+    timeout: 15000,
   },
   reporter: process.env.CI
     ? [

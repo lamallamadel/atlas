@@ -5,8 +5,7 @@ import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { Router } from '@angular/router';
 
 @Component({
-  template: `<button appKeyboardShortcutHint="Ctrl+K">Test Button</button>`,
-})
+  template: `<button appKeyboardShortcutHint="Ctrl+K">Test Button</button>`})
 class TestComponent {}
 
 describe('KeyboardShortcutHintDirective', () => {
@@ -15,16 +14,13 @@ describe('KeyboardShortcutHintDirective', () => {
 
   beforeEach(async () => {
     const routerMock = {
-      navigate: vi.fn().mockName('Router.navigate'),
-    };
+      navigate: vi.fn().mockName('Router.navigate')};
 
     await TestBed.configureTestingModule({
       imports: [TestComponent, KeyboardShortcutHintDirective],
       providers: [
         KeyboardShortcutService,
-        { provide: Router, useValue: routerMock },
-      ],
-    }).compileComponents();
+        { provide: Router, useValue: routerMock }]}).compileComponents();
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;

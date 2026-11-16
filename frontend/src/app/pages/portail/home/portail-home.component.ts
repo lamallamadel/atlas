@@ -2,12 +2,27 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { PortailService, City, Listing } from '../../../services/portail.service';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption
+} from '../../../design-system';
 
 @Component({
     selector: 'app-portail-home',
+    standalone: true,
     templateUrl: './portail-home.component.html',
     styleUrls: ['./portail-home.component.scss'],
-    imports: [FormsModule, RouterLink]
+    imports: [
+      CommonModule,
+      FormsModule, 
+      RouterLink,
+      DsButtonComponent,
+      DsIconComponent,
+      DsSelectComponent
+    ]
 })
 export class PortailHomeComponent implements OnInit, AfterViewInit {
   cities: City[] = [];
@@ -16,7 +31,15 @@ export class PortailHomeComponent implements OnInit, AfterViewInit {
   heroVille = '';
   heroBudget = '';
 
-  readonly villes = ['Casablanca', 'Rabat', 'Tanger', 'Marrakech', 'Fès', 'Agadir', 'Meknès', 'Oujda', 'Tétouan', 'Salé'];
+  readonly villeOptions: DsSelectOption[] = [
+    { value: '', label: 'Toutes les villes' },
+    { value: 'Casablanca', label: 'Casablanca' },
+    { value: 'Rabat', label: 'Rabat' },
+    { value: 'Tanger', label: 'Tanger' },
+    { value: 'Marrakech', label: 'Marrakech' },
+    { value: 'Fès', label: 'Fès' },
+    { value: 'Agadir', label: 'Agadir' }
+  ];
 
   constructor(public portailService: PortailService, private router: Router) {}
 

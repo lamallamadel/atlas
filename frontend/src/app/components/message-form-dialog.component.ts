@@ -1,14 +1,20 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { MessageChannel, MessageDirection } from '../services/message-api.service';
-import { trigger, transition, style, animate } from '@angular/animations';
-import { MatIcon } from '@angular/material/icon';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { DatetimePickerComponent } from './datetime-picker.component';
-import { MatButton } from '@angular/material/button';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { 
+  DsSkeletonComponent, 
+  DsSelectComponent, 
+  DsSelectOption, 
+  DsButtonComponent, 
+  DsIconComponent,
+  DsCardComponent,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
 export interface MessageFormData {
   dossierId: number;
@@ -16,17 +22,21 @@ export interface MessageFormData {
 
 @Component({
     selector: 'app-message-form-dialog',
+    standalone: true,
     templateUrl: './message-form-dialog.component.html',
     styleUrls: ['./message-form-dialog.component.css'],
-    animations: [
-        trigger('slideIn', [
-            transition(':enter', [
-                style({ transform: 'translateX(100%)', opacity: 0 }),
-                animate('300ms ease-out', style({ transform: 'translateX(0)', opacity: 1 }))
-            ])
-        ])
-    ],
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, NgClass, DatetimePickerComponent, MatDialogActions, MatButton, DsSkeletonComponent]
+    imports: [
+      CommonModule,
+      FormsModule, 
+      ReactiveFormsModule, 
+      DatetimePickerComponent, 
+      DsSelectComponent,
+      DsButtonComponent,
+      DsIconComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class MessageFormDialogComponent implements OnInit {
   messageForm!: FormGroup;
@@ -34,24 +44,24 @@ export class MessageFormDialogComponent implements OnInit {
   MessageChannel = MessageChannel;
   MessageDirection = MessageDirection;
 
-  channelOptions = [
-    { value: MessageChannel.EMAIL, label: 'EMAIL' },
+  readonly channelOptions: DsSelectOption[] = [
+    { value: MessageChannel.EMAIL, label: 'Email' },
     { value: MessageChannel.SMS, label: 'SMS' },
-    { value: MessageChannel.PHONE, label: 'PHONE' },
-    { value: MessageChannel.WHATSAPP, label: 'WHATSAPP' },
-    { value: MessageChannel.CHAT, label: 'CHAT' },
-    { value: MessageChannel.IN_APP, label: 'IN_APP' }
+    { value: MessageChannel.PHONE, label: 'Téléphone' },
+    { value: MessageChannel.WHATSAPP, label: 'WhatsApp' },
+    { value: MessageChannel.CHAT, label: 'Chat' },
+    { value: MessageChannel.IN_APP, label: 'In-app' }
   ];
 
-  directionOptions = [
+  readonly directionOptions: DsSelectOption[] = [
     { value: MessageDirection.INBOUND, label: 'Entrant' },
     { value: MessageDirection.OUTBOUND, label: 'Sortant' }
   ];
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<MessageFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: MessageFormData
+    private dialogRef: DialogRef<any>,
+    @Inject(DIALOG_DATA) public data: MessageFormData
   ) {}
 
   ngOnInit(): void {

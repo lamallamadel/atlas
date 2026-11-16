@@ -16,8 +16,7 @@ describe('SkeletonLoaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SkeletonLoaderComponent],
-    }).compileComponents();
+      imports: [SkeletonLoaderComponent]}).compileComponents();
 
     fixture = TestBed.createComponent(SkeletonLoaderComponent);
     debugElement = fixture.debugElement;

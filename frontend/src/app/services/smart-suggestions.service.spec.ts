@@ -2,8 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { SmartSuggestionsService } from './smart-suggestions.service';
 import {
   SmartSuggestionsApiService,
-  SmartSuggestion,
-} from './smart-suggestions-api.service';
+  SmartSuggestion} from './smart-suggestions-api.service';
 import { of, throwError } from 'rxjs';
 
 describe('SmartSuggestionsService', () => {
@@ -17,9 +16,7 @@ describe('SmartSuggestionsService', () => {
       description: 'Inactif depuis 3 jours',
       actionType: 'SEND_MESSAGE',
       priority: 8,
-      confidenceScore: 0.85,
-    },
-  ];
+      confidenceScore: 0.85}];
 
   beforeEach(() => {
     const spy = {
@@ -40,15 +37,12 @@ describe('SmartSuggestionsService', () => {
         .mockName('SmartSuggestionsApiService.getPrefilledMessage'),
       recordTemplateUsage: vi
         .fn()
-        .mockName('SmartSuggestionsApiService.recordTemplateUsage'),
-    };
+        .mockName('SmartSuggestionsApiService.recordTemplateUsage')};
 
     TestBed.configureTestingModule({
       providers: [
         SmartSuggestionsService,
-        { provide: SmartSuggestionsApiService, useValue: spy },
-      ],
-    });
+        { provide: SmartSuggestionsApiService, useValue: spy }]});
 
     service = TestBed.inject(SmartSuggestionsService);
     apiServiceSpy = TestBed.inject(
@@ -88,8 +82,7 @@ describe('SmartSuggestionsService', () => {
     expect(apiServiceSpy.trackBehavior).toHaveBeenCalledWith({
       actionType: 'SEND_EMAIL',
       contextType: 'DOSSIER',
-      contextId: 123,
-    });
+      contextId: 123});
   });
 
   it('should accept suggestion', () => {
@@ -112,8 +105,7 @@ describe('SmartSuggestionsService', () => {
     expect(apiServiceSpy.submitFeedback).toHaveBeenCalledWith(
       expect.objectContaining({
         wasAccepted: false,
-        feedbackText: 'Not relevant',
-      })
+        feedbackText: 'Not relevant'})
     );
   });
 

@@ -22,6 +22,21 @@ export interface TransitionRule {
   allowedRoles?: string[];
   requiresApproval?: boolean;
   conditions?: string;
+  actionsJson?: WorkflowAction[];
+}
+
+export interface WorkflowAction {
+  type: 'CREATE_TASK' | 'SEND_EMAIL' | 'SCHEDULE_ACTION';
+  title?: string;
+  description?: string;
+  dueInDays?: number;
+  assignTo?: string;
+  template?: string;
+  subject?: string;
+  to?: string;
+  delayHours?: number;
+  action?: WorkflowAction;
+  priority?: string;
 }
 
 export interface WorkflowConfiguration {

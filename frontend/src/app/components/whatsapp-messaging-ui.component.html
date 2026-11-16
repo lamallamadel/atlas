@@ -1,61 +1,61 @@
-<div class="whatsapp-messaging-ui" [class.mobile]="isMobile">
+<div class="whatsapp-messaging-ui ds-form-stack" [class.mobile]="isMobile" style="display: flex; flex-direction: column; height: 100%; background: var(--ds-bg);">
   <!-- Header -->
-  <div class="messaging-header">
-    <div class="recipient-info">
-      <mat-icon class="whatsapp-icon">chat</mat-icon>
+  <div class="messaging-header ds-card" style="padding: 16px 24px; border-bottom: 1px solid var(--ds-border); display: flex; justify-content: space-between; align-items: center; background: var(--ds-surface); z-index: 10;">
+    <div class="recipient-info" style="display: flex; gap: 16px; align-items: center;">
+      <ds-avatar [name]="recipientName() || 'Contact'" size="md"></ds-avatar>
       <div class="recipient-details">
-        <div class="recipient-name">{{ recipientName() || 'Contact WhatsApp' }}</div>
+        <div class="recipient-name" style="font-weight: 700; color: var(--ds-marine); font-size: 16px;">{{ recipientName() || 'Contact WhatsApp' }}</div>
         @if (recipientPhone()) {
-          <div class="recipient-phone">{{ recipientPhone() }}</div>
+          <div class="recipient-phone" style="font-size: 12px; color: var(--ds-text-muted);">{{ recipientPhone() }}</div>
         }
       </div>
     </div>
-    <div class="header-actions">
-      <button
-        mat-icon-button
-        type="button"
-        [attr.title]="'Actualiser'"
-        (click)="loadMessages()">
-        <mat-icon>refresh</mat-icon>
-      </button>
-      <mat-icon
-        class="connection-indicator"
-        [class.online]="isOnline"
-        [class.offline]="!isOnline"
-        [attr.title]="isOnline ? 'En ligne' : 'Hors ligne'">
-        {{ isOnline ? 'wifi' : 'wifi_off' }}
-      </mat-icon>
+    <div class="header-actions" style="display: flex; gap: 12px; align-items: center;">
+      <ds-button
+        variant="ghost"
+        size="sm"
+        [title]="'Actualiser'"
+        (dsClick)="loadMessages()">
+        <ds-icon name="refresh" [size]="20"></ds-icon>
+      </ds-button>
+      <ds-badge 
+        [status]="isOnline ? 'active' : 'paused'" 
+        size="sm" 
+        [showDot]="true"
+        [title]="isOnline ? 'En ligne' : 'Hors ligne'">
+        {{ isOnline ? 'Online' : 'Offline' }}
+      </ds-badge>
     </div>
   </div>
 
   <!-- Consent Warning -->
   @if (!hasValidConsent && consentChecked) {
-    <div class="consent-warning">
-      <mat-icon>warning</mat-icon>
-      <span>{{ getConsentWarningMessage() }}</span>
+    <div class="consent-warning ds-alert ds-alert--warning" style="margin: 16px 24px; padding: 12px 16px; border-radius: var(--ds-radius-md); display: flex; align-items: center; gap: 12px; background: var(--ds-warning-hl); color: var(--ds-warning);">
+      <ds-icon name="info" [size]="20"></ds-icon>
+      <span style="font-size: 13px; font-weight: 500;">{{ getConsentWarningMessage() }}</span>
     </div>
   }
 
   <!-- Messages Thread -->
-  <div class="messages-container" [class.with-consent-warning]="!hasValidConsent && consentChecked">
+  <div class="messages-container" style="flex: 1; position: relative; overflow: hidden;">
     <cdk-virtual-scroll-viewport
       #viewport
       itemSize="80"
-      class="messages-viewport">
+      style="height: 100%; width: 100%;">
 
       @if (loading) {
-        <div class="loading-indicator">
-          <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
+        <div class="loading-indicator" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 16px; color: var(--ds-text-muted);">
+          <ds-skeleton variant="circle" width="48px" height="48px" [animate]="true"></ds-skeleton>
           <span>Chargement des messages...</span>
         </div>
       }
 
       @if (!loading) {
-        <div class="messages-list ds-thread ds-thread--whatsapp">
+        <div class="messages-list ds-thread ds-thread--whatsapp" style="padding: 24px;">
           <ng-container *cdkVirtualFor="let message of messages; trackBy: trackByMessageId; let i = index">
             @if (showDateDivider(i)) {
-              <div class="ds-date-divider">
-                <span>{{ getDateDividerText(message.timestamp) }}</span>
+              <div class="ds-date-divider" style="display: flex; align-items: center; justify-content: center; margin: 32px 0 24px;">
+                <span style="background: var(--ds-surface-offset); padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; color: var(--ds-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">{{ getDateDividerText(message.timestamp) }}</span>
               </div>
             }
             <div
@@ -66,50 +66,46 @@
               [style.transform]="getSwipeTransform(message.id)"
               (touchstart)="onTouchStart($event, message)"
               (touchmove)="onTouchMove($event, message)"
-              (touchend)="onTouchEnd($event, message)">
-              <div
-                class="swipe-actions"
-                [class.visible]="swipedMessageId === message.id && Math.abs(swipeOffset) > 50">
-                @if (message.deliveryStatus === MessageDeliveryStatus.FAILED) {
-                  <button
-                    mat-icon-button
-                    type="button"
-                    class="action-retry"
-                    (click)="retryMessage(message, $event)"
-                    [attr.title]="'Réessayer'">
-                    <mat-icon>refresh</mat-icon>
-                  </button>
-                }
-                <button
-                  mat-icon-button
-                  type="button"
-                  class="action-copy"
-                  (click)="copyMessage(message, $event)"
-                  [attr.title]="'Copier'">
-                  <mat-icon>content_copy</mat-icon>
-                </button>
-              </div>
-              <div class="ds-thread__bubble">
-                <p class="ds-thread__text">{{ message.content }}</p>
-                <div class="ds-thread__meta">
-                  <time class="ds-thread__time">{{ formatTimestamp(message.timestamp) }}</time>
+              (touchend)="onTouchEnd($event, message)"
+              style="margin-bottom: 8px;">
+              
+              <div class="ds-thread__bubble" style="max-width: 80%; padding: 10px 14px; border-radius: 12px; position: relative; box-shadow: var(--ds-shadow-xs);">
+                <p class="ds-thread__text" style="margin: 0; font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;">{{ message.content }}</p>
+                <div class="ds-thread__meta" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 4px;">
+                  <time class="ds-thread__time" style="font-size: 10px; color: var(--ds-text-faint);">{{ formatTimestamp(message.timestamp) }}</time>
                   @if (message.direction === MessageDirection.OUTBOUND && message.deliveryStatus) {
-                    <mat-icon
-                      class="ds-thread__delivery"
-                      [ngClass]="getDeliveryStatusClass(message.deliveryStatus)">
-                      {{ getDeliveryStatusIcon(message.deliveryStatus) }}
-                    </mat-icon>
+                    <ds-icon
+                      [name]="getDeliveryStatusIcon(message.deliveryStatus)"
+                      [size]="16"
+                      [style.color]="message.deliveryStatus === MessageDeliveryStatus.READ ? 'var(--ds-primary)' : 'var(--ds-text-faint)'">
+                    </ds-icon>
                   }
                 </div>
               </div>
+
+              @if (swipedMessageId === message.id && Math.abs(swipeOffset) > 50) {
+                <div class="swipe-actions" style="position: absolute; right: -100px; display: flex; gap: 8px; align-items: center;">
+                   @if (message.deliveryStatus === MessageDeliveryStatus.FAILED) {
+                    <ds-button variant="icon" size="sm" (dsClick)="retryMessage(message, $event)" style="background: var(--ds-surface); box-shadow: var(--ds-shadow-sm);">
+                      <ds-icon name="refresh" [size]="16"></ds-icon>
+                    </ds-button>
+                  }
+                  <ds-button variant="icon" size="sm" (dsClick)="copyMessage(message, $event)" style="background: var(--ds-surface); box-shadow: var(--ds-shadow-sm);">
+                    <ds-icon name="plus" [size]="16"></ds-icon>
+                  </ds-button>
+                </div>
+              }
             </div>
           </ng-container>
+          
           <!-- Empty state -->
           @if (messages.length === 0) {
-            <div class="empty-state">
-              <mat-icon>chat_bubble_outline</mat-icon>
-              <p>Aucun message WhatsApp</p>
-              <small>Commencez une conversation en envoyant un message</small>
+            <div class="empty-state" style="padding: 64px 24px; text-align: center;">
+              <ds-empty-state
+                icon="chat"
+                title="Aucun message WhatsApp"
+                description="Commencez une conversation en envoyant un message ci-dessous.">
+              </ds-empty-state>
             </div>
           }
         </div>
@@ -118,162 +114,148 @@
   </div>
 
   <!-- Message Input Area -->
-  <div class="message-input-area" [class.disabled]="!hasValidConsent">
+  <div class="message-input-area ds-form-stack" [class.disabled]="!hasValidConsent" style="background: var(--ds-surface); border-top: 1px solid var(--ds-border); padding: 16px 24px;">
 
     <!-- Template chip -->
     @if (selectedTemplate) {
-      <div class="template-chip-container">
-        <mat-chip-listbox>
-          <mat-chip class="template-chip" [highlighted]="true">
-            <mat-icon matChipAvatar>description</mat-icon>
-            <span>{{ selectedTemplate.name }}</span>
-            <button matChipRemove (click)="removeTemplate()">
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </mat-chip>
-        </mat-chip-listbox>
+      <div class="template-chip-container" style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
+        <ds-filter-chip
+          [active]="true"
+          (click)="openTemplateSelector()">
+          Modèle : {{ selectedTemplate.name }}
+        </ds-filter-chip>        <ds-button variant="icon" size="sm" (dsClick)="removeTemplate()" style="color: var(--ds-error);">
+          <ds-icon name="close" [size]="16"></ds-icon>
+        </ds-button>
       </div>
     }
 
     <!-- Template variables -->
     @if (selectedTemplate && selectedTemplate.variables.length > 0) {
-      <div class="template-variables">
-        <div class="variables-header">
-          <mat-icon>edit</mat-icon>
+      <ds-card [pad]="true" elevation="xs" style="margin-bottom: 12px; background: var(--ds-bg-subtle);">
+        <div class="variables-header" style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--ds-text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <ds-icon name="edit" [size]="16"></ds-icon>
           <span>Variables du modèle</span>
         </div>
-        <div class="variable-inputs">
+        <div class="variable-inputs" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
           @for (variable of selectedTemplate.variables; track variable) {
-            <mat-form-field
-              appearance="outline"
-              class="variable-field"
-              >
-              <mat-label>{{ variable }}</mat-label>
-              <input
-                matInput
-                [(ngModel)]="templateVariables[variable]"
-                (ngModelChange)="onVariableChange()"
-                [placeholder]="'Valeur pour ' + variable"
-                required>
-                <mat-icon matSuffix>label</mat-icon>
-              </mat-form-field>
-            }
-          </div>
+            <ds-input
+              [label]="variable"
+              [(ngModel)]="templateVariables[variable]"
+              (ngModelChange)="onVariableChange()"
+              [placeholder]="'Valeur pour ' + variable"
+              required="true">
+            </ds-input>
+          }
         </div>
-      }
+      </ds-card>
+    }
 
-      <!-- Attachments preview -->
-      @if (attachments.length > 0) {
-        <div class="attachments-preview">
-          <div class="attachments-header">
-            <mat-icon>attach_file</mat-icon>
-            <span>{{ attachments.length }} fichier(s) joint(s)</span>
-          </div>
-          <div class="attachment-list">
-            @for (attachment of attachments; track attachment; let i = $index) {
-              <div class="attachment-item">
-                @if (attachment.type === 'image' && attachment.preview) {
-                  <div class="attachment-preview">
-                    <img [src]="attachment.preview" [alt]="attachment.file.name">
-                  </div>
-                }
-                @if (attachment.type === 'document') {
-                  <div class="attachment-preview document">
-                    <mat-icon>{{ getAttachmentIcon(attachment) }}</mat-icon>
-                  </div>
-                }
-                <div class="attachment-info">
-                  <div class="attachment-name">{{ attachment.file.name }}</div>
-                  <div class="attachment-size">{{ getAttachmentSize(attachment) }}</div>
+    <!-- Attachments preview -->
+    @if (attachments.length > 0) {
+      <div class="attachments-preview ds-form-stack" style="margin-bottom: 16px;">
+        <div class="attachments-header" style="font-size: 12px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <ds-icon name="folder" [size]="16"></ds-icon>
+          <span>{{ attachments.length }} fichier(s) joint(s)</span>
+        </div>
+        <div class="attachment-list" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;">
+          @for (attachment of attachments; track attachment; let i = $index) {
+            <div class="attachment-item ds-card" style="flex: none; width: 140px; padding: 8px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); background: var(--ds-surface); position: relative;">
+              @if (attachment.type === 'image' && attachment.preview) {
+                <div class="attachment-preview" style="height: 80px; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+                  <img [src]="attachment.preview" [alt]="attachment.file.name" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
-                <button
-                  mat-icon-button
-                  type="button"
-                  class="remove-attachment"
-                  (click)="removeAttachment(i)"
-                  [attr.title]="'Retirer'">
-                  <mat-icon>close</mat-icon>
-                </button>
+              }
+              @if (attachment.type === 'document') {
+                <div class="attachment-preview document" style="height: 80px; border-radius: 4px; background: var(--ds-bg-subtle); display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                  <ds-icon [name]="getAttachmentIcon(attachment)" [size]="24" style="color: var(--ds-text-faint);"></ds-icon>
+                </div>
+              }
+              <div class="attachment-info" style="overflow: hidden;">
+                <div class="attachment-name" style="font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ attachment.file.name }}</div>
+                <div class="attachment-size" style="font-size: 10px; color: var(--ds-text-faint);">{{ getAttachmentSize(attachment) }}</div>
               </div>
-            }
-          </div>
+              <ds-button
+                variant="icon"
+                size="sm"
+                (dsClick)="removeAttachment(i)"
+                style="position: absolute; top: -8px; right: -8px; background: var(--ds-surface); box-shadow: var(--ds-shadow-sm); color: var(--ds-error);">
+                <ds-icon name="close" [size]="16"></ds-icon>
+              </ds-button>
+            </div>
+          }
         </div>
-      }
+      </div>
+    }
 
-      <!-- Input controls -->
-      <div class="input-controls">
-        <button
-          mat-icon-button
-          type="button"
-          class="template-button"
-          [disabled]="!hasValidConsent"
-          (click)="openTemplateSelector()"
-          [attr.title]="selectedTemplate ? 'Modifier le modèle' : 'Sélectionner un modèle'">
-          <mat-icon>{{ selectedTemplate ? 'edit' : 'insert_drive_file' }}</mat-icon>
-        </button>
+    <!-- Input controls -->
+    <div class="input-controls" style="display: flex; gap: 12px; align-items: flex-end;">
+      <ds-button
+        variant="ghost"
+        size="md"
+        [disabled]="!hasValidConsent"
+        (dsClick)="openTemplateSelector()"
+        [title]="selectedTemplate ? 'Modifier le modèle' : 'Sélectionner un modèle'">
+        <ds-icon [name]="selectedTemplate ? 'edit' : 'folder'" [size]="20"></ds-icon>
+      </ds-button>
 
-        <button
-          mat-icon-button
-          type="button"
-          class="attachment-button"
-          [disabled]="!hasValidConsent"
-          (click)="fileInput.click()"
-          [attr.title]="'Joindre un fichier'">
-          <mat-icon>attach_file</mat-icon>
-        </button>
-        <input
-          #fileInput
-          type="file"
-          hidden
-          multiple
-          [accept]="allowedImageTypes.concat(allowedDocumentTypes).join(',')"
-          (change)="onFileSelected($event)">
+      <ds-button
+        variant="ghost"
+        size="md"
+        [disabled]="!hasValidConsent"
+        (dsClick)="fileInput.click()"
+        [title]="'Joindre un fichier'">
+        <ds-icon name="upload" [size]="20"></ds-icon>
+      </ds-button>
+      <input
+        #fileInput
+        type="file"
+        hidden
+        multiple
+        [accept]="allowedImageTypes.concat(allowedDocumentTypes).join(',')"
+        (change)="onFileSelected($event)">
 
-          <div class="message-input-wrapper">
+      <div class="message-input-wrapper" style="flex: 1;">
+        <div class="ds-field" style="margin: 0;">
+          <div class="ds-field__wrap">
             <textarea
               #messageInput
-              class="message-textarea"
+              class="ds-field__input"
               [placeholder]="getPlaceholder()"
               [(ngModel)]="messageContent"
               [disabled]="!hasValidConsent || selectedTemplate !== null"
               (input)="autoGrow($event)"
               (keydown.enter)="onEnterKey($any($event))"
               rows="1"
-              maxlength="4096"
-              cdkTextareaAutosize
-              [cdkAutosizeMinRows]="1"
-            [cdkAutosizeMaxRows]="4"></textarea>
+              style="height: auto; min-height: 38px; max-height: 150px; padding: 10px 12px; resize: none;"
+              maxlength="4096"></textarea>
           </div>
-
-          <button
-            mat-fab
-            color="primary"
-            type="button"
-            class="send-button"
-            [disabled]="!canSend()"
-            (click)="sendMessage()"
-            [class.sending]="sending"
-            [attr.title]="'Envoyer'">
-            @if (!sending) {
-              <mat-icon>send</mat-icon>
-            }
-            @if (sending) {
-              <ds-skeleton variant="circle" width="24px" height="24px"></ds-skeleton>
-            }
-          </button>
         </div>
+      </div>
 
-        <!-- Message info -->
-        @if (messageContent.length > 0 || attachments.length > 0) {
-          <div class="message-info">
-            <span class="character-count">{{ messageContent.length }}/4096</span>
-            @if (attachments.length > 0) {
-              <span class="separator">•</span>
-            }
-            @if (attachments.length > 0) {
-              <span class="attachment-count">{{ attachments.length }} fichier(s)</span>
-            }
-          </div>
+      <ds-button
+        variant="marine"
+        size="md"
+        [disabled]="!canSend()"
+        (dsClick)="sendMessage()"
+        [class.sending]="sending"
+        style="padding: 0; min-width: 44px; width: 44px; height: 44px; border-radius: 50%; justify-content: center;">
+        @if (!sending) {
+          <ds-icon name="send" [size]="20"></ds-icon>
+        }
+        @if (sending) {
+          <ds-skeleton variant="circle" width="20px" height="20px" [animate]="true"></ds-skeleton>
+        }
+      </ds-button>
+    </div>
+
+    <!-- Message info -->
+    @if (messageContent.length > 0 || attachments.length > 0) {
+      <div class="message-info" style="margin-top: 8px; display: flex; justify-content: flex-end; gap: 12px; font-size: 11px; color: var(--ds-text-faint);">
+        <span class="character-count">{{ messageContent.length }}/4096</span>
+        @if (attachments.length > 0) {
+          <span class="attachment-count">• {{ attachments.length }} fichier(s)</span>
         }
       </div>
-    </div>
+    }
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
 import { SpinnerVariant, SpinnerSize, SpinnerColor, SpinnerComponent } from './spinner.component';
 import { NgClass } from '@angular/common';
 import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
@@ -7,6 +7,7 @@ export type SkeletonVariant = 'card' | 'list' | 'table' | 'form' | 'dashboard-kp
 
 @Component({
     selector: 'app-loading-skeleton',
+    standalone: true,
     templateUrl: './loading-skeleton.component.html',
     styleUrls: ['./loading-skeleton.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,13 +25,13 @@ export class LoadingSkeletonComponent {
   readonly spinnerColor = input<SpinnerColor>('primary');
   readonly spinnerMessage = input<string>();
 
-  get rowsArray(): number[] {
+  readonly rowsArray = computed(() => {
     return Array(this.rows()).fill(0).map((_, i) => i);
-  }
+  });
 
-  get columnsArray(): number[] {
+  readonly columnsArray = computed(() => {
     return Array(this.columns()).fill(0).map((_, i) => i);
-  }
+  });
 
   trackByIndex(index: number): number {
     return index;

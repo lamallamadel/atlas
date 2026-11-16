@@ -17,7 +17,8 @@
     </div>
   }
 
-  <!-- Org ID (compact) -->
+  <!-- Org ID (compact) + dev form share the same formGroup -->
+  <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-dev-form">
   <div class="login-field">
     <label class="login-label" for="orgId">Organisation</label>
     <input
@@ -26,7 +27,6 @@
       type="text"
       placeholder="ORG-001"
       formControlName="orgId"
-      [formGroup]="loginForm"
       [disabled]="isLoading"
       aria-describedby="orgId-hint" />
     <span id="orgId-hint" class="login-hint">Identifiant de votre organisation</span>
@@ -52,7 +52,6 @@
   </div>
 
   <!-- Token JWT -->
-  <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-dev-form">
     <div class="login-field">
       <label class="login-label" for="token">Token JWT</label>
       <textarea

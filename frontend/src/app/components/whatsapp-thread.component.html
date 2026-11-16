@@ -1,91 +1,75 @@
-<div class="whatsapp-thread-container" [class.offline]="!isOnline()">
+<div class="whatsapp-thread-container ds-form-stack" style="height: 100%; display: flex; flex-direction: column;">
+  
   @if (!isOnline()) {
-    <div class="offline-banner">
-      <mat-icon>cloud_off</mat-icon>
-      <span>Mode hors ligne - Les messages seront envoyés dès la reconnexion</span>
+    <div class="offline-banner ds-alert ds-alert--warning" style="margin: 12px 16px; padding: 8px 12px; display: flex; align-items: center; gap: 12px; border-radius: var(--ds-radius-md);">
+      <ds-icon name="info" [size]="16"></ds-icon>
+      <span style="font-size: 12px; font-weight: 500;">Mode hors ligne. Les messages seront envoyés une fois la connexion rétablie.</span>
     </div>
   }
 
   <cdk-virtual-scroll-viewport
     #viewport
     itemSize="80"
-    class="messages-viewport"
-    [class.loading]="loading()">
+    style="flex: 1; width: 100%; height: 100%;">
 
-    @if (loading()) {
-      <div class="loading-indicator">
-        <ds-skeleton variant="circle" width="40px" height="40px"></ds-skeleton>
-      </div>
-    }
-
-    <div class="messages-list ds-thread ds-thread--whatsapp">
-      <ng-container *cdkVirtualFor="let message of messages(); trackBy: trackByMessageId; let i = index">
-
-        @if (showDateDivider(i)) {
-          <div class="ds-date-divider">
-            <span>{{ getDateDividerText(message.timestamp) }}</span>
+    <div class="messages-list ds-thread ds-thread--whatsapp" style="padding: 16px;">
+      @if (loading()) {
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="loading-item" style="margin-bottom: 24px;">
+            <ds-skeleton variant="rect" [width]="i % 2 === 0 ? '60%' : '40%'" height="40px" style="border-radius: 12px;"></ds-skeleton>
           </div>
         }
+      }
 
-        <div
-          class="ds-thread__msg"
-          [class.ds-thread__msg--outbound]="message.direction === MessageDirection.OUTBOUND"
-          [class.ds-thread__msg--inbound]="message.direction === MessageDirection.INBOUND"
-          [class.ds-thread__msg--failed]="message.deliveryStatus === MessageDeliveryStatus.FAILED"
-          [style.transform]="getSwipeTransform(message.id)"
-          (touchstart)="onTouchStart($event, message)"
-          (touchmove)="onTouchMove($event, message)"
-          (touchend)="onTouchEnd($event, message)"
-          (mousedown)="onMouseDown($event, message)"
-          (mousemove)="onMouseMove($event, message)"
-          (mouseup)="onMouseUp($event, message)">
-
+      @if (!loading()) {
+        <ng-container *cdkVirtualFor="let message of messages(); trackBy: trackByMessageId; let i = index">
+          @if (showDateDivider(i)) {
+            <div class="ds-date-divider" style="display: flex; align-items: center; justify-content: center; margin: 24px 0 16px;">
+              <span style="background: var(--ds-bg-subtle); padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 700; color: var(--ds-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">{{ getDateDividerText(message.timestamp) }}</span>
+            </div>
+          }
+          
           <div
-            class="swipe-actions"
-            [class.visible]="swipedMessageId === message.id && Math.abs(swipeOffset) > 50">
-            @if (message.deliveryStatus === MessageDeliveryStatus.FAILED) {
-              <button
-                mat-icon-button
-                type="button"
-                class="action-retry"
-                (click)="retryMessage(message, $event)"
-                [attr.title]="'Réessayer'">
-                <mat-icon>refresh</mat-icon>
-              </button>
-            }
-            <button
-              mat-icon-button
-              type="button"
-              class="action-copy"
-              (click)="copyMessage(message, $event)"
-              [attr.title]="'Copier'">
-              <mat-icon>content_copy</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              type="button"
-              class="action-delete"
-              (click)="deleteMessage(message, $event)"
-              [attr.title]="'Supprimer'">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
+            class="ds-thread__msg"
+            [class.ds-thread__msg--outbound]="message.direction === MessageDirection.OUTBOUND"
+            [class.ds-thread__msg--inbound]="message.direction === MessageDirection.INBOUND"
+            [style.transform]="getSwipeTransform(message.id)"
+            (touchstart)="onTouchStart($event, message)"
+            (touchmove)="onTouchMove($event, message)"
+            (touchend)="onTouchEnd($event, message)"
+            style="margin-bottom: 8px;">
+            
+            <div class="ds-thread__bubble" style="max-width: 85%; padding: 10px 14px; border-radius: 12px; box-shadow: var(--ds-shadow-xs);">
+              <p class="ds-thread__text" style="margin: 0; font-size: 14px; line-height: 1.5; white-space: pre-wrap;">{{ message.content }}</p>
+              <div class="ds-thread__meta" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 4px;">
+                <time class="ds-thread__time" style="font-size: 10px; color: var(--ds-text-faint);">{{ formatTimestamp(message.timestamp) }}</time>
+                @if (message.direction === MessageDirection.OUTBOUND && message.deliveryStatus) {
+                  <ds-icon
+                    [name]="getDeliveryStatusIcon(message.deliveryStatus)"
+                    [size]="16"
+                    [style.color]="message.deliveryStatus === MessageDeliveryStatus.READ ? 'var(--ds-primary)' : 'var(--ds-text-faint)'">
+                  </ds-icon>
+                }
+              </div>
 
-          <div class="ds-thread__bubble">
-            <p class="ds-thread__text">{{ message.content }}</p>
-            <div class="ds-thread__meta">
-              <time class="ds-thread__time">{{ formatTimestamp(message.timestamp) }}</time>
-              @if (message.direction === MessageDirection.OUTBOUND) {
-                <span
-                  class="ds-thread__delivery"
-                  [ngClass]="getDeliveryStatusClass(message.deliveryStatus)">
-                  {{ getDeliveryStatusIcon(message.deliveryStatus) }}
-                </span>
-              }
+              <!-- Inline actions on swipe or hover -->
+              <div class="bubble-actions" style="position: absolute; top: 0; right: -48px; display: flex; flex-direction: column; gap: 4px; opacity: 0; transition: opacity 0.2s ease;">
+                <ds-button variant="icon" size="sm" (dsClick)="copyMessage(message, $event)" title="Copier">
+                  <ds-icon name="plus" [size]="16"></ds-icon>
+                </ds-button>
+                @if (message.deliveryStatus === MessageDeliveryStatus.FAILED) {
+                  <ds-button variant="icon" size="sm" (dsClick)="retryMessage(message, $event)" title="Réessayer">
+                    <ds-icon name="refresh" [size]="16"></ds-icon>
+                  </ds-button>
+                }
+                <ds-button variant="icon" size="sm" (dsClick)="deleteMessage(message, $event)" title="Supprimer" style="color: var(--ds-error);">
+                  <ds-icon name="trash" [size]="16"></ds-icon>
+                </ds-button>
+              </div>
             </div>
           </div>
-        </div>
-      </ng-container>
+        </ng-container>
+      }
     </div>
   </cdk-virtual-scroll-viewport>
 </div>

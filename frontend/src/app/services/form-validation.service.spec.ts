@@ -1,17 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+  provideHttpClientTesting} from '@angular/common/http/testing';
 import { FormControl } from '@angular/forms';
 import {
   FormValidationService,
-  ValidationSuggestion,
-} from './form-validation.service';
+  ValidationSuggestion} from './form-validation.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 describe('FormValidationService', () => {
@@ -24,9 +21,7 @@ describe('FormValidationService', () => {
       providers: [
         FormValidationService,
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
+        provideHttpClientTesting()]});
     service = TestBed.inject(FormValidationService);
     httpMock = TestBed.inject(HttpTestingController);
   });

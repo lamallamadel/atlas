@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { Injectable, inject } from '@angular/core';
+import { DsDialogService } from '../design-system';
 import { Observable } from 'rxjs';
 import { tap, finalize } from 'rxjs/operators';
 import {
@@ -17,7 +17,7 @@ export interface BulkOperationResult {
   providedIn: 'root'
 })
 export class BulkOperationService {
-  constructor(private dialog: MatDialog) { }
+  private dsDialogService = inject(DsDialogService);
 
   private isBulkOperationResult(value: unknown): value is BulkOperationResult {
     if (!value || typeof value !== 'object') {
@@ -48,11 +48,9 @@ export class BulkOperationService {
       inProgress: true
     };
 
-    this.dialog.open(BulkOperationDialogComponent, {
+    this.dsDialogService.open(BulkOperationDialogComponent, {
       width: '500px',
       maxWidth: '100vw',
-      maxHeight: '100vh',
-      panelClass: 'responsive-dialog',
       disableClose: true,
       data: dialogData
     });

@@ -1,8 +1,7 @@
-import { Component, OnInit, viewChild } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, FormControl, AbstractControl, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPlaceholder } from '@angular/cdk/drag-drop';
-import { MatStepper, MatStep, MatStepLabel, MatStepperNext, MatStepperPrevious } from '@angular/material/stepper';
+import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragPlaceholder } from '@angular/cdk/drag-drop';
 import {
   AnnonceApiService,
   AnnonceCreateRequest,
@@ -11,23 +10,50 @@ import {
   AnnonceResponse
 } from '../../services/annonce-api.service';
 import { LoadingSkeletonComponent } from '../../components/loading-skeleton.component';
-import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel, MatError, MatSuffix, MatHint } from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
-import { MatInput } from '@angular/material/input';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { DsSkeletonComponent } from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { CommonModule } from '@angular/common';
+import { 
+  DsSkeletonComponent, 
+  DsSelectComponent, 
+  DsSelectOption, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsInputComponent,
+  DsBadgeComponent,
+  DsCardComponent,
+  DsToastService,
+  StageStepperComponent,
+  DsStage
+} from '../../design-system';
 
 @Component({
     selector: 'app-annonce-create',
+    standalone: true,
     templateUrl: './annonce-create.component.html',
     styleUrls: ['./annonce-create.component.css'],
-    imports: [LoadingSkeletonComponent, DsSkeletonComponent, MatStepper, MatStep, MatStepLabel, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatError, MatInput, MatButton, MatStepperNext, MatStepperPrevious, MatIconButton, MatSuffix, CdkDropList, CdkDrag, CdkDragPlaceholder, MatHint]
+    imports: [
+      CommonModule,
+      LoadingSkeletonComponent, 
+      FormsModule, 
+      ReactiveFormsModule, 
+      CdkDropList, 
+      CdkDrag, 
+      CdkDragPlaceholder, 
+      DsSelectComponent,
+      DsButtonComponent,
+      DsIconComponent,
+      DsInputComponent,
+      StageStepperComponent
+    ]
 })
 export class AnnonceCreateComponent implements OnInit {
-  readonly stepper = viewChild.required<MatStepper>('stepper');
+  private fb = inject(FormBuilder);
+  private annonceApiService = inject(AnnonceApiService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private toastService = inject(DsToastService);
 
+  activeStepIndex = signal(0);
+  
   step1FormGroup!: FormGroup;
   step2FormGroup!: FormGroup;
   step3FormGroup!: FormGroup;
@@ -41,7 +67,8 @@ export class AnnonceCreateComponent implements OnInit {
   validationErrors: { [key: string]: string } = {};
 
   AnnonceStatus = AnnonceStatus;
-  statusOptions = [
+  
+  readonly statusOptions: DsSelectOption[] = [
     { value: AnnonceStatus.DRAFT, label: 'Brouillon' },
     { value: AnnonceStatus.PUBLISHED, label: 'Publié' },
     { value: AnnonceStatus.ACTIVE, label: 'Actif' },
@@ -49,14 +76,14 @@ export class AnnonceCreateComponent implements OnInit {
     { value: AnnonceStatus.ARCHIVED, label: 'Archivé' }
   ];
 
-  categoryOptions = [
+  readonly categoryOptions: DsSelectOption[] = [
     { value: 'APARTMENT', label: 'Appartement' },
     { value: 'HOUSE', label: 'Maison' },
     { value: 'STUDIO', label: 'Studio' },
     { value: 'COMMERCIAL', label: 'Commercial' }
   ];
 
-  annonceTypeOptions = [
+  readonly typeOptions: DsSelectOption[] = [
     { value: 'SALE', label: 'Vente' },
     { value: 'RENT', label: 'Location' },
     { value: 'LEASE', label: 'Bail' },
@@ -67,12 +94,18 @@ export class AnnonceCreateComponent implements OnInit {
   previewUrls: { [key: number]: string } = {};
   photoLoadErrors: { [key: number]: boolean } = {};
 
-  constructor(
-    private fb: FormBuilder,
-    private annonceApiService: AnnonceApiService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) { }
+  readonly stages = computed<DsStage[]>(() => [
+    { label: 'Infos de base', state: this.getStageState(0) },
+    { label: 'Localisation', state: this.getStageState(1) },
+    { label: 'Photos', state: this.getStageState(2) },
+    { label: 'Règles', state: this.getStageState(3) }
+  ]);
+
+  private getStageState(index: number): 'done' | 'current' | 'upcoming' {
+    if (this.activeStepIndex() === index) return 'current';
+    if (this.isStepCompleted(index)) return 'done';
+    return 'upcoming';
+  }
 
   ngOnInit(): void {
     this.initForms();
@@ -285,6 +318,43 @@ export class AnnonceCreateComponent implements OnInit {
     });
   }
 
+  nextStep(): void {
+    const currentGroup = this.getCurrentFormGroup();
+    if (currentGroup.valid) {
+      this.activeStepIndex.update(i => i + 1);
+    } else {
+      this.markFormGroupTouched(currentGroup);
+      this.toastService.warning('Veuillez remplir correctement tous les champs obligatoires.');
+    }
+  }
+
+  prevStep(): void {
+    if (this.activeStepIndex() > 0) {
+      this.activeStepIndex.update(i => i - 1);
+    }
+  }
+
+  goToStep(index: number): void {
+    if (index < this.activeStepIndex()) {
+      this.activeStepIndex.set(index);
+    } else if (index > this.activeStepIndex()) {
+      // Logic for skipping steps could be added here
+      if (this.isStepCompleted(this.activeStepIndex())) {
+        this.activeStepIndex.set(index);
+      }
+    }
+  }
+
+  private getCurrentFormGroup(): FormGroup {
+    switch (this.activeStepIndex()) {
+      case 0: return this.step1FormGroup;
+      case 1: return this.step2FormGroup;
+      case 2: return this.step3FormGroup;
+      case 3: return this.step4FormGroup;
+      default: return this.step1FormGroup;
+    }
+  }
+
   onSubmit(): void {
     this.markAllFormGroupsTouched();
 
@@ -294,6 +364,7 @@ export class AnnonceCreateComponent implements OnInit {
       this.step3FormGroup.invalid ||
       this.step4FormGroup.invalid
     ) {
+      this.toastService.error('Certaines étapes contiennent des erreurs.');
       return;
     }
 
@@ -346,6 +417,7 @@ export class AnnonceCreateComponent implements OnInit {
     this.annonceApiService.create(request).subscribe({
       next: () => {
         this.submitting = false;
+        this.toastService.success('Annonce créée avec succès');
         this.router.navigate(['/annonces']);
       },
       error: (err) => {
@@ -380,6 +452,7 @@ export class AnnonceCreateComponent implements OnInit {
     this.annonceApiService.update(this.annonceId, request).subscribe({
       next: () => {
         this.submitting = false;
+        this.toastService.success('Annonce modifiée avec succès');
         this.router.navigate(['/annonces']);
       },
       error: (err) => {
@@ -516,11 +589,5 @@ export class AnnonceCreateComponent implements OnInit {
         return false;
     }
   }
-
-  getStepIcon(stepIndex: number): string {
-    if (this.isStepCompleted(stepIndex)) {
-      return 'check_circle';
-    }
-    return 'edit';
-  }
 }
+

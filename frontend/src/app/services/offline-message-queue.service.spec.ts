@@ -6,12 +6,10 @@ import {
   MessageApiService,
   MessageCreateRequest,
   MessageChannel,
-  MessageDirection,
-} from './message-api.service';
+  MessageDirection} from './message-api.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('OfflineMessageQueueService', () => {
   let service: OfflineMessageQueueService;
@@ -19,8 +17,7 @@ describe('OfflineMessageQueueService', () => {
 
   beforeEach(() => {
     const messageApiServiceSpy = {
-      create: vi.fn().mockName('MessageApiService.create'),
-    };
+      create: vi.fn().mockName('MessageApiService.create')};
 
     TestBed.configureTestingModule({
       imports: [],
@@ -28,9 +25,7 @@ describe('OfflineMessageQueueService', () => {
         OfflineMessageQueueService,
         { provide: MessageApiService, useValue: messageApiServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    });
+        provideHttpClientTesting()]});
 
     messageApiService = TestBed.inject(
       MessageApiService
@@ -78,8 +73,7 @@ describe('OfflineMessageQueueService', () => {
     );
     Object.defineProperty(navigator, 'onLine', {
       get: () => false,
-      configurable: true,
-    });
+      configurable: true});
 
     service = TestBed.inject(OfflineMessageQueueService);
 
@@ -88,8 +82,7 @@ describe('OfflineMessageQueueService', () => {
       content: 'Test message',
       channel: MessageChannel.WHATSAPP,
       direction: MessageDirection.OUTBOUND,
-      timestamp: new Date().toISOString(),
-    };
+      timestamp: new Date().toISOString()};
 
     service.enqueue(request).subscribe((res) => {
       expect(res).toBeNull();
@@ -111,8 +104,7 @@ describe('OfflineMessageQueueService', () => {
       content: 'Test message',
       channel: MessageChannel.WHATSAPP,
       direction: MessageDirection.OUTBOUND,
-      timestamp: new Date().toISOString(),
-    };
+      timestamp: new Date().toISOString()};
 
     service.enqueue(request).subscribe((result) => {
       expect(result).toEqual(mockResponse);

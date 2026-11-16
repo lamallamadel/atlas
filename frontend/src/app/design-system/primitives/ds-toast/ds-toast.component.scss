@@ -1,0 +1,97 @@
+.ds-toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
+  padding: 14px 16px;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-lg);
+  min-width: 300px;
+  max-width: 450px;
+  overflow: hidden;
+  pointer-events: auto;
+
+  &__icon {
+    flex: none;
+    margin-top: 2px;
+  }
+
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__message {
+    font-size: var(--ds-text-sm);
+    line-height: 1.5;
+    color: var(--ds-text);
+  }
+
+  &__action {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: var(--ds-text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    color: var(--ds-primary);
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__close {
+    flex: none;
+    margin-top: -4px;
+    margin-right: -8px;
+    color: var(--ds-text-faint);
+  }
+
+  &__progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--ds-divider);
+  }
+
+  &__progress-bar {
+    height: 100%;
+    background: var(--ds-primary);
+    transition: width 50ms linear;
+  }
+
+  /* Variants */
+  &--success {
+    border-left: 4px solid var(--ds-success);
+    .ds-toast__icon { color: var(--ds-success); }
+    .ds-toast__progress-bar { background: var(--ds-success); }
+  }
+
+  &--error {
+    border-left: 4px solid var(--ds-error);
+    .ds-toast__icon { color: var(--ds-error); }
+    .ds-toast__progress-bar { background: var(--ds-error); }
+  }
+
+  &--warning {
+    border-left: 4px solid var(--ds-warning);
+    .ds-toast__icon { color: var(--ds-warning); }
+    .ds-toast__progress-bar { background: var(--ds-warning); }
+  }
+
+  &--info {
+    border-left: 4px solid var(--ds-marine);
+    .ds-toast__icon { color: var(--ds-marine); }
+    .ds-toast__progress-bar { background: var(--ds-marine); }
+  }
+}

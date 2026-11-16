@@ -1,15 +1,19 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { NotificationApiService, NotificationResponse } from '../services/notification-api.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { MatIcon } from '@angular/material/icon';
-import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
-import { DsCardComponent } from '../design-system/primitives/ds-card/ds-card.component';
-import { DsBadgeComponent } from '../design-system/primitives/ds-badge/ds-badge.component';
-import { DsButtonComponent } from '../design-system/primitives/ds-button/ds-button.component';
-import { DsIconComponent } from '../design-system/icons/ds-icon.component';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { 
+  DsSkeletonComponent, 
+  DsCardComponent, 
+  DsBadgeComponent, 
+  DsButtonComponent, 
+  DsIconComponent,
+  DsTabsComponent,
+  DsTab
+} from '../design-system';
 
 interface GroupedNotifications {
   date: string;
@@ -23,17 +27,19 @@ interface GroupedNotifications {
     templateUrl: './notification-center.component.html',
     styleUrls: ['./notification-center.component.scss'],
     imports: [
-      MatIcon,
-      MatButtonToggleGroup,
-      MatButtonToggle,
-      DsSkeletonComponent,
+      CommonModule,
+      FormsModule,
       DsCardComponent,
       DsBadgeComponent,
       DsButtonComponent,
       DsIconComponent,
+      DsTabsComponent
     ],
 })
 export class NotificationCenterComponent implements OnInit, OnDestroy {
+  private notificationApiService = inject(NotificationApiService);
+  private router = inject(Router);
+
   notifications: NotificationResponse[] = [];
   groupedNotifications: GroupedNotifications[] = [];
   loading = false;
@@ -45,18 +51,13 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   
   private destroy$ = new Subject<void>();
 
-  notificationTypes = [
+  readonly filterTabs: DsTab[] = [
     { value: 'ALL', label: 'Toutes' },
-    { value: 'IN_APP', label: 'In-App' },
+    { value: 'IN_APP', label: 'App' },
     { value: 'EMAIL', label: 'Email' },
     { value: 'SMS', label: 'SMS' },
     { value: 'WHATSAPP', label: 'WhatsApp' }
   ];
-
-  constructor(
-    private notificationApiService: NotificationApiService,
-    private router: Router
-  ) {}
 
   ngOnInit(): void {
     this.loadNotifications();

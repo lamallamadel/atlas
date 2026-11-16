@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { ToastNotificationService } from '../services/toast-notification.service';
+import { NotificationService } from '../services/notification.service';
 
 interface ProblemDetail {
   type?: string;
@@ -20,7 +20,7 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
   private pendingRequests = new Map<string, HttpRequest<any>>();
 
   constructor(
-    private toastService: ToastNotificationService,
+    private notificationService: NotificationService,
     private router: Router,
     private authService: AuthService
   ) { }
@@ -62,56 +62,55 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
 
     switch (error.status) {
       case 401:
-        this.toastService.error(
+        this.notificationService.error(
           'Session expirée. Veuillez vous reconnecter.',
-          {
-            label: 'Reconnecter',
-            handler: () => {
-              this.authService.handleSessionExpired();
-            }
-          }
+          'Reconnecter',
+          () => {
+            this.authService.handleSessionExpired();
+          },
+          false
         );
         break;
 
       case 403:
-        this.toastService.error(
+        this.notificationService.error(
           "Accès refusé. Vous n'avez pas les droits nécessaires.",
-          'Fermer'
+          'Fermer',
+          undefined,
+          false
         );
         break;
 
       case 400: {
         const badRequestMessage = problemDetail?.detail || 'Requête invalide. Veuillez vérifier votre saisie.';
-        this.toastService.error(badRequestMessage, 'Fermer');
+        this.notificationService.error(badRequestMessage, 'Fermer', undefined, false);
         break;
       }
 
       case 404: {
         const notFoundMessage = problemDetail?.detail || 'La ressource demandée est introuvable.';
-        this.toastService.error(notFoundMessage, 'Fermer');
+        this.notificationService.error(notFoundMessage, 'Fermer', undefined, false);
         break;
       }
 
       case 409: {
         const conflictMessage = problemDetail?.detail || 'Un conflit est survenu. Veuillez réessayer.';
-        this.toastService.warning(
+        this.notificationService.warning(
           conflictMessage,
-          {
-            label: 'Réessayer',
-            handler: () => this.retryRequest(originalRequest, correlationId)
-          }
+          'Réessayer',
+          () => this.retryRequest(originalRequest, correlationId),
+          false
         );
         break;
       }
 
       case 500: {
         const serverErrorMessage = problemDetail?.detail || 'Une erreur interne est survenue.';
-        this.toastService.error(
+        this.notificationService.error(
           serverErrorMessage,
-          {
-            label: 'Réessayer',
-            handler: () => this.retryRequest(originalRequest, correlationId)
-          }
+          'Réessayer',
+          () => this.retryRequest(originalRequest, correlationId),
+          false
         );
         break;
       }
@@ -119,24 +118,22 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
       case 0:
       case 504:
       case 503: {
-        this.toastService.error(
+        this.notificationService.error(
           'Impossible de contacter le serveur. Vérifiez votre connexion.',
-          {
-            label: 'Réessayer',
-            handler: () => this.retryRequest(originalRequest, correlationId)
-          }
+          'Réessayer',
+          () => this.retryRequest(originalRequest, correlationId),
+          false
         );
         break;
       }
 
       default: {
         if (error.status >= 500) {
-          this.toastService.error(
+          this.notificationService.error(
             'Une erreur serveur est survenue.',
-            {
-              label: 'Réessayer',
-              handler: () => this.retryRequest(originalRequest, correlationId)
-            }
+            'Réessayer',
+            () => this.retryRequest(originalRequest, correlationId),
+            false
           );
         }
         break;

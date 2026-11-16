@@ -1,9 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
-  MatDialogModule,
   MatDialogRef,
-  MAT_DIALOG_DATA,
-} from '@angular/material/dialog';
+  MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -21,34 +19,27 @@ describe('VoipConfigDialogComponent', () => {
 
   beforeEach(async () => {
     mockDialogRef = {
-      close: vi.fn().mockName('MatDialogRef.close'),
-    };
+      close: vi.fn().mockName('MatDialogRef.close')};
     mockVoipService = {
       getConfiguration: vi.fn().mockName('VoipService.getConfiguration'),
-      setConfiguration: vi.fn().mockName('VoipService.setConfiguration'),
-    };
+      setConfiguration: vi.fn().mockName('VoipService.setConfiguration')};
     mockVoipService.getConfiguration.mockReturnValue({
       enabled: false,
-      provider: null,
-    });
+      provider: null});
 
     await TestBed.configureTestingModule({
       imports: [
         NoopAnimationsModule,
         FormsModule,
-        MatDialogModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
         MatSlideToggleModule,
-        VoipConfigDialogComponent,
-      ],
+        VoipConfigDialogComponent],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: VoipService, useValue: mockVoipService },
-        { provide: MAT_DIALOG_DATA, useValue: null },
-      ],
-    }).compileComponents();
+        { provide: MAT_DIALOG_DATA, useValue: null }]}).compileComponents();
 
     fixture = TestBed.createComponent(VoipConfigDialogComponent);
     component = fixture.componentInstance;
@@ -64,8 +55,7 @@ describe('VoipConfigDialogComponent', () => {
       enabled: true,
       provider: 'twilio',
       apiKey: 'test-key',
-      clickToCallUrl: 'tel:{phone}',
-    };
+      clickToCallUrl: 'tel:{phone}'};
 
     component.onSave();
     expect(mockVoipService.setConfiguration).toHaveBeenCalledWith(

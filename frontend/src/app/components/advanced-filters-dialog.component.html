@@ -1,105 +1,115 @@
-<div class="dialog-container">
-  <h2 mat-dialog-title>Filtres avancés</h2>
+<ds-dialog-header (close)="cancel()">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <ds-icon name="filter" [size]="24" aria-hidden="true"></ds-icon>
+    <span>Filtres avancés</span>
+  </div>
+</ds-dialog-header>
 
-  <mat-dialog-content class="dialog-content">
-    <!-- Predefined Quick Filters -->
-    @if (predefinedPresets.length > 0) {
-      <section class="quick-filters-section">
-        <h3 class="section-title">Filtres rapides</h3>
-        <div class="quick-filters-grid">
-          @for (preset of predefinedPresets; track preset) {
-            <ds-button
-              variant="ghost"
-              size="md"
-              class="quick-filter-btn"
-              [ariaLabel]="preset.name"
-              (dsClick)="loadPreset(preset)">
-              <div class="quick-filter-content">
-                <ds-icon name="filter" [size]="24" class="filter-icon"></ds-icon>
-                <div class="filter-info">
-                  <span class="filter-name">{{ preset.name }}</span>
-                  @if (preset.description) {
-                    <span class="filter-desc">{{ preset.description }}</span>
-                  }
-                </div>
+<ds-dialog-content>
+  <div class="advanced-filters-layout" style="display: grid; grid-template-columns: 280px 1fr; gap: 24px; min-height: 500px;">
+    <!-- Sidebar: Presets -->
+    <aside class="filters-sidebar" style="border-right: 1px solid var(--ds-divider); padding-right: 24px;">
+      <h3 style="font-size: 13px; font-weight: 700; color: var(--ds-text-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;">Presets sauvegardés</h3>
+      
+      <div class="presets-list" style="display: flex; flex-direction: column; gap: 8px;">
+        @if (predefinedPresets.length > 0) {
+          <div class="preset-section">
+            <h4 style="font-size: 12px; font-weight: 600; margin: 0 0 8px; color: var(--ds-text-muted);">Standards</h4>
+            @for (p of predefinedPresets; track p.id) {
+              <button 
+                class="preset-item" 
+                (click)="loadPreset(p)"
+                style="width: 100%; text-align: left; padding: 8px 12px; border-radius: var(--ds-radius-md); border: 1px solid transparent; background: var(--ds-surface-2); font-size: 13px; cursor: pointer;">
+                {{ p.name }}
+              </button>
+            }
+          </div>
+        }
+
+        @if (userPresets.length > 0) {
+          <div class="preset-section" style="margin-top: 16px;">
+            <h4 style="font-size: 12px; font-weight: 600; margin: 0 0 8px; color: var(--ds-text-muted);">Mes filtres</h4>
+            @for (p of userPresets; track p.id) {
+              <div style="display: flex; gap: 4px;">
+                <button 
+                  class="preset-item" 
+                  (click)="loadPreset(p)"
+                  style="flex: 1; text-align: left; padding: 8px 12px; border-radius: var(--ds-radius-md); border: 1px solid transparent; background: var(--ds-surface-2); font-size: 13px; cursor: pointer;">
+                  {{ p.name }}
+                </button>
+                <ds-button variant="icon" size="sm" (dsClick)="deletePreset(p)" style="color: var(--ds-error);">
+                  <ds-icon name="trash" [size]="16"></ds-icon>
+                </ds-button>
               </div>
-            </ds-button>
-          }
-        </div>
-      </section>
-    }
+            }
+          </div>
+        }
 
-    <!-- User Saved Presets -->
-    @if (userPresets.length > 0) {
-      <section class="saved-presets-section">
-        <h3 class="section-title">Mes filtres sauvegardés</h3>
-        <div class="saved-presets-list">
-          @for (preset of userPresets; track preset) {
-            <div class="saved-preset-item">
-              <ds-button variant="ghost" size="md" class="preset-load-btn" [ariaLabel]="'Charger ' + preset.name" (dsClick)="loadPreset(preset)">
-                <ds-icon name="star" [size]="20"></ds-icon>
-                <span>{{ preset.name }}</span>
-              </ds-button>
-              <ds-button variant="icon" size="sm" class="preset-delete-btn" ariaLabel="Supprimer le filtre sauvegardé" (dsClick)="deletePreset(preset)">
-                <ds-icon name="trash" [size]="20"></ds-icon>
-              </ds-button>
+        @if (predefinedPresets.length === 0 && userPresets.length === 0) {
+          <p style="font-size: 12px; color: var(--ds-text-faint); font-style: italic;">Aucun preset disponible</p>
+        }
+      </div>
+    </aside>
+
+    <!-- Main: Editor -->
+    <main class="filters-main">
+      @if (showSaveDialog) {
+        <div class="save-preset-overlay" style="margin-bottom: 24px;">
+          <ds-card [pad]="true" elevation="sm" style="border: 2px solid var(--ds-marine-light);">
+            <h3 style="margin: 0 0 16px; font-size: 15px; font-weight: 700;">Sauvegarder ce filtre</h3>
+            <div class="ds-form-stack">
+              <ds-input label="Nom du preset" [(ngModel)]="presetName" placeholder="ex: Prospects VIP"></ds-input>
+              <ds-input label="Description (optionnel)" [(ngModel)]="presetDescription"></ds-input>
+              <ds-checkbox label="Partager avec l'équipe" [(ngModel)]="sharePreset"></ds-checkbox>
+              
+              <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+                <ds-button variant="ghost" size="sm" (dsClick)="closeSaveDialog()">Annuler</ds-button>
+                <ds-button variant="marine" size="sm" (dsClick)="savePreset()">Enregistrer</ds-button>
+              </div>
             </div>
-          }
+          </ds-card>
         </div>
-      </section>
-    }
+      }
 
-    <!-- Advanced Filters Component -->
-    <section class="filters-section">
-      <h3 class="section-title">Créer un filtre personnalisé</h3>
       <app-advanced-filters
         [fields]="data.fields"
         [initialFilter]="currentFilter"
         (filterChange)="onFilterChange($event)"
-        (countRequest)="onCountRequest($event)"
-        (filterApplied)="onFilterApplied($event)">
+        (filterApplied)="onFilterApplied($event)"
+        (countRequest)="onCountRequest($event)">
       </app-advanced-filters>
-    </section>
-  </mat-dialog-content>
 
-  <mat-dialog-actions class="dialog-actions">
-    <ds-button variant="ghost" size="md" (dsClick)="cancel()">Annuler</ds-button>
-    <ds-button variant="copper" size="md" [disabled]="!currentFilter" ariaLabel="Sauvegarder ce filtre" (dsClick)="openSaveDialog()">
-      <ds-icon name="check" [size]="20"></ds-icon>
-      Sauvegarder ce filtre
-    </ds-button>
-  </mat-dialog-actions>
-</div>
-
-<!-- Save Preset Dialog -->
-@if (showSaveDialog) {
-  <div class="save-dialog-overlay" role="button" tabindex="0" (click)="closeSaveDialog()" (keydown.enter)="closeSaveDialog()" (keydown.space)="$event.preventDefault(); closeSaveDialog()">
-    <div class="save-dialog-content" role="dialog" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
-      <h3>Sauvegarder le filtre</h3>
-      <ds-input
-        class="full-width"
-        label="Nom du filtre"
-        placeholder="Ex: Mes dossiers urgents"
-        [(ngModel)]="presetName">
-      </ds-input>
-      <label for="preset-desc" class="ds-form-label">Description (optionnel)</label>
-      <textarea
-        id="preset-desc"
-        class="ds-dialog-textarea"
-        [(ngModel)]="presetDescription"
-        rows="3"
-        placeholder="Décrivez ce filtre…"></textarea>
-      <label class="ds-checkbox-row">
-        <input type="checkbox" [(ngModel)]="sharePreset" />
-        <span>Partager avec mon équipe</span>
-      </label>
-      <div class="save-dialog-actions">
-        <ds-button variant="ghost" size="md" (dsClick)="closeSaveDialog()">Annuler</ds-button>
-        <ds-button variant="marine" size="md" ariaLabel="Sauvegarder le filtre" (dsClick)="savePreset()">
-          <ds-icon name="check" [size]="20"></ds-icon>
-          Sauvegarder
-        </ds-button>
-      </div>
-    </div>
+      @if (resultCount !== null || countLoading) {
+        <div class="results-count-preview" style="margin-top: 24px; padding: 12px 16px; background: var(--ds-marine-hl); border-radius: var(--ds-radius-md); display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <ds-icon name="chart" [size]="20" style="color: var(--ds-marine);"></ds-icon>
+            <span style="font-size: 14px; font-weight: 600; color: var(--ds-marine-dark);">
+              @if (countLoading) {
+                Calcul des résultats...
+              } @else {
+                {{ resultCount }} dossier(s) correspondent à ces critères
+              }
+            </span>
+          </div>
+          @if (!countLoading) {
+            <ds-button variant="ghost" size="sm" (dsClick)="openSaveDialog()">
+              <ds-icon name="plus" [size]="16" style="margin-right: 8px;"></ds-icon>
+              Sauvegarder
+            </ds-button>
+          }
+        </div>
+      }
+    </main>
   </div>
-}
+</ds-dialog-content>
+
+<ds-dialog-actions align="end">
+  <ds-button variant="ghost" size="md" (dsClick)="cancel()">Annuler</ds-button>
+  <ds-button
+    variant="marine"
+    size="md"
+    (dsClick)="onFilterApplied(currentFilter!)"
+    [disabled]="!currentFilter || currentFilter.conditions.length === 0">
+    Appliquer les filtres
+  </ds-button>
+</ds-dialog-actions>

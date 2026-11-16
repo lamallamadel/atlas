@@ -1,18 +1,14 @@
 import {
   ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+  TestBed} from '@angular/core/testing';
 import { LottieAnimationComponent } from './lottie-animation.component';
-import { MatIconModule } from '@angular/material/icon';
-
 describe('LottieAnimationComponent', () => {
   let component: LottieAnimationComponent;
   let fixture: ComponentFixture<LottieAnimationComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MatIconModule, LottieAnimationComponent],
-    }).compileComponents();
+      imports: [LottieAnimationComponent]}).compileComponents();
 
     fixture = TestBed.createComponent(LottieAnimationComponent);
     component = fixture.componentInstance;
@@ -64,16 +60,16 @@ describe('LottieAnimationComponent', () => {
     expect(component.getFallbackIcon()).toBe('search');
 
     fixture.componentRef.setInput('animationType', 'success');
-    expect(component.getFallbackIcon()).toBe('check_circle');
+    expect(component.getFallbackIcon()).toBe('check');
 
     fixture.componentRef.setInput('animationType', 'error');
-    expect(component.getFallbackIcon()).toBe('error');
+    expect(component.getFallbackIcon()).toBe('info');
 
     fixture.componentRef.setInput('animationType', 'upload');
-    expect(component.getFallbackIcon()).toBe('cloud_upload');
+    expect(component.getFallbackIcon()).toBe('upload');
 
     fixture.componentRef.setInput('animationType', 'maintenance');
-    expect(component.getFallbackIcon()).toBe('build');
+    expect(component.getFallbackIcon()).toBe('settings');
   });
 
   it('should return correct fallback color for animation type', () => {
@@ -131,8 +127,7 @@ describe('LottieAnimationComponent', () => {
   describe('Cleanup', () => {
     it('should destroy animation on component destroy', () => {
       component.lottieInstance = {
-        destroy: vi.fn(),
-      };
+        destroy: vi.fn()};
 
       component.ngOnDestroy();
 

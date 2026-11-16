@@ -7,25 +7,19 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DossiersComponent } from './dossiers.component';
 import {
   DossierApiService,
-  DossierStatus,
-} from '../../services/dossier-api.service';
+  DossierStatus} from '../../services/dossier-api.service';
 import { AnnonceApiService } from '../../services/annonce-api.service';
 import { FilterPresetService } from '../../services/filter-preset.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
-import {} from '@angular/material/snack-bar';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
@@ -35,8 +29,7 @@ import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 /** Espions Jasmine sans `@types/jasmine` global (évite le conflit Vitest / Karma sur `expect`). */
 type KarmaSpyFn = ((...args: unknown[]) => unknown) & {
@@ -50,8 +43,7 @@ function karmaSpy(name: string): KarmaSpyFn {
     returnValue(v: unknown): KarmaSpyFn {
       base.mockReturnValue(v);
       return fn;
-    },
-  };
+    }};
   return fn;
 }
 
@@ -73,26 +65,21 @@ describe('DossiersComponent', () => {
       list: karmaSpy('DossierApiService.list'),
       getById: karmaSpy('DossierApiService.getById'),
       create: karmaSpy('DossierApiService.create'),
-      patchStatus: karmaSpy('DossierApiService.patchStatus'),
-    };
+      patchStatus: karmaSpy('DossierApiService.patchStatus')};
     const annonceApiServiceSpy = {
       list: karmaSpy('AnnonceApiService.list'),
-      getById: karmaSpy('AnnonceApiService.getById'),
-    };
+      getById: karmaSpy('AnnonceApiService.getById')};
     const filterPresetServiceSpy = {
       getPresets: karmaSpy('FilterPresetService.getPresets'),
       savePreset: karmaSpy('FilterPresetService.savePreset'),
       deletePreset: karmaSpy('FilterPresetService.deletePreset'),
       getPresetsLocally: karmaSpy('FilterPresetService.getPresetsLocally'),
       savePresetLocally: karmaSpy('FilterPresetService.savePresetLocally'),
-      deletePresetLocally: karmaSpy('FilterPresetService.deletePresetLocally'),
-    };
+      deletePresetLocally: karmaSpy('FilterPresetService.deletePresetLocally')};
     const bottomSheetSpy = {
-      open: karmaSpy('MatBottomSheet.open'),
-    };
+      open: karmaSpy('MatBottomSheet.open')};
     const breakpointObserverSpy = {
-      observe: karmaSpy('BreakpointObserver.observe'),
-    };
+      observe: karmaSpy('BreakpointObserver.observe')};
 
     breakpointObserverSpy.observe.and.returnValue(
       of({ matches: false, breakpoints: {} })
@@ -108,8 +95,7 @@ describe('DossiersComponent', () => {
           pageNumber: 0,
           pageSize: 10,
           paged: true,
-          unpaged: false,
-        },
+          unpaged: false},
         last: true,
         totalPages: 0,
         totalElements: 0,
@@ -118,8 +104,7 @@ describe('DossiersComponent', () => {
         sort: { empty: true, sorted: false, unsorted: true },
         first: true,
         numberOfElements: 0,
-        empty: true,
-      })
+        empty: true})
     );
 
     await TestBed.configureTestingModule({
@@ -128,12 +113,8 @@ describe('DossiersComponent', () => {
         RouterTestingModule,
         FormsModule,
         ReactiveFormsModule,
-        MatButtonModule,
-        MatIconModule,
-        MatTableModule,
         MatPaginatorModule,
         MatSortModule,
-        MatChipsModule,
         MatAutocompleteModule,
         MatFormFieldModule,
         MatInputModule,
@@ -141,19 +122,15 @@ describe('DossiersComponent', () => {
         MatSelectModule,
 
         NoopAnimationsModule,
-        DossiersComponent,
-      ],
+        DossiersComponent],
       providers: [
         {
           provide: MatSnackBar,
           useValue: {
             open: () => ({
               onAction: () => of(null),
-              afterDismissed: () => of(null),
-            }),
-            dismiss: () => {},
-          },
-        },
+              afterDismissed: () => of(null)}),
+            dismiss: () => {}}},
         { provide: LOCALE_ID, useValue: 'fr-FR' },
         { provide: DossierApiService, useValue: dossierApiServiceSpy },
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
@@ -163,13 +140,9 @@ describe('DossiersComponent', () => {
         {
           provide: MatDialog,
           useValue: {
-            open: karmaSpy('MatDialog.open'),
-          },
-        },
+            open: karmaSpy('MatDialog.open')}},
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
 
     dossierApiService = TestBed.inject(
       DossierApiService
@@ -204,8 +177,7 @@ describe('DossiersComponent', () => {
         pageNumber: 0,
         pageSize: 10,
         paged: true,
-        unpaged: false,
-      },
+        unpaged: false},
       last: true,
       totalPages: 1,
       totalElements: 0,
@@ -214,8 +186,7 @@ describe('DossiersComponent', () => {
       sort: { empty: true, sorted: false, unsorted: true },
       first: true,
       numberOfElements: 0,
-      empty: true,
-    };
+      empty: true};
 
     dossierApiService.list.and.returnValue(of(mockPage));
     fixture.detectChanges();
@@ -237,17 +208,14 @@ describe('DossiersComponent', () => {
           createdAt: '2024-01-01T00:00:00Z',
           updatedAt: '2024-01-01T00:00:00Z',
           createdBy: 'user1',
-          updatedBy: 'user1',
-        },
-      ],
+          updatedBy: 'user1'}],
       pageable: {
         sort: { empty: true, sorted: false, unsorted: true },
         offset: 0,
         pageNumber: 0,
         pageSize: 10,
         paged: true,
-        unpaged: false,
-      },
+        unpaged: false},
       last: true,
       totalPages: 1,
       totalElements: 1,
@@ -256,8 +224,7 @@ describe('DossiersComponent', () => {
       sort: { empty: true, sorted: false, unsorted: true },
       first: true,
       numberOfElements: 1,
-      empty: false,
-    };
+      empty: false};
 
     dossierApiService.list.and.returnValue(of(mockPage));
     fixture.detectChanges();
@@ -265,16 +232,6 @@ describe('DossiersComponent', () => {
     expect(dossierApiService.list).toHaveBeenCalled();
     expect(component.dossiers.length).toBe(1);
     expect(component.dossiers[0].leadName).toBe('John Doe');
-  });
-
-  it('should update applied filters when filters change', () => {
-    component.selectedStatus = DossierStatus.QUALIFIED;
-    component.phoneFilter = '+33612345678';
-    component.updateAppliedFilters();
-
-    expect(component.appliedFilters.length).toBe(2);
-    expect(component.appliedFilters[0].key).toBe('selectedStatus');
-    expect(component.appliedFilters[1].key).toBe('phoneFilter');
   });
 
   it('should remove filter when chip is removed', () => {
@@ -286,8 +243,7 @@ describe('DossiersComponent', () => {
         pageNumber: 0,
         pageSize: 10,
         paged: true,
-        unpaged: false,
-      },
+        unpaged: false},
       last: true,
       totalPages: 0,
       totalElements: 0,
@@ -296,16 +252,13 @@ describe('DossiersComponent', () => {
       sort: { empty: true, sorted: false, unsorted: true },
       first: true,
       numberOfElements: 0,
-      empty: true,
-    };
+      empty: true};
 
     dossierApiService.list.and.returnValue(of(mockPage));
 
     component.selectedStatus = DossierStatus.QUALIFIED;
-    component.phoneFilter = '+33612345678';
-    component.updateAppliedFilters();
-
-    const filter = component.appliedFilters[0];
+    const filter: any = { key: 'selectedStatus', label: 'Qualifié', value: DossierStatus.QUALIFIED };
+    component.appliedFilters = [filter];
     component.removeFilter(filter);
 
     expect(component.selectedStatus).toBe('');

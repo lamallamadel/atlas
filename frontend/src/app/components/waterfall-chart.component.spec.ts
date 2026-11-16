@@ -9,8 +9,7 @@ describe('WaterfallChartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WaterfallChartComponent],
-    }).compileComponents();
+      imports: [WaterfallChartComponent]}).compileComponents();
 
     fixture = TestBed.createComponent(WaterfallChartComponent);
     component = fixture.componentInstance;
@@ -25,8 +24,7 @@ describe('WaterfallChartComponent', () => {
       { label: 'Initial', value: 100, isTotal: true },
       { label: 'Gain', value: 50 },
       { label: 'Loss', value: -30 },
-      { label: 'Final', value: 0, isTotal: true },
-    ]);
+      { label: 'Final', value: 0, isTotal: true }]);
 
     fixture.detectChanges();
 
@@ -59,13 +57,11 @@ describe('WaterfallChartComponent', () => {
     const buildSpy = vi.spyOn(comp, 'buildChart');
 
     fixture.componentRef.setInput('entries', [
-      { label: 'Initial', value: 100 },
-    ]);
+      { label: 'Initial', value: 100 }]);
 
     // simulate ngOnChanges not as firstChange
     component.ngOnChanges({
-      entries: new SimpleChange(null, component.entries(), false),
-    });
+      entries: new SimpleChange(null, component.entries(), false)});
 
     expect(buildSpy).toHaveBeenCalled();
   });

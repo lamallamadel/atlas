@@ -1,21 +1,25 @@
-import { Component } from '@angular/core';
-import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, inject } from '@angular/core';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { LeadApiService, LeadExportRequest } from '../services/lead-api.service';
 import { DossierStatus } from '../services/dossier-api.service';
-import { MatIcon } from '@angular/material/icon';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatDivider } from '@angular/material/list';
-import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
-import { MatInput } from '@angular/material/input';
-import { MatProgressBar } from '@angular/material/progress-bar';
+import { 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsInputComponent,
+  DsCheckboxComponent,
+  DsProgressBarComponent,
+  DsCardComponent,
+  DsToastService,
+  DsDialogHeaderComponent,
+  DsDialogContentComponent,
+  DsDialogActionsComponent
+} from '../design-system';
 
-interface ColumnOption {
+export interface ColumnOption {
   value: string;
   label: string;
   selected: boolean;
@@ -23,11 +27,28 @@ interface ColumnOption {
 
 @Component({
     selector: 'app-lead-export-dialog',
+    standalone: true,
     templateUrl: './lead-export-dialog.component.html',
     styleUrls: ['./lead-export-dialog.component.css'],
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatButton, MatCheckbox, FormsModule, MatDivider, MatFormField, MatLabel, MatSelect, MatOption, MatSuffix, MatInput, MatProgressBar, MatDialogActions]
+    imports: [
+      CommonModule,
+      FormsModule,
+      DsButtonComponent,
+      DsIconComponent,
+      DsSelectComponent,
+      DsInputComponent,
+      DsCheckboxComponent,
+      DsProgressBarComponent,
+      DsCardComponent,
+      DsDialogHeaderComponent,
+      DsDialogContentComponent,
+      DsDialogActionsComponent
+    ]
 })
 export class LeadExportDialogComponent {
+  private leadApiService = inject(LeadApiService);
+  private toastService = inject(DsToastService);
+
   columns: ColumnOption[] = [
     { value: 'id', label: 'ID', selected: true },
     { value: 'name', label: 'Nom du prospect', selected: true },
@@ -56,7 +77,7 @@ export class LeadExportDialogComponent {
   
   isExporting = false;
 
-  statusOptions = [
+  readonly statusOptions: DsSelectOption[] = [
     { value: '', label: 'Tous les statuts' },
     { value: DossierStatus.NEW, label: 'Nouveau' },
     { value: DossierStatus.QUALIFYING, label: 'En qualification' },
@@ -66,7 +87,7 @@ export class LeadExportDialogComponent {
     { value: DossierStatus.LOST, label: 'Perdu' }
   ];
 
-  sourceOptions = [
+  readonly sourceOptions: DsSelectOption[] = [
     { value: '', label: 'Toutes les sources' },
     { value: 'WEB', label: 'Web' },
     { value: 'MOBILE', label: 'Mobile' },
@@ -78,9 +99,7 @@ export class LeadExportDialogComponent {
   ];
 
   constructor(
-    public dialogRef: MatDialogRef<LeadExportDialogComponent>,
-    private leadApiService: LeadApiService,
-    private snackBar: MatSnackBar
+    public dialogRef: DialogRef<any>
   ) {}
 
   selectAllColumns(): void {
@@ -101,7 +120,7 @@ export class LeadExportDialogComponent {
 
   exportLeads(): void {
     if (!this.canExport()) {
-      this.snackBar.open('Veuillez sélectionner au moins une colonne', 'Fermer', { duration: 3000 });
+      this.toastService.warning('Veuillez sélectionner au moins une colonne');
       return;
     }
 
@@ -132,20 +151,14 @@ export class LeadExportDialogComponent {
       .subscribe({
         next: (blob) => {
           this.downloadFile(blob);
-          this.snackBar.open('Export réussi', 'Fermer', {
-            duration: 3000,
-            panelClass: ['success-snackbar']
-          });
+          this.toastService.success('Export réussi');
           this.isExporting = false;
           this.dialogRef.close(true);
         },
         error: (err) => {
           this.isExporting = false;
           const message = err.error?.message || 'Échec de l\'export';
-          this.snackBar.open(message, 'Fermer', {
-            duration: 5000,
-            panelClass: ['error-snackbar']
-          });
+          this.toastService.error(message);
         }
       });
   }

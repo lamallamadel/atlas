@@ -13,12 +13,10 @@ describe('NavigationService', () => {
     mockRouter = {
       events: routerEventsSubject.asObservable(),
       url: '/test',
-      navigateByUrl: vi.fn().mockReturnValue(Promise.resolve(true)),
-    };
+      navigateByUrl: vi.fn().mockReturnValue(Promise.resolve(true))};
 
     TestBed.configureTestingModule({
-      providers: [NavigationService, { provide: Router, useValue: mockRouter }],
-    });
+      providers: [NavigationService, { provide: Router, useValue: mockRouter }]});
     service = TestBed.inject(NavigationService);
   });
 

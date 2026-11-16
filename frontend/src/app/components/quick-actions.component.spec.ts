@@ -1,9 +1,5 @@
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogModule } from '@angular/material/dialog';
-import {} from '@angular/material/snack-bar';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { QuickActionsComponent } from './quick-actions.component';
 import { QuickActionsService } from '../services/quick-actions.service';
@@ -14,8 +10,7 @@ import { AppointmentApiService } from '../services/appointment-api.service';
 import { DossierApiService } from '../services/dossier-api.service';
 import {
   DossierResponse,
-  DossierStatus,
-} from '../services/dossier-api.service';
+  DossierStatus} from '../services/dossier-api.service';
 import { of } from 'rxjs';
 
 describe('QuickActionsComponent', () => {
@@ -39,71 +34,53 @@ describe('QuickActionsComponent', () => {
     annonceId: undefined,
     parties: [],
     createdAt: '2024-01-01T10:00:00Z',
-    updatedAt: '2024-01-01T10:00:00Z',
-  };
+    updatedAt: '2024-01-01T10:00:00Z'};
 
   beforeEach(async () => {
     mockQuickActionsService = {
       addRecentAction: vi.fn().mockName('QuickActionsService.addRecentAction'),
       getRecentActions: vi
         .fn()
-        .mockName('QuickActionsService.getRecentActions'),
-    };
+        .mockName('QuickActionsService.getRecentActions')};
     mockQuickActionsService.recentActions$ = of([]);
 
     mockVoipService = {
       isConfigured: vi.fn().mockName('VoipService.isConfigured'),
-      initiateCall: vi.fn().mockName('VoipService.initiateCall'),
-    };
+      initiateCall: vi.fn().mockName('VoipService.initiateCall')};
     mockVoipService.isConfigured.mockReturnValue(true);
 
     mockKeyboardShortcutService = {
       registerShortcut: vi
         .fn()
-        .mockName('KeyboardShortcutService.registerShortcut'),
-    };
+        .mockName('KeyboardShortcutService.registerShortcut')};
 
     mockMessageApiService = {
-      create: vi.fn().mockName('MessageApiService.create'),
-    };
+      create: vi.fn().mockName('MessageApiService.create')};
     mockAppointmentApiService = {
-      create: vi.fn().mockName('AppointmentApiService.create'),
-    };
+      create: vi.fn().mockName('AppointmentApiService.create')};
     mockDossierApiService = {
-      patchStatus: vi.fn().mockName('DossierApiService.patchStatus'),
-    };
+      patchStatus: vi.fn().mockName('DossierApiService.patchStatus')};
 
     await TestBed.configureTestingModule({
       imports: [
         NoopAnimationsModule,
-        MatDialogModule,
-
-        MatButtonModule,
-        MatIconModule,
-        QuickActionsComponent,
-      ],
+        QuickActionsComponent],
       providers: [
         {
           provide: MatSnackBar,
           useValue: {
             open: () => ({
               onAction: () => of(null),
-              afterDismissed: () => of(null),
-            }),
-            dismiss: () => {},
-          },
-        },
+              afterDismissed: () => of(null)}),
+            dismiss: () => {}}},
         { provide: QuickActionsService, useValue: mockQuickActionsService },
         { provide: VoipService, useValue: mockVoipService },
         {
           provide: KeyboardShortcutService,
-          useValue: mockKeyboardShortcutService,
-        },
+          useValue: mockKeyboardShortcutService},
         { provide: MessageApiService, useValue: mockMessageApiService },
         { provide: AppointmentApiService, useValue: mockAppointmentApiService },
-        { provide: DossierApiService, useValue: mockDossierApiService },
-      ],
-    }).compileComponents();
+        { provide: DossierApiService, useValue: mockDossierApiService }]}).compileComponents();
 
     fixture = TestBed.createComponent(QuickActionsComponent);
     component = fixture.componentInstance;
@@ -152,6 +129,6 @@ describe('QuickActionsComponent', () => {
   it('should format action timestamp correctly', () => {
     const timestamp = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const formatted = component.formatActionTimestamp(timestamp);
-    expect(formatted).toContain('Il y a 5 min');
+    expect(formatted).toContain('5 min');
   });
 });

@@ -1,32 +1,42 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { WorkflowApiService, WorkflowTemplate } from '../services/workflow-api.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { DsCardComponent } from '../design-system';
-import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatChipListbox, MatChipOption } from '@angular/material/chips';
-import { DsSkeletonComponent } from '../design-system/primitives/ds-skeleton/ds-skeleton.component';
+import { CommonModule } from '@angular/common';
+import { 
+  DsCardComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSkeletonComponent,
+  DsFilterChipComponent,
+  DsToastService,
+  DsBadgeComponent
+} from '../design-system';
 
 @Component({
   selector: 'app-workflow-template-library',
   standalone: true,
-  imports: [DsCardComponent, DsSkeletonComponent, MatButton, MatIcon, MatChipListbox, MatChipOption],
+  imports: [
+    CommonModule,
+    DsCardComponent, 
+    DsSkeletonComponent, 
+    DsButtonComponent, 
+    DsIconComponent,
+    DsFilterChipComponent,
+    DsBadgeComponent
+  ],
   templateUrl: './workflow-template-library.component.html',
   styleUrls: ['./workflow-template-library.component.css']
 })
 export class WorkflowTemplateLibraryComponent implements OnInit {
+  private workflowApi = inject(WorkflowApiService);
+  private toastService = inject(DsToastService);
+  private router = inject(Router);
+
   templates: WorkflowTemplate[] = [];
   filteredTemplates: WorkflowTemplate[] = [];
   selectedCategory = '';
   categories = ['SALE', 'RENTAL', 'MANDATE', 'CONSTRUCTION'];
   isLoading = false;
-
-  constructor(
-    private workflowApi: WorkflowApiService,
-    private snackBar: MatSnackBar,
-    private router: Router
-  ) {}
 
   ngOnInit(): void {
     this.loadTemplates();
@@ -41,7 +51,7 @@ export class WorkflowTemplateLibraryComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        this.snackBar.open('Error loading templates: ' + error.message, 'Close', { duration: 5000 });
+        this.toastService.error('Erreur lors du chargement des modèles: ' + error.message);
         this.isLoading = false;
       }
     });
@@ -60,11 +70,11 @@ export class WorkflowTemplateLibraryComponent implements OnInit {
   instantiateTemplate(templateId: number, name: string): void {
     this.workflowApi.instantiateTemplate(templateId, name).subscribe({
       next: (workflow) => {
-        this.snackBar.open('Template instantiated successfully', 'Close', { duration: 3000 });
+        this.toastService.success('Modèle instancié avec succès');
         this.router.navigate(['/workflow-builder'], { queryParams: { id: workflow.id } });
       },
       error: (error) => {
-        this.snackBar.open('Error instantiating template: ' + error.message, 'Close', { duration: 5000 });
+        this.toastService.error('Erreur lors de l\'instanciation du modèle: ' + error.message);
       }
     });
   }
@@ -72,42 +82,32 @@ export class WorkflowTemplateLibraryComponent implements OnInit {
   seedTemplates(): void {
     this.workflowApi.seedTemplates().subscribe({
       next: () => {
-        this.snackBar.open('Templates seeded successfully', 'Close', { duration: 3000 });
+        this.toastService.success('Modèles initialisés avec succès');
         this.loadTemplates();
       },
       error: (error) => {
-        this.snackBar.open('Error seeding templates: ' + error.message, 'Close', { duration: 5000 });
+        this.toastService.error('Erreur lors de l\'initialisation des modèles: ' + error.message);
       }
     });
   }
 
   getCategoryIcon(category: string): string {
     switch (category) {
-      case 'SALE':
-        return 'home';
-      case 'RENTAL':
-        return 'apartment';
-      case 'MANDATE':
-        return 'gavel';
-      case 'CONSTRUCTION':
-        return 'construction';
-      default:
-        return 'category';
+      case 'SALE': return 'home';
+      case 'RENTAL': return 'refresh';
+      case 'MANDATE': return 'edit';
+      case 'CONSTRUCTION': return 'refresh';
+      default: return 'folder';
     }
   }
 
   getCategoryColor(category: string): string {
     switch (category) {
-      case 'SALE':
-        return 'var(--ds-marine)';
-      case 'RENTAL':
-        return 'var(--ds-success)';
-      case 'MANDATE':
-        return 'var(--ds-copper)';
-      case 'CONSTRUCTION':
-        return 'var(--ds-info)';
-      default:
-        return 'var(--ds-text-muted)';
+      case 'SALE': return 'var(--ds-marine)';
+      case 'RENTAL': return 'var(--ds-success)';
+      case 'MANDATE': return 'var(--ds-warning)';
+      case 'CONSTRUCTION': return 'var(--ds-primary)';
+      default: return 'var(--ds-text-muted)';
     }
   }
 }

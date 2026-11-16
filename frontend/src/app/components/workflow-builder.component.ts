@@ -1,18 +1,20 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import * as d3 from 'd3';
 import { WorkflowApiService, WorkflowDefinition, WorkflowState, WorkflowTransition } from '../services/workflow-api.service';
 import { resolveDsToken } from '../design-system/chart-ds-colors';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { DsCardComponent } from '../design-system';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatListModule } from '@angular/material/list';
+import { 
+  DsCardComponent, 
+  DsButtonComponent, 
+  DsIconComponent, 
+  DsSelectComponent, 
+  DsSelectOption,
+  DsInputComponent,
+  DsToastService,
+  DsTabsComponent,
+  DsTab
+} from '../design-system';
 
 interface D3Node extends d3.SimulationNodeDatum {
   id: string;
@@ -35,19 +37,21 @@ interface D3Link extends d3.SimulationLinkDatum<D3Node> {
     CommonModule,
     ReactiveFormsModule,
     DsCardComponent,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatTabsModule,
-    MatListModule,
+    DsButtonComponent,
+    DsIconComponent,
+    DsSelectComponent,
+    DsInputComponent,
+    DsTabsComponent
   ],
   templateUrl: './workflow-builder.component.html',
   styleUrls: ['./workflow-builder.component.css']
 })
 export class WorkflowBuilderComponent implements AfterViewInit {
   @ViewChild('svgCanvas', { static: false }) svgCanvas!: ElementRef<SVGElement>;
+
+  private fb = inject(FormBuilder);
+  private workflowApi = inject(WorkflowApiService);
+  private toastService = inject(DsToastService);
 
   workflowForm: FormGroup;
   stateForm: FormGroup;
@@ -69,15 +73,33 @@ export class WorkflowBuilderComponent implements AfterViewInit {
   private nodes: D3Node[] = [];
   private links: D3Link[] = [];
 
-  caseTypes = ['SALE', 'RENTAL', 'MANDATE', 'CONSTRUCTION'];
-  stateTypes = ['initial', 'intermediate', 'final'];
+  activeTab = 'states';
+  readonly propertyTabs: DsTab[] = [
+    { value: 'states', label: 'États' },
+    { value: 'transitions', label: 'Transitions' },
+    { value: 'details', label: 'Détails' }
+  ];
+
+  readonly caseTypes: DsSelectOption[] = [
+    { value: 'SALE', label: 'Vente' },
+    { value: 'RENTAL', label: 'Location' },
+    { value: 'MANDATE', label: 'Mandat' },
+    { value: 'CONSTRUCTION', label: 'Construction' }
+  ];
+
+  readonly stateTypes: DsSelectOption[] = [
+    { value: 'initial', label: 'Initial' },
+    { value: 'intermediate', label: 'Intermédiaire' },
+    { value: 'final', label: 'Final' }
+  ];
+
   stateColors: string[] = [];
 
-  constructor(
-    private fb: FormBuilder,
-    private workflowApi: WorkflowApiService,
-    private snackBar: MatSnackBar
-  ) {
+  get stateOptions(): DsSelectOption[] {
+    return this.states.map(s => ({ value: s.stateCode, label: s.stateName }));
+  }
+
+  constructor() {
     this.stateColors = [
       resolveDsToken('--ds-marine'),
       resolveDsToken('--ds-success'),
@@ -98,7 +120,7 @@ export class WorkflowBuilderComponent implements AfterViewInit {
       stateCode: ['', Validators.required],
       stateName: ['', Validators.required],
       stateType: ['intermediate', Validators.required],
-      color: ['#3B82F6', Validators.required],
+      color: [this.stateColors[0], Validators.required],
       description: ['']
     });
 
@@ -248,9 +270,9 @@ export class WorkflowBuilderComponent implements AfterViewInit {
 
       this.states.push(newState);
       this.updateGraph();
-      this.stateForm.reset({ stateType: 'intermediate', color: resolveDsToken('--ds-marine') });
+      this.stateForm.reset({ stateType: 'intermediate', color: this.stateColors[0] });
       this.isAddingState = false;
-      this.snackBar.open('State added successfully', 'Close', { duration: 3000 });
+      this.toastService.success('État ajouté avec succès');
     }
   }
 
@@ -271,7 +293,7 @@ export class WorkflowBuilderComponent implements AfterViewInit {
       this.transitionForm.reset({ allowedRoles: 'ADMIN,AGENT,MANAGER' });
       this.isAddingTransition = false;
       this.transitionSourceState = null;
-      this.snackBar.open('Transition added successfully', 'Close', { duration: 3000 });
+      this.toastService.success('Transition ajoutée avec succès');
     }
   }
 
@@ -298,6 +320,7 @@ export class WorkflowBuilderComponent implements AfterViewInit {
   onStateClick(node: D3Node): void {
     this.selectedState = node.state;
     this.selectedTransition = null;
+    this.activeTab = 'details';
   }
 
   deleteState(stateCode: string): void {
@@ -305,14 +328,14 @@ export class WorkflowBuilderComponent implements AfterViewInit {
     this.transitions = this.transitions.filter(t => t.fromState !== stateCode && t.toState !== stateCode);
     this.selectedState = null;
     this.updateGraph();
-    this.snackBar.open('State deleted', 'Close', { duration: 3000 });
+    this.toastService.success('État supprimé');
   }
 
   deleteTransition(fromState: string, toState: string): void {
     this.transitions = this.transitions.filter(t => !(t.fromState === fromState && t.toState === toState));
     this.selectedTransition = null;
     this.updateGraph();
-    this.snackBar.open('Transition deleted', 'Close', { duration: 3000 });
+    this.toastService.success('Transition supprimée');
   }
 
   saveWorkflow(): void {
@@ -333,10 +356,10 @@ export class WorkflowBuilderComponent implements AfterViewInit {
       this.workflowApi.createWorkflow(workflow).subscribe({
         next: (response) => {
           this.workflow = response;
-          this.snackBar.open('Workflow saved successfully', 'Close', { duration: 3000 });
+          this.toastService.success('Workflow enregistré avec succès');
         },
         error: (error) => {
-          this.snackBar.open('Error saving workflow: ' + error.message, 'Close', { duration: 5000 });
+          this.toastService.error('Erreur lors de l\'enregistrement: ' + error.message);
         }
       });
     }
@@ -347,10 +370,10 @@ export class WorkflowBuilderComponent implements AfterViewInit {
       this.workflowApi.publishWorkflow(this.workflow.id).subscribe({
         next: (response) => {
           this.workflow = response;
-          this.snackBar.open('Workflow published successfully', 'Close', { duration: 3000 });
+          this.toastService.success('Workflow publié avec succès');
         },
         error: (error) => {
-          this.snackBar.open('Error publishing workflow: ' + error.message, 'Close', { duration: 5000 });
+          this.toastService.error('Erreur lors de la publication: ' + error.message);
         }
       });
     }
@@ -361,10 +384,10 @@ export class WorkflowBuilderComponent implements AfterViewInit {
       this.workflowApi.activateWorkflow(this.workflow.id).subscribe({
         next: (response) => {
           this.workflow = response;
-          this.snackBar.open('Workflow activated successfully', 'Close', { duration: 3000 });
+          this.toastService.success('Workflow activé avec succès');
         },
         error: (error) => {
-          this.snackBar.open('Error activating workflow: ' + error.message, 'Close', { duration: 5000 });
+          this.toastService.error('Erreur lors de l\'activation: ' + error.message);
         }
       });
     }
@@ -374,6 +397,7 @@ export class WorkflowBuilderComponent implements AfterViewInit {
     this.transitionSourceState = stateCode;
     this.transitionForm.patchValue({ fromState: stateCode });
     this.isAddingTransition = true;
+    this.activeTab = 'transitions';
   }
 
   loadTemplate(templateId: number): void {
@@ -390,10 +414,10 @@ export class WorkflowBuilderComponent implements AfterViewInit {
           finalStates: workflow.finalStates
         });
         this.updateGraph();
-        this.snackBar.open('Template loaded successfully', 'Close', { duration: 3000 });
+        this.toastService.success('Modèle chargé avec succès');
       },
       error: (error) => {
-        this.snackBar.open('Error loading template: ' + error.message, 'Close', { duration: 5000 });
+        this.toastService.error('Erreur lors du chargement du modèle: ' + error.message);
       }
     });
   }

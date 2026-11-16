@@ -2,11 +2,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import {} from '@angular/material/snack-bar';
 import { OfflineIndicatorComponent } from './offline-indicator.component';
 import { OfflineService } from '../services/offline.service';
 import { OfflineQueueService } from '../services/offline-queue.service';
@@ -14,8 +11,7 @@ import { OfflineStorageService } from '../services/offline-storage.service';
 import { NotificationService } from '../services/notification.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('OfflineIndicatorComponent', () => {
   let component: OfflineIndicatorComponent;
@@ -25,22 +21,16 @@ describe('OfflineIndicatorComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         BrowserAnimationsModule,
-        MatIconModule,
-        MatButtonModule,
         MatProgressBarModule,
-        OfflineIndicatorComponent,
-      ],
+        OfflineIndicatorComponent],
       providers: [
         {
           provide: MatSnackBar,
           useValue: {
             open: () => ({
               onAction: () => of(null),
-              afterDismissed: () => of(null),
-            }),
-            dismiss: () => {},
-          },
-        },
+              afterDismissed: () => of(null)}),
+            dismiss: () => {}}},
         OfflineService,
         OfflineQueueService,
         OfflineStorageService,
@@ -51,13 +41,9 @@ describe('OfflineIndicatorComponent', () => {
             error: vi.fn().mockName('NotificationService.error'),
             info: vi.fn().mockName('NotificationService.info'),
             warning: vi.fn().mockName('NotificationService.warning'),
-            critical: vi.fn().mockName('NotificationService.critical'),
-          },
-        },
+            critical: vi.fn().mockName('NotificationService.critical')}},
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
 
     fixture = TestBed.createComponent(OfflineIndicatorComponent);
     component = fixture.componentInstance;

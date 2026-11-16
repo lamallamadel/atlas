@@ -7,8 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 
 describe('ObservabilityDashboardComponent', () => {
   let component: ObservabilityDashboardComponent;
@@ -20,41 +19,32 @@ describe('ObservabilityDashboardComponent', () => {
       queueDepthByChannel: {
         SMS: 10,
         EMAIL: 5,
-        WHATSAPP: 3,
-      },
-      totalQueued: 18,
-    },
+        WHATSAPP: 3},
+      totalQueued: 18},
     latencyMetrics: {
       latencyByChannel: {
         SMS: { p50: 100, p95: 200, p99: 300, average: 120 },
         EMAIL: { p50: 150, p95: 250, p99: 350, average: 170 },
-        WHATSAPP: { p50: 80, p95: 180, p99: 280, average: 100 },
-      },
-    },
+        WHATSAPP: { p50: 80, p95: 180, p99: 280, average: 100 }}},
     failureMetrics: {
       failuresByChannel: {
         SMS: 2,
         EMAIL: 1,
-        WHATSAPP: 0,
-      },
+        WHATSAPP: 0},
       failuresByErrorCode: {
         INVALID_NUMBER: 1,
         TIMEOUT: 1,
-        REJECTED: 1,
-      },
+        REJECTED: 1},
       failureTrend: [
         { date: '2024-01-01', value: 1 },
-        { date: '2024-01-02', value: 2 },
-      ],
-      overallFailureRate: 5.5,
-    },
+        { date: '2024-01-02', value: 2 }],
+      overallFailureRate: 5.5},
     dlqMetrics: {
       dlqSize: 5,
       dlqSizeByChannel: {
         SMS: 3,
         EMAIL: 2,
-        WHATSAPP: 0,
-      },
+        WHATSAPP: 0},
       recentDlqMessages: [
         {
           messageId: 1,
@@ -62,12 +52,9 @@ describe('ObservabilityDashboardComponent', () => {
           errorCode: 'INVALID_NUMBER',
           errorMessage: 'Invalid phone number',
           attemptCount: 3,
-          lastAttemptAt: '2024-01-01T10:00:00Z',
-        },
-      ],
+          lastAttemptAt: '2024-01-01T10:00:00Z'}],
       alertThresholdExceeded: false,
-      alertThreshold: 100,
-    },
+      alertThreshold: 100},
     quotaMetrics: {
       quotaByChannel: {
         SMS: { used: 500, limit: 1000, usagePercentage: 50, period: 'daily' },
@@ -76,12 +63,8 @@ describe('ObservabilityDashboardComponent', () => {
           used: 950,
           limit: 1000,
           usagePercentage: 95,
-          period: 'daily',
-        },
-      },
-    },
-    timestamp: '2024-01-01T12:00:00Z',
-  };
+          period: 'daily'}}},
+    timestamp: '2024-01-01T12:00:00Z'};
 
   const createMockMetrics = () => JSON.parse(JSON.stringify(baseMockMetrics));
 
@@ -92,21 +75,17 @@ describe('ObservabilityDashboardComponent', () => {
         .mockName('ReportingApiService.getObservabilityMetrics'),
       exportObservabilityMetrics: vi
         .fn()
-        .mockName('ReportingApiService.exportObservabilityMetrics'),
-    };
+        .mockName('ReportingApiService.exportObservabilityMetrics')};
 
     await TestBed.configureTestingModule({
       imports: [
         FormsModule,
         BrowserAnimationsModule,
-        ObservabilityDashboardComponent,
-      ],
+        ObservabilityDashboardComponent],
       providers: [
         { provide: ReportingApiService, useValue: reportingServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
 
     reportingService = TestBed.inject(
       ReportingApiService

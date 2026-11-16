@@ -9,13 +9,10 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
-// Add whatever your templates use frequently:
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { DsCardComponent } from '../design-system';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -28,8 +25,6 @@ import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { LayoutModule } from '@angular/cdk/layout';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 @NgModule({ 
     exports: [
@@ -45,8 +40,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
         MatInputModule,
         MatSelectModule,
         MatProgressSpinnerModule,
-        MatProgressBarModule,
-        
         MatTabsModule,
         DsCardComponent,
         MatExpansionModule,
@@ -72,8 +65,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
         MatInputModule,
         MatSelectModule,
         MatProgressSpinnerModule,
-        MatProgressBarModule,
-        
         MatTabsModule,
         DsCardComponent,
         MatExpansionModule,
@@ -88,14 +79,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     ], 
     providers: [
         provideHttpClient(withInterceptorsFromDi()), 
-        provideHttpClientTesting(),
-        {
-            provide: MatSnackBar,
-            useValue: {
-                open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }),
-                dismiss: () => {}
-            }
-        }
+        provideHttpClientTesting()
     ] 
 })
 export class MaterialTestingModule { }

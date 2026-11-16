@@ -1,14 +1,10 @@
 import {
   ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+  TestBed} from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -19,14 +15,12 @@ import { CalendarViewComponent } from './calendar-view.component';
 import {
   AppointmentApiService,
   AppointmentStatus,
-  AppointmentResponse,
-} from '../services/appointment-api.service';
-import { ToastNotificationService } from '../services/toast-notification.service';
+  AppointmentResponse} from '../services/appointment-api.service';
+import { NotificationService } from '../services/notification.service';
 import { CalendarSyncService } from '../services/calendar-sync.service';
 import {
   provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+  withInterceptorsFromDi} from '@angular/common/http';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { resolveDsToken } from '../design-system/chart-ds-colors';
 
@@ -60,7 +54,7 @@ describe('CalendarViewComponent', () => {
   let component: CalendarViewComponent;
   let fixture: ComponentFixture<CalendarViewComponent>;
   let appointmentService: AngularVitestPartialMock<AppointmentApiService>;
-  let toastService: AngularVitestPartialMock<ToastNotificationService>;
+  let toastService: AngularVitestPartialMock<NotificationService>;
 
   const mockAppointments: AppointmentResponse[] = [
     {
@@ -74,8 +68,7 @@ describe('CalendarViewComponent', () => {
       notes: 'Initial meeting',
       status: AppointmentStatus.SCHEDULED,
       createdAt: '2024-01-10T08:00:00Z',
-      updatedAt: '2024-01-10T08:00:00Z',
-    },
+      updatedAt: '2024-01-10T08:00:00Z'},
     {
       id: 2,
       orgId: 'org1',
@@ -87,9 +80,7 @@ describe('CalendarViewComponent', () => {
       notes: 'Follow-up',
       status: AppointmentStatus.COMPLETED,
       createdAt: '2024-01-10T09:00:00Z',
-      updatedAt: '2024-01-15T15:00:00Z',
-    },
-  ];
+      updatedAt: '2024-01-15T15:00:00Z'}];
 
   beforeEach(async () => {
     const appointmentServiceSpy = {
@@ -97,53 +88,42 @@ describe('CalendarViewComponent', () => {
       getById: vi.fn().mockName('AppointmentApiService.getById'),
       create: vi.fn().mockName('AppointmentApiService.create'),
       update: vi.fn().mockName('AppointmentApiService.update'),
-      delete: vi.fn().mockName('AppointmentApiService.delete'),
-    };
+      delete: vi.fn().mockName('AppointmentApiService.delete')};
     const toastServiceSpy = {
-      success: vi.fn().mockName('ToastNotificationService.success'),
-      error: vi.fn().mockName('ToastNotificationService.error'),
-      warning: vi.fn().mockName('ToastNotificationService.warning'),
-    };
+      success: vi.fn().mockName('NotificationService.success'),
+      error: vi.fn().mockName('NotificationService.error'),
+      warning: vi.fn().mockName('NotificationService.warning')};
     const calendarSyncServiceSpy = {
       downloadICalendar: vi
         .fn()
-        .mockName('CalendarSyncService.downloadICalendar'),
-    };
+        .mockName('CalendarSyncService.downloadICalendar')};
 
     await TestBed.configureTestingModule({
       schemas: [NO_ERRORS_SCHEMA],
       imports: [
         BrowserAnimationsModule,
-        MatDialogModule,
         MatFormFieldModule,
         MatSelectModule,
-        MatIconModule,
-        MatButtonModule,
-        CalendarViewComponent,
-      ],
+        CalendarViewComponent],
       providers: [
         { provide: AppointmentApiService, useValue: appointmentServiceSpy },
-        { provide: ToastNotificationService, useValue: toastServiceSpy },
+        { provide: NotificationService, useValue: toastServiceSpy },
         { provide: CalendarSyncService, useValue: calendarSyncServiceSpy },
         {
           provide: BreakpointObserver,
           useValue: {
             observe: () =>
               of({ matches: false, breakpoints: {} }),
-            isMatched: () => false,
-          },
-        },
+            isMatched: () => false}},
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-      ],
-    }).compileComponents();
+        provideHttpClientTesting()]}).compileComponents();
 
     appointmentService = TestBed.inject(
       AppointmentApiService
     ) as AngularVitestPartialMock<AppointmentApiService>;
     toastService = TestBed.inject(
-      ToastNotificationService
-    ) as AngularVitestPartialMock<ToastNotificationService>;
+      NotificationService
+    ) as AngularVitestPartialMock<NotificationService>;
   });
 
   beforeEach(() => {
@@ -156,8 +136,7 @@ describe('CalendarViewComponent', () => {
           pageNumber: 0,
           pageSize: 20,
           paged: true,
-          unpaged: false,
-        },
+          unpaged: false},
         last: true,
         totalPages: 1,
         totalElements: 2,
@@ -166,8 +145,7 @@ describe('CalendarViewComponent', () => {
         sort: { empty: true, sorted: false, unsorted: true },
         first: true,
         numberOfElements: 2,
-        empty: false,
-      })
+        empty: false})
     );
 
     fixture = TestBed.createComponent(CalendarViewComponent);
@@ -180,8 +158,7 @@ describe('CalendarViewComponent', () => {
       dayGridPlugin,
       timeGridPlugin,
       listPlugin,
-      interactionPlugin,
-    ];
+      interactionPlugin];
     component.calendarLoaded = true;
     component.calendarLoading = false;
   });
@@ -228,8 +205,7 @@ describe('CalendarViewComponent', () => {
           pageNumber: 0,
           pageSize: 20,
           paged: true,
-          unpaged: false,
-        },
+          unpaged: false},
         last: true,
         totalPages: 1,
         totalElements: 1,
@@ -238,16 +214,14 @@ describe('CalendarViewComponent', () => {
         sort: { empty: true, sorted: false, unsorted: true },
         first: true,
         numberOfElements: 1,
-        empty: false,
-      })
+        empty: false})
     );
 
     component.onFilterByStatusChange(AppointmentStatus.SCHEDULED);
 
     expect(appointmentService.list).toHaveBeenCalledWith({
       size: 1000,
-      status: AppointmentStatus.SCHEDULED,
-    });
+      status: AppointmentStatus.SCHEDULED});
   });
 
   it('should get correct status color', () => {
@@ -292,8 +266,7 @@ describe('CalendarViewComponent', () => {
   it('should not detect conflict for cancelled appointments', () => {
     const cancelledAppointment: AppointmentResponse = {
       ...mockAppointments[0],
-      status: AppointmentStatus.CANCELLED,
-    };
+      status: AppointmentStatus.CANCELLED};
     component.appointments = [cancelledAppointment];
 
     const start = new Date('2024-01-15T10:30:00Z');
@@ -318,8 +291,7 @@ describe('CalendarViewComponent', () => {
       notes: 'New appointment',
       status: AppointmentStatus.SCHEDULED,
       createdAt: '2024-01-15T08:00:00Z',
-      updatedAt: '2024-01-15T08:00:00Z',
-    };
+      updatedAt: '2024-01-15T08:00:00Z'};
 
     appointmentService.create.mockReturnValue(of(newAppointment));
     fixture.detectChanges();
@@ -333,8 +305,7 @@ describe('CalendarViewComponent', () => {
       location: 'Office C',
       assignedTo: 'John Doe',
       notes: 'New appointment',
-      status: AppointmentStatus.SCHEDULED,
-    });
+      status: AppointmentStatus.SCHEDULED});
 
     expect(appointmentService.create).toHaveBeenCalled();
     expect(component.appointments.length).toBe(initialCount + 1);
@@ -346,8 +317,7 @@ describe('CalendarViewComponent', () => {
   it('should update appointment', () => {
     const updatedAppointment: AppointmentResponse = {
       ...mockAppointments[0],
-      location: 'Updated Location',
-    };
+      location: 'Updated Location'};
 
     appointmentService.update.mockReturnValue(of(updatedAppointment));
     fixture.detectChanges();
@@ -359,8 +329,7 @@ describe('CalendarViewComponent', () => {
       endTime: '2024-01-15T11:00:00Z',
       location: 'Updated Location',
       assignedTo: 'John Doe',
-      status: AppointmentStatus.SCHEDULED,
-    });
+      status: AppointmentStatus.SCHEDULED});
 
     expect(appointmentService.update).toHaveBeenCalledWith(
       1,

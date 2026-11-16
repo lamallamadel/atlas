@@ -18,14 +18,11 @@ describe('DossierCreateComponent', () => {
   beforeEach(async () => {
     dossierApiService = {
       create: vi.fn().mockName('DossierApiService.create'),
-      checkDuplicates: vi.fn().mockName('DossierApiService.checkDuplicates'),
-    };
+      checkDuplicates: vi.fn().mockName('DossierApiService.checkDuplicates')};
     annonceApiService = {
-      list: vi.fn().mockName('AnnonceApiService.list'),
-    };
+      list: vi.fn().mockName('AnnonceApiService.list')};
     router = {
-      navigate: vi.fn().mockName('Router.navigate'),
-    };
+      navigate: vi.fn().mockName('Router.navigate')};
 
     annonceApiService.list.mockReturnValue(
       of({
@@ -36,8 +33,7 @@ describe('DossierCreateComponent', () => {
           pageNumber: 0,
           pageSize: 20,
           paged: true,
-          unpaged: false,
-        },
+          unpaged: false},
         last: true,
         totalPages: 1,
         totalElements: 0,
@@ -46,8 +42,7 @@ describe('DossierCreateComponent', () => {
         sort: { empty: true, sorted: false, unsorted: true },
         first: true,
         numberOfElements: 0,
-        empty: true,
-      } as any)
+        empty: true} as any)
     );
 
     await TestBed.configureTestingModule({
@@ -55,9 +50,7 @@ describe('DossierCreateComponent', () => {
       providers: [
         { provide: DossierApiService, useValue: dossierApiService },
         { provide: AnnonceApiService, useValue: annonceApiService },
-        { provide: Router, useValue: router },
-      ],
-    })
+        { provide: Router, useValue: router }]})
       .overrideTemplate(DossierCreateComponent, '')
       .compileComponents();
 

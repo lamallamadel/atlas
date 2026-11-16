@@ -1,92 +1,86 @@
-<div class="template-sheet-container">
-  <div class="sheet-header">
-    <h2>Sélectionner un modèle</h2>
-    <button mat-icon-button (click)="cancel()">
-      <mat-icon>close</mat-icon>
-    </button>
+<div class="template-sheet-container ds-form-stack" style="padding: 24px; max-height: 90vh; display: flex; flex-direction: column;">
+  <div class="sheet-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--ds-marine);">Sélectionner un modèle WhatsApp</h2>
+    <ds-button variant="icon" size="md" (dsClick)="cancel()" ariaLabel="Fermer">
+      <ds-icon name="close" [size]="20"></ds-icon>
+    </ds-button>
   </div>
 
-  <div class="search-container">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Rechercher un modèle</mat-label>
-      <input
-        matInput
-        [(ngModel)]="searchQuery"
-        placeholder="Nom, description ou contenu..."
-        autocomplete="off">
-        <mat-icon matPrefix>search</mat-icon>
-        @if (searchQuery) {
-          <button
-            mat-icon-button
-            matSuffix
-            (click)="searchQuery = ''"
-            aria-label="Effacer">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-      </mat-form-field>
-    </div>
+  <div class="search-container" style="margin-bottom: 20px;">
+    <ds-input
+      label="Rechercher"
+      [(ngModel)]="searchQuery"
+      placeholder="Nom, description ou contenu..."
+      prefixIcon="search">
+    </ds-input>
+  </div>
 
-    <div class="templates-list">
-      @if (filteredTemplates.length === 0) {
-        <div class="empty-state">
-          <mat-icon>search_off</mat-icon>
-          <p>Aucun modèle trouvé</p>
-        </div>
-      }
+  <div class="templates-list" style="flex: 1; overflow-y: auto; margin-bottom: 24px; display: flex; flex-direction: column; gap: 12px;">
+    @if (filteredTemplates.length === 0) {
+      <div class="empty-state" style="padding: 48px; text-align: center; color: var(--ds-text-faint);">
+        <ds-icon name="search" [size]="24" style="opacity: 0.5; margin-bottom: 12px;"></ds-icon>
+        <p>Aucun modèle trouvé pour cette recherche</p>
+      </div>
+    }
 
-      <mat-selection-list
-        #templateList
-        [multiple]="false"
-        [(ngModel)]="selectedTemplate"
-        (selectionChange)="selectTemplate($event.options[0].value)">
-        @for (template of filteredTemplates; track template) {
-          <mat-list-option
-            [value]="template"
-            [selected]="selectedTemplate?.id === template.id"
-            class="template-option">
-            <div class="template-card">
-              <div class="template-header">
-                <mat-icon class="template-icon">description</mat-icon>
-                <div class="template-title">
-                  <h3>{{ template.name }}</h3>
-                  <p class="template-description">{{ template.description }}</p>
-                </div>
-                @if (selectedTemplate?.id === template.id) {
-                  <mat-icon class="check-icon">
-                    check_circle
-                  </mat-icon>
+    @for (template of filteredTemplates; track template.id) {
+      <ds-card
+        [pad]="true"
+        elevation="xs"
+        [hover]="true"
+        [interactive]="true"
+        (click)="selectTemplate(template)"
+        [style.border-color]="selectedTemplate?.id === template.id ? 'var(--ds-primary)' : 'var(--ds-border)'"
+        [style.background]="selectedTemplate?.id === template.id ? 'var(--ds-primary-subtle)' : 'var(--ds-surface)'">
+        <div class="template-item-content">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <ds-icon name="tasks" [size]="20" style="color: var(--ds-marine);"></ds-icon>
+              <div>
+                <strong style="font-size: 15px;">{{ template.name }}</strong>
+                @if (template.description) {
+                  <p style="margin: 0; font-size: 12px; color: var(--ds-text-muted);">{{ template.description }}</p>
                 }
               </div>
-              <div class="template-preview">
-                <div class="preview-label">Aperçu:</div>
-                <div class="preview-content">{{ template.content }}</div>
-              </div>
-              @if (template.variables.length > 0) {
-                <div class="template-variables">
-                  <mat-icon class="variables-icon">code</mat-icon>
-                  <span class="variables-text">{{ getVariablesText(template.variables) }}</span>
-                </div>
+            </div>
+            @if (selectedTemplate?.id === template.id) {
+              <ds-icon name="check" [size]="20" style="color: var(--ds-primary);"></ds-icon>
+            }
+          </div>
+          
+          <div class="template-preview" style="background: var(--ds-bg-subtle); padding: 8px 12px; border-radius: var(--ds-radius-sm); font-size: 13px; color: var(--ds-text); margin-bottom: 8px;">
+            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--ds-text-muted); margin-bottom: 4px;">Aperçu :</div>
+            {{ template.content }}
+          </div>
+
+          @if (template.variables.length > 0) {
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+              <ds-icon name="settings" [size]="16" style="color: var(--ds-text-faint);"></ds-icon>
+              @for (v of template.variables; track v) {
+                <ds-badge status="neutral" [showDot]="false" size="sm">{{ '{{' + v + '}}' }}</ds-badge>
               }
             </div>
-          </mat-list-option>
-        }
-      </mat-selection-list>
-    </div>
-
-    <div class="sheet-actions">
-      <button
-        mat-stroked-button
-        (click)="clear()"
-        class="clear-button">
-        Aucun modèle
-      </button>
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="apply()"
-        [disabled]="!selectedTemplate">
-        Appliquer
-      </button>
-    </div>
+          }
+        </div>
+      </ds-card>
+    }
   </div>
+
+  <div class="sheet-actions" style="display: flex; gap: 12px; padding-top: 20px; border-top: 1px solid var(--ds-divider);">
+    <ds-button
+      variant="ghost"
+      size="md"
+      (dsClick)="clear()"
+      style="flex: 1;">
+      Aucun modèle
+    </ds-button>
+    <ds-button
+      variant="marine"
+      size="md"
+      (dsClick)="apply()"
+      [disabled]="!selectedTemplate"
+      style="flex: 1;">
+      Appliquer
+    </ds-button>
+  </div>
+</div>

@@ -3,13 +3,7 @@ import {
   FormBuilder,
   FormControl,
   FormGroup,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+  ReactiveFormsModule} from '@angular/forms';
 import { DatetimePickerComponent } from './datetime-picker.component';
 import { CommonModule } from '@angular/common';
 
@@ -23,15 +17,8 @@ describe('DatetimePickerComponent', () => {
       imports: [
         CommonModule,
         ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        BrowserAnimationsModule,
-        DatetimePickerComponent,
-      ],
-      providers: [FormBuilder],
-    }).compileComponents();
+        DatetimePickerComponent],
+      providers: [FormBuilder]}).compileComponents();
 
     formBuilder = TestBed.inject(FormBuilder);
     fixture = TestBed.createComponent(DatetimePickerComponent);
@@ -46,21 +33,15 @@ describe('DatetimePickerComponent', () => {
     it('should initialize with default input values', () => {
       expect(component.label()).toBe('Date et heure');
       expect(component.required()).toBe(false);
-      expect(component.datePlaceholder()).toBe('jj/mm/aaaa');
-      expect(component.timePlaceholder()).toBe('hh:mm');
     });
 
     it('should accept custom input values', () => {
       fixture.componentRef.setInput('label', 'Custom Label');
       fixture.componentRef.setInput('required', true);
-      fixture.componentRef.setInput('datePlaceholder', 'dd/mm/yyyy');
-      fixture.componentRef.setInput('timePlaceholder', 'HH:MM');
       fixture.detectChanges();
 
       expect(component.label()).toBe('Custom Label');
       expect(component.required()).toBe(true);
-      expect(component.datePlaceholder()).toBe('dd/mm/yyyy');
-      expect(component.timePlaceholder()).toBe('HH:MM');
     });
   });
 
@@ -99,14 +80,6 @@ describe('DatetimePickerComponent', () => {
       expect(timeControl?.hasError('required')).toBe(true);
     });
 
-    it('should add time validator to time control', () => {
-      component.ngOnInit();
-
-      const timeControl = component.form.get('time');
-      timeControl?.setValue('invalid');
-
-      expect(timeControl?.hasError('invalidTime')).toBe(true);
-    });
   });
 
   describe('ControlValueAccessor - writeValue', () => {
@@ -117,14 +90,14 @@ describe('DatetimePickerComponent', () => {
     it('should handle null value', () => {
       component.writeValue(null);
 
-      expect(component.form.get('date')?.value).toBeNull();
+      expect(component.form.get('date')?.value).toBe('');
       expect(component.form.get('time')?.value).toBe('');
     });
 
     it('should handle empty string value', () => {
       component.writeValue('');
 
-      expect(component.form.get('date')?.value).toBeNull();
+      expect(component.form.get('date')?.value).toBe('');
       expect(component.form.get('time')?.value).toBe('');
     });
 
@@ -134,21 +107,8 @@ describe('DatetimePickerComponent', () => {
       const dateValue = component.form.get('date')?.value;
       const timeValue = component.form.get('time')?.value;
 
-      expect(dateValue).toBeInstanceOf(Date);
-      expect(dateValue?.getFullYear()).toBe(2024);
-      expect(dateValue?.getMonth()).toBe(5); // June is month 5 (0-indexed)
-      expect(dateValue?.getDate()).toBe(15);
+      expect(dateValue).toBe('2024-06-15');
       expect(timeValue).toBe('14:30');
-    });
-
-    it('should parse and set ISO datetime string', () => {
-      component.writeValue('2024-12-25T09:45:00.000Z');
-
-      const dateValue = component.form.get('date')?.value;
-      const timeValue = component.form.get('time')?.value;
-
-      expect(dateValue).toBeInstanceOf(Date);
-      expect(timeValue).toMatch(/^\d{2}:\d{2}$/);
     });
 
     it('should handle writeValue before form initialization', () => {
@@ -186,7 +146,7 @@ describe('DatetimePickerComponent', () => {
       const onChangeSpy = vi.fn();
       component.registerOnChange(onChangeSpy);
 
-      component.form.get('date')?.setValue(new Date(2024, 5, 15));
+      component.form.get('date')?.setValue('2024-06-15');
       component.form.get('time')?.setValue('14:30');
 
       expect(onChangeSpy).toHaveBeenCalled();
@@ -198,8 +158,7 @@ describe('DatetimePickerComponent', () => {
         emittedValue = value;
       });
 
-      const testDate = new Date(2024, 5, 15); // June 15, 2024
-      component.form.get('date')?.setValue(testDate);
+      component.form.get('date')?.setValue('2024-06-15');
       component.form.get('time')?.setValue('14:30');
 
       expect(emittedValue).toBe('2024-06-15T14:30');
@@ -211,7 +170,7 @@ describe('DatetimePickerComponent', () => {
         emittedValue = value;
       });
 
-      component.form.get('date')?.setValue(null);
+      component.form.get('date')?.setValue('');
       component.form.get('time')?.setValue('14:30');
 
       expect(emittedValue).toBe('');
@@ -223,20 +182,8 @@ describe('DatetimePickerComponent', () => {
         emittedValue = value;
       });
 
-      component.form.get('date')?.setValue(new Date(2024, 5, 15));
+      component.form.get('date')?.setValue('2024-06-15');
       component.form.get('time')?.setValue('');
-
-      expect(emittedValue).toBe('');
-    });
-
-    it('should emit empty string when time is invalid', () => {
-      let emittedValue = '';
-      component.registerOnChange((value: string) => {
-        emittedValue = value;
-      });
-
-      component.form.get('date')?.setValue(new Date(2024, 5, 15));
-      component.form.get('time')?.setValue('25:99');
 
       expect(emittedValue).toBe('');
     });
@@ -324,7 +271,7 @@ describe('DatetimePickerComponent', () => {
       component.ngOnInit(); // Re-initialize with required = true
       const control = new FormControl();
 
-      component.form.get('date')?.setValue(null);
+      component.form.get('date')?.setValue('');
       component.form.get('time')?.setValue('14:30');
 
       const errors = component.validate(control);
@@ -337,7 +284,7 @@ describe('DatetimePickerComponent', () => {
       component.ngOnInit(); // Re-initialize with required = true
       const control = new FormControl();
 
-      component.form.get('date')?.setValue(new Date());
+      component.form.get('date')?.setValue('2024-06-15');
       component.form.get('time')?.setValue('');
 
       const errors = component.validate(control);
@@ -345,21 +292,10 @@ describe('DatetimePickerComponent', () => {
       expect(errors).toEqual({ required: true });
     });
 
-    it('should return invalidTime error when time format is invalid', () => {
-      const control = new FormControl();
-
-      component.form.get('date')?.setValue(new Date());
-      component.form.get('time')?.setValue('25:99');
-
-      const errors = component.validate(control);
-
-      expect(errors).toEqual({ invalidTime: true });
-    });
-
     it('should return null when both date and time are valid', () => {
       const control = new FormControl();
 
-      component.form.get('date')?.setValue(new Date());
+      component.form.get('date')?.setValue('2024-06-15');
       component.form.get('time')?.setValue('14:30');
 
       const errors = component.validate(control);
@@ -379,150 +315,13 @@ describe('DatetimePickerComponent', () => {
     });
   });
 
-  describe('Form Validation - Time Validator', () => {
-    it('should validate correct time format HH:mm', () => {
-      const control = new FormControl('14:30');
-      const errors = DatetimePickerComponent.timeValidator(control);
-
-      expect(errors).toBeNull();
-    });
-
-    it('should accept valid time ranges', () => {
-      const validTimes = ['00:00', '12:00', '23:59', '09:15'];
-
-      validTimes.forEach((time) => {
-        const control = new FormControl(time);
-        const errors = DatetimePickerComponent.timeValidator(control);
-        expect(errors).toBeNull();
-      });
-    });
-
-    it('should reject invalid hours', () => {
-      const control = new FormControl('24:00');
-      const errors = DatetimePickerComponent.timeValidator(control);
-
-      expect(errors).toEqual({ invalidTime: true });
-    });
-
-    it('should reject invalid minutes', () => {
-      const control = new FormControl('12:60');
-      const errors = DatetimePickerComponent.timeValidator(control);
-
-      expect(errors).toEqual({ invalidTime: true });
-    });
-
-    it('should reject incorrect format', () => {
-      const invalidFormats = ['1:30', '14:3', '14-30', '14.30', 'invalid'];
-
-      invalidFormats.forEach((time) => {
-        const control = new FormControl(time);
-        const errors = DatetimePickerComponent.timeValidator(control);
-        expect(errors).toEqual({ invalidTime: true });
-      });
-    });
-
-    it('should accept empty string', () => {
-      const control = new FormControl('');
-      const errors = DatetimePickerComponent.timeValidator(control);
-
-      expect(errors).toBeNull();
-    });
-
-    it('should accept null value', () => {
-      const control = new FormControl(null);
-      const errors = DatetimePickerComponent.timeValidator(control);
-
-      expect(errors).toBeNull();
-    });
-  });
-
-  describe('Time Validation Helper', () => {
-    it('should validate correct time format', () => {
-      expect(DatetimePickerComponent.isValidTime('14:30')).toBe(true);
-      expect(DatetimePickerComponent.isValidTime('00:00')).toBe(true);
-      expect(DatetimePickerComponent.isValidTime('23:59')).toBe(true);
-    });
-
-    it('should reject invalid hours', () => {
-      expect(DatetimePickerComponent.isValidTime('24:00')).toBe(false);
-      expect(DatetimePickerComponent.isValidTime('25:30')).toBe(false);
-      expect(DatetimePickerComponent.isValidTime('-1:30')).toBe(false);
-    });
-
-    it('should reject invalid minutes', () => {
-      expect(DatetimePickerComponent.isValidTime('12:60')).toBe(false);
-      expect(DatetimePickerComponent.isValidTime('12:99')).toBe(false);
-      expect(DatetimePickerComponent.isValidTime('12:-1')).toBe(false);
-    });
-
-    it('should reject invalid format', () => {
-      expect(DatetimePickerComponent.isValidTime('1:30')).toBe(false);
-      expect(DatetimePickerComponent.isValidTime('14:3')).toBe(false);
-      expect(DatetimePickerComponent.isValidTime('14-30')).toBe(false);
-      expect(DatetimePickerComponent.isValidTime('invalid')).toBe(false);
-    });
-  });
-
-  describe('Error Display Getters', () => {
-    beforeEach(() => {
-      component.ngOnInit();
-    });
-
-    it('should show required error when touched and required fields are empty', () => {
-      fixture.componentRef.setInput('required', true);
-      component.ngOnInit(); // Re-initialize with required = true
-      component.form.markAsTouched();
-
-      expect(component.showRequiredError).toBe(true);
-    });
-
-    it('should not show required error when not touched', () => {
-      fixture.componentRef.setInput('required', true);
-      component.ngOnInit(); // Re-initialize with required = true
-
-      expect(component.showRequiredError).toBe(false);
-    });
-
-    it('should not show required error when fields are filled', () => {
-      fixture.componentRef.setInput('required', true);
-      component.ngOnInit(); // Re-initialize with required = true
-      component.form.markAsTouched();
-      component.form.get('date')?.setValue(new Date());
-      component.form.get('time')?.setValue('14:30');
-
-      expect(component.showRequiredError).toBe(false);
-    });
-
-    it('should show invalid time error when time format is wrong', () => {
-      component.form.markAsTouched();
-      component.form.get('time')?.setValue('25:99');
-      component.form.get('time')?.updateValueAndValidity();
-
-      expect(component.showInvalidTimeError).toBe(true);
-    });
-
-    it('should not show invalid time error when not touched', () => {
-      component.form.get('time')?.setValue('25:99');
-
-      expect(component.showInvalidTimeError).toBe(false);
-    });
-
-    it('should not show invalid time error when time is valid', () => {
-      component.form.markAsTouched();
-      component.form.get('time')?.setValue('14:30');
-
-      expect(component.showInvalidTimeError).toBe(false);
-    });
-  });
-
   describe('Integration with FormControl', () => {
     let testForm: FormGroup;
 
     beforeEach(() => {
       component.ngOnInit();
       testForm = formBuilder.group({
-        datetime: [''],
-      });
+        datetime: ['']});
     });
 
     it('should work as part of reactive form', () => {
@@ -532,7 +331,7 @@ describe('DatetimePickerComponent', () => {
       testForm.get('datetime')?.setValue('2024-06-15T14:30');
       component.writeValue(testForm.get('datetime')?.value);
 
-      expect(component.form.get('date')?.value).toBeInstanceOf(Date);
+      expect(component.form.get('date')?.value).toBe('2024-06-15');
       expect(component.form.get('time')?.value).toBe('14:30');
     });
 
@@ -541,106 +340,10 @@ describe('DatetimePickerComponent', () => {
         testForm.get('datetime')?.setValue(value, { emitEvent: false });
       });
 
-      component.form.get('date')?.setValue(new Date(2024, 5, 15));
+      component.form.get('date')?.setValue('2024-06-15');
       component.form.get('time')?.setValue('14:30');
 
       expect(testForm.get('datetime')?.value).toBe('2024-06-15T14:30');
-    });
-  });
-
-  describe('Accessibility Features', () => {
-    beforeEach(() => {
-      component.ngOnInit();
-      fixture.detectChanges();
-    });
-
-    it('should render aria-label for required indicator', () => {
-      fixture.componentRef.setInput('required', true);
-      fixture.detectChanges();
-
-      const compiled = fixture.nativeElement;
-      const requiredSpan = compiled.querySelector('.required');
-
-      expect(requiredSpan?.getAttribute('aria-label')).toBe('obligatoire');
-    });
-
-    it('should render error container with aria-live', () => {
-      const compiled = fixture.nativeElement;
-      const errorContainer = compiled.querySelector('.datetime-errors');
-
-      expect(errorContainer?.getAttribute('aria-live')).toBe('polite');
-    });
-
-    it('should display required error message when validation fails', () => {
-      fixture.componentRef.setInput('required', true);
-      component.ngOnInit();
-      component.form.markAsTouched();
-      fixture.detectChanges();
-
-      const compiled = fixture.nativeElement;
-      const errorMessage = compiled.querySelector('.datetime-error');
-
-      expect(errorMessage?.textContent).toContain('Ce champ est requis');
-    });
-
-    it('should display invalid time error message', () => {
-      component.form.markAsTouched();
-      component.form.get('time')?.setValue('25:99');
-      component.form.get('time')?.updateValueAndValidity();
-      fixture.detectChanges();
-
-      const compiled = fixture.nativeElement;
-      const errorMessage = compiled.querySelector('.datetime-error');
-
-      expect(errorMessage?.textContent).toContain(
-        'Heure invalide (format HH:mm)'
-      );
-    });
-  });
-
-  describe('Responsive Behavior', () => {
-    beforeEach(() => {
-      component.ngOnInit();
-      fixture.detectChanges();
-    });
-
-    it('should render date and time fields in separate form fields', () => {
-      const compiled = fixture.nativeElement;
-      const dateField = compiled.querySelector('.date-part');
-      const timeField = compiled.querySelector('.time-part');
-
-      expect(dateField).toBeTruthy();
-      expect(timeField).toBeTruthy();
-    });
-
-    it('should render datetime-row container for layout', () => {
-      const compiled = fixture.nativeElement;
-      const row = compiled.querySelector('.datetime-row');
-
-      expect(row).toBeTruthy();
-    });
-
-    it('should display custom label', () => {
-      fixture.componentRef.setInput('label', 'Rendez-vous');
-      fixture.detectChanges();
-
-      const compiled = fixture.nativeElement;
-      const label = compiled.querySelector('.datetime-label span');
-
-      expect(label?.textContent).toBe('Rendez-vous');
-    });
-
-    it('should apply custom placeholders', () => {
-      fixture.componentRef.setInput('datePlaceholder', 'Select date');
-      fixture.componentRef.setInput('timePlaceholder', 'Select time');
-      fixture.detectChanges();
-
-      const compiled = fixture.nativeElement;
-      const dateInput = compiled.querySelector('input[formControlName="date"]');
-      const timeInput = compiled.querySelector('input[formControlName="time"]');
-
-      expect(dateInput?.getAttribute('placeholder')).toBe('Select date');
-      expect(timeInput?.getAttribute('placeholder')).toBe('Select time');
     });
   });
 
@@ -649,8 +352,7 @@ describe('DatetimePickerComponent', () => {
       component.ngOnInit();
       const destroySpy = vi.fn();
       component['destroy$'].subscribe({
-        complete: destroySpy,
-      });
+        complete: destroySpy});
 
       component.ngOnDestroy();
 
@@ -681,54 +383,32 @@ describe('DatetimePickerComponent', () => {
       component.writeValue(isoString);
 
       const dateValue = component.form.get('date')?.value;
-      expect(dateValue).toBeInstanceOf(Date);
+      expect(typeof dateValue).toBe('string');
+      expect(dateValue).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     });
 
-    it('should pad single digit months and days with zeros', () => {
+    it('should emit combined datetime string on valid string inputs', () => {
       let emittedValue = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
 
-      const testDate = new Date(2024, 0, 5); // January 5, 2024
-      component.form.get('date')?.setValue(testDate);
+      component.form.get('date')?.setValue('2024-01-05');
       component.form.get('time')?.setValue('09:05');
 
       expect(emittedValue).toBe('2024-01-05T09:05');
     });
 
-    it('should handle year boundary dates correctly', () => {
-      let emittedValue = '';
+    it('should emit empty string when either field is missing', () => {
+      let emittedValue = 'initial';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
 
-      const testDate = new Date(2024, 11, 31); // December 31, 2024
-      component.form.get('date')?.setValue(testDate);
-      component.form.get('time')?.setValue('23:59');
+      component.form.get('date')?.setValue('');
+      component.form.get('time')?.setValue('09:05');
 
-      expect(emittedValue).toBe('2024-12-31T23:59');
-    });
-
-    it('should handle leap year dates', () => {
-      let emittedValue = '';
-      component.registerOnChange((value: string) => {
-        emittedValue = value;
-      });
-
-      const testDate = new Date(2024, 1, 29); // February 29, 2024 (leap year)
-      component.form.get('date')?.setValue(testDate);
-      component.form.get('time')?.setValue('12:00');
-
-      expect(emittedValue).toBe('2024-02-29T12:00');
-    });
-
-    it('should handle midnight time', () => {
-      expect(DatetimePickerComponent.isValidTime('00:00')).toBe(true);
-    });
-
-    it('should handle end of day time', () => {
-      expect(DatetimePickerComponent.isValidTime('23:59')).toBe(true);
+      expect(emittedValue).toBe('');
     });
   });
 });

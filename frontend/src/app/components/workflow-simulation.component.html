@@ -1,138 +1,115 @@
-<div class="simulation-container">
-  <ds-card class="simulation-card" [pad]="false" [elevation]="'sm'">
-    <div class="sim-card-header">
-      <h3 class="sim-card-title">Workflow Simulation</h3>
-      <p class="sim-card-subtitle">Test workflow transitions with sample data before activation</p>
-    </div>
-    <div class="sim-card-body">
-      <form [formGroup]="simulationForm" class="simulation-form">
-        <mat-form-field appearance="outline">
-          <mat-label>Simulation Name</mat-label>
-          <input matInput formControlName="simulationName" placeholder="e.g., Test lead qualification flow">
-        </mat-form-field>
+<div class="workflow-simulation-container ds-form-stack">
+  <div class="simulation-layout" style="display: grid; grid-template-columns: 1fr 320px; gap: 32px;">
+    <div class="simulation-main ds-form-stack">
+      <ds-card [pad]="true" elevation="sm">
+        <div class="rb-card-header" style="margin-bottom: 24px;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--ds-marine);">Simulateur de Workflow</h2>
+          <p style="margin: 4px 0 0; font-size: 14px; color: var(--ds-text-muted);">Testez vos règles de transition et actions automatisées en temps réel</p>
+        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Starting State</mat-label>
-          <mat-select formControlName="currentState">
-            @for (state of workflow?.statesJson; track state) {
-              <mat-option [value]="state.stateCode">
-                {{ state.stateName }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="test-data-field">
-          <mat-label>Test Data (JSON)</mat-label>
-          <textarea matInput formControlName="testData" rows="10" placeholder="Enter test data as JSON"></textarea>
-          <mat-hint>Provide sample dossier data to test field validations</mat-hint>
-        </mat-form-field>
-
-        <button mat-raised-button color="primary" (click)="runSimulation()" [disabled]="!simulationForm.valid || isRunning">
-          <mat-icon>play_circle</mat-icon>
-          {{ isRunning ? 'Running...' : 'Run Simulation' }}
-        </button>
-      </form>
-
-      @if (simulationResult) {
-        <mat-divider></mat-divider>
-      }
-
-      @if (simulationResult) {
-        <div class="results-section">
-          <h3>Simulation Results</h3>
-          <div class="result-summary">
-            <mat-chip-listbox>
-              <mat-chip-option [color]="getStatusColor(simulationResult.status)" selected>
-                Status: {{ simulationResult.status }}
-              </mat-chip-option>
-              <mat-chip-option color="primary">
-                Current State: {{ simulationResult.currentState }}
-              </mat-chip-option>
-              @if (simulationResult.resultJson?.validTransitions) {
-                <mat-chip-option color="accent">
-                  Valid Transitions: {{ simulationResult.resultJson.validTransitions }}
-                </mat-chip-option>
-              }
-            </mat-chip-listbox>
+        <form [formGroup]="simulationForm" (ngSubmit)="runSimulation()" class="ds-form-stack">
+          <div class="ds-form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <ds-input label="Nom de la simulation" formControlName="simulationName"></ds-input>
+            
+            <ds-select
+              label="Statut actuel"
+              [options]="stateOptions"
+              formControlName="currentState">
+            </ds-select>
           </div>
-          @if (simulationResult.resultJson?.possibleTransitions?.length > 0) {
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <mat-icon>trending_flat</mat-icon> Possible Transitions
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <mat-list>
-                @for (transition of simulationResult.resultJson.possibleTransitions; track transition) {
-                  <mat-list-item>
-                    <mat-icon matListItemIcon>arrow_forward</mat-icon>
-                    <span matListItemTitle>{{ transition }}</span>
-                  </mat-list-item>
-                }
-              </mat-list>
-            </mat-expansion-panel>
-          }
-          @if (simulationResult.executionLog?.length > 0) {
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <mat-icon>description</mat-icon> Execution Log
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <mat-list>
-                @for (log of simulationResult.executionLog; track log) {
-                  <mat-list-item>
-                    <mat-icon matListItemIcon [color]="getLogEventColor(log.eventType)">
-                      {{ log.success ? 'check_circle' : 'error' }}
-                    </mat-icon>
-                    <span matListItemTitle>{{ log.message }}</span>
-                    @if (log.fromState) {
-                      <span matListItemLine>{{ log.fromState }} → {{ log.toState }}</span>
-                    }
-                    @if (log.error) {
-                      <span matListItemLine class="error-text">Error: {{ log.error }}</span>
-                    }
-                    <span matListItemLine class="timestamp">{{ log.timestamp }}</span>
-                  </mat-list-item>
-                }
-              </mat-list>
-            </mat-expansion-panel>
-          }
-          @if (simulationResult.resultJson) {
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <mat-icon>code</mat-icon> Raw Result JSON
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <pre class="json-output">{{ formatJson(simulationResult.resultJson) }}</pre>
-            </mat-expansion-panel>
-          }
-        </div>
-      }
 
-      @if (simulationHistory.length > 0) {
-        <mat-divider></mat-divider>
-      }
+          <div class="ds-field" style="margin-top: 16px;">
+            <label class="ds-field__label">Données de test (JSON)</label>
+            <div class="ds-field__wrap">
+              <textarea
+                class="ds-field__input"
+                formControlName="testData"
+                rows="10"
+                style="height: auto; font-family: var(--ds-font-mono); font-size: 13px; padding: 12px;"></textarea>
+            </div>
+            <p class="ds-field__hint">Simulez les propriétés d'un dossier pour tester les conditions</p>
+          </div>
 
-      @if (simulationHistory.length > 0) {
-        <div class="history-section">
-          <h3>Simulation History</h3>
-          <mat-list>
-            @for (sim of simulationHistory; track sim) {
-              <mat-list-item (click)="loadSimulation(sim)" class="history-item">
-                <mat-icon matListItemIcon [color]="getStatusColor(sim.status)">
-                  {{ sim.status === 'COMPLETED' ? 'check_circle' : 'error' }}
-                </mat-icon>
-                <span matListItemTitle>{{ sim.simulationName }}</span>
-                <span matListItemLine>{{ sim.createdAt | date:'short' }}</span>
-                <span matListItemLine>Status: {{ sim.status }} | State: {{ sim.currentState }}</span>
-              </mat-list-item>
-            }
-          </mat-list>
-        </div>
+          <div class="form-actions" style="display: flex; gap: 12px; margin-top: 24px;">
+            <ds-button
+              variant="marine"
+              size="md"
+              type="submit"
+              [disabled]="isRunning || !simulationForm.valid">
+              @if (isRunning) {
+                <ds-skeleton variant="circle" width="18px" height="18px" style="margin-right: 8px;"></ds-skeleton>
+              } @else {
+                <ds-icon name="refresh" [size]="20" style="margin-right: 8px;"></ds-icon>
+              }
+              <span>Lancer la simulation</span>
+            </ds-button>
+            <ds-button variant="ghost" size="md" (dsClick)="initializeTestData()">
+              Réinitialiser les données
+            </ds-button>
+          </div>
+        </form>
+      </ds-card>
+
+      @if (simulationResult) {
+        <ds-card class="result-card" [pad]="true" elevation="xs" style="margin-top: 32px; border-left: 4px solid var(--ds-primary);">
+          <div class="rb-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700;">Résultat de la simulation</h3>
+            <ds-badge [status]="getBadgeStatus(simulationResult.status)" size="md">
+              {{ simulationResult.status }}
+            </ds-badge>
+          </div>
+
+          <div class="result-summary ds-form-stack">
+            <div class="summary-item" style="padding: 12px; background: var(--ds-bg-subtle); border-radius: var(--ds-radius-sm); border: 1px solid var(--ds-border);">
+              <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--ds-text-muted); margin-bottom: 4px;">Nouvel État Potentiel</div>
+              <strong style="color: var(--ds-marine);">{{ simulationResult.nextState || 'Aucun changement' }}</strong>
+            </div>
+
+            <div class="simulation-logs" style="margin-top: 24px;">
+              <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">Trace d'exécution</h4>
+              <div class="log-list ds-form-stack">
+                @for (log of simulationResult.logs; track log.timestamp) {
+                  <div class="log-item" style="padding: 8px 12px; border-radius: var(--ds-radius-sm); border: 1px solid var(--ds-border); font-size: 13px; display: flex; gap: 12px;">
+                    <span style="color: var(--ds-text-faint); white-space: nowrap;">{{ log.timestamp | date:'HH:mm:ss.SSS' }}</span>
+                    <ds-badge [status]="getBadgeStatus(log.eventType)" [showDot]="false" size="sm" style="min-width: 80px; text-align: center;">{{ log.eventType }}</ds-badge>
+                    <span style="flex: 1;">{{ log.message }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </ds-card>
       }
     </div>
-  </ds-card>
+
+    <div class="simulation-sidebar ds-form-stack">
+      <ds-card [pad]="true" elevation="xs" style="height: 100%;">
+        <div class="rb-card-header" style="margin-bottom: 20px;">
+          <h3 style="margin: 0; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Historique</h3>
+        </div>
+        
+        <div class="history-list" style="display: flex; flex-direction: column; gap: 8px;">
+          @for (sim of simulationHistory; track sim.id) {
+            <button
+              type="button"
+              class="history-item ds-card"
+              style="width: 100%; text-align: left; padding: 12px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); background: var(--ds-surface); cursor: pointer; transition: all 0.2s ease;"
+              (click)="loadSimulation(sim)">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <strong style="font-size: 14px; color: var(--ds-marine);">{{ sim.simulationName }}</strong>
+                <ds-badge [status]="getBadgeStatus(sim.status)" [showDot]="false" size="sm">{{ sim.status === 'COMPLETED' ? 'OK' : 'ERR' }}</ds-badge>
+              </div>
+              <div style="font-size: 11px; color: var(--ds-text-faint); margin-top: 4px;">{{ sim.createdAt | date:'short' }}</div>
+            </button>
+          }
+          @if (simulationHistory.length === 0) {
+            <div style="padding: 24px; text-align: center; color: var(--ds-text-faint); font-size: 13px;">
+              <ds-icon name="history" [size]="32" style="opacity: 0.3; margin-bottom: 8px;"></ds-icon>
+              <p>Aucun historique</p>
+            </div>
+          }
+        </div>
+      </ds-card>
+    </div>
+  </div>
 </div>

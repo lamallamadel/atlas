@@ -7,17 +7,13 @@ describe('BulkOperationService', () => {
 
   const mockDialog = {
     open: vi.fn().mockReturnValue({
-      afterClosed: () => ({ subscribe: vi.fn() }),
-    }),
-  };
+      afterClosed: () => ({ subscribe: vi.fn() })})};
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         BulkOperationService,
-        { provide: MatDialog, useValue: mockDialog },
-      ],
-    });
+        { provide: MatDialog, useValue: mockDialog }]});
     service = TestBed.inject(BulkOperationService);
   });
 

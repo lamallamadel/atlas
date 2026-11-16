@@ -23,8 +23,7 @@ describe('VoipService', () => {
       enabled: true,
       provider: 'twilio',
       clickToCallUrl: 'https://example.com/call/{phone}',
-      apiKey: 'test-key',
-    };
+      apiKey: 'test-key'};
 
     service.setConfiguration(config);
     expect(service.isConfigured()).toBe(true);
@@ -34,8 +33,7 @@ describe('VoipService', () => {
     const config: VoipConfiguration = {
       enabled: true,
       provider: 'asterisk',
-      clickToCallUrl: 'https://example.com/call/{phone}',
-    };
+      clickToCallUrl: 'https://example.com/call/{phone}'};
 
     service.setConfiguration(config);
     const stored = localStorage.getItem('voip_configuration');
@@ -52,8 +50,7 @@ describe('VoipService', () => {
     const config: VoipConfiguration = {
       enabled: true,
       provider: 'custom',
-      clickToCallUrl: 'tel:{phone}',
-    };
+      clickToCallUrl: 'tel:{phone}'};
 
     service.setConfiguration(config);
 
@@ -71,8 +68,7 @@ describe('VoipService', () => {
     const config: VoipConfiguration = {
       enabled: true,
       provider: 'custom',
-      clickToCallUrl: 'tel:{phone}',
-    };
+      clickToCallUrl: 'tel:{phone}'};
 
     service.setConfiguration(config);
     service.initiateCall('+33612345678', 'John Doe');
@@ -87,8 +83,7 @@ describe('VoipService', () => {
   it('should clear call history', () => {
     const config: VoipConfiguration = {
       enabled: true,
-      provider: 'twilio',
-    };
+      provider: 'twilio'};
 
     service.setConfiguration(config);
     service.initiateCall('+33612345678', 'John Doe');
@@ -103,8 +98,7 @@ describe('VoipService', () => {
     const config: VoipConfiguration = {
       enabled: true,
       provider: 'twilio',
-      phoneNumberFormat: 'international',
-    };
+      phoneNumberFormat: 'international'};
 
     service.setConfiguration(config);
     const formatted = service.formatPhoneNumber('0612345678');

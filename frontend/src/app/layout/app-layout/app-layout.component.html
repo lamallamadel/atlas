@@ -1,338 +1,195 @@
-<a href="#main-content" class="skip-to-content">Passer au contenu principal</a>
+<div class="ds-app-layout" [class.ds-app-layout--sidebar-closed]="!sidebarOpen()" [class.ds-app-layout--handset]="isHandset$ | async">
+  <a href="#main-content" class="skip-to-content">Passer au contenu principal</a>
 
-<app-keyboard-shortcuts></app-keyboard-shortcuts>
-<app-command-palette></app-command-palette>
-<app-ai-agent-panel></app-ai-agent-panel>
+  <app-keyboard-shortcuts></app-keyboard-shortcuts>
+  <app-command-palette></app-command-palette>
+  <app-ai-agent-panel></app-ai-agent-panel>
 
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #drawer class="sidenav" fixedInViewport [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-    [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false"
-    [attr.aria-label]="'Menu de navigation principal'">
-    <header class="sidenav-header" role="banner">
-      <span class="brand-text">Atlasia Pro</span>
+  <!-- Sidebar -->
+  <aside class="ds-sidebar" [class.ds-sidebar--mobile-open]="mobileSidebarOpen()">
+    <header class="ds-sidebar__header">
+      <span class="ds-sidebar__brand">Atlasia Pro</span>
+      <ds-button variant="icon" size="sm" (dsClick)="closeMobileSidebar()" class="ds-sidebar__close-mobile" ariaLabel="Fermer le menu">
+        <ds-icon name="close" [size]="20"></ds-icon>
+      </ds-button>
     </header>
-    <nav class="nav-list" aria-label="Navigation principale">
-      <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-        aria-label="Accéder au tableau de bord" title="Raccourci : g puis h">
-        <ds-icon class="nav-link-icon" name="chart" [size]="20" aria-hidden="true"></ds-icon>
+
+    <nav class="ds-sidebar__nav" aria-label="Navigation principale">
+      <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" aria-label="Tableau de bord">
+        <ds-icon name="chart" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Tableau de bord</span>
       </a>
-      <a class="nav-link" routerLink="/reports" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-        aria-label="Accéder aux rapports et KPIs">
-        <ds-icon class="nav-link-icon" name="bars-asc" [size]="20" aria-hidden="true"></ds-icon>
+      <a class="nav-link" routerLink="/reports" routerLinkActive="active" aria-label="Rapports">
+        <ds-icon name="bars-asc" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Rapports et KPIs</span>
       </a>
-      <a class="nav-link" routerLink="/observability" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-        aria-label="Accéder au tableau de bord observabilité">
-        <ds-icon class="nav-link-icon" name="gauge" [size]="20" aria-hidden="true"></ds-icon>
+      <a class="nav-link" routerLink="/observability" routerLinkActive="active" aria-label="Observabilité">
+        <ds-icon name="gauge" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Observabilité</span>
       </a>
-      <a class="nav-link" routerLink="/tasks" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-        aria-label="Accéder aux tâches" title="Raccourci : g puis t">
-        <ds-icon class="nav-link-icon" name="tasks" [size]="20" aria-hidden="true"></ds-icon>
+      <a class="nav-link" routerLink="/tasks" routerLinkActive="active" aria-label="Tâches">
+        <ds-icon name="tasks" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Tâches</span>
       </a>
-      <a class="nav-link" routerLink="/calendar" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-        aria-label="Accéder au calendrier" title="Raccourci : g puis c">
-        <ds-icon class="nav-link-icon" name="calendar" [size]="20" aria-hidden="true"></ds-icon>
+      <a class="nav-link" routerLink="/calendar" routerLinkActive="active" aria-label="Calendrier">
+        <ds-icon name="calendar" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Calendrier</span>
       </a>
-      <a class="nav-link" routerLink="/annonces" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-        aria-label="Accéder aux annonces" title="Raccourci : g puis a">
-        <ds-icon class="nav-link-icon" name="megaphone" [size]="20" aria-hidden="true"></ds-icon>
+      <a class="nav-link" routerLink="/annonces" routerLinkActive="active" aria-label="Annonces">
+        <ds-icon name="megaphone" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Annonces</span>
       </a>
-      <a class="nav-link" routerLink="/dossiers" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-        aria-label="Accéder aux dossiers" title="Raccourci : g puis d">
-        <ds-icon class="nav-link-icon" name="folder" [size]="20" aria-hidden="true"></ds-icon>
-        <span class="nav-link-title">Dossiers @if (dossiersPendingCount$ | async; as count) {
-          <span class="badge-count">({{
-          count }})</span>
-        }</span>
+      <a class="nav-link" routerLink="/dossiers" routerLinkActive="active" aria-label="Dossiers">
+        <ds-icon name="folder" [size]="20" aria-hidden="true"></ds-icon>
+        <span class="nav-link-title">
+          Dossiers 
+          @if (dossiersPendingCount$ | async; as count) {
+            <span class="badge-count">({{ count }})</span>
+          }
+        </span>
       </a>
-      <div class="layout-divider" role="separator" aria-hidden="true"></div>
-      <a class="nav-link" routerLink="/workflow-admin" routerLinkActive="active" (click)="closeSidenavOnMobile()"
-        aria-label="Configuration des workflows">
-        <ds-icon class="nav-link-icon" name="settings" [size]="20" aria-hidden="true"></ds-icon>
+      
+      <div class="layout-divider" role="separator"></div>
+      
+      <a class="nav-link" routerLink="/workflow-admin" routerLinkActive="active" aria-label="Administration">
+        <ds-icon name="settings" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Workflows</span>
       </a>
     </nav>
-  </mat-sidenav>
+  </aside>
 
-  <mat-sidenav-content class="sidenav-content">
-    <header class="top-toolbar" role="banner">
-      @if (isHandset$ | async) {
-        <ds-button variant="icon" (dsClick)="drawer.toggle()" class="menu-button" ariaLabel="Ouvrir le menu de navigation"
-          aria-label="Ouvrir le menu de navigation" [attr.aria-expanded]="drawer.opened">
-          <ds-icon name="bars-asc" [size]="20" aria-hidden="true"></ds-icon>
-        </ds-button>
-      }
+  <!-- Layout Content -->
+  <div class="ds-app-layout__content">
+    <!-- Topbar -->
+    <header class="ds-topbar" role="banner">
+      <ds-button variant="icon" (dsClick)="toggleSidebar()" class="menu-button" ariaLabel="Menu">
+        <ds-icon name="bars-asc" [size]="20" aria-hidden="true"></ds-icon>
+      </ds-button>
 
-      <span class="toolbar-spacer"></span>
+      <div class="toolbar-spacer"></div>
 
       <app-global-search-bar></app-global-search-bar>
-
       <app-api-status-indicator></app-api-status-indicator>
 
-      <span class="toolbar-spacer"></span>
+      <div class="toolbar-spacer"></div>
 
-      <ds-button variant="icon" (dsClick)="toggleTheme()" class="theme-toggle-button"
-        [attr.aria-label]="(isDarkTheme$ | async) ? 'Basculer en mode clair' : 'Basculer en mode sombre'"
-        [attr.title]="(isDarkTheme$ | async) ? 'Passer en mode clair' : 'Passer en mode sombre'">
-        <ds-icon [name]="(isDarkTheme$ | async) ? 'monitor' : 'settings'" [size]="20" aria-hidden="true"></ds-icon>
-      </ds-button>
-
-      <ds-button variant="icon" (dsClick)="showKeyboardShortcuts()" class="keyboard-shortcuts-button"
-        aria-label="Afficher les raccourcis clavier" title="Raccourcis clavier (?)">
-        <ds-icon name="info" [size]="20" aria-hidden="true"></ds-icon>
-      </ds-button>
-
-      <span class="notification-menu-anchor" cdkOverlayOrigin #notificationOverlayOrigin="cdkOverlayOrigin">
-        @let unreadCount = (unreadNotificationCount$ | async) ?? 0;
-        <ds-button variant="icon" class="notification-menu-button"
-          (dsClick)="toggleNotificationMenu()"
-          [attr.aria-expanded]="notificationMenuOpen"
-          aria-haspopup="dialog"
-          aria-controls="notification-center-panel"
-          [attr.aria-label]="unreadCount > 0
-            ? 'Ouvrir le centre de notifications, ' + unreadCount + ' non lues'
-            : 'Ouvrir le centre de notifications'"
-          title="Notifications">
-          <span class="toolbar-icon-badge-wrap">
-            <ds-icon name="bell" [size]="20" aria-hidden="true"></ds-icon>
-            @if (unreadCount > 0) {
-              <span class="toolbar-count-badge" aria-hidden="true">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
-            }
-          </span>
+      <!-- Actions -->
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <ds-button variant="icon" (dsClick)="toggleTheme()" [ariaLabel]="(isDarkTheme$ | async) ? 'Mode clair' : 'Mode sombre'">
+          <ds-icon [name]="(isDarkTheme$ | async) ? 'sun' : 'moon'" [size]="20" aria-hidden="true"></ds-icon>
         </ds-button>
-      </span>
 
-      <ng-template
-        cdkConnectedOverlay
-        [cdkConnectedOverlayOrigin]="notificationOverlayOrigin"
-        [cdkConnectedOverlayOpen]="notificationMenuOpen"
-        [cdkConnectedOverlayPositions]="toolbarDropdownPositions"
-        [cdkConnectedOverlayScrollStrategy]="toolbarDropdownScrollStrategy"
-        [cdkConnectedOverlayHasBackdrop]="true"
-        [cdkConnectedOverlayBackdropClass]="'shell-toolbar-overlay-backdrop'"
-        (backdropClick)="closeNotificationMenu()"
-        (detach)="closeNotificationMenu()"
-        (overlayKeydown)="$event.key === 'Escape' && closeNotificationMenu()">
-        <div id="notification-center-panel" class="notification-panel-dropdown" role="dialog"
-          aria-label="Centre de notifications">
-          <div (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"
-            (keyup)="$event.stopPropagation()" (keypress)="$event.stopPropagation()"
-            class="notification-menu-content" tabindex="0" role="region" aria-label="Centre de notifications">
-            <app-notification-center></app-notification-center>
-          </div>
-        </div>
-      </ng-template>
-
-      <span class="help-menu-anchor" cdkOverlayOrigin #helpOverlayOrigin="cdkOverlayOrigin">
-        <ds-button variant="icon" class="help-menu-button"
-          (dsClick)="toggleHelpPanel()"
-          [attr.aria-expanded]="helpPanelOpen"
-          aria-haspopup="menu"
-          aria-controls="help-menu-panel"
-          aria-label="Aide et guides interactifs" title="Aide (?)">
-          <ds-icon name="info" [size]="20" aria-hidden="true"></ds-icon>
+        <ds-button variant="icon" (dsClick)="showKeyboardShortcuts()" ariaLabel="Raccourcis">
+          <ds-icon name="keyboard" [size]="20" aria-hidden="true"></ds-icon>
         </ds-button>
-      </span>
 
-      <ng-template
-        cdkConnectedOverlay
-        [cdkConnectedOverlayOrigin]="helpOverlayOrigin"
-        [cdkConnectedOverlayOpen]="helpPanelOpen"
-        [cdkConnectedOverlayPositions]="toolbarDropdownPositions"
-        [cdkConnectedOverlayScrollStrategy]="toolbarDropdownScrollStrategy"
-        [cdkConnectedOverlayHasBackdrop]="true"
-        [cdkConnectedOverlayBackdropClass]="'shell-toolbar-overlay-backdrop'"
-        (backdropClick)="closeHelpPanel()"
-        (detach)="closeHelpPanel()"
-        (overlayKeydown)="$event.key === 'Escape' && closeHelpPanel()">
-        <div id="help-menu-panel" class="help-menu-dropdown" role="menu" aria-label="Menu d'aide">
-          <div class="help-menu-header" role="presentation">
-            <ds-icon name="info" [size]="16" aria-hidden="true"></ds-icon>
-            <span>Guides interactifs</span>
-          </div>
-          <div class="menu-divider" role="separator"></div>
-          <button type="button" class="help-menu-item" role="menuitem"
-            (click)="startTourFromHelp('dossier-creation')"
-            aria-label="Démarrer le guide de création de dossier">
-            <ds-icon name="plus" [size]="16" aria-hidden="true"></ds-icon>
-            <span>Créer un dossier</span>
-          </button>
-          <button type="button" class="help-menu-item" role="menuitem"
-            (click)="startTourFromHelp('dossier-detail')" aria-label="Démarrer le guide du détail de dossier">
-            <ds-icon name="folder" [size]="16" aria-hidden="true"></ds-icon>
-            <span>Explorer un dossier</span>
-          </button>
-          <button type="button" class="help-menu-item" role="menuitem"
-            (click)="startTourFromHelp('message-creation')" aria-label="Démarrer le guide d'envoi de message">
-            <ds-icon name="mail" [size]="16" aria-hidden="true"></ds-icon>
-            <span>Envoyer un message</span>
-          </button>
-          <button type="button" class="help-menu-item" role="menuitem"
-            (click)="startTourFromHelp('workflow-status')" aria-label="Démarrer le guide de workflow">
-            <ds-icon name="refresh" [size]="16" aria-hidden="true"></ds-icon>
-            <span>Changer le statut</span>
-          </button>
-          <div class="menu-divider" role="separator"></div>
-          <button type="button" class="help-menu-item" role="menuitem"
-            (click)="resetAllToursFromHelp()" aria-label="Réinitialiser tous les guides">
-            <ds-icon name="refresh" [size]="16" aria-hidden="true"></ds-icon>
-            <span>Réinitialiser tous les guides</span>
-          </button>
-        </div>
-      </ng-template>
-
-      <div class="user-menu-container">
-        <span class="user-menu-anchor" cdkOverlayOrigin #userOverlayOrigin="cdkOverlayOrigin">
-          <ds-button variant="icon" class="user-menu-button" (dsClick)="toggleUserMenu()"
-            aria-label="Ouvrir le menu utilisateur" aria-haspopup="menu" [attr.aria-expanded]="userMenuOpen"
-            aria-controls="user-menu-panel" title="Menu utilisateur">
-            <ds-icon name="user" [size]="20" aria-hidden="true"></ds-icon>
+        <!-- Notifications -->
+        <span cdkOverlayOrigin #notificationOrigin="cdkOverlayOrigin">
+          @let unread = (unreadNotificationCount$ | async) ?? 0;
+          <ds-button variant="icon" (dsClick)="toggleNotificationMenu()">
+            <div style="position: relative;">
+              <ds-icon name="bell" [size]="20"></ds-icon>
+              @if (unread > 0) {
+                <span class="toolbar-count-badge">{{ unread > 99 ? '99+' : unread }}</span>
+              }
+            </div>
           </ds-button>
         </span>
 
-        <ng-template
-          cdkConnectedOverlay
-          [cdkConnectedOverlayOrigin]="userOverlayOrigin"
-          [cdkConnectedOverlayOpen]="userMenuOpen"
-          [cdkConnectedOverlayPositions]="toolbarDropdownPositions"
-          [cdkConnectedOverlayScrollStrategy]="toolbarDropdownScrollStrategy"
-          [cdkConnectedOverlayHasBackdrop]="true"
-          [cdkConnectedOverlayBackdropClass]="'shell-toolbar-overlay-backdrop'"
-          (backdropClick)="closeUserMenu()"
-          (detach)="closeUserMenu()"
-          (overlayKeydown)="$event.key === 'Escape' && closeUserMenu()">
-          <div id="user-menu-panel" class="user-menu-dropdown" role="menu" aria-label="Options utilisateur">
-            <div class="user-menu-header" role="presentation">
-              <div class="user-info">
-                <ds-icon class="user-avatar-large" name="user" [size]="24" aria-hidden="true"></ds-icon>
-                <div class="user-details">
-                  <div class="user-name">Utilisateur</div>
-                  <div class="user-email">user&#64;example.com</div>
-                </div>
-              </div>
-            </div>
-            <div class="menu-divider" role="separator"></div>
+        <!-- Help -->
+        <span cdkOverlayOrigin #helpOrigin="cdkOverlayOrigin">
+          <ds-button variant="icon" (dsClick)="toggleHelpPanel()" ariaLabel="Aide">
+            <ds-icon name="help-circle" [size]="20"></ds-icon>
+          </ds-button>
+        </span>
 
-            <button type="button" class="help-menu-item user-menu-tours-trigger" role="menuitem"
-              (click)="toggleToursSubmenu()"
-              [attr.aria-expanded]="toursSubmenuOpen"
-              aria-controls="user-menu-tours-section"
-              aria-label="Guides interactifs">
-              <ds-icon name="info" [size]="16" aria-hidden="true"></ds-icon>
-              <span>Guides interactifs</span>
-              <ds-icon class="submenu-arrow" [class.submenu-arrow-open]="toursSubmenuOpen" name="chevron-right"
-                [size]="16" aria-hidden="true"></ds-icon>
-            </button>
-
-            @if (toursSubmenuOpen) {
-              <div id="user-menu-tours-section" class="user-menu-tours-inline" role="group"
-                aria-label="Menu des guides">
-                <div class="tour-menu-header" role="presentation">
-                  <div class="tour-progress-badge">
-                    <ds-icon name="clock" [size]="16" aria-hidden="true"></ds-icon>
-                    <span>{{ tourCompletionPercentage }}% complété</span>
-                  </div>
-                </div>
-                <div class="menu-divider" role="separator"></div>
-
-                <button type="button" class="help-menu-item" role="menuitem" (click)="viewAllTours()"
-                  aria-label="Voir tous les guides">
-                  <ds-icon name="table" [size]="16" aria-hidden="true"></ds-icon>
-                  <span>Voir tous les guides</span>
-                </button>
-
-                <div class="menu-divider" role="separator"></div>
-
-                <button type="button" class="help-menu-item" role="menuitem"
-                  (click)="startQuickTour('dashboard-overview')" aria-label="Démarrer le guide du dashboard">
-                  <ds-icon name="chart" [size]="16" aria-hidden="true"></ds-icon>
-                  <span>Dashboard</span>
-                  @if (isTourCompleted('dashboard-overview')) {
-                    <ds-icon class="tour-status-icon" name="check" [size]="16" aria-hidden="true"></ds-icon>
-                  }
-                </button>
-
-                <button type="button" class="help-menu-item" role="menuitem"
-                  (click)="startQuickTour('create-dossier')" aria-label="Démarrer le guide de création de dossier">
-                  <ds-icon name="plus" [size]="16" aria-hidden="true"></ds-icon>
-                  <span>Créer un dossier</span>
-                  @if (isTourCompleted('create-dossier')) {
-                    <ds-icon class="tour-status-icon" name="check" [size]="16" aria-hidden="true"></ds-icon>
-                  }
-                </button>
-
-                <button type="button" class="help-menu-item" role="menuitem"
-                  (click)="startQuickTour('message-workflow')" aria-label="Démarrer le guide de messagerie">
-                  <ds-icon name="mail" [size]="16" aria-hidden="true"></ds-icon>
-                  <span>Messagerie</span>
-                  @if (isTourCompleted('message-workflow')) {
-                    <ds-icon class="tour-status-icon" name="check" [size]="16" aria-hidden="true"></ds-icon>
-                  }
-                </button>
-
-                <button type="button" class="help-menu-item" role="menuitem"
-                  (click)="startQuickTour('status-transitions')" aria-label="Démarrer le guide de workflow">
-                  <ds-icon name="refresh" [size]="16" aria-hidden="true"></ds-icon>
-                  <span>Workflow de statut</span>
-                  @if (isTourCompleted('status-transitions')) {
-                    <ds-icon class="tour-status-icon" name="check" [size]="16" aria-hidden="true"></ds-icon>
-                  }
-                </button>
-
-                <button type="button" class="help-menu-item" role="menuitem"
-                  (click)="startQuickTour('reports')" aria-label="Démarrer le guide des rapports">
-                  <ds-icon name="bars-asc" [size]="16" aria-hidden="true"></ds-icon>
-                  <span>Rapports</span>
-                  @if (isTourCompleted('reports')) {
-                    <ds-icon class="tour-status-icon" name="check" [size]="16" aria-hidden="true"></ds-icon>
-                  }
-                </button>
-
-                <div class="menu-divider" role="separator"></div>
-
-                <button type="button" class="help-menu-item" role="menuitem" (click)="skipAllTours()"
-                  aria-label="Ignorer tous les guides">
-                  <ds-icon name="close" [size]="16" aria-hidden="true"></ds-icon>
-                  <span>Ignorer tous les guides</span>
-                </button>
-
-                <button type="button" class="help-menu-item" role="menuitem" (click)="restartAllTours()"
-                  aria-label="Redémarrer tous les guides">
-                  <ds-icon name="refresh" [size]="16" aria-hidden="true"></ds-icon>
-                  <span>Redémarrer tous les guides</span>
-                </button>
-              </div>
-            }
-
-            <div class="menu-divider" role="separator"></div>
-            <button type="button" class="help-menu-item" role="menuitem" (click)="logout()"
-              aria-label="Se déconnecter de l'application">
-              <ds-icon name="close" [size]="16" aria-hidden="true"></ds-icon>
-              <span>Déconnexion</span>
-            </button>
-          </div>
-        </ng-template>
+        <!-- User -->
+        <span cdkOverlayOrigin #userOrigin="cdkOverlayOrigin">
+          <ds-button variant="icon" (dsClick)="toggleUserMenu()" class="user-avatar-btn">
+            <ds-icon name="user" [size]="24"></ds-icon>
+          </ds-button>
+        </span>
       </div>
     </header>
 
-    <main id="main-content" class="main-content" role="main" tabindex="-1" appMaintainScroll>
-      <div [@routeFadeSlideAnimation]="prepareRoute(outlet)">
-        <router-outlet #outlet="outlet"></router-outlet>
+    <!-- Main Content Area -->
+    <main id="main-content" class="ds-main-content" role="main" tabindex="-1" appMaintainScroll>
+      <div [@routeFadeSlideAnimation]="getRouteAnimationData()">
+        <router-outlet></router-outlet>
       </div>
     </main>
 
     <!-- Mobile Bottom Navigation -->
     <app-mobile-bottom-navigation></app-mobile-bottom-navigation>
 
-    <!-- PWA Install Prompt -->
+    <!-- PWA -->
     <app-pwa-install-prompt></app-pwa-install-prompt>
+  </div>
 
-    <!-- App Shell for instant loading -->
-    <app-shell></app-shell>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  <!-- Mobile Sidebar Backdrop -->
+  @if (mobileSidebarOpen()) {
+    <div class="ds-sidebar-backdrop" (click)="closeMobileSidebar()"></div>
+  }
+
+  <!-- Overlays -->
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="notificationOrigin"
+    [cdkConnectedOverlayOpen]="notificationMenuOpen"
+    [cdkConnectedOverlayPositions]="toolbarDropdownPositions"
+    [cdkConnectedOverlayScrollStrategy]="notificationMenuScrollStrategy"
+    (overlayOutsideClick)="closeNotificationMenu()">
+    <div class="notification-panel-dropdown ds-card" elevation="lg">
+      <app-notification-center></app-notification-center>
+    </div>
+  </ng-template>
+
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="helpOrigin"
+    [cdkConnectedOverlayOpen]="helpPanelOpen"
+    [cdkConnectedOverlayPositions]="toolbarDropdownPositions"
+    [cdkConnectedOverlayScrollStrategy]="helpPanelScrollStrategy"
+    (overlayOutsideClick)="closeHelpPanel()">
+    <div class="help-menu-dropdown ds-card" elevation="lg">
+      <div class="help-menu-header">
+        <ds-icon name="info" [size]="16"></ds-icon>
+        <span>Guides interactifs</span>
+      </div>
+      <div class="menu-divider"></div>
+      <button class="help-menu-item" (click)="startTourFromHelp('dossier-creation')">
+        <ds-icon name="plus" [size]="16"></ds-icon> Créer un dossier
+      </button>
+      <button class="help-menu-item" (click)="startTourFromHelp('dossier-detail')">
+        <ds-icon name="folder" [size]="16"></ds-icon> Explorer un dossier
+      </button>
+      <button class="help-menu-item" (click)="resetAllToursFromHelp()">
+        <ds-icon name="refresh" [size]="16"></ds-icon> Réinitialiser les guides
+      </button>
+    </div>
+  </ng-template>
+
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="userOrigin"
+    [cdkConnectedOverlayOpen]="userMenuOpen"
+    [cdkConnectedOverlayPositions]="toolbarDropdownPositions"
+    [cdkConnectedOverlayScrollStrategy]="userMenuScrollStrategy"
+    (overlayOutsideClick)="closeUserMenu()">
+    <div class="user-menu-dropdown ds-card" elevation="lg">
+      <div class="user-menu-header">
+        <div class="user-info">
+          <ds-icon name="user" [size]="32" style="color: var(--ds-primary);"></ds-icon>
+          <div>
+            <div class="user-name">Utilisateur</div>
+            <div class="user-email">user&#64;example.com</div>
+          </div>
+        </div>
+      </div>
+      <div class="menu-divider"></div>
+      <button class="help-menu-item" (click)="logout()">
+        <ds-icon name="close" [size]="16"></ds-icon> Déconnexion
+      </button>
+    </div>
+  </ng-template>
+</div>
