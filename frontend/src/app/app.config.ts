@@ -9,10 +9,8 @@ import { CorrelationIdInterceptor } from './interceptors/correlation-id.intercep
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { OfflineInterceptor } from './interceptors/offline.interceptor';
 import { HttpCacheInterceptor } from './interceptors/http-cache.interceptor';
-import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { NgChartsModule } from 'ng2-charts';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { MatDialogModule } from '@angular/material/dialog';
 
 export function initAuth(authService: AuthService): () => Promise<void> {
   return () => authService.init();
@@ -21,7 +19,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
-    provideRouter(routes, 
+    provideRouter(routes,
       withInMemoryScrolling({
         scrollPositionRestoration: 'disabled',
         anchorScrolling: 'enabled'
@@ -31,13 +29,10 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     importProvidersFrom(
       OAuthModule.forRoot(),
-      MatNativeDateModule,
-      MatDialogModule,
       NgChartsModule,
       FullCalendarModule
     ),
     { provide: LOCALE_ID, useValue: 'fr-FR' },
-    { provide: MAT_DATE_LOCALE, useValue: 'fr-FR' },
     {
       provide: APP_INITIALIZER,
       useFactory: initAuth,
