@@ -13,7 +13,7 @@ import {
     selector: 'app-api-status-indicator',
     standalone: true,
     templateUrl: './api-status-indicator.component.html',
-    styleUrls: ['./api-status-indicator.component.css'],
+    styleUrls: ['./api-status-indicator.component.scss'],
     imports: [
       CommonModule,
       CdkConnectedOverlay, 

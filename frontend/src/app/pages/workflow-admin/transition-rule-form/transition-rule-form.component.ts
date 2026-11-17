@@ -19,7 +19,7 @@ import { CommonModule } from '@angular/common';
     selector: 'app-transition-rule-form',
     standalone: true,
     templateUrl: './transition-rule-form.component.html',
-    styleUrls: ['./transition-rule-form.component.css'],
+    styleUrls: ['./transition-rule-form.component.scss'],
     imports: [
       CommonModule,
       FormsModule, 

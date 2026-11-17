@@ -25,7 +25,7 @@
 
 .ds-toggle-btn:last-child { border-right: none; }
 .ds-toggle-btn:hover { background: var(--ds-bg-subtle); color: var(--ds-text); }
-.ds-toggle-btn.active { background: var(--ds-marine); color: #fff; }
+.ds-toggle-btn.active { background: var(--ds-marine); color: var(--ds-text-inverse); }
 
 .workflow-admin-card {
   display: block;

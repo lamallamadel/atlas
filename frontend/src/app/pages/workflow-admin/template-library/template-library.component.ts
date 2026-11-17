@@ -22,7 +22,7 @@ import { CommonModule, DatePipe } from '@angular/common';
     selector: 'app-template-library',
     standalone: true,
     templateUrl: './template-library.component.html',
-    styleUrls: ['./template-library.component.css'],
+    styleUrls: ['./template-library.component.scss'],
     imports: [
       CommonModule,
       FormsModule,

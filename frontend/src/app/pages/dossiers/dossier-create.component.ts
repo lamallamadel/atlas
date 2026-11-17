@@ -10,7 +10,7 @@ import { AsyncPipe } from '@angular/common';
 @Component({
     selector: 'app-dossier-create',
     templateUrl: './dossier-create.component.html',
-    styleUrls: ['./dossier-create.component.css'],
+    styleUrls: ['./dossier-create.component.scss'],
     imports: [FormsModule, ReactiveFormsModule, AsyncPipe]
 })
 export class DossierCreateComponent implements OnInit {

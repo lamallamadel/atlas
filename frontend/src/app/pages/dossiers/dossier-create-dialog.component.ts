@@ -22,7 +22,7 @@ import {
     selector: 'app-dossier-create-dialog',
     standalone: true,
     templateUrl: './dossier-create-dialog.component.html',
-    styleUrls: ['./dossier-create-dialog.component.css'],
+    styleUrls: ['./dossier-create-dialog.component.scss'],
     imports: [
       CommonModule,
       FormsModule, 

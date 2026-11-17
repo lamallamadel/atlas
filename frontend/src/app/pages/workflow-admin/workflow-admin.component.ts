@@ -21,7 +21,7 @@ import { CommonModule } from '@angular/common';
     selector: 'app-workflow-admin',
     standalone: true,
     templateUrl: './workflow-admin.component.html',
-    styleUrls: ['./workflow-admin.component.css'],
+    styleUrls: ['./workflow-admin.component.scss'],
     imports: [
       CommonModule,
       DsCardComponent, 
