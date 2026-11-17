@@ -2,15 +2,30 @@ import { Component, OnInit, inject } from '@angular/core';
 import { WorkflowApiService, WorkflowTemplate } from '../services/workflow-api.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { 
-  DsCardComponent, 
-  DsButtonComponent, 
-  DsIconComponent, 
+import {
+  DsCardComponent,
+  DsButtonComponent,
+  DsIconComponent,
   DsSkeletonComponent,
   DsFilterChipComponent,
   DsToastService,
-  DsBadgeComponent
+  DsBadgeComponent,
+  DsIconName
 } from '../design-system';
+
+type WorkflowCategory = 'SALE' | 'RENTAL' | 'MANDATE' | 'CONSTRUCTION';
+
+const CATEGORY_META: Record<WorkflowCategory, { icon: DsIconName; color: string }> = {
+  SALE:         { icon: 'home',    color: 'var(--ds-marine)'  },
+  RENTAL:       { icon: 'refresh', color: 'var(--ds-success)' },
+  MANDATE:      { icon: 'edit',    color: 'var(--ds-warning)' },
+  CONSTRUCTION: { icon: 'refresh', color: 'var(--ds-primary)' },
+};
+
+const FALLBACK_META: { icon: DsIconName; color: string } = {
+  icon: 'folder',
+  color: 'var(--ds-text-muted)',
+};
 
 @Component({
   selector: 'app-workflow-template-library',
@@ -34,8 +49,8 @@ export class WorkflowTemplateLibraryComponent implements OnInit {
 
   templates: WorkflowTemplate[] = [];
   filteredTemplates: WorkflowTemplate[] = [];
-  selectedCategory = '';
-  categories = ['SALE', 'RENTAL', 'MANDATE', 'CONSTRUCTION'];
+  selectedCategory: WorkflowCategory | '' = '';
+  categories: WorkflowCategory[] = ['SALE', 'RENTAL', 'MANDATE', 'CONSTRUCTION'];
   isLoading = false;
 
   ngOnInit(): void {
@@ -57,14 +72,12 @@ export class WorkflowTemplateLibraryComponent implements OnInit {
     });
   }
 
-  filterByCategory(category: string | undefined): void {
+  filterByCategory(category: WorkflowCategory | '' | undefined): void {
     const c = category ?? '';
     this.selectedCategory = c;
-    if (c) {
-      this.filteredTemplates = this.templates.filter((t) => t.category === c);
-    } else {
-      this.filteredTemplates = this.templates;
-    }
+    this.filteredTemplates = c
+      ? this.templates.filter((t) => t.category === c)
+      : this.templates;
   }
 
   instantiateTemplate(templateId: number, name: string): void {
@@ -91,23 +104,11 @@ export class WorkflowTemplateLibraryComponent implements OnInit {
     });
   }
 
-  getCategoryIcon(category: string): string {
-    switch (category) {
-      case 'SALE': return 'home';
-      case 'RENTAL': return 'refresh';
-      case 'MANDATE': return 'edit';
-      case 'CONSTRUCTION': return 'refresh';
-      default: return 'folder';
-    }
+  getCategoryIcon(category: string): DsIconName {
+    return (CATEGORY_META[category as WorkflowCategory] ?? FALLBACK_META).icon;
   }
 
   getCategoryColor(category: string): string {
-    switch (category) {
-      case 'SALE': return 'var(--ds-marine)';
-      case 'RENTAL': return 'var(--ds-success)';
-      case 'MANDATE': return 'var(--ds-warning)';
-      case 'CONSTRUCTION': return 'var(--ds-primary)';
-      default: return 'var(--ds-text-muted)';
-    }
+    return (CATEGORY_META[category as WorkflowCategory] ?? FALLBACK_META).color;
   }
 }

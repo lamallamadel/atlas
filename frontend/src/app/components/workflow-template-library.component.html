@@ -26,7 +26,7 @@
           <ds-filter-chip
             [active]="selectedCategory === category"
             (toggled)="filterByCategory(category)">
-            <ds-icon [name]="$any(getCategoryIcon(category))" [size]="16" [style.color]="getCategoryColor(category)"></ds-icon>
+            <ds-icon [name]="getCategoryIcon(category)" [size]="16" [style.color]="getCategoryColor(category)"></ds-icon>
             {{ category }}
           </ds-filter-chip>
         }
@@ -50,10 +50,10 @@
   @if (!isLoading && filteredTemplates.length > 0) {
     <div class="templates-grid">
       @for (template of filteredTemplates; track template) {
-        <ds-card class="template-card" [pad]="false" [elevation]="'sm'">
+        <ds-card class="template-card" [pad]="false" [elevation]="'sm'" [hover]="true">
           <div class="wfl-tpl-header">
             <div class="wfl-tpl-avatar" [style.background-color]="getCategoryColor(template.category)">
-              <ds-icon [name]="$any(getCategoryIcon(template.category))" [size]="24"></ds-icon>
+              <ds-icon [name]="getCategoryIcon(template.category)" [size]="24"></ds-icon>
             </div>
             <div class="wfl-tpl-headings">
               <h3 class="wfl-tpl-title">{{ template.name }}</h3>

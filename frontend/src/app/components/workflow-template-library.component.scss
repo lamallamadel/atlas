@@ -78,10 +78,6 @@
     transform: translateY(-4px);
   }
 
-  &:hover ::ng-deep .ds-card {
-    box-shadow: var(--ds-shadow-md);
-  }
-
   .wfl-tpl-header {
     display: flex;
     align-items: center;
