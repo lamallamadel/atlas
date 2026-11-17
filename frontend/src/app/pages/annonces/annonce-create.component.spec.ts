@@ -3,10 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 
@@ -35,10 +31,6 @@ describe('AnnonceCreateComponent', () => {
         RouterTestingModule,
         FormsModule, // required because template uses [(ngModel)] for photo URL input
         ReactiveFormsModule,
-        MatStepperModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
         NoopAnimationsModule,
         AnnonceCreateComponent],
       providers: [

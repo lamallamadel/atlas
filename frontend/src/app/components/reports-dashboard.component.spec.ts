@@ -1,10 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgChartsModule } from 'ng2-charts';
 
@@ -19,10 +15,6 @@ describe('ReportsDashboardComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
         BrowserAnimationsModule,
         NgChartsModule,
         ReportsDashboardComponent],

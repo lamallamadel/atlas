@@ -1,85 +1,34 @@
-import { of } from 'rxjs';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientTestingModule, provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTabsModule } from '@angular/material/tabs';
-import { DsCardComponent } from '../design-system';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatListModule } from '@angular/material/list';
-import { MatDividerModule } from '@angular/material/divider';
 import { LayoutModule } from '@angular/cdk/layout';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { DsCardComponent } from '../design-system';
 
-@NgModule({ 
-    exports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        HttpClientTestingModule,
-        NoopAnimationsModule,
-        MatDialogModule,
-        MatIconModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatProgressSpinnerModule,
-        MatTabsModule,
-        DsCardComponent,
-        MatExpansionModule,
-        MatPaginatorModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatSidenavModule,
-        MatToolbarModule,
-        MatListModule,
-        MatDividerModule,
-        LayoutModule
-    ], 
-    imports: [
-        CommonModule,
-        HttpClientTestingModule,
-        FormsModule,
-        ReactiveFormsModule,
-        NoopAnimationsModule,
-        MatDialogModule,
-        MatIconModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatProgressSpinnerModule,
-        MatTabsModule,
-        DsCardComponent,
-        MatExpansionModule,
-        MatPaginatorModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatSidenavModule,
-        MatToolbarModule,
-        MatListModule,
-        MatDividerModule,
-        LayoutModule
-    ], 
-    providers: [
-        provideHttpClient(withInterceptorsFromDi()), 
-        provideHttpClientTesting()
-    ] 
+@NgModule({
+  exports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientTestingModule,
+    NoopAnimationsModule,
+    LayoutModule,
+    DsCardComponent,
+  ],
+  imports: [
+    CommonModule,
+    HttpClientTestingModule,
+    FormsModule,
+    ReactiveFormsModule,
+    NoopAnimationsModule,
+    LayoutModule,
+    DsCardComponent,
+  ],
+  providers: [
+    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClientTesting(),
+  ],
 })
 export class MaterialTestingModule { }

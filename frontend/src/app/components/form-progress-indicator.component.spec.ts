@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { FormProgressIndicatorComponent, FormStep } from './form-progress-indicator.component';
 
 describe('FormProgressIndicatorComponent', () => {
@@ -8,7 +7,7 @@ describe('FormProgressIndicatorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [MatProgressBarModule, FormProgressIndicatorComponent]
+    imports: [FormProgressIndicatorComponent]
 }).compileComponents();
 
     fixture = TestBed.createComponent(FormProgressIndicatorComponent);

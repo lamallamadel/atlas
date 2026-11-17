@@ -3,8 +3,6 @@ import {
   TestBed} from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -102,8 +100,6 @@ describe('CalendarViewComponent', () => {
       schemas: [NO_ERRORS_SCHEMA],
       imports: [
         BrowserAnimationsModule,
-        MatFormFieldModule,
-        MatSelectModule,
         CalendarViewComponent],
       providers: [
         { provide: AppointmentApiService, useValue: appointmentServiceSpy },

@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { KeyboardShortcutsComponent } from './keyboard-shortcuts.component';
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { Router } from '@angular/router';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { CommonModule } from '@angular/common';
 
 describe('KeyboardShortcutsComponent', () => {
@@ -17,7 +16,6 @@ describe('KeyboardShortcutsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         CommonModule,
-        MatCheckboxModule,
         KeyboardShortcutsComponent],
       providers: [
         KeyboardShortcutService,

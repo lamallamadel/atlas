@@ -1,10 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { DialogRef } from '@angular/cdk/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
@@ -43,10 +39,6 @@ describe('DossierCreateDialogComponent', () => {
       imports: [
         ReactiveFormsModule,
         NoopAnimationsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatAutocompleteModule,
-        MatExpansionModule,
         DossierCreateDialogComponent],
       providers: [
         { provide: DialogRef, useValue: mockDialogRef },

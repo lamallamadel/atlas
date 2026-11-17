@@ -1,11 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatSliderModule } from '@angular/material/slider';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { of, throwError } from 'rxjs';
 
 import { NotificationPreferencesFormComponent } from './notification-preferences-form.component';
@@ -58,11 +53,6 @@ describe('NotificationPreferencesFormComponent', () => {
       imports: [
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        MatSlideToggleModule,
-        MatSliderModule,
-        MatRadioModule,
-        MatDividerModule,
-        MatProgressBarModule,
         NotificationPreferencesFormComponent],
       providers: [
         {

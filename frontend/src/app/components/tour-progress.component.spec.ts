@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { OAuthService } from 'angular-oauth2-oidc';
 
 import { TourProgressComponent } from './tour-progress.component';
@@ -30,8 +29,7 @@ describe('TourProgressComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TourProgressComponent,
-        RouterTestingModule,
-        MatProgressBarModule],
+        RouterTestingModule],
       providers: [
         TourDefinitionService,
         OnboardingTourService,

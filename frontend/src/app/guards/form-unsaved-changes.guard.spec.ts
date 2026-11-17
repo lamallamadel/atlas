@@ -1,25 +1,25 @@
 import { TestBed } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
+import { DsDialogService } from '../design-system';
 import {
   FormUnsavedChangesGuard,
   ComponentCanDeactivate} from './form-unsaved-changes.guard';
 
 describe('FormUnsavedChangesGuard', () => {
   let guard: FormUnsavedChangesGuard;
-  let dialogSpy: AngularVitestPartialMock<MatDialog>;
+  let dialogSpy: AngularVitestPartialMock<DsDialogService>;
 
   beforeEach(() => {
     const spy = {
-      open: vi.fn().mockName('MatDialog.open')};
+      open: vi.fn().mockName('DsDialogService.open')};
 
     TestBed.configureTestingModule({
       providers: [
         FormUnsavedChangesGuard,
-        { provide: MatDialog, useValue: spy }]});
+        { provide: DsDialogService, useValue: spy }]});
 
     guard = TestBed.inject(FormUnsavedChangesGuard);
-    dialogSpy = TestBed.inject(MatDialog) as AngularVitestPartialMock<MatDialog>;
+    dialogSpy = TestBed.inject(DsDialogService) as AngularVitestPartialMock<DsDialogService>;
   });
 
   it('should be created', () => {
@@ -41,7 +41,7 @@ describe('FormUnsavedChangesGuard', () => {
       hasUnsavedChanges: () => true};
 
     dialogSpy.open.mockReturnValue({
-      afterClosed: () => of(true)} as any);
+      closed: of(true)} as any);
 
     const result = guard.canDeactivate(component);
     if (result instanceof Object) {

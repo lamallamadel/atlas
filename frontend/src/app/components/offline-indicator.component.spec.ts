@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { OfflineIndicatorComponent } from './offline-indicator.component';
 import { OfflineService } from '../services/offline.service';
@@ -19,7 +18,6 @@ describe('OfflineIndicatorComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         BrowserAnimationsModule,
-        MatProgressBarModule,
         OfflineIndicatorComponent],
       providers: [
         OfflineService,

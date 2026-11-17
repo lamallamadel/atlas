@@ -1,8 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { FormsModule } from '@angular/forms';
@@ -48,10 +45,6 @@ describe('WhatsappMessagingUiComponent', () => {
       imports: [
         BrowserAnimationsModule,
         FormsModule,
-        MatBottomSheetModule,
-
-        MatFormFieldModule,
-        MatInputModule,
         ScrollingModule,
         TextFieldModule,
         WhatsappMessagingUiComponent],

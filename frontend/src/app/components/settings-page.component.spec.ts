@@ -2,15 +2,6 @@ import {
   ComponentFixture,
   TestBed} from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatDividerModule } from '@angular/material/divider';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { SettingsPageComponent } from './settings-page.component';
@@ -62,15 +53,6 @@ describe('SettingsPageComponent', () => {
       imports: [
         ReactiveFormsModule,
         NoopAnimationsModule,
-        MatTabsModule,
-        MatFormFieldModule,
-        MatSelectModule,
-        MatCheckboxModule,
-        MatSlideToggleModule,
-        MatInputModule,
-        MatButtonToggleModule,
-        MatProgressBarModule,
-        MatDividerModule,
         SettingsPageComponent],
       providers: [
         {

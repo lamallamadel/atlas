@@ -2,7 +2,6 @@ import {
   ComponentFixture,
   TestBed} from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, BehaviorSubject, Subject } from 'rxjs';
@@ -18,7 +17,6 @@ describe('CommandPaletteComponent', () => {
   let component: CommandPaletteComponent;
   let fixture: ComponentFixture<CommandPaletteComponent>;
   let mockRouter: AngularVitestPartialMock<Router>;
-  let mockDialog: AngularVitestPartialMock<MatDialog>;
   let mockKeyboardService: any;
   let mockSearchService: AngularVitestPartialMock<SearchApiService>;
   let mockRecentNavService: AngularVitestPartialMock<RecentNavigationService>;
@@ -31,8 +29,6 @@ describe('CommandPaletteComponent', () => {
       navigate: vi.fn().mockName('Router.navigate'),
       url: '/',
       events: of(new NavigationEnd(1, '/', '/'))};
-    mockDialog = {
-      open: vi.fn().mockName('MatDialog.open')};
 
     mockKeyboardService = {
       commandPaletteVisible$: visibleSubject.asObservable(),
@@ -64,7 +60,6 @@ describe('CommandPaletteComponent', () => {
         CommandPaletteComponent],
       providers: [
         { provide: Router, useValue: mockRouter },
-        { provide: MatDialog, useValue: mockDialog },
         { provide: KeyboardShortcutService, useValue: mockKeyboardService },
         { provide: SearchApiService, useValue: mockSearchService },
         { provide: RecentNavigationService, useValue: mockRecentNavService },

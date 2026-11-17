@@ -2,7 +2,6 @@ import type { Mock } from 'vitest';
 import { Component, NO_ERRORS_SCHEMA, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
 import { of, throwError, EMPTY } from 'rxjs';
 import { DsToastService, DsDialogService } from '../../design-system';
 
@@ -43,7 +42,6 @@ describe('DossierDetailComponent', () => {
   let auditEventApiService: AngularVitestPartialMock<AuditEventApiService>;
   let router: AngularVitestPartialMock<Router>;
   let toastService: AngularVitestPartialMock<DsToastService>;
-  let dialog: AngularVitestPartialMock<MatDialog>;
 
   let activatedRouteStub: {
     snapshot: {
@@ -182,8 +180,6 @@ describe('DossierDetailComponent', () => {
       error: vi.fn().mockName('DsToastService.error'),
       info: vi.fn().mockName('DsToastService.info'),
       warning: vi.fn().mockName('DsToastService.warning')};
-    dialog = {
-      open: vi.fn().mockName('MatDialog.open')};
 
     activatedRouteStub = {
       snapshot: {
@@ -208,7 +204,6 @@ describe('DossierDetailComponent', () => {
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: DsToastService, useValue: toastService },
         { provide: DsDialogService, useValue: { open: vi.fn().mockReturnValue({ closed: EMPTY }) } },
-        { provide: MatDialog, useValue: dialog },
         {
           provide: RecentNavigationService,
           useValue: {

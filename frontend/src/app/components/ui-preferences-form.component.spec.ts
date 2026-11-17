@@ -1,14 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatDividerModule } from '@angular/material/divider';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 
@@ -50,15 +41,6 @@ describe('UiPreferencesFormComponent', () => {
       imports: [
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatRadioModule,
-        MatButtonToggleModule,
-        MatAutocompleteModule,
-        MatCheckboxModule,
-        MatProgressBarModule,
-        MatDividerModule,
         UiPreferencesFormComponent],
       providers: [
         {

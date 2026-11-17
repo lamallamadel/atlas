@@ -3,12 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { of } from 'rxjs';
 
 import { AnnoncesComponent } from './annonces.component';
@@ -23,11 +18,7 @@ import { FilterPresetService } from '../../services/filter-preset.service';
   template: '',
   imports: [
     FormsModule,
-    RouterTestingModule,
-    MatExpansionModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule]})
+    RouterTestingModule]})
 class GenericTableStubComponent {
   readonly columns = input<any>();
   readonly data = input<any>();
@@ -46,11 +37,7 @@ class GenericTableStubComponent {
   template: '',
   imports: [
     FormsModule,
-    RouterTestingModule,
-    MatExpansionModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule]})
+    RouterTestingModule]})
 class EmptyStateStubComponent {
   readonly message = input('');
   readonly subtext = input('');
@@ -65,11 +52,7 @@ class EmptyStateStubComponent {
   template: '',
   imports: [
     FormsModule,
-    RouterTestingModule,
-    MatExpansionModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule]})
+    RouterTestingModule]})
 class LoadingSkeletonStubComponent {
   readonly variant = input('');
   readonly rows = input(0);
@@ -81,7 +64,6 @@ describe('AnnoncesComponent', () => {
   let fixture: ComponentFixture<AnnoncesComponent>;
   let annonceApiService: AngularVitestPartialMock<AnnonceApiService>;
   let filterPresetService: AngularVitestPartialMock<FilterPresetService>;
-  let bottomSheet: AngularVitestPartialMock<MatBottomSheet>;
   let breakpointObserver: AngularVitestPartialMock<BreakpointObserver>;
 
   const emptyPage = {
@@ -119,9 +101,6 @@ describe('AnnoncesComponent', () => {
       savePresetLocally: vi.fn(),
       deletePresetLocally: vi.fn()};
 
-    const bottomSheetSpy = {
-      open: vi.fn()};
-
     const breakpointObserverSpy = {
       observe: vi.fn().mockReturnValue(of({ matches: false, breakpoints: {} }))};
 
@@ -130,10 +109,6 @@ describe('AnnoncesComponent', () => {
         FormsModule,
         RouterTestingModule,
         NoopAnimationsModule,
-        MatExpansionModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
         AnnoncesComponent,
         GenericTableStubComponent,
         EmptyStateStubComponent,
@@ -141,7 +116,6 @@ describe('AnnoncesComponent', () => {
       providers: [
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         { provide: FilterPresetService, useValue: filterPresetServiceSpy },
-        { provide: MatBottomSheet, useValue: bottomSheetSpy },
         { provide: BreakpointObserver, useValue: breakpointObserverSpy }]}).compileComponents();
 
     annonceApiService = TestBed.inject(
@@ -150,9 +124,6 @@ describe('AnnoncesComponent', () => {
     filterPresetService = TestBed.inject(
       FilterPresetService
     ) as AngularVitestPartialMock<FilterPresetService>;
-    bottomSheet = TestBed.inject(
-      MatBottomSheet
-    ) as AngularVitestPartialMock<MatBottomSheet>;
     breakpointObserver = TestBed.inject(
       BreakpointObserver
     ) as AngularVitestPartialMock<BreakpointObserver>;

@@ -1,11 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  MatDialogRef,
-  MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { FormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { VoipConfigDialogComponent } from './voip-config-dialog.component';
@@ -14,12 +8,12 @@ import { VoipService } from '../services/voip.service';
 describe('VoipConfigDialogComponent', () => {
   let component: VoipConfigDialogComponent;
   let fixture: ComponentFixture<VoipConfigDialogComponent>;
-  let mockDialogRef: AngularVitestPartialMock<MatDialogRef<VoipConfigDialogComponent>>;
+  let mockDialogRef: AngularVitestPartialMock<DialogRef<VoipConfigDialogComponent>>;
   let mockVoipService: AngularVitestPartialMock<VoipService>;
 
   beforeEach(async () => {
     mockDialogRef = {
-      close: vi.fn().mockName('MatDialogRef.close')};
+      close: vi.fn().mockName('DialogRef.close')};
     mockVoipService = {
       getConfiguration: vi.fn().mockName('VoipService.getConfiguration'),
       setConfiguration: vi.fn().mockName('VoipService.setConfiguration')};
@@ -31,15 +25,11 @@ describe('VoipConfigDialogComponent', () => {
       imports: [
         NoopAnimationsModule,
         FormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatSlideToggleModule,
         VoipConfigDialogComponent],
       providers: [
-        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: DialogRef, useValue: mockDialogRef },
         { provide: VoipService, useValue: mockVoipService },
-        { provide: MAT_DIALOG_DATA, useValue: null }]}).compileComponents();
+        { provide: DIALOG_DATA, useValue: null }]}).compileComponents();
 
     fixture = TestBed.createComponent(VoipConfigDialogComponent);
     component = fixture.componentInstance;

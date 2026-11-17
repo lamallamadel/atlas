@@ -9,16 +9,7 @@ import {
   DossierStatus} from '../../services/dossier-api.service';
 import { AnnonceApiService } from '../../services/annonce-api.service';
 import { FilterPresetService } from '../../services/filter-preset.service';
-import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSortModule } from '@angular/material/sort';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatSelectModule } from '@angular/material/select';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
@@ -52,7 +43,6 @@ describe('DossiersComponent', () => {
   let dossierApiService: AngularVitestPartialMock<DossierApiService>;
   let annonceApiService: AngularVitestPartialMock<AnnonceApiService>;
   let filterPresetService: AngularVitestPartialMock<FilterPresetService>;
-  let bottomSheet: AngularVitestPartialMock<MatBottomSheet>;
   let breakpointObserver: AngularVitestPartialMock<BreakpointObserver>;
 
   beforeAll(() => {
@@ -75,8 +65,6 @@ describe('DossiersComponent', () => {
       getPresetsLocally: karmaSpy('FilterPresetService.getPresetsLocally'),
       savePresetLocally: karmaSpy('FilterPresetService.savePresetLocally'),
       deletePresetLocally: karmaSpy('FilterPresetService.deletePresetLocally')};
-    const bottomSheetSpy = {
-      open: karmaSpy('MatBottomSheet.open')};
     const breakpointObserverSpy = {
       observe: karmaSpy('BreakpointObserver.observe')};
 
@@ -112,14 +100,6 @@ describe('DossiersComponent', () => {
         RouterTestingModule,
         FormsModule,
         ReactiveFormsModule,
-        MatPaginatorModule,
-        MatSortModule,
-        MatAutocompleteModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatExpansionModule,
-        MatSelectModule,
-
         NoopAnimationsModule,
         DossiersComponent],
       providers: [
@@ -127,12 +107,7 @@ describe('DossiersComponent', () => {
         { provide: DossierApiService, useValue: dossierApiServiceSpy },
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         { provide: FilterPresetService, useValue: filterPresetServiceSpy },
-        { provide: MatBottomSheet, useValue: bottomSheetSpy },
         { provide: BreakpointObserver, useValue: breakpointObserverSpy },
-        {
-          provide: MatDialog,
-          useValue: {
-            open: karmaSpy('MatDialog.open')}},
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()]}).compileComponents();
 
@@ -145,9 +120,6 @@ describe('DossiersComponent', () => {
     filterPresetService = TestBed.inject(
       FilterPresetService
     ) as AngularVitestPartialMock<FilterPresetService>;
-    bottomSheet = TestBed.inject(
-      MatBottomSheet
-    ) as AngularVitestPartialMock<MatBottomSheet>;
     breakpointObserver = TestBed.inject(
       BreakpointObserver
     ) as AngularVitestPartialMock<BreakpointObserver>;
