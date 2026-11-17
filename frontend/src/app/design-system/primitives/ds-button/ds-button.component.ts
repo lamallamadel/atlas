@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatRippleModule } from '@angular/material/core';
 import { DsIconComponent } from '../../icons/ds-icon.component';
+import { DsRippleDirective } from './ds-ripple.directive';
 
 export type DsButtonVariant = 'marine' | 'copper' | 'ghost' | 'danger' | 'icon';
 export type DsButtonSize = 'sm' | 'md' | 'lg';
@@ -9,7 +9,7 @@ export type DsButtonSize = 'sm' | 'md' | 'lg';
 @Component({
   selector: 'ds-button',
   standalone: true,
-  imports: [CommonModule, MatRippleModule, DsIconComponent],
+  imports: [CommonModule, DsRippleDirective, DsIconComponent],
   template: `
     <button
       [attr.type]="nativeType"
@@ -17,9 +17,9 @@ export type DsButtonSize = 'sm' | 'md' | 'lg';
       [disabled]="disabled || loading"
       [attr.aria-busy]="loading"
       [attr.aria-label]="ariaLabel || null"
-      matRipple
-      [matRippleColor]="rippleColor"
-      [matRippleDisabled]="disabled || loading"
+      dsRipple
+      [dsRippleColor]="rippleColor"
+      [dsRippleDisabled]="disabled || loading"
       (click)="onClick($event)">
       @if (loading) {
         <span class="ds-btn__spinner" aria-hidden="true"></span>

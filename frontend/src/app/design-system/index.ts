@@ -4,6 +4,7 @@
 
 /* ── Primitives ── */
 export { DsButtonComponent }         from './primitives/ds-button/ds-button.component';
+export { DsRippleDirective }         from './primitives/ds-button/ds-ripple.directive';
 export { DsIconComponent }           from './icons/ds-icon.component';
 export { DsCardComponent }           from './primitives/ds-card/ds-card.component';
 export { DsInputComponent }          from './primitives/ds-input/ds-input.component';
