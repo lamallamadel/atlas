@@ -25,7 +25,7 @@ import {
     DsBadgeComponent
   ],
   templateUrl: './workflow-template-library.component.html',
-  styleUrls: ['./workflow-template-library.component.css']
+  styleUrls: ['./workflow-template-library.component.scss']
 })
 export class WorkflowTemplateLibraryComponent implements OnInit {
   private workflowApi = inject(WorkflowApiService);

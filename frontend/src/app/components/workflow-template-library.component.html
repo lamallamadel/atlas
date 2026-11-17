@@ -6,24 +6,31 @@
     </div>
     <div class="wfl-lib-header-body">
       <div class="actions">
-        <button mat-raised-button color="primary" (click)="seedTemplates()">
-          <mat-icon>refresh</mat-icon> Seed System Templates
-        </button>
+        <ds-button variant="primary" (click)="seedTemplates()">
+          <ds-icon name="refresh" [size]="16"></ds-icon>
+          Seed System Templates
+        </ds-button>
       </div>
     </div>
   </ds-card>
 
   <ds-card class="filter-card" [pad]="false" [elevation]="'sm'">
     <div class="wfl-filter-body">
-      <mat-chip-listbox [(value)]="selectedCategory" (change)="filterByCategory($event.value)">
-        <mat-chip-option value="">All Templates</mat-chip-option>
+      <div class="wfl-chip-group" role="radiogroup" aria-label="Filter templates by category">
+        <ds-filter-chip
+          [active]="selectedCategory === ''"
+          (toggled)="filterByCategory('')">
+          All Templates
+        </ds-filter-chip>
         @for (category of categories; track category) {
-          <mat-chip-option [value]="category">
-            <mat-icon [style.color]="getCategoryColor(category)">{{ getCategoryIcon(category) }}</mat-icon>
+          <ds-filter-chip
+            [active]="selectedCategory === category"
+            (toggled)="filterByCategory(category)">
+            <ds-icon [name]="$any(getCategoryIcon(category))" [size]="16" [style.color]="getCategoryColor(category)"></ds-icon>
             {{ category }}
-          </mat-chip-option>
+          </ds-filter-chip>
         }
-      </mat-chip-listbox>
+      </div>
     </div>
   </ds-card>
 
@@ -35,7 +42,7 @@
 
   @if (!isLoading && filteredTemplates.length === 0) {
     <div class="empty-state">
-      <mat-icon>inbox</mat-icon>
+      <ds-icon name="inbox" [size]="64"></ds-icon>
       <p>No templates available. Click "Seed System Templates" to populate the library.</p>
     </div>
   }
@@ -46,7 +53,7 @@
         <ds-card class="template-card" [pad]="false" [elevation]="'sm'">
           <div class="wfl-tpl-header">
             <div class="wfl-tpl-avatar" [style.background-color]="getCategoryColor(template.category)">
-              <mat-icon>{{ getCategoryIcon(template.category) }}</mat-icon>
+              <ds-icon [name]="$any(getCategoryIcon(template.category))" [size]="24"></ds-icon>
             </div>
             <div class="wfl-tpl-headings">
               <h3 class="wfl-tpl-title">{{ template.name }}</h3>
@@ -57,19 +64,20 @@
             <p>{{ template.description }}</p>
             <div class="template-stats">
               <span class="stat">
-                <mat-icon>radio_button_checked</mat-icon>
+                <ds-icon name="target" [size]="16"></ds-icon>
                 {{ template.stateCount }} states
               </span>
               <span class="stat">
-                <mat-icon>trending_flat</mat-icon>
+                <ds-icon name="arrow-right" [size]="16"></ds-icon>
                 {{ template.transitionCount }} transitions
               </span>
             </div>
           </div>
           <div class="wfl-tpl-actions">
-            <button mat-raised-button color="primary" (click)="instantiateTemplate(template.id, template.name)">
-              <mat-icon>content_copy</mat-icon> Use Template
-            </button>
+            <ds-button variant="primary" (click)="instantiateTemplate(template.id, template.name)">
+              <ds-icon name="copy" [size]="16"></ds-icon>
+              Use Template
+            </ds-button>
           </div>
         </ds-card>
       }
