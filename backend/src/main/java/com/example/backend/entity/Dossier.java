@@ -3,8 +3,10 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -69,6 +71,14 @@ public class Dossier extends BaseEntity {
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "source", length = 50)
     private DossierSource source;
+
+    /** Critères de recherche de l'acheteur ou du locataire (voir DossierSearchCriteria). */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "search_criteria")
+    private Map<String, Object> searchCriteria;
+
+    @Column(name = "search_criteria_updated_at")
+    private LocalDateTime searchCriteriaUpdatedAt;
 
     @Column(name = "locale", length = 10)
     private String locale;
@@ -270,5 +280,21 @@ public class Dossier extends BaseEntity {
 
     public void setLocale(String locale) {
         this.locale = locale;
+    }
+
+    public Map<String, Object> getSearchCriteria() {
+        return searchCriteria;
+    }
+
+    public void setSearchCriteria(Map<String, Object> searchCriteria) {
+        this.searchCriteria = searchCriteria;
+    }
+
+    public LocalDateTime getSearchCriteriaUpdatedAt() {
+        return searchCriteriaUpdatedAt;
+    }
+
+    public void setSearchCriteriaUpdatedAt(LocalDateTime searchCriteriaUpdatedAt) {
+        this.searchCriteriaUpdatedAt = searchCriteriaUpdatedAt;
     }
 }
