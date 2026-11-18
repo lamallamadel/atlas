@@ -30,16 +30,11 @@
      ======================================== */
   
   /* Hide navigation components */
-  mat-sidenav,
-  mat-sidenav-container mat-sidenav,
   .sidenav,
-  .sidenav-container mat-sidenav,
-  mat-toolbar,
   .top-toolbar,
   .sidenav-header,
   nav,
-  .nav-list,
-  mat-nav-list {
+  .nav-list {
     display: none !important;
   }
 
@@ -57,12 +52,10 @@
   .btn-retry,
   .btn-complete,
   .action-buttons button,
-  mat-icon-button,
   .menu-button,
   .theme-toggle-button,
   .user-menu-button,
   .user-menu-container,
-  mat-paginator,
   .consent-actions,
   .consent-btn,
   .tab-header-actions {
@@ -80,32 +73,13 @@
   .filter-select,
   .status-change-form,
   .lead-form,
-  .audit-filters,
-  mat-form-field {
+  .audit-filters {
     display: none !important;
   }
 
   /* Hide dialogs, modals, overlays */
-  mat-dialog-container,
-  .mat-mdc-dialog-container,
   .cdk-overlay-container,
-  mat-menu,
-  mat-expansion-panel-header,
-  .mat-expansion-panel-header,
   .skip-to-content {
-    display: none !important;
-  }
-
-  /* Hide snackbars and notifications */
-  mat-snack-bar-container,
-  .mat-mdc-snack-bar-container {
-    display: none !important;
-  }
-
-  /* Hide tabs navigation but keep content */
-  mat-tab-header,
-  .mat-mdc-tab-header,
-  .mat-mdc-tab-labels {
     display: none !important;
   }
 
@@ -116,18 +90,12 @@
     display: none !important;
   }
 
-  /* Hide expansion panel headers */
-  mat-expansion-panel-header {
-    display: none !important;
-  }
-
   /* ========================================
      PAGE LAYOUT & STRUCTURE
      ======================================== */
   
   .page-container,
-  .sidenav-content,
-  mat-sidenav-content {
+  .sidenav-content {
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -186,8 +154,7 @@
      ======================================== */
   
   table,
-  .data-table,
-  .mat-mdc-table {
+  .data-table {
     width: 100% !important;
     border-collapse: collapse !important;
     page-break-inside: auto;
@@ -196,36 +163,30 @@
   }
 
   thead,
-  .data-table thead,
-  .mat-mdc-header-row {
+  .data-table thead {
     display: table-header-group;
     font-weight: bold;
   }
 
   tbody,
-  .data-table tbody,
-  .mat-mdc-table tbody {
+  .data-table tbody {
     display: table-row-group;
   }
 
-  tr,
-  .mat-mdc-row {
+  tr {
     page-break-inside: avoid;
     page-break-after: auto;
   }
 
   th,
-  td,
-  .mat-mdc-header-cell,
-  .mat-mdc-cell {
+  td {
     padding: 8pt 6pt !important;
     border: 1pt solid #333 !important;
     text-align: left;
     vertical-align: top;
   }
 
-  th,
-  .mat-mdc-header-cell {
+  th {
     background-color: #f0f0f0 !important;
     font-weight: bold;
     color: black !important;
@@ -242,8 +203,7 @@
 
   /* Optimize table wrapper */
   .data-table-wrapper,
-  .table-wrapper,
-  .mat-mdc-table-container {
+  .table-wrapper {
     overflow: visible !important;
     max-height: none !important;
   }
@@ -339,7 +299,6 @@
      CARDS & SECTIONS
      ======================================== */
   
-  mat-card,
   .ds-card,
   .info-section,
   .consent-card,
@@ -352,7 +311,6 @@
     box-shadow: none !important;
   }
 
-  mat-card-header,
   .consent-card-header,
   .message-card-header {
     margin-bottom: 0.25cm !important;
@@ -360,14 +318,12 @@
     border-bottom: 1pt solid #333 !important;
   }
 
-  mat-card-title,
   .consent-channel-title {
     font-size: 12pt !important;
     font-weight: bold !important;
     color: black !important;
   }
 
-  mat-card-content,
   .consent-card-body,
   .message-card-body {
     padding: 0.25cm 0 !important;
@@ -408,27 +364,8 @@
      TABS CONTENT
      ======================================== */
   
-  mat-tab-group,
   .tabs-container {
     display: block !important;
-  }
-
-  mat-tab-body,
-  .mat-mdc-tab-body {
-    display: block !important;
-    overflow: visible !important;
-  }
-
-  .mat-mdc-tab-body-content {
-    overflow: visible !important;
-    transform: none !important;
-  }
-
-  /* Show all tabs content */
-  .mat-mdc-tab-body-wrapper {
-    position: static !important;
-    overflow: visible !important;
-    height: auto !important;
   }
 
   /* Add tab section headers for print */
@@ -529,20 +466,6 @@
      EXPANSION PANELS
      ======================================== */
   
-  mat-expansion-panel {
-    box-shadow: none !important;
-    border: 1pt solid #333 !important;
-    margin-bottom: 0.5cm !important;
-  }
-
-  mat-expansion-panel-content,
-  .mat-expansion-panel-content {
-    display: block !important;
-    visibility: visible !important;
-    height: auto !important;
-    overflow: visible !important;
-  }
-
   .advanced-content,
   .consent-history-content {
     padding: 0.5cm !important;
@@ -627,8 +550,7 @@
   
   /* Force page breaks before major sections */
   .dossier-header,
-  .sections-container,
-  mat-tab-group {
+  .sections-container {
     page-break-before: auto;
   }
 

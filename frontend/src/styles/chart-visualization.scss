@@ -104,14 +104,6 @@
   color: var(--chart-text-color-dark);
 }
 
-.chart-empty-state mat-icon {
-  font-size: 64px;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
 .chart-empty-state-title {
   font-size: var(--font-size-1, 17.5px);
   font-weight: var(--font-weight-semibold, 600);
@@ -135,13 +127,6 @@
   background: var(--chart-error-alpha);
   border-radius: 8px;
   margin: 16px;
-}
-
-.chart-error-state mat-icon {
-  font-size: 48px;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 16px;
 }
 
 .chart-grid {
@@ -319,12 +304,6 @@
 
 .chart-kpi-trend.neutral {
   color: var(--chart-neutral);
-}
-
-.chart-kpi-trend mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
 }
 
 .chart-export-dialog {

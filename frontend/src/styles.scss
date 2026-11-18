@@ -24,7 +24,6 @@
 @import './styles/animations.css';
 @import './styles/pages.css';
 @import './styles/cdk-overlay-backdrops.css';
-@import './styles/document-preview-dialog.css';
 
 @include meta.load-css('styles/_color-utilities.scss');
 @include meta.load-css('styles/cards.scss');
@@ -143,25 +142,13 @@ a:hover {
   color: white !important;
 }
 
-.success-snackbar .mat-simple-snackbar-action {
-  color: white !important;
-}
-
 .error-snackbar {
   background-color: #e74c3c !important;
   color: white !important;
 }
 
-.error-snackbar .mat-simple-snackbar-action {
-  color: white !important;
-}
-
 .warning-snackbar {
   background-color: #f39c12 !important;
-  color: white !important;
-}
-
-.warning-snackbar .mat-simple-snackbar-action {
   color: white !important;
 }
 
@@ -205,119 +192,13 @@ a:hover {
   opacity: 0.5;
 }
 
-/* Mat menu item with icons */
-.mat-mdc-menu-item mat-icon {
-  margin-right: 8px;
-}
-
 .info-snackbar {
   background-color: #2196f3 !important;
   color: white !important;
 }
 
-.info-snackbar .mat-simple-snackbar-action {
-  color: white !important;
-}
-
-.enhanced-snackbar.success-snackbar .mdc-snackbar__surface {
-  background-color: #27ae60 !important;
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3) !important;
-}
-
-.enhanced-snackbar.error-snackbar .mdc-snackbar__surface {
-  background-color: #e74c3c !important;
-  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3) !important;
-}
-
-.enhanced-snackbar.warning-snackbar .mdc-snackbar__surface {
-  background-color: #f39c12 !important;
-  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3) !important;
-}
-
-.enhanced-snackbar.info-snackbar .mdc-snackbar__surface {
-  background-color: #2196f3 !important;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3) !important;
-}
-
-.enhanced-snackbar .mat-mdc-button,
-.enhanced-snackbar .mat-mdc-icon-button {
-  color: white !important;
-}
-
-.enhanced-snackbar .mat-mdc-button:hover {
-  background-color: rgba(255, 255, 255, 0.15) !important;
-}
-
 .validation-error-container {
   margin-top: 4px;
-}
-
-/* Enhanced Notification Snackbar Styles */
-.notification-success .mdc-snackbar__surface {
-  background-color: #4caf50 !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4) !important;
-}
-
-.notification-error .mdc-snackbar__surface {
-  background-color: #f44336 !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4) !important;
-}
-
-.notification-warning .mdc-snackbar__surface {
-  background-color: #ff9800 !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4) !important;
-}
-
-.notification-info .mdc-snackbar__surface {
-  background-color: #2196f3 !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4) !important;
-}
-
-/* Dark theme support for snackbars */
-.dark-theme-snackbar.notification-success .mdc-snackbar__surface {
-  background-color: #388e3c !important;
-  box-shadow: 0 4px 16px rgba(56, 142, 60, 0.5) !important;
-}
-
-.dark-theme-snackbar.notification-error .mdc-snackbar__surface {
-  background-color: #d32f2f !important;
-  box-shadow: 0 4px 16px rgba(211, 47, 47, 0.5) !important;
-}
-
-.dark-theme-snackbar.notification-warning .mdc-snackbar__surface {
-  background-color: #f57c00 !important;
-  box-shadow: 0 4px 16px rgba(245, 124, 0, 0.5) !important;
-}
-
-.dark-theme-snackbar.notification-info .mdc-snackbar__surface {
-  background-color: #1976d2 !important;
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.5) !important;
-}
-
-/* Snackbar action button styles */
-.notification-success .mat-mdc-button,
-.notification-error .mat-mdc-button,
-.notification-warning .mat-mdc-button,
-.notification-info .mat-mdc-button {
-  color: white !important;
-}
-
-.notification-success .mat-mdc-button:hover,
-.notification-error .mat-mdc-button:hover,
-.notification-warning .mat-mdc-button:hover,
-.notification-info .mat-mdc-button:hover {
-  background-color: rgba(255, 255, 255, 0.15) !important;
-}
-
-.notification-success .mat-mdc-icon-button,
-.notification-error .mat-mdc-icon-button,
-.notification-warning .mat-mdc-icon-button,
-.notification-info .mat-mdc-icon-button {
-  color: white !important;
 }
 
 .validation-error-container .error-message {
@@ -368,21 +249,6 @@ a:hover {
   }
 }
 
-/* Responsive Dialog Styles */
-@media (max-width: 599px) {
-  .responsive-dialog .mat-mdc-dialog-container {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    border-radius: 0 !important;
-  }
-
-  .responsive-dialog .mat-mdc-dialog-surface {
-    border-radius: 0 !important;
-  }
-}
-
 /* Accessibility: Focus Indicators - WCAG AA Compliant 2px solid primary */
 *:focus {
   outline: none;
@@ -400,26 +266,11 @@ select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible,
 [role="button"]:focus-visible,
-.mat-mdc-button:focus-visible,
-.mat-mdc-raised-button:focus-visible,
-.mat-mdc-icon-button:focus-visible,
-.mat-mdc-fab:focus-visible,
-.mat-mdc-mini-fab:focus-visible,
-.mat-mdc-card:focus-visible,
-.mat-mdc-chip:focus-visible,
-.mat-mdc-tab:focus-visible,
 .clickable:focus-visible,
 .clickable-row:focus-visible,
 .btn-icon-action:focus-visible,
 .btn-edit:focus-visible,
-.btn-delete:focus-visible,
-/* NOTE: `.kebab-menu-button` supprimé (non utilisé). */
-
-.mat-mdc-menu-item:focus-visible,
-.mat-mdc-list-item:focus-visible,
-.mat-mdc-option:focus-visible,
-.mat-button-toggle:focus-visible,
-.mat-expansion-panel-header:focus-visible {
+.btn-delete:focus-visible {
   outline: 2px solid var(--color-primary-500, #2c5aa0) !important;
   outline-offset: -2px !important;
 }
@@ -427,11 +278,6 @@ textarea:focus-visible,
 /* Minimum touch target size - WCAG AA 40x40px */
 button,
 a,
-.mat-mdc-button,
-.mat-mdc-icon-button,
-.mat-mdc-fab,
-.mat-mdc-mini-fab,
-.mat-button-toggle,
 [role="button"],
 .clickable,
 .btn-icon-action,
@@ -456,11 +302,6 @@ a,
   justify-content: center;
   padding: 8px 16px;
 }
-
-/* Icon buttons specific sizing */
-.mat-mdc-icon-button,
-.btn-icon-action,
-/* NOTE: `.kebab-menu-button` supprimé (non utilisé). */
 
 /* SVG icons within buttons should be visible */
 .btn-icon-action svg,
@@ -547,26 +388,11 @@ textarea:disabled {
 .dark-theme textarea:focus-visible,
 .dark-theme [tabindex]:focus-visible,
 .dark-theme [role="button"]:focus-visible,
-.dark-theme .mat-mdc-button:focus-visible,
-.dark-theme .mat-mdc-raised-button:focus-visible,
-.dark-theme .mat-mdc-icon-button:focus-visible,
-.dark-theme .mat-mdc-fab:focus-visible,
-.dark-theme .mat-mdc-mini-fab:focus-visible,
-.dark-theme .mat-mdc-card:focus-visible,
-.dark-theme .mat-mdc-chip:focus-visible,
-.dark-theme .mat-mdc-tab:focus-visible,
 .dark-theme .clickable:focus-visible,
 .dark-theme .clickable-row:focus-visible,
 .dark-theme .btn-icon-action:focus-visible,
 .dark-theme .btn-edit:focus-visible,
-.dark-theme .btn-delete:focus-visible,
-/* NOTE: `.kebab-menu-button` supprimé (non utilisé). */
-
-.dark-theme .mat-mdc-menu-item:focus-visible,
-.dark-theme .mat-mdc-list-item:focus-visible,
-.dark-theme .mat-mdc-option:focus-visible,
-.dark-theme .mat-button-toggle:focus-visible,
-.dark-theme .mat-expansion-panel-header:focus-visible {
+.dark-theme .btn-delete:focus-visible {
   outline: 2px solid var(--color-primary-400) !important;
   outline-offset: -2px !important;
 }
@@ -579,64 +405,16 @@ textarea:disabled {
   background-color: var(--color-success-600) !important;
 }
 
-.dark-theme .enhanced-snackbar.success-snackbar .mdc-snackbar__surface {
-  background-color: var(--color-success-600) !important;
-  box-shadow: 0 4px 12px rgba(117, 199, 127, 0.3) !important;
-}
-
 .dark-theme .error-snackbar {
   background-color: var(--color-error-600) !important;
-}
-
-.dark-theme .enhanced-snackbar.error-snackbar .mdc-snackbar__surface {
-  background-color: var(--color-error-600) !important;
-  box-shadow: 0 4px 12px rgba(237, 127, 127, 0.3) !important;
 }
 
 .dark-theme .warning-snackbar {
   background-color: var(--color-warning-600) !important;
 }
 
-.dark-theme .enhanced-snackbar.warning-snackbar .mdc-snackbar__surface {
-  background-color: var(--color-warning-600) !important;
-  box-shadow: 0 4px 12px rgba(240, 201, 115, 0.3) !important;
-}
-
 .dark-theme .info-snackbar {
   background-color: var(--color-info-600) !important;
-}
-
-.dark-theme .enhanced-snackbar.info-snackbar .mdc-snackbar__surface {
-  background-color: var(--color-info-600) !important;
-  box-shadow: 0 4px 12px rgba(125, 184, 238, 0.3) !important;
-}
-
-/* Bottom Sheet Overrides for Mobile */
-.template-bottom-sheet .mat-bottom-sheet-container {
-  padding: 0;
-  max-height: 85vh;
-  border-radius: 16px 16px 0 0;
-}
-
-.template-bottom-sheet-backdrop {
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-@media (max-width: 599px) {
-  .template-bottom-sheet .mat-bottom-sheet-container {
-    max-height: 90vh;
-  }
-}
-
-/* Mat Chip Listbox Styles for Message Input */
-mat-chip-listbox {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-mat-chip.template-chip button[matChipRemove] {
-  opacity: 1;
 }
 
 /* Keyboard Shortcut Hints */
@@ -1084,9 +862,7 @@ kbd {
    ATLAS 2026 — BUTTON MICRO-INTERACTIONS
    Subtle scale + glow on interactive elements.
 
-.btn-atlas,
-.mat-mdc-raised-button,
-.mat-mdc-flat-button {
+.btn-atlas {
   transition:
     transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 200ms ease,
@@ -1094,27 +870,23 @@ kbd {
   will-change: transform;
 }
 
-.btn-atlas:hover,
-.mat-mdc-raised-button:hover:not([disabled]),
-.mat-mdc-flat-button:hover:not([disabled]) {
+.btn-atlas:hover {
   transform: translateY(-1px) scale(1.015);
   box-shadow: 0 4px 16px -4px rgba(44, 90, 160, 0.30) !important;
 }
 
-.btn-atlas:active,
-.mat-mdc-raised-button:active:not([disabled]),
-.mat-mdc-flat-button:active:not([disabled]) {
+.btn-atlas:active {
   transform: translateY(0) scale(0.980);
   box-shadow: 0 1px 4px -1px rgba(44, 90, 160, 0.20) !important;
 }
 
 /* Icon button subtle shine on hover */
-.mat-mdc-icon-button:hover:not([disabled]) {
+.btn-icon-action:hover:not([disabled]) {
   filter: brightness(1.12);
   transform: scale(1.10);
 }
 
-.mat-mdc-icon-button:active:not([disabled]) {
+.btn-icon-action:active:not([disabled]) {
   transform: scale(0.92);
   filter: brightness(0.95);
 }

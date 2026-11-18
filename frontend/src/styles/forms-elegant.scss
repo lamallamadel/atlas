@@ -17,7 +17,6 @@
    =================================== */
 
 .elegant-form {
-  .mat-mdc-form-field,
   .form-field,
   .form-group {
     margin-bottom: 24px !important;
@@ -27,11 +26,6 @@
     display: flex;
     gap: 16px;
     margin-bottom: 24px;
-
-    .mat-mdc-form-field {
-      flex: 1;
-      margin-bottom: 0 !important;
-    }
   }
 
   .form-section {
@@ -124,13 +118,6 @@
     color: var(--color-neutral-600);
     transition: color var(--duration-moderate) var(--ease-out);
     pointer-events: none;
-
-    mat-icon,
-    .mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
   }
 
   .field-prefix {
@@ -162,14 +149,6 @@
     font-size: 12px;
     color: var(--color-neutral-600);
     line-height: 1.4;
-
-    mat-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-      margin-top: 2px;
-      flex-shrink: 0;
-    }
   }
 
   &.field-valid .field-helper {
@@ -195,12 +174,6 @@
     transition: opacity var(--duration-moderate) var(--ease-out),
                 transform var(--duration-moderate) var(--ease-out);
     pointer-events: none;
-
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
   }
 
   &.field-validating .validation-icon {
@@ -252,13 +225,6 @@
   font-size: 12px;
   color: var(--color-error-700);
   animation: slideDown var(--duration-moderate) var(--ease-out);
-
-  mat-icon {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-  }
 }
 
 /* ===================================
@@ -308,13 +274,6 @@
     margin-bottom: 24px;
     padding-bottom: 16px;
     border-bottom: 2px solid var(--color-neutral-200);
-
-    mat-icon {
-      color: var(--color-primary-500);
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
 
     .section-title {
       font-size: var(--font-size-2);
@@ -402,12 +361,6 @@
       font-size: var(--font-size-lg);
       transition: all var(--duration-moderate) var(--ease-out);
       position: relative;
-
-      mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-      }
     }
 
     .step-label {
@@ -464,75 +417,6 @@
       .step-label {
         color: var(--color-error-700);
       }
-    }
-  }
-}
-
-/* ===================================
-   MATERIAL FORM FIELD OVERRIDES
-   =================================== */
-
-.elegant-form .mat-mdc-form-field {
-  .mat-mdc-text-field-wrapper {
-    padding-bottom: 0;
-  }
-
-  .mat-mdc-form-field-focus-overlay {
-    display: none;
-  }
-
-  .mdc-text-field--filled {
-    background-color: transparent;
-  }
-
-  .mat-mdc-form-field-subscript-wrapper {
-    margin-top: 6px;
-  }
-
-  .mat-mdc-form-field-hint-wrapper,
-  .mat-mdc-form-field-error-wrapper {
-    padding: 0;
-  }
-
-  &.mat-focused {
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing {
-      border-width: 2px !important;
-      border-color: var(--color-primary-500) !important;
-    }
-
-    .mdc-text-field {
-      box-shadow: 0 0 0 4px var(--color-primary-alpha-20),
-                  0 2px 8px rgba(44, 90, 160, 0.15) !important;
-    }
-  }
-
-  &.mat-form-field-invalid {
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing {
-      border-color: var(--color-error-500) !important;
-    }
-
-    &.mat-focused .mdc-text-field {
-      box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.2),
-                  0 2px 8px rgba(231, 76, 60, 0.15) !important;
-    }
-  }
-
-  .mat-mdc-form-field-icon-prefix,
-  .mat-mdc-form-field-icon-suffix {
-    mat-icon {
-      color: var(--color-neutral-600);
-      transition: color var(--duration-moderate) var(--ease-out);
-    }
-  }
-
-  &.mat-focused {
-    .mat-mdc-form-field-icon-prefix mat-icon,
-    .mat-mdc-form-field-icon-suffix mat-icon {
-      color: var(--color-primary-500);
     }
   }
 }
@@ -604,10 +488,6 @@
   .elegant-form .form-row {
     flex-direction: column;
     gap: 0;
-
-    .mat-mdc-form-field {
-      margin-bottom: 24px !important;
-    }
   }
 
   .form-section-card {
@@ -633,12 +513,6 @@
       .step-circle {
         width: 40px;
         height: 40px;
-
-        mat-icon {
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
-        }
       }
 
       .step-label {
