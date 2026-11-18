@@ -1,13 +1,6 @@
 import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { DsInputComponent } from '../app/design-system/primitives/ds-input/ds-input.component';
 import { DsButtonComponent } from '../app/design-system/primitives/ds-button/ds-button.component';
 
@@ -21,13 +14,6 @@ const meta: Meta = {
         FormsModule,
         DsInputComponent,
         DsButtonComponent,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatCheckboxModule,
-        MatRadioModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
       ],
     }),
   ],
@@ -36,7 +22,7 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          'Champs simples avec ds-input (tokens DS). Listes, cases et datepicker : Angular Material tant qu’il n’y a pas d’équivalent DS — thème aligné sur --ds-*.',
+          'Champs simples avec ds-input (tokens DS). Tous les contrôles s’appuient désormais sur les primitives du Design System.',
       },
     },
   },
@@ -69,69 +55,11 @@ export const DsTextFields: Story = {
   }),
 };
 
-export const MaterialSelects: Story = {
-  render: () => ({
-    template: `
-      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text); max-width: 520px;">
-        <h2 style="margin-bottom: 24px;">Sélecteurs (Material)</h2>
-        <div style="display: flex; flex-direction: column; gap: 28px;">
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Type de bien</mat-label>
-            <mat-select>
-              <mat-option value="apartment">Appartement</mat-option>
-              <mat-option value="house">Maison</mat-option>
-              <mat-option value="villa">Villa</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Équipements</mat-label>
-            <mat-select multiple>
-              <mat-option value="parking">Parking</mat-option>
-              <mat-option value="balcony">Balcon</mat-option>
-              <mat-option value="garden">Jardin</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </div>
-    `,
-  }),
-};
-
-export const CheckboxesAndRadios: Story = {
-  render: () => ({
-    template: `
-      <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text); max-width: 520px;">
-        <h2 style="margin-bottom: 24px;">Cases & radios (Material)</h2>
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-          <div>
-            <h3 style="margin-bottom: 12px; font-size: 15px; color: var(--ds-text-muted);">Cases à cocher</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <mat-checkbox>J’accepte les conditions</mat-checkbox>
-              <mat-checkbox checked>Recevoir la newsletter</mat-checkbox>
-              <mat-checkbox disabled>Option désactivée</mat-checkbox>
-            </div>
-          </div>
-          <div>
-            <h3 style="margin-bottom: 12px; font-size: 15px; color: var(--ds-text-muted);">Boutons radio</h3>
-            <mat-radio-group>
-              <div style="display: flex; flex-direction: column; gap: 10px;">
-                <mat-radio-button value="sale">À vendre</mat-radio-button>
-                <mat-radio-button value="rent">À louer</mat-radio-button>
-                <mat-radio-button value="both" checked>Les deux</mat-radio-button>
-              </div>
-            </mat-radio-group>
-          </div>
-        </div>
-      </div>
-    `,
-  }),
-};
-
 export const CompleteExample: Story = {
   render: () => ({
     template: `
       <div style="font-family: var(--ds-font-body, system-ui); color: var(--ds-text);">
-        <h2 style="margin-bottom: 24px;">Formulaire mixte</h2>
+        <h2 style="margin-bottom: 24px;">Formulaire simple</h2>
         <div style="max-width: 600px; background: var(--ds-surface); padding: 28px; border-radius: var(--ds-radius-xl); box-shadow: var(--ds-shadow-md); border: 1px solid var(--ds-divider);">
           <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px;">Demande d’information</h3>
           <div style="display: grid; gap: 18px;">
@@ -141,18 +69,10 @@ export const CompleteExample: Story = {
             </div>
             <ds-input inputId="sb-cf3" label="E-mail *" type="email" placeholder="vous@exemple.com"></ds-input>
             <ds-input inputId="sb-cf4" label="Téléphone" type="tel" placeholder="+33 …"></ds-input>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Type de bien *</mat-label>
-              <mat-select>
-                <mat-option value="apartment">Appartement</mat-option>
-                <mat-option value="house">Maison</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field appearance="outline" style="width: 100%;">
-              <mat-label>Message</mat-label>
-              <textarea matInput rows="3" placeholder="Votre besoin…"></textarea>
-            </mat-form-field>
-            <mat-checkbox>J’accepte les conditions *</mat-checkbox>
+            <div>
+              <label style="display:block;font-weight:600;margin-bottom:8px;font-size:14px;color:var(--ds-text);">Message</label>
+              <textarea rows="3" placeholder="Votre besoin…" style="width:100%;padding:10px 12px;border:1px solid var(--ds-border);border-radius:var(--ds-radius-md);font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;background:var(--ds-surface);"></textarea>
+            </div>
             <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
               <ds-button variant="ghost" size="md">Annuler</ds-button>
               <ds-button variant="marine" size="md">Envoyer</ds-button>

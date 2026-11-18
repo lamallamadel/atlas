@@ -44,8 +44,7 @@ export class FormValidationAnimationDirective implements OnInit, OnDestroy {
   private findFormField(): HTMLElement | null {
     let element = this.el.nativeElement;
     while (element && element.parentElement) {
-      if (element.parentElement.classList.contains('mat-mdc-form-field') ||
-          element.parentElement.classList.contains('form-field')) {
+      if (element.parentElement.classList.contains('form-field')) {
         return element.parentElement;
       }
       element = element.parentElement;
