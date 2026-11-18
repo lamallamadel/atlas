@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+"""Matching acheteur ↔ biens. Voir match/engine.py pour l'algorithme."""
 
-from security import verify_api_key
 import logging
 import time
 
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
-logging.basicConfig(level=logging.INFO)
+from match.engine import Bien, Criteria, MatchResult, match
+from security import verify_api_key
+
 logger = logging.getLogger("match-service")
 
 router = APIRouter()
@@ -14,28 +16,31 @@ router = APIRouter()
 
 class MatchRequest(BaseModel):
     client_id: int
-    preferences: dict
-    biens: list[dict]
+    criteres: Criteria = Criteria()
+    biens: list[Bien] = Field(default=[], max_length=1000)
+    limit: int = Field(default=50, ge=1, le=200)
+
 
 class MatchResponse(BaseModel):
-    matches: list[dict]
+    matches: list[MatchResult]
+    exclus: dict[str, int]
+    total_biens: int
 
-def calculer_match(req: MatchRequest) -> MatchResponse:
-    # TODO: Implémenter le vrai matching
-    # Pour l'instant on retourne tout avec un score aléatoire
-    import random
-    matches = []
-    for b in req.biens:
-        matches.append({
-            "bien_id": b.get("id"),
-            "score_match": random.randint(50, 95),
-            "raisons": ["Correspondance budget", "Secteur recherché"]
-        })
-    return MatchResponse(matches=sorted(matches, key=lambda x: x["score_match"], reverse=True))
 
 @router.post("/api/match/calculer", response_model=MatchResponse)
 def calculer(req: MatchRequest, _: str = Depends(verify_api_key)):
+    if req.criteres.is_empty():
+        raise HTTPException(status_code=422, detail="Aucun critère de recherche renseigné.")
+    if (
+        req.criteres.budget_min is not None
+        and req.criteres.budget_max is not None
+        and req.criteres.budget_min > req.criteres.budget_max
+    ):
+        raise HTTPException(status_code=422, detail="Budget minimum supérieur au budget maximum.")
     start = time.time()
-    result = calculer_match(req)
-    logger.info(f"Match [{req.client_id}] → {len(result.matches)} biens ({round((time.time()-start)*1000)}ms)")
-    return result
+    results, excluded = match(req.criteres, req.biens, req.limit)
+    logger.info(
+        "Match [%s] → %d/%d biens retenus (%dms)",
+        req.client_id, len(results), len(req.biens), round((time.time() - start) * 1000),
+    )
+    return MatchResponse(matches=results, exclus=excluded, total_biens=len(req.biens))

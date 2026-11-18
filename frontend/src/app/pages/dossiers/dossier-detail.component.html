@@ -83,6 +83,10 @@
           </ds-card>
         }
 
+        @if (activeTab === 'matching' && dossier) {
+          <app-dossier-matching [dossierId]="dossier.id"></app-dossier-matching>
+        }
+
         @if (activeTab === 'parties') {
           <div class="ds-form-stack">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">

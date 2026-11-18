@@ -43,16 +43,19 @@ import org.springframework.web.bind.annotation.*;
 public class DossierController {
 
     private final DossierService dossierService;
+    private final com.example.backend.service.DossierMatchingService dossierMatchingService;
     private final DossierStatusHistoryService statusHistoryService;
     private final DossierStatusCodeValidationService statusCodeValidationService;
     private final DossierAdvancedFilterService advancedFilterService;
 
     public DossierController(
             DossierService dossierService,
+            com.example.backend.service.DossierMatchingService dossierMatchingService,
             DossierStatusHistoryService statusHistoryService,
             DossierStatusCodeValidationService statusCodeValidationService,
             DossierAdvancedFilterService advancedFilterService) {
         this.dossierService = dossierService;
+        this.dossierMatchingService = dossierMatchingService;
         this.statusHistoryService = statusHistoryService;
         this.statusCodeValidationService = statusCodeValidationService;
         this.advancedFilterService = advancedFilterService;
@@ -144,7 +147,8 @@ public class DossierController {
             })
     public ResponseEntity<com.example.backend.brain.dto.MatchResponse> matchOffMarket(
             @Parameter(description = "ID of the dossier", required = true) @PathVariable Long id) {
-        com.example.backend.brain.dto.MatchResponse response = dossierService.matchOffMarket(id);
+        com.example.backend.brain.dto.MatchResponse response =
+                dossierMatchingService.rawOffMarketMatch(id);
         if (response == null) {
             return ResponseEntity.noContent().build();
         }

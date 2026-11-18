@@ -23,6 +23,10 @@ public interface AnnonceRepository
 
     List<Annonce> findByStatusAndOrgId(AnnonceStatus status, String orgId);
 
+    /** Candidats au matching : annonces récentes de l'organisation dans les statuts donnés. */
+    List<Annonce> findTop300ByOrgIdAndStatusInOrderByCreatedAtDesc(
+            String orgId, java.util.Collection<AnnonceStatus> statuses);
+
     @Query("SELECT DISTINCT a.city FROM Annonce a WHERE a.city IS NOT NULL ORDER BY a.city")
     List<String> findDistinctCities();
 

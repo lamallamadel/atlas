@@ -9,6 +9,7 @@ import { AuditEventApiService, AuditEventResponse, AuditEntityType, AuditAction 
 import { PartiePrenanteFormDialogComponent, PartiePrenanteFormData } from '../../components/partie-prenante-form-dialog.component';
 import { MessageFormDialogComponent } from '../../components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
+import { DossierMatchingComponent } from '../../components/dossier-matching.component';
 import { AppointmentFormDialogComponent, AppointmentFormData } from '../../components/appointment-form-dialog.component';
 import { RecentNavigationService } from '../../services/recent-navigation.service';
 import { CollaborationService, CollaborationEdit } from '../../services/collaboration.service';
@@ -71,6 +72,7 @@ export interface WhatsAppTemplate {
     styleUrls: ['./dossier-detail.component.css'],
     imports: [
       CommonModule,
+      DossierMatchingComponent,
       FormsModule, 
       DsTabsComponent, 
       DsCardComponent, 
@@ -128,6 +130,7 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
   activeTab = 'informations';
   dossierTabs: DsTab[] = [
     { value: 'informations',    label: 'Informations' },
+    { value: 'matching',        label: 'Biens correspondants' },
     { value: 'parties',         label: 'Parties prenantes' },
     { value: 'messages',        label: 'Messages' },
     { value: 'whatsapp',        label: 'WhatsApp' },
