@@ -17,6 +17,7 @@ import {
   DsToastService,
 } from '../design-system';
 import {
+  CriteriaSuggestion,
   DossierMatchesResponse,
   DossierMatchingApiService,
   DossierSearchCriteria,
@@ -133,6 +134,69 @@ export function validateCriteria(c: DossierSearchCriteria): string | null {
   return null;
 }
 
+const FIELD_LABELS: Record<string, string> = {
+  transactionTypes: 'Projet', categories: 'Type de bien', cities: 'Villes', budgetMin: 'Budget minimum',
+  budgetMax: 'Budget maximum', surfaceMin: 'Surface minimum', surfaceMax: 'Surface maximum',
+  furnished: 'Mobilier', equipments: 'Équipements', acceptedConditions: 'États acceptés',
+};
+
+function optionLabel(options: ChoiceOption[], value: string): string {
+  return options.find((o) => o.value === value)?.label ?? value;
+}
+
+export interface SuggestionLine {
+  field: string;
+  label: string;
+  value: string;
+  evidence: string | null;
+}
+
+/** Lignes lisibles d'une suggestion (champ, valeur, citation du client). */
+export function suggestionLines(s: CriteriaSuggestion): SuggestionLine[] {
+  const out: SuggestionLine[] = [];
+  const c = s.suggestion;
+  const fmt = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
+  const push = (field: string, value: string | null) => {
+    if (value) out.push({ field, label: FIELD_LABELS[field], value, evidence: s.evidence[field] ?? null });
+  };
+  push('transactionTypes', c.transactionTypes?.map((v) => optionLabel(TRANSACTION_OPTIONS, v)).join(', ') || null);
+  push('categories', c.categories?.map((v) => optionLabel(CATEGORY_OPTIONS, v)).join(', ') || null);
+  push('cities', c.cities?.join(', ') || null);
+  push('budgetMin', c.budgetMin != null ? `${fmt(c.budgetMin)} MAD` : null);
+  push('budgetMax', c.budgetMax != null ? `${fmt(c.budgetMax)} MAD` : null);
+  push('surfaceMin', c.surfaceMin != null ? `${fmt(c.surfaceMin)} m²` : null);
+  push('surfaceMax', c.surfaceMax != null ? `${fmt(c.surfaceMax)} m²` : null);
+  push('furnished', c.furnished === true ? 'Meublé' : c.furnished === false ? 'Non meublé' : null);
+  push('equipments', c.equipments?.map((v) => optionLabel(EQUIPMENT_OPTIONS, v)).join(', ') || null);
+  push('acceptedConditions', c.acceptedConditions?.map((v) => optionLabel(CONDITION_OPTIONS, v)).join(', ') || null);
+  return out;
+}
+
+/**
+ * Applique une suggestion au formulaire sans rien effacer : les listes sont complétées,
+ * les valeurs simples ne sont remplacées que si la suggestion en propose une.
+ */
+export function mergeSuggestion(form: CriteriaForm, s: Partial<DossierSearchCriteria>): CriteriaForm {
+  const union = (a: string[], b?: string[]) => [...new Set([...a, ...(b ?? [])])];
+  const num = (current: string, v?: number | null) => (v === null || v === undefined ? current : String(v));
+  const cities = union(
+    form.cities.split(',').map((c) => c.trim()).filter(Boolean),
+    s.cities,
+  );
+  return {
+    transactionTypes: union(form.transactionTypes, s.transactionTypes),
+    categories: union(form.categories, s.categories),
+    cities: cities.join(', '),
+    budgetMin: num(form.budgetMin, s.budgetMin),
+    budgetMax: num(form.budgetMax, s.budgetMax),
+    surfaceMin: num(form.surfaceMin, s.surfaceMin),
+    surfaceMax: num(form.surfaceMax, s.surfaceMax),
+    furnished: s.furnished === true ? 'yes' : s.furnished === false ? 'no' : form.furnished,
+    equipments: union(form.equipments, s.equipments),
+    acceptedConditions: union(form.acceptedConditions, s.acceptedConditions),
+  };
+}
+
 export function scoreStatus(score: number): DsBadgeStatus {
   if (score >= 80) return 'success';
   if (score >= 60) return 'info';
@@ -202,6 +266,46 @@ export class DossierMatchingComponent implements OnInit {
   });
 
   readonly scoreStatus = scoreStatus;
+
+  readonly suggesting = signal(false);
+  readonly suggestion = signal<CriteriaSuggestion | null>(null);
+  readonly suggestionLines = computed(() => {
+    const s = this.suggestion();
+    return s ? suggestionLines(s) : [];
+  });
+
+  suggest(): void {
+    this.suggesting.set(true);
+    this.api.suggestCriteria(this.dossierId()).subscribe({
+      next: (s) => {
+        this.suggesting.set(false);
+        this.suggestion.set(s);
+        if (!suggestionLines(s).length) {
+          this.toast.info('Aucun critère clair trouvé dans les notes et messages du client');
+        }
+      },
+      error: (err) => {
+        this.suggesting.set(false);
+        if (err?.status === 400) {
+          this.toast.info("Ce dossier n'a encore ni note ni message du client");
+        } else {
+          this.toast.error('La suggestion de critères a échoué');
+        }
+      },
+    });
+  }
+
+  applySuggestion(): void {
+    const s = this.suggestion();
+    if (!s) return;
+    this.form = mergeSuggestion(this.form, s.suggestion);
+    this.suggestion.set(null);
+    this.toast.success('Critères ajoutés au formulaire : vérifiez-les puis enregistrez');
+  }
+
+  dismissSuggestion(): void {
+    this.suggestion.set(null);
+  }
 
   ngOnInit(): void {
     this.api.getCriteria(this.dossierId()).subscribe({

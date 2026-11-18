@@ -10,19 +10,25 @@ import static org.mockito.Mockito.when;
 import com.example.backend.brain.BrainClientService;
 import com.example.backend.brain.dto.MatchRequest;
 import com.example.backend.brain.dto.MatchResponse;
+import com.example.backend.dto.CriteriaSuggestionResponse;
 import com.example.backend.dto.DossierMatchesResponse;
 import com.example.backend.dto.DossierSearchCriteria;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
+import com.example.backend.entity.MessageEntity;
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
 import com.example.backend.entity.enums.DossierStatus;
+import com.example.backend.entity.enums.MessageChannel;
+import com.example.backend.entity.enums.MessageDirection;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
+import com.example.backend.repository.MessageRepository;
 import com.example.backend.util.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,6 +53,7 @@ class DossierMatchingServiceTest {
     @Autowired private DossierRepository dossierRepository;
     @Autowired private AnnonceRepository annonceRepository;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private MessageRepository messageRepository;
 
     @MockitoBean private BrainClientService brainClientService;
 
@@ -54,6 +61,7 @@ class DossierMatchingServiceTest {
 
     @BeforeEach
     void setUp() {
+        messageRepository.deleteAll();
         dossierRepository.deleteAll();
         annonceRepository.deleteAll();
         TenantContext.setOrgId(ORG);
@@ -280,5 +288,83 @@ class DossierMatchingServiceTest {
         TenantContext.setOrgId("other-org");
         assertThatThrownBy(() -> service.getCriteria(dossierId))
                 .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    private void message(MessageDirection direction, String content, int minutesAgo) {
+        MessageEntity m = new MessageEntity();
+        m.setOrgId(ORG);
+        m.setDossier(dossierRepository.findById(dossierId).orElseThrow());
+        m.setDirection(direction);
+        m.setChannel(MessageChannel.WHATSAPP);
+        m.setContent(content);
+        m.setTimestamp(LocalDateTime.now().minusMinutes(minutesAgo));
+        messageRepository.save(m);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void suggestion_envoie_notes_et_messages_recus_dans_l_ordre() {
+        Dossier d = dossierRepository.findById(dossierId).orElseThrow();
+        d.setNotes("Client pressé, veut acheter avant l'été");
+        dossierRepository.save(d);
+        message(MessageDirection.INBOUND, "Je cherche à Tanger", 30);
+        message(MessageDirection.OUTBOUND, "Avez-vous un budget ?", 20);
+        message(MessageDirection.INBOUND, "120 millions max", 10);
+
+        AtomicReference<Map<String, Object>> sent = new AtomicReference<>();
+        when(brainClientService.extractCriteria(any()))
+                .thenAnswer(
+                        inv -> {
+                            sent.set(inv.getArgument(0));
+                            return Optional.of(
+                                    Map.of(
+                                            "criteres",
+                                                    Map.of(
+                                                            "cities", List.of("Tanger"),
+                                                            "budget_max", 1_200_000.0,
+                                                            "transaction_types", List.of("SALE")),
+                                            "preuves",
+                                                    Map.of(
+                                                            "cities", "à Tanger",
+                                                            "budget_max", "120 millions max",
+                                                            "transaction_types", "veut acheter"),
+                                            "moteur", "openai"));
+                        });
+
+        CriteriaSuggestionResponse res = service.suggestCriteria(dossierId).orElseThrow();
+
+        List<Map<String, Object>> textes = (List<Map<String, Object>>) sent.get().get("textes");
+        assertThat(textes)
+                .extracting(t -> t.get("texte"))
+                .containsExactly(
+                        "Client pressé, veut acheter avant l'été",
+                        "Je cherche à Tanger",
+                        "120 millions max");
+        assertThat(textes.get(1)).containsEntry("source", "whatsapp");
+        assertThat(res.suggestion().cities()).containsExactly("Tanger");
+        assertThat(res.suggestion().budgetMax()).isEqualByComparingTo("1200000");
+        assertThat(res.suggestion().transactionTypes()).containsExactly("SALE");
+        assertThat(res.evidence()).containsEntry("budgetMax", "120 millions max");
+        assertThat(res.engine()).isEqualTo("openai");
+        assertThat(res.notesUsed()).isEqualTo(1);
+        assertThat(res.messagesUsed()).isEqualTo(2);
+        // rien n'est enregistré
+        assertThat(service.getCriteria(dossierId)).isEmpty();
+    }
+
+    @Test
+    void suggestion_sans_texte_refusee() {
+        message(MessageDirection.OUTBOUND, "Bonjour, je suis votre agent", 5);
+        assertThatThrownBy(() -> service.suggestCriteria(dossierId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Aucune note ni message");
+        verify(brainClientService, never()).extractCriteria(any());
+    }
+
+    @Test
+    void conversion_snake_case() {
+        assertThat(DossierMatchingService.toCamel("accepted_conditions"))
+                .isEqualTo("acceptedConditions");
+        assertThat(DossierMatchingService.toCamel("cities")).isEqualTo("cities");
     }
 }

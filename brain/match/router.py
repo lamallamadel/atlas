@@ -44,3 +44,33 @@ def calculer(req: MatchRequest, _: str = Depends(verify_api_key)):
         req.client_id, len(results), len(req.biens), round((time.time() - start) * 1000),
     )
     return MatchResponse(matches=results, exclus=excluded, total_biens=len(req.biens))
+
+
+# ─── Extraction des critères depuis les notes et messages du client ──────────
+
+from match.extract import extract_criteria  # noqa: E402
+
+
+class Texte(BaseModel):
+    source: str = Field(default="message", max_length=30)
+    texte: str = Field(max_length=4000)
+
+
+class ExtractionRequest(BaseModel):
+    textes: list[Texte] = Field(max_length=100)
+
+
+class ExtractionResponse(BaseModel):
+    criteres: dict
+    preuves: dict[str, str]
+    moteur: str
+
+
+@router.post("/api/match/extraire-criteres", response_model=ExtractionResponse)
+async def extraire_criteres(req: ExtractionRequest, _: str = Depends(verify_api_key)):
+    textes = [t.model_dump() for t in req.textes if t.texte.strip()]
+    if not textes:
+        raise HTTPException(status_code=422, detail="Aucun texte à analyser.")
+    criteres, preuves, moteur = await extract_criteria(textes)
+    logger.info("Extraction critères : %d champ(s) via %s", len(criteres), moteur)
+    return ExtractionResponse(criteres=criteres, preuves=preuves, moteur=moteur)
