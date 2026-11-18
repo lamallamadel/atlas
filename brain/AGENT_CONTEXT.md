@@ -18,6 +18,7 @@ brain/
 │   └── router.py
 ├── document/            # Extraction et analyse de documents
 │   └── router.py
+├── vision/              # Lecture des photos (pièce, équipements, matériaux, mobilier, état, époque, surfaces estimées) + profil et description
 ├── dupli/               # Détection de doublons (embeddings sentence-transformers + cosinus)
 │   └── router.py
 ├── fraud/               # Détection de fraude
@@ -47,6 +48,9 @@ ou un fichier `.env` dans le dossier courant :
 | `OPENAI_ENABLED` / `OPENAI_API_KEY` / `OPENAI_MODEL` | `false` / vide / `gpt-4o-mini` | LLM distant pour l'agent |
 | `OLLAMA_ENABLED` / `OLLAMA_URL` / `OLLAMA_MODEL` | `false` / `http://ollama:11434` / `mistral:7b` | LLM local pour l'agent |
 | `SEUIL_DOUBLON` | `0.85` | Seuil de similarité pour les doublons |
+| `OPENAI_VISION_MODEL` | vide (= `OPENAI_MODEL`) | Modèle de vision OpenAI |
+| `OLLAMA_VISION_MODEL` | `llava:7b` | Modèle de vision local (Ollama) |
+| `VISION_TIMEOUT_SECONDS` | `60` | Délai max d'un appel de vision |
 
 Tests : `cd brain && python -m pytest`
 

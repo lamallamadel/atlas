@@ -59,6 +59,8 @@ services:
       OPENAI_ENABLED: ${OPENAI_ENABLED:-false}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      OPENAI_VISION_MODEL: ${OPENAI_VISION_MODEL:-}
+      OLLAMA_VISION_MODEL: ${OLLAMA_VISION_MODEL:-llava:7b}
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 15s
@@ -112,6 +114,7 @@ services:
       BRAIN_NEGO_URL: http://brain:8000
       BRAIN_AGENT_URL: http://brain:8000
       BRAIN_DOCUMENT_URL: http://brain:8000
+      BRAIN_VISION_URL: http://brain:8000
       BRAIN_API_KEY: local-dev
 
       # Disable OAuth2 & Elasticsearch for local

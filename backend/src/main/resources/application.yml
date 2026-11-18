@@ -74,6 +74,11 @@ brain:
     base-url: ${BRAIN_DOCUMENT_URL:http://localhost:8000}
     api-key: ${BRAIN_API_KEY:change-me-in-production}
     timeout-seconds: ${BRAIN_DOCUMENT_TIMEOUT:15}
+  # Analyse visuelle des photos : un appel au modèle de vision peut prendre plusieurs dizaines de secondes
+  vision:
+    base-url: ${BRAIN_VISION_URL:http://localhost:8000}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_VISION_TIMEOUT:90}
 
 management:
   endpoints:

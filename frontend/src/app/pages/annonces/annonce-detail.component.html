@@ -94,6 +94,9 @@
     <!-- Analyse IA (score, fraude, doublon) -->
     <app-annonce-ai-badges [annonce]="annonce"></app-annonce-ai-badges>
 
+    <!-- Photos : lecture par IA (pièces, équipements, mobilier, état…) et description proposée -->
+    <app-annonce-vision-panel [annonceId]="annonce.id" (descriptionApplied)="loadAnnonce()"></app-annonce-vision-panel>
+
     <!-- Description -->
     @if (annonce.description) {
       <ds-card elevation="xs" class="ad-description-card">

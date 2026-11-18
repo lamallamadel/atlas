@@ -1,0 +1,159 @@
+<ds-card elevation="xs" class="vp" data-testid="annonce-vision-panel">
+  <header class="vp__head">
+    <h2 class="vp__title">
+      <ds-icon name="sparkle" [size]="16"></ds-icon>
+      Photos et analyse IA
+    </h2>
+    <div class="vp__actions">
+      <input #fileInput type="file" accept="image/jpeg,image/png,image/webp" multiple hidden
+             (change)="onFilesSelected($event)" data-testid="vp-file-input" />
+      <ds-button variant="ghost" size="sm" prefixIcon="upload" [loading]="uploading()"
+                 (dsClick)="fileInput.click()">Importer des photos</ds-button>
+      @if (state()?.status === 'DONE' && result()) {
+        <ds-button variant="ghost" size="sm" [disabled]="running() || starting()"
+                   (dsClick)="analyze(true)">Tout réanalyser</ds-button>
+      }
+      <ds-button variant="marine" size="sm" [loading]="starting() || running()"
+                 [disabled]="running() || loading()" (dsClick)="analyze()" data-testid="vp-analyze">
+        Analyser les photos
+      </ds-button>
+    </div>
+  </header>
+
+  <p class="vp__hint">
+    L'IA lit les photos sans les modifier : pièces, équipements, matériaux, mobilier, état, époque et surfaces
+    estimées. Les photos liées par URL sont aussi analysées.
+  </p>
+
+  @if (running()) {
+    <div class="vp__progress" data-testid="vp-running">
+      <ds-progress-bar [value]="progress()"></ds-progress-bar>
+      <span class="vp__muted">Analyse en cours… {{ state()?.done }}/{{ state()?.total }} photo(s)</span>
+    </div>
+  }
+
+  @if (failures().length && !running()) {
+    <div class="vp__notice vp__notice--warning" role="alert" data-testid="vp-failures">
+      <ds-icon name="alert-circle" [size]="16"></ds-icon>
+      <div>
+        <strong>Certaines photos n'ont pas pu être analysées.</strong>
+        @for (f of failures(); track f) { <div class="vp__muted">{{ f }}</div> }
+        <div class="vp__muted">Relancez l'analyse une fois le service disponible.</div>
+      </div>
+    </div>
+  }
+
+  <!-- Photos -->
+  @if (media().length) {
+    <ul class="vp__grid" data-testid="vp-media">
+      @for (m of media(); track m.id) {
+        <li class="vp__photo">
+          <div class="vp__thumb">
+            @if (imageSrc(m); as src) {
+              <img [src]="src" [alt]="m.analysis?.caption || roomLabel(m.analysis?.room_type)" loading="lazy" />
+            }
+            @if (m.source === 'UPLOAD') {
+              <button type="button" class="vp__delete" (click)="deleteMedia(m)" aria-label="Supprimer la photo">
+                <ds-icon name="trash" [size]="16"></ds-icon>
+              </button>
+            }
+          </div>
+          <div class="vp__photo-meta">
+            <span class="vp__room">{{ m.analysis ? roomLabel(m.analysis.room_type) : (m.fileName || 'Photo') }}</span>
+            <ds-badge size="sm" [showDot]="false" [status]="mediaStatusBadge(m.analysisStatus).status"
+                      [attr.title]="m.analysisError || null">
+              {{ mediaStatusBadge(m.analysisStatus).label }}
+            </ds-badge>
+          </div>
+        </li>
+      }
+    </ul>
+  } @else if (!loading()) {
+    <p class="vp__muted" data-testid="vp-empty">
+      Aucune photo pour l'instant. Importez des photos ou ajoutez des liens https dans l'annonce.
+    </p>
+  }
+
+  <!-- Profil extrait -->
+  @if (profile(); as p) {
+    @if (result()?.inconsistencies?.length) {
+      <div class="vp__notice vp__notice--error" data-testid="vp-inconsistencies">
+        <ds-icon name="alert-circle" [size]="16"></ds-icon>
+        <div>
+          <strong>Écarts entre l'annonce et les photos</strong>
+          <ul>
+            @for (i of result()!.inconsistencies; track i) { <li>{{ i }}</li> }
+          </ul>
+        </div>
+      </div>
+    }
+
+    <dl class="vp__facts" data-testid="vp-profile">
+      @if (condition(); as c) {
+        <div><dt>État apparent</dt>
+          <dd><ds-badge size="sm" [showDot]="false" [status]="c.status">{{ c.label }}</ds-badge>
+            @if (p.signes_etat.length) { <span class="vp__muted">{{ p.signes_etat.join(', ') }}</span> }
+          </dd></div>
+      }
+      @if (era()) {
+        <div><dt>Époque estimée</dt><dd>{{ era() }}</dd></div>
+      }
+      @if (p.meuble !== null) {
+        <div><dt>Meublé</dt><dd>{{ p.meuble ? 'Oui' : 'Non' }}</dd></div>
+      }
+      @if (p.vues.length) {
+        <div><dt>Vue</dt><dd>{{ p.vues.join(', ') }}</dd></div>
+      }
+      @if (p.equipements.length) {
+        <div class="vp__wide"><dt>Équipements</dt>
+          <dd class="vp__chips">@for (e of p.equipements; track e.label) { <span class="vp__chip">{{ e.label }}</span> }</dd></div>
+      }
+      @if (p.materiaux.length) {
+        <div class="vp__wide"><dt>Matériaux</dt>
+          <dd class="vp__chips">@for (m of p.materiaux; track m.surface + m.material) {
+            <span class="vp__chip">{{ m.material }} <span class="vp__muted">({{ m.surface }})</span></span> }</dd></div>
+      }
+    </dl>
+
+    @if (p.pieces.length) {
+      <table class="vp__rooms" data-testid="vp-rooms">
+        <thead><tr><th>Pièce</th><th>Photos</th><th>Surface estimée</th><th>Mobilier visible</th><th>État</th></tr></thead>
+        <tbody>
+          @for (r of p.pieces; track r.room_type) {
+            <tr>
+              <td>{{ r.label }}</td>
+              <td>{{ r.photos }}</td>
+              <td>{{ formatArea(r.area_m2_min, r.area_m2_max) || '—' }}</td>
+              <td>
+                @for (f of r.furniture; track f.item; let last = $last) { {{ f.count }} {{ f.item }}{{ last ? '' : ', ' }} }
+                @if (!r.furniture.length) { — }
+              </td>
+              <td>{{ conditionBadge(r.condition)?.label || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <p class="vp__muted">
+        Plusieurs photos peuvent montrer la même pièce. Les surfaces sont des estimations visuelles, pas des mesures.
+      </p>
+    }
+
+    <!-- Description proposée -->
+    @if (result()?.descriptions?.['fr']) {
+      <section class="vp__description" data-testid="vp-description">
+        <ds-textarea label="Description proposée (à relire avant d'appliquer)" [rows]="7"
+                     [(ngModel)]="descriptionDraft" [maxLength]="10000"></ds-textarea>
+        <div class="vp__description-actions">
+          <span class="vp__muted">
+            Rédigée par IA à partir des photos et des informations de l'annonce
+            ({{ result()!.description_engine === 'template' ? 'modèle de texte, sans IA' : result()!.description_engine }}).
+          </span>
+          <ds-button variant="copper" size="sm" [loading]="applying()" [disabled]="!descriptionDraft.trim()"
+                     (dsClick)="applyDescription()" data-testid="vp-apply">
+            Remplacer la description de l'annonce
+          </ds-button>
+        </div>
+      </section>
+    }
+  }
+</ds-card>
