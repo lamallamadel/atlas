@@ -1,5 +1,10 @@
 # Calendar View Integration Examples
 
+> ⚠️ **Note** — Snippets below may mention Angular Material modules (e.g.
+> `MatDialog`, `mat-fab`, `mat-icon`). Angular Material was removed from the
+> project; replace with Design System equivalents (`DsDialogService`,
+> `ds-button`, `ds-icon`) from `src/app/design-system/`.
+
 ## Example 1: Standalone Calendar Page
 
 The calendar view is accessible via the route `/calendar` and provides a comprehensive view of all appointments.
@@ -115,7 +120,7 @@ Add a floating action button to quickly create appointments:
 
 ```typescript
 import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { DsDialogService } from '../design-system';
 import { AppointmentFormDialogComponent } from './appointment-form-dialog.component';
 
 @Component({

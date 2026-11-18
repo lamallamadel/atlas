@@ -1,6 +1,11 @@
 # WhatsApp Messaging UI Component
 
-A comprehensive, production-ready WhatsApp messaging interface built with Angular Material, featuring bubble chat layout, real-time delivery tracking, template management, consent validation, and attachment support.
+> ⚠️ **Note** — Snippets in this guide may still mention Angular Material
+> modules. Those dependencies have been removed from the project; the
+> component now uses the Design System primitives in
+> `src/app/design-system/` (`ds-button`, `ds-icon`, `ds-input`, `ds-toast`, …).
+
+A comprehensive, production-ready WhatsApp messaging interface featuring bubble chat layout, real-time delivery tracking, template management, consent validation, and attachment support.
 
 ## Features
 
@@ -268,18 +273,14 @@ Component uses default change detection but optimizes with:
 
 ## Dependencies
 
-### Required Angular Material Modules
+### Required Design System Primitives & CDK Modules
+
+The component uses standalone DS primitives (`ds-button`, `ds-icon`,
+`ds-input`, `ds-toast`, etc.) from `src/app/design-system/`. The only
+Angular dependencies that still need explicit module imports are the CDK
+helpers for virtual scrolling and auto-size textareas:
 
 ```typescript
-import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TextFieldModule } from '@angular/cdk/text-field';
 ```

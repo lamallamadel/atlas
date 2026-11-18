@@ -1,5 +1,10 @@
 # Quick Actions - Usage Examples
 
+> ⚠️ **Note** — Snippets below may still reference Angular Material
+> (`MatDialog`, `mat-card`, `mat-raised-button`, …). Angular Material was
+> removed from the project; use the Design System equivalents from
+> `src/app/design-system/` (`DsDialogService`, `ds-card`, `ds-button`, …).
+
 ## Table of Contents
 1. [Basic Integration](#basic-integration)
 2. [VoIP Configuration](#voip-configuration)
@@ -54,7 +59,7 @@ export class DossierDetailComponent implements OnInit {
 ```typescript
 // settings.component.ts
 import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { DsDialogService } from '../design-system';
 import { VoipConfigDialogComponent } from './voip-config-dialog.component';
 import { VoipService } from '../services/voip.service';
 
@@ -93,7 +98,7 @@ export class SettingsComponent {
   voipProvider = '';
 
   constructor(
-    private dialog: MatDialog,
+    private dialog: DsDialogService,
     private voipService: VoipService
   ) {
     this.checkVoipStatus();

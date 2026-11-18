@@ -1,5 +1,10 @@
 # PhotoGalleryComponent - Exemples d'intégration
 
+> ⚠️ **Note** — Certains extraits mentionnent encore Angular Material
+> (`MatSnackBar`, `mat-raised-button`, `mat-icon`, …). Angular Material a été
+> retiré du projet : utilisez les primitives du Design System depuis
+> `src/app/design-system/` (`DsToastService`, `ds-button`, `ds-icon`, …).
+
 ## Exemple 1: Intégration dans AnnonceDetailComponent
 
 ### Mise à jour de l'interface Annonce
@@ -203,7 +208,7 @@ export class PropertyShowcaseComponent {
 ```typescript
 import { Component } from '@angular/core';
 import { Photo } from '../../components/photo-gallery.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { DsToastService } from '../../design-system';
 
 @Component({
   selector: 'app-property-photos-manager',
@@ -257,7 +262,7 @@ export class PropertyPhotosManagerComponent {
   photos: Photo[] = [];
   private nextId = 1;
 
-  constructor(private snackBar: MatSnackBar) {}
+  constructor(private snackBar: DsToastService) {}
 
   async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;

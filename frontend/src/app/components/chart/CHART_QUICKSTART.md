@@ -1,5 +1,10 @@
 # Chart Visualization - Guide de Démarrage Rapide
 
+> ⚠️ **Note** — Les extraits de code de ce guide peuvent encore mentionner des
+> modules Angular Material dans la configuration historique. Ces dépendances
+> ont été retirées du projet : utilisez les primitives équivalentes dans
+> `src/app/design-system/` (`ds-button`, `ds-icon`, `ds-menu`, …).
+
 ## 🚀 Installation en 5 Minutes
 
 ### 1. Vérifier les Dépendances
@@ -15,19 +20,13 @@ npm install chart.js@^4.4.0
 // app.module.ts
 import { ChartComponent } from './components/chart/chart.component';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
   declarations: [ChartComponent],
   imports: [
     CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatTooltipModule
+    // DS primitives (ds-button, ds-icon, ds-menu, ds-tooltip) are standalone
+    // and imported directly in components that need them.
   ]
 })
 ```

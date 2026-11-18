@@ -1,5 +1,10 @@
 # Notification Preferences Form Component
 
+> ⚠️ **Note** — Les extraits ci-dessous peuvent encore mentionner Angular
+> Material (`MatSlideToggleModule`, `MatDialog`, …). Angular Material a été
+> retiré du projet : utilisez les primitives du Design System dans
+> `src/app/design-system/` (`DsSwitchComponent`, `DsDialogService`, …).
+
 ## Vue d'ensemble
 
 Le `NotificationPreferencesFormComponent` est un composant Angular complet pour la gestion des préférences de notification utilisateur. Il offre une interface riche avec des contrôles interactifs pour configurer tous les aspects des notifications.
@@ -53,19 +58,8 @@ Section de preview dynamique montrant :
 
 ```typescript
 import { NotificationPreferencesFormComponent } from './components/notification-preferences-form.component';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatSliderModule } from '@angular/material/slider';
-import { MatRadioModule } from '@angular/material/radio';
-
-@NgModule({
-  declarations: [NotificationPreferencesFormComponent],
-  imports: [
-    MatSlideToggleModule,
-    MatSliderModule,
-    MatRadioModule,
-    // ... autres modules
-  ]
-})
+// The form is standalone and imports its DS primitives
+// (ds-switch, ds-slider, ds-radio) directly from src/app/design-system/.
 ```
 
 ### Utilisation dans un template
@@ -235,7 +229,7 @@ export class SettingsComponent {}
 ### Utilisation dans un dialog
 
 ```typescript
-import { MatDialog } from '@angular/material/dialog';
+import { DsDialogService } from '../design-system';
 
 openNotificationSettings() {
   this.dialog.open(NotificationPreferencesFormComponent, {

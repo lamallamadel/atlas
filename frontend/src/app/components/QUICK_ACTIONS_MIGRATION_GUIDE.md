@@ -1,5 +1,11 @@
 # Quick Actions - Migration Guide
 
+> ⚠️ **Note** — Snippets below may still reference Angular Material modules
+> and `MatDialog`. Angular Material was removed from the project; replace
+> them with Design System primitives (`ds-button`, `ds-icon`, `ds-dialog`,
+> `ds-input`, `ds-select`, `ds-switch`) and `DsDialogService` from
+> `src/app/design-system/`.
+
 ## Overview
 
 This guide helps you integrate the Quick Actions feature into existing Angular applications.
@@ -7,7 +13,7 @@ This guide helps you integrate the Quick Actions feature into existing Angular a
 ## Prerequisites
 
 - Angular 15+ (tested with Angular 15-16)
-- Angular Material 15+
+- Design System primitives (`src/app/design-system/`)
 - TypeScript 4.8+
 - RxJS 7+
 
@@ -66,30 +72,18 @@ export class AppModule { }
 
 ### Step 3: Verify Dependencies
 
-Ensure you have the required Material modules imported:
+The Quick Actions components and their dialogs are standalone and import
+the DS primitives they need (`ds-button`, `ds-icon`, `ds-tooltip`,
+`ds-dialog`, `ds-input`, `ds-select`, `ds-switch`) directly from
+`src/app/design-system/`. The only module-level import the host app needs
+to add is `FormsModule`:
 
 ```typescript
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [
     // ... existing imports
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatSlideToggleModule,
     FormsModule
   ]
 })

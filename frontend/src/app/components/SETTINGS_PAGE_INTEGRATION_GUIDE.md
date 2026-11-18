@@ -1,5 +1,9 @@
 # Settings Page - Guide d'intégration
 
+> ⚠️ **Note** — Certains extraits mentionnent encore `MatDialog` (Angular
+> Material). Angular Material a été retiré du projet : utilisez
+> `DsDialogService` depuis `src/app/design-system/`.
+
 ## Intégration dans le menu de navigation
 
 ### Option 1: Ajouter au menu latéral (sidebar)
@@ -350,7 +354,7 @@ export class AppComponent implements OnInit {
 import { Injectable } from '@angular/core';
 import { CanDeactivate } from '@angular/router';
 import { SettingsPageComponent } from './settings-page.component';
-import { MatDialog } from '@angular/material/dialog';
+import { DsDialogService } from '../design-system';
 import { ConfirmNavigationDialogComponent } from './confirm-navigation-dialog.component';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -359,7 +363,7 @@ import { map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class SettingsPageCanDeactivateGuard implements CanDeactivate<SettingsPageComponent> {
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: DsDialogService) {}
 
   canDeactivate(component: SettingsPageComponent): Observable<boolean> | boolean {
     if (!component.hasUnsavedChanges()) {

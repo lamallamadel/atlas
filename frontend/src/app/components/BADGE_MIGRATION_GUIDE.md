@@ -1,5 +1,10 @@
 # Migration Guide: badge-status to badge Component
 
+> ⚠️ **Note** — Snippets below may reference Angular Material imports (e.g.
+> `MatIconModule`). Angular Material was removed from the project; use the
+> Design System icon primitive (`ds-icon`) from `src/app/design-system/`
+> instead.
+
 This guide helps you migrate from the legacy `badge-status` component to the new comprehensive `badge` component.
 
 ## Why Migrate?
@@ -367,12 +372,12 @@ Use this checklist for migration:
 
 **Problem**: Icon not showing up
 
-**Solution**: 
+**Solution**:
 ```html
-<!-- Ensure MatIconModule is imported -->
-import { MatIconModule } from '@angular/material/icon';
+<!-- Ensure the DS icon primitive is imported in the host component -->
+import { DsIconComponent } from '../design-system';
 
-<!-- Use valid Material icon name -->
+<!-- Use a valid Material Symbols name -->
 <app-badge icon="check">Valid</app-badge>
 ```
 
