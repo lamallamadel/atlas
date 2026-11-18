@@ -1,10 +1,13 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+import threading
 
+from config import settings
 from agent.router import router as agent_router
 from document.router import router as document_router
-from dupli.router import router as dupli_router
+from dupli.router import router as dupli_router, get_model as get_dupli_model
 from fraud.router import router as fraud_router
 from match.router import router as match_router
 from nego.router import router as nego_router
@@ -14,11 +17,27 @@ from scoring.router import router as scoring_router
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("brain.main")
 
-app = FastAPI(title="Atlas Brain Monolith", version="2.0.0")
+
+def _preload_dupli_model():
+    try:
+        get_dupli_model()
+    except Exception as e:  # le module dupli reste utilisable, il réessaiera au premier appel
+        logger.warning(f"Préchargement du modèle de doublons impossible : {e}")
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Préchargement en arrière-plan : /health répond tout de suite,
+    # le premier appel à /api/dupli n'attend pas le chargement du modèle.
+    threading.Thread(target=_preload_dupli_model, daemon=True).start()
+    yield
+
+
+app = FastAPI(title="Atlas Brain Monolith", version="2.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://localhost:4200"],
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,6 +57,12 @@ routers = [
 for name, r in routers:
     app.include_router(r, tags=[name])
 
+
 @app.get("/health")
 def root_health():
-    return {"status": "ok", "version": "2.0.0", "service": "brain-monolith"}
+    return {
+        "status": "ok",
+        "version": "2.0.0",
+        "service": "brain-monolith",
+        "llm": {"openai": settings.openai_enabled, "ollama": settings.ollama_enabled},
+    }

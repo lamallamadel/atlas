@@ -1,38 +1,30 @@
-from fastapi import APIRouter, Depends, HTTPException, Security
-from fastapi.security import APIKeyHeader
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings
-from sentence_transformers import SentenceTransformer
+
+from config import settings
+from security import verify_api_key
 from sklearn.metrics.pairwise import cosine_similarity
+from functools import lru_cache
 import logging
 
-# ─── Config ──────────────────────────────────────────────────────────────────
-
-class Settings(BaseSettings):
-    api_key: str = "change-me"
-    seuil_doublon: float = 0.85
-
-    class Config:
-        env_file = ".env"
-
-settings = Settings()
 logger = logging.getLogger("dupli-service")
 
-# ─── Modèle ML (chargé une seule fois au démarrage) ──────────────────────────
+# ─── Modèle ML (chargé une seule fois, au premier appel) ─────────────────────
+# Chargement paresseux : le brain démarre sans attendre le modèle, et les tests
+# des autres modules n'ont pas besoin de sentence-transformers.
 
-logger.info("Chargement du modèle...")
-model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-logger.info("Modèle prêt ✅")
+@lru_cache(maxsize=1)
+def get_model():
+    from sentence_transformers import SentenceTransformer
+    logger.info("Chargement du modèle %s...", settings.dupli_model_name)
+    model = SentenceTransformer(settings.dupli_model_name)
+    logger.info("Modèle prêt")
+    return model
 
 # ─── App ─────────────────────────────────────────────────────────────────────
 
 router = APIRouter()
 
-api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
-
-def verify_api_key(api_key: str = Security(api_key_header)):
-    if api_key != settings.api_key:
-        raise HTTPException(status_code=403, detail="API Key invalide")
 
 # ─── Modèles ─────────────────────────────────────────────────────────────────
 
@@ -51,7 +43,7 @@ class DoublonResult(BaseModel):
 
 def detecter_doublons(annonces: list[Annonce]) -> list[DoublonResult]:
     textes = [f"{a.titre} {a.description}" for a in annonces]
-    embeddings = model.encode(textes)
+    embeddings = get_model().encode(textes)
     similarites = cosine_similarity(embeddings)
 
     resultats = []

@@ -1,46 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, Security
-from fastapi.security import APIKeyHeader
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings
+
+from config import settings
+from security import verify_api_key
 import logging
 import time
 import httpx
 import json
 
-# 1. CORRECTION SÉCURITÉ : Pas de valeur par défaut pour api_key
-class Settings(BaseSettings):
-    api_key: str  # FastAPI plantera au démarrage si ce n'est pas défini dans le .env
-    allowed_origins: list[str] = ["http://localhost:8080", "http://localhost:4200"]
-    
-    ollama_url: str = "http://ollama:11434"
-    ollama_model: str = "mistral:7b"
-    ollama_enabled: bool = False
-    
-    openai_api_key: str = ""
-    openai_enabled: bool = False
-    openai_model: str = "gpt-4o-mini"
-    
-    class Config:
-        env_file = "../.env"
-
-settings = Settings()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("agent-service")
 
 router = APIRouter()
 
-api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
 # 2. OPTIMISATION PERFORMANCES : Client HTTP global pour éviter l'épuisement des sockets
 http_client = httpx.AsyncClient(timeout=10.0)
-
-def verify_api_key(api_key: str = Security(api_key_header)):
-    if api_key != settings.api_key:
-        logger.warning("Tentative d'accès avec une clé invalide")
-        raise HTTPException(status_code=403, detail="API Key invalide")
-    return api_key
 
 class AgentRequest(BaseModel):
     query: str
