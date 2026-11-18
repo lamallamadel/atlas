@@ -20,6 +20,7 @@ import com.example.backend.brain.dto.ProposalRequest;
 import com.example.backend.brain.dto.ProposalResponse;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +124,29 @@ public class BrainClientService {
             return Optional.ofNullable(response.getBody());
         } catch (Exception e) {
             log.warn("Match service unavailable: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Critères de recherche extraits de textes du client (notes, messages). Corps : {@code
+     * {"textes": [{"source": ..., "texte": ...}]}}. Réponse : {@code criteres}, {@code preuves},
+     * {@code moteur}.
+     */
+    @SuppressWarnings("unchecked")
+    public Optional<Map<String, Object>> extractCriteria(Map<String, Object> body) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(API_KEY_HEADER, properties.getMatch().getApiKey());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            ResponseEntity<Map> response =
+                    restTemplate.postForEntity(
+                            properties.getMatch().getBaseUrl() + "/api/match/extraire-criteres",
+                            new HttpEntity<>(body, headers),
+                            Map.class);
+            return Optional.ofNullable((Map<String, Object>) response.getBody());
+        } catch (Exception e) {
+            log.warn("Criteria extraction unavailable: {}", e.getMessage());
             return Optional.empty();
         }
     }

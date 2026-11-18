@@ -3,13 +3,17 @@ package com.example.backend.service;
 import com.example.backend.brain.BrainClientService;
 import com.example.backend.brain.dto.MatchRequest;
 import com.example.backend.brain.dto.MatchResponse;
+import com.example.backend.dto.CriteriaSuggestionResponse;
 import com.example.backend.dto.DossierMatchesResponse;
 import com.example.backend.dto.DossierSearchCriteria;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
+import com.example.backend.entity.MessageEntity;
 import com.example.backend.entity.enums.AnnonceStatus;
+import com.example.backend.entity.enums.MessageDirection;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
+import com.example.backend.repository.MessageRepository;
 import com.example.backend.util.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,6 +28,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,16 +60,19 @@ public class DossierMatchingService {
 
     private final DossierRepository dossierRepository;
     private final AnnonceRepository annonceRepository;
+    private final MessageRepository messageRepository;
     private final BrainClientService brainClientService;
     private final ObjectMapper objectMapper;
 
     public DossierMatchingService(
             DossierRepository dossierRepository,
             AnnonceRepository annonceRepository,
+            MessageRepository messageRepository,
             @Autowired(required = false) @Nullable BrainClientService brainClientService,
             ObjectMapper objectMapper) {
         this.dossierRepository = dossierRepository;
         this.annonceRepository = annonceRepository;
+        this.messageRepository = messageRepository;
         this.brainClientService = brainClientService;
         this.objectMapper = objectMapper;
     }
@@ -194,6 +203,98 @@ public class DossierMatchingService {
         request.setBiens(candidates.stream().map(DossierMatchingService::toBien).toList());
         request.setLimit(Math.max(1, Math.min(limit, 200)));
         return brainClientService.calculateMatch(request);
+    }
+
+    static final int MAX_MESSAGES = 50;
+    static final int MAX_TEXT_LENGTH = 4000;
+
+    /**
+     * Critères suggérés à partir des notes du dossier et des derniers messages REÇUS du client.
+     * Rien n'est enregistré : l'agent relit la suggestion et l'applique au formulaire.
+     */
+    @Transactional(readOnly = true)
+    public Optional<CriteriaSuggestionResponse> suggestCriteria(Long dossierId) {
+        Dossier dossier = requireDossier(dossierId);
+        List<Map<String, Object>> textes = new ArrayList<>();
+        int notes = 0;
+        if (dossier.getNotes() != null && !dossier.getNotes().isBlank()) {
+            textes.add(Map.of("source", "notes", "texte", truncate(dossier.getNotes())));
+            notes = 1;
+        }
+        List<MessageEntity> inbound =
+                messageRepository
+                        .findByDossierIdWithFilters(
+                                dossierId,
+                                null,
+                                MessageDirection.INBOUND,
+                                null,
+                                null,
+                                PageRequest.of(
+                                        0, MAX_MESSAGES, Sort.by(Sort.Direction.DESC, "timestamp")))
+                        .getContent();
+        int messages = 0;
+        for (int i = inbound.size() - 1; i >= 0; i--) { // ordre chronologique
+            MessageEntity m = inbound.get(i);
+            String text =
+                    m.getContent() != null && !m.getContent().isBlank()
+                            ? m.getContent()
+                            : m.getTextContent();
+            if (text != null && !text.isBlank()) {
+                String source =
+                        m.getChannel() != null ? m.getChannel().name().toLowerCase() : "message";
+                textes.add(Map.of("source", source, "texte", truncate(text)));
+                messages++;
+            }
+        }
+        if (textes.isEmpty()) {
+            throw new IllegalArgumentException("Aucune note ni message du client à analyser");
+        }
+        if (brainClientService == null) {
+            return Optional.empty();
+        }
+        Optional<Map<String, Object>> brain =
+                brainClientService.extractCriteria(Map.of("textes", textes));
+        if (brain.isEmpty()) {
+            return Optional.empty();
+        }
+        Map<String, Object> criteres = asMap(brain.get().get("criteres"));
+        Map<String, Object> preuves = asMap(brain.get().get("preuves"));
+        Map<String, String> evidence = new LinkedHashMap<>();
+        preuves.forEach((k, v) -> evidence.put(toCamel(k), String.valueOf(v)));
+        Map<String, Object> camel = new LinkedHashMap<>();
+        criteres.forEach((k, v) -> camel.put(toCamel(k), v));
+        DossierSearchCriteria suggestion =
+                objectMapper.convertValue(camel, DossierSearchCriteria.class);
+        return Optional.of(
+                new CriteriaSuggestionResponse(
+                        suggestion,
+                        evidence,
+                        String.valueOf(brain.get().getOrDefault("moteur", "inconnu")),
+                        notes,
+                        messages));
+    }
+
+    private static String truncate(String s) {
+        return s.length() > MAX_TEXT_LENGTH ? s.substring(0, MAX_TEXT_LENGTH) : s;
+    }
+
+    static String toCamel(String snake) {
+        StringBuilder sb = new StringBuilder();
+        boolean upper = false;
+        for (char c : snake.toCharArray()) {
+            if (c == '_') {
+                upper = true;
+            } else {
+                sb.append(upper ? Character.toUpperCase(c) : c);
+                upper = false;
+            }
+        }
+        return sb.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> asMap(Object o) {
+        return o instanceof Map<?, ?> m ? (Map<String, Object>) m : Map.of();
     }
 
     // ─── Conversions ─────────────────────────────────────────────────────────

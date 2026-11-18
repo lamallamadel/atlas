@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,6 +46,27 @@ public class DossierMatchingController {
     public DossierSearchCriteria saveCriteria(
             @PathVariable Long dossierId, @Valid @RequestBody DossierSearchCriteria criteria) {
         return matchingService.saveCriteria(dossierId, criteria);
+    }
+
+    @PostMapping("/search-criteria/suggest")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(
+            summary = "Suggérer des critères à partir des notes et messages du client",
+            description =
+                    "N'enregistre rien. Chaque critère suggéré est accompagné de la citation du"
+                            + " client qui le justifie.")
+    public ResponseEntity<?> suggestCriteria(@PathVariable Long dossierId) {
+        return matchingService
+                .suggestCriteria(dossierId)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(
+                        () ->
+                                ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                                        .body(
+                                                Map.of(
+                                                        "message",
+                                                        "Le service de suggestion est"
+                                                                + " momentanément indisponible")));
     }
 
     @GetMapping("/matches")

@@ -9,10 +9,13 @@ import {
   emptyForm,
   exclusionSummary,
   formToCriteria,
+  mergeSuggestion,
   scoreStatus,
+  suggestionLines,
   validateCriteria,
 } from './dossier-matching.component';
 import {
+  CriteriaSuggestion,
   DossierMatchesResponse,
   DossierMatchingApiService,
   DossierSearchCriteria,
@@ -73,6 +76,36 @@ describe('conversion des critères', () => {
   });
 });
 
+const SUGGESTION: CriteriaSuggestion = {
+  suggestion: { cities: ['Tanger'], budgetMax: 1200000, furnished: true, equipments: ['parking'] },
+  evidence: { cities: 'à Tanger', budgetMax: '120 millions max', furnished: 'meublé', equipments: 'avec parking' },
+  engine: 'openai',
+  notesUsed: 1,
+  messagesUsed: 3,
+};
+
+describe('suggestion de critères', () => {
+  it('lignes lisibles avec la citation du client', () => {
+    const lines = suggestionLines(SUGGESTION);
+    expect(lines.map((l) => l.field)).toEqual(['cities', 'budgetMax', 'furnished', 'equipments']);
+    const budget = lines.find((l) => l.field === 'budgetMax')!;
+    expect(budget.label).toBe('Budget maximum');
+    expect(budget.value.replace(/\s/g, ' ')).toBe('1 200 000 MAD');
+    expect(budget.evidence).toBe('120 millions max');
+  });
+
+  it("complète le formulaire sans rien effacer", () => {
+    const form = criteriaToForm({ ...CRITERIA, equipments: ['piscine'], furnished: null });
+    const merged = mergeSuggestion(form, { ...SUGGESTION.suggestion, cities: ['Tanger', 'Asilah'] });
+    expect(merged.cities).toBe('Tanger, Tétouan, Asilah');
+    expect(merged.equipments).toEqual(['piscine', 'parking']);
+    expect(merged.budgetMax).toBe('1200000');
+    expect(merged.budgetMin).toBe('800000');       // conservé
+    expect(merged.furnished).toBe('yes');
+    expect(merged.categories).toEqual(['APARTMENT']); // conservé
+  });
+});
+
 describe('DossierMatchingComponent', () => {
   let fixture: ComponentFixture<DossierMatchingComponent>;
   let api: Record<string, ReturnType<typeof vi.fn>>;
@@ -83,6 +116,7 @@ describe('DossierMatchingComponent', () => {
       getCriteria: vi.fn().mockReturnValue(of(criteria)),
       saveCriteria: vi.fn().mockImplementation((_id, c) => of(c)),
       matches: vi.fn().mockReturnValue(of(RESULT)),
+      suggestCriteria: vi.fn().mockReturnValue(of(SUGGESTION)),
     };
     toast = { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn() };
     await TestBed.configureTestingModule({
@@ -154,5 +188,29 @@ describe('DossierMatchingComponent', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.unavailable()).toBe(true);
     expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="dm-unavailable"]')).not.toBeNull();
+  });
+
+  it('suggère, affiche les citations puis applique sans enregistrer', async () => {
+    const el = await create(null);
+    const c = fixture.componentInstance;
+    c.suggest();
+    fixture.detectChanges();
+    const box = el.querySelector('[data-testid="dm-suggestion"]')?.textContent ?? '';
+    expect(box).toContain('Tanger');
+    expect(box).toContain('120 millions max');
+    expect(box).toContain('3 message(s)');
+
+    c.applySuggestion();
+    expect(c.form.cities).toBe('Tanger');
+    expect(c.form.furnished).toBe('yes');
+    expect(c.suggestion()).toBeNull();
+    expect(api['saveCriteria']).not.toHaveBeenCalled();
+  });
+
+  it('dossier sans note ni message', async () => {
+    await create(null);
+    api['suggestCriteria'].mockReturnValue(throwError(() => ({ status: 400 })));
+    fixture.componentInstance.suggest();
+    expect(toast['info']).toHaveBeenCalledWith("Ce dossier n'a encore ni note ni message du client");
   });
 });

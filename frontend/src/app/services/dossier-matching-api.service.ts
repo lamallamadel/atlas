@@ -43,6 +43,17 @@ export interface DossierMatchesResponse {
   criteriaUpdatedAt: string | null;
 }
 
+export interface CriteriaSuggestion {
+  /** Seuls les champs justifiés par une citation du client sont renseignés. */
+  suggestion: Partial<DossierSearchCriteria>;
+  /** Citation du client pour chaque champ suggéré. */
+  evidence: Record<string, string>;
+  /** openai, ollama ou regles (sans IA). */
+  engine: string;
+  notesUsed: number;
+  messagesUsed: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DossierMatchingApiService {
   constructor(private http: HttpClient) {}
@@ -58,6 +69,11 @@ export class DossierMatchingApiService {
 
   saveCriteria(dossierId: number, criteria: DossierSearchCriteria): Observable<DossierSearchCriteria> {
     return this.http.put<DossierSearchCriteria>(`${this.base(dossierId)}/search-criteria`, criteria);
+  }
+
+  /** N'enregistre rien : la suggestion est à relire puis appliquer au formulaire. */
+  suggestCriteria(dossierId: number): Observable<CriteriaSuggestion> {
+    return this.http.post<CriteriaSuggestion>(`${this.base(dossierId)}/search-criteria/suggest`, null);
   }
 
   matches(dossierId: number, scope: MatchScope = 'ALL', limit = 20): Observable<DossierMatchesResponse> {

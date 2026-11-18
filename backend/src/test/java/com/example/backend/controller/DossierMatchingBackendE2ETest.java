@@ -161,4 +161,54 @@ class DossierMatchingBackendE2ETest extends BaseBackendE2ETest {
         mockMvc.perform(withTenantHeaders(get(base() + "/matches"), ORG2))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void suggestion_de_criteres() throws Exception {
+        Dossier d = dossierRepository.findById(dossierId).orElseThrow();
+        d.setNotes("Cherche un appartement à Tanger");
+        dossierRepository.save(d);
+        when(brainClientService.extractCriteria(any()))
+                .thenReturn(
+                        Optional.of(
+                                Map.of(
+                                        "criteres",
+                                                Map.of(
+                                                        "cities",
+                                                        List.of("Tanger"),
+                                                        "categories",
+                                                        List.of("APARTMENT")),
+                                        "preuves",
+                                                Map.of(
+                                                        "cities",
+                                                        "à Tanger",
+                                                        "categories",
+                                                        "un appartement"),
+                                        "moteur", "regles")));
+
+        mockMvc.perform(withTenantHeaders(post(base() + "/search-criteria/suggest"), ORG1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.suggestion.cities[0]").value("Tanger"))
+                .andExpect(jsonPath("$.suggestion.categories[0]").value("APARTMENT"))
+                .andExpect(jsonPath("$.evidence.cities").value("à Tanger"))
+                .andExpect(jsonPath("$.engine").value("regles"))
+                .andExpect(jsonPath("$.notesUsed").value(1));
+
+        // aucune sauvegarde
+        mockMvc.perform(withTenantHeaders(get(base() + "/search-criteria"), ORG1))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void suggestion_sans_texte_400_brain_indisponible_503_autre_org_404() throws Exception {
+        mockMvc.perform(withTenantHeaders(post(base() + "/search-criteria/suggest"), ORG1))
+                .andExpect(status().isBadRequest());
+        Dossier d = dossierRepository.findById(dossierId).orElseThrow();
+        d.setNotes("Studio à Agadir");
+        dossierRepository.save(d);
+        when(brainClientService.extractCriteria(any())).thenReturn(Optional.empty());
+        mockMvc.perform(withTenantHeaders(post(base() + "/search-criteria/suggest"), ORG1))
+                .andExpect(status().isServiceUnavailable());
+        mockMvc.perform(withTenantHeaders(post(base() + "/search-criteria/suggest"), ORG2))
+                .andExpect(status().isNotFound());
+    }
 }
