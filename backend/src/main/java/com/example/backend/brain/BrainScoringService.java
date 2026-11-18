@@ -8,7 +8,9 @@ import com.example.backend.entity.Annonce;
 import com.example.backend.repository.AnnonceRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,41 +114,14 @@ public class BrainScoringService {
                 return;
             }
 
-            List<DoublonResultDto> doublons = brainClientService.detectDuplicates(dupliDtos);
-
-            for (DoublonResultDto doublon : doublons) {
-                if (doublon.getAnnonce1().equals(annonceId)
-                        || doublon.getAnnonce2().equals(annonceId)) {
-                    log.info(
-                            "Duplicate detected for annonce {}: similarity={}, status={}",
-                            annonceId,
-                            doublon.getSimilarite(),
-                            doublon.getStatut());
-
-                    if ("DOUBLON_CERTAIN".equals(doublon.getStatut())) {
-                        annonce.setFraudStatut("FRAUDULEUX");
-                        annonce.setFraudScore(
-                                Math.max(
-                                        annonce.getFraudScore() != null
-                                                ? annonce.getFraudScore()
-                                                : 0,
-                                        90));
-                        annonceRepository.save(annonce);
-                    } else if ("DOUBLON_PROBABLE".equals(doublon.getStatut())) {
-                        if (annonce.getFraudStatut() == null
-                                || "SAIN".equals(annonce.getFraudStatut())) {
-                            annonce.setFraudStatut("SUSPECT");
-                            annonce.setFraudScore(
-                                    Math.max(
-                                            annonce.getFraudScore() != null
-                                                    ? annonce.getFraudScore()
-                                                    : 0,
-                                            50));
-                            annonceRepository.save(annonce);
-                        }
-                    }
-                }
-            }
+            // Brain injoignable : on garde le résultat précédent plutôt que de l'effacer.
+            brainClientService
+                    .tryDetectDuplicates(dupliDtos)
+                    .ifPresent(
+                            doublons -> {
+                                applyDuplicateResult(annonce, doublons);
+                                annonceRepository.save(annonce);
+                            });
         } catch (Exception e) {
             log.warn("Failed to check duplicates for annonce {}: {}", annonceId, e.getMessage());
         }
@@ -176,6 +151,10 @@ public class BrainScoringService {
                             result -> {
                                 annonce.setFraudScore(result.getScoreFraude());
                                 annonce.setFraudStatut(result.getStatut());
+                                annonce.setFraudAlertes(
+                                        result.getAlertes() != null
+                                                ? result.getAlertes()
+                                                : List.of());
                                 annonceRepository.save(annonce);
                                 log.info(
                                         "Fraud analysis for annonce {}: {} (score: {})",
@@ -186,5 +165,38 @@ public class BrainScoringService {
         } catch (Exception e) {
             log.warn("Failed to analyze fraud for annonce {}: {}", annonceId, e.getMessage());
         }
+    }
+
+    /**
+     * Retient le doublon le plus proche de l'annonce parmi les paires renvoyées par le brain, ou
+     * efface le marquage s'il n'y en a plus (l'annonce a pu être modifiée depuis). Ne touche pas
+     * aux champs de fraude : les deux analyses tournent en parallèle et restent indépendantes.
+     */
+    static void applyDuplicateResult(Annonce annonce, List<DoublonResultDto> doublons) {
+        Long id = annonce.getId();
+        Optional<DoublonResultDto> best =
+                doublons.stream()
+                        .filter(d -> id.equals(d.getAnnonce1()) || id.equals(d.getAnnonce2()))
+                        .max(Comparator.comparingDouble(DoublonResultDto::getSimilarite));
+
+        if (best.isEmpty()) {
+            annonce.setDuplicateOfId(null);
+            annonce.setDuplicateSimilarity(null);
+            annonce.setDuplicateStatut(null);
+            return;
+        }
+
+        DoublonResultDto doublon = best.get();
+        Long otherId =
+                id.equals(doublon.getAnnonce1()) ? doublon.getAnnonce2() : doublon.getAnnonce1();
+        annonce.setDuplicateOfId(otherId);
+        annonce.setDuplicateSimilarity(doublon.getSimilarite());
+        annonce.setDuplicateStatut(doublon.getStatut());
+        log.info(
+                "Duplicate detected for annonce {}: annonce {} (similarity={}, status={})",
+                id,
+                otherId,
+                doublon.getSimilarite(),
+                doublon.getStatut());
     }
 }

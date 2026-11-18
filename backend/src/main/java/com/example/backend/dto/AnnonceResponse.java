@@ -28,6 +28,10 @@ public class AnnonceResponse {
     private String aiScoreDetails;
     private Integer fraudScore;
     private String fraudStatut;
+    private List<String> fraudAlertes;
+    private Long duplicateOfId;
+    private Double duplicateSimilarity;
+    private String duplicateStatut;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
@@ -185,6 +189,38 @@ public class AnnonceResponse {
 
     public void setFraudStatut(String fraudStatut) {
         this.fraudStatut = fraudStatut;
+    }
+
+    public List<String> getFraudAlertes() {
+        return fraudAlertes;
+    }
+
+    public void setFraudAlertes(List<String> fraudAlertes) {
+        this.fraudAlertes = fraudAlertes;
+    }
+
+    public Long getDuplicateOfId() {
+        return duplicateOfId;
+    }
+
+    public void setDuplicateOfId(Long duplicateOfId) {
+        this.duplicateOfId = duplicateOfId;
+    }
+
+    public Double getDuplicateSimilarity() {
+        return duplicateSimilarity;
+    }
+
+    public void setDuplicateSimilarity(Double duplicateSimilarity) {
+        this.duplicateSimilarity = duplicateSimilarity;
+    }
+
+    public String getDuplicateStatut() {
+        return duplicateStatut;
+    }
+
+    public void setDuplicateStatut(String duplicateStatut) {
+        this.duplicateStatut = duplicateStatut;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -156,8 +156,9 @@
                 <ds-icon name="image" [size]="24" style="opacity: 0.3;"></ds-icon>
               </div>
             }
-            <div class="ann-card__badge-overlay" style="position: absolute; top: 12px; left: 12px;">
+            <div class="ann-card__badge-overlay" style="position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 6px;">
               <ds-badge [status]="getAnnonceBadgeStatus(a.status)" size="sm" [showDot]="false">{{ a.status }}</ds-badge>
+              <app-annonce-ai-badges [annonce]="a" [compact]="true"></app-annonce-ai-badges>
             </div>
           </div>
 
@@ -194,6 +195,9 @@
           [trackBy]="trackByAnnonceId"
           (rowClick)="onDsTableRowClick($event)"
           (rowAction)="onDsTableRowAction($event)">
+          <ng-template dsCell="ai" let-a>
+            <app-annonce-ai-badges [annonce]="a" [compact]="true"></app-annonce-ai-badges>
+          </ng-template>
         </ds-table>
         @if (page) {
           <div class="ann-pagination ann-pagination--in-card" style="padding: 16px; border-top: 1px solid var(--ds-divider); display: flex; justify-content: space-between; align-items: center;">

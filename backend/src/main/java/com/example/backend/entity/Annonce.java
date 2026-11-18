@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -16,6 +17,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "annonce")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 @EntityListeners(AuditingEntityListener.class)
+// Les analyses IA (score, fraude, doublons) tournent en parallèle et sauvent chacune
+// l'annonce : sans @DynamicUpdate, chaque sauvegarde réécrirait toutes les colonnes
+// et effacerait le résultat des autres analyses.
+@DynamicUpdate
 public class Annonce extends BaseEntity {
 
     @Id
@@ -78,6 +83,19 @@ public class Annonce extends BaseEntity {
 
     @Column(name = "fraud_statut", length = 20)
     private String fraudStatut;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "fraud_alertes")
+    private List<String> fraudAlertes;
+
+    @Column(name = "duplicate_of_id")
+    private Long duplicateOfId;
+
+    @Column(name = "duplicate_similarity")
+    private Double duplicateSimilarity;
+
+    @Column(name = "duplicate_statut", length = 20)
+    private String duplicateStatut;
 
     @Column(name = "virtual_tour_url", length = 1000)
     private String virtualTourUrl;
@@ -224,6 +242,38 @@ public class Annonce extends BaseEntity {
 
     public void setFraudStatut(String fraudStatut) {
         this.fraudStatut = fraudStatut;
+    }
+
+    public List<String> getFraudAlertes() {
+        return fraudAlertes;
+    }
+
+    public void setFraudAlertes(List<String> fraudAlertes) {
+        this.fraudAlertes = fraudAlertes;
+    }
+
+    public Long getDuplicateOfId() {
+        return duplicateOfId;
+    }
+
+    public void setDuplicateOfId(Long duplicateOfId) {
+        this.duplicateOfId = duplicateOfId;
+    }
+
+    public Double getDuplicateSimilarity() {
+        return duplicateSimilarity;
+    }
+
+    public void setDuplicateSimilarity(Double duplicateSimilarity) {
+        this.duplicateSimilarity = duplicateSimilarity;
+    }
+
+    public String getDuplicateStatut() {
+        return duplicateStatut;
+    }
+
+    public void setDuplicateStatut(String duplicateStatut) {
+        this.duplicateStatut = duplicateStatut;
     }
 
     public String getVirtualTourUrl() {

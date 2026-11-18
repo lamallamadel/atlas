@@ -7,6 +7,7 @@ import { FilterPresetService } from '../../services/filter-preset.service';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe, CommonModule } from '@angular/common';
+import { AnnonceAiBadgesComponent } from '../../components/annonce-ai-badges.component';
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
 import { 
   PageHeaderComponent, 
@@ -19,6 +20,7 @@ import {
   DsSkeletonComponent,
   DsCardComponent, 
   DsTableComponent, 
+  DsCellDirective,
   DsColumn, 
   DsRowAction,
   DsIconComponent,
@@ -39,7 +41,8 @@ import {
       FormsModule, DecimalPipe,
       PageHeaderComponent, FilterBarComponent,
       DsButtonComponent, DsBadgeComponent, DsEmptyStateComponent, DsSkeletonComponent,
-      DsCardComponent, DsTableComponent, DsIconComponent, DsSelectComponent,
+      DsCardComponent, DsTableComponent, DsCellDirective, DsIconComponent, DsSelectComponent,
+      AnnonceAiBadgesComponent,
     ]
 })
 export class AnnoncesComponent implements OnInit {
@@ -94,7 +97,8 @@ export class AnnoncesComponent implements OnInit {
     { key: 'title', header: 'Titre' },
     { key: 'city', header: 'Ville' },
     { key: 'price', header: 'Prix' },
-    { key: 'status', header: 'Statut' }
+    { key: 'status', header: 'Statut' },
+    { key: 'ai', header: 'Alertes IA' }
   ];
 
   dsTableRowActions: DsRowAction<any>[] = [

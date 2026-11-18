@@ -65,6 +65,14 @@ public class BrainClientService {
     }
 
     public List<DoublonResultDto> detectDuplicates(List<DupliAnnonceDto> annonces) {
+        return tryDetectDuplicates(annonces).orElse(List.of());
+    }
+
+    /**
+     * Comme {@link #detectDuplicates}, mais distingue « aucun doublon » (liste vide) de « brain
+     * injoignable » (Optional vide).
+     */
+    public Optional<List<DoublonResultDto>> tryDetectDuplicates(List<DupliAnnonceDto> annonces) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.set(API_KEY_HEADER, properties.getDupli().getApiKey());
@@ -75,10 +83,11 @@ public class BrainClientService {
                             properties.getDupli().getBaseUrl() + "/api/dupli/verifier",
                             new HttpEntity<>(annonces, headers),
                             DoublonResultDto[].class);
-            return response.getBody() != null ? Arrays.asList(response.getBody()) : List.of();
+            return Optional.of(
+                    response.getBody() != null ? Arrays.asList(response.getBody()) : List.of());
         } catch (Exception e) {
             log.warn("Dupli service unavailable: {}", e.getMessage());
-            return List.of();
+            return Optional.empty();
         }
     }
 

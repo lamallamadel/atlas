@@ -4,6 +4,7 @@ import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../service
 import { RecentNavigationService } from '../../services/recent-navigation.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PriceFormatPipe } from '../../pipes/price-format.pipe';
+import { AnnonceAiBadgesComponent } from '../../components/annonce-ai-badges.component';
 import {
   DsButtonComponent,
   DsBadgeComponent,
@@ -24,6 +25,7 @@ import {
     DsCardComponent,
     DsSkeletonComponent,
     DsEmptyStateComponent,
+    AnnonceAiBadgesComponent,
   ],
 })
 export class AnnonceDetailComponent implements OnInit {
@@ -41,7 +43,9 @@ export class AnnonceDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadAnnonce();
+    // paramMap (et non snapshot) : le lien « Voir l'annonce #… » du doublon
+    // réutilise ce composant, il faut recharger quand l'id change.
+    this.route.paramMap.subscribe(() => this.loadAnnonce());
   }
 
   loadAnnonce(): void {
