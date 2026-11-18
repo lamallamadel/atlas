@@ -17,4 +17,6 @@ public record BuyerMatchResponse(
         List<String> reasons,
         List<String> alerts,
         String status,
-        LocalDateTime createdAt) {}
+        LocalDateTime createdAt,
+        LocalDateTime pitchedAt,
+        String pitchChannel) {}

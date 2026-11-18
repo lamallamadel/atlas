@@ -48,6 +48,10 @@
       @if (m.status === 'NEW') { <ds-badge status="info" size="sm" [showDot]="false">Nouveau</ds-badge> }
       <ds-badge [status]="scoreStatus(m.score)" size="sm" [showDot]="false"
                 [attr.aria-label]="'Score ' + m.score + ' sur 100'">{{ m.score }}/100</ds-badge>
+      @if (m.status !== 'DISMISSED') {
+        <ds-button variant="ghost" size="sm" prefixIcon="send" (dsClick)="toggleComposer(m)"
+                   [attr.data-testid]="'bm-pitch-' + m.id">{{ composerFor() === m.id ? 'Fermer' : 'Proposer' }}</ds-button>
+      }
       <ds-button variant="ghost" size="sm" [loading]="busyId() === m.id" (dsClick)="toggleDismiss(m)"
                  [attr.data-testid]="'bm-toggle-' + m.id">
         {{ m.status === 'DISMISSED' ? 'Rétablir' : 'Écarter' }}
@@ -63,5 +67,15 @@
     <ul class="bm__alerts">
       @for (x of m.alerts; track x) { <li><ds-icon name="alert-circle" [size]="12"></ds-icon> {{ x }}</li> }
     </ul>
+  }
+  @if (m.pitchedAt) {
+    <p class="bm__pitched" [attr.data-testid]="'bm-pitched-' + m.id">
+      <ds-icon name="send" [size]="12"></ds-icon>
+      Proposé le {{ m.pitchedAt | date:'dd/MM/yyyy à HH:mm' }} par {{ channelLabel(m.pitchChannel) }}
+    </p>
+  }
+  @if (composerFor() === m.id) {
+    <app-annonce-pitch-composer [annonceId]="annonceId()" [match]="m"
+                                (sent)="onPitchSent(m, $event)" (closed)="composerFor.set(null)"></app-annonce-pitch-composer>
   }
 </ng-template>

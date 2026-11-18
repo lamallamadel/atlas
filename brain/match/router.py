@@ -124,3 +124,14 @@ def acheteurs(req: AcheteursRequest, _: str = Depends(verify_api_key)):
     results.sort(key=lambda x: (-x.score_match, x.client_id))
     logger.info("Matching inverse bien %s : %d acheteur(s) retenu(s) sur %d", req.bien.id, len(results), len(req.acheteurs))
     return AcheteursResponse(resultats=results, exclus=excluded, sous_seuil=below)
+
+
+# ---------- Message de proposition d'un bien à un acheteur ----------
+
+from match.pitch import PitchRequest, PitchResponse, generate_pitch  # noqa: E402
+
+
+@router.post("/api/match/proposition", response_model=PitchResponse)
+async def proposition(req: PitchRequest, _: str = Depends(verify_api_key)):
+    """Brouillon de message (WhatsApp ou SMS) à relire par l'agent avant envoi."""
+    return await generate_pitch(req)

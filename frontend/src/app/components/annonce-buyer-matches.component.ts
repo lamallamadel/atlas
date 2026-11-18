@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { NgTemplateOutlet } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
   DsBadgeComponent,
@@ -11,7 +11,12 @@ import {
   DsSkeletonComponent,
   DsToastService,
 } from '../design-system';
-import { AnnonceBuyerMatchesApiService, BuyerMatch } from '../services/annonce-buyer-matches-api.service';
+import {
+  AnnonceBuyerMatchesApiService,
+  BuyerMatch,
+  PitchSendResult,
+} from '../services/annonce-buyer-matches-api.service';
+import { AnnoncePitchComposerComponent } from './annonce-pitch-composer.component';
 import { scoreStatus } from './dossier-matching.component';
 
 /** Ordre d'affichage : écartés en dernier, puis score décroissant. */
@@ -32,7 +37,9 @@ export function sortMatches(list: BuyerMatch[]): BuyerMatch[] {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    DatePipe,
     NgTemplateOutlet,
+    AnnoncePitchComposerComponent,
     RouterLink,
     DsBadgeComponent,
     DsButtonComponent,
@@ -55,6 +62,8 @@ export class AnnonceBuyerMatchesComponent implements OnInit {
   readonly refreshing = signal(false);
   readonly loadError = signal(false);
   readonly busyId = signal<number | null>(null);
+  /** Acheteur pour lequel l'éditeur de proposition est ouvert. */
+  readonly composerFor = signal<number | null>(null);
 
   readonly active = computed(() => this.matches().filter((m) => m.status !== 'DISMISSED'));
   readonly dismissed = computed(() => this.matches().filter((m) => m.status === 'DISMISSED'));
@@ -115,5 +124,24 @@ export class AnnonceBuyerMatchesComponent implements OnInit {
         this.toast.error("L'opération a échoué");
       },
     });
+  }
+
+  toggleComposer(m: BuyerMatch): void {
+    this.composerFor.update((id) => (id === m.id ? null : m.id));
+  }
+
+  onPitchSent(m: BuyerMatch, r: PitchSendResult): void {
+    this.composerFor.set(null);
+    this.matches.update((list) =>
+      list.map((x) =>
+        x.id === m.id
+          ? { ...x, pitchedAt: r.pitchedAt, pitchChannel: r.channel, status: x.status === 'NEW' ? 'SEEN' : x.status }
+          : x,
+      ),
+    );
+  }
+
+  channelLabel(c: string | null): string {
+    return c === 'SMS' ? 'SMS' : 'WhatsApp';
   }
 }

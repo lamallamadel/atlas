@@ -51,6 +51,41 @@ public class AnnonceDossierMatch extends BaseEntity {
     @Column(name = "notified_at")
     private LocalDateTime notifiedAt;
 
+    /** Date d'envoi de la proposition au client (null si jamais proposé). */
+    @Column(name = "pitched_at")
+    private LocalDateTime pitchedAt;
+
+    @Column(name = "pitch_channel", length = 20)
+    private String pitchChannel;
+
+    /** Message sortant (outbound_message) de la dernière proposition. */
+    @Column(name = "pitch_message_id")
+    private Long pitchMessageId;
+
+    public LocalDateTime getPitchedAt() {
+        return pitchedAt;
+    }
+
+    public void setPitchedAt(LocalDateTime pitchedAt) {
+        this.pitchedAt = pitchedAt;
+    }
+
+    public String getPitchChannel() {
+        return pitchChannel;
+    }
+
+    public void setPitchChannel(String pitchChannel) {
+        this.pitchChannel = pitchChannel;
+    }
+
+    public Long getPitchMessageId() {
+        return pitchMessageId;
+    }
+
+    public void setPitchMessageId(Long pitchMessageId) {
+        this.pitchMessageId = pitchMessageId;
+    }
+
     public Long getId() {
         return id;
     }

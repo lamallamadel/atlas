@@ -11,7 +11,7 @@ import { DsToastService } from '../design-system';
 function match(partial: Partial<BuyerMatch> = {}): BuyerMatch {
   return {
     id: 1, dossierId: 10, leadName: 'Youssef', dossierStatus: 'QUALIFIED', score: 90,
-    reasons: ['Ville recherchée (Tanger)'], alerts: ['Piscine : non trouvé'], status: 'NEW', createdAt: null,
+    reasons: ['Ville recherchée (Tanger)'], alerts: ['Piscine : non trouvé'], status: 'NEW', createdAt: null, pitchedAt: null, pitchChannel: null,
     ...partial,
   };
 }
@@ -102,5 +102,17 @@ describe('AnnonceBuyerMatchesComponent', () => {
     fixture.componentInstance.refresh();
     expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('indisponible'));
     expect(fixture.componentInstance.refreshing()).toBe(false);
+  });
+
+  it('ouvre l\'éditeur puis affiche la proposition envoyée', () => {
+    create();
+    const c = fixture.componentInstance;
+    c.toggleComposer(c.matches()[0]);
+    expect(c.composerFor()).toBe(1);
+    c.onPitchSent(c.matches()[0], { outboundMessageId: 4, status: 'QUEUED', channel: 'SMS', pitchedAt: '2026-11-18T23:00:00' });
+    fixture.detectChanges();
+    expect(c.composerFor()).toBeNull();
+    expect(c.matches()[0].pitchChannel).toBe('SMS');
+    expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="bm-pitched-1"]')?.textContent).toContain('par SMS');
   });
 });

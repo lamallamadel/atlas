@@ -259,7 +259,9 @@ public class ReverseMatchingService {
                             nullToEmpty(m.getReasons()),
                             nullToEmpty(m.getAlerts()),
                             m.getStatus(),
-                            m.getCreatedAt()));
+                            m.getCreatedAt(),
+                            m.getPitchedAt(),
+                            m.getPitchChannel()));
             if (markSeen && AnnonceDossierMatch.STATUS_NEW.equals(m.getStatus())) {
                 m.setStatus(AnnonceDossierMatch.STATUS_SEEN);
                 matchRepository.save(m);
