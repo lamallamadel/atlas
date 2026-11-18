@@ -27,10 +27,22 @@ public class LocalFileStorageStrategy implements FileStorageStrategy {
             InputStream inputStream,
             long size,
             String contentType) {
+        return storeInFolder(
+                orgId, "dossiers/" + dossierId, fileName, inputStream, size, contentType);
+    }
+
+    @Override
+    public String storeInFolder(
+            String orgId,
+            String folder,
+            String fileName,
+            InputStream inputStream,
+            long size,
+            String contentType) {
         try {
             String sanitizedFileName = sanitizeFileName(fileName);
             String uniqueFileName = UUID.randomUUID().toString() + "_" + sanitizedFileName;
-            String relativePath = buildPath(orgId, dossierId, uniqueFileName);
+            String relativePath = buildPath(orgId, folder, uniqueFileName);
             Path fullPath = Paths.get(basePath, relativePath);
 
             Files.createDirectories(fullPath.getParent());
@@ -79,8 +91,8 @@ public class LocalFileStorageStrategy implements FileStorageStrategy {
         return Files.exists(fullPath);
     }
 
-    private String buildPath(String orgId, Long dossierId, String fileName) {
-        return String.format("%s/dossiers/%d/%s", orgId, dossierId, fileName);
+    private String buildPath(String orgId, String folder, String fileName) {
+        return String.format("%s/%s/%s", orgId, folder, fileName);
     }
 
     private String sanitizeFileName(String fileName) {

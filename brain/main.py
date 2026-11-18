@@ -13,6 +13,7 @@ from match.router import router as match_router
 from nego.router import router as nego_router
 from proposal.router import router as proposal_router
 from scoring.router import router as scoring_router
+from vision.router import router as vision_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("brain.main")
@@ -52,6 +53,7 @@ routers = [
     ("Nego", nego_router),
     ("Proposal", proposal_router),
     ("Scoring", scoring_router),
+    ("Vision", vision_router),
 ]
 
 for name, r in routers:

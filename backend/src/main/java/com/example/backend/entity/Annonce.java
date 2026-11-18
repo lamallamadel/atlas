@@ -4,6 +4,7 @@ import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +97,14 @@ public class Annonce extends BaseEntity {
 
     @Column(name = "duplicate_statut", length = 20)
     private String duplicateStatut;
+
+    /** Profil issu de l'analyse des photos (pièces, équipements, état…) et description proposée. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "ai_vision_result")
+    private Map<String, Object> aiVisionResult;
+
+    @Column(name = "ai_vision_updated_at")
+    private LocalDateTime aiVisionUpdatedAt;
 
     @Column(name = "virtual_tour_url", length = 1000)
     private String virtualTourUrl;
@@ -274,6 +283,22 @@ public class Annonce extends BaseEntity {
 
     public void setDuplicateStatut(String duplicateStatut) {
         this.duplicateStatut = duplicateStatut;
+    }
+
+    public Map<String, Object> getAiVisionResult() {
+        return aiVisionResult;
+    }
+
+    public void setAiVisionResult(Map<String, Object> aiVisionResult) {
+        this.aiVisionResult = aiVisionResult;
+    }
+
+    public LocalDateTime getAiVisionUpdatedAt() {
+        return aiVisionUpdatedAt;
+    }
+
+    public void setAiVisionUpdatedAt(LocalDateTime aiVisionUpdatedAt) {
+        this.aiVisionUpdatedAt = aiVisionUpdatedAt;
     }
 
     public String getVirtualTourUrl() {

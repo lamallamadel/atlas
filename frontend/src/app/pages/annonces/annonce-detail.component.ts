@@ -5,6 +5,7 @@ import { RecentNavigationService } from '../../services/recent-navigation.servic
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PriceFormatPipe } from '../../pipes/price-format.pipe';
 import { AnnonceAiBadgesComponent } from '../../components/annonce-ai-badges.component';
+import { AnnonceVisionPanelComponent } from '../../components/annonce-vision-panel.component';
 import {
   DsButtonComponent,
   DsBadgeComponent,
@@ -26,6 +27,7 @@ import {
     DsSkeletonComponent,
     DsEmptyStateComponent,
     AnnonceAiBadgesComponent,
+    AnnonceVisionPanelComponent,
   ],
 })
 export class AnnonceDetailComponent implements OnInit {

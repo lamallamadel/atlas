@@ -61,10 +61,22 @@ public class S3FileStorageStrategy implements FileStorageStrategy {
             InputStream inputStream,
             long size,
             String contentType) {
+        return storeInFolder(
+                orgId, "dossiers/" + dossierId, fileName, inputStream, size, contentType);
+    }
+
+    @Override
+    public String storeInFolder(
+            String orgId,
+            String folder,
+            String fileName,
+            InputStream inputStream,
+            long size,
+            String contentType) {
         try {
             String sanitizedFileName = sanitizeFileName(fileName);
             String uniqueFileName = UUID.randomUUID().toString() + "_" + sanitizedFileName;
-            String s3Key = buildPath(orgId, dossierId, uniqueFileName);
+            String s3Key = buildPath(orgId, folder, uniqueFileName);
 
             byte[] bytes = inputStream.readAllBytes();
 
@@ -133,8 +145,8 @@ public class S3FileStorageStrategy implements FileStorageStrategy {
         }
     }
 
-    private String buildPath(String orgId, Long dossierId, String fileName) {
-        return String.format("%s/dossiers/%d/%s", orgId, dossierId, fileName);
+    private String buildPath(String orgId, String folder, String fileName) {
+        return String.format("%s/%s/%s", orgId, folder, fileName);
     }
 
     private String sanitizeFileName(String fileName) {
