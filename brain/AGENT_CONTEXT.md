@@ -8,13 +8,17 @@ Le brain est un **monolithe FastAPI unifié** qui regroupe tous les services AI 
 ```
 brain/
 ├── main.py              # Point d'entrée FastAPI — inclut tous les routers
+├── config.py            # Configuration unique (variables d'environnement / .env)
+├── security.py          # Vérification X-API-Key partagée par tous les routers
+├── conftest.py          # Config pytest (fournit API_KEY de test)
+├── tests/               # Tests transverses (sécurité, nego)
 ├── Dockerfile           # Image unique pour le monolith
 ├── requirements.txt     # Dépendances globales
 ├── agent/               # Agent IA conversationnel (routage NLP)
 │   └── router.py
 ├── document/            # Extraction et analyse de documents
 │   └── router.py
-├── dupli/               # Détection de doublons (TF-IDF cosine similarity)
+├── dupli/               # Détection de doublons (embeddings sentence-transformers + cosinus)
 │   └── router.py
 ├── fraud/               # Détection de fraude
 │   └── router.py
@@ -32,6 +36,19 @@ brain/
 ### Port unique
 - **Port 8000** — Tous les endpoints sont exposés sur ce port unique
 - Health check : `GET /health`
+
+### Configuration
+Toute la configuration est dans `config.py` (classe `Settings`), lue depuis les variables d'environnement
+ou un fichier `.env` dans le dossier courant :
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `API_KEY` | **obligatoire** | Clé attendue dans le header `X-API-Key` |
+| `OPENAI_ENABLED` / `OPENAI_API_KEY` / `OPENAI_MODEL` | `false` / vide / `gpt-4o-mini` | LLM distant pour l'agent |
+| `OLLAMA_ENABLED` / `OLLAMA_URL` / `OLLAMA_MODEL` | `false` / `http://ollama:11434` / `mistral:7b` | LLM local pour l'agent |
+| `SEUIL_DOUBLON` | `0.85` | Seuil de similarité pour les doublons |
+
+Tests : `cd brain && python -m pytest`
 
 ### Docker
 ```yaml
@@ -64,7 +81,7 @@ brain:
 | Module | Endpoint pattern | Description |
 |--------|-----------------|-------------|
 | Scoring | `/api/scoring/*` | Score 0-100 basé sur prix/m², étage, surface |
-| Dupli | `/api/dupli/*` | Détection doublons (cosine similarity, seuil 0.30) |
+| Dupli | `/api/dupli/*` | Détection doublons (embeddings multilingues, cosinus, seuil `SEUIL_DOUBLON` = 0.85) |
 | Fraud | `/api/fraud/*` | Détection de fraude |
 | Match | `/api/match/*` | Matching annonces/dossiers |
 | Proposal | `/api/proposal/*` | Génération d'emails et propositions |

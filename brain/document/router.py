@@ -1,37 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, Security
-from fastapi.security import APIKeyHeader
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings
+
+from security import verify_api_key
 import logging
 import time
 
-# 1. CORRECTION SÉCURITÉ : La clé API n'a plus de valeur par défaut.
-# FastAPI refusera de démarrer si elle n'est pas définie dans le .env
-class Settings(BaseSettings):
-    api_key: str  
-    allowed_origins: list[str] = ["http://localhost:8080", "http://localhost:4200"]
-    
-    ollama_url: str = "http://ollama:11434"
-    ollama_model: str = "mistral:7b"
-    ollama_enabled: bool = False
-    
-    class Config:
-        env_file = "../.env"
-
-settings = Settings()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("document-service")
 
 router = APIRouter()
 
-api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
-
-def verify_api_key(api_key: str = Security(api_key_header)):
-    if api_key != settings.api_key:
-        logger.warning("Tentative d'accès avec une clé invalide")
-        raise HTTPException(status_code=403, detail="API Key invalide")
-    return api_key
 
 class VerifyRequest(BaseModel):
     document_id: int

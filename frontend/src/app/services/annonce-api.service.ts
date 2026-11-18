@@ -29,7 +29,11 @@ export interface AnnonceResponse {
   aiScore?: number;
   aiScoreDetails?: string;
   fraudScore?: number;
-  fraudStatut?: string;
+  fraudStatut?: string;          // SAIN | SUSPECT | FRAUDULEUX
+  fraudAlertes?: string[];
+  duplicateOfId?: number;
+  duplicateSimilarity?: number;  // en %
+  duplicateStatut?: string;      // DOUBLON_PROBABLE | DOUBLON_CERTAIN
   createdAt: string;
   updatedAt: string;
   createdBy: string;

@@ -91,6 +91,9 @@
 
     </div>
 
+    <!-- Analyse IA (score, fraude, doublon) -->
+    <app-annonce-ai-badges [annonce]="annonce"></app-annonce-ai-badges>
+
     <!-- Description -->
     @if (annonce.description) {
       <ds-card elevation="xs" class="ad-description-card">

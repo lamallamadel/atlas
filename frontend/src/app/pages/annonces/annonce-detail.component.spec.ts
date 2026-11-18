@@ -2,7 +2,7 @@ import type { Mock, MockedObject } from 'vitest';
 import { Component, Pipe, PipeTransform, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of, throwError, EMPTY } from 'rxjs';
+import { Observable, of, throwError, EMPTY } from 'rxjs';
 
 import { AnnonceDetailComponent } from './annonce-detail.component';
 import {
@@ -39,6 +39,7 @@ describe('AnnonceDetailComponent', () => {
   let mockAnnonceApiService: AngularVitestPartialMock<AnnonceApiService>;
   let mockRouter: AngularVitestPartialMock<Router>;
   let mockActivatedRoute: {
+    paramMap: Observable<unknown>;
     snapshot: {
       paramMap: {
         get: Mock;
@@ -68,6 +69,7 @@ describe('AnnonceDetailComponent', () => {
       navigate: vi.fn().mockName('Router.navigate'),
       events: EMPTY};
     mockActivatedRoute = {
+      paramMap: of(null),
       snapshot: {
         paramMap: {
           get: vi.fn().mockReturnValue('1')}}};

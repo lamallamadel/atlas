@@ -88,6 +88,10 @@ public class AnnonceMapper {
         response.setAiScoreDetails(annonce.getAiScoreDetails());
         response.setFraudScore(annonce.getFraudScore());
         response.setFraudStatut(annonce.getFraudStatut());
+        response.setFraudAlertes(annonce.getFraudAlertes());
+        response.setDuplicateOfId(annonce.getDuplicateOfId());
+        response.setDuplicateSimilarity(annonce.getDuplicateSimilarity());
+        response.setDuplicateStatut(annonce.getDuplicateStatut());
         response.setCreatedAt(annonce.getCreatedAt());
         response.setUpdatedAt(annonce.getUpdatedAt());
         response.setCreatedBy(annonce.getCreatedBy());

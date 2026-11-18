@@ -1,8 +1,8 @@
 from fastapi.testclient import TestClient
-from main import app
+from main import app, settings
 
 client = TestClient(app)
-API_KEY = "change-me-in-production"
+API_KEY = settings.api_key
 HEADERS = {"X-API-Key": API_KEY}
 
 

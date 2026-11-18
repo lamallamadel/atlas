@@ -40,35 +40,40 @@ spring:
     caffeine:
       spec: maximumSize=1000,expireAfterWrite=10m
 
+# Brain (FastAPI monolithe) : tous les modules sont servis sur le même port 8000.
 brain:
   scoring:
     base-url: ${BRAIN_SCORING_URL:http://localhost:8000}
     api-key: ${BRAIN_API_KEY:change-me-in-production}
     timeout-seconds: ${BRAIN_SCORING_TIMEOUT:5}
   dupli:
-    base-url: ${BRAIN_DUPLI_URL:http://localhost:8001}
+    base-url: ${BRAIN_DUPLI_URL:http://localhost:8000}
     api-key: ${BRAIN_API_KEY:change-me-in-production}
     timeout-seconds: ${BRAIN_DUPLI_TIMEOUT:30}
   fraud:
-    base-url: ${BRAIN_FRAUD_URL:http://localhost:8002}
+    base-url: ${BRAIN_FRAUD_URL:http://localhost:8000}
     api-key: ${BRAIN_API_KEY:change-me-in-production}
     timeout-seconds: ${BRAIN_FRAUD_TIMEOUT:5}
   match:
-    base-url: ${BRAIN_MATCH_URL:http://localhost:8003}
+    base-url: ${BRAIN_MATCH_URL:http://localhost:8000}
     api-key: ${BRAIN_API_KEY:change-me-in-production}
     timeout-seconds: ${BRAIN_MATCH_TIMEOUT:10}
   proposal:
-    base-url: ${BRAIN_PROPOSAL_URL:http://localhost:8004}
+    base-url: ${BRAIN_PROPOSAL_URL:http://localhost:8000}
     api-key: ${BRAIN_API_KEY:change-me-in-production}
     timeout-seconds: ${BRAIN_PROPOSAL_TIMEOUT:15}
   nego:
-    base-url: ${BRAIN_NEGO_URL:http://localhost:8005}
+    base-url: ${BRAIN_NEGO_URL:http://localhost:8000}
     api-key: ${BRAIN_API_KEY:change-me-in-production}
     timeout-seconds: ${BRAIN_NEGO_TIMEOUT:5}
   agent:
-    base-url: ${BRAIN_AGENT_URL:http://localhost:8006}
+    base-url: ${BRAIN_AGENT_URL:http://localhost:8000}
     api-key: ${BRAIN_API_KEY:change-me-in-production}
     timeout-seconds: ${BRAIN_AGENT_TIMEOUT:15}
+  document:
+    base-url: ${BRAIN_DOCUMENT_URL:http://localhost:8000}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_DOCUMENT_TIMEOUT:15}
 
 management:
   endpoints:
