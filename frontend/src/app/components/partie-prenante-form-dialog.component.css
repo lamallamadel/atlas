@@ -1,11 +1,5 @@
 @use '../../styles/variables' as vars;
 
-.elegant-dialog {
-  .mat-mdc-dialog-container {
-    padding: 0;
-  }
-}
-
 .dialog-title-elegant {
   display: flex;
   align-items: center;
@@ -14,13 +8,6 @@
   margin: 0 !important;
   border-bottom: 2px solid var(--ds-divider);
   background: linear-gradient(135deg, var(--ds-marine-hl) 0%, var(--ds-surface) 100%);
-
-  mat-icon {
-    color: var(--ds-marine);
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
-  }
 
   span {
     font-size: var(--font-size-2);
@@ -50,12 +37,6 @@
     align-items: center;
     gap: 8px;
     min-width: 120px;
-
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
   }
 }
 
@@ -65,25 +46,9 @@
   gap: 24px;
 }
 
-button[mat-raised-button] {
-  mat-spinner {
-    display: inline-block;
-  }
-
-  mat-spinner ::ng-deep circle {
-    stroke: white;
-  }
-}
-
 @media (max-width: 599px) {
   .dialog-title-elegant {
     padding: 20px 16px 12px !important;
-
-    mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
 
     span {
       font-size: var(--font-size-1);

@@ -119,29 +119,11 @@
   color: var(--ds-text);
 }
 
-.form-section mat-form-field {
-  width: 100%;
-  display: block;
-  margin-bottom: 12px;
-}
-
 .form-actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
   margin-top: 16px;
-}
-
-mat-list-item.selected {
-  background: rgba(63, 81, 181, 0.1);
-}
-
-mat-list-item {
-  border-bottom: 1px solid var(--ds-divider);
-}
-
-mat-list-item:hover {
-  background: rgba(0, 0, 0, 0.04);
 }
 
 @media (max-width: 1200px) {

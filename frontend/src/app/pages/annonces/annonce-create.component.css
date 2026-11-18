@@ -42,89 +42,6 @@
   color: var(--ds-error);
 }
 
-/* ========================================
-   MAT-STEPPER STYLING
-   ======================================== */
-
-::ng-deep .annonce-stepper {
-  background: transparent;
-}
-
-::ng-deep .annonce-stepper .mat-stepper-horizontal {
-  background: transparent;
-}
-
-::ng-deep .annonce-stepper .mat-horizontal-stepper-header-container {
-  margin-bottom: var(--spacing-8);
-  padding: var(--spacing-4);
-  background: var(--ds-surface-2);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-::ng-deep .annonce-stepper .mat-step-header {
-  padding: var(--spacing-4);
-  border-radius: var(--radius-md);
-  transition: var(--transition-base);
-}
-
-::ng-deep .annonce-stepper .mat-step-header:hover {
-  background: color-mix(in oklab, var(--ds-marine) 10%, transparent);
-}
-
-::ng-deep .annonce-stepper .mat-step-header.cdk-keyboard-focused,
-::ng-deep .annonce-stepper .mat-step-header.cdk-program-focused {
-  background: color-mix(in oklab, var(--ds-marine) 20%, transparent);
-}
-
-::ng-deep .annonce-stepper .mat-step-header .mat-step-icon {
-  background-color: var(--ds-text-faint);
-  color: var(--ds-surface);
-  width: 32px;
-  height: 32px;
-  margin-right: var(--spacing-2);
-}
-
-::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-selected {
-  background-color: var(--ds-marine);
-  color: var(--ds-surface);
-}
-
-::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-state-done {
-  background-color: var(--ds-success);
-  color: var(--ds-surface);
-}
-
-::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-state-edit {
-  background-color: var(--ds-marine);
-  color: var(--ds-surface);
-}
-
-::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-state-error {
-  background-color: var(--ds-error);
-  color: var(--ds-surface);
-}
-
-::ng-deep .annonce-stepper .mat-step-label {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--ds-text-muted);
-  white-space: nowrap;
-  overflow: visible !important;
-  text-overflow: unset !important;
-}
-
-::ng-deep .annonce-stepper .mat-step-label-selected {
-  color: var(--ds-marine-hover);
-  font-weight: var(--font-weight-semibold);
-}
-
-::ng-deep .annonce-stepper .mat-stepper-horizontal-line {
-  border-top-color: var(--ds-border);
-  border-top-width: 2px;
-  margin: 0 var(--spacing-2);
-}
-
 .step-label {
   display: flex;
   align-items: center;
@@ -163,75 +80,12 @@
   border-bottom: 2px solid var(--ds-marine-hl);
 }
 
-/* ========================================
-   FORM FIELDS WITH MATERIAL
-   ======================================== */
-
-::ng-deep .step-form .mat-form-field {
-  display: block;
-  margin-bottom: var(--spacing-4);
-}
-
-::ng-deep .step-form .mat-form-field.full-width {
-  width: 100%;
-}
-
-::ng-deep .step-form .mat-form-field.half-width {
-  width: calc(50% - var(--spacing-2));
-}
-
-::ng-deep .step-form .mat-form-field.full-grid-width {
-  grid-column: 1 / -1;
-  width: 100%;
-}
-
 .form-row {
   display: flex;
   flex-wrap: wrap;
   /* Allow wrapping for better responsive behavior */
   gap: var(--spacing-4);
   margin-bottom: var(--spacing-4);
-}
-
-::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
-  color: var(--ds-border);
-}
-
-::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-thick {
-  color: var(--ds-marine);
-}
-
-::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
-  color: var(--ds-marine);
-  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ds-marine) 20%, transparent);
-}
-
-::ng-deep .mat-form-field-appearance-outline.mat-form-field-invalid .mat-form-field-outline-thick {
-  color: var(--ds-error);
-}
-
-::ng-deep .mat-form-field-appearance-outline .mat-form-field-label {
-  color: var(--ds-text-muted);
-}
-
-::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-label {
-  color: var(--ds-marine);
-}
-
-::ng-deep .mat-form-field-appearance-outline.mat-form-field-invalid .mat-form-field-label {
-  color: var(--ds-error);
-}
-
-::ng-deep .mat-error {
-  font-size: var(--font-size-xs);
-  color: var(--ds-error);
-  margin-top: var(--spacing-1);
-}
-
-::ng-deep .mat-hint {
-  font-size: var(--font-size-xs);
-  color: var(--ds-text-muted);
-  margin-top: var(--spacing-1);
 }
 
 .required {
@@ -396,12 +250,6 @@
   gap: var(--spacing-2);
 }
 
-.photo-error-placeholder mat-icon {
-  font-size: 48px;
-  width: 48px;
-  height: 48px;
-}
-
 .photo-overlay {
   position: absolute;
   top: 0;
@@ -447,10 +295,6 @@
   margin-bottom: var(--spacing-4);
 }
 
-::ng-deep .json-field .mat-form-field-wrapper {
-  padding-bottom: 0;
-}
-
 .json-editor {
   font-family: 'Courier New', Consolas, monospace;
   font-size: var(--font-size-sm);
@@ -491,42 +335,6 @@
   gap: var(--spacing-2);
 }
 
-::ng-deep .btn-spinner {
-  display: inline-block;
-}
-
-::ng-deep .btn-spinner .mat-progress-spinner circle {
-  stroke: currentColor;
-}
-
-/* ========================================
-   MATERIAL BUTTON OVERRIDES
-   ======================================== */
-
-::ng-deep .mat-raised-button {
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-base);
-}
-
-::ng-deep .mat-raised-button:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-::ng-deep .mat-raised-button:active {
-  box-shadow: var(--shadow-sm);
-  transform: translateY(0);
-}
-
-::ng-deep .mat-stroked-button {
-  border-width: 2px;
-  transition: var(--transition-base);
-}
-
-::ng-deep .mat-stroked-button:hover {
-  background: var(--ds-surface-2);
-}
-
 /* ========================================
    RESPONSIVE DESIGN
    ======================================== */
@@ -548,10 +356,6 @@
     flex-direction: column;
   }
 
-  ::ng-deep .step-form .mat-form-field.half-width {
-    width: 100%;
-  }
-
   .photos-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: var(--spacing-3);
@@ -563,14 +367,6 @@
 
   .step-actions button {
     width: 100%;
-  }
-
-  ::ng-deep .annonce-stepper .mat-horizontal-stepper-header-container {
-    padding: var(--spacing-2);
-  }
-
-  ::ng-deep .annonce-stepper .mat-step-header {
-    padding: var(--spacing-2);
   }
 
   .step-label {
@@ -595,10 +391,5 @@
 
   .photos-grid {
     grid-template-columns: 1fr;
-  }
-
-  ::ng-deep .annonce-stepper .mat-step-header .mat-step-icon {
-    width: 28px;
-    height: 28px;
   }
 }

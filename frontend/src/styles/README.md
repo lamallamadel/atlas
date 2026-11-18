@@ -12,7 +12,7 @@ styles/
 ├── _typography.scss             # Typography mixins and modular scale
 ├── animations.css               # Animation utilities
 ├── document-preview-dialog.css  # Document preview styles
-├── material-overrides.css       # Angular Material customizations
+├── cdk-overlay-backdrops.css    # Transparent backdrops for CDK overlays (menus, popovers)
 ├── pages.css                    # Page-specific styles
 ├── print.scss                   # Print media styles
 ├── shepherd-theme.css           # Tour/guide styling

@@ -99,11 +99,6 @@
       background-color: var(--ds-marine-hl);
     }
 
-    mat-icon {
-      margin-right: 8px;
-      color: var(--ds-text-faint);
-    }
-
     .item-content {
       flex: 1;
 
@@ -136,12 +131,6 @@
     margin-top: 24px;
     display: flex;
     gap: 12px;
-
-    button {
-      mat-icon {
-        margin-right: 8px;
-      }
-    }
   }
 
   .export-controls {
@@ -150,17 +139,6 @@
     align-items: center;
     margin-bottom: 20px;
     flex-wrap: wrap;
-
-    mat-form-field {
-      flex: 0 0 auto;
-      min-width: 200px;
-    }
-
-    button {
-      mat-icon {
-        margin-right: 8px;
-      }
-    }
   }
 
   .table-container {

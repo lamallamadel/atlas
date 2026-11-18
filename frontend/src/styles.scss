@@ -23,7 +23,7 @@
 
 @import './styles/animations.css';
 @import './styles/pages.css';
-@import './styles/material-overrides.css';
+@import './styles/cdk-overlay-backdrops.css';
 @import './styles/document-preview-dialog.css';
 
 @include meta.load-css('styles/_color-utilities.scss');
@@ -46,7 +46,7 @@
 
 /*
   Global overflow guard.
-  Angular Material + flex layouts can introduce a permanent horizontal scrollbar
+  Some flex layouts can introduce a permanent horizontal scrollbar
   (e.g., table min-width, subpixel rounding). We explicitly disallow horizontal
   scrolling at the application shell level.
 */

@@ -41,13 +41,6 @@
   color: var(--ds-text-faint);
 }
 
-.no-results mat-icon {
-  font-size: 64px;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 16px;
-}
-
 .search-results {
   background: var(--ds-surface);
   border-radius: 8px;
@@ -142,12 +135,6 @@
   color: var(--ds-text-muted);
 }
 
-.result-author mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-}
-
 .view-link {
   display: flex;
   align-items: center;
@@ -160,12 +147,6 @@
 
 .view-link:hover {
   text-decoration: underline;
-}
-
-.view-link mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
 }
 
 @media (max-width: 768px) {

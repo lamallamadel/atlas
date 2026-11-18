@@ -161,17 +161,6 @@ details[open] .ds-details__summary::after { transform: rotate(90deg); }
   margin-top: 16px;
 }
 
-.variable-tips mat-expansion-panel {
-  box-shadow: none;
-  border: 1px solid var(--ds-divider);
-}
-
-.variable-tips mat-panel-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .variable-tips ul {
   margin: 0;
   padding-left: 24px;

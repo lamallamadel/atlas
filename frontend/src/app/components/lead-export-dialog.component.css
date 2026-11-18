@@ -3,26 +3,11 @@
   max-width: 800px;
 }
 
-h2[mat-dialog-title] {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 16px 0;
-  font-size: 24px;
-  font-weight: 500;
-}
-
 .title-icon {
   color: var(--ds-marine);
   font-size: 28px;
   width: 28px;
   height: 28px;
-}
-
-mat-dialog-content {
-  padding: 0 24px;
-  max-height: 70vh;
-  overflow-y: auto;
 }
 
 .export-section {
@@ -99,10 +84,6 @@ mat-dialog-content {
   height: 20px;
 }
 
-mat-divider {
-  margin: 8px 0;
-}
-
 .filters-section {
   display: flex;
   flex-direction: column;
@@ -156,12 +137,6 @@ mat-divider {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
-}
-
-mat-dialog-actions {
-  padding: 16px 24px;
-  margin: 0;
-  border-top: 1px solid var(--ds-divider);
 }
 
 @media (max-width: 768px) {

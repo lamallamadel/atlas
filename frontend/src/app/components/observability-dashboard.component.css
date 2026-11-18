@@ -323,17 +323,6 @@
   cursor: help;
 }
 
-:host ::ng-deep .mat-mdc-menu-item {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-2);
-}
-
-:host ::ng-deep .mat-mdc-menu-item .ds-icon {
-  flex-shrink: 0;
-  color: var(--ds-text-muted);
-}
-
 /* ─────────── Alert banners ─────────── */
 .obs-alert {
   display: flex;

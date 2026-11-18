@@ -51,14 +51,6 @@
   color: var(--ds-text-faint);
 }
 
-.empty-state mat-icon {
-  font-size: 64px;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
 .empty-state p {
   margin: 0;
   font-size: 16px;
@@ -72,10 +64,6 @@
 
 .template-option:hover {
   background: var(--ds-bg);
-}
-
-.template-option.mat-mdc-list-option.mdc-list-item--selected {
-  background: var(--ds-marine-hl);
 }
 
 .template-card {

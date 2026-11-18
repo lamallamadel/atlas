@@ -22,12 +22,6 @@
   color: var(--ds-warning);
 }
 
-.queue-indicator mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-}
-
 .template-chip-container {
   padding: 12px 16px 0;
 }
@@ -55,10 +49,6 @@
 .variable-field {
   width: 100%;
   margin: 0;
-}
-
-.variable-field .mat-mdc-text-field-wrapper {
-  padding-bottom: 0;
 }
 
 .input-wrapper {
@@ -122,12 +112,6 @@
 
 .send-button.sending {
   pointer-events: none;
-}
-
-.send-button mat-icon {
-  font-size: 24px;
-  width: 24px;
-  height: 24px;
 }
 
 @media (max-width: 768px) {

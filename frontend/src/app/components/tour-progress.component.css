@@ -55,11 +55,6 @@
   margin-bottom: 16px;
 }
 
-.progress-bar-container mat-progress-bar {
-  height: 8px;
-  border-radius: 4px;
-}
-
 .progress-actions {
   display: flex;
   justify-content: flex-end;
@@ -129,12 +124,6 @@
   border-radius: 50%;
 }
 
-.tour-icon mat-icon {
-  font-size: 28px;
-  width: 28px;
-  height: 28px;
-}
-
 .tour-card-title {
   font-size: 18px;
   font-weight: 600;
@@ -179,14 +168,6 @@
   font-weight: 500;
 }
 
-.completed-chip mat-icon {
-  color: white;
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  margin-right: 4px;
-}
-
 .tour-card-actions {
   display: flex;
   gap: 8px;
@@ -220,11 +201,6 @@
   background-color: var(--ds-marine-hl);
   border-left: 4px solid var(--ds-marine);
   border-radius: 4px;
-}
-
-.tour-info-banner mat-icon {
-  color: var(--ds-marine);
-  margin-top: 2px;
 }
 
 .banner-content h3 {

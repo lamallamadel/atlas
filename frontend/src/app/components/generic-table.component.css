@@ -26,27 +26,6 @@ table {
   transition: var(--transition-shadow);
 }
 
-/* Sticky Header */
-table.sticky-header {
-  .mat-header-row {
-    position: sticky;
-    top: 0;
-    z-index: var(--z-index-sticky);
-    background: var(--ds-surface);
-  }
-}
-
-/* Header Styles */
-.mat-header-cell {
-  font-weight: var(--font-weight-semibold);
-  color: var(--ds-text-muted);
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: var(--ds-surface-2);
-  border-bottom: 2px solid var(--ds-marine);
-}
-
 .resizable-header {
   position: relative;
   padding-right: var(--spacing-8) !important;
@@ -93,18 +72,6 @@ table.sticky-header {
   background: var(--ds-marine);
 }
 
-/* Row Styles */
-.mat-row {
-  transition: all var(--duration-normal) ease-in-out;
-  cursor: default;
-}
-
-.mat-row:hover {
-  background-color: color-mix(in oklab, var(--ds-marine) 10%, transparent);
-  box-shadow: var(--shadow-2);
-  transform: translateY(-1px);
-}
-
 .clickable-row {
   cursor: pointer;
   transition: background-color 150ms ease, transform 150ms ease;
@@ -125,13 +92,6 @@ table.sticky-header {
 
 .selected-row:hover {
   background-color: color-mix(in oklab, var(--ds-marine) 30%, transparent) !important;
-}
-
-/* Cell Styles */
-.mat-cell {
-  color: var(--ds-text);
-  font-size: var(--font-size-sm);
-  padding: var(--spacing-4) var(--spacing-3);
 }
 
 /* Ensure raw HTML injected via innerHTML can use global badge styles */
@@ -338,13 +298,6 @@ table.sticky-header {
   border-top: 1px solid var(--ds-divider);
 }
 
-/* Paginator */
-mat-paginator {
-  background: var(--ds-surface-2);
-  border-top: 1px solid var(--ds-border);
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
-}
-
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .table-wrapper {
@@ -370,30 +323,6 @@ mat-paginator {
   }
 }
 
-/* Material Design Overrides for better integration */
-::ng-deep {
-  .mat-sort-header-arrow {
-    color: var(--ds-marine);
-  }
-
-  .mat-checkbox-checked.mat-accent .mat-checkbox-background {
-    background-color: var(--ds-marine);
-  }
-
-  .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background {
-    background-color: var(--ds-marine);
-  }
-}
-
-/* Elevation Changes on Hover */
-.mat-elevation-z2 {
-  box-shadow: var(--shadow-2);
-}
-
-.mat-row:hover {
-  z-index: var(--z-default);
-}
-
 /* Print Styles */
 @media print {
   .resize-handle {
@@ -402,11 +331,6 @@ mat-paginator {
 
   .actions-cell {
     display: none;
-  }
-
-  .mat-row:hover {
-    box-shadow: none;
-    transform: none;
   }
 
   .card-container .data-card {

@@ -129,10 +129,6 @@
   color: var(--ds-error) !important;
 }
 
-.overdue-text mat-icon {
-  color: var(--ds-error) !important;
-}
-
 .approaching-text {
   color: var(--ds-warning) !important;
 }

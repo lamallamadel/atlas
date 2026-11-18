@@ -171,13 +171,6 @@
   cursor: grabbing;
 }
 
-.drag-handle mat-icon {
-  color: var(--ds-text-muted);
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-}
-
 .photo-title {
   padding: 12px;
   font-size: 14px;
@@ -279,12 +272,6 @@
 
 .lightbox-nav:hover {
   background-color: rgba(255, 255, 255, 0.2);
-}
-
-.lightbox-nav mat-icon {
-  font-size: 36px;
-  width: 36px;
-  height: 36px;
 }
 
 .lightbox-prev {
@@ -524,12 +511,6 @@ kbd {
     height: 48px;
   }
 
-  .lightbox-nav mat-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-  }
-
   .lightbox-prev {
     left: 8px;
   }
@@ -601,21 +582,9 @@ kbd {
     padding: 0;
   }
 
-  .control-btn mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-  }
-
   .lightbox-nav {
     width: 40px;
     height: 40px;
-  }
-
-  .lightbox-nav mat-icon {
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
   }
 
   .lightbox-image-container {

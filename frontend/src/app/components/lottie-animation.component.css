@@ -78,12 +78,6 @@
   outline-offset: 2px;
 }
 
-.control-btn mat-icon {
-  width: 20px;
-  height: 20px;
-  font-size: 20px;
-}
-
 .speed-control {
   display: flex;
   align-items: center;
@@ -211,12 +205,6 @@
   .control-btn {
     width: 28px;
     height: 28px;
-  }
-
-  .control-btn mat-icon {
-    width: 18px;
-    height: 18px;
-    font-size: 18px;
   }
 
   .speed-slider {

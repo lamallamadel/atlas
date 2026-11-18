@@ -151,12 +151,6 @@
   color: var(--ds-warning);
 }
 
-.preview-note mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-}
-
 @media (max-width: 1200px) {
   .editor-layout {
     grid-template-columns: 1fr;

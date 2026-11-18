@@ -3,26 +3,11 @@
   max-width: 800px;
 }
 
-h2[mat-dialog-title] {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 16px 0;
-  font-size: 24px;
-  font-weight: 500;
-}
-
 .title-icon {
   color: var(--ds-marine);
   font-size: 28px;
   width: 28px;
   height: 28px;
-}
-
-mat-dialog-content {
-  padding: 0 24px;
-  max-height: 70vh;
-  overflow-y: auto;
 }
 
 .import-section {
@@ -166,11 +151,6 @@ mat-dialog-content {
 
 .strategy-option:hover {
   background-color: var(--ds-bg);
-}
-
-.strategy-option.mat-radio-button-checked {
-  border-color: var(--ds-marine);
-  background-color: var(--ds-marine-hl);
 }
 
 .option-content {
@@ -437,12 +417,6 @@ mat-dialog-content {
   font-size: 20px;
   width: 20px;
   height: 20px;
-}
-
-mat-dialog-actions {
-  padding: 16px 24px;
-  margin: 0;
-  border-top: 1px solid var(--ds-divider);
 }
 
 @media (max-width: 768px) {

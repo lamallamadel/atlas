@@ -55,15 +55,6 @@
   padding: var(--ds-space-3) var(--ds-space-4);
   border-bottom: 1px solid var(--ds-divider);
   flex-shrink: 0;
-
-  mat-button-toggle-group {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  mat-button-toggle {
-    font-size: var(--ds-text-xs);
-  }
 }
 
 .notification-list {
@@ -78,14 +69,6 @@
     justify-content: center;
     padding: var(--ds-space-12) var(--ds-space-4);
     color: var(--ds-text-muted);
-
-    mat-icon {
-      font-size: 64px;
-      width: 64px;
-      height: 64px;
-      margin-bottom: var(--ds-space-4);
-      opacity: 0.5;
-    }
 
     p {
       margin: 0;
@@ -195,12 +178,6 @@
     flex-shrink: 0;
     opacity: 0;
     transition: opacity var(--ds-transition-fast);
-
-    ds-button mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
   }
 
   &:hover .notification-actions {

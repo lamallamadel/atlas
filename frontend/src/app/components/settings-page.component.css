@@ -132,10 +132,6 @@
   margin-bottom: 16px;
 }
 
-.checkbox-group mat-checkbox {
-  display: block;
-}
-
 .checkbox-label {
   display: flex;
   flex-direction: column;
@@ -173,16 +169,8 @@
   flex: 1;
 }
 
-.notification-info mat-icon {
-  color: var(--ds-marine);
-}
-
 .notification-info ds-icon {
   color: var(--ds-marine);
-}
-
-.dark-theme .notification-info mat-icon {
-  color: var(--ds-marine-light);
 }
 
 .dark-theme .notification-info ds-icon {
@@ -218,22 +206,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
-}
-
-.theme-toggle-group mat-button-toggle {
-  height: 80px;
-}
-
-.theme-toggle-group mat-button-toggle mat-icon {
-  font-size: 32px;
-  width: 32px;
-  height: 32px;
-  margin-bottom: 8px;
-}
-
-.theme-toggle-group mat-button-toggle span {
-  display: block;
-  font-size: 14px;
 }
 
 .preview-card {
@@ -346,7 +318,6 @@
   color: var(--ds-marine-light);
 }
 
-.shortcuts-hint mat-icon,
 .shortcuts-hint ds-icon {
   font-size: 18px;
   width: 18px;
@@ -381,19 +352,8 @@ kbd {
   margin-bottom: 12px;
 }
 
-.integration-header mat-icon {
-  color: var(--ds-marine);
-  font-size: 32px;
-  width: 32px;
-  height: 32px;
-}
-
 .integration-header ds-icon {
   color: var(--ds-marine);
-}
-
-.dark-theme .integration-header mat-icon {
-  color: var(--ds-marine-light);
 }
 
 .dark-theme .integration-header ds-icon {
@@ -530,15 +490,6 @@ ds-card.settings-card {
   }
 }
 
-/* Form validation feedback */
-mat-form-field.ng-invalid.ng-touched .mat-form-field-outline {
-  border-color: var(--ds-error);
-}
-
-mat-form-field.ng-valid.ng-touched .mat-form-field-outline {
-  border-color: var(--ds-success);
-}
-
 /* Hover effects */
 .notification-item:hover,
 .integration-item:hover {
@@ -557,9 +508,3 @@ button[disabled] {
   cursor: not-allowed;
 }
 
-/* Smooth transitions */
-mat-slide-toggle,
-mat-checkbox,
-mat-button-toggle {
-  transition: all 0.2s ease;
-}

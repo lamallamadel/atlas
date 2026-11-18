@@ -1,0 +1,14 @@
+/* Transparent backdrops for CDK overlays that should dismiss on click
+   without visually dimming the page (menus, popovers, context menus). */
+
+.cdk-overlay-backdrop.rpt-chart-menu-backdrop {
+  background: transparent;
+}
+
+.cdk-overlay-backdrop.obs-export-menu-backdrop {
+  background: transparent;
+}
+
+.cdk-overlay-backdrop.ds-menu-backdrop {
+  background: transparent;
+}

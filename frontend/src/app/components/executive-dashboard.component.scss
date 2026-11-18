@@ -13,10 +13,6 @@
       font-size: 28px;
       font-weight: 500;
     }
-
-    button mat-icon {
-      margin-right: 8px;
-    }
   }
 
   .kpi-grid {
@@ -40,13 +36,6 @@
           display: flex;
           align-items: center;
           justify-content: center;
-
-          mat-icon {
-            color: var(--ds-text-inverse);
-            font-size: 32px;
-            width: 32px;
-            height: 32px;
-          }
         }
 
         .kpi-details {
@@ -76,12 +65,6 @@
 
             &.negative {
               color: var(--ds-error);
-            }
-
-            mat-icon {
-              font-size: 16px;
-              width: 16px;
-              height: 16px;
             }
           }
         }
@@ -149,10 +132,6 @@
           gap: 16px;
           padding: 16px 20px;
 
-          mat-icon {
-            flex-shrink: 0;
-          }
-
           .insight-text {
             flex: 1;
 
@@ -169,10 +148,6 @@
               line-height: 1.5;
             }
           }
-        }
-
-        mat-divider {
-          margin: 0;
         }
       }
     }
