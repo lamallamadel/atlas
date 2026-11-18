@@ -74,3 +74,64 @@ async def extraire_criteres(req: ExtractionRequest, _: str = Depends(verify_api_
     criteres, preuves, moteur = await extract_criteria(textes)
     logger.info("Extraction critères : %d champ(s) via %s", len(criteres), moteur)
     return ExtractionResponse(criteres=criteres, preuves=preuves, moteur=moteur)
+
+
+# ─── Matching inverse : un bien face à plusieurs acheteurs ───────────────────
+
+from match.engine import exclusion_reason, score_bien  # noqa: E402
+
+
+class Acheteur(BaseModel):
+    client_id: int
+    criteres: Criteria
+
+
+class AcheteursRequest(BaseModel):
+    bien: Bien
+    acheteurs: list[Acheteur] = Field(default=[], max_length=2000)
+    seuil: int = Field(default=0, ge=0, le=100)
+
+
+class AcheteurResult(BaseModel):
+    client_id: int
+    score_match: int
+    raisons: list[str]
+    alertes: list[str]
+
+
+class AcheteursResponse(BaseModel):
+    resultats: list[AcheteurResult]
+    exclus: int
+    sous_seuil: int
+
+
+@router.post("/api/match/acheteurs", response_model=AcheteursResponse)
+def acheteurs(req: AcheteursRequest, _: str = Depends(verify_api_key)):
+    """Acheteurs dont les critères correspondent au bien, au-dessus du seuil, triés par score."""
+    results: list[AcheteurResult] = []
+    excluded = below = 0
+    for a in req.acheteurs:
+        if a.criteres.is_empty():
+            continue
+        if exclusion_reason(a.criteres, req.bien):
+            excluded += 1
+            continue
+        r = score_bien(a.criteres, req.bien)
+        if r.score_match < req.seuil:
+            below += 1
+            continue
+        results.append(AcheteurResult(client_id=a.client_id, score_match=r.score_match, raisons=r.raisons, alertes=r.alertes))
+    results.sort(key=lambda x: (-x.score_match, x.client_id))
+    logger.info("Matching inverse bien %s : %d acheteur(s) retenu(s) sur %d", req.bien.id, len(results), len(req.acheteurs))
+    return AcheteursResponse(resultats=results, exclus=excluded, sous_seuil=below)
+
+
+# ---------- Message de proposition d'un bien à un acheteur ----------
+
+from match.pitch import PitchRequest, PitchResponse, generate_pitch  # noqa: E402
+
+
+@router.post("/api/match/proposition", response_model=PitchResponse)
+async def proposition(req: PitchRequest, _: str = Depends(verify_api_key)):
+    """Brouillon de message (WhatsApp ou SMS) à relire par l'agent avant envoi."""
+    return await generate_pitch(req)

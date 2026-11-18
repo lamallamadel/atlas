@@ -134,3 +134,27 @@ def test_endpoint_sans_critere_refuse():
 def test_endpoint_budget_incoherent_refuse():
     body = {"client_id": 7, "criteres": {"budget_min": 2_000_000, "budget_max": 1_000_000}}
     assert client.post("/api/match/calculer", json=body, headers=HEADERS).status_code == 422
+
+
+# ─── Matching inverse ────────────────────────────────────────────────────────
+
+def test_acheteurs_pour_un_bien():
+    body = {
+        "bien": bien(id=9, price=1_000_000, surface=90).model_dump(),
+        "acheteurs": [
+            {"client_id": 1, "criteres": {"cities": ["Tanger"], "budget_max": 1_100_000}},   # 100
+            {"client_id": 2, "criteres": {"cities": ["Rabat"]}},                           # exclu
+            {"client_id": 3, "criteres": {"surface_min": 150}},                            # 36 < seuil
+            {"client_id": 4, "criteres": {}},                                              # ignoré
+            {"client_id": 5, "criteres": {"budget_max": 1_000_000, "surface_min": 100}},  # 81
+        ],
+        "seuil": 60,
+    }
+    r = client.post("/api/match/acheteurs", json=body, headers=HEADERS)
+    assert r.status_code == 200
+    data = r.json()
+    assert [x["client_id"] for x in data["resultats"]] == [1, 5]
+    assert data["resultats"][0]["score_match"] == 100
+    assert data["exclus"] == 1
+    assert data["sous_seuil"] == 1
+    assert "Ville recherchée (Tanger)" in data["resultats"][0]["raisons"]

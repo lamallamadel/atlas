@@ -22,6 +22,10 @@ public interface DossierRepository
             @Param("phone") String phone,
             @Param("excludedStatuses") List<DossierStatus> excludedStatuses);
 
+    /** Acheteurs en cours ayant des critères de recherche (matching inverse). */
+    List<Dossier> findByOrgIdAndSearchCriteriaIsNotNullAndStatusNotIn(
+            String orgId, java.util.Collection<DossierStatus> statuses);
+
     @Query(
             "SELECT DISTINCT d FROM Dossier d WHERE d.leadPhone = :phone AND d.status NOT IN :excludedStatuses")
     List<Dossier> findByLeadPhoneAndStatusNotIn(

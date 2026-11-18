@@ -1,0 +1,43 @@
+<section class="pc" data-testid="pitch-composer" aria-label="Proposer ce bien au client">
+  <div class="pc__options">
+    <ds-radio-group label="Langue" [options]="languageOptions" [inline]="true"
+                    [(ngModel)]="language" (ngModelChange)="onOptionsChange()" name="pitch-language"></ds-radio-group>
+    <ds-radio-group label="Canal" [options]="channelOptions" [inline]="true"
+                    [(ngModel)]="channel" (ngModelChange)="onOptionsChange()" name="pitch-channel"></ds-radio-group>
+  </div>
+
+  @if (loading()) {
+    <ds-skeleton variant="rect" width="100%" height="120px" [animate]="true"></ds-skeleton>
+  } @else if (loadError()) {
+    <p class="pc__muted">Le brouillon n'a pas pu être préparé.</p>
+    <ds-button variant="ghost" size="sm" prefixIcon="refresh" (dsClick)="loadDraft()">Réessayer</ds-button>
+  } @else if (draft(); as d) {
+    @if (d.blockers.length) {
+      <ul class="pc__blockers" data-testid="pitch-blockers">
+        @for (b of d.blockers; track b) { <li><ds-icon name="alert-circle" [size]="16"></ds-icon> {{ b }}</li> }
+      </ul>
+      @if (suggestSms()) {
+        <ds-button variant="ghost" size="sm" (dsClick)="switchToSms()" data-testid="pitch-switch-sms">Envoyer par SMS</ds-button>
+      }
+    }
+    @for (w of d.warnings; track w) { <p class="pc__warning">{{ w }}</p> }
+
+    <ds-textarea [label]="'Message à ' + (d.to || 'ce client') + ' (à relire avant envoi)'" [rows]="7"
+                 [ngModel]="message()" (ngModelChange)="message.set($event)" name="pitch-message"
+                 [error]="tooLong() ? 'Trop long pour ce canal' : null"></ds-textarea>
+    <div class="pc__meta">
+      <span class="pc__muted" data-testid="pitch-engine">
+        Rédigé par {{ engineLabel(d.engine) }}
+        @if (d.aiRejection) { — le texte de l'IA a été écarté ({{ d.aiRejection }}) }
+      </span>
+      <span class="pc__muted" [class.pc__over]="tooLong()">{{ message().length }} / {{ d.maxLength }}</span>
+    </div>
+
+    <div class="pc__actions">
+      <ds-button variant="ghost" size="sm" (dsClick)="closed.emit()">Annuler</ds-button>
+      <ds-button variant="ghost" size="sm" prefixIcon="refresh" (dsClick)="loadDraft()">Régénérer</ds-button>
+      <ds-button variant="marine" size="sm" prefixIcon="send" [loading]="sending()" [disabled]="!canSend()"
+                 (dsClick)="send()" data-testid="pitch-send">Envoyer</ds-button>
+    </div>
+  }
+</section>

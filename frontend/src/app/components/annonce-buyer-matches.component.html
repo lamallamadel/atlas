@@ -1,0 +1,81 @@
+<ds-card elevation="xs" class="bm" data-testid="annonce-buyer-matches">
+  <header class="bm__head">
+    <h2 class="bm__title">
+      <ds-icon name="users" [size]="16"></ds-icon>
+      Acheteurs potentiels
+      @if (newCount()) {
+        <ds-badge status="info" size="sm" [showDot]="false" data-testid="bm-new-count">{{ newCount() }} nouveau(x)</ds-badge>
+      }
+    </h2>
+    <ds-button variant="ghost" size="sm" prefixIcon="refresh" [loading]="refreshing()"
+               (dsClick)="refresh()" data-testid="bm-refresh">Actualiser</ds-button>
+  </header>
+
+  @if (loading()) {
+    <ds-skeleton variant="rect" width="100%" height="120px" [animate]="true"></ds-skeleton>
+  } @else if (loadError()) {
+    <ds-empty-state icon="alert-circle" title="Impossible de charger les acheteurs potentiels"
+                    description="Réessayez dans un instant."></ds-empty-state>
+  } @else if (!matches().length) {
+    <ds-empty-state icon="users" title="Aucun acheteur ne correspond pour le moment"
+                    description="Les dossiers dont les critères de recherche correspondent à ce bien apparaîtront ici."
+                    data-testid="bm-empty"></ds-empty-state>
+  } @else {
+    <ul class="bm__list" data-testid="bm-list">
+      @for (m of active(); track m.id) {
+        <li class="bm__item">
+          <ng-container *ngTemplateOutlet="row; context: { $implicit: m }"></ng-container>
+        </li>
+      }
+    </ul>
+    @if (dismissed().length) {
+      <p class="bm__muted">Écartés ({{ dismissed().length }})</p>
+      <ul class="bm__list bm__list--dismissed" data-testid="bm-dismissed">
+        @for (m of dismissed(); track m.id) {
+          <li class="bm__item">
+            <ng-container *ngTemplateOutlet="row; context: { $implicit: m }"></ng-container>
+          </li>
+        }
+      </ul>
+    }
+  }
+</ds-card>
+
+<ng-template #row let-m>
+  <div class="bm__item-head">
+    <a class="bm__link" [routerLink]="['/dossiers', m.dossierId]">{{ m.leadName || ('Dossier #' + m.dossierId) }}</a>
+    <div class="bm__badges">
+      @if (m.status === 'NEW') { <ds-badge status="info" size="sm" [showDot]="false">Nouveau</ds-badge> }
+      <ds-badge [status]="scoreStatus(m.score)" size="sm" [showDot]="false"
+                [attr.aria-label]="'Score ' + m.score + ' sur 100'">{{ m.score }}/100</ds-badge>
+      @if (m.status !== 'DISMISSED') {
+        <ds-button variant="ghost" size="sm" prefixIcon="send" (dsClick)="toggleComposer(m)"
+                   [attr.data-testid]="'bm-pitch-' + m.id">{{ composerFor() === m.id ? 'Fermer' : 'Proposer' }}</ds-button>
+      }
+      <ds-button variant="ghost" size="sm" [loading]="busyId() === m.id" (dsClick)="toggleDismiss(m)"
+                 [attr.data-testid]="'bm-toggle-' + m.id">
+        {{ m.status === 'DISMISSED' ? 'Rétablir' : 'Écarter' }}
+      </ds-button>
+    </div>
+  </div>
+  @if (m.reasons.length) {
+    <ul class="bm__reasons">
+      @for (x of m.reasons; track x) { <li><ds-icon name="check" [size]="12"></ds-icon> {{ x }}</li> }
+    </ul>
+  }
+  @if (m.alerts.length) {
+    <ul class="bm__alerts">
+      @for (x of m.alerts; track x) { <li><ds-icon name="alert-circle" [size]="12"></ds-icon> {{ x }}</li> }
+    </ul>
+  }
+  @if (m.pitchedAt) {
+    <p class="bm__pitched" [attr.data-testid]="'bm-pitched-' + m.id">
+      <ds-icon name="send" [size]="12"></ds-icon>
+      Proposé le {{ m.pitchedAt | date:'dd/MM/yyyy à HH:mm' }} par {{ channelLabel(m.pitchChannel) }}
+    </p>
+  }
+  @if (composerFor() === m.id) {
+    <app-annonce-pitch-composer [annonceId]="annonceId()" [match]="m"
+                                (sent)="onPitchSent(m, $event)" (closed)="composerFor.set(null)"></app-annonce-pitch-composer>
+  }
+</ng-template>

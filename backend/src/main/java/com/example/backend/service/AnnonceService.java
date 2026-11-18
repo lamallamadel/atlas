@@ -39,6 +39,7 @@ public class AnnonceService {
     private final MetricsService metricsService;
     @Nullable private final BrainScoringService brainScoringService;
     @Nullable private final OrganizationSettingsService organizationSettingsService;
+    @Nullable private final ReverseMatchingService reverseMatchingService;
 
     public AnnonceService(
             AnnonceRepository annonceRepository,
@@ -46,12 +47,15 @@ public class AnnonceService {
             @Autowired(required = false) @Nullable SearchService searchService,
             MetricsService metricsService,
             @Autowired(required = false) @Nullable BrainScoringService brainScoringService,
-            @Autowired(required = false) @Nullable OrganizationSettingsService organizationSettingsService) {
+            @Autowired(required = false) @Nullable
+                    OrganizationSettingsService organizationSettingsService,
+            @Autowired(required = false) @Nullable ReverseMatchingService reverseMatchingService) {
         this.annonceRepository = annonceRepository;
         this.annonceMapper = annonceMapper;
         this.searchService = searchService;
         this.metricsService = metricsService;
         this.brainScoringService = brainScoringService;
+        this.reverseMatchingService = reverseMatchingService;
         this.organizationSettingsService = organizationSettingsService;
     }
 
@@ -100,6 +104,7 @@ public class AnnonceService {
             brainScoringService.triggerFraudAsync(saved.getId());
             brainScoringService.triggerDuplicateCheckAsync(saved.getId());
         }
+        triggerBuyerMatching(saved.getId());
         return annonceMapper.toResponse(saved);
     }
 
@@ -175,6 +180,7 @@ public class AnnonceService {
             brainScoringService.triggerFraudAsync(updated.getId());
             brainScoringService.triggerDuplicateCheckAsync(updated.getId());
         }
+        triggerBuyerMatching(updated.getId());
         return annonceMapper.toResponse(updated);
     }
 
@@ -381,7 +387,8 @@ public class AnnonceService {
     @Transactional(readOnly = true)
     public Page<Annonce> findAll(
             AnnonceStatus status, String q, String city, String type, Pageable pageable) {
-        Specification<Annonce> spec = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+        Specification<Annonce> spec =
+                (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
         if (status != null) {
             spec =
@@ -433,14 +440,46 @@ public class AnnonceService {
     }
 
     private void checkAnnonceQuota(String orgId, Annonce annonce) {
-        if (AnnonceStatus.ACTIVE.equals(annonce.getStatus()) && organizationSettingsService != null) {
-            com.example.backend.dto.QuotaSettingsDto quotas = organizationSettingsService.getQuotas(orgId);
-            if (quotas != null && quotas.getMaxAnnonces() != null && quotas.getMaxAnnonces() != -1) {
-                long currentCount = annonceRepository.countByOrgIdAndStatus(orgId, AnnonceStatus.ACTIVE);
+        if (AnnonceStatus.ACTIVE.equals(annonce.getStatus())
+                && organizationSettingsService != null) {
+            com.example.backend.dto.QuotaSettingsDto quotas =
+                    organizationSettingsService.getQuotas(orgId);
+            if (quotas != null
+                    && quotas.getMaxAnnonces() != null
+                    && quotas.getMaxAnnonces() != -1) {
+                long currentCount =
+                        annonceRepository.countByOrgIdAndStatus(orgId, AnnonceStatus.ACTIVE);
                 if (currentCount >= quotas.getMaxAnnonces()) {
-                    throw new IllegalStateException("Annonce quota exceeded. Maximum allowed active annonces is " + quotas.getMaxAnnonces() + ".");
+                    throw new IllegalStateException(
+                            "Annonce quota exceeded. Maximum allowed active annonces is "
+                                    + quotas.getMaxAnnonces()
+                                    + ".");
                 }
             }
+        }
+    }
+
+    /**
+     * Acheteurs correspondant à l'annonce, calculés en arrière-plan une fois la transaction
+     * validée.
+     */
+    private void triggerBuyerMatching(Long annonceId) {
+        if (reverseMatchingService == null) {
+            return;
+        }
+        if (org.springframework.transaction.support.TransactionSynchronizationManager
+                .isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager
+                    .registerSynchronization(
+                            new org.springframework.transaction.support
+                                    .TransactionSynchronization() {
+                                @Override
+                                public void afterCommit() {
+                                    reverseMatchingService.triggerAsync(annonceId);
+                                }
+                            });
+        } else {
+            reverseMatchingService.triggerAsync(annonceId);
         }
     }
 }

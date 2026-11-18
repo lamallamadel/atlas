@@ -151,6 +151,48 @@ public class BrainClientService {
         }
     }
 
+    /**
+     * Matching inverse : acheteurs correspondant à un bien. Corps : {@code bien}, {@code acheteurs}
+     * [{client_id, criteres}], {@code seuil}. Réponse : {@code resultats} [{client_id, score_match,
+     * raisons, alertes}].
+     */
+    @SuppressWarnings("unchecked")
+    public Optional<Map<String, Object>> matchBuyers(Map<String, Object> body) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(API_KEY_HEADER, properties.getMatch().getApiKey());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            ResponseEntity<Map> response =
+                    restTemplate.postForEntity(
+                            properties.getMatch().getBaseUrl() + "/api/match/acheteurs",
+                            new HttpEntity<>(body, headers),
+                            Map.class);
+            return Optional.ofNullable((Map<String, Object>) response.getBody());
+        } catch (Exception e) {
+            log.warn("Buyer matching unavailable: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /** Brouillon de message proposant un bien à un acheteur (brain /api/match/proposition). */
+    @SuppressWarnings("unchecked")
+    public Optional<Map<String, Object>> generatePitch(Map<String, Object> body) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(API_KEY_HEADER, properties.getMatch().getApiKey());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            ResponseEntity<Map> response =
+                    restTemplate.postForEntity(
+                            properties.getMatch().getBaseUrl() + "/api/match/proposition",
+                            new HttpEntity<>(body, headers),
+                            Map.class);
+            return Optional.ofNullable((Map<String, Object>) response.getBody());
+        } catch (Exception e) {
+            log.warn("Pitch generation unavailable: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
     public Optional<ProposalResponse> generateProposal(ProposalRequest request) {
         try {
             HttpHeaders headers = new HttpHeaders();

@@ -6,6 +6,7 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PriceFormatPipe } from '../../pipes/price-format.pipe';
 import { AnnonceAiBadgesComponent } from '../../components/annonce-ai-badges.component';
 import { AnnonceVisionPanelComponent } from '../../components/annonce-vision-panel.component';
+import { AnnonceBuyerMatchesComponent } from '../../components/annonce-buyer-matches.component';
 import {
   DsButtonComponent,
   DsBadgeComponent,
@@ -28,6 +29,7 @@ import {
     DsEmptyStateComponent,
     AnnonceAiBadgesComponent,
     AnnonceVisionPanelComponent,
+    AnnonceBuyerMatchesComponent,
   ],
 })
 export class AnnonceDetailComponent implements OnInit {

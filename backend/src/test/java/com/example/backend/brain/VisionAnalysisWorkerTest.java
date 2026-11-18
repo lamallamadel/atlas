@@ -43,7 +43,7 @@ class VisionAnalysisWorkerTest {
     void setUp() {
         worker =
                 new VisionAnalysisWorker(
-                        annonceRepository, mediaRepository, mediaService, visionClient);
+                        annonceRepository, mediaRepository, mediaService, visionClient, null);
         annonce = new Annonce();
         annonce.setId(1L);
         annonce.setOrgId("org-1");

@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -281,6 +282,26 @@ public class GlobalExceptionHandler {
         pd.addProperty("value", String.valueOf(ex.getValue()));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
+                .body(pd);
+    }
+
+    /**
+     * Statut et message choisis par le service (409, 422…). Sans ce gestionnaire, ces exceptions
+     * tombaient dans le gestionnaire générique et sortaient en 500.
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ProblemDetail> handleResponseStatusException(
+            ResponseStatusException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+        ProblemDetail pd =
+                new ProblemDetail(
+                        "about:blank",
+                        status != null ? status.getReasonPhrase() : "Error",
+                        ex.getStatusCode().value(),
+                        ex.getReason() != null ? ex.getReason() : "Request failed",
+                        request.getRequestURI());
+        return ResponseEntity.status(ex.getStatusCode())
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(pd);
     }

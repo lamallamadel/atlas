@@ -97,6 +97,9 @@
     <!-- Photos : lecture par IA (pièces, équipements, mobilier, état…) et description proposée -->
     <app-annonce-vision-panel [annonceId]="annonce.id" (descriptionApplied)="loadAnnonce()"></app-annonce-vision-panel>
 
+    <!-- Dossiers acheteurs dont les critères correspondent à ce bien -->
+    <app-annonce-buyer-matches [annonceId]="annonce.id"></app-annonce-buyer-matches>
+
     <!-- Description -->
     @if (annonce.description) {
       <ds-card elevation="xs" class="ad-description-card">

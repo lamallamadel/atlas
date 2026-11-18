@@ -1,0 +1,118 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
+
+import { AnnonceBuyerMatchesComponent, sortMatches } from './annonce-buyer-matches.component';
+import { AnnonceBuyerMatchesApiService, BuyerMatch } from '../services/annonce-buyer-matches-api.service';
+import { DsToastService } from '../design-system';
+
+function match(partial: Partial<BuyerMatch> = {}): BuyerMatch {
+  return {
+    id: 1, dossierId: 10, leadName: 'Youssef', dossierStatus: 'QUALIFIED', score: 90,
+    reasons: ['Ville recherchée (Tanger)'], alerts: ['Piscine : non trouvé'], status: 'NEW', createdAt: null, pitchedAt: null, pitchChannel: null,
+    ...partial,
+  };
+}
+
+describe('sortMatches', () => {
+  it('met les écartés en dernier puis trie par score', () => {
+    const out = sortMatches([
+      match({ id: 1, score: 95, status: 'DISMISSED' }),
+      match({ id: 2, score: 70 }),
+      match({ id: 3, score: 85, status: 'SEEN' }),
+    ]);
+    expect(out.map((m) => m.id)).toEqual([3, 2, 1]);
+  });
+});
+
+describe('AnnonceBuyerMatchesComponent', () => {
+  let fixture: ComponentFixture<AnnonceBuyerMatchesComponent>;
+  let api: Record<'list' | 'refresh' | 'dismiss' | 'undismiss', ReturnType<typeof vi.fn>>;
+  let toast: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+
+  function create(list: BuyerMatch[] = [match()]) {
+    api.list.mockReturnValue(of(list));
+    fixture = TestBed.createComponent(AnnonceBuyerMatchesComponent);
+    fixture.componentRef.setInput('annonceId', 5);
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  beforeEach(() => {
+    api = { list: vi.fn(), refresh: vi.fn(), dismiss: vi.fn(), undismiss: vi.fn() };
+    toast = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
+    TestBed.configureTestingModule({
+      imports: [AnnonceBuyerMatchesComponent],
+      providers: [
+        provideRouter([]),
+        { provide: AnnonceBuyerMatchesApiService, useValue: api },
+        { provide: DsToastService, useValue: toast },
+      ],
+    });
+  });
+
+  it('affiche les acheteurs avec score, raisons, alertes et lien vers le dossier', () => {
+    const el = create();
+    expect(api.list).toHaveBeenCalledWith(5);
+    const text = el.textContent ?? '';
+    expect(text).toContain('Youssef');
+    expect(text).toContain('90/100');
+    expect(text).toContain('Ville recherchée (Tanger)');
+    expect(text).toContain('Piscine : non trouvé');
+    expect(el.querySelector('[data-testid="bm-new-count"]')?.textContent).toContain('1');
+    expect(el.querySelector('a')?.getAttribute('href')).toBe('/dossiers/10');
+  });
+
+  it('état vide', () => {
+    const el = create([]);
+    expect(el.querySelector('[data-testid="bm-empty"]')).not.toBeNull();
+  });
+
+  it('écarter puis rétablir', () => {
+    create();
+    api.dismiss.mockReturnValue(of(undefined));
+    api.undismiss.mockReturnValue(of(undefined));
+    const c = fixture.componentInstance;
+
+    c.toggleDismiss(c.matches()[0]);
+    expect(api.dismiss).toHaveBeenCalledWith(5, 1);
+    expect(c.dismissed().length).toBe(1);
+    expect(c.active().length).toBe(0);
+
+    c.toggleDismiss(c.matches()[0]);
+    expect(api.undismiss).toHaveBeenCalledWith(5, 1);
+    expect(c.matches()[0].status).toBe('SEEN');
+  });
+
+  it('actualiser remplace la liste', () => {
+    create([]);
+    api.refresh.mockReturnValue(of([match({ id: 2, score: 75, leadName: 'Salma' })]));
+    fixture.componentInstance.refresh();
+    fixture.detectChanges();
+    expect(api.refresh).toHaveBeenCalledWith(5);
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Salma');
+    expect(toast.success).toHaveBeenCalled();
+  });
+
+  it('IA indisponible : message dédié', () => {
+    create();
+    api.refresh.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 503 })));
+    fixture.componentInstance.refresh();
+    expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('indisponible'));
+    expect(fixture.componentInstance.refreshing()).toBe(false);
+  });
+
+  it('ouvre l\'éditeur puis affiche la proposition envoyée', () => {
+    create();
+    const c = fixture.componentInstance;
+    c.toggleComposer(c.matches()[0]);
+    expect(c.composerFor()).toBe(1);
+    c.onPitchSent(c.matches()[0], { outboundMessageId: 4, status: 'QUEUED', channel: 'SMS', pitchedAt: '2026-11-18T23:00:00' });
+    fixture.detectChanges();
+    expect(c.composerFor()).toBeNull();
+    expect(c.matches()[0].pitchChannel).toBe('SMS');
+    expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="bm-pitched-1"]')?.textContent).toContain('par SMS');
+  });
+});
