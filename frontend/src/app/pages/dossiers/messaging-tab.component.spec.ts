@@ -7,7 +7,7 @@ import {
   OutboundMessageApiService,
   OutboundMessageStatus} from '../../services/outbound-message-api.service';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
-import { MaterialTestingModule } from '../../testing/material-testing.module';
+import { CommonTestingModule } from '../../testing/common-testing.module';
 import { DsDialogService, DsToastService } from '../../design-system';
 
 describe('MessagingTabComponent', () => {
@@ -34,7 +34,7 @@ describe('MessagingTabComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        MaterialTestingModule,
+        CommonTestingModule,
         MessagingTabComponent,
         OutboundMessageFormComponent,
         OutboundMessageListComponent],

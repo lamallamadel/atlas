@@ -31,4 +31,4 @@ import { DsCardComponent } from '../design-system';
     provideHttpClientTesting(),
   ],
 })
-export class MaterialTestingModule { }
+export class CommonTestingModule { }

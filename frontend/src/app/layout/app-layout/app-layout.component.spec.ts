@@ -13,14 +13,14 @@ import { NotificationApiService } from '../../services/notification-api.service'
 import { KeyboardShortcutService } from '../../services/keyboard-shortcut.service';
 import { OnboardingTourService } from '../../services/onboarding-tour.service';
 import { TourDefinitionService } from '../../services/tour-definition.service';
-import { MaterialTestingModule } from '../../testing/material-testing.module';
+import { CommonTestingModule } from '../../testing/common-testing.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @Component({
   selector: 'app-global-search-bar',
   template: '',
   standalone: true,
-  imports: [RouterTestingModule, MaterialTestingModule]})
+  imports: [RouterTestingModule, CommonTestingModule]})
 class GlobalSearchBarStubComponent {}
 
 describe('AppLayoutComponent', () => {
@@ -98,7 +98,7 @@ describe('AppLayoutComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
-        MaterialTestingModule,
+        CommonTestingModule,
         BrowserAnimationsModule,
         AppLayoutComponent,
         GlobalSearchBarStubComponent],

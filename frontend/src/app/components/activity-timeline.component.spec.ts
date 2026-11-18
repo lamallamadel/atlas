@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivityTimelineComponent } from './activity-timeline.component';
-import { MaterialTestingModule } from '../testing/material-testing.module';
+import { CommonTestingModule } from '../testing/common-testing.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('ActivityTimelineComponent', () => {
@@ -10,7 +10,7 @@ describe('ActivityTimelineComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        MaterialTestingModule, 
+        CommonTestingModule, 
         BrowserAnimationsModule,
         ActivityTimelineComponent
       ]

@@ -17,14 +17,14 @@ import { MessageApiService } from '../../services/message-api.service';
 import { AppointmentApiService } from '../../services/appointment-api.service';
 import { ConsentementApiService } from '../../services/consentement-api.service';
 import { AuditEventApiService } from '../../services/audit-event-api.service';
-import { MaterialTestingModule } from '../../testing/material-testing.module';
+import { CommonTestingModule } from '../../testing/common-testing.module';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 
 @Component({
   selector: 'app-badge-status',
   template: '',
   imports: [
-    MaterialTestingModule, // centralized: animations + forms + material + http testing
+    CommonTestingModule, // centralized: animations + forms + http testing
   ]})
 class BadgeStatusStubComponent {
   readonly status = input<any>();
@@ -187,7 +187,7 @@ describe('DossierDetailComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
-        MaterialTestingModule, // centralized: animations + forms + material + http testing
+        CommonTestingModule, // centralized: animations + forms + http testing
         DossierDetailComponent,
         BadgeStatusStubComponent,
         PhoneFormatPipe],
