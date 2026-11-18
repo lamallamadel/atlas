@@ -5,6 +5,7 @@ import com.example.backend.entity.AnnonceMedia;
 import com.example.backend.repository.AnnonceMediaRepository;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.service.AnnonceMediaService;
+import com.example.backend.service.ReverseMatchingService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -15,6 +16,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -33,17 +36,20 @@ public class VisionAnalysisWorker {
     private final AnnonceMediaRepository mediaRepository;
     private final AnnonceMediaService mediaService;
     private final BrainVisionClient visionClient;
+    private final ReverseMatchingService reverseMatchingService;
     private final Set<Long> running = ConcurrentHashMap.newKeySet();
 
     public VisionAnalysisWorker(
             AnnonceRepository annonceRepository,
             AnnonceMediaRepository mediaRepository,
             AnnonceMediaService mediaService,
-            BrainVisionClient visionClient) {
+            BrainVisionClient visionClient,
+            @Autowired(required = false) @Nullable ReverseMatchingService reverseMatchingService) {
         this.annonceRepository = annonceRepository;
         this.mediaRepository = mediaRepository;
         this.mediaService = mediaService;
         this.visionClient = visionClient;
+        this.reverseMatchingService = reverseMatchingService;
     }
 
     public boolean isRunning(Long annonceId) {
@@ -143,6 +149,14 @@ public class VisionAnalysisWorker {
                 "Profil visuel de l'annonce {} calculé à partir de {} photo(s)",
                 annonceId,
                 analyses.size());
+        // Ce que l'IA a vu (meublé, état, équipements) change le matching : on le recalcule
+        if (reverseMatchingService != null) {
+            try {
+                reverseMatchingService.recompute(annonceId);
+            } catch (Exception e) {
+                log.warn("Matching inverse après analyse visuelle échoué : {}", e.getMessage());
+            }
+        }
     }
 
     private BrainVisionClient.Result analyzeOne(AnnonceMedia media, Map<String, Object> context) {

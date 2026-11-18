@@ -360,7 +360,7 @@ public class DossierMatchingService {
         return Optional.of(objectMapper.convertValue(stored, DossierSearchCriteria.class));
     }
 
-    static Map<String, Object> toBrainCriteria(DossierSearchCriteria c) {
+    public static Map<String, Object> toBrainCriteria(DossierSearchCriteria c) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("transaction_types", nullToEmpty(c.transactionTypes()));
         m.put("categories", nullToEmpty(c.categories()));
@@ -375,7 +375,7 @@ public class DossierMatchingService {
         return m;
     }
 
-    static Map<String, Object> toBien(Annonce a) {
+    public static Map<String, Object> toBien(Annonce a) {
         Map<String, Object> b = new HashMap<>();
         b.put("id", a.getId());
         b.put("title", a.getTitle());
