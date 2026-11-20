@@ -11,7 +11,7 @@ import { DsToastService } from '../design-system';
 const MATCH: BuyerMatch = {
   id: 3, dossierId: 10, leadName: 'Youssef', dossierStatus: 'QUALIFIED', score: 88, reasons: [], alerts: [],
   status: 'SEEN', createdAt: null, pitchedAt: null, pitchChannel: null,
-  replyIntent: null, replyExcerpt: null, replyAt: null, proposedStart: null, proposedEnd: null, visitAppointmentId: null,
+  replyIntent: null, replyExcerpt: null, replyAt: null, proposedStart: null, proposedEnd: null, visitAppointmentId: null, followUpKind: null,
 };
 
 function draft(partial: Partial<PitchDraft> = {}): PitchDraft {
@@ -66,7 +66,7 @@ describe('AnnoncePitchComposerComponent', () => {
 
   it('charge un brouillon WhatsApp en français et autorise l\'envoi', () => {
     const c = create();
-    expect(api.draftPitch).toHaveBeenCalledWith(5, 3, 'fr', 'WHATSAPP');
+    expect(api.draftPitch).toHaveBeenCalledWith(5, 3, 'fr', 'WHATSAPP', 'PITCH');
     expect(c.message()).toContain('Youssef');
     expect(c.canSend()).toBe(true);
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('IA (openai)');
@@ -74,7 +74,7 @@ describe('AnnoncePitchComposerComponent', () => {
 
   it('reprend le canal de la proposition précédente', () => {
     create(draft({ channel: 'SMS' }), { ...MATCH, pitchChannel: 'SMS' });
-    expect(api.draftPitch).toHaveBeenCalledWith(5, 3, 'fr', 'SMS');
+    expect(api.draftPitch).toHaveBeenCalledWith(5, 3, 'fr', 'SMS', 'PITCH');
   });
 
   it('bloque l\'envoi et propose le SMS hors fenêtre WhatsApp', () => {
@@ -87,7 +87,7 @@ describe('AnnoncePitchComposerComponent', () => {
 
     api.draftPitch.mockReturnValue(of(draft({ channel: 'SMS', whatsappWindowOpen: null })));
     c.switchToSms();
-    expect(api.draftPitch).toHaveBeenLastCalledWith(5, 3, 'fr', 'SMS');
+    expect(api.draftPitch).toHaveBeenLastCalledWith(5, 3, 'fr', 'SMS', 'PITCH');
     expect(c.canSend()).toBe(true);
   });
 
@@ -107,7 +107,7 @@ describe('AnnoncePitchComposerComponent', () => {
     api.sendPitch.mockReturnValue(of({ outboundMessageId: 9, status: 'QUEUED', channel: 'WHATSAPP', pitchedAt: '2026-11-18T23:00:00', photosQueued: 0 }));
     c.send();
     expect(api.sendPitch).toHaveBeenCalledWith(5, 3, {
-      message: 'Bonjour Youssef, texte relu.', channel: 'WHATSAPP', language: 'fr', mediaIds: [],
+      message: 'Bonjour Youssef, texte relu.', channel: 'WHATSAPP', language: 'fr', mediaIds: [], purpose: 'PITCH',
     });
     expect(sent).toHaveBeenCalled();
     expect(toast.success).toHaveBeenCalledWith('Proposition envoyée par WhatsApp');
@@ -125,7 +125,22 @@ describe('AnnoncePitchComposerComponent', () => {
     const c = create();
     c.language = 'ar';
     c.onOptionsChange();
-    expect(api.draftPitch).toHaveBeenLastCalledWith(5, 3, 'ar', 'WHATSAPP');
+    expect(api.draftPitch).toHaveBeenLastCalledWith(5, 3, 'ar', 'WHATSAPP', 'PITCH');
+  });
+
+  it('mode relance : brouillon et envoi marqués FOLLOW_UP', () => {
+    api.draftPitch.mockReturnValue(of(draft()));
+    fixture = TestBed.createComponent(AnnoncePitchComposerComponent);
+    fixture.componentRef.setInput('annonceId', 5);
+    fixture.componentRef.setInput('match', MATCH);
+    fixture.componentRef.setInput('purpose', 'FOLLOW_UP');
+    fixture.detectChanges();
+    const c = fixture.componentInstance;
+    expect(api.draftPitch).toHaveBeenCalledWith(5, 3, 'fr', 'WHATSAPP', 'FOLLOW_UP');
+    api.sendPitch.mockReturnValue(of({ outboundMessageId: 9, status: 'QUEUED', channel: 'WHATSAPP', pitchedAt: 'x', photosQueued: 0 }));
+    c.send();
+    expect(api.sendPitch.mock.calls[0][2].purpose).toBe('FOLLOW_UP');
+    expect(toast.success).toHaveBeenCalledWith('Relance envoyée par WhatsApp');
   });
 
   describe('photos', () => {

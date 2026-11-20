@@ -6,6 +6,7 @@ import com.example.backend.dto.PitchSendRequest;
 import com.example.backend.dto.PitchSendResponse;
 import com.example.backend.dto.VisitPlanRequest;
 import com.example.backend.dto.VisitPlanResponse;
+import com.example.backend.service.PitchFollowUpService;
 import com.example.backend.service.PitchReplyService;
 import com.example.backend.service.PropertyPitchService;
 import com.example.backend.service.ReverseMatchingService;
@@ -35,14 +36,17 @@ public class AnnonceBuyerMatchController {
     private final ReverseMatchingService service;
     private final PropertyPitchService pitchService;
     private final PitchReplyService replyService;
+    private final PitchFollowUpService followUpService;
 
     public AnnonceBuyerMatchController(
             ReverseMatchingService service,
             PropertyPitchService pitchService,
-            PitchReplyService replyService) {
+            PitchReplyService replyService,
+            PitchFollowUpService followUpService) {
         this.service = service;
         this.pitchService = pitchService;
         this.replyService = replyService;
+        this.followUpService = followUpService;
     }
 
     @GetMapping
@@ -92,8 +96,9 @@ public class AnnonceBuyerMatchController {
             @PathVariable Long annonceId,
             @PathVariable Long matchId,
             @RequestParam(name = "language", defaultValue = "fr") String language,
-            @RequestParam(name = "channel", defaultValue = "WHATSAPP") String channel) {
-        return pitchService.draft(annonceId, matchId, language, channel);
+            @RequestParam(name = "channel", defaultValue = "WHATSAPP") String channel,
+            @RequestParam(name = "purpose", defaultValue = "PITCH") String purpose) {
+        return pitchService.draft(annonceId, matchId, language, channel, purpose);
     }
 
     @PostMapping("/{matchId}/pitch/send")
@@ -114,5 +119,14 @@ public class AnnonceBuyerMatchController {
             @PathVariable Long matchId,
             @Valid @RequestBody VisitPlanRequest request) {
         return replyService.planVisit(annonceId, matchId, request);
+    }
+
+    @PostMapping("/{matchId}/follow-up/done")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Relance faite en dehors d'Atlas (téléphone…) : fermer le rappel")
+    public ResponseEntity<Void> followUpDone(
+            @PathVariable Long annonceId, @PathVariable Long matchId) {
+        followUpService.markDone(annonceId, matchId);
+        return ResponseEntity.noContent().build();
     }
 }

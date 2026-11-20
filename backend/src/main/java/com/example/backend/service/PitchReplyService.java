@@ -187,6 +187,8 @@ public class PitchReplyService {
             return Optional.of(match);
         }
 
+        match.closeFollowUp(
+                at); // le client a répondu : la relance « silence » n'a plus lieu d'être
         match.setReplyIntent(intent);
         match.setReplyExcerpt(excerpt(content));
         match.setReplyAt(at);
@@ -402,6 +404,7 @@ public class PitchReplyService {
         AppointmentResponse created = appointmentService.create(create);
 
         match.setVisitAppointmentId(created.getId());
+        match.closeFollowUp(LocalDateTime.now());
         matchRepository.save(match);
         return new VisitPlanResponse(
                 created.getId(),

@@ -102,9 +102,27 @@ public class PropertyPitchService {
     @Transactional(readOnly = true)
     public PitchDraftResponse draft(
             Long annonceId, Long matchId, String language, String channelName) {
+        return draft(annonceId, matchId, language, channelName, PURPOSE_PITCH);
+    }
+
+    public static final String PURPOSE_PITCH = "PITCH";
+    public static final String PURPOSE_FOLLOW_UP = "FOLLOW_UP";
+
+    static boolean isFollowUp(String purpose) {
+        return purpose != null && PURPOSE_FOLLOW_UP.equalsIgnoreCase(purpose.strip());
+    }
+
+    /**
+     * @param purpose PITCH (proposition) ou FOLLOW_UP (relance : répond au dernier message du
+     *     client ou relance un client silencieux, avec le créneau de visite proposé s'il y en a un)
+     */
+    @Transactional(readOnly = true)
+    public PitchDraftResponse draft(
+            Long annonceId, Long matchId, String language, String channelName, String purpose) {
         Context ctx = load(annonceId, matchId);
         String lang = normalizeLanguage(language);
         MessageChannel channel = parseChannel(channelName);
+        boolean followUp = isFollowUp(purpose);
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("bien", fiche(ctx.annonce()));
@@ -113,6 +131,23 @@ public class PropertyPitchService {
                 "raisons", ctx.match().getReasons() != null ? ctx.match().getReasons() : List.of());
         body.put("langue", lang);
         body.put("canal", channel == MessageChannel.SMS ? "sms" : "whatsapp");
+        if (followUp) {
+            AnnonceDossierMatch m = ctx.match();
+            body.put("objet", "relance");
+            boolean replied =
+                    m.getReplyAt() != null
+                            && (m.getPitchedAt() == null
+                                    || !m.getReplyAt().isBefore(m.getPitchedAt()));
+            if (replied && m.getReplyExcerpt() != null) {
+                body.put("reponse_client", m.getReplyExcerpt());
+                body.put("intention_client", m.getReplyIntent());
+            }
+            if (m.getProposedStart() != null
+                    && m.getVisitAppointmentId() == null
+                    && m.getProposedStart().isAfter(LocalDateTime.now())) {
+                body.put("creneau", m.getProposedStart().toString());
+            }
+        }
 
         String message;
         String engine;
@@ -124,11 +159,14 @@ public class PropertyPitchService {
             Object rej = generated.get().get("rejet_ia");
             aiRejection = rej != null ? rej.toString() : null;
         } else {
-            message = fallbackMessage(ctx.annonce(), ctx.dossier().getLeadName(), lang);
+            message =
+                    followUp
+                            ? fallbackFollowUp(ctx.annonce(), ctx.dossier().getLeadName(), lang)
+                            : fallbackMessage(ctx.annonce(), ctx.dossier().getLeadName(), lang);
             engine = "modele";
         }
 
-        Checks checks = checks(ctx, channel);
+        Checks checks = checks(ctx, channel, followUp);
         return new PitchDraftResponse(
                 message,
                 engine,
@@ -282,6 +320,7 @@ public class PropertyPitchService {
         m.setPitchedAt(now);
         m.setPitchChannel(channel.name());
         m.setPitchMessageId(outbound.getId());
+        m.closeFollowUp(now);
         if (AnnonceDossierMatch.STATUS_NEW.equals(m.getStatus())) {
             m.setStatus(AnnonceDossierMatch.STATUS_SEEN);
         }
@@ -299,7 +338,9 @@ public class PropertyPitchService {
                 activityService.logActivity(
                         ctx.dossier().getId(),
                         ActivityType.MESSAGE_SENT,
-                        "Bien proposé par "
+                        (isFollowUp(request.purpose())
+                                        ? "Relance envoyée par "
+                                        : "Bien proposé par ")
                                 + label(channel)
                                 + " : "
                                 + safeTitle(ctx.annonce())
@@ -332,6 +373,10 @@ public class PropertyPitchService {
             List<String> warnings) {}
 
     private Checks checks(Context ctx, MessageChannel channel) {
+        return checks(ctx, channel, false);
+    }
+
+    private Checks checks(Context ctx, MessageChannel channel, boolean followUp) {
         List<String> blockers = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
         Dossier d = ctx.dossier();
@@ -365,7 +410,7 @@ public class PropertyPitchService {
         if (d.getStatus() == DossierStatus.WON || d.getStatus() == DossierStatus.LOST) {
             warnings.add("Ce dossier est clôturé (" + d.getStatus().name() + ").");
         }
-        if (ctx.match().getPitchedAt() != null) {
+        if (ctx.match().getPitchedAt() != null && !followUp) {
             warnings.add(
                     "Ce bien a déjà été proposé le "
                             + ctx.match()
@@ -473,6 +518,29 @@ public class PropertyPitchService {
         }
         String first = leadName.strip().split("\\s+")[0];
         return first.length() > 80 ? first.substring(0, 80) : first;
+    }
+
+    /** Relance minimale quand le brain est injoignable. */
+    static String fallbackFollowUp(Annonce a, String leadName, String lang) {
+        String name = firstName(leadName);
+        String city = a.getCity();
+        return switch (lang) {
+            case "en" ->
+                    (name != null ? "Hello " + name + "," : "Hello,")
+                            + "\nFollowing up about the property"
+                            + (city != null ? " in " + city : "")
+                            + ".\nWould you like more photos or to arrange a viewing?";
+            case "ar" ->
+                    (name != null ? "السلام " + name + "،" : "السلام،")
+                            + "\nكنرجع ليك على العقار"
+                            + (city != null ? " ف" + city : "")
+                            + ".\nبغيتي تصاور كثر ولا نديرو زيارة؟";
+            default ->
+                    (name != null ? "Bonjour " + name + "," : "Bonjour,")
+                            + "\nJe reviens vers vous au sujet du bien"
+                            + (city != null ? " à " + city : "")
+                            + ".\nSouhaitez-vous plus de photos ou organiser une visite ?";
+        };
     }
 
     /** Modèle minimal quand le brain est injoignable. */

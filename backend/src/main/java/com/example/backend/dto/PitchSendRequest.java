@@ -10,9 +10,11 @@ import java.util.List;
  *
  * @param mediaIds photos de l'annonce à joindre (WhatsApp uniquement, 3 au plus), envoyées après le
  *     texte
+ * @param purpose PITCH (proposition, par défaut) ou FOLLOW_UP (relance)
  */
 public record PitchSendRequest(
         @NotBlank @Size(max = 1000) String message,
         @NotNull String channel,
         String language,
-        @Size(max = 3) List<Long> mediaIds) {}
+        @Size(max = 3) List<Long> mediaIds,
+        String purpose) {}

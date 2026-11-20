@@ -1,4 +1,5 @@
-<section class="pc" data-testid="pitch-composer" aria-label="Proposer ce bien au client">
+<section class="pc" data-testid="pitch-composer"
+         [attr.aria-label]="purpose() === 'FOLLOW_UP' ? 'Relancer le client' : 'Proposer ce bien au client'">
   <div class="pc__options">
     <ds-radio-group label="Langue" [options]="languageOptions" [inline]="true"
                     [(ngModel)]="language" (ngModelChange)="onOptionsChange()" name="pitch-language"></ds-radio-group>

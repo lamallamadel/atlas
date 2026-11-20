@@ -54,4 +54,12 @@ public interface MessageRepository
             Pageable pageable);
 
     boolean existsByProviderMessageId(String providerMessageId);
+
+    /**
+     * Message du dossier dans ce sens depuis {@code after} (réponse saisie dans la conversation).
+     */
+    boolean existsByDossier_IdAndDirectionAndTimestampAfter(
+            Long dossierId,
+            com.example.backend.entity.enums.MessageDirection direction,
+            LocalDateTime after);
 }

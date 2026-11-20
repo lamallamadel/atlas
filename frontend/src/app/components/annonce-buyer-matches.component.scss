@@ -38,3 +38,10 @@
   ds-icon { color: var(--ds-success); }
   a { color: var(--ds-marine); }
 }
+.bm__follow-up {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-3); border-radius: var(--ds-radius-md);
+  background: var(--ds-warning-hl); color: var(--ds-text); font-size: 13px;
+  > span:first-child { display: inline-flex; align-items: center; gap: 4px; }
+  ds-icon { color: var(--ds-warning); }
+}

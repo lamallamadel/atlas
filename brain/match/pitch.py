@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from datetime import datetime
 from typing import Literal
 
 import httpx
@@ -24,6 +25,7 @@ logger = logging.getLogger("match-service")
 
 Langue = Literal["fr", "ar", "en"]
 Canal = Literal["whatsapp", "sms"]
+Objet = Literal["proposition", "relance"]
 
 MAX_CHARS = {"whatsapp": 700, "sms": 320}
 
@@ -60,6 +62,11 @@ class PitchRequest(BaseModel):
     langue: Langue = "fr"
     canal: Canal = "whatsapp"
     agent: str | None = Field(default=None, max_length=80)
+    # Relance : après une réponse du client restée sans suite, ou un silence du client
+    objet: Objet = "proposition"
+    reponse_client: str | None = Field(default=None, max_length=1000)
+    intention_client: str | None = Field(default=None, max_length=30)
+    creneau: datetime | None = None  # visite proposée (créneau libre de l'agent)
 
 
 class PitchResponse(BaseModel):
@@ -107,9 +114,38 @@ def numbers_in(text: str) -> list[float]:
     return out
 
 
+JOURS = {
+    "fr": ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+    "en": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "ar": ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],
+}
+MOIS = {
+    "fr": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre",
+           "octobre", "novembre", "décembre"],
+    "en": ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+           "October", "November", "December"],
+    "ar": ["يناير", "فبراير", "مارس", "أبريل", "ماي", "يونيو", "يوليوز", "غشت", "شتنبر", "أكتوبر",
+           "نونبر", "دجنبر"],
+}
+
+
+def format_creneau(dt: datetime, langue: str) -> str:
+    j, m = JOURS[langue][dt.weekday()], MOIS[langue][dt.month - 1]
+    if langue == "en":
+        return f"{j} {m} {dt.day} at {dt.strftime('%H:%M')}"
+    if langue == "ar":
+        return f"{j} {dt.day} {m} مع {dt.strftime('%H:%M')}"
+    return f"{j} {dt.day} {m} à {dt.hour}h{dt.minute:02d}"
+
+
 def allowed_numbers(req: PitchRequest) -> set[float]:
     b = req.bien
     allowed: set[float] = {1.0}
+    if req.creneau:
+        allowed.update(round(n, 2) for n in numbers_in(format_creneau(req.creneau, req.langue)))
+        allowed.update({float(req.creneau.day), float(req.creneau.hour), float(req.creneau.minute)})
+    if req.reponse_client:
+        allowed.update(round(n, 2) for n in numbers_in(req.reponse_client))
     for room in set(b.pieces):  # « 2 chambres » quand l'analyse photo en a vu deux
         allowed.add(float(b.pieces.count(room)))
     for v in (b.prix, b.surface):
@@ -148,7 +184,54 @@ def _category(b: BienFiche, langue: str) -> str:
     return {"fr": "bien", "ar": "عقار", "en": "property"}[langue]
 
 
+FR_DU = {"APARTMENT": "de l'appartement", "HOUSE": "de la maison", "STUDIO": "du studio",
+         "COMMERCIAL": "du local commercial", "VILLA": "de la villa", "LAND": "du terrain"}
+
+
+def _fr_du(b: BienFiche) -> str:
+    return FR_DU.get((b.categorie or "").upper(), "du bien")
+
+
+def template_relance(req: PitchRequest) -> str:
+    b, lg = req.bien, req.langue
+    cat = _category(b, lg)
+    slot = format_creneau(req.creneau, lg) if req.creneau else None
+    nego = req.intention_client == "NEGOCIATION"
+    if lg == "en":
+        lines = [f"Hello {req.prenom}," if req.prenom else "Hello,",
+                 f"Following up about the {cat}" + (f" in {b.ville}" if b.ville else "") + "."]
+        if slot:
+            lines.append(f"I can show it to you on {slot}. Does that work for you?")
+        elif nego:
+            lines.append("I can pass your offer on to the owner: what price did you have in mind?")
+        else:
+            lines.append("Would you like more photos or to arrange a viewing?")
+    elif lg == "ar":
+        lines = [f"السلام {req.prenom}،" if req.prenom else "السلام،",
+                 f"كنرجع ليك على {cat}" + (f" ف{b.ville}" if b.ville else "") + "."]
+        if slot:
+            lines.append(f"نقدر نوريها ليك {slot}. واش مناسب ليك؟")
+        elif nego:
+            lines.append("نقدر نوصل العرض ديالك لمول الدار: شحال كتفكر؟")
+        else:
+            lines.append("بغيتي تصاور كثر ولا نديرو زيارة؟")
+    else:
+        lines = [f"Bonjour {req.prenom}," if req.prenom else "Bonjour,",
+                 f"Je reviens vers vous au sujet {_fr_du(b)}" + (f" à {b.ville}" if b.ville else "") + "."]
+        if slot:
+            lines.append(f"Je peux vous le faire visiter {slot}. Cela vous convient-il ?")
+        elif nego:
+            lines.append("Je peux transmettre votre proposition au propriétaire : quel prix envisagez-vous ?")
+        else:
+            lines.append("Souhaitez-vous plus de photos ou organiser une visite ?")
+    if req.agent:
+        lines.append(req.agent)
+    return "\n".join(lines)
+
+
 def template_message(req: PitchRequest) -> str:
+    if req.objet == "relance":
+        return template_relance(req)
     b, lg = req.bien, req.langue
     cat = _category(b, lg)
     rent = (b.type or "").upper() == "RENT"
@@ -219,10 +302,42 @@ LANG_INSTRUCTIONS = {
 }
 
 
+def relance_prompt(req: PitchRequest, facts: dict, limit: int) -> str:
+    slot = format_creneau(req.creneau, req.langue) if req.creneau else None
+    if req.reponse_client:
+        situation = (
+            f"Le client a répondu à la proposition : « {req.reponse_client} » "
+            f"(intention détectée : {req.intention_client or 'inconnue'}), et n'a pas encore eu de réponse. "
+            "Rédige la réponse de l'agent, qui fait avancer vers une visite. "
+            "S'il pose une question dont la réponse n'est pas dans les faits, dis que tu vérifies et reviens vers lui, "
+            "sans inventer de réponse."
+        )
+    else:
+        situation = (
+            "Le client n'a pas répondu à la proposition envoyée il y a quelques jours. Rédige une relance courte et "
+            "polie, sans insister, qui rappelle le bien en une phrase."
+        )
+    return (
+        f"Rédige un message {req.canal.upper()} {LANG_INSTRUCTIONS[req.langue]} d'un agent immobilier à un client "
+        f"acheteur. {situation} {limit} caractères maximum, ton chaleureux et professionnel, pas de markdown"
+        + (", au plus un emoji" if req.canal == "whatsapp" else ", sans emoji")
+        + ".\n"
+        + (f"Propose la visite exactement à ce moment, écrit tel quel : « {slot} ».\n" if slot else
+           "Termine par une question qui propose plus de photos ou une visite.\n")
+        + "Utilise UNIQUEMENT les faits ci-dessous. N'invente aucune caractéristique, aucun chiffre absent. "
+        "N'écris ni numéro de téléphone, ni lien, ni adresse précise.\n\n"
+        f"Prénom du client : {req.prenom or '(inconnu)'}\n"
+        f"Faits du bien :\n{json.dumps(facts, ensure_ascii=False, indent=2)}"
+        + (f"\nSigne avec : {req.agent}" if req.agent else "")
+    )
+
+
 def pitch_prompt(req: PitchRequest) -> str:
     facts = req.bien.model_dump(exclude_none=True)
     facts = {k: v for k, v in facts.items() if v not in ([], "")}
     limit = MAX_CHARS[req.canal]
+    if req.objet == "relance":
+        return relance_prompt(req, facts, limit)
     return (
         f"Rédige un message {req.canal.upper()} {LANG_INSTRUCTIONS[req.langue]} d'un agent immobilier "
         f"à un client acheteur pour lui proposer un bien qui correspond à sa recherche. "

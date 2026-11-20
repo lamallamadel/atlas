@@ -88,6 +88,56 @@ public class AnnonceDossierMatch extends BaseEntity {
     @Column(name = "visit_appointment_id")
     private Long visitAppointmentId;
 
+    /**
+     * Relance à faire : AGENT_REPLY_DUE (client sans réponse) ou CLIENT_SILENT (client silencieux).
+     */
+    @Column(name = "follow_up_kind", length = 30)
+    private String followUpKind;
+
+    @Column(name = "follow_up_notified_at")
+    private LocalDateTime followUpNotifiedAt;
+
+    @Column(name = "follow_up_done_at")
+    private LocalDateTime followUpDoneAt;
+
+    public String getFollowUpKind() {
+        return followUpKind;
+    }
+
+    public void setFollowUpKind(String followUpKind) {
+        this.followUpKind = followUpKind;
+    }
+
+    public LocalDateTime getFollowUpNotifiedAt() {
+        return followUpNotifiedAt;
+    }
+
+    public void setFollowUpNotifiedAt(LocalDateTime followUpNotifiedAt) {
+        this.followUpNotifiedAt = followUpNotifiedAt;
+    }
+
+    public LocalDateTime getFollowUpDoneAt() {
+        return followUpDoneAt;
+    }
+
+    public void setFollowUpDoneAt(LocalDateTime followUpDoneAt) {
+        this.followUpDoneAt = followUpDoneAt;
+    }
+
+    /** Relance en attente : signalée à l'agent et pas encore faite. */
+    public boolean isFollowUpPending() {
+        return followUpKind != null
+                && followUpNotifiedAt != null
+                && (followUpDoneAt == null || followUpDoneAt.isBefore(followUpNotifiedAt));
+    }
+
+    /** Clôt la relance en attente (message envoyé, visite planifiée, client qui répond…). */
+    public void closeFollowUp(LocalDateTime at) {
+        if (isFollowUpPending()) {
+            followUpDoneAt = at;
+        }
+    }
+
     public String getReplyIntent() {
         return replyIntent;
     }

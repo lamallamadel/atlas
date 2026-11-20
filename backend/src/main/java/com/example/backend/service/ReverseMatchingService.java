@@ -224,8 +224,11 @@ public class ReverseMatchingService {
 
     private void deleteUnlessDismissed(List<AnnonceDossierMatch> existing, Set<Long> kept) {
         for (AnnonceDossierMatch m : existing) {
+            // Une correspondance déjà proposée au client garde son historique (proposition,
+            // réponse, visite, relance) même si les critères ne collent plus.
             if (!kept.contains(m.getDossierId())
-                    && !AnnonceDossierMatch.STATUS_DISMISSED.equals(m.getStatus())) {
+                    && !AnnonceDossierMatch.STATUS_DISMISSED.equals(m.getStatus())
+                    && m.getPitchedAt() == null) {
                 matchRepository.delete(m);
             }
         }
@@ -284,7 +287,8 @@ public class ReverseMatchingService {
                             m.getReplyAt(),
                             m.getProposedStart(),
                             m.getProposedEnd(),
-                            m.getVisitAppointmentId()));
+                            m.getVisitAppointmentId(),
+                            m.isFollowUpPending() ? m.getFollowUpKind() : null));
             if (markSeen && AnnonceDossierMatch.STATUS_NEW.equals(m.getStatus())) {
                 m.setStatus(AnnonceDossierMatch.STATUS_SEEN);
                 matchRepository.save(m);

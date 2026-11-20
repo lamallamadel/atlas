@@ -26,7 +26,13 @@ export interface BuyerMatch {
   proposedStart: string | null;
   proposedEnd: string | null;
   visitAppointmentId: number | null;
+  /** Relance en attente : client sans réponse depuis 24 h, ou client silencieux depuis 3 jours. */
+  followUpKind: FollowUpKind | null;
 }
+
+export type FollowUpKind = 'AGENT_REPLY_DUE' | 'CLIENT_SILENT';
+/** PITCH : proposition ; FOLLOW_UP : relance. */
+export type PitchPurpose = 'PITCH' | 'FOLLOW_UP';
 
 export type ReplyIntent = 'VISITE' | 'INTERESSE' | 'NEGOCIATION' | 'QUESTION' | 'PAS_INTERESSE' | 'AUTRE';
 
@@ -109,9 +115,20 @@ export class AnnonceBuyerMatchesApiService {
   }
 
   /** Brouillon rédigé par l'IA (ou un modèle sans IA) : rien n'est envoyé. */
-  draftPitch(annonceId: number, matchId: number, language: PitchLanguage, channel: PitchChannel): Observable<PitchDraft> {
-    const params = new HttpParams().set('language', language).set('channel', channel);
+  draftPitch(
+    annonceId: number,
+    matchId: number,
+    language: PitchLanguage,
+    channel: PitchChannel,
+    purpose: PitchPurpose = 'PITCH',
+  ): Observable<PitchDraft> {
+    const params = new HttpParams().set('language', language).set('channel', channel).set('purpose', purpose);
     return this.http.post<PitchDraft>(`${this.base(annonceId)}/${matchId}/pitch/draft`, null, { params });
+  }
+
+  /** Relance faite en dehors d'Atlas (téléphone…) : ferme le rappel. */
+  followUpDone(annonceId: number, matchId: number): Observable<void> {
+    return this.http.post<void>(`${this.base(annonceId)}/${matchId}/follow-up/done`, null);
   }
 
   /** Crée le rendez-vous de visite (heures locales, format ISO sans fuseau). */
@@ -127,7 +144,7 @@ export class AnnonceBuyerMatchesApiService {
   sendPitch(
     annonceId: number,
     matchId: number,
-    body: { message: string; channel: PitchChannel; language: PitchLanguage; mediaIds?: number[] },
+    body: { message: string; channel: PitchChannel; language: PitchLanguage; mediaIds?: number[]; purpose?: PitchPurpose },
   ): Observable<PitchSendResult> {
     return this.http.post<PitchSendResult>(`${this.base(annonceId)}/${matchId}/pitch/send`, body);
   }

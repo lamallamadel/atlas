@@ -14,7 +14,7 @@ function match(p: Partial<BuyerMatch> = {}): BuyerMatch {
     id: 3, dossierId: 10, leadName: 'Youssef', dossierStatus: 'QUALIFIED', score: 88, reasons: [], alerts: [],
     status: 'SEEN', createdAt: null, pitchedAt: null, pitchChannel: null,
     replyIntent: 'VISITE', replyExcerpt: 'samedi 10h', replyAt: null,
-    proposedStart: FUTURE, proposedEnd: '2099-11-21T10:45:00', visitAppointmentId: null,
+    proposedStart: FUTURE, proposedEnd: '2099-11-21T10:45:00', visitAppointmentId: null, followUpKind: null,
     ...p,
   };
 }
