@@ -25,4 +25,5 @@ public record BuyerMatchResponse(
         LocalDateTime replyAt,
         LocalDateTime proposedStart,
         LocalDateTime proposedEnd,
-        Long visitAppointmentId) {}
+        Long visitAppointmentId,
+        String followUpKind) {}

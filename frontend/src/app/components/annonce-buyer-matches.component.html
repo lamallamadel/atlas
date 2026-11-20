@@ -6,6 +6,9 @@
       @if (newCount()) {
         <ds-badge status="info" size="sm" [showDot]="false" data-testid="bm-new-count">{{ newCount() }} nouveau(x)</ds-badge>
       }
+      @if (followUpCount()) {
+        <ds-badge status="warning" size="sm" [showDot]="false" data-testid="bm-follow-up-count">{{ followUpCount() }} à relancer</ds-badge>
+      }
     </h2>
     <ds-button variant="ghost" size="sm" prefixIcon="refresh" [loading]="refreshing()"
                (dsClick)="refresh()" data-testid="bm-refresh">Actualiser</ds-button>
@@ -50,7 +53,7 @@
                 [attr.aria-label]="'Score ' + m.score + ' sur 100'">{{ m.score }}/100</ds-badge>
       @if (m.status !== 'DISMISSED') {
         <ds-button variant="ghost" size="sm" prefixIcon="send" (dsClick)="toggleComposer(m)"
-                   [attr.data-testid]="'bm-pitch-' + m.id">{{ composerFor() === m.id ? 'Fermer' : 'Proposer' }}</ds-button>
+                   [attr.data-testid]="'bm-pitch-' + m.id">{{ composerFor() === m.id && composerPurpose() === 'PITCH' ? 'Fermer' : 'Proposer' }}</ds-button>
       }
       <ds-button variant="ghost" size="sm" [loading]="busyId() === m.id" (dsClick)="toggleDismiss(m)"
                  [attr.data-testid]="'bm-toggle-' + m.id">
@@ -100,8 +103,19 @@
       }
     }
   }
+  @if (m.followUpKind) {
+    <div class="bm__follow-up" [attr.data-testid]="'bm-follow-up-' + m.id">
+      <span><ds-icon name="clock" [size]="12"></ds-icon> {{ followUpLabel(m.followUpKind) }}</span>
+      <span class="bm__badges">
+        <ds-button variant="marine" size="sm" prefixIcon="send" (dsClick)="toggleComposer(m, 'FOLLOW_UP')"
+                   [attr.data-testid]="'bm-follow-up-open-' + m.id">Relancer</ds-button>
+        <ds-button variant="ghost" size="sm" [loading]="busyId() === m.id" (dsClick)="followUpDone(m)"
+                   [attr.data-testid]="'bm-follow-up-done-' + m.id">C'est fait</ds-button>
+      </span>
+    </div>
+  }
   @if (composerFor() === m.id) {
-    <app-annonce-pitch-composer [annonceId]="annonceId()" [match]="m"
+    <app-annonce-pitch-composer [annonceId]="annonceId()" [match]="m" [purpose]="composerPurpose()"
                                 (sent)="onPitchSent(m, $event)" (closed)="composerFor.set(null)"></app-annonce-pitch-composer>
   }
 </ng-template>

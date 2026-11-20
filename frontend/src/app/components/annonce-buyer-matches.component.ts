@@ -14,6 +14,8 @@ import {
 import {
   AnnonceBuyerMatchesApiService,
   BuyerMatch,
+  FollowUpKind,
+  PitchPurpose,
   PitchSendResult,
   ReplyIntent,
   VisitPlanResult,
@@ -84,6 +86,12 @@ export class AnnonceBuyerMatchesComponent implements OnInit {
   readonly busyId = signal<number | null>(null);
   /** Acheteur pour lequel l'éditeur de proposition est ouvert. */
   readonly composerFor = signal<number | null>(null);
+  readonly composerPurpose = signal<PitchPurpose>('PITCH');
+  readonly followUpCount = computed(() => this.matches().filter((m) => !!m.followUpKind).length);
+  readonly followUpLabels: Record<FollowUpKind, string> = {
+    AGENT_REPLY_DUE: 'À relancer : le client attend votre réponse depuis plus de 24 h',
+    CLIENT_SILENT: "À relancer : pas de réponse du client depuis 3 jours",
+  };
   /** Acheteur pour lequel le formulaire de visite est ouvert. */
   readonly plannerFor = signal<number | null>(null);
   replyLabel(intent: ReplyIntent): { label: string; status: DsBadgeStatus } {
@@ -152,8 +160,25 @@ export class AnnonceBuyerMatchesComponent implements OnInit {
     });
   }
 
-  toggleComposer(m: BuyerMatch): void {
-    this.composerFor.update((id) => (id === m.id ? null : m.id));
+  toggleComposer(m: BuyerMatch, purpose: PitchPurpose = 'PITCH'): void {
+    const sameOpen = this.composerFor() === m.id && this.composerPurpose() === purpose;
+    this.composerPurpose.set(purpose);
+    this.composerFor.set(sameOpen ? null : m.id);
+  }
+
+  /** Relance faite autrement (téléphone…) : le rappel disparaît. */
+  followUpDone(m: BuyerMatch): void {
+    this.busyId.set(m.id);
+    this.api.followUpDone(this.annonceId(), m.id).subscribe({
+      next: () => {
+        this.busyId.set(null);
+        this.matches.update((list) => list.map((x) => (x.id === m.id ? { ...x, followUpKind: null } : x)));
+      },
+      error: () => {
+        this.busyId.set(null);
+        this.toast.error("L'opération a échoué");
+      },
+    });
   }
 
   onPitchSent(m: BuyerMatch, r: PitchSendResult): void {
@@ -161,10 +186,20 @@ export class AnnonceBuyerMatchesComponent implements OnInit {
     this.matches.update((list) =>
       list.map((x) =>
         x.id === m.id
-          ? { ...x, pitchedAt: r.pitchedAt, pitchChannel: r.channel, status: x.status === 'NEW' ? 'SEEN' : x.status }
+          ? {
+              ...x,
+              pitchedAt: r.pitchedAt,
+              pitchChannel: r.channel,
+              status: x.status === 'NEW' ? 'SEEN' : x.status,
+              followUpKind: null,
+            }
           : x,
       ),
     );
+  }
+
+  followUpLabel(kind: FollowUpKind): string {
+    return this.followUpLabels[kind] ?? 'À relancer';
   }
 
   channelLabel(c: string | null): string {

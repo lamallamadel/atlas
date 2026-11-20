@@ -12,7 +12,7 @@ function match(partial: Partial<BuyerMatch> = {}): BuyerMatch {
   return {
     id: 1, dossierId: 10, leadName: 'Youssef', dossierStatus: 'QUALIFIED', score: 90,
     reasons: ['Ville recherchée (Tanger)'], alerts: ['Piscine : non trouvé'], status: 'NEW', createdAt: null, pitchedAt: null, pitchChannel: null,
-    replyIntent: null, replyExcerpt: null, replyAt: null, proposedStart: null, proposedEnd: null, visitAppointmentId: null,
+    replyIntent: null, replyExcerpt: null, replyAt: null, proposedStart: null, proposedEnd: null, visitAppointmentId: null, followUpKind: null,
     ...partial,
   };
 }
@@ -30,7 +30,7 @@ describe('sortMatches', () => {
 
 describe('AnnonceBuyerMatchesComponent', () => {
   let fixture: ComponentFixture<AnnonceBuyerMatchesComponent>;
-  let api: Record<'list' | 'refresh' | 'dismiss' | 'undismiss', ReturnType<typeof vi.fn>>;
+  let api: Record<'list' | 'refresh' | 'dismiss' | 'undismiss' | 'followUpDone', ReturnType<typeof vi.fn>>;
   let toast: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
 
   function create(list: BuyerMatch[] = [match()]) {
@@ -42,7 +42,7 @@ describe('AnnonceBuyerMatchesComponent', () => {
   }
 
   beforeEach(() => {
-    api = { list: vi.fn(), refresh: vi.fn(), dismiss: vi.fn(), undismiss: vi.fn() };
+    api = { list: vi.fn(), refresh: vi.fn(), dismiss: vi.fn(), undismiss: vi.fn(), followUpDone: vi.fn() };
     toast = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
     TestBed.configureTestingModule({
       imports: [AnnonceBuyerMatchesComponent],
@@ -138,6 +138,32 @@ describe('AnnonceBuyerMatchesComponent', () => {
     expect(c.plannerFor()).toBeNull();
     expect(el.querySelector('[data-testid="bm-visit-1"]')?.textContent).toContain('21/11/2026 à 11:00');
     expect(el.querySelector('[data-testid="bm-plan-1"]')).toBeNull();
+  });
+
+  it('relance en attente : bandeau, compteur, éditeur en mode relance', () => {
+    const el = create([match({ followUpKind: 'AGENT_REPLY_DUE', replyIntent: 'QUESTION' })]);
+    expect(el.querySelector('[data-testid="bm-follow-up-count"]')?.textContent).toContain('1 à relancer');
+    expect(el.querySelector('[data-testid="bm-follow-up-1"]')?.textContent).toContain('attend votre réponse');
+    const c = fixture.componentInstance;
+    c.toggleComposer(c.matches()[0], 'FOLLOW_UP');
+    expect(c.composerFor()).toBe(1);
+    expect(c.composerPurpose()).toBe('FOLLOW_UP');
+    c.toggleComposer(c.matches()[0], 'PITCH'); // autre mode : reste ouvert, change de mode
+    expect(c.composerFor()).toBe(1);
+    expect(c.composerPurpose()).toBe('PITCH');
+    c.onPitchSent(c.matches()[0], { outboundMessageId: 1, status: 'QUEUED', channel: 'WHATSAPP', pitchedAt: 'x', photosQueued: 0 });
+    expect(c.matches()[0].followUpKind).toBeNull();
+  });
+
+  it("« C'est fait » ferme le rappel", () => {
+    create([match({ followUpKind: 'CLIENT_SILENT' })]);
+    api.followUpDone.mockReturnValue(of(undefined));
+    const c = fixture.componentInstance;
+    c.followUpDone(c.matches()[0]);
+    fixture.detectChanges();
+    expect(api.followUpDone).toHaveBeenCalledWith(5, 1);
+    expect(c.followUpCount()).toBe(0);
+    expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="bm-follow-up-1"]')).toBeNull();
   });
 });
 

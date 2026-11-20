@@ -165,6 +165,25 @@ class ReverseMatchingServiceTest {
     }
 
     @Test
+    void deja_propose_garde_son_historique() {
+        brainReturns(Map.of(buyer2, 75));
+        service.recompute(annonceId);
+        AnnonceDossierMatch m =
+                matchRepository.findByAnnonceIdOrderByScoreDescIdAsc(annonceId).get(0);
+        m.setPitchedAt(java.time.LocalDateTime.now());
+        m.setReplyIntent("VISITE");
+        matchRepository.save(m);
+
+        brainReturns(Map.of()); // l'annonce modifiée ne correspond plus
+        service.recompute(annonceId);
+
+        List<AnnonceDossierMatch> matches =
+                matchRepository.findByAnnonceIdOrderByScoreDescIdAsc(annonceId);
+        assertThat(matches).hasSize(1);
+        assertThat(matches.get(0).getReplyIntent()).isEqualTo("VISITE");
+    }
+
+    @Test
     void ecarte_reste_ecarte_et_disparus_supprimes() {
         brainReturns(Map.of(buyer1, 92, buyer2, 75));
         service.recompute(annonceId);

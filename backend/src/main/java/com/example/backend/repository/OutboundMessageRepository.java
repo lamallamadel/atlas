@@ -21,6 +21,9 @@ public interface OutboundMessageRepository extends JpaRepository<OutboundMessage
 
     List<OutboundMessageEntity> findByDossierId(Long dossierId);
 
+    /** Un message est parti vers ce dossier depuis {@code after} (l'agent a répondu). */
+    boolean existsByDossierIdAndCreatedAtAfter(Long dossierId, LocalDateTime after);
+
     Page<OutboundMessageEntity> findByDossierId(Long dossierId, Pageable pageable);
 
     @Query(

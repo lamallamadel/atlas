@@ -106,3 +106,8 @@ rate-limit:
 
 elasticsearch:
   enabled: false
+
+# Relances des propositions de biens : la tâche planifiée est appelée directement par les tests.
+atlas:
+  follow-up:
+    enabled: false

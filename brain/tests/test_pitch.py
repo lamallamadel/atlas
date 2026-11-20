@@ -97,3 +97,42 @@ def test_endpoint(monkeypatch):
     assert r.status_code == 200
     body = r.json()
     assert body["moteur"] == "modele" and body["canal"] == "sms" and "Salma" in body["message"]
+
+
+# ---------- relances ----------
+
+from datetime import datetime  # noqa: E402
+
+from match.pitch import format_creneau, pitch_prompt  # noqa: E402
+
+
+def test_format_creneau():
+    dt = datetime(2026, 11, 21, 10, 30)
+    assert format_creneau(dt, "fr") == "samedi 21 novembre à 10h30"
+    assert format_creneau(dt, "en") == "Saturday November 21 at 10:30"
+    assert format_creneau(dt, "ar").startswith("السبت 21 نونبر")
+
+
+@pytest.mark.parametrize("langue", ["fr", "ar", "en"])
+def test_relance_avec_creneau_sans_chiffre_inconnu(langue):
+    r = req(objet="relance", langue=langue, creneau=datetime(2026, 11, 21, 10, 0),
+            reponse_client="samedi 10h ?", intention_client="VISITE")
+    msg = template_message(r)
+    assert "21" in msg and "Youssef" in msg
+    assert unknown_numbers(msg, r) == []
+
+
+def test_relance_negociation_et_silence():
+    r = req(objet="relance", intention_client="NEGOCIATION", reponse_client="dernier prix ?")
+    assert "propriétaire" in template_message(r)
+    assert "au sujet de l'appartement à Tanger" in template_message(r)
+    silence = req(objet="relance")
+    assert "plus de photos" in template_message(silence)
+    assert "n'a pas répondu" in pitch_prompt(silence)
+    assert "dernier prix" in pitch_prompt(r)
+
+
+def test_relance_ia_ne_peut_pas_inventer_une_autre_heure():
+    r = req(objet="relance", creneau=datetime(2026, 11, 21, 10, 0))
+    assert check_llm_message("Bonjour Youssef, visite samedi 21 à 10h ?", r) is None
+    assert "chiffres absents" in check_llm_message("Bonjour Youssef, visite samedi 21 à 16h ?", r)

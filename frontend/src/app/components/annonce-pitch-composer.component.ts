@@ -27,6 +27,7 @@ import {
   PitchDraft,
   PitchLanguage,
   PitchPhoto,
+  PitchPurpose,
   PitchSendResult,
 } from '../services/annonce-buyer-matches-api.service';
 import { AnnonceMediaApiService } from '../services/annonce-media-api.service';
@@ -70,6 +71,8 @@ export function apiErrorMessage(e: HttpErrorResponse | null | undefined, fallbac
 export class AnnoncePitchComposerComponent implements OnInit, OnDestroy {
   readonly annonceId = input.required<number>();
   readonly match = input.required<BuyerMatch>();
+  /** Proposition du bien, ou relance (répond au client ou relance un silence). */
+  readonly purpose = input<PitchPurpose>('PITCH');
   readonly sent = output<PitchSendResult>();
   readonly closed = output<void>();
 
@@ -120,7 +123,7 @@ export class AnnoncePitchComposerComponent implements OnInit, OnDestroy {
   loadDraft(): void {
     this.loading.set(true);
     this.loadError.set(false);
-    this.api.draftPitch(this.annonceId(), this.match().id, this.language, this.channel).subscribe({
+    this.api.draftPitch(this.annonceId(), this.match().id, this.language, this.channel, this.purpose()).subscribe({
       next: (d) => {
         this.draft.set(d);
         this.message.set(d.message);
@@ -155,12 +158,14 @@ export class AnnoncePitchComposerComponent implements OnInit, OnDestroy {
         channel: this.channel,
         language: this.language,
         mediaIds: this.channel === 'WHATSAPP' ? this.selectedPhotos() : [],
+        purpose: this.purpose(),
       })
       .subscribe({
         next: (r) => {
           this.sending.set(false);
           const photos = r.photosQueued ? ` avec ${r.photosQueued} photo(s)` : '';
-          this.toast.success(`Proposition envoyée par ${r.channel === 'SMS' ? 'SMS' : 'WhatsApp'}${photos}`);
+          const what = this.purpose() === 'FOLLOW_UP' ? 'Relance envoyée' : 'Proposition envoyée';
+          this.toast.success(`${what} par ${r.channel === 'SMS' ? 'SMS' : 'WhatsApp'}${photos}`);
           this.sent.emit(r);
         },
         error: (e: HttpErrorResponse) => {
