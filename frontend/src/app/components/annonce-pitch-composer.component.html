@@ -33,6 +33,30 @@
       <span class="pc__muted" [class.pc__over]="tooLong()">{{ message().length }} / {{ d.maxLength }}</span>
     </div>
 
+    @if (d.channel === 'WHATSAPP' && d.photos.length) {
+      <fieldset class="pc__photos" data-testid="pitch-photos">
+        <legend class="pc__legend">
+          Photos à joindre ({{ selectedPhotos().length }}/{{ maxPhotos }}) — envoyées après le message
+        </legend>
+        <div class="pc__photo-grid">
+          @for (p of d.photos; track p.mediaId) {
+            <label class="pc__photo" [class.pc__photo--on]="isSelected(p)"
+                   [class.pc__photo--off]="!isSelected(p) && selectedPhotos().length >= maxPhotos">
+              <input type="checkbox" [checked]="isSelected(p)"
+                     [disabled]="!isSelected(p) && selectedPhotos().length >= maxPhotos"
+                     (change)="togglePhoto(p)" [attr.data-testid]="'pitch-photo-' + p.mediaId" />
+              @if (photoSrc(p); as src) {
+                <img [src]="src" [alt]="p.caption || roomLabel(p.roomType)" loading="lazy" />
+              } @else {
+                <span class="pc__photo-placeholder"><ds-icon name="image" [size]="16"></ds-icon></span>
+              }
+              <span class="pc__photo-label">{{ roomLabel(p.roomType) }}</span>
+            </label>
+          }
+        </div>
+      </fieldset>
+    }
+
     <div class="pc__actions">
       <ds-button variant="ghost" size="sm" (dsClick)="closed.emit()">Annuler</ds-button>
       <ds-button variant="ghost" size="sm" prefixIcon="refresh" (dsClick)="loadDraft()">Régénérer</ds-button>

@@ -13,6 +13,7 @@ import java.util.List;
  * @param consentStatus GRANTED, DENIED, PENDING, REVOKED, EXPIRED ou MISSING
  * @param whatsappWindowOpen le client a écrit sur WhatsApp il y a moins de 24 h (null pour SMS)
  * @param blockers raisons empêchant l'envoi (vide si l'envoi est possible)
+ * @param photos photos envoyables par WhatsApp (vide pour SMS)
  */
 public record PitchDraftResponse(
         String message,
@@ -27,4 +28,5 @@ public record PitchDraftResponse(
         List<String> warnings,
         int maxLength,
         LocalDateTime pitchedAt,
-        String pitchChannel) {}
+        String pitchChannel,
+        List<PitchPhotoResponse> photos) {}

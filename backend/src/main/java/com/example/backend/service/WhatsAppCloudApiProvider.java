@@ -22,8 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -49,6 +52,14 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
 
     @Value("${whatsapp.cloud.api.base-url:https://graph.facebook.com/v18.0}")
     private String baseUrl;
+
+    /** Photos d'annonce (propositions de biens) ; absent dans certains tests unitaires. */
+    private WhatsAppMediaResolver mediaResolver;
+
+    @Autowired(required = false)
+    public void setMediaResolver(WhatsAppMediaResolver mediaResolver) {
+        this.mediaResolver = mediaResolver;
+    }
 
     public WhatsAppCloudApiProvider(
             WhatsAppProviderConfigRepository providerConfigRepository,
@@ -179,6 +190,21 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
 
             Map<String, Object> payload = buildPayload(message, config, withinSessionWindow);
 
+            if (WhatsAppMediaResolver.isImageMessage(message) && withinSessionWindow) {
+                try {
+                    payload.put("type", "image");
+                    payload.remove("text");
+                    payload.put("image", resolveImage(message, config));
+                } catch (WhatsAppMediaResolver.MediaUnavailableException e) {
+                    logger.warn(
+                            "WhatsApp image unavailable: messageId={}, reason={}",
+                            message.getId(),
+                            e.getMessage());
+                    return ProviderSendResult.failure(
+                            "MEDIA_UNAVAILABLE", sanitizeErrorMessage(e.getMessage()), false, null);
+                }
+            }
+
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
 
             logger.info(
@@ -273,6 +299,66 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
         }
 
         return payload;
+    }
+
+    /**
+     * Objet {@code image} du message : lien public pour une photo externe, sinon photo téléversée
+     * chez Meta ({@code /media}) et référencée par son identifiant.
+     */
+    private Map<String, Object> resolveImage(
+            OutboundMessageEntity message, WhatsAppProviderConfig config)
+            throws WhatsAppMediaResolver.MediaUnavailableException {
+        if (mediaResolver == null) {
+            throw new WhatsAppMediaResolver.MediaUnavailableException("Photos non disponibles");
+        }
+        WhatsAppMediaResolver.ResolvedImage img = mediaResolver.resolve(message);
+        Map<String, Object> image = new HashMap<>();
+        Object caption =
+                message.getPayloadJson() != null ? message.getPayloadJson().get("caption") : null;
+        if (caption instanceof String c && !c.isBlank()) {
+            image.put("caption", c.length() > 1024 ? c.substring(0, 1024) : c);
+        }
+        if (img.isLink()) {
+            image.put("link", img.link());
+            return image;
+        }
+        image.put("id", uploadMedia(img, config));
+        return image;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String uploadMedia(
+            WhatsAppMediaResolver.ResolvedImage img, WhatsAppProviderConfig config)
+            throws WhatsAppMediaResolver.MediaUnavailableException {
+        HttpHeaders fileHeaders = new HttpHeaders();
+        fileHeaders.setContentType(MediaType.parseMediaType(img.contentType()));
+        ByteArrayResource file =
+                new ByteArrayResource(img.bytes()) {
+                    @Override
+                    public String getFilename() {
+                        return img.fileName();
+                    }
+                };
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("messaging_product", "whatsapp");
+        body.add("type", img.contentType());
+        body.add("file", new HttpEntity<>(file, fileHeaders));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setBearerAuth(config.getApiKeyEncrypted());
+        ResponseEntity<Map> response =
+                restTemplate.exchange(
+                        String.format("%s/%s/media", baseUrl, config.getPhoneNumberId()),
+                        HttpMethod.POST,
+                        new HttpEntity<>(body, headers),
+                        Map.class);
+        Object id = response.getBody() != null ? response.getBody().get("id") : null;
+        if (id == null) {
+            throw new WhatsAppMediaResolver.MediaUnavailableException(
+                    "Téléversement de la photo refusé par WhatsApp");
+        }
+        return id.toString();
     }
 
     private void buildTemplatePayload(Map<String, Object> payload, OutboundMessageEntity message) {

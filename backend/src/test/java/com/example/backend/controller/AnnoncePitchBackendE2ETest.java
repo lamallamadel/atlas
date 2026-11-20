@@ -12,6 +12,7 @@ import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.brain.BrainClientService;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.AnnonceDossierMatch;
+import com.example.backend.entity.AnnonceMedia;
 import com.example.backend.entity.ConsentementEntity;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.OutboundMessageEntity;
@@ -23,6 +24,7 @@ import com.example.backend.entity.enums.ConsentementType;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.repository.AnnonceDossierMatchRepository;
+import com.example.backend.repository.AnnonceMediaRepository;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.ConsentementRepository;
 import com.example.backend.repository.DossierRepository;
@@ -52,6 +54,7 @@ class AnnoncePitchBackendE2ETest extends BaseBackendE2ETest {
     @Autowired private AnnonceDossierMatchRepository matchRepository;
     @Autowired private ConsentementRepository consentementRepository;
     @Autowired private OutboundMessageRepository outboundMessageRepository;
+    @Autowired private AnnonceMediaRepository mediaRepository;
     @MockitoBean private BrainClientService brainClientService;
     @MockitoBean private WhatsAppSessionWindowService sessionWindowService;
 
@@ -226,5 +229,90 @@ class AnnoncePitchBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(status().isBadRequest());
         mockMvc.perform(withTenantHeaders(post(base() + "/draft"), "ORG2"))
                 .andExpect(status().isNotFound());
+    }
+
+    private Long photo(String contentType, String room, int position) {
+        AnnonceMedia m = new AnnonceMedia();
+        m.setOrgId(ORG1);
+        m.setAnnonceId(annonceId);
+        m.setMediaType(AnnonceMedia.TYPE_PHOTO);
+        m.setSource(AnnonceMedia.SOURCE_UPLOAD);
+        m.setStoragePath(ORG1 + "/annonces/" + annonceId + "/p" + position);
+        m.setContentType(contentType);
+        m.setFileSize(1000L);
+        m.setPosition(position);
+        m.setAnalysisStatus(AnnonceMedia.STATUS_DONE);
+        m.setAnalysis(Map.of("is_property_photo", true, "room_type", room, "confidence", 0.9));
+        return mediaRepository.save(m).getId();
+    }
+
+    @Test
+    void photos_jointes_par_whatsapp() throws Exception {
+        consent(ConsentementChannel.WHATSAPP, ConsentementStatus.GRANTED);
+        when(brainClientService.generatePitch(any())).thenReturn(Optional.empty());
+        Long cuisine = photo("image/jpeg", "cuisine", 1);
+        Long salon = photo("image/jpeg", "salon", 2);
+        Long facade = photo("image/png", "facade", 3);
+        Long webp = photo("image/webp", "vue", 4);
+
+        mockMvc.perform(withTenantHeaders(post(base() + "/draft?channel=WHATSAPP"), ORG1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photos.length()").value(3))
+                .andExpect(jsonPath("$.photos[0].mediaId").value(salon))
+                .andExpect(jsonPath("$.photos[0].suggested").value(true))
+                .andExpect(jsonPath("$.photos[1].mediaId").value(facade))
+                .andExpect(jsonPath("$.photos[2].suggested").value(false))
+                .andExpect(
+                        jsonPath("$.photos[0].url")
+                                .value(
+                                        org.hamcrest.Matchers.endsWith(
+                                                "/media/" + salon + "/content")));
+        mockMvc.perform(withTenantHeaders(post(base() + "/draft?channel=SMS"), ORG1))
+                .andExpect(jsonPath("$.photos").isEmpty());
+
+        // photo au format refusé par WhatsApp
+        mockMvc.perform(
+                        withTenantHeaders(post(base() + "/send"), ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        "{\"message\":\"Bonjour\",\"channel\":\"WHATSAPP\",\"mediaIds\":["
+                                                + webp
+                                                + "]}"))
+                .andExpect(status().isBadRequest());
+        // photos par SMS
+        mockMvc.perform(
+                        withTenantHeaders(post(base() + "/send"), ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        "{\"message\":\"Bonjour\",\"channel\":\"SMS\",\"mediaIds\":["
+                                                + salon
+                                                + "]}"))
+                .andExpect(status().isBadRequest());
+        assertThat(outboundMessageRepository.findAll()).isEmpty();
+
+        mockMvc.perform(
+                        withTenantHeaders(post(base() + "/send"), ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        "{\"message\":\"Bonjour Youssef\",\"channel\":\"WHATSAPP\",\"mediaIds\":["
+                                                + salon
+                                                + ","
+                                                + facade
+                                                + "]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photosQueued").value(2));
+
+        List<OutboundMessageEntity> sent =
+                outboundMessageRepository.findAll().stream()
+                        .sorted(java.util.Comparator.comparing(OutboundMessageEntity::getId))
+                        .toList();
+        assertThat(sent).hasSize(3);
+        assertThat(sent.get(0).getPayloadJson()).containsEntry("body", "Bonjour Youssef");
+        assertThat(sent.get(1).getPayloadJson()).containsEntry("type", "image");
+        assertThat(((Number) sent.get(1).getPayloadJson().get("mediaId")).longValue())
+                .isEqualTo(salon);
+        assertThat(((Number) sent.get(2).getPayloadJson().get("mediaId")).longValue())
+                .isEqualTo(facade);
+        assertThat(cuisine).isNotNull();
     }
 }

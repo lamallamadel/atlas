@@ -2,10 +2,12 @@ package com.example.backend.service;
 
 import com.example.backend.brain.BrainClientService;
 import com.example.backend.dto.PitchDraftResponse;
+import com.example.backend.dto.PitchPhotoResponse;
 import com.example.backend.dto.PitchSendRequest;
 import com.example.backend.dto.PitchSendResponse;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.AnnonceDossierMatch;
+import com.example.backend.entity.AnnonceMedia;
 import com.example.backend.entity.ConsentementEntity;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.OutboundMessageEntity;
@@ -16,6 +18,7 @@ import com.example.backend.entity.enums.ConsentementType;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.repository.AnnonceDossierMatchRepository;
+import com.example.backend.repository.AnnonceMediaRepository;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.ConsentementRepository;
 import com.example.backend.repository.DossierRepository;
@@ -72,6 +75,7 @@ public class PropertyPitchService {
     private final WhatsAppSessionWindowService sessionWindowService;
     private final BrainClientService brainClientService;
     private final ActivityService activityService;
+    private final AnnonceMediaRepository mediaRepository;
 
     public PropertyPitchService(
             AnnonceRepository annonceRepository,
@@ -81,7 +85,8 @@ public class PropertyPitchService {
             OutboundMessageService outboundMessageService,
             WhatsAppSessionWindowService sessionWindowService,
             BrainClientService brainClientService,
-            @Nullable ActivityService activityService) {
+            @Nullable ActivityService activityService,
+            AnnonceMediaRepository mediaRepository) {
         this.annonceRepository = annonceRepository;
         this.dossierRepository = dossierRepository;
         this.matchRepository = matchRepository;
@@ -90,6 +95,7 @@ public class PropertyPitchService {
         this.sessionWindowService = sessionWindowService;
         this.brainClientService = brainClientService;
         this.activityService = activityService;
+        this.mediaRepository = mediaRepository;
     }
 
     /** Brouillon à relire : rien n'est envoyé ni enregistré. */
@@ -136,7 +142,41 @@ public class PropertyPitchService {
                 checks.warnings(),
                 MAX_LENGTH.get(channel),
                 ctx.match().getPitchedAt(),
-                ctx.match().getPitchChannel());
+                ctx.match().getPitchChannel(),
+                channel == MessageChannel.WHATSAPP ? photos(ctx.annonce().getId()) : List.of());
+    }
+
+    /** Photos envoyables par WhatsApp, les présélectionnées en premier. */
+    private List<PitchPhotoResponse> photos(Long annonceId) {
+        List<AnnonceMedia> eligible = eligiblePhotos(annonceId);
+        List<Long> suggested = PitchPhotoSelector.suggest(eligible);
+        List<PitchPhotoResponse> out = new ArrayList<>();
+        for (AnnonceMedia m : eligible) {
+            out.add(
+                    new PitchPhotoResponse(
+                            m.getId(),
+                            m.getSource(),
+                            AnnonceMedia.SOURCE_URL.equals(m.getSource())
+                                    ? m.getExternalUrl()
+                                    : "/api/v1/annonces/"
+                                            + annonceId
+                                            + "/media/"
+                                            + m.getId()
+                                            + "/content",
+                            PitchPhotoSelector.roomType(m),
+                            PitchPhotoSelector.caption(m),
+                            suggested.contains(m.getId())));
+        }
+        out.sort(
+                java.util.Comparator.comparing((PitchPhotoResponse p) -> !p.suggested())
+                        .thenComparing(p -> suggested.indexOf(p.mediaId())));
+        return out;
+    }
+
+    private List<AnnonceMedia> eligiblePhotos(Long annonceId) {
+        return mediaRepository.findByAnnonceIdOrderByPositionAscIdAsc(annonceId).stream()
+                .filter(m -> PitchPhotoSelector.ineligibility(m) == null)
+                .toList();
     }
 
     /** Envoi du message validé par l'agent. */
@@ -157,6 +197,37 @@ public class PropertyPitchService {
                             + MAX_LENGTH.get(channel)
                             + " caractères maximum).");
         }
+        List<Long> mediaIds =
+                request.mediaIds() == null
+                        ? List.of()
+                        : request.mediaIds().stream()
+                                .filter(java.util.Objects::nonNull)
+                                .distinct()
+                                .toList();
+        if (!mediaIds.isEmpty() && channel != MessageChannel.WHATSAPP) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Les photos ne peuvent être envoyées que par WhatsApp.");
+        }
+        if (mediaIds.size() > PitchPhotoSelector.MAX_PHOTOS) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    PitchPhotoSelector.MAX_PHOTOS + " photos au plus par proposition.");
+        }
+        Set<Long> eligibleIds =
+                mediaIds.isEmpty()
+                        ? Set.of()
+                        : eligiblePhotos(ctx.annonce().getId()).stream()
+                                .map(AnnonceMedia::getId)
+                                .collect(java.util.stream.Collectors.toSet());
+        for (Long id : mediaIds) {
+            if (!eligibleIds.contains(id)) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "La photo " + id + " ne peut pas être envoyée par WhatsApp.");
+            }
+        }
+
         Checks checks = checks(ctx, channel);
         // Le consentement est vérifié par la file des messages sortants (422 si absent).
         List<String> blocking =
@@ -184,6 +255,28 @@ public class PropertyPitchService {
                         idempotencyKey(ctx.match().getId(), channel, message),
                         ConsentementType.MARKETING);
 
+        // Photos : un message WhatsApp par photo, créés après le texte (envoyés dans cet ordre).
+        // Si une photo échoue, le texte est parti quand même.
+        int photosQueued = 0;
+        for (Long mediaId : mediaIds) {
+            Map<String, Object> photo = new LinkedHashMap<>();
+            photo.put("type", "image");
+            photo.put("kind", "PROPERTY_PITCH_PHOTO");
+            photo.put("annonceId", ctx.annonce().getId());
+            photo.put("mediaId", mediaId);
+            photo.put("matchId", ctx.match().getId());
+            outboundMessageService.createOutboundMessage(
+                    ctx.dossier().getId(),
+                    channel,
+                    ctx.dossier().getLeadPhone(),
+                    null,
+                    "Photo : " + safeTitle(ctx.annonce()),
+                    photo,
+                    idempotencyKey(ctx.match().getId(), channel, message) + "-photo-" + mediaId,
+                    ConsentementType.MARKETING);
+            photosQueued++;
+        }
+
         LocalDateTime now = LocalDateTime.now();
         AnnonceDossierMatch m = ctx.match();
         m.setPitchedAt(now);
@@ -202,6 +295,7 @@ public class PropertyPitchService {
                 meta.put("outboundMessageId", outbound.getId());
                 meta.put("channel", channel.name());
                 meta.put("score", m.getScore());
+                meta.put("photos", mediaIds);
                 activityService.logActivity(
                         ctx.dossier().getId(),
                         ActivityType.MESSAGE_SENT,
@@ -211,7 +305,9 @@ public class PropertyPitchService {
                                 + safeTitle(ctx.annonce())
                                 + " (correspondance "
                                 + m.getScore()
-                                + "/100)",
+                                + "/100"
+                                + (photosQueued > 0 ? ", " + photosQueued + " photo(s)" : "")
+                                + ")",
                         meta);
             } catch (Exception e) {
                 log.warn("Activité de proposition non enregistrée : {}", e.getMessage());
@@ -221,7 +317,8 @@ public class PropertyPitchService {
                 outbound.getId(),
                 outbound.getStatus() != null ? outbound.getStatus().name() : null,
                 channel.name(),
-                now);
+                now,
+                photosQueued);
     }
 
     // ---------- vérifications ----------
