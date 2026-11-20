@@ -173,6 +173,15 @@ class PitchReplyBackendE2ETest extends BaseBackendE2ETest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(body))
                 .andExpect(status().isConflict());
+
+        // visite annulée : on peut en replanifier une
+        appt.setStatus(com.example.backend.entity.enums.AppointmentStatus.CANCELLED);
+        appointmentRepository.save(appt);
+        mockMvc.perform(
+                        withTenantHeaders(post(base + "/" + matchId + "/visit"), ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                .andExpect(status().isOk());
     }
 
     @Test

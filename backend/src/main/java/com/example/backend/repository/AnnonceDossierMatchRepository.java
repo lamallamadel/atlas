@@ -36,6 +36,16 @@ public interface AnnonceDossierMatchRepository extends JpaRepository<AnnonceDoss
             @org.springframework.data.repository.query.Param("since")
                     java.time.LocalDateTime since);
 
+    /** Propositions récentes ou avec visite de l'organisation (page « Mes relances »). */
+    @org.springframework.data.jpa.repository.Query(
+            "SELECT m FROM AnnonceDossierMatch m WHERE m.orgId = :orgId AND m.status <> 'DISMISSED'"
+                    + " AND (m.pitchedAt > :since OR m.visitAppointmentId IS NOT NULL)"
+                    + " ORDER BY m.id DESC")
+    List<AnnonceDossierMatch> findInbox(
+            @org.springframework.data.repository.query.Param("orgId") String orgId,
+            @org.springframework.data.repository.query.Param("since") java.time.LocalDateTime since,
+            org.springframework.data.domain.Pageable page);
+
     /** Dernière proposition envoyée à ce dossier (la réponse du client s'y rapporte). */
     java.util.Optional<AnnonceDossierMatch>
             findFirstByOrgIdAndDossierIdAndPitchedAtIsNotNullOrderByPitchedAtDesc(
