@@ -62,6 +62,88 @@ public class AnnonceDossierMatch extends BaseEntity {
     @Column(name = "pitch_message_id")
     private Long pitchMessageId;
 
+    /** Intention du client : VISITE, INTERESSE, NEGOCIATION, QUESTION, PAS_INTERESSE ou AUTRE. */
+    @Column(name = "reply_intent", length = 30)
+    private String replyIntent;
+
+    /** Extrait de la réponse du client. */
+    @Column(name = "reply_excerpt", length = 500)
+    private String replyExcerpt;
+
+    @Column(name = "reply_at")
+    private LocalDateTime replyAt;
+
+    /** Message entrant (message) analysé. */
+    @Column(name = "reply_message_id")
+    private Long replyMessageId;
+
+    /** Créneau de visite proposé à l'agent (libre dans son agenda). */
+    @Column(name = "proposed_start")
+    private LocalDateTime proposedStart;
+
+    @Column(name = "proposed_end")
+    private LocalDateTime proposedEnd;
+
+    /** Rendez-vous de visite créé depuis la proposition. */
+    @Column(name = "visit_appointment_id")
+    private Long visitAppointmentId;
+
+    public String getReplyIntent() {
+        return replyIntent;
+    }
+
+    public void setReplyIntent(String replyIntent) {
+        this.replyIntent = replyIntent;
+    }
+
+    public String getReplyExcerpt() {
+        return replyExcerpt;
+    }
+
+    public void setReplyExcerpt(String replyExcerpt) {
+        this.replyExcerpt = replyExcerpt;
+    }
+
+    public LocalDateTime getReplyAt() {
+        return replyAt;
+    }
+
+    public void setReplyAt(LocalDateTime replyAt) {
+        this.replyAt = replyAt;
+    }
+
+    public Long getReplyMessageId() {
+        return replyMessageId;
+    }
+
+    public void setReplyMessageId(Long replyMessageId) {
+        this.replyMessageId = replyMessageId;
+    }
+
+    public LocalDateTime getProposedStart() {
+        return proposedStart;
+    }
+
+    public void setProposedStart(LocalDateTime proposedStart) {
+        this.proposedStart = proposedStart;
+    }
+
+    public LocalDateTime getProposedEnd() {
+        return proposedEnd;
+    }
+
+    public void setProposedEnd(LocalDateTime proposedEnd) {
+        this.proposedEnd = proposedEnd;
+    }
+
+    public Long getVisitAppointmentId() {
+        return visitAppointmentId;
+    }
+
+    public void setVisitAppointmentId(Long visitAppointmentId) {
+        this.visitAppointmentId = visitAppointmentId;
+    }
+
     public LocalDateTime getPitchedAt() {
         return pitchedAt;
     }

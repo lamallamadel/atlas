@@ -29,3 +29,12 @@
   font-size: 12px; color: var(--ds-text-muted);
   ds-icon { color: var(--ds-marine); }
 }
+.bm__reply { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2); font-size: 13px; }
+.bm__quote { color: var(--ds-text); font-style: italic; }
+.bm__muted-inline { font-size: 12px; color: var(--ds-text-muted); }
+.bm__plan { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2); }
+.bm__visit {
+  display: inline-flex; align-items: center; gap: 4px; margin: 0; font-size: 12px; color: var(--ds-text);
+  ds-icon { color: var(--ds-success); }
+  a { color: var(--ds-marine); }
+}

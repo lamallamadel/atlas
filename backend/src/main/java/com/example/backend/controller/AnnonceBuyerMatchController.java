@@ -4,6 +4,9 @@ import com.example.backend.dto.BuyerMatchResponse;
 import com.example.backend.dto.PitchDraftResponse;
 import com.example.backend.dto.PitchSendRequest;
 import com.example.backend.dto.PitchSendResponse;
+import com.example.backend.dto.VisitPlanRequest;
+import com.example.backend.dto.VisitPlanResponse;
+import com.example.backend.service.PitchReplyService;
 import com.example.backend.service.PropertyPitchService;
 import com.example.backend.service.ReverseMatchingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,11 +34,15 @@ public class AnnonceBuyerMatchController {
 
     private final ReverseMatchingService service;
     private final PropertyPitchService pitchService;
+    private final PitchReplyService replyService;
 
     public AnnonceBuyerMatchController(
-            ReverseMatchingService service, PropertyPitchService pitchService) {
+            ReverseMatchingService service,
+            PropertyPitchService pitchService,
+            PitchReplyService replyService) {
         this.service = service;
         this.pitchService = pitchService;
+        this.replyService = replyService;
     }
 
     @GetMapping
@@ -97,5 +104,15 @@ public class AnnonceBuyerMatchController {
             @PathVariable Long matchId,
             @Valid @RequestBody PitchSendRequest request) {
         return pitchService.send(annonceId, matchId, request);
+    }
+
+    @PostMapping("/{matchId}/visit")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Planifier la visite demandée par l'acheteur (rendez-vous)")
+    public VisitPlanResponse planVisit(
+            @PathVariable Long annonceId,
+            @PathVariable Long matchId,
+            @Valid @RequestBody VisitPlanRequest request) {
+        return replyService.planVisit(annonceId, matchId, request);
     }
 }

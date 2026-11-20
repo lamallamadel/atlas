@@ -11,6 +11,7 @@ import { DsToastService } from '../design-system';
 const MATCH: BuyerMatch = {
   id: 3, dossierId: 10, leadName: 'Youssef', dossierStatus: 'QUALIFIED', score: 88, reasons: [], alerts: [],
   status: 'SEEN', createdAt: null, pitchedAt: null, pitchChannel: null,
+  replyIntent: null, replyExcerpt: null, replyAt: null, proposedStart: null, proposedEnd: null, visitAppointmentId: null,
 };
 
 function draft(partial: Partial<PitchDraft> = {}): PitchDraft {

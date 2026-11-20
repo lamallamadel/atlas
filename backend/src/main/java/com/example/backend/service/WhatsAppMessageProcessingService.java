@@ -54,6 +54,14 @@ public class WhatsAppMessageProcessingService {
         this.activityService = activityService;
     }
 
+    /** Analyse des réponses aux propositions de biens ; absent dans certains tests. */
+    private PitchReplyService pitchReplyService;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPitchReplyService(PitchReplyService pitchReplyService) {
+        this.pitchReplyService = pitchReplyService;
+    }
+
     @Transactional
     public void processInboundMessage(WhatsAppWebhookPayload payload, String orgId) {
         if (payload.getEntry() == null || payload.getEntry().isEmpty()) {
@@ -123,6 +131,8 @@ public class WhatsAppMessageProcessingService {
 
         sessionWindowService.updateSessionWindow(orgId, phoneNumber, timestamp);
 
+        triggerPitchReply(orgId, dossier.getId(), messageEntity.getId(), messageContent, timestamp);
+
         log.info(
                 "Processed WhatsApp message {} for dossier {} in org {}",
                 providerMessageId,
@@ -160,9 +170,18 @@ public class WhatsAppMessageProcessingService {
 
     private Dossier findOrCreateDossier(String phoneNumber, String contactName, String orgId) {
         List<DossierStatus> excludedStatuses = List.of(DossierStatus.WON, DossierStatus.LOST);
-        List<Dossier> existingDossiers =
-                dossierRepository.findByLeadPhoneAndOrgIdAndStatusNotIn(
-                        phoneNumber, orgId, excludedStatuses);
+        // WhatsApp envoie le numéro sans « + » (212600000002) ; l'agent l'a souvent saisi
+        // autrement (+212600000002, 0600000002) : sans ces variantes, la réponse du client
+        // ouvrirait un nouveau dossier.
+        List<Dossier> existingDossiers = List.of();
+        for (String candidate : phoneVariants(phoneNumber)) {
+            existingDossiers =
+                    dossierRepository.findByLeadPhoneAndOrgIdAndStatusNotIn(
+                            candidate, orgId, excludedStatuses);
+            if (!existingDossiers.isEmpty()) {
+                break;
+            }
+        }
 
         if (!existingDossiers.isEmpty()) {
             Dossier dossier = existingDossiers.get(0);
@@ -390,5 +409,49 @@ public class WhatsAppMessageProcessingService {
     public String getWebhookSecret(String orgId) {
         Optional<WhatsAppProviderConfig> config = configRepository.findByOrgId(orgId);
         return config.map(WhatsAppProviderConfig::getWebhookSecretEncrypted).orElse(null);
+    }
+
+    /** Après validation : le message doit être enregistré avant son analyse (autre thread). */
+    private void triggerPitchReply(
+            String orgId, Long dossierId, Long messageId, String content, LocalDateTime at) {
+        if (pitchReplyService == null || content == null || content.isBlank()) {
+            return;
+        }
+        Runnable run =
+                () ->
+                        pitchReplyService.onInboundMessageAsync(
+                                orgId, dossierId, messageId, content, at);
+        if (org.springframework.transaction.support.TransactionSynchronizationManager
+                .isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager
+                    .registerSynchronization(
+                            new org.springframework.transaction.support
+                                    .TransactionSynchronization() {
+                                @Override
+                                public void afterCommit() {
+                                    run.run();
+                                }
+                            });
+        } else {
+            run.run();
+        }
+    }
+
+    /** Le numéro tel quel, puis avec et sans « + », puis au format local marocain (0…). */
+    static List<String> phoneVariants(String phone) {
+        java.util.LinkedHashSet<String> out = new java.util.LinkedHashSet<>();
+        if (phone == null || phone.isBlank()) {
+            return List.of();
+        }
+        out.add(phone);
+        String digits = phone.replaceAll("[^0-9]", "");
+        if (!digits.isEmpty()) {
+            out.add("+" + digits);
+            out.add(digits);
+            if (digits.startsWith("212") && digits.length() == 12) {
+                out.add("0" + digits.substring(3));
+            }
+        }
+        return List.copyOf(out);
     }
 }

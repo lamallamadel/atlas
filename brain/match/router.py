@@ -135,3 +135,14 @@ from match.pitch import PitchRequest, PitchResponse, generate_pitch  # noqa: E40
 async def proposition(req: PitchRequest, _: str = Depends(verify_api_key)):
     """Brouillon de message (WhatsApp ou SMS) à relire par l'agent avant envoi."""
     return await generate_pitch(req)
+
+
+# ---------- Réponse du client à une proposition ----------
+
+from match.reply import ReponseRequest, ReponseResponse, analyse_reply  # noqa: E402
+
+
+@router.post("/api/match/reponse", response_model=ReponseResponse)
+async def reponse(req: ReponseRequest, _: str = Depends(verify_api_key)):
+    """Intention du client (visite, intérêt, négociation…) et disponibilités lues dans sa réponse."""
+    return await analyse_reply(req)
