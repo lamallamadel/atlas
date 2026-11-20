@@ -63,6 +63,13 @@ webhook non signé par Meta.
 
 ## 4. Enregistrer la configuration dans Atlas
 
+**En local** (`infra/docker-compose.local.yml`, base H2) : utiliser plutôt
+`infra/scripts/configure-whatsapp-h2.sql` dans la console H2 (<http://localhost:8083>, JDBC URL
+`jdbc:h2:tcp://localhost:1521/atlas`, utilisateur `sa`, mot de passe vide). L'organisation des
+données de démonstration est `ORG-001`, et le « Verify token » par défaut est `atlas-local`.
+
+**Sur le serveur** (PostgreSQL) :
+
 Ouvrir `infra/scripts/configure-whatsapp.sql`, remplacer les valeurs entre `<>` et exécuter la
 première requête (`INSERT … ON CONFLICT`) :
 
