@@ -50,7 +50,7 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
     private final Map<String, CircuitBreaker> circuitBreakerByChannel;
     private final Map<String, TimeLimiter> timeLimiterByChannel;
 
-    @Value("${whatsapp.cloud.api.base-url:https://graph.facebook.com/v18.0}")
+    @Value("${whatsapp.cloud.api.base-url:https://graph.facebook.com/v25.0}")
     private String baseUrl;
 
     /** Photos d'annonce (propositions de biens) ; absent dans certains tests unitaires. */

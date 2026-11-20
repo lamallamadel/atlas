@@ -140,6 +140,11 @@ services:
       BRAIN_DOCUMENT_URL: http://brain:8000
       BRAIN_VISION_URL: http://brain:8000
       BRAIN_API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
+
+      # Heure du Maroc : créneaux de visite, réception des messages WhatsApp
+      TZ: ${TZ:-Africa/Casablanca}
+      # WhatsApp Cloud API : jeton saisi dans Meta > WhatsApp > Configuration > Verify token
+      WHATSAPP_WEBHOOK_VERIFY_TOKEN: ${WHATSAPP_WEBHOOK_VERIFY_TOKEN:-}
     volumes:
       - backend_logs:/var/log/atlas
     healthcheck:

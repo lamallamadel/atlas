@@ -147,3 +147,12 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+# WhatsApp Cloud API (Meta). Identifiants par organisation : table whatsapp_provider_config.
+whatsapp:
+  cloud:
+    api:
+      base-url: ${WHATSAPP_API_BASE_URL:https://graph.facebook.com/v25.0}
+  webhook:
+    # Doit être identique au « Verify token » saisi dans Meta > WhatsApp > Configuration
+    verify-token: ${WHATSAPP_WEBHOOK_VERIFY_TOKEN:}

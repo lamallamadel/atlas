@@ -22,8 +22,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -85,6 +85,86 @@ class WhatsAppWebhookControllerTest {
                                 .param("hub.verify_token", "test-token")
                                 .param("hub.challenge", "challenge-value"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void webhookMeta_sansXOrgId_organisationRetrouveeParLeNumero() throws Exception {
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.meta1", "+212600000002", "1234567890", "Bonjour", "Youssef");
+        mockMvc.perform(
+                        post("/api/v1/webhooks/whatsapp/inbound")
+                                .header(
+                                        "X-Hub-Signature-256",
+                                        generateSignature(payload, WEBHOOK_SECRET))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
+        assertThat(messageRepository.findAll())
+                .singleElement()
+                .satisfies(m -> assertThat(m.getOrgId()).isEqualTo(ORG_ID));
+    }
+
+    @Test
+    void webhookMeta_sansXOrgId_nonSigne_ouMalSigne_refuse() throws Exception {
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.meta2", "+212600000002", "1234567890", "Bonjour", "Youssef");
+        mockMvc.perform(
+                        post("/api/v1/webhooks/whatsapp/inbound")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(
+                        post("/api/v1/webhooks/whatsapp/inbound")
+                                .header(
+                                        "X-Hub-Signature-256",
+                                        generateSignature(payload, "mauvais-secret"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isUnauthorized());
+        assertThat(messageRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void webhookMeta_numeroInconnu_refuse() throws Exception {
+        String payload =
+                createWhatsAppWebhookPayload(
+                                "wamid.meta3", "+212600000002", "1234567890", "Bonjour", "Youssef")
+                        .replace("123456789", "000000000");
+        mockMvc.perform(
+                        post("/api/v1/webhooks/whatsapp/inbound")
+                                .header(
+                                        "X-Hub-Signature-256",
+                                        generateSignature(payload, WEBHOOK_SECRET))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void verification_jetonConfigure_doitCorrespondre(
+            @Autowired WhatsAppWebhookController controller) throws Exception {
+        org.springframework.test.util.ReflectionTestUtils.setField(
+                controller, "verifyTokenExpected", "atlas-verif-123");
+        try {
+            mockMvc.perform(
+                            get("/api/v1/webhooks/whatsapp/inbound")
+                                    .param("hub.mode", "subscribe")
+                                    .param("hub.verify_token", "atlas-verif-123")
+                                    .param("hub.challenge", "4242"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("4242"));
+            mockMvc.perform(
+                            get("/api/v1/webhooks/whatsapp/inbound")
+                                    .param("hub.mode", "subscribe")
+                                    .param("hub.verify_token", "autre")
+                                    .param("hub.challenge", "4242"))
+                    .andExpect(status().isForbidden());
+        } finally {
+            org.springframework.test.util.ReflectionTestUtils.setField(
+                    controller, "verifyTokenExpected", "");
+        }
     }
 
     @Test
@@ -275,7 +355,8 @@ class WhatsAppWebhookControllerTest {
     }
 
     @Test
-    void receiveInboundMessage_MissingOrgId_ReturnsBadRequest() throws Exception {
+    void receiveInboundMessage_MissingOrgIdAndSignature_ReturnsUnauthorized() throws Exception {
+        // Sans X-Org-Id, l'organisation vient du numéro WhatsApp : la signature Meta est exigée.
         String payload =
                 createWhatsAppWebhookPayload(
                         "wamid.noorg", "+33612345678", "1234567890", "Test message", "John Doe");
@@ -284,8 +365,8 @@ class WhatsAppWebhookControllerTest {
                         post("/api/v1/webhooks/whatsapp/inbound")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Missing organization context"));
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("Missing signature"));
     }
 
     @Test
@@ -492,4 +573,3 @@ class WhatsAppWebhookControllerTest {
         return "sha256=" + HexFormat.of().formatHex(hash);
     }
 }
-
