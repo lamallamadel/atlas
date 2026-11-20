@@ -1,4 +1,5 @@
-<ds-entity-detail-layout [rightSlot]="true">
+<!-- Pas de colonne de droite : les actions rapides sont un bouton flottant -->
+<ds-entity-detail-layout [rightSlot]="false">
   <!-- Breadcrumb -->
   <div slot="breadcrumb" style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
     <a href="javascript:void(0)" (click)="goBack()" style="color: var(--ds-text-faint); text-decoration: none;">Dossiers</a>
@@ -218,7 +219,5 @@
   </div>
 
   <!-- Right Sidebar -->
-  <div slot="right">
-    <app-quick-actions [dossier]="dossier!"></app-quick-actions>
-  </div>
 </ds-entity-detail-layout>
+<app-quick-actions [dossier]="dossier!"></app-quick-actions>
