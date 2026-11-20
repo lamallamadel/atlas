@@ -270,7 +270,7 @@ export class KeyboardShortcutService {
   }
 
   private navigateToAnnonces(): void {
-    this.router.navigate(['/annonces']);
+    this.router.navigate(['/pro/annonces']);
   }
 
   private navigateToDossiers(): void {

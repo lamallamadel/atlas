@@ -143,7 +143,7 @@ export function duplicateBadge(a: AnnonceAiFields): { status: DsBadgeStatus; lab
               <dd>
                 @if (duplicate(); as d) {
                   <ds-badge [status]="d.status" size="sm" [showDot]="false">{{ d.label }}</ds-badge>
-                  <a class="ai-card__link" [routerLink]="['/annonces', annonce().duplicateOfId]">
+                  <a class="ai-card__link" [routerLink]="['/pro/annonces', annonce().duplicateOfId]">
                     Voir l'annonce #{{ annonce().duplicateOfId }}
                   </a>
                   @if (isSet(annonce().duplicateSimilarity)) {

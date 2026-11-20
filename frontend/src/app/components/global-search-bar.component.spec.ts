@@ -92,7 +92,7 @@ describe('GlobalSearchBarComponent', () => {
 
     component.navigateToResult(result);
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/annonces', 1]);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pro/annonces', 1]);
   });
 
   it('should navigate to dossier detail on result selection', () => {
@@ -263,7 +263,7 @@ describe('GlobalSearchBarComponent', () => {
     const event = new KeyboardEvent('keydown', { key: 'Enter' });
     component.handleKeyboardShortcut(event);
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/annonces', 1]);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pro/annonces', 1]);
   });
 
   it('should handle Escape key to close dropdown', () => {

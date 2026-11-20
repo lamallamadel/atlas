@@ -418,7 +418,7 @@ export class AnnonceCreateComponent implements OnInit {
       next: () => {
         this.submitting = false;
         this.toastService.success('Annonce créée avec succès');
-        this.router.navigate(['/annonces']);
+        this.router.navigate(['/pro/annonces']);
       },
       error: (err) => {
         this.submitting = false;
@@ -453,7 +453,7 @@ export class AnnonceCreateComponent implements OnInit {
       next: () => {
         this.submitting = false;
         this.toastService.success('Annonce modifiée avec succès');
-        this.router.navigate(['/annonces']);
+        this.router.navigate(['/pro/annonces']);
       },
       error: (err) => {
         this.submitting = false;
@@ -488,7 +488,7 @@ export class AnnonceCreateComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/annonces']);
+    this.router.navigate(['/pro/annonces']);
   }
 
   markAllFormGroupsTouched(): void {

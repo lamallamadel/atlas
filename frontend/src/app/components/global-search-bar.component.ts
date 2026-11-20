@@ -130,7 +130,7 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
     this.saveRecentSearch(this.searchQuery);
     
     if (result.type === 'annonce') {
-      this.router.navigate(['/annonces', result.id]);
+      this.router.navigate(['/pro/annonces', result.id]);
     } else if (result.type === 'dossier') {
       this.router.navigate(['/dossiers', result.id]);
     } else if (result.type === 'contact') {

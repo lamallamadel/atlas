@@ -113,7 +113,7 @@ export class SearchComponent implements OnInit {
 
   navigateToResult(result: SearchResult): void {
     if (result.type === 'ANNONCE') {
-      this.router.navigate(['/annonces', result.id]);
+      this.router.navigate(['/pro/annonces', result.id]);
     } else if (result.type === 'DOSSIER') {
       this.router.navigate(['/dossiers', result.id]);
     }

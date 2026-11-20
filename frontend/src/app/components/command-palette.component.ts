@@ -178,7 +178,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
           icon: 'edit',
           category: 'Actions contextuelles',
           keywords: ['éditer', 'modifier', 'annonce'],
-          action: () => this.router.navigate(['/annonces', id, 'edit'])
+          action: () => this.router.navigate(['/pro/annonces', id, 'edit'])
         },
         {
           id: 'ctx-create-dossier-for-annonce',
@@ -264,7 +264,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
         category: 'Actions',
         keywords: ['nouveau', 'créer', 'annonce', 'propriété', 'bien'],
         shortcut: 'Ctrl+Shift+A',
-        action: () => this.navigateTo('/annonces/new')
+        action: () => this.navigateTo('/pro/annonces/new')
       },
       {
         id: 'toggle-dark-mode',
@@ -294,7 +294,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
         category: 'Navigation',
         keywords: ['propriété', 'bien', 'annonce', 'liste'],
         shortcut: 'g+a',
-        action: () => this.navigateTo('/annonces')
+        action: () => this.navigateTo('/pro/annonces')
       },
       {
         id: 'nav-dossiers',
@@ -552,7 +552,7 @@ export class CommandPaletteComponent implements OnInit, OnDestroy {
   private navigateTo(path: string): void { this.router.navigate([path]); }
 
   private navigateToSearchResult(result: SearchResult): void {
-    if (result.type === 'ANNONCE') this.navigateTo(`/annonces/${result.id}`);
+    if (result.type === 'ANNONCE') this.navigateTo(`/pro/annonces/${result.id}`);
     else if (result.type === 'DOSSIER') this.navigateTo(`/dossiers/${result.id}`);
   }
 

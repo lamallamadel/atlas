@@ -152,7 +152,7 @@ describe('DossierMatchingComponent', () => {
     expect(list).toContain('Piscine : non trouvé');
     expect(list).toContain('hors marché');
     expect(list).toContain('Photos non analysées');
-    expect(el.querySelector('[data-testid="dm-matches"] a')?.getAttribute('href')).toBe('/annonces/42');
+    expect(el.querySelector('[data-testid="dm-matches"] a')?.getAttribute('href')).toBe('/pro/annonces/42');
     expect(el.querySelector('[data-testid="dm-summary"]')?.textContent).toContain('Écartés : 3 (ville), 2 (budget)');
   });
 

@@ -199,13 +199,13 @@ export class AnnoncesComponent implements OnInit {
 
   removeFilter(filter: any): void { /* ... */ }
 
-  createAnnonce(): void { this.router.navigate(['/annonces/new']); }
-  goToAnnonce(id: number): void { this.router.navigate(['/annonces', id]); }
+  createAnnonce(): void { this.router.navigate(['/pro/annonces/new']); }
+  goToAnnonce(id: number): void { this.router.navigate(['/pro/annonces', id]); }
 
   onDsTableRowClick(row: any): void { this.goToAnnonce(row.id); }
   onDsTableRowAction(event: { action: string; row: any }): void {
     if (event.action === 'view') this.goToAnnonce(event.row.id);
-    if (event.action === 'edit') this.router.navigate(['/annonces', event.row.id, 'edit']);
+    if (event.action === 'edit') this.router.navigate(['/pro/annonces', event.row.id, 'edit']);
   }
 
   getAnnonceBadgeStatus(status: string): DsBadgeStatus {

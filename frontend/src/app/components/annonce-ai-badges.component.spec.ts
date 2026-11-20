@@ -102,7 +102,7 @@ describe('AnnonceAiBadgesComponent', () => {
     expect(el.textContent).toContain('80');
     expect(el.querySelector('[data-testid="ai-fraud"]')?.textContent).toContain('Prix/m² très bas');
     const link = el.querySelector('[data-testid="ai-duplicate"] a') as HTMLAnchorElement;
-    expect(link.getAttribute('href')).toBe('/annonces/42');
+    expect(link.getAttribute('href')).toBe('/pro/annonces/42');
     expect(el.querySelector('[data-testid="ai-duplicate"]')?.textContent).toContain('88 % similaire');
   });
 

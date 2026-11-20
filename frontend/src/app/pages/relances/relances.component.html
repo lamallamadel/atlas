@@ -42,7 +42,7 @@
                   <div class="relances__who">
                     <a class="relances__lead" [routerLink]="['/dossiers', i.dossierId]">{{ i.leadName || ('Dossier #' + i.dossierId) }}</a>
                     <span class="relances__muted">
-                      <a [routerLink]="['/annonces', i.annonceId]">{{ i.annonceTitle || ('Annonce #' + i.annonceId) }}</a>
+                      <a [routerLink]="['/pro/annonces', i.annonceId]">{{ i.annonceTitle || ('Annonce #' + i.annonceId) }}</a>
                       @if (i.annonceCity) { · {{ i.annonceCity }} }
                     </span>
                   </div>
