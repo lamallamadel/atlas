@@ -55,6 +55,11 @@ export const routes: Routes = [
       { path: 'search',        component: SearchComponent,               data: { animation: 'SearchPage' } },
       { path: 'tasks',         component: TaskListComponent,             data: { animation: 'TasksPage' } },
       { path: 'calendar',      component: CalendarViewComponent,         data: { animation: 'CalendarPage' } },
+      {
+        path: 'relances',
+        loadComponent: () => import('./pages/relances/relances.component').then(m => m.RelancesComponent),
+        data: { animation: 'RelancesPage' }
+      },
       { path: 'settings',      component: SettingsPageComponent,         data: { animation: 'SettingsPage' } },
       {
         path: 'annonces',
@@ -79,6 +84,7 @@ export const routes: Routes = [
   { path: 'dossiers',        redirectTo: 'pro/dossiers',  pathMatch: 'prefix' },
   { path: 'annonces',        redirectTo: 'pro/annonces',  pathMatch: 'prefix' },
   { path: 'calendar',        redirectTo: 'pro/calendar',  pathMatch: 'full' },
+  { path: 'relances',        redirectTo: 'pro/relances',  pathMatch: 'full' },
   { path: 'tasks',           redirectTo: 'pro/tasks',     pathMatch: 'full' },
   { path: 'settings',        redirectTo: 'pro/settings',  pathMatch: 'full' },
   { path: 'reports',         redirectTo: 'pro/reports',   pathMatch: 'full' },

@@ -1,0 +1,104 @@
+<div class="pro-page relances">
+  <ds-page-header
+    eyebrow="Propositions de biens"
+    titleBefore="Re"
+    titleAccent="lances"
+    description="Les clients qui attendent une réponse, les visites demandées et les visites prévues, toutes annonces confondues.">
+    <ng-container slot="actions">
+      <div class="relances__scope" role="group" aria-label="Clients affichés">
+        <ds-filter-chip [active]="mine()" (toggled)="setMine(true)" data-testid="scope-mine">Mes clients</ds-filter-chip>
+        <ds-filter-chip [active]="!mine()" (toggled)="setMine(false)" data-testid="scope-all">Toute l'agence</ds-filter-chip>
+      </div>
+    </ng-container>
+  </ds-page-header>
+
+  @if (loading()) {
+    <ds-skeleton variant="rect" width="100%" height="240px" [animate]="true"></ds-skeleton>
+  } @else if (loadError()) {
+    <ds-empty-state icon="alert-circle" title="Impossible de charger les relances" description="Réessayez dans un instant."></ds-empty-state>
+    <ds-button variant="ghost" size="sm" prefixIcon="refresh" (dsClick)="load()">Réessayer</ds-button>
+  } @else if (!total()) {
+    <ds-empty-state icon="check" title="Rien ne vous attend"
+                    description="Les réponses des clients aux propositions de biens et les visites demandées apparaîtront ici."
+                    data-testid="relances-empty"></ds-empty-state>
+  } @else {
+    @if (urgent()) {
+      <p class="relances__summary" data-testid="relances-summary">
+        {{ urgent() }} client(s) attendent une action de votre part.
+      </p>
+    }
+    @for (s of sections; track s) {
+      @if (counts()[s]) {
+        <ds-card elevation="xs" class="relances__section" [attr.data-testid]="'section-' + s">
+          <h2 class="relances__title">
+            <ds-icon [name]="info[s].icon" [size]="16"></ds-icon>
+            {{ info[s].title }}
+            <ds-badge [status]="s === 'FOLLOW_UP' ? 'warning' : 'neutral'" size="sm" [showDot]="false">{{ counts()[s] }}</ds-badge>
+          </h2>
+          <ul class="relances__list">
+            @for (i of itemsOf(s); track i.matchId) {
+              <li class="relances__item" [attr.data-testid]="'item-' + i.matchId">
+                <div class="relances__row">
+                  <div class="relances__who">
+                    <a class="relances__lead" [routerLink]="['/dossiers', i.dossierId]">{{ i.leadName || ('Dossier #' + i.dossierId) }}</a>
+                    <span class="relances__muted">
+                      <a [routerLink]="['/annonces', i.annonceId]">{{ i.annonceTitle || ('Annonce #' + i.annonceId) }}</a>
+                      @if (i.annonceCity) { · {{ i.annonceCity }} }
+                    </span>
+                  </div>
+                  <div class="relances__badges">
+                    @if (replyLabel(i.replyIntent); as r) {
+                      <ds-badge [status]="r.status" size="sm" [showDot]="false">{{ r.label }}</ds-badge>
+                    }
+                    @if (waitingLabel(waitingSince(i)); as w) {
+                      <span class="relances__wait" [class.relances__wait--late]="s === 'FOLLOW_UP'">{{ w }}</span>
+                    }
+                    @if (i.section === 'RECENT_REPLY' && i.answered) {
+                      <ds-badge status="success" size="sm" [showDot]="false">Répondu</ds-badge>
+                    }
+                  </div>
+                </div>
+
+                @if (i.replyExcerpt) { <q class="relances__quote">{{ i.replyExcerpt }}</q> }
+                @if (i.section === 'FOLLOW_UP' && i.followUpKind === 'CLIENT_SILENT') {
+                  <p class="relances__muted">Proposition envoyée le {{ i.pitchedAt | date:'dd/MM à HH:mm' }}, sans réponse.</p>
+                }
+                @if (i.section === 'VISIT_TO_PLAN' && i.proposedStart) {
+                  <p class="relances__muted">Créneau libre proposé : {{ i.proposedStart | date:'EEEE dd/MM à HH:mm' }}</p>
+                }
+                @if (i.section === 'UPCOMING_VISIT') {
+                  <p class="relances__visit"><ds-icon name="calendar" [size]="12"></ds-icon>
+                    Visite le {{ i.visitStart | date:'EEEE dd/MM à HH:mm' }}</p>
+                }
+
+                <div class="relances__actions">
+                  @if (i.section === 'FOLLOW_UP' || (i.section === 'RECENT_REPLY' && !i.answered)) {
+                    <ds-button variant="marine" size="sm" prefixIcon="send" (dsClick)="toggle(i, 'follow-up')"
+                               [attr.data-testid]="'reply-' + i.matchId">{{ isOpen(i, 'follow-up') ? 'Fermer' : (i.replyAt ? 'Répondre' : 'Relancer') }}</ds-button>
+                  }
+                  @if (i.section === 'VISIT_TO_PLAN' || (i.section === 'FOLLOW_UP' && i.replyIntent === 'VISITE')) {
+                    <ds-button variant="ghost" size="sm" prefixIcon="calendar" (dsClick)="toggle(i, 'plan')"
+                               [attr.data-testid]="'plan-' + i.matchId">{{ isOpen(i, 'plan') ? 'Fermer' : 'Planifier la visite' }}</ds-button>
+                  }
+                  @if (i.section === 'FOLLOW_UP') {
+                    <ds-button variant="ghost" size="sm" [loading]="busyId() === i.matchId" (dsClick)="followUpDone(i)"
+                               [attr.data-testid]="'done-' + i.matchId">C'est fait</ds-button>
+                  }
+                </div>
+
+                @if (isOpen(i, 'follow-up')) {
+                  <app-annonce-pitch-composer [annonceId]="i.annonceId" [match]="match(i)" purpose="FOLLOW_UP"
+                                              (sent)="done()" (closed)="open.set(null)"></app-annonce-pitch-composer>
+                }
+                @if (isOpen(i, 'plan')) {
+                  <app-annonce-visit-planner [annonceId]="i.annonceId" [match]="match(i)"
+                                             (planned)="done()" (closed)="open.set(null)"></app-annonce-visit-planner>
+                }
+              </li>
+            }
+          </ul>
+        </ds-card>
+      }
+    }
+  }
+</div>

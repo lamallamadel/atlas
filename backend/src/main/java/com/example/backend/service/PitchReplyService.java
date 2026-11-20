@@ -366,8 +366,12 @@ public class PitchReplyService {
                                                 && orgId.equals(x.getOrgId()))
                         .orElseThrow(
                                 () -> new EntityNotFoundException("Match not found: " + matchId));
+        // Une visite annulée (ou supprimée) peut être replanifiée.
         if (match.getVisitAppointmentId() != null
-                && appointmentRepository.existsById(match.getVisitAppointmentId())) {
+                && appointmentRepository
+                        .findById(match.getVisitAppointmentId())
+                        .filter(v -> v.getStatus() != AppointmentStatus.CANCELLED)
+                        .isPresent()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "Une visite est déjà planifiée pour cet acheteur.");
         }
