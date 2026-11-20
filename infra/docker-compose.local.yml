@@ -2,8 +2,10 @@
 # Starts: Frontend (Angular), Backend (Spring), Brain (FastAPI unified), H2, Redis, Nginx
 #
 # Usage:
-#   cd infra
-#   docker compose -f docker-compose.local.yml up
+#   cd backend ; mvn clean package -DskipTests -Dspotless.check.skip=true   (JDK 25)
+#   cd ../infra ; docker compose -f docker-compose.local.yml up -d --build
+#   (le backend est construit à partir de backend/target/*.jar : reconstruire le JAR après
+#    chaque modification Java, puis relancer avec --build)
 #
 # Access:
 #   Frontend: http://localhost (Angular app)
@@ -73,10 +75,8 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile.backend
-      cache_from:
-        - type=local,src=./build-cache
-      cache_to:
-        - type=local,dest=./build-cache,mode=max
+      # Pas de cache_from/cache_to « local » : non pris en charge par le moteur Docker par
+      # défaut de Docker Desktop (« Cache export is not supported for the docker driver »).
     container_name: backend_app
     restart: unless-stopped
     ports:
@@ -95,7 +95,9 @@ services:
       SPRING_DATASOURCE_USERNAME: sa
       SPRING_DATASOURCE_PASSWORD: ""
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
-      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      # update : la base H2 (volume h2_data) est conservée entre les redémarrages, avec la
+      # configuration WhatsApp. Base neuve : docker compose -f docker-compose.local.yml down -v
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${LOCAL_DDL_AUTO:-update}
 
       SPRING_PROFILES_ACTIVE: h2,local,dev
       IMMO_MOCK_ENABLED: "true"
@@ -130,6 +132,11 @@ services:
 
       APP_ENV: local
       JAVA_OPTS: "-Xmx1g -Xms512m"
+
+      # Heure du Maroc : créneaux de visite, réception des messages WhatsApp
+      TZ: ${TZ:-Africa/Casablanca}
+      # WhatsApp (test) : même valeur que « Verify token » dans Meta > WhatsApp > Configuration
+      WHATSAPP_WEBHOOK_VERIFY_TOKEN: ${WHATSAPP_WEBHOOK_VERIFY_TOKEN:-atlas-local}
     volumes:
       - backend_logs:/var/log/atlas
     healthcheck:

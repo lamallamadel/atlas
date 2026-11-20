@@ -9,4 +9,7 @@ import org.springframework.stereotype.Repository;
 public interface WhatsAppProviderConfigRepository
         extends JpaRepository<WhatsAppProviderConfig, Long> {
     Optional<WhatsAppProviderConfig> findByOrgId(String orgId);
+
+    /** Numéro WhatsApp (phone_number_id) des webhooks Meta → organisation. */
+    Optional<WhatsAppProviderConfig> findFirstByPhoneNumberIdAndEnabledTrue(String phoneNumberId);
 }

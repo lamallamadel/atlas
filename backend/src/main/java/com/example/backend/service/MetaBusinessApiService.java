@@ -18,7 +18,7 @@ public class MetaBusinessApiService {
 
     private static final Logger logger = LoggerFactory.getLogger(MetaBusinessApiService.class);
 
-    @Value("${whatsapp.business.api.url:https://graph.facebook.com/v18.0}")
+    @Value("${whatsapp.business.api.url:https://graph.facebook.com/v25.0}")
     private String apiUrl;
 
     @Value("${whatsapp.business.api.access-token:}")

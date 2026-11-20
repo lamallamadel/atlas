@@ -567,15 +567,16 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser
-    @DisplayName("Webhook - should reject when org ID missing")
-    void testWebhook_MissingOrgId() throws Exception {
+    @DisplayName("Webhook - sans org ID ni signature : refusé")
+    void testWebhook_MissingOrgIdUnsigned_Unauthorized() throws Exception {
+        // Sans X-Org-Id, l'organisation vient du numéro WhatsApp : la signature Meta est exigée.
         String payload = createInboundMessagePayload("+33612345678", "Test message");
 
         mockMvc.perform(
                         post(WEBHOOK_ENDPOINT)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
