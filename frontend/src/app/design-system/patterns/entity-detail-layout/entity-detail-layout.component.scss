@@ -1,7 +1,17 @@
+/*
+ * Fiche détaillée (dossier…) : colonnes selon la largeur RÉELLEMENT disponible pour la page
+ * (menu latéral déduit), grâce aux container queries — pas selon la largeur de la fenêtre.
+ *   ≥ 1240 px : gauche | centre | droite
+ *   ≥ 880 px  : gauche (+ droite en dessous) | centre
+ *   sinon     : une seule colonne
+ * La colonne centrale (onglets et contenu) garde toujours la place restante.
+ */
 .ds-detail {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  container-type: inline-size;
+  container-name: ds-detail;
 
   &__breadcrumb {
     padding: 12px var(--ds-space-8);
@@ -25,15 +35,11 @@
 
   &__body {
     display: grid;
-    grid-template-columns: 360px 1fr 320px;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--ds-space-6);
     padding: var(--ds-space-6) var(--ds-space-8) var(--ds-space-16);
     flex: 1;
     align-items: start;
-  }
-
-  &--full &__body {
-    grid-template-columns: 360px 1fr;
   }
 
   &__left,
@@ -41,10 +47,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--ds-space-4);
-    position: sticky;
-    top: var(--ds-space-6);
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
+    min-width: 0;
   }
 
   &__center {
@@ -53,15 +56,53 @@
     flex-direction: column;
     gap: var(--ds-space-4);
   }
+}
 
-  @media (max-width: 1100px) {
-    &__body {
-      grid-template-columns: 1fr;
-    }
-    &__left,
-    &__right {
-      position: static;
-      max-height: unset;
-    }
+@container ds-detail (max-width: 640px) {
+  .ds-detail__breadcrumb,
+  .ds-detail__topbar {
+    padding-left: var(--ds-space-4);
+    padding-right: var(--ds-space-4);
+  }
+  .ds-detail__body {
+    padding: var(--ds-space-4) var(--ds-space-4) var(--ds-space-12);
+  }
+}
+
+@container ds-detail (min-width: 880px) {
+  .ds-detail__body {
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  }
+  .ds-detail__left {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .ds-detail__center {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  .ds-detail__right {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
+@container ds-detail (min-width: 1240px) {
+  .ds-detail:not(.ds-detail--full) .ds-detail__body {
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr) minmax(240px, 280px);
+  }
+  .ds-detail__center {
+    grid-row: 1;
+  }
+  .ds-detail__right {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .ds-detail__left,
+  .ds-detail__right {
+    position: sticky;
+    top: var(--ds-space-6);
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
   }
 }
