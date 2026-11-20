@@ -39,6 +39,15 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
     private static final Logger logger = LoggerFactory.getLogger(WhatsAppCloudApiProvider.class);
     private static final String WHATSAPP_CHANNEL = "WHATSAPP";
 
+    /**
+     * Jeton d'accès sans espaces ni retours à la ligne : un jeton collé depuis Meta en contient
+     * souvent, et l'en-tête HTTP est alors rejeté ("Illegal character(s) in message header").
+     */
+    static String accessToken(WhatsAppProviderConfig config) {
+        String raw = config.getApiKeyEncrypted();
+        return raw == null ? null : raw.replaceAll("\\s+", "");
+    }
+
     private final WhatsAppProviderConfigRepository providerConfigRepository;
     private final WhatsAppSessionWindowService sessionWindowService;
     private final WhatsAppRateLimitService rateLimitService;
@@ -186,7 +195,7 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(config.getApiKeyEncrypted());
+            headers.setBearerAuth(accessToken(config));
 
             Map<String, Object> payload = buildPayload(message, config, withinSessionWindow);
 
@@ -346,7 +355,7 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        headers.setBearerAuth(config.getApiKeyEncrypted());
+        headers.setBearerAuth(accessToken(config));
         ResponseEntity<Map> response =
                 restTemplate.exchange(
                         String.format("%s/%s/media", baseUrl, config.getPhoneNumberId()),
