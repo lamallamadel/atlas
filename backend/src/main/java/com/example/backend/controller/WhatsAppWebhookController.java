@@ -100,7 +100,12 @@ public class WhatsAppWebhookController {
         log.info("WhatsApp inbound webhook received for orgId={}", orgId);
 
         if (orgId == null || orgId.isBlank()) {
-            log.warn("Missing organization context for WhatsApp webhook");
+            // Numéro WhatsApp reçu de Meta, à comparer avec
+            // whatsapp_provider_config.phone_number_id
+            log.warn(
+                    "Missing organization context for WhatsApp webhook: no enabled configuration for"
+                            + " phone_number_id={}",
+                    phoneNumberIdOf(payload));
             return ResponseEntity.badRequest().body("Missing organization context");
         }
         if (resolvedFromPayload && (signature == null || signature.isBlank())) {
@@ -129,9 +134,9 @@ public class WhatsAppWebhookController {
         }
     }
 
-    /** Organisation configurée pour le phone_number_id du premier changement du webhook. */
-    private String orgFromPayload(String payload) {
-        if (providerConfigRepository == null || payload == null) {
+    /** phone_number_id du premier changement du webhook, ou null. */
+    private String phoneNumberIdOf(String payload) {
+        if (payload == null) {
             return null;
         }
         try {
@@ -145,11 +150,24 @@ public class WhatsAppWebhookController {
                             .path("value")
                             .path("metadata")
                             .path("phone_number_id");
-            if (!id.isTextual() || id.asText().isBlank()) {
-                return null;
-            }
+            return id.isTextual() && !id.asText().isBlank() ? id.asText() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** Organisation configurée pour le phone_number_id du premier changement du webhook. */
+    private String orgFromPayload(String payload) {
+        if (providerConfigRepository == null) {
+            return null;
+        }
+        String phoneNumberId = phoneNumberIdOf(payload);
+        if (phoneNumberId == null) {
+            return null;
+        }
+        try {
             return providerConfigRepository
-                    .findFirstByPhoneNumberIdAndEnabledTrue(id.asText())
+                    .findFirstByPhoneNumberIdAndEnabledTrue(phoneNumberId)
                     .map(com.example.backend.entity.WhatsAppProviderConfig::getOrgId)
                     .orElse(null);
         } catch (Exception e) {

@@ -101,6 +101,28 @@ première requête (`INSERT … ON CONFLICT`) :
 8. **Relance** (facultatif) : ne répondez pas à un client pendant 24 h, ou réglez
    `atlas.follow-up.agent-reply-hours=1` pour tester plus vite ; il apparaît dans « Relances ».
 
+## 5 bis. App non publiée : simuler la réception
+
+Tant que l'app Meta n'est pas publiée (ce qui exige la vérification complète de l'entreprise),
+Meta ne transmet pas les vrais messages au webhook : seul le bouton « Test » arrive. L'envoi
+d'Atlas vers votre téléphone fonctionne, lui.
+
+Pour chaque message que vous écrivez au client fictif depuis votre téléphone :
+
+1. Écrivez-le dans WhatsApp au numéro de test : cela ouvre la fenêtre de 24 h côté Meta.
+2. Envoyez le même texte à Atlas avec le script, qui imite exactement le webhook de Meta
+   (même format, même signature) :
+
+```powershell
+cd infra\scripts
+powershell -ExecutionPolicy Bypass -File .\simulate-whatsapp-inbound.ps1 `
+    -From 2126XXXXXXXX -Message "Bonjour" `
+    -PhoneNumberId <ID_DU_NUMERO_DE_TEST> -AppSecret "<CLE_SECRETE>"
+```
+
+`-From` est votre numéro (chiffres seuls), `-AppSecret` la valeur enregistrée dans
+`webhook_secret_encrypted`. Réponse attendue : « Atlas a accepté le message (HTTP 200) ».
+
 ## 6. En cas de problème
 
 | Symptôme | Cause probable |
