@@ -42,6 +42,18 @@ export interface PitchDraft {
   maxLength: number;
   pitchedAt: string | null;
   pitchChannel: PitchChannel | null;
+  /** Photos envoyables par WhatsApp (vide pour SMS), présélectionnées en premier. */
+  photos: PitchPhoto[];
+}
+
+export interface PitchPhoto {
+  mediaId: number;
+  source: 'UPLOAD' | 'URL';
+  /** UPLOAD : chemin de l'API (à charger avec le jeton). URL : lien externe. */
+  url: string;
+  roomType: string | null;
+  caption: string | null;
+  suggested: boolean;
 }
 
 export interface PitchSendResult {
@@ -49,6 +61,7 @@ export interface PitchSendResult {
   status: string | null;
   channel: PitchChannel;
   pitchedAt: string;
+  photosQueued: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -87,7 +100,7 @@ export class AnnonceBuyerMatchesApiService {
   sendPitch(
     annonceId: number,
     matchId: number,
-    body: { message: string; channel: PitchChannel; language: PitchLanguage },
+    body: { message: string; channel: PitchChannel; language: PitchLanguage; mediaIds?: number[] },
   ): Observable<PitchSendResult> {
     return this.http.post<PitchSendResult>(`${this.base(annonceId)}/${matchId}/pitch/send`, body);
   }

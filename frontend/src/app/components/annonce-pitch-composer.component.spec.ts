@@ -4,7 +4,8 @@ import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
 import { AnnoncePitchComposerComponent, apiErrorMessage, engineLabel } from './annonce-pitch-composer.component';
-import { AnnonceBuyerMatchesApiService, BuyerMatch, PitchDraft } from '../services/annonce-buyer-matches-api.service';
+import { AnnonceBuyerMatchesApiService, BuyerMatch, PitchDraft, PitchPhoto } from '../services/annonce-buyer-matches-api.service';
+import { AnnonceMediaApiService } from '../services/annonce-media-api.service';
 import { DsToastService } from '../design-system';
 
 const MATCH: BuyerMatch = {
@@ -16,7 +17,7 @@ function draft(partial: Partial<PitchDraft> = {}): PitchDraft {
   return {
     message: 'Bonjour Youssef, un appartement à Tanger. Une visite ?', engine: 'openai', aiRejection: null,
     language: 'fr', channel: 'WHATSAPP', to: '+212600000002', consentStatus: 'GRANTED',
-    whatsappWindowOpen: true, blockers: [], warnings: [], maxLength: 1000, pitchedAt: null, pitchChannel: null,
+    whatsappWindowOpen: true, blockers: [], warnings: [], maxLength: 1000, pitchedAt: null, pitchChannel: null, photos: [],
     ...partial,
   };
 }
@@ -37,6 +38,7 @@ describe('AnnoncePitchComposerComponent', () => {
   let fixture: ComponentFixture<AnnoncePitchComposerComponent>;
   let api: { draftPitch: ReturnType<typeof vi.fn>; sendPitch: ReturnType<typeof vi.fn> };
   let toast: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn>; info: ReturnType<typeof vi.fn> };
+  let mediaApi: { content: ReturnType<typeof vi.fn> };
 
   function create(d: PitchDraft = draft(), match: BuyerMatch = MATCH) {
     api.draftPitch.mockReturnValue(of(d));
@@ -50,11 +52,13 @@ describe('AnnoncePitchComposerComponent', () => {
   beforeEach(() => {
     api = { draftPitch: vi.fn(), sendPitch: vi.fn() };
     toast = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
+    mediaApi = { content: vi.fn().mockReturnValue(of(new Blob(['x'], { type: 'image/jpeg' }))) };
     TestBed.configureTestingModule({
       imports: [AnnoncePitchComposerComponent],
       providers: [
         { provide: AnnonceBuyerMatchesApiService, useValue: api },
         { provide: DsToastService, useValue: toast },
+        { provide: AnnonceMediaApiService, useValue: mediaApi },
       ],
     });
   });
@@ -99,9 +103,11 @@ describe('AnnoncePitchComposerComponent', () => {
     const sent = vi.fn();
     c.sent.subscribe(sent);
     c.message.set('  Bonjour Youssef, texte relu.  ');
-    api.sendPitch.mockReturnValue(of({ outboundMessageId: 9, status: 'QUEUED', channel: 'WHATSAPP', pitchedAt: '2026-11-18T23:00:00' }));
+    api.sendPitch.mockReturnValue(of({ outboundMessageId: 9, status: 'QUEUED', channel: 'WHATSAPP', pitchedAt: '2026-11-18T23:00:00', photosQueued: 0 }));
     c.send();
-    expect(api.sendPitch).toHaveBeenCalledWith(5, 3, { message: 'Bonjour Youssef, texte relu.', channel: 'WHATSAPP', language: 'fr' });
+    expect(api.sendPitch).toHaveBeenCalledWith(5, 3, {
+      message: 'Bonjour Youssef, texte relu.', channel: 'WHATSAPP', language: 'fr', mediaIds: [],
+    });
     expect(sent).toHaveBeenCalled();
     expect(toast.success).toHaveBeenCalledWith('Proposition envoyée par WhatsApp');
   });
@@ -119,5 +125,50 @@ describe('AnnoncePitchComposerComponent', () => {
     c.language = 'ar';
     c.onOptionsChange();
     expect(api.draftPitch).toHaveBeenLastCalledWith(5, 3, 'ar', 'WHATSAPP');
+  });
+
+  describe('photos', () => {
+    const photo = (mediaId: number, suggested: boolean, source: 'UPLOAD' | 'URL' = 'UPLOAD'): PitchPhoto => ({
+      mediaId, source, url: source === 'URL' ? 'https://cdn.example.ma/p.jpg' : `/api/v1/annonces/5/media/${mediaId}/content`,
+      roomType: 'salon', caption: null, suggested,
+    });
+
+    beforeEach(() => {
+      (globalThis.URL as unknown as { createObjectURL: unknown }).createObjectURL = vi.fn(() => 'blob:x');
+      (globalThis.URL as unknown as { revokeObjectURL: unknown }).revokeObjectURL = vi.fn();
+    });
+
+    it('présélectionne les photos suggérées et charge les vignettes', () => {
+      const c = create(draft({ photos: [photo(1, true), photo(2, true), photo(3, false, 'URL')] }));
+      fixture.detectChanges();
+      expect(c.selectedPhotos()).toEqual([1, 2]);
+      expect(mediaApi.content).toHaveBeenCalledTimes(2);
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('[data-testid="pitch-photos"]')?.textContent).toContain('2/3');
+      expect(c.photoSrc(photo(3, false, 'URL'))).toBe('https://cdn.example.ma/p.jpg');
+    });
+
+    it('3 photos au plus', () => {
+      const c = create(draft({ photos: [1, 2, 3, 4].map((i) => photo(i, false)) }));
+      [1, 2, 3, 4].forEach((i) => c.togglePhoto(photo(i, false)));
+      expect(c.selectedPhotos()).toEqual([1, 2, 3]);
+      c.togglePhoto(photo(2, false));
+      expect(c.selectedPhotos()).toEqual([1, 3]);
+    });
+
+    it('envoie les photos cochées par WhatsApp, aucune par SMS', () => {
+      const c = create(draft({ photos: [photo(1, true), photo(2, false)] }));
+      c.togglePhoto(photo(2, false));
+      api.sendPitch.mockReturnValue(of({ outboundMessageId: 9, status: 'QUEUED', channel: 'WHATSAPP', pitchedAt: 'x', photosQueued: 2 }));
+      c.send();
+      expect(api.sendPitch.mock.calls[0][2].mediaIds).toEqual([1, 2]);
+      expect(toast.success).toHaveBeenCalledWith('Proposition envoyée par WhatsApp avec 2 photo(s)');
+
+      api.draftPitch.mockReturnValue(of(draft({ channel: 'SMS', photos: [] })));
+      c.channel = 'SMS';
+      c.onOptionsChange();
+      c.send();
+      expect(api.sendPitch.mock.calls[1][2].mediaIds).toEqual([]);
+    });
   });
 });

@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import {
@@ -16,8 +26,14 @@ import {
   PitchChannel,
   PitchDraft,
   PitchLanguage,
+  PitchPhoto,
   PitchSendResult,
 } from '../services/annonce-buyer-matches-api.service';
+import { AnnonceMediaApiService } from '../services/annonce-media-api.service';
+import { roomLabel } from './annonce-vision-panel.component';
+
+/** WhatsApp : photos envoyées après le texte, une par message. */
+export const MAX_PITCH_PHOTOS = 3;
 
 export const LANGUAGE_OPTIONS: DsRadioOption[] = [
   { value: 'fr', label: 'Français' },
@@ -51,7 +67,7 @@ export function apiErrorMessage(e: HttpErrorResponse | null | undefined, fallbac
   templateUrl: './annonce-pitch-composer.component.html',
   styleUrls: ['./annonce-pitch-composer.component.scss'],
 })
-export class AnnoncePitchComposerComponent implements OnInit {
+export class AnnoncePitchComposerComponent implements OnInit, OnDestroy {
   readonly annonceId = input.required<number>();
   readonly match = input.required<BuyerMatch>();
   readonly sent = output<PitchSendResult>();
@@ -59,10 +75,18 @@ export class AnnoncePitchComposerComponent implements OnInit {
 
   private readonly api = inject(AnnonceBuyerMatchesApiService);
   private readonly toast = inject(DsToastService);
+  private readonly mediaApi = inject(AnnonceMediaApiService);
 
   readonly languageOptions = LANGUAGE_OPTIONS;
   readonly channelOptions = CHANNEL_OPTIONS;
   readonly engineLabel = engineLabel;
+  readonly roomLabel = roomLabel;
+  readonly maxPhotos = MAX_PITCH_PHOTOS;
+
+  /** Photos cochées, dans l'ordre d'envoi. */
+  readonly selectedPhotos = signal<number[]>([]);
+  /** Vignettes des photos importées (URL locales créées à partir du contenu protégé). */
+  readonly thumbnails = signal<Record<number, string>>({});
 
   language: PitchLanguage = 'fr';
   channel: PitchChannel = 'WHATSAPP';
@@ -100,6 +124,9 @@ export class AnnoncePitchComposerComponent implements OnInit {
       next: (d) => {
         this.draft.set(d);
         this.message.set(d.message);
+        const photos = d.photos ?? [];
+        this.selectedPhotos.set(photos.filter((p) => p.suggested).map((p) => p.mediaId).slice(0, MAX_PITCH_PHOTOS));
+        this.loadThumbnails(photos);
         this.loading.set(false);
       },
       error: (e: HttpErrorResponse) => {
@@ -127,11 +154,13 @@ export class AnnoncePitchComposerComponent implements OnInit {
         message: this.message().trim(),
         channel: this.channel,
         language: this.language,
+        mediaIds: this.channel === 'WHATSAPP' ? this.selectedPhotos() : [],
       })
       .subscribe({
         next: (r) => {
           this.sending.set(false);
-          this.toast.success(`Proposition envoyée par ${r.channel === 'SMS' ? 'SMS' : 'WhatsApp'}`);
+          const photos = r.photosQueued ? ` avec ${r.photosQueued} photo(s)` : '';
+          this.toast.success(`Proposition envoyée par ${r.channel === 'SMS' ? 'SMS' : 'WhatsApp'}${photos}`);
           this.sent.emit(r);
         },
         error: (e: HttpErrorResponse) => {
@@ -139,5 +168,35 @@ export class AnnoncePitchComposerComponent implements OnInit {
           this.toast.error(apiErrorMessage(e, "L'envoi a échoué"));
         },
       });
+  }
+
+  isSelected(p: PitchPhoto): boolean {
+    return this.selectedPhotos().includes(p.mediaId);
+  }
+
+  /** Coche ou décoche une photo ; au-delà de la limite, la case reste désactivée. */
+  togglePhoto(p: PitchPhoto): void {
+    this.selectedPhotos.update((ids) => {
+      if (ids.includes(p.mediaId)) return ids.filter((id) => id !== p.mediaId);
+      return ids.length >= MAX_PITCH_PHOTOS ? ids : [...ids, p.mediaId];
+    });
+  }
+
+  photoSrc(p: PitchPhoto): string | null {
+    return p.source === 'UPLOAD' ? this.thumbnails()[p.mediaId] ?? null : p.url;
+  }
+
+  private loadThumbnails(photos: PitchPhoto[]): void {
+    for (const p of photos) {
+      if (p.source !== 'UPLOAD' || this.thumbnails()[p.mediaId]) continue;
+      this.mediaApi.content(p.url).subscribe({
+        next: (blob) => this.thumbnails.update((t) => ({ ...t, [p.mediaId]: URL.createObjectURL(blob) })),
+        error: () => undefined,
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    for (const url of Object.values(this.thumbnails())) URL.revokeObjectURL(url);
   }
 }
