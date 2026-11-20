@@ -240,38 +240,43 @@ def pitch_prompt(req: PitchRequest) -> str:
     )
 
 
+async def _call_json(engine: str, prompt: str, schema: dict, name: str) -> dict | None:
+    """Appel d'un moteur avec sortie JSON contrainte ; None en cas d'échec."""
+    try:
+        if engine == "openai":
+            from openai import AsyncOpenAI
+
+            client = AsyncOpenAI(api_key=settings.openai_api_key, timeout=settings.vision_timeout_seconds)
+            resp = await client.chat.completions.create(
+                model=settings.openai_model,
+                temperature=0.4,
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_schema", "json_schema": {"name": name, "strict": True, "schema": schema}},
+            )
+            return json.loads(resp.choices[0].message.content)
+        async with httpx.AsyncClient(timeout=settings.vision_timeout_seconds) as client:
+            r = await client.post(
+                f"{settings.ollama_url}/api/chat",
+                json={
+                    "model": settings.ollama_model,
+                    "stream": False,
+                    "format": schema,
+                    "options": {"temperature": 0.4},
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+            )
+            r.raise_for_status()
+            return json.loads(r.json()["message"]["content"])
+    except Exception as e:
+        logger.warning("Appel %s (%s) échoué : %s", engine, name, e)
+        return None
+
+
 async def _call_llm(prompt: str) -> tuple[str, str] | None:
     for engine in _llm_engines():
-        try:
-            if engine == "openai":
-                from openai import AsyncOpenAI
-
-                client = AsyncOpenAI(api_key=settings.openai_api_key, timeout=settings.vision_timeout_seconds)
-                resp = await client.chat.completions.create(
-                    model=settings.openai_model,
-                    temperature=0.4,
-                    messages=[{"role": "user", "content": prompt}],
-                    response_format={
-                        "type": "json_schema",
-                        "json_schema": {"name": "pitch", "strict": True, "schema": PITCH_SCHEMA},
-                    },
-                )
-                return json.loads(resp.choices[0].message.content)["message"].strip(), engine
-            async with httpx.AsyncClient(timeout=settings.vision_timeout_seconds) as client:
-                r = await client.post(
-                    f"{settings.ollama_url}/api/chat",
-                    json={
-                        "model": settings.ollama_model,
-                        "stream": False,
-                        "format": PITCH_SCHEMA,
-                        "options": {"temperature": 0.4},
-                        "messages": [{"role": "user", "content": prompt}],
-                    },
-                )
-                r.raise_for_status()
-                return json.loads(r.json()["message"]["content"])["message"].strip(), engine
-        except Exception as e:
-            logger.warning("Rédaction du message %s échouée : %s", engine, e)
+        data = await _call_json(engine, prompt, PITCH_SCHEMA, "pitch")
+        if data and isinstance(data.get("message"), str):
+            return data["message"].strip(), engine
     return None
 
 

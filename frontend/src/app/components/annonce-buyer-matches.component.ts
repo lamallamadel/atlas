@@ -15,9 +15,28 @@ import {
   AnnonceBuyerMatchesApiService,
   BuyerMatch,
   PitchSendResult,
+  ReplyIntent,
+  VisitPlanResult,
 } from '../services/annonce-buyer-matches-api.service';
+import { AnnonceVisitPlannerComponent } from './annonce-visit-planner.component';
 import { AnnoncePitchComposerComponent } from './annonce-pitch-composer.component';
 import { scoreStatus } from './dossier-matching.component';
+import type { DsBadgeStatus } from '../design-system';
+
+/** Libellé et couleur de la réponse du client. */
+export const REPLY_LABELS: Record<ReplyIntent, { label: string; status: DsBadgeStatus }> = {
+  VISITE: { label: 'Veut visiter', status: 'success' },
+  INTERESSE: { label: 'Intéressé', status: 'info' },
+  NEGOCIATION: { label: 'Discute le prix', status: 'warning' },
+  QUESTION: { label: 'Pose une question', status: 'info' },
+  PAS_INTERESSE: { label: 'Pas intéressé', status: 'error' },
+  AUTRE: { label: 'A répondu', status: 'neutral' },
+};
+
+/** Une visite peut être planifiée tant que le client n'a pas refusé et qu'aucune n'existe. */
+export function canPlanVisit(m: BuyerMatch): boolean {
+  return !!m.replyIntent && m.replyIntent !== 'PAS_INTERESSE' && !m.visitAppointmentId;
+}
 
 /** Ordre d'affichage : écartés en dernier, puis score décroissant. */
 export function sortMatches(list: BuyerMatch[]): BuyerMatch[] {
@@ -40,6 +59,7 @@ export function sortMatches(list: BuyerMatch[]): BuyerMatch[] {
     DatePipe,
     NgTemplateOutlet,
     AnnoncePitchComposerComponent,
+    AnnonceVisitPlannerComponent,
     RouterLink,
     DsBadgeComponent,
     DsButtonComponent,
@@ -64,6 +84,12 @@ export class AnnonceBuyerMatchesComponent implements OnInit {
   readonly busyId = signal<number | null>(null);
   /** Acheteur pour lequel l'éditeur de proposition est ouvert. */
   readonly composerFor = signal<number | null>(null);
+  /** Acheteur pour lequel le formulaire de visite est ouvert. */
+  readonly plannerFor = signal<number | null>(null);
+  replyLabel(intent: ReplyIntent): { label: string; status: DsBadgeStatus } {
+    return REPLY_LABELS[intent] ?? REPLY_LABELS.AUTRE;
+  }
+  readonly canPlanVisit = canPlanVisit;
 
   readonly active = computed(() => this.matches().filter((m) => m.status !== 'DISMISSED'));
   readonly dismissed = computed(() => this.matches().filter((m) => m.status === 'DISMISSED'));
@@ -143,5 +169,16 @@ export class AnnonceBuyerMatchesComponent implements OnInit {
 
   channelLabel(c: string | null): string {
     return c === 'SMS' ? 'SMS' : 'WhatsApp';
+  }
+
+  togglePlanner(m: BuyerMatch): void {
+    this.plannerFor.update((id) => (id === m.id ? null : m.id));
+  }
+
+  onVisitPlanned(m: BuyerMatch, r: VisitPlanResult): void {
+    this.plannerFor.set(null);
+    this.matches.update((list) =>
+      list.map((x) => (x.id === m.id ? { ...x, visitAppointmentId: r.appointmentId, proposedStart: r.startTime, proposedEnd: r.endTime } : x)),
+    );
   }
 }

@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
-import { AnnonceBuyerMatchesComponent, sortMatches } from './annonce-buyer-matches.component';
+import { AnnonceBuyerMatchesComponent, canPlanVisit, sortMatches } from './annonce-buyer-matches.component';
 import { AnnonceBuyerMatchesApiService, BuyerMatch } from '../services/annonce-buyer-matches-api.service';
 import { DsToastService } from '../design-system';
 
@@ -12,6 +12,7 @@ function match(partial: Partial<BuyerMatch> = {}): BuyerMatch {
   return {
     id: 1, dossierId: 10, leadName: 'Youssef', dossierStatus: 'QUALIFIED', score: 90,
     reasons: ['Ville recherchée (Tanger)'], alerts: ['Piscine : non trouvé'], status: 'NEW', createdAt: null, pitchedAt: null, pitchChannel: null,
+    replyIntent: null, replyExcerpt: null, replyAt: null, proposedStart: null, proposedEnd: null, visitAppointmentId: null,
     ...partial,
   };
 }
@@ -114,5 +115,39 @@ describe('AnnonceBuyerMatchesComponent', () => {
     expect(c.composerFor()).toBeNull();
     expect(c.matches()[0].pitchChannel).toBe('SMS');
     expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="bm-pitched-1"]')?.textContent).toContain('par SMS');
+  });
+
+  it('affiche la réponse du client et le créneau proposé', () => {
+    const el = create([match({ replyIntent: 'VISITE', replyExcerpt: 'samedi 10h ?', replyAt: '2026-11-19T20:00:00',
+      proposedStart: '2026-11-21T10:00:00', proposedEnd: '2026-11-21T10:45:00' })]);
+    const reply = el.querySelector('[data-testid="bm-reply-1"]')?.textContent ?? '';
+    expect(reply).toContain('Veut visiter');
+    expect(reply).toContain('samedi 10h ?');
+    expect(el.textContent).toContain('Créneau libre proposé');
+    expect(el.querySelector('[data-testid="bm-plan-1"]')).not.toBeNull();
+  });
+
+  it('visite planifiée : plus de bouton, lien vers le dossier', () => {
+    create([match({ replyIntent: 'VISITE', proposedStart: '2026-11-21T10:00:00' })]);
+    const c = fixture.componentInstance;
+    c.togglePlanner(c.matches()[0]);
+    expect(c.plannerFor()).toBe(1);
+    c.onVisitPlanned(c.matches()[0], { appointmentId: 77, startTime: '2026-11-21T11:00:00', endTime: '2026-11-21T11:45:00', warnings: [] });
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(c.plannerFor()).toBeNull();
+    expect(el.querySelector('[data-testid="bm-visit-1"]')?.textContent).toContain('21/11/2026 à 11:00');
+    expect(el.querySelector('[data-testid="bm-plan-1"]')).toBeNull();
+  });
+});
+
+describe('canPlanVisit', () => {
+  const m = (p: Partial<BuyerMatch>) => ({ id: 1, visitAppointmentId: null, replyIntent: null, ...p }) as BuyerMatch;
+  it('selon la réponse', () => {
+    expect(canPlanVisit(m({}))).toBe(false);
+    expect(canPlanVisit(m({ replyIntent: 'VISITE' }))).toBe(true);
+    expect(canPlanVisit(m({ replyIntent: 'NEGOCIATION' }))).toBe(true);
+    expect(canPlanVisit(m({ replyIntent: 'PAS_INTERESSE' }))).toBe(false);
+    expect(canPlanVisit(m({ replyIntent: 'VISITE', visitAppointmentId: 3 }))).toBe(false);
   });
 });

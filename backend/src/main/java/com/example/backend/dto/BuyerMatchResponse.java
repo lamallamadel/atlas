@@ -19,4 +19,10 @@ public record BuyerMatchResponse(
         String status,
         LocalDateTime createdAt,
         LocalDateTime pitchedAt,
-        String pitchChannel) {}
+        String pitchChannel,
+        String replyIntent,
+        String replyExcerpt,
+        LocalDateTime replyAt,
+        LocalDateTime proposedStart,
+        LocalDateTime proposedEnd,
+        Long visitAppointmentId) {}

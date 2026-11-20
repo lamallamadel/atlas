@@ -174,6 +174,25 @@ public class BrainClientService {
         }
     }
 
+    /** Intention et disponibilités dans la réponse d'un client (brain /api/match/reponse). */
+    @SuppressWarnings("unchecked")
+    public Optional<Map<String, Object>> analyseReply(Map<String, Object> body) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(API_KEY_HEADER, properties.getMatch().getApiKey());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            ResponseEntity<Map> response =
+                    restTemplate.postForEntity(
+                            properties.getMatch().getBaseUrl() + "/api/match/reponse",
+                            new HttpEntity<>(body, headers),
+                            Map.class);
+            return Optional.ofNullable((Map<String, Object>) response.getBody());
+        } catch (Exception e) {
+            log.warn("Reply analysis unavailable: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
     /** Brouillon de message proposant un bien à un acheteur (brain /api/match/proposition). */
     @SuppressWarnings("unchecked")
     public Optional<Map<String, Object>> generatePitch(Map<String, Object> body) {

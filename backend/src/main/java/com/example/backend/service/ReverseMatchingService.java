@@ -100,6 +100,23 @@ public class ReverseMatchingService {
         if (annonce == null) {
             return true;
         }
+        // Tâche de fond : pas de requête, donc pas d'organisation dans le contexte. Le journal
+        // d'audit (déclenché par les notifications) en a besoin.
+        boolean ownTenant = TenantContext.getOrgId() == null;
+        if (ownTenant) {
+            TenantContext.setOrgId(annonce.getOrgId());
+        }
+        try {
+            return recomputeFor(annonce);
+        } finally {
+            if (ownTenant) {
+                TenantContext.clear();
+            }
+        }
+    }
+
+    private boolean recomputeFor(Annonce annonce) {
+        Long annonceId = annonce.getId();
         List<AnnonceDossierMatch> existing =
                 matchRepository.findByAnnonceIdOrderByScoreDescIdAsc(annonceId);
         if (annonce.getStatus() == null || !MATCHABLE.contains(annonce.getStatus())) {
@@ -261,7 +278,13 @@ public class ReverseMatchingService {
                             m.getStatus(),
                             m.getCreatedAt(),
                             m.getPitchedAt(),
-                            m.getPitchChannel()));
+                            m.getPitchChannel(),
+                            m.getReplyIntent(),
+                            m.getReplyExcerpt(),
+                            m.getReplyAt(),
+                            m.getProposedStart(),
+                            m.getProposedEnd(),
+                            m.getVisitAppointmentId()));
             if (markSeen && AnnonceDossierMatch.STATUS_NEW.equals(m.getStatus())) {
                 m.setStatus(AnnonceDossierMatch.STATUS_SEEN);
                 matchRepository.save(m);

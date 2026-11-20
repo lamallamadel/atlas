@@ -18,6 +18,24 @@ export interface BuyerMatch {
   /** Dernière proposition envoyée au client (null si jamais proposé). */
   pitchedAt: string | null;
   pitchChannel: PitchChannel | null;
+  /** Réponse du client à la proposition (null tant qu'il n'a pas répondu). */
+  replyIntent: ReplyIntent | null;
+  replyExcerpt: string | null;
+  replyAt: string | null;
+  /** Créneau libre proposé à l'agent quand le client veut visiter. */
+  proposedStart: string | null;
+  proposedEnd: string | null;
+  visitAppointmentId: number | null;
+}
+
+export type ReplyIntent = 'VISITE' | 'INTERESSE' | 'NEGOCIATION' | 'QUESTION' | 'PAS_INTERESSE' | 'AUTRE';
+
+export interface VisitPlanResult {
+  appointmentId: number;
+  startTime: string;
+  endTime: string;
+  /** Chevauchements avec d'autres rendez-vous de l'agent. */
+  warnings: string[];
 }
 
 export type PitchChannel = 'WHATSAPP' | 'SMS';
@@ -94,6 +112,15 @@ export class AnnonceBuyerMatchesApiService {
   draftPitch(annonceId: number, matchId: number, language: PitchLanguage, channel: PitchChannel): Observable<PitchDraft> {
     const params = new HttpParams().set('language', language).set('channel', channel);
     return this.http.post<PitchDraft>(`${this.base(annonceId)}/${matchId}/pitch/draft`, null, { params });
+  }
+
+  /** Crée le rendez-vous de visite (heures locales, format ISO sans fuseau). */
+  planVisit(
+    annonceId: number,
+    matchId: number,
+    body: { startTime: string; endTime: string; location?: string; notes?: string },
+  ): Observable<VisitPlanResult> {
+    return this.http.post<VisitPlanResult>(`${this.base(annonceId)}/${matchId}/visit`, body);
   }
 
   /** Envoie le message relu et validé par l'agent. */

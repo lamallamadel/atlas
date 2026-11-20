@@ -74,6 +74,32 @@
       Proposé le {{ m.pitchedAt | date:'dd/MM/yyyy à HH:mm' }} par {{ channelLabel(m.pitchChannel) }}
     </p>
   }
+  @if (m.replyIntent) {
+    <div class="bm__reply" [attr.data-testid]="'bm-reply-' + m.id">
+      <ds-badge [status]="replyLabel(m.replyIntent).status" size="sm" [showDot]="false">{{ replyLabel(m.replyIntent).label }}</ds-badge>
+      @if (m.replyExcerpt) { <q class="bm__quote">{{ m.replyExcerpt }}</q> }
+      @if (m.replyAt) { <span class="bm__muted-inline">{{ m.replyAt | date:'dd/MM à HH:mm' }}</span> }
+    </div>
+    @if (m.visitAppointmentId) {
+      <p class="bm__visit" [attr.data-testid]="'bm-visit-' + m.id">
+        <ds-icon name="calendar" [size]="12"></ds-icon>
+        Visite planifiée le {{ m.proposedStart | date:'dd/MM/yyyy à HH:mm' }}
+        — <a [routerLink]="['/dossiers', m.dossierId]">voir le dossier</a>
+      </p>
+    } @else if (canPlanVisit(m)) {
+      <div class="bm__plan">
+        @if (m.proposedStart) {
+          <span class="bm__muted-inline">Créneau libre proposé : {{ m.proposedStart | date:'EEEE dd/MM à HH:mm' }}</span>
+        }
+        <ds-button variant="ghost" size="sm" prefixIcon="calendar" (dsClick)="togglePlanner(m)"
+                   [attr.data-testid]="'bm-plan-' + m.id">{{ plannerFor() === m.id ? 'Fermer' : 'Planifier la visite' }}</ds-button>
+      </div>
+      @if (plannerFor() === m.id) {
+        <app-annonce-visit-planner [annonceId]="annonceId()" [match]="m"
+                                   (planned)="onVisitPlanned(m, $event)" (closed)="plannerFor.set(null)"></app-annonce-visit-planner>
+      }
+    }
+  }
   @if (composerFor() === m.id) {
     <app-annonce-pitch-composer [annonceId]="annonceId()" [match]="m"
                                 (sent)="onPitchSent(m, $event)" (closed)="composerFor.set(null)"></app-annonce-pitch-composer>
