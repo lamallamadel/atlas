@@ -170,7 +170,7 @@ export class MobileBottomNavigationComponent implements OnInit {
   navItems: NavItem[] = [
     { label: 'Tableau de bord', icon: 'chart', route: '/dashboard' },
     { label: 'Dossiers', icon: 'folder', route: '/dossiers' },
-    { label: 'Annonces', icon: 'megaphone', route: '/annonces' },
+    { label: 'Annonces', icon: 'megaphone', route: '/pro/annonces' },
     { label: 'Plus', icon: 'bars-asc', route: '/menu' }
   ];
 

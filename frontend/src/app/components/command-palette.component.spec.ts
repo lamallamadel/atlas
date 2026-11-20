@@ -225,7 +225,7 @@ describe('CommandPaletteComponent', () => {
       updatedAt: ''};
 
     component.executeItem(annonceResult);
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/annonces/1']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pro/annonces/1']);
   });
 
   it('should call search service when query length >= 2', async () => {

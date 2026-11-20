@@ -357,7 +357,7 @@ export class AiAgentService {
         } else if (q.includes('dossier') || q.includes('lead')) {
             this.router.navigate(['/dossiers']);
         } else if (q.includes('annonce')) {
-            this.router.navigate(['/annonces']);
+            this.router.navigate(['/pro/annonces']);
         } else if (q.includes('calendrier') || q.includes('rdv')) {
             this.router.navigate(['/calendar']);
         } else if (q.includes('rapport') || q.includes('kpi')) {
@@ -372,13 +372,13 @@ export class AiAgentService {
         switch (type) {
             case 'SEARCH':
                 return [
-                    { label: 'Voir les annonces', icon: 'megaphone', handler: () => this.router.navigate(['/annonces']) },
+                    { label: 'Voir les annonces', icon: 'megaphone', handler: () => this.router.navigate(['/pro/annonces']) },
                     { label: 'Voir les dossiers', icon: 'folder', handler: () => this.router.navigate(['/dossiers']) }
                 ];
             case 'CREATE':
                 return [
                     { label: 'Créer un dossier', icon: 'user', handler: () => this.router.navigate(['/dossiers'], { queryParams: { action: 'create' } }) },
-                    { label: 'Créer une annonce', icon: 'plus', handler: () => this.router.navigate(['/annonces/new']) }
+                    { label: 'Créer une annonce', icon: 'plus', handler: () => this.router.navigate(['/pro/annonces/new']) }
                 ];
             case 'SEND_MESSAGE':
                 return [

@@ -72,7 +72,7 @@ export class AnnonceDetailComponent implements OnInit {
           subtitle: response.city
             ? `${response.city} - ${response.price ? response.price + '€' : ''}`
             : undefined,
-          route: `/annonces/${response.id}`,
+          route: `/pro/annonces/${response.id}`,
         });
       },
       error: (err) => {
@@ -85,10 +85,10 @@ export class AnnonceDetailComponent implements OnInit {
   }
 
   editAnnonce(): void {
-    if (this.annonce) this.router.navigate(['/annonces', this.annonce.id, 'edit']);
+    if (this.annonce) this.router.navigate(['/pro/annonces', this.annonce.id, 'edit']);
   }
 
   goBack(): void {
-    this.router.navigate(['/annonces']);
+    this.router.navigate(['/pro/annonces']);
   }
 }

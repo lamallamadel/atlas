@@ -137,13 +137,13 @@ describe('AnnonceDetailComponent', () => {
 
     component.editAnnonce();
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/annonces', 1, 'edit']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pro/annonces', 1, 'edit']);
   });
 
   it('should navigate back to annonces list', () => {
     component.goBack();
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/annonces']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/pro/annonces']);
   });
 
   it('should handle invalid annonce ID', () => {

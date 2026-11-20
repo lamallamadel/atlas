@@ -143,7 +143,7 @@
               </div>
               <div class="dm__body">
                 <div class="dm__match-head">
-                  <a class="dm__link" [routerLink]="['/annonces', m.annonceId]">{{ m.title }}</a>
+                  <a class="dm__link" [routerLink]="['/pro/annonces', m.annonceId]">{{ m.title }}</a>
                   <ds-badge [status]="scoreStatus(m.score)" size="sm" [showDot]="false"
                             [attr.aria-label]="'Score ' + m.score + ' sur 100'">{{ m.score }}/100</ds-badge>
                 </div>
