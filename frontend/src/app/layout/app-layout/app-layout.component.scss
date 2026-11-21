@@ -34,6 +34,7 @@
 .ds-sidebar {
   width: 260px;
   height: 100%;
+  overflow: hidden;
   background: var(--ds-surface);
   border-right: 1px solid var(--ds-divider);
   display: flex;
@@ -43,9 +44,43 @@
   flex-shrink: 0;
 }
 
+/* Menu replié (ordinateur) : rail d'icônes, libellés en infobulle (attribut title). */
 .ds-app-layout--sidebar-closed .ds-sidebar {
-  width: 0;
-  transform: translateX(-100%);
+  width: 72px;
+}
+
+.ds-app-layout--sidebar-closed .ds-sidebar__header {
+  padding: 0;
+  justify-content: center;
+}
+
+.ds-app-layout--sidebar-closed .ds-sidebar__brand,
+.ds-app-layout--sidebar-closed .nav-link-title {
+  display: none;
+}
+
+.ds-app-layout--sidebar-closed .ds-sidebar__brand-short {
+  display: inline;
+}
+
+.ds-app-layout--sidebar-closed .ds-sidebar__nav {
+  padding: var(--ds-space-4) var(--ds-space-2);
+}
+
+.ds-app-layout--sidebar-closed .nav-link {
+  justify-content: center;
+  padding: var(--ds-space-2);
+}
+
+.ds-app-layout--sidebar-closed .layout-divider {
+  margin: var(--ds-space-2);
+}
+
+.ds-sidebar__brand-short {
+  display: none;
+  font-family: var(--ds-font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
 }
 
 .ds-sidebar__header {
@@ -81,6 +116,11 @@
 .nav-link {
   display: flex;
   align-items: center;
+  /* une règle globale centre le contenu de tous les liens (cible tactile) */
+  justify-content: flex-start;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
   gap: var(--ds-space-3);
   padding: var(--ds-space-2) var(--ds-space-4);
   border-radius: var(--ds-radius-md);
@@ -160,6 +200,25 @@
 
   .ds-sidebar--mobile-open {
     transform: translateX(0);
+  }
+
+  /* Sur mobile, le menu est un tiroir complet, même si le rail était replié sur ordinateur. */
+  .ds-app-layout--sidebar-closed .ds-sidebar {
+    width: 280px;
+  }
+
+  .ds-app-layout--sidebar-closed .ds-sidebar__brand,
+  .ds-app-layout--sidebar-closed .nav-link-title {
+    display: inline;
+  }
+
+  .ds-app-layout--sidebar-closed .ds-sidebar__brand-short {
+    display: none;
+  }
+
+  .ds-app-layout--sidebar-closed .nav-link {
+    justify-content: flex-start;
+    padding: var(--ds-space-2) var(--ds-space-4);
   }
 
   .ds-sidebar__close-mobile {
