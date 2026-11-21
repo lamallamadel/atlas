@@ -9,6 +9,7 @@ import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.observability.MetricsService;
 import com.example.backend.repository.OutboundAttemptRepository;
 import com.example.backend.repository.OutboundMessageRepository;
+import com.example.backend.util.TenantContext;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.retry.Retry;
@@ -122,6 +123,10 @@ public class OutboundJobWorker {
                     MDC.put("hypothesisId", message.getHypothesisId());
                 }
 
+                // Le worker tourne hors requête HTTP : sans organisation dans le contexte,
+                // l'audit et l'activité échouent, la transaction est marquée rollback-only et le
+                // statut SENT est annulé — le message repartait alors à chaque passage (5 s).
+                TenantContext.setOrgId(message.getOrgId());
                 try {
                     if (isReadyForProcessing(message)) {
                         processMessage(message);
@@ -134,6 +139,7 @@ public class OutboundJobWorker {
                     logger.error(
                             "Error processing message {}: {}", message.getId(), e.getMessage(), e);
                 } finally {
+                    TenantContext.clear();
                     MDC.remove("messageId");
                     MDC.remove("channel");
                     MDC.remove("sessionId");
