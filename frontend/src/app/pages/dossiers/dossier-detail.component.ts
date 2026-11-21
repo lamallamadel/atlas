@@ -32,9 +32,14 @@ import {
   DsSkeletonComponent,
   DsTableComponent,
   DsColumn,
-  DsCellDirective
+  DsCellDirective,
+  DsBadgeStatus
 } from '../../design-system';
 import { QuickActionsComponent } from '../../components/quick-actions.component';
+import { ActivityTimelineComponent } from '../../components/activity-timeline.component';
+import { DocumentListComponent } from '../../components/document-list.component';
+import { WhatsappMessagingContainerComponent } from '../../components/whatsapp-messaging-container.component';
+import { OutboundMessageApiService, DossierOutboundMessage } from '../../services/outbound-message-api.service';
 import { CommonModule, DatePipe } from '@angular/common';
 
 export interface RendezVous {
@@ -79,6 +84,9 @@ export interface WhatsAppTemplate {
       EntityDetailLayoutComponent, 
       DsEmptyStateComponent, 
       QuickActionsComponent, 
+      ActivityTimelineComponent,
+      DocumentListComponent,
+      WhatsappMessagingContainerComponent,
       DsSelectComponent,
       DsButtonComponent,
       DsIconComponent,
@@ -97,6 +105,7 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
   private appointmentApiService = inject(AppointmentApiService);
   private consentementApiService = inject(ConsentementApiService);
   private auditEventApiService = inject(AuditEventApiService);
+  private outboundMessageApiService = inject(OutboundMessageApiService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private toastService = inject(DsToastService);
@@ -183,6 +192,8 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
 
   messages: MessageResponse[] = [];
   loadingMessages = false;
+  outboundMessages: DossierOutboundMessage[] = [];
+  loadingOutbound = false;
   appointments: AppointmentResponse[] = [];
   loadingAppointments = false;
   rendezVous: RendezVous[] = [];
@@ -273,12 +284,7 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadDossier();
-    this.loadMessages();
-    this.loadAppointments();
-    this.loadConsentements();
-    this.loadAuditEvents();
     this.loadMockData();
-    this.loadWhatsAppMessages();
     this.initializeCollaboration();
   }
 
@@ -342,6 +348,8 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
         this.dossier = response;
         this.selectedStatus = response.status;
         this.loading = false;
+        // Les onglets dépendent de l'id du dossier : on les charge une fois le dossier connu.
+        this.loadRelatedData();
         this.recentNavigationService.addRecentItem({
           id: String(response.id),
           type: 'dossier',
@@ -365,6 +373,84 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
       next: (response) => { this.messages = response.content; this.loadingMessages = false; },
       error: () => { this.loadingMessages = false; }
     });
+  }
+
+  loadRelatedData(): void {
+    this.loadMessages();
+    this.loadWhatsAppMessages();
+    this.loadOutboundMessages();
+    this.loadAppointments();
+    this.loadConsentements();
+    this.loadAuditEvents();
+  }
+
+  loadOutboundMessages(): void {
+    const dossierId = this.dossier?.id ?? parseInt(this.route.snapshot.paramMap.get('id') || '', 10);
+    if (!dossierId || isNaN(dossierId)) return;
+    this.loadingOutbound = true;
+    this.outboundMessageApiService.listForDossier(dossierId).subscribe({
+      next: (list) => {
+        this.outboundMessages = [...list].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+        this.loadingOutbound = false;
+      },
+      error: () => { this.outboundMessages = []; this.loadingOutbound = false; }
+    });
+  }
+
+  outboundText(m: DossierOutboundMessage): string {
+    const p = m.payloadJson || {};
+    return p['body'] || p['text'] || p['content'] || m.subject || (m.templateCode ? `Modèle « ${m.templateCode} »` : '—');
+  }
+
+  outboundStatusLabel(status: DossierOutboundMessage['status']): string {
+    switch (status) {
+      case 'QUEUED': return 'En attente';
+      case 'SENDING': return 'Envoi en cours';
+      case 'SENT': return 'Envoyé';
+      case 'DELIVERED': return 'Livré';
+      case 'FAILED': return 'Échec';
+      case 'CANCELLED': return 'Annulé';
+      case 'THROTTLED': return 'Quota atteint';
+      default: return status;
+    }
+  }
+
+  outboundStatusBadge(status: DossierOutboundMessage['status']): DsBadgeStatus {
+    switch (status) {
+      case 'SENT': case 'DELIVERED': return 'success';
+      case 'FAILED': return 'error';
+      case 'QUEUED': case 'SENDING': case 'THROTTLED': return 'warning';
+      default: return 'neutral';
+    }
+  }
+
+  appointmentBadge(status: AppointmentStatus): DsBadgeStatus {
+    switch (status) {
+      case AppointmentStatus.COMPLETED: return 'success';
+      case AppointmentStatus.CANCELLED: return 'neutral';
+      default: return 'info';
+    }
+  }
+
+  consentBadge(status: ConsentementStatus | undefined): DsBadgeStatus {
+    switch (status) {
+      case ConsentementStatus.GRANTED: return 'success';
+      case ConsentementStatus.DENIED:
+      case ConsentementStatus.REVOKED: return 'error';
+      case ConsentementStatus.PENDING: return 'warning';
+      default: return 'neutral';
+    }
+  }
+
+  consentTypeLabel(type: string | undefined): string {
+    switch ((type || '').toUpperCase()) {
+      case 'MARKETING': return 'Prospection';
+      case 'TRANSACTIONNEL': return 'Suivi du dossier';
+      case 'PROFILING': return 'Profilage';
+      case 'GESTIONNEL': return 'Gestion';
+      case 'RECHERCHE': return 'Recherche';
+      default: return type || '—';
+    }
   }
 
   loadAppointments(): void {

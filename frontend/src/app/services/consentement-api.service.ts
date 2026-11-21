@@ -37,6 +37,7 @@ export interface ConsentementResponse {
   orgId: string;
   dossierId: number;
   channel: ConsentementChannel;
+  consentType?: string;
   status: ConsentementStatus;
   meta?: Record<string, any>;
   createdAt: string;

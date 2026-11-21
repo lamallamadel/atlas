@@ -107,6 +107,18 @@ export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Fil de discussion dans l'ordre de lecture : le plus ancien en haut. */
+  get threadMessages(): MessageResponse[] {
+    if (this.sortedFor !== this.messages) {
+      const at = (m: MessageResponse) => new Date(m.timestamp || m.createdAt).getTime();
+      this.sorted = [...this.messages].sort((a, b) => at(a) - at(b));
+      this.sortedFor = this.messages;
+    }
+    return this.sorted;
+  }
+  private sorted: MessageResponse[] = [];
+  private sortedFor: MessageResponse[] | null = null;
+
   getEnrichedTemplates(): any[] {
     return this.templates().map(t => ({
       ...t,

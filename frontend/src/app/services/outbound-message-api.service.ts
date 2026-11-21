@@ -73,6 +73,25 @@ export interface Page<T> {
   empty: boolean;
 }
 
+/** Message sortant tel que renvoyé par GET /api/v1/outbound/messages?dossierId= */
+export interface DossierOutboundMessage {
+  id: number;
+  dossierId: number;
+  channel: string;
+  to: string;
+  templateCode?: string;
+  subject?: string;
+  payloadJson?: Record<string, any>;
+  status: 'QUEUED' | 'SENDING' | 'SENT' | 'DELIVERED' | 'FAILED' | 'CANCELLED' | 'THROTTLED';
+  providerMessageId?: string;
+  attemptCount: number;
+  maxAttempts: number;
+  errorCode?: string;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface OutboundMessageListParams {
   dossierId?: number;
   status?: OutboundMessageStatus;
@@ -122,6 +141,13 @@ export class OutboundMessageApiService {
 
   retry(id: number): Observable<OutboundMessageResponse> {
     return this.http.post<OutboundMessageResponse>(`${this.apiUrl}/${id}/retry`, {});
+  }
+
+  /** Envois (WhatsApp, SMS, e-mail) d'un dossier, du plus récent au plus ancien. */
+  listForDossier(dossierId: number): Observable<DossierOutboundMessage[]> {
+    return this.http.get<DossierOutboundMessage[]>('/api/v1/outbound/messages', {
+      params: new HttpParams().set('dossierId', String(dossierId))
+    });
   }
 
   listTemplates(): Observable<OutboundMessageTemplate[]> {

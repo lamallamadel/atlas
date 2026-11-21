@@ -120,6 +120,171 @@
           </div>
         }
 
+        @if (activeTab === 'messages') {
+          <div class="ds-form-stack">
+            <div class="dd-panel__head">
+              <h2 class="dd-panel__title">Messages</h2>
+              <ds-button variant="ghost" size="sm" prefixIcon="plus" (dsClick)="openMessageDialog()">Consigner un échange</ds-button>
+            </div>
+            @if (loadingMessages) {
+              <ds-skeleton variant="rect" width="100%" height="160px" [animate]="true"></ds-skeleton>
+            } @else if (messages.length === 0) {
+              <ds-empty-state icon="inbox" title="Aucun message"
+                description="Les messages reçus et envoyés sur tous les canaux (WhatsApp, SMS, e-mail) apparaîtront ici."></ds-empty-state>
+            } @else {
+              <ul class="dd-list" data-testid="dd-messages">
+                @for (m of messages; track m.id) {
+                  <li class="dd-msg" [class.dd-msg--in]="m.direction === 'INBOUND'">
+                    <div class="dd-msg__meta">
+                      <ds-badge [status]="m.direction === 'INBOUND' ? 'info' : 'neutral'" size="sm" [showDot]="false">
+                        {{ m.direction === 'INBOUND' ? 'Reçu' : 'Envoyé' }} · {{ getChannelLabel(m.channel) }}
+                      </ds-badge>
+                      <span class="dd-muted">{{ formatMessageTimestamp(m.timestamp || m.createdAt) }}</span>
+                    </div>
+                    <p class="dd-msg__body">{{ m.content }}</p>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+
+        @if (activeTab === 'whatsapp' && dossier) {
+          <ds-card [pad]="true" elevation="xs">
+            @if (!isWhatsAppConsentGranted()) {
+              <p class="dd-notice" data-testid="dd-wa-consent">
+                <ds-icon name="alert-circle" [size]="16"></ds-icon>
+                Pas de consentement WhatsApp enregistré : vous pouvez lire la conversation, mais pas écrire depuis cet onglet.
+              </p>
+            }
+            <app-whatsapp-messaging-container
+              class="dd-whatsapp"
+              [dossierId]="dossier.id"
+              [consentGranted]="isWhatsAppConsentGranted()"
+              [leadName]="dossier.leadName || ''"
+              [templates]="whatsappTemplates">
+            </app-whatsapp-messaging-container>
+          </ds-card>
+        }
+
+        @if (activeTab === 'messages-sortants') {
+          <div class="ds-form-stack">
+            <div class="dd-panel__head">
+              <h2 class="dd-panel__title">Messages sortants</h2>
+              <ds-button variant="ghost" size="sm" prefixIcon="refresh" [loading]="loadingOutbound" (dsClick)="loadOutboundMessages()">Actualiser</ds-button>
+            </div>
+            @if (loadingOutbound && outboundMessages.length === 0) {
+              <ds-skeleton variant="rect" width="100%" height="160px" [animate]="true"></ds-skeleton>
+            } @else if (outboundMessages.length === 0) {
+              <ds-empty-state icon="send" title="Aucun envoi"
+                description="Les propositions et relances envoyées par Atlas (WhatsApp, SMS, e-mail) et leur statut de livraison apparaîtront ici."></ds-empty-state>
+            } @else {
+              <ul class="dd-list" data-testid="dd-outbound">
+                @for (o of outboundMessages; track o.id) {
+                  <li class="dd-msg">
+                    <div class="dd-msg__meta">
+                      <ds-badge [status]="outboundStatusBadge(o.status)" size="sm">{{ outboundStatusLabel(o.status) }}</ds-badge>
+                      <span class="dd-muted">{{ getChannelLabel($any(o.channel)) }} → {{ o.to }}</span>
+                      <span class="dd-muted dd-push">{{ formatDate(o.createdAt) }}</span>
+                    </div>
+                    <p class="dd-msg__body">{{ outboundText(o) }}</p>
+                    @if (o.status === 'FAILED' || o.errorMessage) {
+                      <p class="dd-error">
+                        {{ o.errorCode || 'Erreur' }} — {{ o.errorMessage || 'raison inconnue' }}
+                        @if (o.status !== 'SENT' && o.status !== 'DELIVERED') { · essai {{ o.attemptCount }}/{{ o.maxAttempts }} }
+                      </p>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+
+        @if (activeTab === 'rendezvous') {
+          <div class="ds-form-stack">
+            <div class="dd-panel__head">
+              <h2 class="dd-panel__title">Rendez-vous</h2>
+              <ds-button variant="ghost" size="sm" prefixIcon="plus" (dsClick)="openAppointmentDialog()">Nouveau rendez-vous</ds-button>
+            </div>
+            @if (loadingAppointments) {
+              <ds-skeleton variant="rect" width="100%" height="120px" [animate]="true"></ds-skeleton>
+            } @else if (appointments.length === 0) {
+              <ds-empty-state icon="calendar" title="Aucun rendez-vous"
+                description="Les visites planifiées depuis une proposition ou ajoutées à la main apparaîtront ici."></ds-empty-state>
+            } @else {
+              <ul class="dd-list" data-testid="dd-appointments">
+                @for (a of appointments; track a.id) {
+                  <li class="dd-msg">
+                    <div class="dd-msg__meta">
+                      <ds-badge [status]="appointmentBadge(a.status)" size="sm">{{ getAppointmentStatusLabel(a.status) }}</ds-badge>
+                      <strong>{{ formatDate(a.startTime) }}</strong>
+                      <span class="dd-push dd-actions">
+                        @if (a.status === 'SCHEDULED') {
+                          <ds-button variant="ghost" size="sm" (dsClick)="completeAppointment(a)">Marquer terminé</ds-button>
+                        }
+                        <ds-button variant="icon" size="sm" (dsClick)="editAppointment(a)"><ds-icon name="edit" [size]="16"></ds-icon></ds-button>
+                        <ds-button variant="icon" size="sm" (dsClick)="deleteAppointment(a)"><ds-icon name="trash" [size]="16"></ds-icon></ds-button>
+                      </span>
+                    </div>
+                    @if (a.location) { <p class="dd-msg__body"><ds-icon name="map-pin" [size]="16"></ds-icon> {{ a.location }}</p> }
+                    @if (a.notes) { <p class="dd-muted">{{ a.notes }}</p> }
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+
+        @if (activeTab === 'consentements') {
+          <div class="ds-form-stack">
+            <div class="dd-panel__head">
+              <h2 class="dd-panel__title">Consentements</h2>
+            </div>
+            @if (consentementsLoading) {
+              <ds-skeleton variant="rect" width="100%" height="120px" [animate]="true"></ds-skeleton>
+            } @else {
+              <div class="dd-consent-grid" data-testid="dd-consents">
+                @for (g of consentementGroups; track g.channel) {
+                  <ds-card [pad]="true" elevation="xs">
+                    <div class="dd-msg__meta">
+                      <strong>{{ getChannelLabel(g.channel) }}</strong>
+                      <ds-badge class="dd-push" [status]="consentBadge(g.current?.status)" size="sm">
+                        {{ g.current ? getConsentementStatusLabel(g.current.status) : 'Non renseigné' }}
+                      </ds-badge>
+                    </div>
+                    @if (g.current) {
+                      <p class="dd-muted">{{ consentTypeLabel(g.current.consentType) }} · mis à jour le {{ getConsentDate(g.current) }}</p>
+                    }
+                  </ds-card>
+                }
+              </div>
+              @if (consentements.length > 0) {
+                <h3 class="dd-subtitle">Historique</h3>
+                <ul class="dd-list">
+                  @for (c of consentements; track c.id) {
+                    <li class="dd-msg">
+                      <div class="dd-msg__meta">
+                        <ds-badge [status]="consentBadge(c.status)" size="sm">{{ getConsentementStatusLabel(c.status) }}</ds-badge>
+                        <span>{{ getChannelLabel(c.channel) }} · {{ consentTypeLabel(c.consentType) }}</span>
+                        <span class="dd-muted dd-push">{{ formatDate(c.updatedAt) }}</span>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            }
+          </div>
+        }
+
+        @if (activeTab === 'documents' && dossier) {
+          <app-document-list [dossierId]="dossier.id"></app-document-list>
+        }
+
+        @if (activeTab === 'chronologie' && dossier) {
+          <app-activity-timeline [dossierId]="dossier.id"></app-activity-timeline>
+        }
+
         @if (activeTab === 'historique') {
           <div class="ds-form-stack">
             <div class="historique-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap;">
