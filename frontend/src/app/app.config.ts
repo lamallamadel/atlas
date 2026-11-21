@@ -1,4 +1,4 @@
-import { ApplicationConfig, LOCALE_ID, importProvidersFrom, APP_INITIALIZER, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID, importProvidersFrom, APP_INITIALIZER, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -18,7 +18,10 @@ export function initAuth(authService: AuthService): () => Promise<void> {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZonelessChangeDetection(),
+    // Détection des changements par zone.js : la plupart des écrans mettent à jour de simples
+    // champs dans des callbacks HTTP. Sans zone, la vue ne se redessinait qu'au clic suivant
+    // (filtres « bloqués », boutons qui tournaient sans fin).
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes,
       withInMemoryScrolling({
         scrollPositionRestoration: 'disabled',

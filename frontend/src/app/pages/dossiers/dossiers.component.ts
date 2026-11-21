@@ -102,19 +102,33 @@ export class DossiersComponent implements OnInit {
 
   readonly statusFilters: DsFilterOption[] = [
     { value: 'NEW',           label: 'Nouveaux' },
-    { value: 'QUALIFYING',    label: 'Qualification' },
-    { value: 'RDV',           label: 'RDV' },
+    { value: 'QUALIFYING',    label: 'En qualification' },
+    { value: 'QUALIFIED',     label: 'Qualifiés' },
+    { value: 'APPOINTMENT',   label: 'RDV' },
     { value: 'WON',           label: 'Gagnés' },
     { value: 'LOST',          label: 'Perdus' },
   ];
+
+  private static readonly STATUS_LABELS: Record<string, string> = {
+    NEW: 'Nouveau', QUALIFYING: 'En qualification', QUALIFIED: 'Qualifié',
+    APPOINTMENT: 'RDV', WON: 'Gagné', LOST: 'Perdu',
+  };
 
   dsTableColumns: DsColumn<any>[] = [
     { key: 'id', header: 'ID', width: '80px' },
     { key: 'leadName', header: 'Nom du prospect' },
     { key: 'leadPhone', header: 'Téléphone' },
-    { key: 'status', header: 'Statut' },
-    { key: 'updatedAt', header: 'Mis à jour' }
+    { key: 'status', header: 'Statut', cell: (d) => DossiersComponent.STATUS_LABELS[d.status] ?? d.status ?? '' },
+    { key: 'updatedAt', header: 'Mis à jour', cell: (d) => DossiersComponent.formatDate(d.updatedAt) }
   ];
+
+  /** « 20/11/2026 18:29 » au lieu de l'horodatage ISO brut. */
+  static formatDate(value: string | null | undefined): string {
+    if (!value) return '';
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
 
   dsTableRowActions: DsRowAction<any>[] = [
     { icon: 'eye', label: 'Voir', action: 'view', ariaLabel: 'Voir le dossier' },
