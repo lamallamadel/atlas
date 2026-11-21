@@ -4,6 +4,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -21,7 +22,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         HibernateFilterInterceptor interceptor = interceptorProvider.getIfAvailable();
         if (interceptor != null) {
-            registry.addInterceptor(interceptor);
+            // Après l'intercepteur open-in-view (ordre 0), qui ouvre la session de la requête.
+            registry.addInterceptor(interceptor).order(Ordered.LOWEST_PRECEDENCE);
         }
     }
 
