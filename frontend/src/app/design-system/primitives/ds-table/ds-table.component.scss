@@ -102,10 +102,14 @@
     text-align: center;
   }
 
+  // Une cellule en display:flex sort du modèle de tableau, et la limite de largeur
+  // (max-width + overflow hidden) des cellules rognait les boutons d'action.
   &__td--actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 4px;
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
+    padding-top: 6px;
+    padding-bottom: 6px;
   }
 
   &__checkbox {

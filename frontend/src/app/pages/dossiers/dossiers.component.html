@@ -14,16 +14,16 @@
           size="sm"
           (dsClick)="viewMode = 'list'"
           ariaLabel="Vue liste"
-          style="padding: 0; width: 32px; height: 32px; justify-content: center;">
-          <ds-icon name="plus" [size]="16" style="transform: rotate(45deg);"></ds-icon>
+          prefixIcon="table">
+          Liste
         </ds-button>
         <ds-button
           [variant]="viewMode === 'kanban' ? 'marine' : 'ghost'"
           size="sm"
           (dsClick)="viewMode = 'kanban'"
           ariaLabel="Vue Kanban"
-          style="padding: 0; width: 32px; height: 32px; justify-content: center;">
-          <ds-icon name="chart" [size]="16"></ds-icon>
+          prefixIcon="chart">
+          Kanban
         </ds-button>
       </div>
 
