@@ -180,3 +180,15 @@
 /* ── Mobile ── */
 .dos-mobile-list { display: flex; flex-direction: column; gap: var(--ds-space-3); }
 
+
+.dos-advanced-filters {
+  margin-top: 16px;
+  background: var(--ds-bg-subtle);
+}
+
+.dos-adv-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  align-items: flex-end;
+}

@@ -16,7 +16,7 @@ import { LeadExportDialogComponent } from '../../components/lead-export-dialog.c
 import { ExportService } from '../../services/export.service';
 import { DossierFilterApiService } from '../../services/dossier-filter-api.service';
 import { MobileAction, MobileActionSheetComponent } from '../../components/mobile-action-sheet.component';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { KanbanBoardComponent } from '../../components/kanban-board.component';
 import { 
@@ -34,7 +34,10 @@ import {
   DsIconComponent,
   DsToastService,
   DsTab,
-  DsDialogService
+  DsDialogService,
+  DsSelectComponent,
+  DsSelectOption,
+  DsInputComponent
 } from '../../design-system';
 import { CommonModule } from '@angular/common';
 
@@ -65,6 +68,8 @@ interface AppliedFilter {
       DsCardComponent, 
       DsTableComponent, 
       DsIconComponent,
+      DsSelectComponent,
+      DsInputComponent,
     ]
 })
 export class DossiersComponent implements OnInit {
@@ -138,6 +143,15 @@ export class DossiersComponent implements OnInit {
 
   ngOnInit(): void {
     this.setupAnnonceAutocomplete();
+    this.searchInput$.pipe(debounceTime(300)).subscribe(q => {
+      this.searchQuery = q;
+      this.reloadFromFirstPage();
+    });
+    this.sourceInput$.pipe(debounceTime(300)).subscribe(source => {
+      this.sourceFilter = source;
+      this.refreshAppliedFilters();
+      this.reloadFromFirstPage();
+    });
     this.breakpointObserver.observe([Breakpoints.Handset])
       .subscribe(result => { this.isMobile = result.matches; });
 
@@ -156,7 +170,8 @@ export class DossiersComponent implements OnInit {
       status: this.selectedStatus || undefined,
       leadPhone: this.phoneFilter.trim() || undefined,
       leadSource: this.sourceFilter.trim() || undefined,
-      annonceId: this.selectedAnnonceId || undefined
+      annonceId: this.selectedAnnonceId || undefined,
+      q: this.searchQuery.trim() || undefined
     }).subscribe({
       next: (response) => {
         this.page = response;
@@ -176,13 +191,70 @@ export class DossiersComponent implements OnInit {
     this.loadDossiers();
   }
 
+  /** Recherche dans le nom ou le téléphone, côté serveur, 300 ms après la dernière frappe. */
   onSearchChange(query: string): void {
-    this.searchQuery = query;
-    // Implement server-side search or filter
+    this.searchInput$.next(query ?? '');
   }
 
   openAdvancedFilters(): void {
     this.filterPanelExpanded = !this.filterPanelExpanded;
+    if (this.filterPanelExpanded && this.annonceOptions.length <= 1) this.loadAnnonceOptions();
+  }
+
+  // ---------- Filtres avancés ----------
+
+  annonceOptions: DsSelectOption[] = [{ value: '', label: 'Toutes les annonces' }];
+  annonceFilterValue = '';
+  private searchInput$ = new Subject<string>();
+  private sourceInput$ = new Subject<string>();
+
+  private loadAnnonceOptions(): void {
+    this.annonceApiService.list({ size: 100, sort: 'updatedAt,desc' }).subscribe({
+      next: (page) => {
+        this.annonceOptions = [
+          { value: '', label: 'Toutes les annonces' },
+          ...page.content.map(a => ({ value: String(a.id), label: `${a.title || 'Sans titre'}${a.city ? ' — ' + a.city : ''}` })),
+        ];
+      },
+      error: () => { /* la liste reste « Toutes les annonces » */ }
+    });
+  }
+
+  onAnnonceFilterChange(value: string): void {
+    this.annonceFilterValue = value || '';
+    this.selectedAnnonceId = value ? Number(value) : null;
+    this.refreshAppliedFilters();
+    this.reloadFromFirstPage();
+  }
+
+  onSourceFilterChange(value: string): void {
+    this.sourceInput$.next(value ?? '');
+  }
+
+  resetAdvancedFilters(): void {
+    this.annonceFilterValue = '';
+    this.selectedAnnonceId = null;
+    this.sourceFilter = '';
+    this.refreshAppliedFilters();
+    this.reloadFromFirstPage();
+  }
+
+  private reloadFromFirstPage(): void {
+    this.currentPage = 0;
+    this.loadDossiers();
+  }
+
+  /** Puces « filtres actifs » sous la barre (annonce, source). */
+  private refreshAppliedFilters(): void {
+    const chips: AppliedFilter[] = [];
+    if (this.selectedAnnonceId) {
+      const label = this.annonceOptions.find(o => o.value === String(this.selectedAnnonceId))?.label || `#${this.selectedAnnonceId}`;
+      chips.push({ key: 'selectedAnnonceId', label: 'Annonce', value: String(this.selectedAnnonceId), displayValue: label });
+    }
+    if (this.sourceFilter.trim()) {
+      chips.push({ key: 'sourceFilter', label: 'Source', value: this.sourceFilter.trim(), displayValue: this.sourceFilter.trim() });
+    }
+    this.appliedFilters = chips;
   }
 
   createDossier(): void {
@@ -292,7 +364,7 @@ export class DossiersComponent implements OnInit {
       case 'selectedStatus': this.selectedStatus = ''; break;
       case 'phoneFilter': this.phoneFilter = ''; break;
       case 'sourceFilter': this.sourceFilter = ''; break;
-      case 'selectedAnnonceId': this.selectedAnnonceId = null; break;
+      case 'selectedAnnonceId': this.selectedAnnonceId = null; this.annonceFilterValue = ''; break;
     }
     this.loadDossiers();
   }
@@ -302,6 +374,7 @@ export class DossiersComponent implements OnInit {
     this.phoneFilter = '';
     this.sourceFilter = '';
     this.selectedAnnonceId = null;
+    this.annonceFilterValue = '';
     this.loadDossiers();
   }
 

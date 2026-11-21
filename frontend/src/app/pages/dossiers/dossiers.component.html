@@ -56,6 +56,27 @@
         (advancedClick)="openAdvancedFilters()">
       </ds-filter-bar>
 
+      @if (filterPanelExpanded) {
+        <ds-card class="dos-advanced-filters" [pad]="true" elevation="xs" data-testid="dos-advanced-filters">
+          <div class="dos-adv-row">
+            <ds-select
+              label="Annonce"
+              [options]="annonceOptions"
+              [ngModel]="annonceFilterValue"
+              (ngModelChange)="onAnnonceFilterChange($event)"
+              prefixIcon="building">
+            </ds-select>
+            <ds-input
+              label="Source du prospect"
+              [ngModel]="sourceFilter"
+              (ngModelChange)="onSourceFilterChange($event)"
+              placeholder="WhatsApp, Portail, recommandation…">
+            </ds-input>
+            <ds-button variant="ghost" size="md" (dsClick)="resetAdvancedFilters()">Réinitialiser</ds-button>
+          </div>
+        </ds-card>
+      }
+
       <!-- Chips filtres actifs -->
       @if (appliedFilters.length) {
         <div class="dos-active-filters" style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;" role="group" aria-label="Filtres actifs">

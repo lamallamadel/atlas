@@ -188,6 +188,12 @@ public class DossierController {
                     String leadPhone,
             @Parameter(description = "Filter by annonce ID") @RequestParam(required = false)
                     Long annonceId,
+            @Parameter(description = "Filter by lead source (contains, case-insensitive)")
+                    @RequestParam(required = false)
+                    String leadSource,
+            @Parameter(description = "Search in lead name or phone (contains, case-insensitive)")
+                    @RequestParam(required = false)
+                    String q,
             @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0")
                     int page,
             @Parameter(description = "Page size (min=1, default=20)", example = "20")
@@ -208,7 +214,7 @@ public class DossierController {
 
         Pageable pageable = createPageable(page, size, sort);
         Page<DossierResponse> response =
-                dossierService.list(status, leadPhone, annonceId, pageable);
+                dossierService.list(status, leadPhone, annonceId, leadSource, q, pageable);
         return ResponseEntity.ok(response);
     }
 

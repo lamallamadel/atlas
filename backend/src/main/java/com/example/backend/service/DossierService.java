@@ -200,10 +200,37 @@ public class DossierService {
         return dossierMapper.toResponse(dossier);
     }
 
+    /** Motif LIKE « contient », en minuscules, caractères spéciaux échappés. */
+    static String containsPattern(String raw) {
+        return "%"
+                + raw.trim()
+                        .toLowerCase(java.util.Locale.ROOT)
+                        .replace("\\", "\\\\")
+                        .replace("%", "\\%")
+                        .replace("_", "\\_")
+                + "%";
+    }
+
     @Transactional(readOnly = true)
     public Page<DossierResponse> list(
             DossierStatus status, String leadPhone, Long annonceId, Pageable pageable) {
-        Specification<Dossier> spec = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+        return list(status, leadPhone, annonceId, null, null, pageable);
+    }
+
+    /**
+     * Liste filtrée. {@code leadSource} : égalité sans tenir compte de la casse ; {@code q} :
+     * recherche dans le nom ou le téléphone du prospect (contient, sans tenir compte de la casse).
+     */
+    @Transactional(readOnly = true)
+    public Page<DossierResponse> list(
+            DossierStatus status,
+            String leadPhone,
+            Long annonceId,
+            String leadSource,
+            String q,
+            Pageable pageable) {
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
         if (status != null) {
             spec =
@@ -224,6 +251,24 @@ public class DossierService {
                     spec.and(
                             (root, query, criteriaBuilder) ->
                                     criteriaBuilder.equal(root.get("annonceId"), annonceId));
+        }
+
+        if (leadSource != null && !leadSource.isBlank()) {
+            String source = containsPattern(leadSource);
+            spec =
+                    spec.and(
+                            (root, query, cb) ->
+                                    cb.like(cb.lower(root.get("leadSource")), source, '\\'));
+        }
+
+        if (q != null && !q.isBlank()) {
+            String like = containsPattern(q);
+            spec =
+                    spec.and(
+                            (root, query, cb) ->
+                                    cb.or(
+                                            cb.like(cb.lower(root.get("leadName")), like, '\\'),
+                                            cb.like(root.get("leadPhone"), like, '\\')));
         }
 
         Page<Dossier> dossiers = dossierRepository.findAll(spec, pageable);
@@ -468,7 +513,8 @@ public class DossierService {
     @Transactional(readOnly = true)
     public Page<Dossier> findAll(
             DossierStatus status, String leadPhone, Long annonceId, Pageable pageable) {
-        Specification<Dossier> spec = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
         if (status != null) {
             spec =
