@@ -9,41 +9,42 @@
   <aside class="ds-sidebar" [class.ds-sidebar--mobile-open]="mobileSidebarOpen()">
     <header class="ds-sidebar__header">
       <span class="ds-sidebar__brand">Atlasia Pro</span>
+      <span class="ds-sidebar__brand-short" aria-hidden="true">A</span>
       <ds-button variant="icon" size="sm" (dsClick)="closeMobileSidebar()" class="ds-sidebar__close-mobile" ariaLabel="Fermer le menu">
         <ds-icon name="close" [size]="20"></ds-icon>
       </ds-button>
     </header>
 
     <nav class="ds-sidebar__nav" aria-label="Navigation principale">
-      <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" aria-label="Tableau de bord">
+      <a class="nav-link" title="Tableau de bord" routerLink="/dashboard" routerLinkActive="active" aria-label="Tableau de bord">
         <ds-icon name="chart" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Tableau de bord</span>
       </a>
-      <a class="nav-link" routerLink="/reports" routerLinkActive="active" aria-label="Rapports">
+      <a class="nav-link" title="Rapports et KPIs" routerLink="/reports" routerLinkActive="active" aria-label="Rapports">
         <ds-icon name="bars-asc" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Rapports et KPIs</span>
       </a>
-      <a class="nav-link" routerLink="/observability" routerLinkActive="active" aria-label="Observabilité">
+      <a class="nav-link" title="Observabilité" routerLink="/observability" routerLinkActive="active" aria-label="Observabilité">
         <ds-icon name="gauge" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Observabilité</span>
       </a>
-      <a class="nav-link" routerLink="/tasks" routerLinkActive="active" aria-label="Tâches">
+      <a class="nav-link" title="Tâches" routerLink="/tasks" routerLinkActive="active" aria-label="Tâches">
         <ds-icon name="tasks" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Tâches</span>
       </a>
-      <a class="nav-link" routerLink="/relances" routerLinkActive="active" aria-label="Relances">
+      <a class="nav-link" title="Relances" routerLink="/relances" routerLinkActive="active" aria-label="Relances">
         <ds-icon name="clock" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Relances</span>
       </a>
-      <a class="nav-link" routerLink="/calendar" routerLinkActive="active" aria-label="Calendrier">
+      <a class="nav-link" title="Calendrier" routerLink="/calendar" routerLinkActive="active" aria-label="Calendrier">
         <ds-icon name="calendar" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Calendrier</span>
       </a>
-      <a class="nav-link" routerLink="/annonces" routerLinkActive="active" aria-label="Annonces">
+      <a class="nav-link" title="Annonces" routerLink="/annonces" routerLinkActive="active" aria-label="Annonces">
         <ds-icon name="megaphone" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Annonces</span>
       </a>
-      <a class="nav-link" routerLink="/dossiers" routerLinkActive="active" aria-label="Dossiers">
+      <a class="nav-link" title="Dossiers" routerLink="/dossiers" routerLinkActive="active" aria-label="Dossiers">
         <ds-icon name="folder" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">
           Dossiers 
@@ -55,7 +56,7 @@
       
       <div class="layout-divider" role="separator"></div>
       
-      <a class="nav-link" routerLink="/workflow-admin" routerLinkActive="active" aria-label="Administration">
+      <a class="nav-link" title="Workflows" routerLink="/workflow-admin" routerLinkActive="active" aria-label="Administration">
         <ds-icon name="settings" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Workflows</span>
       </a>
@@ -66,8 +67,9 @@
   <div class="ds-app-layout__content">
     <!-- Topbar -->
     <header class="ds-topbar" role="banner">
-      <ds-button variant="icon" (dsClick)="toggleSidebar()" class="menu-button" ariaLabel="Menu">
-        <ds-icon name="bars-asc" [size]="20" aria-hidden="true"></ds-icon>
+      <ds-button variant="icon" (dsClick)="toggleSidebar()" class="menu-button"
+        [ariaLabel]="sidebarOpen() ? 'Replier le menu' : 'Déplier le menu'">
+        <ds-icon [name]="sidebarOpen() ? 'chevron-left' : 'chevron-right'" [size]="20" aria-hidden="true"></ds-icon>
       </ds-button>
 
       <div class="toolbar-spacer"></div>
