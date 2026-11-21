@@ -41,6 +41,17 @@ class DossierListFilterBackendE2ETest extends BaseBackendE2ETest {
         dossier("Salma Idrissi", "+212600000051", "WhatsApp", ORG1);
         dossier("Karim Benali", "+212611112222", "Portail", ORG1);
         dossier("Youssef Alami", "+212600000053", "Recommandation 100%", ORG1);
+        dossier("Salma Autre Agence", "+212600000054", "WhatsApp", "ORG2");
+    }
+
+    @Test
+    void les_dossiers_d_une_autre_agence_ne_sont_jamais_listes() throws Exception {
+        mockMvc.perform(withTenantHeaders(get("/api/v1/dossiers"), ORG1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(3));
+        mockMvc.perform(withTenantHeaders(get("/api/v1/dossiers"), "ORG2"))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].leadName").value("Salma Autre Agence"));
     }
 
     @Test
