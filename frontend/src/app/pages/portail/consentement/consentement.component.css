@@ -1,0 +1,8 @@
+.cs { display: flex; justify-content: center; padding: 48px 16px; }
+.cs__card { width: 100%; max-width: 560px; }
+.cs__title { margin: 0 0 12px; font-family: var(--ds-font-display); font-size: 24px; color: var(--ds-marine); }
+.cs__text { margin: 0 0 16px; line-height: 1.6; color: var(--ds-text); }
+.cs__list { margin: 0 0 20px; padding-left: 20px; color: var(--ds-text-muted); font-size: 14px; line-height: 1.6; }
+.cs__actions { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+.cs__error { color: var(--ds-error); font-size: 14px; }
+.cs__done { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; color: var(--ds-success); }

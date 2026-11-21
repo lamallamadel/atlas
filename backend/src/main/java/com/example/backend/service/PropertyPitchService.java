@@ -389,14 +389,22 @@ public class PropertyPitchService {
         }
 
         String consent = consentStatus(d.getId(), channel);
-        if (!"GRANTED".equals(consent)) {
+        if ("UNCONFIRMED".equals(consent)) {
+            blockers.add(
+                    CONSENT_PREFIX
+                            + "l'accord du client a été noté par un agent, mais les propositions par "
+                            + label(channel)
+                            + " exigent qu'il le confirme lui-même. Envoyez-lui le lien de"
+                            + " confirmation depuis l'onglet Consentements du dossier.");
+        } else if (!"GRANTED".equals(consent)) {
             blockers.add(
                     CONSENT_PREFIX
                             + "le client n'a pas donné son accord pour recevoir des propositions par "
                             + label(channel)
                             + " ("
                             + consentLabel(consent)
-                            + "). Enregistrez son accord dans l'onglet Consentements du dossier.");
+                            + "). Envoyez-lui le lien de confirmation depuis l'onglet Consentements"
+                            + " du dossier.");
         }
 
         Boolean windowOpen = null;
@@ -440,7 +448,23 @@ public class PropertyPitchService {
                 && latest.getExpiresAt().isBefore(LocalDateTime.now())) {
             return "EXPIRED";
         }
+        if (latest.getStatus() == ConsentementStatus.GRANTED && !clientConfirmed(latest)) {
+            return "UNCONFIRMED";
+        }
         return latest.getStatus() != null ? latest.getStatus().name() : "MISSING";
+    }
+
+    /** Preuve du double opt-in exigée pour la prospection (voir OutboundMessageService). */
+    static boolean clientConfirmed(ConsentementEntity consent) {
+        Map<String, Object> meta = consent.getMeta();
+        if (meta == null) {
+            return false;
+        }
+        Object confirmed = meta.get("doubleOptInConfirmed");
+        return meta.get("optInTimestamp") != null
+                && meta.get("ipAddress") != null
+                && (Boolean.TRUE.equals(confirmed)
+                        || "true".equalsIgnoreCase(String.valueOf(confirmed)));
     }
 
     private static String consentLabel(String status) {

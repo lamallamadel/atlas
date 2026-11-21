@@ -93,6 +93,7 @@ public class SecurityConfig {
                                                     "/api/v1/webhooks/**",
                                                     "/api/public/v1/**",
                                                     "/api/v1/portal/**",
+                                                    "/api/v1/public/consent/**",
                                                     "/actuator/**",
                                                     "/swagger-ui/**",
                                                     "/api-docs/**",
@@ -161,7 +162,10 @@ public class SecurityConfig {
                                         .permitAll()
                                         .requestMatchers("/api/v1/observability/health")
                                         .permitAll()
-                                        .requestMatchers("/api/public/v1/**", "/api/v1/portal/**")
+                                        .requestMatchers(
+                                                "/api/public/v1/**",
+                                                "/api/v1/portal/**",
+                                                "/api/v1/public/consent/**")
                                         .permitAll()
                                         .requestMatchers("/api/**")
                                         .authenticated()
@@ -234,7 +238,9 @@ public class SecurityConfig {
         DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
         return request -> {
             String path = request.getRequestURI();
-            if (path != null && path.startsWith("/api/v1/webhooks/")) {
+            if (path != null
+                    && (path.startsWith("/api/v1/webhooks/")
+                            || path.startsWith("/api/v1/public/consent/"))) {
                 return null;
             }
             return delegate.resolve(request);

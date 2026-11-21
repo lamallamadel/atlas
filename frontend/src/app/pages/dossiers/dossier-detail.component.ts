@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, viewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, viewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteResponse, PartiePrenanteRole } from '../../services/dossier-api.service';
 import { PartiePrenanteApiService } from '../../services/partie-prenante-api.service';
@@ -40,6 +40,9 @@ import { ActivityTimelineComponent } from '../../components/activity-timeline.co
 import { DocumentListComponent } from '../../components/document-list.component';
 import { WhatsappMessagingContainerComponent } from '../../components/whatsapp-messaging-container.component';
 import { OutboundMessageApiService, DossierOutboundMessage } from '../../services/outbound-message-api.service';
+import { ConsentLinkApiService, ConsentLinkResponse, ConsentPurpose } from '../../services/consent-link-api.service';
+import { DossierWhatsAppApiService } from '../../services/dossier-whatsapp-api.service';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
 
 export interface RendezVous {
@@ -106,6 +109,10 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
   private consentementApiService = inject(ConsentementApiService);
   private auditEventApiService = inject(AuditEventApiService);
   private outboundMessageApiService = inject(OutboundMessageApiService);
+  private consentLinkApi = inject(ConsentLinkApiService);
+  private dossierWhatsAppApi = inject(DossierWhatsAppApiService);
+  // Application sans zone : une réponse HTTP ne redessine pas la vue d'elle-même.
+  private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private toastService = inject(DsToastService);
@@ -370,9 +377,159 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
     if (!dossierId) return;
     this.loadingMessages = true;
     this.messageApiService.list({ dossierId, size: 100, sort: 'timestamp,desc' }).subscribe({
-      next: (response) => { this.messages = response.content; this.loadingMessages = false; },
-      error: () => { this.loadingMessages = false; }
+      next: (response) => { this.cdr.markForCheck(); this.messages = response.content; this.loadingMessages = false; },
+      error: () => { this.cdr.markForCheck(); this.loadingMessages = false; }
     });
+  }
+
+  // ---------- Consentements : saisie par l'agent et lien de confirmation ----------
+
+  readonly consentChannels: ConsentementChannel[] = [ConsentementChannel.WHATSAPP, ConsentementChannel.SMS, ConsentementChannel.EMAIL];
+  readonly consentPurposes: ConsentPurpose[] = ['TRANSACTIONNEL', 'MARKETING'];
+  readonly channelOptions: DsSelectOption[] = [
+    { value: ConsentementChannel.WHATSAPP, label: 'WhatsApp' },
+    { value: ConsentementChannel.SMS, label: 'SMS' },
+    { value: ConsentementChannel.EMAIL, label: 'E-mail' },
+  ];
+  readonly purposeOptions: DsSelectOption[] = [
+    { value: 'TRANSACTIONNEL', label: 'Suivi du dossier (réponses, visites, documents)' },
+    { value: 'MARKETING', label: 'Prospection (propositions de biens)' },
+  ];
+  readonly decisionOptions: DsSelectOption[] = [
+    { value: ConsentementStatus.GRANTED, label: 'Le client est d\'accord' },
+    { value: ConsentementStatus.DENIED, label: 'Le client refuse' },
+    { value: ConsentementStatus.REVOKED, label: 'Le client retire son accord' },
+  ];
+  readonly methodOptions: DsSelectOption[] = [
+    { value: 'PHONE_CALL', label: 'Au téléphone' },
+    { value: 'IN_PERSON', label: 'En agence ou en visite' },
+    { value: 'WRITTEN', label: 'Par écrit (document signé)' },
+    { value: 'MESSAGE', label: 'Par message (WhatsApp, SMS, e-mail)' },
+    { value: 'OTHER', label: 'Autre' },
+  ];
+
+  consentPanel: 'none' | 'record' | 'link' = 'none';
+  recordForm = { channel: ConsentementChannel.WHATSAPP as ConsentementChannel, purpose: 'TRANSACTIONNEL' as ConsentPurpose,
+    decision: ConsentementStatus.GRANTED as ConsentementStatus, method: 'PHONE_CALL', note: '' };
+  savingConsent = false;
+  linkForm = { channel: ConsentementChannel.WHATSAPP as ConsentementChannel, purpose: 'MARKETING' as ConsentPurpose };
+  generatedLink: ConsentLinkResponse | null = null;
+  generatingLink = false;
+  sendingLink = false;
+
+  openConsentPanel(panel: 'record' | 'link'): void {
+    this.consentPanel = this.consentPanel === panel ? 'none' : panel;
+    if (panel === 'link') this.generatedLink = null;
+  }
+
+  /** Dernier consentement pour un canal et une finalité (liste triée du plus récent au plus ancien). */
+  latestConsent(channel: ConsentementChannel, purpose: ConsentPurpose): ConsentementResponse | undefined {
+    return this.consentements
+      .filter(c => c.channel === channel && (c.consentType || '').toUpperCase() === purpose)
+      .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''))[0];
+  }
+
+  /** Accord confirmé par le client lui-même (double opt-in), exigé pour la prospection. */
+  isClientConfirmed(c: ConsentementResponse | undefined): boolean {
+    const m = c?.meta || {};
+    return c?.status === ConsentementStatus.GRANTED && (m['doubleOptInConfirmed'] === true || m['doubleOptInConfirmed'] === 'true');
+  }
+
+  consentSourceLabel(c: ConsentementResponse | undefined): string {
+    if (!c) return '';
+    const m = c.meta || {};
+    if (m['source'] === 'CLIENT_LINK') return 'confirmé par le client';
+    if (m['source'] === 'AGENT') {
+      const how = this.methodOptions.find(o => o.value === m['method'])?.label?.toLowerCase();
+      return `noté par ${m['recordedBy'] || 'un agent'}${how ? ' — ' + how : ''}`;
+    }
+    return this.isClientConfirmed(c) ? 'confirmé par le client' : '';
+  }
+
+  /** La prospection est bloquée tant que le client n'a pas confirmé lui-même. */
+  needsClientConfirmation(channel: ConsentementChannel): boolean {
+    const c = this.latestConsent(channel, 'MARKETING');
+    return c?.status === ConsentementStatus.GRANTED && !this.isClientConfirmed(c);
+  }
+
+  canReplyOnWhatsApp(): boolean {
+    return this.latestConsent(ConsentementChannel.WHATSAPP, 'TRANSACTIONNEL')?.status === ConsentementStatus.GRANTED;
+  }
+
+  saveAgentConsent(): void {
+    if (!this.dossier || this.savingConsent) return;
+    const f = this.recordForm;
+    this.savingConsent = true;
+    this.consentementApiService.create({
+      dossierId: this.dossier.id,
+      channel: f.channel,
+      consentType: f.purpose,
+      status: f.decision,
+      meta: { source: 'AGENT', method: f.method, ...(f.note.trim() ? { note: f.note.trim() } : {}) }
+    }).subscribe({
+      next: () => { this.cdr.markForCheck(); this.cdr.markForCheck();
+        this.savingConsent = false;
+        this.consentPanel = 'none';
+        this.recordForm.note = '';
+        this.toastService.success('Consentement enregistré');
+        this.loadConsentements();
+      },
+      error: (err: HttpErrorResponse) => { this.cdr.markForCheck();
+        this.savingConsent = false;
+        this.toastService.error(this.apiError(err, 'Impossible d\'enregistrer le consentement'));
+      }
+    });
+  }
+
+  generateConsentLink(): void {
+    if (!this.dossier || this.generatingLink) return;
+    this.generatingLink = true;
+    this.consentLinkApi.createLink(this.dossier.id, this.linkForm.channel, this.linkForm.purpose).subscribe({
+      next: (link) => { this.cdr.markForCheck(); this.generatedLink = link; this.generatingLink = false; },
+      error: (err: HttpErrorResponse) => { this.cdr.markForCheck();
+        this.generatingLink = false;
+        this.toastService.error(this.apiError(err, 'Impossible de générer le lien'));
+      }
+    });
+  }
+
+  copyConsentLink(): void {
+    const url = this.generatedLink?.url;
+    if (!url) return;
+    navigator.clipboard?.writeText(url).then(
+      () => this.toastService.success('Lien copié'),
+      () => this.toastService.info(url)
+    );
+  }
+
+  consentLinkMessage(): string {
+    const first = (this.dossier?.leadName || '').trim().split(/\s+/)[0];
+    const purpose = this.generatedLink?.consentType === 'MARKETING'
+      ? 'recevoir nos propositions de biens par WhatsApp'
+      : 'que nous suivions votre dossier par WhatsApp';
+    return `Bonjour${first ? ' ' + first : ''}, pour ${purpose}, merci de confirmer votre accord ici : ${this.generatedLink?.url}`;
+  }
+
+  sendConsentLinkOnWhatsApp(): void {
+    if (!this.dossier || !this.generatedLink || this.sendingLink) return;
+    this.sendingLink = true;
+    this.dossierWhatsAppApi.reply(this.dossier.id, this.consentLinkMessage()).subscribe({
+      next: () => { this.cdr.markForCheck(); this.cdr.markForCheck();
+        this.sendingLink = false;
+        this.toastService.success('Lien envoyé sur WhatsApp');
+        this.loadOutboundMessages();
+        this.loadWhatsAppMessages();
+      },
+      error: (err: HttpErrorResponse) => { this.cdr.markForCheck();
+        this.sendingLink = false;
+        this.toastService.error(this.apiError(err, 'Envoi impossible : copiez le lien et transmettez-le autrement.'));
+      }
+    });
+  }
+
+  private apiError(err: HttpErrorResponse, fallback: string): string {
+    const detail = err?.error?.detail;
+    return typeof detail === 'string' && detail && detail !== 'An unexpected error occurred' ? detail : fallback;
   }
 
   loadRelatedData(): void {
@@ -389,11 +546,11 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
     if (!dossierId || isNaN(dossierId)) return;
     this.loadingOutbound = true;
     this.outboundMessageApiService.listForDossier(dossierId).subscribe({
-      next: (list) => {
+      next: (list) => { this.cdr.markForCheck();
         this.outboundMessages = [...list].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
         this.loadingOutbound = false;
       },
-      error: () => { this.outboundMessages = []; this.loadingOutbound = false; }
+      error: () => { this.cdr.markForCheck(); this.outboundMessages = []; this.loadingOutbound = false; }
     });
   }
 
@@ -458,8 +615,8 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
     if (!dossierId) return;
     this.loadingAppointments = true;
     this.appointmentApiService.list({ dossierId, size: 100, sort: 'startTime,desc' }).subscribe({
-      next: (response) => { this.appointments = response.content; this.loadingAppointments = false; },
-      error: () => { this.loadingAppointments = false; }
+      next: (response) => { this.cdr.markForCheck(); this.appointments = response.content; this.loadingAppointments = false; },
+      error: () => { this.cdr.markForCheck(); this.loadingAppointments = false; }
     });
   }
 
@@ -468,12 +625,12 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
     if (!dossierId) return;
     this.consentementsLoading = true;
     this.consentementApiService.list({ dossierId, size: 100, sort: 'updatedAt,desc' }).subscribe({
-      next: (response) => { 
+      next: (response) => { this.cdr.markForCheck(); 
         this.consentements = response.content; 
         this.buildConsentementGroups();
         this.consentementsLoading = false; 
       },
-      error: () => { this.consentementsLoading = false; }
+      error: () => { this.cdr.markForCheck(); this.consentementsLoading = false; }
     });
   }
 
@@ -501,13 +658,13 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
       params.entityType = this.auditFilterEntityType;
       if (this.auditFilterEntityType === AuditEntityType.DOSSIER) params.entityId = dossierId;
       this.auditEventApiService.list(params).subscribe({
-        next: (response) => { this.auditEvents = response.content; this.auditTotalElements = response.totalElements; this.auditEventsLoading = false; },
-        error: () => { this.auditEventsLoading = false; }
+        next: (response) => { this.cdr.markForCheck(); this.auditEvents = response.content; this.auditTotalElements = response.totalElements; this.auditEventsLoading = false; },
+        error: () => { this.cdr.markForCheck(); this.auditEventsLoading = false; }
       });
     } else {
       this.auditEventApiService.listByDossier(dossierId, params).subscribe({
-        next: (response) => { this.auditEvents = response.content; this.auditTotalElements = response.totalElements; this.auditEventsLoading = false; },
-        error: () => { this.auditEventsLoading = false; }
+        next: (response) => { this.cdr.markForCheck(); this.auditEvents = response.content; this.auditTotalElements = response.totalElements; this.auditEventsLoading = false; },
+        error: () => { this.cdr.markForCheck(); this.auditEventsLoading = false; }
       });
     }
   }
@@ -765,8 +922,8 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
     if (isNaN(dossierId)) return;
     this.loadingWhatsAppMessages = true;
     this.messageApiService.list({ dossierId, channel: MessageChannel.WHATSAPP, size: 50, sort: 'timestamp,asc' }).subscribe({
-      next: (response) => { this.whatsappMessages = response.content; this.loadingWhatsAppMessages = false; },
-      error: () => { this.loadingWhatsAppMessages = false; }
+      next: (response) => { this.cdr.markForCheck(); this.whatsappMessages = response.content; this.loadingWhatsAppMessages = false; },
+      error: () => { this.cdr.markForCheck(); this.loadingWhatsAppMessages = false; }
     });
   }
 

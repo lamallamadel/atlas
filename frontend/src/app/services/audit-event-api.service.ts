@@ -74,6 +74,8 @@ export interface Page<T> {
 }
 
 export interface AuditEventListParams {
+  /** Tous les événements du dossier (dossier, messages, consentements...). */
+  dossierId?: number;
   entityType?: AuditEntityType;
   entityId?: number;
   action?: AuditAction;
@@ -94,6 +96,9 @@ export class AuditEventApiService {
 
   list(params: AuditEventListParams = {}): Observable<Page<AuditEventResponse>> {
     let httpParams = new HttpParams();
+    if (params.dossierId !== undefined && params.dossierId !== null) {
+      httpParams = httpParams.set('dossierId', params.dossierId.toString());
+    }
 
     if (params.entityType !== undefined) {
       httpParams = httpParams.set('entityType', params.entityType);
@@ -129,10 +134,8 @@ export class AuditEventApiService {
   }
 
   listByDossier(dossierId: number, params: Partial<AuditEventListParams> = {}): Observable<Page<AuditEventResponse>> {
-    return this.list({
-      ...params,
-      entityType: params.entityType,
-      entityId: dossierId
-    });
+    // L'API exige dossierId, ou bien entityType ET entityId : un entityId seul était refusé (400).
+    return this.list({ ...params, dossierId });
   }
+
 }

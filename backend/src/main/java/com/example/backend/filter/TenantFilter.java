@@ -88,6 +88,8 @@ public class TenantFilter extends OncePerRequestFilter {
                 || path.startsWith("/swagger-ui.html")
                 || path.startsWith("/api-docs/")
                 || path.startsWith("/v3/api-docs/")
-                || path.startsWith("/api/v1/webhooks/");
+                || path.startsWith("/api/v1/webhooks/")
+                // Page de confirmation du consentement : le client n'a pas d'organisation.
+                || path.startsWith("/api/v1/public/consent/");
     }
 }

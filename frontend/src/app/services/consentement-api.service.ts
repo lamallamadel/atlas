@@ -22,6 +22,8 @@ export enum ConsentementStatus {
 export interface ConsentementCreateRequest {
   dossierId: number;
   channel: ConsentementChannel;
+  /** MARKETING (prospection) ou TRANSACTIONNEL (suivi du dossier) ; exigé par l'API. */
+  consentType?: string;
   status: ConsentementStatus;
   meta?: Record<string, any>;
 }

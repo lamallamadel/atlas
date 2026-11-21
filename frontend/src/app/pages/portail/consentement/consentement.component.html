@@ -1,0 +1,41 @@
+<div class="cs" data-testid="consent-page">
+  <ds-card [pad]="true" elevation="sm" class="cs__card">
+    @if (loading()) {
+      <ds-skeleton variant="rect" width="100%" height="180px" [animate]="true"></ds-skeleton>
+    } @else if (error() && !view()) {
+      <h1 class="cs__title">Lien indisponible</h1>
+      <p class="cs__text">{{ error() }}</p>
+    } @else if (view(); as v) {
+      @if (v.status === 'ANSWERED') {
+        <div class="cs__done">
+          <ds-icon [name]="v.decision === 'ACCEPT' ? 'check' : 'info'" [size]="24"></ds-icon>
+          @if (v.decision === 'ACCEPT') {
+            <h1 class="cs__title">Merci, c'est noté</h1>
+            <p class="cs__text">Votre conseiller pourra {{ purposeText(v) }} par {{ channelLabel(v.channel) }}.
+              Vous pouvez retirer votre accord à tout moment en le lui disant ou en répondant « STOP ».</p>
+          } @else {
+            <h1 class="cs__title">C'est noté</h1>
+            <p class="cs__text">Vous ne recevrez pas ces messages par {{ channelLabel(v.channel) }}.</p>
+          }
+        </div>
+      } @else if (v.status === 'EXPIRED') {
+        <h1 class="cs__title">Ce lien a expiré</h1>
+        <p class="cs__text">Demandez-en un nouveau à votre conseiller.</p>
+      } @else {
+        <h1 class="cs__title">Bonjour{{ v.clientFirstName ? ' ' + v.clientFirstName : '' }},</h1>
+        <p class="cs__text">Votre conseiller immobilier souhaite {{ purposeText(v) }} par <strong>{{ channelLabel(v.channel) }}</strong>.
+          Êtes-vous d'accord ?</p>
+        <ul class="cs__list">
+          <li>Vous pouvez retirer votre accord à tout moment, en le disant à votre conseiller ou en répondant « STOP ».</li>
+          <li>Votre réponse est enregistrée avec sa date et l'adresse de connexion, pour en garder la preuve.</li>
+          <li>Vos données sont traitées conformément à la loi 09-08 sur la protection des données personnelles.</li>
+        </ul>
+        @if (error()) { <p class="cs__error">{{ error() }}</p> }
+        <div class="cs__actions">
+          <ds-button variant="ghost" [loading]="sending() === 'REFUSE'" [disabled]="!!sending()" (dsClick)="answer('REFUSE')" data-testid="consent-refuse">Je refuse</ds-button>
+          <ds-button variant="marine" [loading]="sending() === 'ACCEPT'" [disabled]="!!sending()" (dsClick)="answer('ACCEPT')" data-testid="consent-accept">J'accepte</ds-button>
+        </div>
+      }
+    }
+  </ds-card>
+</div>

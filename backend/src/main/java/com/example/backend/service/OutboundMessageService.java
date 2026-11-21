@@ -310,7 +310,11 @@ public class OutboundMessageService {
         Object ipAddress = meta.get("ipAddress");
         Object doubleOptInConfirmed = meta.get("doubleOptInConfirmed");
 
-        if (optInTimestamp == null || ipAddress == null || doubleOptInConfirmed == null) {
+        // Le double opt-in doit être confirmé (true), pas seulement renseigné.
+        boolean confirmed =
+                Boolean.TRUE.equals(doubleOptInConfirmed)
+                        || "true".equalsIgnoreCase(String.valueOf(doubleOptInConfirmed));
+        if (optInTimestamp == null || ipAddress == null || !confirmed) {
             logger.warn(
                     "MARKETING consent metadata incomplete for dossier {}, channel {}. optInTimestamp={}, ipAddress={}, doubleOptInConfirmed={}",
                     dossierId,

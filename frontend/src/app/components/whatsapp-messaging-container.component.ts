@@ -1,11 +1,13 @@
-import { Component, OnInit, OnDestroy, inject, input } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { MessageApiService, MessageResponse, MessageChannel, MessageDirection } from '../services/message-api.service';
+import { MessageApiService, MessageResponse, MessageChannel } from '../services/message-api.service';
 import { WhatsappThreadComponent } from './whatsapp-thread.component';
 import { WhatsappMessageInputComponent } from './whatsapp-message-input.component';
 import { DsProgressBarComponent, DsToastService } from '../design-system';
+import { DossierWhatsAppApiService } from '../services/dossier-whatsapp-api.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-whatsapp-messaging-container',
@@ -22,6 +24,8 @@ import { DsProgressBarComponent, DsToastService } from '../design-system';
 export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
   private messageApiService = inject(MessageApiService);
   private toastService = inject(DsToastService);
+  private whatsAppApi = inject(DossierWhatsAppApiService);
+  private cdr = inject(ChangeDetectorRef);
 
   readonly dossierId = input.required<number>();
   readonly consentGranted = input<boolean>(false);
@@ -63,10 +67,12 @@ export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
     })
     .subscribe({
       next: (response) => {
+        this.cdr.markForCheck();
         this.messages = response.content;
         this.loading = false;
       },
       error: (err) => {
+        this.cdr.markForCheck();
         console.error('Error loading WhatsApp messages:', err);
         this.loading = false;
         this.toastService.error('Erreur lors du chargement des messages');
@@ -86,6 +92,7 @@ export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
     })
     .subscribe({
       next: (response) => {
+        this.cdr.markForCheck();
         const existingIds = new Set(this.messages.map(m => m.id));
         const newMessages = response.content.filter(m => !existingIds.has(m.id));
         
@@ -95,6 +102,8 @@ export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
         this.isSyncing = false;
       },
       error: () => {
+        this.cdr.markForCheck();
+        this.cdr.markForCheck();
         this.isSyncing = false;
       }
     });
@@ -126,25 +135,26 @@ export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
     }));
   }
 
+  /** Envoi réel au client : file des messages sortants, puis rechargement du fil. */
   onSendMessage(event: any): void {
+    const content = (event?.content ?? '').trim();
+    if (!content || this.sending) return;
     this.sending = true;
-    this.messageApiService.create({
-      dossierId: this.dossierId(),
-      channel: MessageChannel.WHATSAPP,
-      direction: MessageDirection.OUTBOUND,
-      content: event.content,
-      timestamp: new Date().toISOString(),
-      templateId: event.templateId,
-      templateVariables: event.templateVariables
-    }).subscribe({
-      next: (m) => {
-        this.messages = [...this.messages, m];
+    this.whatsAppApi.reply(this.dossierId(), content).subscribe({
+      next: () => {
+        this.cdr.markForCheck();
+        this.cdr.markForCheck();
         this.sending = false;
+        this.toastService.success('Message envoyé à WhatsApp');
+        this.loadMessages();
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
+        this.cdr.markForCheck();
         this.sending = false;
-        this.toastService.error('Échec de l\'envoi');
+        const detail = err?.error?.detail;
+        this.toastService.error(typeof detail === 'string' && detail ? detail : 'Échec de l\'envoi');
       }
     });
   }
+
 }

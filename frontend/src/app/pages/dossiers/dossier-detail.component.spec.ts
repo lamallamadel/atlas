@@ -410,4 +410,48 @@ describe('DossierDetailComponent', () => {
       size: 10,
       sort: 'createdAt,desc'});
   });
+  describe('consentements : saisie agent et confirmation client', () => {
+    const at = (iso: string) => iso;
+    function consent(p: any) {
+      return { id: p.id ?? 1, orgId: 'ORG', dossierId: 1, channel: 'WHATSAPP', consentType: 'MARKETING', status: 'GRANTED',
+        meta: {}, createdAt: at('2026-11-20T10:00:00'), updatedAt: at('2026-11-20T10:00:00'), ...p };
+    }
+
+    it('accord de prospection noté par l’agent : à confirmer par le client', () => {
+      component.consentements = [consent({ meta: { source: 'AGENT', method: 'PHONE_CALL', recordedBy: 'adel' } })] as any;
+      expect(component.needsClientConfirmation('WHATSAPP' as any)).toBe(true);
+      expect(component.consentSourceLabel(component.latestConsent('WHATSAPP' as any, 'MARKETING'))).toBe('noté par adel — au téléphone');
+    });
+
+    it('accord confirmé par le lien : plus rien à confirmer', () => {
+      component.consentements = [consent({ meta: { source: 'CLIENT_LINK', doubleOptInConfirmed: true } })] as any;
+      expect(component.needsClientConfirmation('WHATSAPP' as any)).toBe(false);
+      expect(component.consentSourceLabel(component.latestConsent('WHATSAPP' as any, 'MARKETING'))).toBe('confirmé par le client');
+    });
+
+    it('le dernier consentement l’emporte, et la réponse WhatsApp exige l’accord « suivi »', () => {
+      component.consentements = [
+        consent({ id: 1, consentType: 'TRANSACTIONNEL', status: 'GRANTED', updatedAt: '2026-11-19T10:00:00' }),
+        consent({ id: 2, consentType: 'TRANSACTIONNEL', status: 'REVOKED', updatedAt: '2026-11-20T10:00:00' }),
+      ] as any;
+      expect(component.canReplyOnWhatsApp()).toBe(false);
+      component.consentements = [consent({ id: 3, consentType: 'MARKETING' })] as any;
+      expect(component.canReplyOnWhatsApp()).toBe(false);
+      component.consentements = [consent({ id: 4, consentType: 'TRANSACTIONNEL' })] as any;
+      expect(component.canReplyOnWhatsApp()).toBe(true);
+    });
+
+    it('la saisie agent envoie la finalité, la source et le mode', () => {
+      component.dossier = { ...mockDossier, id: 7 } as any;
+      consentementApiService.create.mockReturnValue(of({} as any));
+      consentementApiService.list.mockReturnValue(of(mockConsentementsPage));
+      component.recordForm = { channel: 'WHATSAPP' as any, purpose: 'TRANSACTIONNEL', decision: 'GRANTED' as any, method: 'IN_PERSON', note: ' visite du 20/11 ' };
+      component.saveAgentConsent();
+      expect(consentementApiService.create).toHaveBeenCalledWith({
+        dossierId: 7, channel: 'WHATSAPP', consentType: 'TRANSACTIONNEL', status: 'GRANTED',
+        meta: { source: 'AGENT', method: 'IN_PERSON', note: 'visite du 20/11' },
+      });
+      expect(toastService.success).toHaveBeenCalledWith('Consentement enregistré');
+    });
+  });
 });
