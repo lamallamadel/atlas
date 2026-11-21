@@ -127,7 +127,10 @@ export interface Page<T> {
 export interface DossierListParams {
   status?: DossierStatus;
   leadPhone?: string;
+  /** Source du prospect : contient, sans tenir compte de la casse. */
   leadSource?: string;
+  /** Recherche dans le nom ou le téléphone du prospect. */
+  q?: string;
   annonceId?: number;
   page?: number;
   size?: number;
@@ -180,6 +183,9 @@ export class DossierApiService {
     }
     if (params.annonceId !== undefined) {
       httpParams = httpParams.set('annonceId', params.annonceId.toString());
+    }
+    if (params.q !== undefined && params.q !== '') {
+      httpParams = httpParams.set('q', params.q);
     }
     if (params.page !== undefined) {
       httpParams = httpParams.set('page', params.page.toString());

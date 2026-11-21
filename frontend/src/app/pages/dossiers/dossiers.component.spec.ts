@@ -227,4 +227,42 @@ describe('DossiersComponent', () => {
 
     expect(component.selectedStatus).toBe('');
   });
+  describe('filtres avancés et recherche', () => {
+    const empty = { content: [], last: true, totalPages: 0, totalElements: 0, size: 10, number: 0, first: true, numberOfElements: 0, empty: true } as any;
+
+    beforeEach(() => {
+      dossierApiService.list.and.returnValue(of(empty));
+      fixture.detectChanges();
+      (dossierApiService.list as any).mockClear();
+    });
+
+    it('la recherche part au serveur 300 ms après la frappe, depuis la première page', async () => {
+      component.currentPage = 3;
+      component.onSearchChange('sal');
+      component.onSearchChange('salma');
+      expect(dossierApiService.list).not.toHaveBeenCalled();
+      await new Promise(r => setTimeout(r, 350));
+      expect(dossierApiService.list).toHaveBeenCalledTimes(1);
+      expect((dossierApiService.list as any).mock.calls.at(-1)[0]).toEqual(expect.objectContaining({ q: 'salma', page: 0 }));
+    });
+
+    it('filtre par annonce : puce affichée et retirable', () => {
+      component.annonceOptions = [{ value: '', label: 'Toutes les annonces' }, { value: '7', label: 'Villa — Tanger' }];
+      component.onAnnonceFilterChange('7');
+      expect((dossierApiService.list as any).mock.calls.at(-1)[0]).toEqual(expect.objectContaining({ annonceId: 7 }));
+      expect(component.appliedFilters).toEqual([expect.objectContaining({ key: 'selectedAnnonceId', displayValue: 'Villa — Tanger' })]);
+
+      component.removeFilter(component.appliedFilters[0]);
+      expect(component.selectedAnnonceId).toBeNull();
+      expect(component.annonceFilterValue).toBe('');
+    });
+
+    it('le bouton Filtres ouvre le panneau et charge les annonces une fois', () => {
+      expect(component.filterPanelExpanded).toBe(false);
+      component.openAdvancedFilters();
+      expect(component.filterPanelExpanded).toBe(true);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('[data-testid="dos-advanced-filters"]')).toBeTruthy();
+    });
+  });
 });
