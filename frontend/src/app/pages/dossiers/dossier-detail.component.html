@@ -151,16 +151,18 @@
 
         @if (activeTab === 'whatsapp' && dossier) {
           <ds-card [pad]="true" elevation="xs">
-            @if (!isWhatsAppConsentGranted()) {
+            @if (!canReplyOnWhatsApp()) {
               <p class="dd-notice" data-testid="dd-wa-consent">
                 <ds-icon name="alert-circle" [size]="16"></ds-icon>
-                Pas de consentement WhatsApp enregistré : vous pouvez lire la conversation, mais pas écrire depuis cet onglet.
+                Pour écrire au client ici, notez d'abord son accord « Suivi du dossier » sur WhatsApp (onglet Consentements).
               </p>
+            } @else {
+              <p class="dd-muted dd-intro">Les messages partent réellement sur WhatsApp. WhatsApp n'accepte un message libre que si le client vous a écrit dans les dernières 24 h.</p>
             }
             <app-whatsapp-messaging-container
               class="dd-whatsapp"
               [dossierId]="dossier.id"
-              [consentGranted]="isWhatsAppConsentGranted()"
+              [consentGranted]="canReplyOnWhatsApp()"
               [leadName]="dossier.leadName || ''"
               [templates]="whatsappTemplates">
             </app-whatsapp-messaging-container>
@@ -240,21 +242,92 @@
           <div class="ds-form-stack">
             <div class="dd-panel__head">
               <h2 class="dd-panel__title">Consentements</h2>
+              <span class="dd-actions">
+                <ds-button variant="ghost" size="sm" prefixIcon="edit" (dsClick)="openConsentPanel('record')" data-testid="dd-consent-record">Noter un accord</ds-button>
+                <ds-button variant="marine" size="sm" prefixIcon="send" (dsClick)="openConsentPanel('link')" data-testid="dd-consent-link">Lien de confirmation</ds-button>
+              </span>
             </div>
+            <p class="dd-muted dd-intro">
+              <strong>Suivi du dossier</strong> : l'agent peut noter l'accord donné à l'oral.
+              <strong>Prospection</strong> (propositions de biens) : le client doit confirmer lui-même, par le lien de confirmation.
+            </p>
+
+            @if (consentPanel === 'record') {
+              <ds-card [pad]="true" elevation="sm" data-testid="dd-consent-form">
+                <h3 class="dd-subtitle dd-subtitle--flush">Noter l'accord du client</h3>
+                <div class="dd-form-grid">
+                  <ds-select label="Canal" [options]="channelOptions" [(ngModel)]="recordForm.channel"></ds-select>
+                  <ds-select label="Pour" [options]="purposeOptions" [(ngModel)]="recordForm.purpose"></ds-select>
+                  <ds-select label="Réponse du client" [options]="decisionOptions" [(ngModel)]="recordForm.decision"></ds-select>
+                  <ds-select label="Comment il l'a dit" [options]="methodOptions" [(ngModel)]="recordForm.method"></ds-select>
+                </div>
+                <div class="ds-field dd-note">
+                  <label class="ds-field__label" for="dd-consent-note">Précision (facultatif)</label>
+                  <div class="ds-field__wrap">
+                    <input id="dd-consent-note" class="ds-field__input" [(ngModel)]="recordForm.note" maxlength="300"
+                           placeholder="Ex. : appel du 20/11, d'accord pour être recontacté sur WhatsApp" />
+                  </div>
+                </div>
+                @if (recordForm.purpose === 'MARKETING' && recordForm.decision === 'GRANTED') {
+                  <p class="dd-notice"><ds-icon name="alert-circle" [size]="16"></ds-icon>
+                    L'accord sera noté, mais les propositions resteront bloquées tant que le client ne l'a pas confirmé par le lien.</p>
+                }
+                <div class="dd-form-actions">
+                  <ds-button variant="ghost" size="sm" (dsClick)="consentPanel = 'none'">Annuler</ds-button>
+                  <ds-button variant="marine" size="sm" [loading]="savingConsent" (dsClick)="saveAgentConsent()" data-testid="dd-consent-save">Enregistrer</ds-button>
+                </div>
+              </ds-card>
+            }
+
+            @if (consentPanel === 'link') {
+              <ds-card [pad]="true" elevation="sm" data-testid="dd-consent-link-panel">
+                <h3 class="dd-subtitle dd-subtitle--flush">Faire confirmer le client</h3>
+                <p class="dd-muted">Le client ouvre le lien, lit ce qu'il accepte et répond lui-même. Sa réponse, l'heure et son adresse IP servent de preuve. Lien valable 7 jours, une seule réponse.</p>
+                <div class="dd-form-grid">
+                  <ds-select label="Canal" [options]="channelOptions" [(ngModel)]="linkForm.channel"></ds-select>
+                  <ds-select label="Pour" [options]="purposeOptions" [(ngModel)]="linkForm.purpose"></ds-select>
+                </div>
+                @if (!generatedLink) {
+                  <div class="dd-form-actions">
+                    <ds-button variant="marine" size="sm" [loading]="generatingLink" (dsClick)="generateConsentLink()" data-testid="dd-consent-generate">Générer le lien</ds-button>
+                  </div>
+                } @else {
+                  <div class="ds-field dd-note">
+                    <label class="ds-field__label" for="dd-consent-url">Lien à envoyer au client</label>
+                    <div class="ds-field__wrap">
+                      <input id="dd-consent-url" class="ds-field__input" [value]="generatedLink.url" readonly data-testid="dd-consent-url" />
+                    </div>
+                  </div>
+                  <div class="dd-form-actions">
+                    <ds-button variant="ghost" size="sm" prefixIcon="copy" (dsClick)="copyConsentLink()">Copier</ds-button>
+                    <ds-button variant="marine" size="sm" prefixIcon="whatsapp" [loading]="sendingLink" (dsClick)="sendConsentLinkOnWhatsApp()">Envoyer par WhatsApp</ds-button>
+                  </div>
+                  <p class="dd-muted">L'envoi par WhatsApp suit les règles habituelles : accord « suivi du dossier » et client qui vous a écrit dans les dernières 24 h. Sinon, copiez le lien.</p>
+                }
+              </ds-card>
+            }
+
             @if (consentementsLoading) {
               <ds-skeleton variant="rect" width="100%" height="120px" [animate]="true"></ds-skeleton>
             } @else {
               <div class="dd-consent-grid" data-testid="dd-consents">
-                @for (g of consentementGroups; track g.channel) {
+                @for (ch of consentChannels; track ch) {
                   <ds-card [pad]="true" elevation="xs">
-                    <div class="dd-msg__meta">
-                      <strong>{{ getChannelLabel(g.channel) }}</strong>
-                      <ds-badge class="dd-push" [status]="consentBadge(g.current?.status)" size="sm">
-                        {{ g.current ? getConsentementStatusLabel(g.current.status) : 'Non renseigné' }}
-                      </ds-badge>
-                    </div>
-                    @if (g.current) {
-                      <p class="dd-muted">{{ consentTypeLabel(g.current.consentType) }} · mis à jour le {{ getConsentDate(g.current) }}</p>
+                    <strong>{{ getChannelLabel(ch) }}</strong>
+                    @for (p of consentPurposes; track p) {
+                      <div class="dd-consent-row">
+                        <span>{{ consentTypeLabel(p) }}</span>
+                        @if (latestConsent(ch, p); as c) {
+                          <ds-badge class="dd-push" [status]="p === 'MARKETING' && needsClientConfirmation(ch) ? 'warning' : consentBadge(c.status)" size="sm">
+                            {{ p === 'MARKETING' && needsClientConfirmation(ch) ? 'À confirmer' : getConsentementStatusLabel(c.status) }}
+                          </ds-badge>
+                        } @else {
+                          <ds-badge class="dd-push" status="neutral" size="sm">Non renseigné</ds-badge>
+                        }
+                      </div>
+                      @if (latestConsent(ch, p); as c) {
+                        <p class="dd-muted dd-consent-src">{{ consentSourceLabel(c) || 'mis à jour' }} · {{ getConsentDate(c) }}</p>
+                      }
                     }
                   </ds-card>
                 }
@@ -269,6 +342,9 @@
                         <span>{{ getChannelLabel(c.channel) }} · {{ consentTypeLabel(c.consentType) }}</span>
                         <span class="dd-muted dd-push">{{ formatDate(c.updatedAt) }}</span>
                       </div>
+                      @if (consentSourceLabel(c) || c.meta?.['note']) {
+                        <p class="dd-muted">{{ consentSourceLabel(c) }}@if (c.meta?.['note']) { — « {{ c.meta?.['note'] }} » }</p>
+                      }
                     </li>
                   }
                 </ul>

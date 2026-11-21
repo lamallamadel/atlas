@@ -59,6 +59,37 @@ public class ConsentementService {
         this.consentEventService = consentEventService;
     }
 
+    /** Accord recueilli par l'agent (oral, en agence, écrit...). */
+    public static final String SOURCE_AGENT = "AGENT";
+
+    /** Accord confirmé par le client lui-même via le lien de confirmation. */
+    public static final String SOURCE_CLIENT_LINK = "CLIENT_LINK";
+
+    private static final java.util.Set<String> CLIENT_PROOF_KEYS =
+            java.util.Set.of("optInTimestamp", "ipAddress", "doubleOptInConfirmed", "userAgent");
+
+    /**
+     * Saisie par l'agent : la preuve (qui, quand) est posée par le serveur, et les champs qui
+     * attestent une confirmation par le client (IP, double opt-in) sont retirés — seule la page de
+     * confirmation peut les renseigner.
+     */
+    static void stampAgentProof(Map<String, Object> meta, LocalDateTime now) {
+        CLIENT_PROOF_KEYS.forEach(meta::remove);
+        String user = TenantContext.getUserId();
+        if (user == null) {
+            org.springframework.security.core.Authentication auth =
+                    org.springframework.security.core.context.SecurityContextHolder.getContext()
+                            .getAuthentication();
+            user = auth != null ? auth.getName() : null;
+        }
+        meta.put("recordedBy", user != null ? user : "inconnu");
+        meta.put("recordedAt", now.toString());
+        Object method = meta.get("method");
+        if (method == null || String.valueOf(method).isBlank()) {
+            meta.put("method", "NON_PRECISE");
+        }
+    }
+
     @Transactional
     public ConsentementResponse create(ConsentementCreateRequest request) {
         String orgId = TenantContext.getOrgId();
@@ -95,6 +126,9 @@ public class ConsentementService {
         meta.put("previousStatus", null);
         meta.put("changedBy", orgId);
         meta.put("changedAt", now.toString());
+        if (SOURCE_AGENT.equals(meta.get("source"))) {
+            stampAgentProof(meta, now);
+        }
         consentement.setMeta(meta);
 
         ConsentementEntity saved = consentementRepository.save(consentement);

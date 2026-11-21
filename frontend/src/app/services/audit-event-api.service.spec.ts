@@ -313,7 +313,8 @@ describe('AuditEventApiService', () => {
 
     const req = httpMock.expectOne(request =>
       request.url === '/api/v1/audit-events' &&
-      request.params.get('entityId') === '123' &&
+      request.params.get('dossierId') === '123' &&
+      !request.params.has('entityId') &&
       request.params.get('page') === '0' &&
       request.params.get('size') === '10'
     );

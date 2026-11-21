@@ -4,6 +4,7 @@ import { RechercheComponent } from './recherche/recherche.component';
 import { AnnonceDetailComponent } from './annonce-detail/annonce-detail.component';
 import { MentionsLegalesComponent } from './mentions-legales/mentions-legales.component';
 import { ConfidentialiteComponent } from './confidentialite/confidentialite.component';
+import { ConsentementComponent } from './consentement/consentement.component';
 
 export const PORTAIL_ROUTES: Routes = [
   { path: '', component: PortailHomeComponent },
@@ -11,4 +12,5 @@ export const PORTAIL_ROUTES: Routes = [
   { path: 'annonces/:id', component: AnnonceDetailComponent },
   { path: 'mentions-legales', component: MentionsLegalesComponent },
   { path: 'confidentialite', component: ConfidentialiteComponent },
+  { path: 'consentement/:token', component: ConsentementComponent },
 ];
