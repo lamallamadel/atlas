@@ -13,6 +13,11 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+  # @DataJpaTest remplace sinon cette source par une base embarquée sans le domaine JSONB :
+  # V148 (JSONB en dur, déjà appliquée en production, donc non modifiable) y échouerait.
+  test:
+    database:
+      replace: none
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
