@@ -85,6 +85,19 @@ describe('AuthService', () => {
     expect(service.isAuthenticated()).toBe(true);
   });
 
+  it("prend l'agence du jeton (claim org_id) pour X-Org-Id", () => {
+    localStorage.setItem('org_id', 'ORG-001');
+    (service as any).syncOrgIdFromToken(buildJwt({ sub: 'u1', org_id: 'ORG-042' }));
+    expect(localStorage.getItem('org_id')).toBe('ORG-042');
+  });
+
+  it("garde l'agence locale si le jeton n'a pas de claim org_id", () => {
+    localStorage.setItem('org_id', 'ORG-001');
+    (service as any).syncOrgIdFromToken(buildJwt({ sub: 'u1' }));
+    (service as any).syncOrgIdFromToken('pas-un-jwt');
+    expect(localStorage.getItem('org_id')).toBe('ORG-001');
+  });
+
   it('logout should clear tokens and navigate to /login', () => {
     const token = buildJwt({
       sub: 'u1',

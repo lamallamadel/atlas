@@ -74,6 +74,7 @@ export class AuthService {
 
       if (this.oauthService.hasValidAccessToken()) {
         localStorage.setItem(this.AUTH_MODE_KEY, 'oidc');
+        this.syncOrgIdFromToken(this.oauthService.getAccessToken());
 
         // If we just handled the OIDC callback, navigate away from /auth/callback.
         if (typeof window !== 'undefined' && window.location.pathname.includes('/auth/callback')) {
@@ -238,6 +239,22 @@ export class AuthService {
       return payload.sub || null;
     } catch {
       return null;
+    }
+  }
+
+  /**
+   * L'agence de l'utilisateur vient du jeton (claim `org_id`, mapper Keycloak) : le backend refuse
+   * un X-Org-Id différent. Sans cette claim, on garde la valeur locale.
+   */
+  private syncOrgIdFromToken(token: string | null): void {
+    if (!token) return;
+    try {
+      const orgId = this.decodeToken(token)['org_id'];
+      if (typeof orgId === 'string' && orgId.trim()) {
+        localStorage.setItem('org_id', orgId.trim());
+      }
+    } catch {
+      // jeton illisible : on garde l'agence locale
     }
   }
 
