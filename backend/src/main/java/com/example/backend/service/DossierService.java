@@ -218,7 +218,7 @@ public class DossierService {
     }
 
     /**
-     * Liste filtrée. {@code leadSource} : égalité sans tenir compte de la casse ; {@code q} :
+     * Liste filtrée. {@code leadSource} : contient, sans tenir compte de la casse ; {@code q} :
      * recherche dans le nom ou le téléphone du prospect (contient, sans tenir compte de la casse).
      */
     @Transactional(readOnly = true)

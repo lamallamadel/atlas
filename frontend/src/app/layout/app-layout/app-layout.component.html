@@ -68,8 +68,8 @@
     <!-- Topbar -->
     <header class="ds-topbar" role="banner">
       <ds-button variant="icon" (dsClick)="toggleSidebar()" class="menu-button"
-        [ariaLabel]="sidebarOpen() ? 'Replier le menu' : 'Déplier le menu'">
-        <ds-icon [name]="sidebarOpen() ? 'chevron-left' : 'chevron-right'" [size]="20" aria-hidden="true"></ds-icon>
+        [ariaLabel]="menuExpanded() ? 'Replier le menu' : 'Déplier le menu'">
+        <ds-icon [name]="menuExpanded() ? 'chevron-left' : 'chevron-right'" [size]="20" aria-hidden="true"></ds-icon>
       </ds-button>
 
       <div class="toolbar-spacer"></div>

@@ -11,7 +11,8 @@ import { AnnonceApiService } from '../../services/annonce-api.service';
 import { FilterPresetService } from '../../services/filter-preset.service';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { vi } from 'vitest';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { LOCALE_ID } from '@angular/core';
@@ -264,5 +265,31 @@ describe('DossiersComponent', () => {
       fixture.detectChanges();
       expect(fixture.nativeElement.querySelector('[data-testid="dos-advanced-filters"]')).toBeTruthy();
     });
+
+    it("une réponse plus ancienne n'écrase pas la plus récente", () => {
+      const older = new Subject<any>();
+      const newer = new Subject<any>();
+      (dossierApiService.list as any).mockReturnValueOnce(older).mockReturnValueOnce(newer);
+      component.loadDossiers();
+      component.loadDossiers();
+      newer.next({ ...empty, content: [{ id: 2, leadName: 'salma' }] });
+      older.next({ ...empty, content: [{ id: 1, leadName: 'sal' }] });
+      expect(component.dossiers.map(d => d.id)).toEqual([2]);
+    });
+
+    it('Réinitialiser annule une source encore en attente', async () => {
+      component.onSourceFilterChange('whats');
+      component.resetAdvancedFilters();
+      await new Promise(r => setTimeout(r, 350));
+      expect(component.sourceFilter).toBe('');
+      expect(component.appliedFilters).toEqual([]);
+    });
+  });
+
+  it('un lien ?source= affiche la puce Source', () => {
+    TestBed.inject(ActivatedRoute).queryParams = of({ source: 'WhatsApp' }) as any;
+    dossierApiService.list.and.returnValue(of({ content: [], last: true } as any));
+    component.ngOnInit();
+    expect(component.appliedFilters).toEqual([expect.objectContaining({ key: 'sourceFilter', value: 'WhatsApp' })]);
   });
 });

@@ -1,4 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -16,8 +17,8 @@ import { LeadExportDialogComponent } from '../../components/lead-export-dialog.c
 import { ExportService } from '../../services/export.service';
 import { DossierFilterApiService } from '../../services/dossier-filter-api.service';
 import { MobileAction, MobileActionSheetComponent } from '../../components/mobile-action-sheet.component';
-import { Observable, Subject } from 'rxjs';
-import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { Observable, Subject, of, timer } from 'rxjs';
+import { catchError, debounceTime, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
 import { KanbanBoardComponent } from '../../components/kanban-board.component';
 import { 
   PageHeaderComponent, 
@@ -84,6 +85,10 @@ export class DossiersComponent implements OnInit {
   private exportService = inject(ExportService);
   private dossierFilterApi = inject(DossierFilterApiService);
   private toastService = inject(DsToastService);
+  private destroyRef = inject(DestroyRef);
+
+  /** Chaque rechargement annule la requête précédente : seule la dernière réponse s'affiche. */
+  private reload$ = new Subject<void>();
 
   dossiers: DossierResponse[] = [];
   page: Page<DossierResponse> | null = null;
@@ -141,49 +146,69 @@ export class DossiersComponent implements OnInit {
     { icon: 'trash', label: 'Supprimer', action: 'delete', ariaLabel: 'Supprimer le dossier' }
   ];
 
+  constructor() {
+    this.reload$.pipe(
+      switchMap(() => this.dossierApiService.list({
+        page: this.currentPage,
+        size: this.pageSize,
+        status: this.selectedStatus || undefined,
+        leadPhone: this.phoneFilter.trim() || undefined,
+        leadSource: this.sourceFilter.trim() || undefined,
+        annonceId: this.selectedAnnonceId || undefined,
+        q: this.searchQuery.trim() || undefined
+      }).pipe(
+        map(response => ({ response: response as Page<DossierResponse> | null })),
+        catchError(() => of({ response: null as Page<DossierResponse> | null }))
+      )),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(({ response }) => {
+      this.loading = false;
+      if (response) {
+        this.page = response;
+        this.dossiers = response.content;
+      } else {
+        this.error = 'Échec du chargement des dossiers';
+        this.toastService.error(this.error);
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.setupAnnonceAutocomplete();
-    this.searchInput$.pipe(debounceTime(300)).subscribe(q => {
+    this.searchInput$.pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef)).subscribe(q => {
       this.searchQuery = q;
       this.reloadFromFirstPage();
     });
-    this.sourceInput$.pipe(debounceTime(300)).subscribe(source => {
+    // Annulable : Réinitialiser / retirer la puce pendant les 300 ms ne doit pas remettre la source.
+    this.sourceInput$.pipe(
+      switchMap(source => timer(300).pipe(map(() => source), takeUntil(this.cancelSource$))),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(source => {
       this.sourceFilter = source;
       this.refreshAppliedFilters();
       this.reloadFromFirstPage();
     });
+    this.annonceSearch$.pipe(
+      debounceTime(300),
+      switchMap(term => this.annonceApiService.list({ q: term || undefined, size: 50, sort: 'updatedAt,desc' }).pipe(
+        catchError(() => of(null))
+      )),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(page => { if (page) this.setAnnonceOptions(page.content); });
     this.breakpointObserver.observe([Breakpoints.Handset])
       .subscribe(result => { this.isMobile = result.matches; });
 
     this.route.queryParams.subscribe(params => {
       if (params['status']) this.selectedStatus = params['status'] as DossierStatus;
       if (params['source']) this.sourceFilter = params['source'];
+      this.refreshAppliedFilters();
       this.loadDossiers();
     });
   }
 
   loadDossiers(): void {
     this.loading = true;
-    this.dossierApiService.list({
-      page: this.currentPage,
-      size: this.pageSize,
-      status: this.selectedStatus || undefined,
-      leadPhone: this.phoneFilter.trim() || undefined,
-      leadSource: this.sourceFilter.trim() || undefined,
-      annonceId: this.selectedAnnonceId || undefined,
-      q: this.searchQuery.trim() || undefined
-    }).subscribe({
-      next: (response) => {
-        this.page = response;
-        this.dossiers = response.content;
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Échec du chargement des dossiers';
-        this.loading = false;
-        this.toastService.error(this.error!);
-      }
-    });
+    this.reload$.next();
   }
 
   onStatusFilterChange(status: any): void {
@@ -205,19 +230,31 @@ export class DossiersComponent implements OnInit {
 
   annonceOptions: DsSelectOption[] = [{ value: '', label: 'Toutes les annonces' }];
   annonceFilterValue = '';
+  annonceSearchTerm = '';
   private searchInput$ = new Subject<string>();
   private sourceInput$ = new Subject<string>();
+  private cancelSource$ = new Subject<void>();
+  private annonceSearch$ = new Subject<string>();
 
+  /** 50 annonces les plus récentes ; « Rechercher une annonce » interroge le serveur pour les autres. */
   private loadAnnonceOptions(): void {
-    this.annonceApiService.list({ size: 100, sort: 'updatedAt,desc' }).subscribe({
-      next: (page) => {
-        this.annonceOptions = [
-          { value: '', label: 'Toutes les annonces' },
-          ...page.content.map(a => ({ value: String(a.id), label: `${a.title || 'Sans titre'}${a.city ? ' — ' + a.city : ''}` })),
-        ];
-      },
-      error: () => { /* la liste reste « Toutes les annonces » */ }
-    });
+    this.annonceSearch$.next('');
+  }
+
+  onAnnonceSearchChange(term: string): void {
+    this.annonceSearchTerm = term ?? '';
+    this.annonceSearch$.next(this.annonceSearchTerm.trim());
+  }
+
+  private setAnnonceOptions(annonces: AnnonceResponse[]): void {
+    const options: DsSelectOption[] = annonces.map(a => ({
+      value: String(a.id),
+      label: `${a.title || 'Sans titre'}${a.city ? ' — ' + a.city : ''}`
+    }));
+    // L'annonce sélectionnée reste dans la liste même si la recherche ne la renvoie pas.
+    const selected = this.annonceOptions.find(o => o.value && o.value === this.annonceFilterValue);
+    if (selected && !options.some(o => o.value === selected.value)) options.unshift(selected);
+    this.annonceOptions = [{ value: '', label: 'Toutes les annonces' }, ...options];
   }
 
   onAnnonceFilterChange(value: string): void {
@@ -231,7 +268,12 @@ export class DossiersComponent implements OnInit {
     this.sourceInput$.next(value ?? '');
   }
 
+  private cancelPendingSource(): void {
+    this.cancelSource$.next();
+  }
+
   resetAdvancedFilters(): void {
+    this.cancelPendingSource();
     this.annonceFilterValue = '';
     this.selectedAnnonceId = null;
     this.sourceFilter = '';
@@ -363,12 +405,13 @@ export class DossiersComponent implements OnInit {
     switch (filter.key) {
       case 'selectedStatus': this.selectedStatus = ''; break;
       case 'phoneFilter': this.phoneFilter = ''; break;
-      case 'sourceFilter': this.sourceFilter = ''; break;
+      case 'sourceFilter': this.cancelPendingSource(); this.sourceFilter = ''; break;
       case 'selectedAnnonceId': this.selectedAnnonceId = null; this.annonceFilterValue = ''; break;
     }
     this.loadDossiers();
   }
   clearFilters(): void {
+    this.cancelPendingSource();
     this.appliedFilters = [];
     this.selectedStatus = '';
     this.phoneFilter = '';

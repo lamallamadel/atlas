@@ -59,6 +59,12 @@
       @if (filterPanelExpanded) {
         <ds-card class="dos-advanced-filters" [pad]="true" elevation="xs" data-testid="dos-advanced-filters">
           <div class="dos-adv-row">
+            <ds-input
+              label="Rechercher une annonce"
+              [ngModel]="annonceSearchTerm"
+              (ngModelChange)="onAnnonceSearchChange($event)"
+              placeholder="Titre, ville…">
+            </ds-input>
             <ds-select
               label="Annonce"
               [options]="annonceOptions"

@@ -7,9 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
-import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.DossierStatus;
-import com.example.backend.repository.DossierRepository;
+import com.example.backend.utils.BackendE2ETestDataBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +23,17 @@ class DossierListFilterBackendE2ETest extends BaseBackendE2ETest {
 
     private static final String ORG1 = "ORG1";
 
-    @Autowired private DossierRepository dossierRepository;
+    @Autowired private BackendE2ETestDataBuilder testDataBuilder;
 
     private void dossier(String name, String phone, String source, String org) {
-        Dossier d = new Dossier();
-        d.setOrgId(org);
-        d.setLeadName(name);
-        d.setLeadPhone(phone);
-        d.setLeadSource(source);
-        d.setStatus(DossierStatus.NEW);
-        dossierRepository.save(d);
+        testDataBuilder
+                .dossierBuilder()
+                .withOrgId(org)
+                .withLeadName(name)
+                .withLeadPhone(phone)
+                .withLeadSource(source)
+                .withStatus(DossierStatus.NEW)
+                .persist();
     }
 
     @BeforeEach

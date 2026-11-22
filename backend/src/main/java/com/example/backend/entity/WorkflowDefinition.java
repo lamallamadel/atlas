@@ -12,7 +12,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "workflow_definition")
-@Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+// Les modèles partagés (org_id = SYSTEM) restent visibles de toutes les agences.
+@Filter(name = "orgIdFilter", condition = "(org_id = :orgId OR org_id = 'SYSTEM')")
 @EntityListeners(AuditingEntityListener.class)
 public class WorkflowDefinition extends BaseEntity {
 

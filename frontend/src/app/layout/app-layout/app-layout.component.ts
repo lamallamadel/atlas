@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, computed, inject, signal } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import { AuthService } from '../../services/auth.service';
@@ -66,6 +66,9 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
 
   sidebarOpen = signal(true);
   mobileSidebarOpen = signal(false);
+  private isHandset = signal(false);
+  /** État que le bouton du menu bascule réellement : tiroir sur mobile, barre latérale sinon. */
+  menuExpanded = computed(() => this.isHandset() ? this.mobileSidebarOpen() : this.sidebarOpen());
 
   helpPanelOpen = false;
   notificationMenuOpen = false;
@@ -114,6 +117,7 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscriptions.add(
       this.isHandset$.subscribe(isHandset => {
+        this.isHandset.set(isHandset);
         this.sidebarOpen.set(!isHandset);
         if (!isHandset) {
           this.mobileSidebarOpen.set(false);
