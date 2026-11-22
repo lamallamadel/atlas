@@ -68,6 +68,30 @@ class TenantFilterScopeBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
+    void un_jeton_d_une_agence_ne_peut_pas_viser_une_autre_agence() throws Exception {
+        mockMvc.perform(
+                        get("/api/v1/dossiers")
+                                .header("X-Org-Id", "ORG2")
+                                .with(jwtWithRoles("ORG1", "PRO")))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(
+                        get("/api/v1/dossiers")
+                                .header("X-Org-Id", "ORG1")
+                                .with(jwtWithRoles("ORG1", "PRO")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void un_super_admin_peut_viser_une_autre_agence() throws Exception {
+        mockMvc.perform(
+                        get("/api/v1/dossiers")
+                                .header("X-Org-Id", "ORG2")
+                                .with(jwtWithRoles("ORG1", "ADMIN", "SUPER_ADMIN")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void les_modeles_systeme_restent_visibles_des_agences() throws Exception {
         templateLibraryService.seedSystemTemplates();
 

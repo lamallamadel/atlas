@@ -8,6 +8,9 @@ import java.io.IOException;
 import org.hibernate.Filter;
 import org.hibernate.Session;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -23,6 +26,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
  *
  * <p>Avec une clé d'API ({@code /api/public/v1}), l'agence est celle de la clé, jamais l'en-tête
  * {@code X-Org-Id} : un en-tête différent est refusé (403).
+ *
+ * <p>Avec un jeton JWT qui porte {@code org_id}, l'en-tête doit lui correspondre (403 sinon), sauf
+ * pour un SUPER_ADMIN.
  */
 @Component
 public class HibernateFilterInterceptor implements HandlerInterceptor {
@@ -31,6 +37,8 @@ public class HibernateFilterInterceptor implements HandlerInterceptor {
     static final String API_KEY_ORG_ATTRIBUTE = "orgId";
 
     private static final String PORTAL_PREFIX = "/api/v1/portal/";
+    private static final String ORG_ID_CLAIM = "org_id";
+    private static final String SUPER_ADMIN_AUTHORITY = "ROLE_SUPER_ADMIN";
 
     // Absent dans les tests en tranche web (@WebMvcTest) : l'intercepteur ne fait alors rien.
     private final ObjectProvider<EntityManager> entityManagerProvider;
@@ -60,6 +68,11 @@ public class HibernateFilterInterceptor implements HandlerInterceptor {
             }
             orgId = apiKeyOrgId;
             TenantContext.setOrgId(orgId);
+        } else if (orgId != null && !orgId.isBlank() && !headerMatchesToken(orgId)) {
+            response.sendError(
+                    HttpServletResponse.SC_FORBIDDEN,
+                    "X-Org-Id does not match the token organization");
+            return false;
         }
 
         if (orgId == null || orgId.isBlank()) {
@@ -75,6 +88,23 @@ public class HibernateFilterInterceptor implements HandlerInterceptor {
         filter.setParameter("orgId", orgId);
 
         return true;
+    }
+
+    /**
+     * Un jeton qui porte une agence ({@code org_id}) doit correspondre à l'en-tête. Sans cette
+     * claim, ou pour un SUPER_ADMIN (qui agit sur plusieurs agences), on ne contrôle rien.
+     */
+    private static boolean headerMatchesToken(String headerOrgId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!(auth instanceof JwtAuthenticationToken jwtAuth)) {
+            return true;
+        }
+        String tokenOrgId = jwtAuth.getToken().getClaimAsString(ORG_ID_CLAIM);
+        if (tokenOrgId == null || tokenOrgId.isBlank() || tokenOrgId.equals(headerOrgId)) {
+            return true;
+        }
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> SUPER_ADMIN_AUTHORITY.equals(a.getAuthority()));
     }
 
     @Override
