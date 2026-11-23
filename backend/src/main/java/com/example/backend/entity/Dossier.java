@@ -2,6 +2,7 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
+import com.example.backend.workflow.DossierStatusCodes;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -144,8 +145,29 @@ public class Dossier extends BaseEntity {
         return status;
     }
 
+    /**
+     * Met à jour le statut et, pendant la migration ADR 0004, le {@code status_code} correspondant
+     * de la nomenclature. Un code explicite peut être posé ensuite par {@link #setStatusCode}.
+     */
     public void setStatus(DossierStatus status) {
         this.status = status;
+        if (status != null) {
+            this.statusCode = DossierStatusCodes.toCode(status);
+        }
+    }
+
+    /** Type par défaut et code de statut cohérents avant écriture (ADR 0004, phase A). */
+    @PrePersist
+    @PreUpdate
+    void applyWorkflowDefaults() {
+        if (caseType == null || caseType.isBlank()) {
+            caseType = DossierStatusCodes.DEFAULT_CASE_TYPE;
+        }
+        if (statusCode == null || statusCode.isBlank()) {
+            statusCode = DossierStatusCodes.toCode(status);
+        } else {
+            statusCode = DossierStatusCodes.normalize(statusCode);
+        }
     }
 
     public Integer getScore() {

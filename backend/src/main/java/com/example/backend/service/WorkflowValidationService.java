@@ -10,6 +10,9 @@ import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.WorkflowDefinitionRepository;
 import com.example.backend.repository.WorkflowTransitionRepository;
 import com.example.backend.util.TenantContext;
+import com.example.backend.workflow.DossierStatusCodes;
+import com.example.backend.workflow.DossierWorkflow;
+import com.example.backend.workflow.DossierWorkflowResolver;
 import java.time.LocalDateTime;
 import java.util.*;
 import org.springframework.security.core.Authentication;
@@ -19,23 +22,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Validates dossier status transitions against custom workflow rules defined per case type.
+ * Valide les transitions de statut d'un dossier contre le workflow de son type (ADR 0004).
  *
- * <p>TWO-TIER VALIDATION ARCHITECTURE:
+ * <p>Le workflow vient de la définition publiée et active de l'organisation, sinon du modèle
+ * système ({@link com.example.backend.workflow.DossierWorkflowCatalog}). Un dossier sans type est
+ * traité comme {@code CRM_LEAD}. Les statuts reçus sous forme de noms d'enum ({@code NEW}, …) sont
+ * ramenés aux codes de la nomenclature ({@code CRM_NEW}, …).
  *
- * <p>1. BASIC VALIDATION (DossierStatusTransitionService) - ALWAYS APPLIED - Enforces terminal
- * states (WON, LOST cannot transition) - Validates allowed transitions (e.g., NEW can go to
- * QUALIFYING, QUALIFIED, APPOINTMENT, LOST) - Applied to ALL dossiers regardless of caseType
- *
- * <p>2. WORKFLOW VALIDATION (This Service) - CONDITIONAL - Only applied when dossier.caseType is
- * set (not null/blank) - Enforces custom rules per case type (e.g., "SALE", "RENTAL") - Can require
- * specific fields, validate conditions, or impose stricter transitions - Records all transition
- * attempts in workflow_transition table for audit - Enforces role-based authorization for
- * transitions - Validates pre-conditions (e.g., appointments) before allowing transitions
- *
- * <p>BYPASS MECHANISM: When caseType is null or blank, this validation is skipped, allowing: -
- * Generic dossiers without workflow constraints - Legacy data migration without workflow setup -
- * Flexible transitions that only need basic validation
+ * <p>La validation de base ({@link DossierStatusTransitionService}) reste appliquée en amont
+ * pendant la migration. Chaque tentative est enregistrée dans {@code workflow_transition}.
  */
 @Service
 public class WorkflowValidationService {
@@ -44,16 +39,19 @@ public class WorkflowValidationService {
     private final WorkflowTransitionRepository workflowTransitionRepository;
     private final AppointmentRepository appointmentRepository;
     private final DossierStatusTransitionService dossierStatusTransitionService;
+    private final DossierWorkflowResolver workflowResolver;
 
     public WorkflowValidationService(
             WorkflowDefinitionRepository workflowDefinitionRepository,
             WorkflowTransitionRepository workflowTransitionRepository,
             AppointmentRepository appointmentRepository,
-            DossierStatusTransitionService dossierStatusTransitionService) {
+            DossierStatusTransitionService dossierStatusTransitionService,
+            DossierWorkflowResolver workflowResolver) {
         this.workflowDefinitionRepository = workflowDefinitionRepository;
         this.workflowTransitionRepository = workflowTransitionRepository;
         this.appointmentRepository = appointmentRepository;
         this.dossierStatusTransitionService = dossierStatusTransitionService;
+        this.workflowResolver = workflowResolver;
     }
 
     @Transactional
@@ -64,65 +62,63 @@ public class WorkflowValidationService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        String caseType = dossier.getCaseType();
+        String caseType = DossierStatusCodes.effectiveCaseType(dossier.getCaseType());
+        String from = DossierStatusCodes.normalize(fromStatus);
+        String to = DossierStatusCodes.normalize(toStatus);
 
         WorkflowTransition transition = new WorkflowTransition();
         transition.setOrgId(orgId);
         transition.setDossierId(dossier.getId());
         transition.setCaseType(caseType);
-        transition.setFromStatus(fromStatus);
-        transition.setToStatus(toStatus);
+        transition.setFromStatus(from);
+        transition.setToStatus(to);
         transition.setUserId(userId);
         transition.setReason(reason);
         transition.setTransitionedAt(LocalDateTime.now());
 
-        if (caseType == null || caseType.isBlank()) {
-            transition.setIsAllowed(true);
-            transition.setValidationErrorsJson(null);
-            workflowTransitionRepository.save(transition);
-            return;
+        Optional<DossierWorkflow> resolved = workflowResolver.resolve(orgId, caseType);
+        if (resolved.isEmpty()) {
+            Map<String, Object> errors = new HashMap<>();
+            errors.put(
+                    "transition",
+                    String.format("No workflow is defined for case type %s", caseType));
+            errors.put(
+                    "actionableMessage",
+                    String.format(
+                            "Aucun workflow n'est publié pour le type de dossier '%s'. "
+                                    + "Publiez-en un dans l'administration des workflows.",
+                            caseType));
+            reject(transition, errors, from, to, caseType);
         }
+        DossierWorkflow workflow = resolved.get();
 
-        Optional<WorkflowDefinition> workflowDef =
-                workflowDefinitionRepository.findActiveTransition(
-                        orgId, caseType, fromStatus, toStatus);
-
-        if (workflowDef.isEmpty()) {
+        Optional<DossierWorkflow.Transition> rule = workflow.transition(from, to);
+        if (rule.isEmpty()) {
+            List<String> allowed = workflow.targetsFrom(from);
             Map<String, Object> errors = new HashMap<>();
             errors.put(
                     "transition",
                     String.format(
                             "Transition from %s to %s is not allowed for case type %s",
-                            fromStatus, toStatus, caseType));
-            errors.put("allowedTransitions", getAllowedTransitions(orgId, caseType, fromStatus));
+                            from, to, caseType));
+            errors.put("allowedTransitions", allowed);
             errors.put(
                     "actionableMessage",
                     String.format(
                             "The status transition from '%s' to '%s' is not configured in your workflow. "
                                     + "Please configure this transition in the workflow definition or choose from the allowed transitions: %s",
-                            fromStatus,
-                            toStatus,
-                            String.join(", ", getAllowedTransitions(orgId, caseType, fromStatus))));
-
-            transition.setIsAllowed(false);
-            transition.setValidationErrorsJson(errors);
-            workflowTransitionRepository.save(transition);
-
-            throw new WorkflowValidationException(
-                    String.format(
-                            "Invalid workflow transition from %s to %s for case type %s",
-                            fromStatus, toStatus, caseType),
-                    errors);
+                            from, to, String.join(", ", allowed)));
+            reject(transition, errors, from, to, caseType);
         }
 
-        WorkflowDefinition definition = workflowDef.get();
+        WorkflowDefinition definition = workflow.definition().orElseGet(WorkflowDefinition::new);
         Map<String, Object> validationErrors = new HashMap<>();
 
-        validateRequiredFields(dossier, definition, toStatus, validationErrors);
+        validateRequiredFields(dossier, definition, rule.get(), validationErrors);
 
-        validateRoleBasedAuthorization(toStatus, validationErrors);
+        validateRoleBasedAuthorization(to, rule.get(), validationErrors);
 
-        validatePreConditions(dossier, definition, toStatus, validationErrors);
+        validatePreConditions(dossier, definition, to, validationErrors);
 
         validateCustomConditions(dossier, definition, validationErrors);
 
@@ -133,8 +129,7 @@ public class WorkflowValidationService {
 
             throw new WorkflowValidationException(
                     String.format(
-                            "Workflow validation failed for transition from %s to %s",
-                            fromStatus, toStatus),
+                            "Workflow validation failed for transition from %s to %s", from, to),
                     validationErrors);
         }
 
@@ -143,33 +138,43 @@ public class WorkflowValidationService {
         workflowTransitionRepository.save(transition);
     }
 
+    private void reject(
+            WorkflowTransition transition,
+            Map<String, Object> errors,
+            String from,
+            String to,
+            String caseType) {
+        transition.setIsAllowed(false);
+        transition.setValidationErrorsJson(errors);
+        workflowTransitionRepository.save(transition);
+        throw new WorkflowValidationException(
+                String.format(
+                        "Invalid workflow transition from %s to %s for case type %s",
+                        from, to, caseType),
+                errors);
+    }
+
+    /**
+     * Champs exigés par la transition ({@code requiredFields}) et par la définition ({@code
+     * metadata_json.requiredFields}). Les raisons de clôture ne sont plus imposées en dur : elles
+     * le sont par le workflow (ADR 0004).
+     */
     private void validateRequiredFields(
             Dossier dossier,
             WorkflowDefinition definition,
-            String toStatus,
+            DossierWorkflow.Transition rule,
             Map<String, Object> errors) {
         List<String> missingFields = new ArrayList<>();
         List<String> actionableMessages = new ArrayList<>();
 
-        boolean isTerminalState =
-                "LOST".equalsIgnoreCase(toStatus) || "WON".equalsIgnoreCase(toStatus);
-
-        if (isTerminalState && "LOST".equalsIgnoreCase(toStatus)) {
-            if (dossier.getLossReason() == null || dossier.getLossReason().isBlank()) {
-                missingFields.add("lossReason");
+        for (String fieldName : rule.requiredFields()) {
+            Object fieldValue = getFieldValue(dossier, fieldName);
+            if (isBlankValue(fieldValue)) {
+                missingFields.add(fieldName);
                 actionableMessages.add(
-                        "Loss reason is required when marking a dossier as LOST. "
-                                + "Please provide a reason such as 'Client not interested', 'Budget constraints', "
-                                + "'Competitor chosen', etc.");
-            }
-        }
-
-        if (isTerminalState && "WON".equalsIgnoreCase(toStatus)) {
-            if (dossier.getWonReason() == null || dossier.getWonReason().isBlank()) {
-                missingFields.add("wonReason");
-                actionableMessages.add(
-                        "Won reason is required when marking a dossier as WON. "
-                                + "Please provide a reason such as 'Deal closed', 'Contract signed', etc.");
+                        String.format(
+                                "Field '%s' is required for this transition. Please provide a valid value.",
+                                fieldName));
             }
         }
 
@@ -177,12 +182,9 @@ public class WorkflowValidationService {
         if (requiredFields != null && !requiredFields.isEmpty()) {
             for (Map.Entry<String, Object> entry : requiredFields.entrySet()) {
                 String fieldName = entry.getKey();
-                Boolean isRequired = (Boolean) entry.getValue();
-
-                if (Boolean.TRUE.equals(isRequired)) {
+                if (Boolean.TRUE.equals(entry.getValue()) && !missingFields.contains(fieldName)) {
                     Object fieldValue = getFieldValue(dossier, fieldName);
-                    if (fieldValue == null
-                            || (fieldValue instanceof String && ((String) fieldValue).isBlank())) {
+                    if (isBlankValue(fieldValue)) {
                         missingFields.add(fieldName);
                         actionableMessages.add(
                                 String.format(
@@ -199,38 +201,52 @@ public class WorkflowValidationService {
         }
     }
 
-    private void validateRoleBasedAuthorization(String toStatus, Map<String, Object> errors) {
-        if ("CRM_QUALIFIED".equalsIgnoreCase(toStatus)) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                errors.put("roleAuthorizationError", "Authentication required for this transition");
-                errors.put(
-                        "roleActionableMessage",
-                        "You must be authenticated to perform this transition. Please log in and try again.");
-                return;
-            }
+    private static boolean isBlankValue(Object value) {
+        return value == null || (value instanceof String str && str.isBlank());
+    }
 
-            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-            boolean hasAgentRole =
-                    authorities.stream()
-                            .anyMatch(
-                                    auth ->
-                                            auth.getAuthority().equalsIgnoreCase("ROLE_AGENT")
-                                                    || auth.getAuthority()
-                                                            .equalsIgnoreCase("AGENT"));
+    /** Rôles autorisés déclarés par la transition ; aucun rôle déclaré = pas de restriction. */
+    private void validateRoleBasedAuthorization(
+            String toStatus, DossierWorkflow.Transition rule, Map<String, Object> errors) {
+        if (rule.allowedRoles().isEmpty()) {
+            return;
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            errors.put("roleAuthorizationError", "Authentication required for this transition");
+            errors.put(
+                    "roleActionableMessage",
+                    "You must be authenticated to perform this transition. Please log in and try again.");
+            return;
+        }
 
-            if (!hasAgentRole) {
-                errors.put(
-                        "roleAuthorizationError",
-                        String.format("Transition to %s requires AGENT role", toStatus));
-                errors.put(
-                        "roleActionableMessage",
-                        String.format(
-                                "Only users with the AGENT role can move dossiers to '%s' status. "
-                                        + "Your current roles are: %s. Please contact your administrator to request the appropriate role.",
-                                toStatus,
-                                authorities.stream().map(GrantedAuthority::getAuthority).toList()));
-            }
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        boolean allowed =
+                authorities.stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .anyMatch(
+                                auth ->
+                                        rule.allowedRoles().stream()
+                                                .anyMatch(
+                                                        role ->
+                                                                auth.equalsIgnoreCase(role)
+                                                                        || auth.equalsIgnoreCase(
+                                                                                "ROLE_" + role)));
+
+        if (!allowed) {
+            errors.put(
+                    "roleAuthorizationError",
+                    String.format(
+                            "Transition to %s requires one of the roles %s",
+                            toStatus, rule.allowedRoles()));
+            errors.put(
+                    "roleActionableMessage",
+                    String.format(
+                            "Only users with one of the roles %s can move dossiers to '%s' status. "
+                                    + "Your current roles are: %s. Please contact your administrator to request the appropriate role.",
+                            rule.allowedRoles(),
+                            toStatus,
+                            authorities.stream().map(GrantedAuthority::getAuthority).toList()));
         }
     }
 
@@ -411,13 +427,6 @@ public class WorkflowValidationService {
         }
     }
 
-    private List<String> getAllowedTransitions(String orgId, String caseType, String fromStatus) {
-        List<WorkflowDefinition> allowed =
-                workflowDefinitionRepository.findAllowedTransitionsFrom(
-                        orgId, caseType, fromStatus);
-        return allowed.stream().map(WorkflowDefinition::getToStatus).toList();
-    }
-
     private boolean evaluateCondition(Object actualValue, String operator, Object expectedValue) {
         switch (operator) {
             case "equals":
@@ -477,17 +486,17 @@ public class WorkflowValidationService {
         };
     }
 
+    /** Statuts atteignables depuis {@code currentStatus} pour ce type de dossier (codes). */
     public List<String> getAllowedNextStatuses(String caseType, String currentStatus) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
-
-        if (caseType == null || caseType.isBlank()) {
-            return Collections.emptyList();
-        }
-
-        return getAllowedTransitions(orgId, caseType, currentStatus);
+        String from = DossierStatusCodes.normalize(currentStatus);
+        return workflowResolver
+                .resolve(orgId, caseType)
+                .map(w -> w.targetsFrom(from))
+                .orElse(Collections.emptyList());
     }
 
     public Map<String, Object> checkTransitionValidity(
@@ -497,34 +506,33 @@ public class WorkflowValidationService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        String caseType = dossier.getCaseType();
+        String caseType = DossierStatusCodes.effectiveCaseType(dossier.getCaseType());
+        String from = DossierStatusCodes.normalize(fromStatus);
+        String to = DossierStatusCodes.normalize(toStatus);
         Map<String, Object> result = new HashMap<>();
         result.put("isValid", true);
 
-        if (caseType == null || caseType.isBlank()) {
-            result.put("reason", "No workflow validation (caseType not set)");
-            return result;
-        }
-
-        Optional<WorkflowDefinition> workflowDef =
-                workflowDefinitionRepository.findActiveTransition(
-                        orgId, caseType, fromStatus, toStatus);
-
-        if (workflowDef.isEmpty()) {
+        Optional<DossierWorkflow> resolved = workflowResolver.resolve(orgId, caseType);
+        if (resolved.isEmpty()) {
             result.put("isValid", false);
-            result.put(
-                    "error",
-                    String.format("Transition from %s to %s is not allowed", fromStatus, toStatus));
-            result.put("allowedTransitions", getAllowedTransitions(orgId, caseType, fromStatus));
+            result.put("error", String.format("No workflow is defined for case type %s", caseType));
+            return result;
+        }
+        DossierWorkflow workflow = resolved.get();
+        Optional<DossierWorkflow.Transition> rule = workflow.transition(from, to);
+        if (rule.isEmpty()) {
+            result.put("isValid", false);
+            result.put("error", String.format("Transition from %s to %s is not allowed", from, to));
+            result.put("allowedTransitions", workflow.targetsFrom(from));
             return result;
         }
 
-        WorkflowDefinition definition = workflowDef.get();
+        WorkflowDefinition definition = workflow.definition().orElseGet(WorkflowDefinition::new);
         Map<String, Object> validationErrors = new HashMap<>();
 
-        validateRequiredFields(dossier, definition, toStatus, validationErrors);
-        validateRoleBasedAuthorization(toStatus, validationErrors);
-        validatePreConditions(dossier, definition, toStatus, validationErrors);
+        validateRequiredFields(dossier, definition, rule.get(), validationErrors);
+        validateRoleBasedAuthorization(to, rule.get(), validationErrors);
+        validatePreConditions(dossier, definition, to, validationErrors);
         validateCustomConditions(dossier, definition, validationErrors);
 
         if (!validationErrors.isEmpty()) {

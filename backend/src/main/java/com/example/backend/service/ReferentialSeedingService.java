@@ -4,6 +4,7 @@ import com.example.backend.entity.ReferentialEntity;
 import com.example.backend.repository.ReferentialRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReferentialSeedingService {
+
+    /** Organisation fictive des référentiels système renvoyés par {@link #findSystemDefault}. */
+    public static final String SYSTEM_ORG = "SYSTEM";
 
     private static final Logger log = LoggerFactory.getLogger(ReferentialSeedingService.class);
 
@@ -41,6 +45,26 @@ public class ReferentialSeedingService {
         referentialRepository.saveAll(referentials);
 
         log.info("Seeded {} referentials for organization: {}", referentials.size(), orgId);
+    }
+
+    /**
+     * Référentiel système par défaut pour une catégorie et un code, sans dépendre d'un semis pour
+     * l'organisation (ADR 0004). L'entité renvoyée n'est pas persistée.
+     */
+    public Optional<ReferentialEntity> findSystemDefault(String category, String code) {
+        if (category == null || code == null) {
+            return Optional.empty();
+        }
+        List<ReferentialEntity> defaults =
+                switch (category) {
+                    case "CASE_TYPE" -> createCaseTypeReferentials(SYSTEM_ORG);
+                    case "CASE_STATUS" -> createCaseStatusReferentials(SYSTEM_ORG);
+                    case "LEAD_SOURCE" -> createLeadSourceReferentials(SYSTEM_ORG);
+                    case "LOSS_REASON" -> createLossReasonReferentials(SYSTEM_ORG);
+                    case "WON_REASON" -> createWonReasonReferentials(SYSTEM_ORG);
+                    default -> List.of();
+                };
+        return defaults.stream().filter(r -> code.equals(r.getCode())).findFirst();
     }
 
     private List<ReferentialEntity> createCaseTypeReferentials(String orgId) {
@@ -96,6 +120,26 @@ public class ReferentialSeedingService {
                         5,
                         true,
                         true));
+        referentials.add(
+                createReferential(
+                        orgId,
+                        "CASE_TYPE",
+                        "CRM_LEAD",
+                        "Prospect",
+                        "Generic lead (default case type, ADR 0004)",
+                        0,
+                        true,
+                        true));
+        referentials.add(
+                createReferential(
+                        orgId,
+                        "CASE_TYPE",
+                        "CRM_LEAD_B2B_DEMO",
+                        "Demande de démo (B2B)",
+                        "Demo request from the corporate site",
+                        6,
+                        true,
+                        true));
 
         return referentials;
     }
@@ -136,6 +180,16 @@ public class ReferentialSeedingService {
                         "CRM_QUALIFIED",
                         "Qualifié",
                         "Qualified",
+                        5,
+                        true,
+                        true));
+        referentials.add(
+                createReferential(
+                        orgId,
+                        "CASE_STATUS",
+                        "CRM_QUALIFYING",
+                        "En qualification",
+                        "Qualification in progress",
                         5,
                         true,
                         true));

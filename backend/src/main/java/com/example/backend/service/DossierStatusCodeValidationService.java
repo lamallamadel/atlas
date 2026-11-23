@@ -1,11 +1,13 @@
 package com.example.backend.service;
 
 import com.example.backend.entity.ReferentialEntity;
-import com.example.backend.entity.WorkflowDefinition;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.ReferentialRepository;
 import com.example.backend.repository.WorkflowDefinitionRepository;
 import com.example.backend.util.TenantContext;
+import com.example.backend.workflow.DossierStatusCodes;
+import com.example.backend.workflow.DossierWorkflow;
+import com.example.backend.workflow.DossierWorkflowResolver;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,16 +27,19 @@ public class DossierStatusCodeValidationService {
     private final WorkflowDefinitionRepository workflowDefinitionRepository;
     private final ReferentialSeedingService referentialSeedingService;
     private final boolean seedOnMissingReferentials;
+    private final DossierWorkflowResolver workflowResolver;
 
     public DossierStatusCodeValidationService(
             ReferentialRepository referentialRepository,
             WorkflowDefinitionRepository workflowDefinitionRepository,
             ReferentialSeedingService referentialSeedingService,
-            @Value("${referential.seed-on-missing:false}") boolean seedOnMissingReferentials) {
+            @Value("${referential.seed-on-missing:false}") boolean seedOnMissingReferentials,
+            DossierWorkflowResolver workflowResolver) {
         this.referentialRepository = referentialRepository;
         this.workflowDefinitionRepository = workflowDefinitionRepository;
         this.referentialSeedingService = referentialSeedingService;
         this.seedOnMissingReferentials = seedOnMissingReferentials;
+        this.workflowResolver = workflowResolver;
     }
 
     @Transactional(readOnly = true)
@@ -62,6 +67,7 @@ public class DossierStatusCodeValidationService {
         if (statusCode == null || statusCode.isBlank()) {
             return;
         }
+        statusCode = DossierStatusCodes.normalize(statusCode);
 
         Optional<ReferentialEntity> statusRef = findReferentialByOrg("CASE_STATUS", statusCode);
         if (statusRef.isEmpty()) {
@@ -79,91 +85,42 @@ public class DossierStatusCodeValidationService {
 
         if (caseType != null && !caseType.isBlank()) {
             validateCaseType(caseType);
-
             String orgId = TenantContext.getOrgId();
             if (orgId == null) {
                 return;
             }
-
-            List<WorkflowDefinition> allowedTransitions =
-                    workflowDefinitionRepository.findByCaseType(orgId, caseType);
-
-            if (!allowedTransitions.isEmpty()) {
-                List<String> allowedStatusCodes =
-                        allowedTransitions.stream()
-                                .map(WorkflowDefinition::getToStatus)
-                                .distinct()
-                                .collect(Collectors.toList());
-
-                List<WorkflowDefinition> fromTransitions =
-                        workflowDefinitionRepository.findByCaseType(orgId, caseType);
-                allowedStatusCodes.addAll(
-                        fromTransitions.stream()
-                                .map(WorkflowDefinition::getFromStatus)
-                                .distinct()
-                                .collect(Collectors.toList()));
-                allowedStatusCodes =
-                        allowedStatusCodes.stream().distinct().collect(Collectors.toList());
-
-                if (!allowedStatusCodes.contains(statusCode)) {
-                    throw new IllegalArgumentException(
-                            String.format(
-                                    "Invalid statusCode: '%s' for caseType: '%s'. "
-                                            + "Allowed status codes for this case type are: %s",
-                                    statusCode, caseType, String.join(", ", allowedStatusCodes)));
-                }
+            Optional<DossierWorkflow> workflow = workflowResolver.resolve(orgId, caseType);
+            if (workflow.isPresent() && !workflow.get().hasState(statusCode)) {
+                throw new IllegalArgumentException(
+                        String.format(
+                                "Invalid statusCode: '%s' for caseType: '%s'. "
+                                        + "Allowed status codes for this case type are: %s",
+                                statusCode,
+                                caseType,
+                                String.join(", ", workflow.get().stateCodes())));
             }
         }
     }
 
     public String deriveStatusCodeFromEnumStatus(DossierStatus status) {
-        if (status == null) {
-            return null;
-        }
-        return status.name();
+        return DossierStatusCodes.toCode(status);
     }
 
     @Transactional(readOnly = true)
     public List<String> getAllowedStatusCodesForCaseType(String caseType) {
-        if (caseType == null || caseType.isBlank()) {
-            List<ReferentialEntity> allStatuses =
-                    referentialRepository.findByCategoryAndIsActiveTrueOrderByDisplayOrderAsc(
-                            "CASE_STATUS");
-            return allStatuses.stream()
-                    .map(ReferentialEntity::getCode)
-                    .collect(Collectors.toList());
-        }
-
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
-
-        List<WorkflowDefinition> allowedTransitions =
-                workflowDefinitionRepository.findByCaseType(orgId, caseType);
-
-        if (allowedTransitions.isEmpty()) {
-            List<ReferentialEntity> allStatuses =
-                    referentialRepository.findByCategoryAndIsActiveTrueOrderByDisplayOrderAsc(
-                            "CASE_STATUS");
-            return allStatuses.stream()
-                    .map(ReferentialEntity::getCode)
-                    .collect(Collectors.toList());
+        Optional<DossierWorkflow> workflow = workflowResolver.resolve(orgId, caseType);
+        if (workflow.isPresent()) {
+            return workflow.get().stateCodes();
         }
-
-        List<String> allowedStatusCodes =
-                allowedTransitions.stream()
-                        .map(WorkflowDefinition::getToStatus)
-                        .distinct()
-                        .collect(Collectors.toList());
-
-        allowedStatusCodes.addAll(
-                allowedTransitions.stream()
-                        .map(WorkflowDefinition::getFromStatus)
-                        .distinct()
-                        .collect(Collectors.toList()));
-
-        return allowedStatusCodes.stream().distinct().collect(Collectors.toList());
+        return referentialRepository
+                .findByCategoryAndIsActiveTrueOrderByDisplayOrderAsc("CASE_STATUS")
+                .stream()
+                .map(ReferentialEntity::getCode)
+                .collect(Collectors.toList());
     }
 
     private Optional<ReferentialEntity> findReferentialByOrg(String category, String code) {
@@ -178,10 +135,19 @@ public class DossierStatusCodeValidationService {
                         category,
                         code);
                 referentialSeedingService.seedDefaultReferentialsForOrg(orgId);
-                return referentialRepository.findByOrgIdAndCategoryAndCode(orgId, category, code);
+                referential =
+                        referentialRepository.findByOrgIdAndCategoryAndCode(orgId, category, code);
             }
-            return referential;
+            if (referential.isPresent()) {
+                return referential;
+            }
+            // Pas de ligne pour l'organisation : on retombe sur le code système (ADR 0004).
+            return referentialSeedingService.findSystemDefault(category, code);
         }
-        return referentialRepository.findByCategoryAndCode(category, code);
+        Optional<ReferentialEntity> referential =
+                referentialRepository.findByCategoryAndCode(category, code);
+        return referential.isPresent()
+                ? referential
+                : referentialSeedingService.findSystemDefault(category, code);
     }
 }

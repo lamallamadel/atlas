@@ -17,6 +17,7 @@ import com.example.backend.repository.ActivityRepository;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
+import com.example.backend.workflow.DossierStatusCodes;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -302,32 +303,33 @@ public class DossierService {
 
         transitionService.validateTransition(currentStatus, newStatus);
 
-        if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
-            workflowValidationService.validateAndRecordTransition(
-                    dossier,
-                    currentStatus.name(),
-                    newStatus.name(),
-                    request.getUserId(),
-                    request.getReason());
-        }
-
-        dossier.setStatus(newStatus);
-
-        if (request.getStatusCode() != null) {
-            statusCodeValidationService.validateStatusCodeForCaseType(
-                    dossier.getCaseType(), request.getStatusCode());
-            dossier.setStatusCode(request.getStatusCode());
-        } else {
-            String derivedStatusCode =
-                    statusCodeValidationService.deriveStatusCodeFromEnumStatus(newStatus);
-            dossier.setStatusCode(derivedStatusCode);
-        }
-
+        // Les raisons de clôture sont posées avant la validation : un workflow peut les exiger.
         if (request.getLossReason() != null) {
             dossier.setLossReason(request.getLossReason());
         }
         if (request.getWonReason() != null) {
             dossier.setWonReason(request.getWonReason());
+        }
+
+        String targetCode =
+                request.getStatusCode() != null
+                        ? DossierStatusCodes.normalize(request.getStatusCode())
+                        : DossierStatusCodes.toCode(newStatus);
+
+        // ADR 0004 : tout dossier suit le workflow de son type (CRM_LEAD par défaut).
+        workflowValidationService.validateAndRecordTransition(
+                dossier,
+                DossierStatusCodes.toCode(currentStatus),
+                targetCode,
+                request.getUserId(),
+                request.getReason());
+
+        dossier.setStatus(newStatus);
+
+        if (request.getStatusCode() != null) {
+            statusCodeValidationService.validateStatusCodeForCaseType(
+                    dossier.getCaseType(), targetCode);
+            dossier.setStatusCode(targetCode);
         }
 
         dossier.setUpdatedAt(LocalDateTime.now());
@@ -429,14 +431,12 @@ public class DossierService {
 
                 transitionService.validateTransition(currentStatus, newStatus);
 
-                if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
-                    workflowValidationService.validateAndRecordTransition(
-                            dossier,
-                            currentStatus.name(),
-                            newStatus.name(),
-                            request.getUserId(),
-                            request.getReason());
-                }
+                workflowValidationService.validateAndRecordTransition(
+                        dossier,
+                        DossierStatusCodes.toCode(currentStatus),
+                        DossierStatusCodes.toCode(newStatus),
+                        request.getUserId(),
+                        request.getReason());
 
                 dossier.setStatus(newStatus);
                 dossier.setUpdatedAt(LocalDateTime.now());
