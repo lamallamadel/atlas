@@ -53,6 +53,8 @@ export interface AnnoncePublication {
   };
   transitions: AnnonceTransitionOption[];
   suspension?: { reasonCode: AnnonceSuspendReason; comment?: string; by?: string; at?: string } | null;
+  /** Signalements de visiteurs encore à traiter. */
+  openReports: number;
 }
 
 export interface AnnonceResponse {

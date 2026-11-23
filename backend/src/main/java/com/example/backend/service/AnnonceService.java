@@ -42,6 +42,7 @@ public class AnnonceService {
     @Nullable private final ReverseMatchingService reverseMatchingService;
     private final AnnoncePublicationService publicationService;
     private final AnnonceQualityService qualityService;
+    private final com.example.backend.repository.AnnonceReportRepository annonceReportRepository;
 
     public AnnonceService(
             AnnonceRepository annonceRepository,
@@ -53,7 +54,9 @@ public class AnnonceService {
                     OrganizationSettingsService organizationSettingsService,
             @Autowired(required = false) @Nullable ReverseMatchingService reverseMatchingService,
             AnnoncePublicationService publicationService,
-            AnnonceQualityService qualityService) {
+            AnnonceQualityService qualityService,
+            com.example.backend.repository.AnnonceReportRepository annonceReportRepository) {
+        this.annonceReportRepository = annonceReportRepository;
         this.publicationService = publicationService;
         this.qualityService = qualityService;
         this.annonceRepository = annonceRepository;
@@ -375,7 +378,11 @@ public class AnnonceService {
                 annonce,
                 qualityService.evaluate(annonce),
                 publicationService.options(annonce),
-                AnnoncePublicationService.trustOverride(annonce));
+                AnnoncePublicationService.trustOverride(annonce),
+                annonceReportRepository.countByOrgIdAndAnnonceIdAndStatus(
+                        annonce.getOrgId(),
+                        annonce.getId(),
+                        com.example.backend.entity.AnnonceReport.STATUS_OPEN));
     }
 
     @CacheEvict(

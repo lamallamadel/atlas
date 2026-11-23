@@ -37,6 +37,15 @@ export interface FilterState {
   page: number;
 }
 
+/** Motifs de signalement (codes REPORT_* du serveur). */
+export const REPORT_REASONS: { value: string; label: string }[] = [
+  { value: 'REPORT_FRAUD', label: 'Arnaque ou annonce suspecte' },
+  { value: 'REPORT_INCORRECT_INFO', label: 'Informations fausses (prix, surface, photos…)' },
+  { value: 'REPORT_DUPLICATE', label: 'Annonce en double' },
+  { value: 'REPORT_SPAM', label: 'Contenu inapproprié ou publicité' },
+  { value: 'REPORT_OTHER', label: 'Autre' },
+];
+
 @Injectable({ providedIn: 'root' })
 export class PortailService {
   readonly PAGE_SIZE = 9;
@@ -126,6 +135,11 @@ export class PortailService {
         return { content: filtered, totalElements: res.totalElements || filtered.length };
       })
     );
+  }
+
+  /** Signalement anonyme, transmis à l'agence qui publie l'annonce. */
+  reportListing(id: string, body: { reasonCode: string; comment?: string | null; email?: string | null }): Observable<unknown> {
+    return this.http.post(`/api/v1/portal/annonces/${id}/reports`, body);
   }
 
   getListingById(id: string): Observable<Listing> {

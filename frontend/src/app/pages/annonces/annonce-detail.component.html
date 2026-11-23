@@ -94,6 +94,9 @@
     <!-- Publication : qualité, doublon/fraude, publier · suspendre · archiver -->
     <app-annonce-publication-panel [annonceId]="annonce.id" (changed)="loadAnnonce()"></app-annonce-publication-panel>
 
+    <!-- Signalements des visiteurs du portail : écarter ou suspendre l'annonce -->
+    <app-annonce-reports-panel [annonceId]="annonce.id" (annonceSuspended)="loadAnnonce()"></app-annonce-reports-panel>
+
     <!-- Analyse IA (score, fraude, doublon) -->
     <app-annonce-ai-badges [annonce]="annonce"></app-annonce-ai-badges>
 

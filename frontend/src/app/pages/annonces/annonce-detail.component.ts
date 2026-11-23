@@ -9,6 +9,7 @@ import { AnnonceAiBadgesComponent } from '../../components/annonce-ai-badges.com
 import { AnnonceVisionPanelComponent } from '../../components/annonce-vision-panel.component';
 import { AnnonceBuyerMatchesComponent } from '../../components/annonce-buyer-matches.component';
 import { AnnoncePublicationPanelComponent } from '../../components/annonce-publication-panel.component';
+import { AnnonceReportsPanelComponent } from '../../components/annonce-reports-panel.component';
 import {
   DsButtonComponent,
   DsBadgeComponent,
@@ -33,6 +34,7 @@ import {
     AnnonceVisionPanelComponent,
     AnnonceBuyerMatchesComponent,
     AnnoncePublicationPanelComponent,
+    AnnonceReportsPanelComponent,
   ],
 })
 export class AnnonceDetailComponent implements OnInit {
