@@ -53,6 +53,17 @@ public class Dossier extends BaseEntity {
     @Column(name = "status_code", length = 100)
     private String statusCode;
 
+    /** Agent assigné (identifiant Keycloak) ; {@code null} = dossier à attribuer. */
+    @Column(name = "assigned_to")
+    private String assignedTo;
+
+    /** Nom de l'agent au moment de l'assignation, pour l'affichage. */
+    @Column(name = "assigned_to_name")
+    private String assignedToName;
+
+    @Column(name = "assigned_at")
+    private LocalDateTime assignedAt;
+
     @Column(name = "workflow_definition_id")
     private Long workflowDefinitionId;
 
@@ -318,5 +329,29 @@ public class Dossier extends BaseEntity {
 
     public void setSearchCriteriaUpdatedAt(LocalDateTime searchCriteriaUpdatedAt) {
         this.searchCriteriaUpdatedAt = searchCriteriaUpdatedAt;
+    }
+
+    public String getAssignedTo() {
+        return assignedTo;
+    }
+
+    public void setAssignedTo(String assignedTo) {
+        this.assignedTo = assignedTo;
+    }
+
+    public String getAssignedToName() {
+        return assignedToName;
+    }
+
+    public void setAssignedToName(String assignedToName) {
+        this.assignedToName = assignedToName;
+    }
+
+    public LocalDateTime getAssignedAt() {
+        return assignedAt;
+    }
+
+    public void setAssignedAt(LocalDateTime assignedAt) {
+        this.assignedAt = assignedAt;
     }
 }

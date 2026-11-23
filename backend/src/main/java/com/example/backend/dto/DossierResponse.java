@@ -32,6 +32,18 @@ public class DossierResponse {
     private DossierStatus status;
     private String caseType;
     private String statusCode;
+
+    @Schema(
+            description = "Agent assigné (identifiant Keycloak) ; absent = à attribuer",
+            nullable = true)
+    private String assignedTo;
+
+    @Schema(description = "Nom de l'agent assigné", nullable = true)
+    private String assignedToName;
+
+    @Schema(description = "Date d'assignation", nullable = true)
+    private LocalDateTime assignedAt;
+
     private String lossReason;
     private String wonReason;
     private Integer score;
@@ -236,5 +248,29 @@ public class DossierResponse {
 
     public void setLocale(String locale) {
         this.locale = locale;
+    }
+
+    public String getAssignedTo() {
+        return assignedTo;
+    }
+
+    public void setAssignedTo(String assignedTo) {
+        this.assignedTo = assignedTo;
+    }
+
+    public String getAssignedToName() {
+        return assignedToName;
+    }
+
+    public void setAssignedToName(String assignedToName) {
+        this.assignedToName = assignedToName;
+    }
+
+    public LocalDateTime getAssignedAt() {
+        return assignedAt;
+    }
+
+    public void setAssignedAt(LocalDateTime assignedAt) {
+        this.assignedAt = assignedAt;
     }
 }

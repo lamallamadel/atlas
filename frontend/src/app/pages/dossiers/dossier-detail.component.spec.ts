@@ -19,6 +19,7 @@ import { ConsentementApiService } from '../../services/consentement-api.service'
 import { AuditEventApiService } from '../../services/audit-event-api.service';
 import { CommonTestingModule } from '../../testing/common-testing.module';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-badge-status',
@@ -193,6 +194,8 @@ describe('DossierDetailComponent', () => {
         PhoneFormatPipe],
       providers: [
         { provide: DossierApiService, useValue: dossierApiService },
+        // Carte « Agent » : rôles de l'utilisateur (agent simple ici).
+        { provide: AuthService, useValue: { hasRole: () => false } },
         {
           provide: PartiePrenanteApiService,
           useValue: partiePrenanteApiService},

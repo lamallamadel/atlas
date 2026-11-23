@@ -113,6 +113,10 @@ public class DossierService {
 
         Dossier dossier = dossierMapper.toEntityWithoutParties(request);
         dossier.setOrgId(orgId);
+        // Créé par un utilisateur : le dossier lui revient. Créé par le système (portail, vitrine)
+        // :
+        // il reste à attribuer.
+        DossierAssignmentService.assignToCreator(dossier);
 
         if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
             statusCodeValidationService.validateCaseType(dossier.getCaseType());
@@ -230,8 +234,36 @@ public class DossierService {
             String leadSource,
             String q,
             Pageable pageable) {
+        return list(status, leadPhone, annonceId, leadSource, q, null, pageable);
+    }
+
+    /**
+     * Comme {@link #list(DossierStatus, String, Long, String, String, Pageable)}, avec l'agent :
+     * {@code me} (l'utilisateur connecté), {@code unassigned} (à attribuer) ou un identifiant.
+     */
+    @Transactional(readOnly = true)
+    public Page<DossierResponse> list(
+            DossierStatus status,
+            String leadPhone,
+            Long annonceId,
+            String leadSource,
+            String q,
+            String assignee,
+            Pageable pageable) {
         Specification<Dossier> spec =
                 (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+
+        if (assignee != null && !assignee.isBlank()) {
+            if ("unassigned".equalsIgnoreCase(assignee)) {
+                spec = spec.and((root, query, cb) -> cb.isNull(root.get("assignedTo")));
+            } else {
+                String who =
+                        "me".equalsIgnoreCase(assignee)
+                                ? com.example.backend.util.CurrentUser.id().orElse("")
+                                : assignee;
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("assignedTo"), who));
+            }
+        }
 
         if (status != null) {
             spec =

@@ -1,3 +1,4 @@
+import { DossierAssigneeCardComponent } from '../../components/dossier-assignee-card.component';
 import { ChangeDetectorRef, Component, OnInit, OnDestroy, viewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteResponse, PartiePrenanteRole } from '../../services/dossier-api.service';
@@ -80,6 +81,7 @@ export interface WhatsAppTemplate {
     templateUrl: './dossier-detail.component.html',
     styleUrls: ['./dossier-detail.component.css'],
     imports: [
+        DossierAssigneeCardComponent,
       CommonModule,
       DossierMatchingComponent,
       FormsModule, 
@@ -955,6 +957,18 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
       next: (response) => { this.cdr.markForCheck(); this.whatsappMessages = response.content; this.loadingWhatsAppMessages = false; },
       error: () => { this.cdr.markForCheck(); this.loadingWhatsAppMessages = false; }
     });
+  }
+
+  /** Agent changé depuis la carte « Agent » : on garde le reste du dossier affiché. */
+  onAssigneeChanged(updated: DossierResponse): void {
+    if (!this.dossier) return;
+    this.dossier = {
+      ...this.dossier,
+      assignedTo: updated.assignedTo ?? null,
+      assignedToName: updated.assignedToName ?? null,
+      assignedAt: updated.assignedAt ?? null,
+    };
+    this.cdr.markForCheck();
   }
 
   goBack(): void {
