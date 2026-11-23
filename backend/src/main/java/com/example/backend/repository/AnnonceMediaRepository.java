@@ -9,4 +9,6 @@ public interface AnnonceMediaRepository extends JpaRepository<AnnonceMedia, Long
     List<AnnonceMedia> findByAnnonceIdOrderByPositionAscIdAsc(Long annonceId);
 
     long countByAnnonceId(Long annonceId);
+
+    long countByAnnonceIdAndMediaType(Long annonceId, String mediaType);
 }

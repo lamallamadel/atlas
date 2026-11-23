@@ -8,6 +8,7 @@ import { PriceFormatPipe } from '../../pipes/price-format.pipe';
 import { AnnonceAiBadgesComponent } from '../../components/annonce-ai-badges.component';
 import { AnnonceVisionPanelComponent } from '../../components/annonce-vision-panel.component';
 import { AnnonceBuyerMatchesComponent } from '../../components/annonce-buyer-matches.component';
+import { AnnoncePublicationPanelComponent } from '../../components/annonce-publication-panel.component';
 import {
   DsButtonComponent,
   DsBadgeComponent,
@@ -31,6 +32,7 @@ import {
     AnnonceAiBadgesComponent,
     AnnonceVisionPanelComponent,
     AnnonceBuyerMatchesComponent,
+    AnnoncePublicationPanelComponent,
   ],
 })
 export class AnnonceDetailComponent implements OnInit {

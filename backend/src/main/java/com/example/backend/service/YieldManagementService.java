@@ -42,7 +42,7 @@ public class YieldManagementService {
 
         List<Annonce> activeAnnonces =
                 annonceRepository.findAll().stream()
-                        .filter(a -> AnnonceStatus.ACTIVE.equals(a.getStatus()))
+                        .filter(a -> AnnonceStatus.PUBLISHED.equals(a.getStatus()))
                         .toList();
 
         for (Annonce annonce : activeAnnonces) {

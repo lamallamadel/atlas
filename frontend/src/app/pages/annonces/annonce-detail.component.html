@@ -91,6 +91,9 @@
 
     </div>
 
+    <!-- Publication : qualité, doublon/fraude, publier · suspendre · archiver -->
+    <app-annonce-publication-panel [annonceId]="annonce.id" (changed)="loadAnnonce()"></app-annonce-publication-panel>
+
     <!-- Analyse IA (score, fraude, doublon) -->
     <app-annonce-ai-badges [annonce]="annonce"></app-annonce-ai-badges>
 

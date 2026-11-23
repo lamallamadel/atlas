@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
-import { formatAnnoncePrice } from '../../utils/annonce-format';
+import { annonceStatusLabel, formatAnnoncePrice } from '../../utils/annonce-format';
 import { Router } from '@angular/router';
 import { DsDialogService } from '../../design-system';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -56,6 +56,7 @@ interface KpiCard {
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly formatPrice = formatAnnoncePrice;
+  readonly statusLabel = annonceStatusLabel;
 
   private destroy$ = new Subject<void>();
 
@@ -449,8 +450,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   navigateToAnnoncesActives(): void {
-    this.router.navigate(['/annonces'], {
-      queryParams: { status: 'ACTIVE' }
+    this.router.navigate(['/pro/annonces'], {
+      queryParams: { status: 'PUBLISHED' }
     });
   }
 

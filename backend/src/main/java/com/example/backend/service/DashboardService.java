@@ -40,7 +40,7 @@ public class DashboardService {
         Long previousCount;
 
         if (period == null) {
-            currentCount = annonceRepository.countByStatus(AnnonceStatus.ACTIVE);
+            currentCount = annonceRepository.countByStatus(AnnonceStatus.PUBLISHED);
             previousCount = currentCount;
         } else {
             LocalDateTime startDate = getStartDateForPeriod(period);
@@ -48,10 +48,10 @@ public class DashboardService {
 
             currentCount =
                     annonceRepository.countByStatusAndCreatedAtAfter(
-                            AnnonceStatus.ACTIVE, startDate);
+                            AnnonceStatus.PUBLISHED, startDate);
             previousCount =
                     annonceRepository.countByStatusAndCreatedAtBetween(
-                            AnnonceStatus.ACTIVE, previousStartDate, startDate);
+                            AnnonceStatus.PUBLISHED, previousStartDate, startDate);
         }
 
         String trend = calculateTrend(currentCount, previousCount);

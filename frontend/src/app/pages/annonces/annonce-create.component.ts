@@ -69,11 +69,12 @@ export class AnnonceCreateComponent implements OnInit {
   AnnonceStatus = AnnonceStatus;
   
   readonly statusOptions: DsSelectOption[] = [
+    // Suspendre ou archiver se fait depuis le bloc « Publication » de la fiche (raison exigée).
+    // Publier n'aboutit que si l'annonce est complète (description, surface, photos…).
     { value: AnnonceStatus.DRAFT, label: 'Brouillon' },
-    { value: AnnonceStatus.PUBLISHED, label: 'Publié' },
-    { value: AnnonceStatus.ACTIVE, label: 'Actif' },
-    { value: AnnonceStatus.PAUSED, label: 'En pause' },
-    { value: AnnonceStatus.ARCHIVED, label: 'Archivé' }
+    { value: AnnonceStatus.PUBLISHED, label: 'En ligne (publier)' },
+    { value: AnnonceStatus.SUSPENDED, label: 'Suspendue' },
+    { value: AnnonceStatus.ARCHIVED, label: 'Archivée' }
   ];
 
   readonly categoryOptions: DsSelectOption[] = [

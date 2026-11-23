@@ -1,8 +1,6 @@
 package com.example.backend.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.example.backend.entity.Annonce;
@@ -21,11 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SyndicationServiceTest {
 
-    @Mock
-    private AnnonceRepository annonceRepository;
+    @Mock private AnnonceRepository annonceRepository;
 
-    @InjectMocks
-    private SyndicationService syndicationService;
+    @InjectMocks private SyndicationService syndicationService;
 
     private Annonce activeAnnonce;
 
@@ -39,12 +35,12 @@ class SyndicationServiceTest {
         activeAnnonce.setCity("Casablanca");
         activeAnnonce.setAddress("Street 1");
         activeAnnonce.setPhotos(Arrays.asList("url1.jpg", "url2.jpg"));
-        activeAnnonce.setStatus(AnnonceStatus.ACTIVE);
+        activeAnnonce.setStatus(AnnonceStatus.PUBLISHED);
     }
 
     @Test
     void testGenerateMubawabFeed() {
-        when(annonceRepository.findByStatusAndOrgId(AnnonceStatus.ACTIVE, "org1"))
+        when(annonceRepository.findByStatusAndOrgId(AnnonceStatus.PUBLISHED, "org1"))
                 .thenReturn(Arrays.asList(activeAnnonce));
 
         String xml = syndicationService.generateMubawabFeed("org1");
@@ -53,7 +49,9 @@ class SyndicationServiceTest {
         assertThat(xml).contains("<properties>");
         assertThat(xml).contains("<reference>1</reference>");
         assertThat(xml).contains("<title>Test Title &amp; Co</title>"); // check escaping
-        assertThat(xml).contains("<description><![CDATA[A beautiful <house>]]></description>"); // check CDATA
+        assertThat(xml)
+                .contains("<description><![CDATA[A beautiful <house>]]></description>"); // check
+        // CDATA
         assertThat(xml).contains("<price>100000</price>");
         assertThat(xml).contains("<city>Casablanca</city>");
         assertThat(xml).contains("<picture>url1.jpg</picture>");
@@ -62,7 +60,7 @@ class SyndicationServiceTest {
 
     @Test
     void testGenerateAvitoFeed() {
-        when(annonceRepository.findByStatusAndOrgId(AnnonceStatus.ACTIVE, "org1"))
+        when(annonceRepository.findByStatusAndOrgId(AnnonceStatus.PUBLISHED, "org1"))
                 .thenReturn(Arrays.asList(activeAnnonce));
 
         String xml = syndicationService.generateAvitoFeed("org1");
@@ -80,7 +78,7 @@ class SyndicationServiceTest {
 
     @Test
     void testGenerateFeeds_EmptyList() {
-        when(annonceRepository.findByStatusAndOrgId(AnnonceStatus.ACTIVE, "org1"))
+        when(annonceRepository.findByStatusAndOrgId(AnnonceStatus.PUBLISHED, "org1"))
                 .thenReturn(Collections.emptyList());
 
         String mubawabXml = syndicationService.generateMubawabFeed("org1");

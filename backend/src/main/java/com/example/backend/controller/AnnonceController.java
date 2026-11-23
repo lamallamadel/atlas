@@ -117,6 +117,70 @@ public class AnnonceController {
         }
     }
 
+    /** Corps de {@code POST /{id}/transitions}. */
+    public record AnnonceTransitionRequest(
+            @jakarta.validation.constraints.NotBlank String transitionCode,
+            String reasonCode,
+            @jakarta.validation.constraints.Size(max = 1000) String comment) {}
+
+    /** Corps de {@code POST /{id}/trust/override}. */
+    public record TrustOverrideRequest(
+            @jakarta.validation.constraints.NotBlank
+                    @jakarta.validation.constraints.Size(max = 1000)
+                    String reason) {}
+
+    @GetMapping("/{id}/publication")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(
+            summary = "Publication state",
+            description =
+                    "Score de qualité, éléments manquants, signaux de doublon et de fraude, et"
+                            + " transitions possibles (publier, suspendre, archiver) avec ce qui"
+                            + " les bloque")
+    public ResponseEntity<com.example.backend.dto.AnnoncePublicationResponse> getPublication(
+            @PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(annonceService.getPublication(id));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/transitions")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(
+            summary = "Change publication status",
+            description =
+                    "ANN_T_PUBLISH, ANN_T_SUSPEND (reasonCode obligatoire) ou ANN_T_ARCHIVE. 409 si"
+                            + " la transition n'existe pas depuis le statut courant, 400 si elle"
+                            + " est bloquée")
+    public ResponseEntity<AnnonceResponse> applyTransition(
+            @PathVariable Long id, @Valid @RequestBody AnnonceTransitionRequest request) {
+        try {
+            return ResponseEntity.ok(
+                    annonceService.applyTransition(
+                            id, request.transitionCode(), request.reasonCode(), request.comment()));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/trust/override")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
+    @Operation(
+            summary = "Manager override of duplicate/fraud signals",
+            description =
+                    "Autorise la publication malgré un doublon certain ou une fraude signalés, avec"
+                            + " une raison. Tracé sur l'annonce et dans l'audit")
+    public ResponseEntity<com.example.backend.dto.AnnoncePublicationResponse> overrideTrust(
+            @PathVariable Long id, @Valid @RequestBody TrustOverrideRequest request) {
+        try {
+            return ResponseEntity.ok(annonceService.overrideTrust(id, request.reason()));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(

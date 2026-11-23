@@ -2,12 +2,57 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+/**
+ * Cycle de vie d'une annonce : DRAFT → PUBLISHED ⇄ SUSPENDED → ARCHIVED.
+ * ACTIVE et PAUSED sont les anciens noms de PUBLISHED et SUSPENDED : le serveur les accepte
+ * encore en entrée mais ne les renvoie plus.
+ */
 export enum AnnonceStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
+  SUSPENDED = 'SUSPENDED',
+  ARCHIVED = 'ARCHIVED',
+  /** @deprecated ancien nom de PUBLISHED */
   ACTIVE = 'ACTIVE',
-  PAUSED = 'PAUSED',
-  ARCHIVED = 'ARCHIVED'
+  /** @deprecated ancien nom de SUSPENDED */
+  PAUSED = 'PAUSED'
+}
+
+export type AnnonceTransitionCode = 'ANN_T_PUBLISH' | 'ANN_T_SUSPEND' | 'ANN_T_ARCHIVE';
+
+export type AnnonceSuspendReason =
+  'OWNER_PAUSE' | 'MOD_SUSPECT_FRAUD' | 'MOD_ILLEGAL_CONTENT' | 'MOD_DUPLICATE_LISTING' | 'MOD_OTHER';
+
+export interface AnnonceTransitionOption {
+  code: AnnonceTransitionCode;
+  label: string;
+  targetStatus: AnnonceStatus;
+  requiresReason: boolean;
+  allowed: boolean;
+  blockers: { code: string; message: string }[];
+}
+
+/** GET /api/v1/annonces/{id}/publication */
+export interface AnnoncePublication {
+  annonceId: number;
+  status: AnnonceStatus;
+  quality: {
+    score: number;
+    photoCount: number;
+    minPhotos: number;
+    missing: { code: string; label: string; blocking: boolean }[];
+  };
+  trust: {
+    duplicateStatut?: string | null;
+    duplicateOfId?: number | null;
+    duplicateSimilarity?: number | null;
+    fraudStatut?: string | null;
+    fraudScore?: number | null;
+    blocking: boolean;
+    override?: { reason: string; by?: string; at?: string } | null;
+  };
+  transitions: AnnonceTransitionOption[];
+  suspension?: { reasonCode: AnnonceSuspendReason; comment?: string; by?: string; at?: string } | null;
 }
 
 export interface AnnonceResponse {
@@ -172,6 +217,25 @@ export class AnnonceApiService {
   getById(id: number): Observable<AnnonceResponse> {
     return this.http.get<AnnonceResponse>(`${this.apiUrl}/${id}`);
   }
+  getPublication(id: number): Observable<AnnoncePublication> {
+    return this.http.get<AnnoncePublication>(`${this.apiUrl}/${id}/publication`);
+  }
+
+  applyTransition(
+    id: number,
+    transitionCode: AnnonceTransitionCode,
+    reasonCode?: AnnonceSuspendReason | null,
+    comment?: string | null
+  ): Observable<AnnonceResponse> {
+    return this.http.post<AnnonceResponse>(`${this.apiUrl}/${id}/transitions`, {
+      transitionCode, reasonCode: reasonCode ?? null, comment: comment ?? null
+    });
+  }
+
+  overrideTrust(id: number, reason: string): Observable<AnnoncePublication> {
+    return this.http.post<AnnoncePublication>(`${this.apiUrl}/${id}/trust/override`, { reason });
+  }
+
 
   create(request: AnnonceCreateRequest): Observable<AnnonceResponse> {
     return this.http.post<AnnonceResponse>(this.apiUrl, request);

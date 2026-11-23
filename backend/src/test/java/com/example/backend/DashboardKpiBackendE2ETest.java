@@ -264,9 +264,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         previousDossier.setUpdatedAt(tenDaysAgo);
         dossierRepository.save(previousDossier);
 
-        mockMvc.perform(
-                        withTenantHeaders(get(BASE_URL), ORG_ID_1)
-                                .param("period", "LAST_7_DAYS"))
+        mockMvc.perform(withTenantHeaders(get(BASE_URL), ORG_ID_1).param("period", "LAST_7_DAYS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(1))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(1))
@@ -354,9 +352,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         recentDossier3.setUpdatedAt(twentyDaysAgo.plusDays(7));
         dossierRepository.save(recentDossier3);
 
-        mockMvc.perform(
-                        withTenantHeaders(get(BASE_URL), ORG_ID_1)
-                                .param("period", "LAST_30_DAYS"))
+        mockMvc.perform(withTenantHeaders(get(BASE_URL), ORG_ID_1).param("period", "LAST_30_DAYS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(2))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(1))
@@ -662,9 +658,10 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         archivedAnnonce.setUpdatedAt(today.plusHours(3));
         annonceRepository.save(archivedAnnonce);
 
+        // ACTIVE et PUBLISHED sont désormais le même statut « en ligne » (V158) : 2 annonces.
         mockMvc.perform(withTenantHeaders(get(BASE_URL), ORG_ID_1).param("period", "TODAY"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.annoncesActives.currentValue").value(1));
+                .andExpect(jsonPath("$.annoncesActives.currentValue").value(2));
     }
 
     @Test

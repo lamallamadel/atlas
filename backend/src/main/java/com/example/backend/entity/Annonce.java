@@ -193,8 +193,9 @@ public class Annonce extends BaseEntity {
         return status;
     }
 
+    /** Les anciens noms (ACTIVE, PAUSED) sont ramenés aux statuts actuels. */
     public void setStatus(AnnonceStatus status) {
-        this.status = status;
+        this.status = AnnonceStatus.normalize(status);
     }
 
     public List<String> getPhotos() {
