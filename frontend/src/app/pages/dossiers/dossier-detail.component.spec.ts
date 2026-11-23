@@ -454,4 +454,18 @@ describe('DossierDetailComponent', () => {
       expect(toastService.success).toHaveBeenCalledWith('Consentement enregistré');
     });
   });
+  describe('onglets regroupés', () => {
+    it('8 onglets, et les anciens noms ouvrent la bonne vue', () => {
+      expect(component.dossierTabs.map(t => t.value)).toEqual(
+        ['informations', 'matching', 'parties', 'echanges', 'rendezvous', 'consentements', 'documents', 'activite']);
+      component.selectTab('messages-sortants');
+      expect(component.activeTab).toBe('echanges');
+      expect(component.exchangeView).toBe('messages-sortants');
+      component.selectTab('historique');
+      expect(component.activeTab).toBe('activite');
+      expect(component.activityView).toBe('historique');
+      component.selectTab('documents');
+      expect(component.activeTab).toBe('documents');
+    });
+  });
 });

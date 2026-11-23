@@ -107,4 +107,23 @@ describe('OnboardingTourService', () => {
     service.cancelCurrentTour();
     expect(service).toBeTruthy();
   });
+  describe('démarrage automatique une seule fois', () => {
+    it('une visite passée ou fermée ne se relance plus', () => {
+      expect(service.wasTourSeen('dossier-detail')).toBe(false);
+      (service as any).tourProgress['dossier-detail'] = { completed: false, skipped: true };
+      expect(service.wasTourSeen('dossier-detail')).toBe(true);
+      (service as any).tourProgress['dossier-creation'] = { completed: false, abandonedAt: '2026-11-23T00:00:00Z' };
+      expect(service.wasTourSeen('dossier-creation')).toBe(true);
+    });
+
+    it('n’ouvre pas la visite de la fiche dossier si elle a été passée', () => {
+      vi.useFakeTimers();
+      const start = vi.spyOn(service, 'startDossierDetailTour').mockResolvedValue();
+      (service as any).tourProgress['dossier-detail'] = { completed: false, skipped: true };
+      (service as any).checkAutoStartTour('/pro/dossiers/12');
+      vi.advanceTimersByTime(600);
+      expect(start).not.toHaveBeenCalled();
+      vi.useRealTimers();
+    });
+  });
 });

@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { annonceStatusLabel, formatAnnoncePrice } from '../../utils/annonce-format';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
@@ -81,9 +82,13 @@ export class AnnoncesComponent implements OnInit {
 
   readonly cityOptions: DsSelectOption[] = [
     { value: '', label: 'Toutes les villes' },
-    { value: 'Paris', label: 'Paris' },
-    { value: 'Lyon', label: 'Lyon' },
-    { value: 'Marseille', label: 'Marseille' }
+    { value: 'Tanger', label: 'Tanger' },
+    { value: 'Tétouan', label: 'Tétouan' },
+    { value: 'Casablanca', label: 'Casablanca' },
+    { value: 'Rabat', label: 'Rabat' },
+    { value: 'Marrakech', label: 'Marrakech' },
+    { value: 'Fès', label: 'Fès' },
+    { value: 'Agadir', label: 'Agadir' }
   ];
 
   readonly typeOptions: DsSelectOption[] = [
@@ -96,8 +101,8 @@ export class AnnoncesComponent implements OnInit {
     { key: 'id', header: 'ID', width: '80px' },
     { key: 'title', header: 'Titre' },
     { key: 'city', header: 'Ville' },
-    { key: 'price', header: 'Prix' },
-    { key: 'status', header: 'Statut' },
+    { key: 'price', header: 'Prix', cell: (a) => formatAnnoncePrice(a) },
+    { key: 'status', header: 'Statut', cell: (a) => annonceStatusLabel(a.status) },
     { key: 'ai', header: 'Alertes IA' }
   ];
 
@@ -218,9 +223,12 @@ export class AnnoncesComponent implements OnInit {
     }
   }
 
-  countByStatus(status: string): number {
-    return this.annonces.filter(a => a.status === status).length;
+  countByStatus(...statuses: string[]): number {
+    return this.annonces.filter(a => statuses.includes(a.status)).length;
   }
+
+  statusLabel(status: string): string { return annonceStatusLabel(status); }
+  formatPrice(a: AnnonceResponse): string { return formatAnnoncePrice(a); }
 
   trackByAnnonceId(index: number, a: AnnonceResponse): number { return a.id; }
   previousPage(): void { if (this.currentPage > 0) { this.currentPage--; this.loadAnnonces(); } }

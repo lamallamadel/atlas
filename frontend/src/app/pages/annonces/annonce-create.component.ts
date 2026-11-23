@@ -408,7 +408,7 @@ export class AnnonceCreateComponent implements OnInit {
       surface: step2Value.surface !== null && step2Value.surface !== '' ? step2Value.surface : undefined,
       price: step2Value.price !== null && step2Value.price !== '' ? step2Value.price : undefined,
 
-      currency: 'EUR',
+      currency: 'MAD', // marché marocain : dirham
       photos: this.step3FormGroup.value.photos,
       rulesJson: this.parseRulesJson(),
       meta: { source: 'wizard' }

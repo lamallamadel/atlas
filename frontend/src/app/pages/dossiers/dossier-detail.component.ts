@@ -33,7 +33,8 @@ import {
   DsTableComponent,
   DsColumn,
   DsCellDirective,
-  DsBadgeStatus
+  DsBadgeStatus,
+  DsFilterChipComponent
 } from '../../design-system';
 import { QuickActionsComponent } from '../../components/quick-actions.component';
 import { ActivityTimelineComponent } from '../../components/activity-timeline.component';
@@ -88,6 +89,7 @@ export interface WhatsAppTemplate {
       DsEmptyStateComponent, 
       QuickActionsComponent, 
       ActivityTimelineComponent,
+      DsFilterChipComponent,
       DocumentListComponent,
       WhatsappMessagingContainerComponent,
       DsSelectComponent,
@@ -144,19 +146,41 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
   leadSuccessMessage: string | null = null;
 
   activeTab = 'informations';
+  /** 8 onglets : les messages (3 vues) et l'activité (2 vues) sont regroupés. */
   dossierTabs: DsTab[] = [
     { value: 'informations',    label: 'Informations' },
     { value: 'matching',        label: 'Biens correspondants' },
     { value: 'parties',         label: 'Parties prenantes' },
-    { value: 'messages',        label: 'Messages' },
-    { value: 'whatsapp',        label: 'WhatsApp' },
-    { value: 'messages-sortants', label: 'Messages sortants' },
+    { value: 'echanges',        label: 'Échanges' },
     { value: 'rendezvous',      label: 'Rendez-vous' },
     { value: 'consentements',   label: 'Consentements' },
     { value: 'documents',       label: 'Documents' },
-    { value: 'chronologie',     label: 'Chronologie' },
-    { value: 'historique',      label: 'Historique' },
+    { value: 'activite',        label: 'Activité' },
   ];
+
+  /** Vue de l'onglet Échanges : conversation WhatsApp, tous les canaux, ou envois et leur statut. */
+  exchangeView: 'whatsapp' | 'messages' | 'messages-sortants' = 'whatsapp';
+  /** Vue de l'onglet Activité : chronologie lisible ou journal d'audit filtrable. */
+  activityView: 'chronologie' | 'historique' = 'chronologie';
+
+  /** Accepte aussi les anciens noms d'onglets (liens, raccourcis, visite guidée). */
+  selectTab(tab: string): void {
+    switch (tab) {
+      case 'whatsapp':
+      case 'messages':
+      case 'messages-sortants':
+        this.exchangeView = tab;
+        this.activeTab = 'echanges';
+        break;
+      case 'chronologie':
+      case 'historique':
+        this.activityView = tab;
+        this.activeTab = 'activite';
+        break;
+      default:
+        this.activeTab = tab;
+    }
+  }
 
   DossierStatus = DossierStatus;
   PartiePrenanteRole = PartiePrenanteRole;
