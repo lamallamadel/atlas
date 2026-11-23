@@ -58,7 +58,7 @@ Tracking : `biz_demo_viewed`, `biz_demo_submitted`, `biz_demo_failed`, `biz_demo
 À la soumission de `/demo` :
 - Créer un dossier avec `case_type_code = CRM_LEAD_B2B_DEMO`
 - Statut initial : `B2B_NEW`
-- Source : `LEAD_SOURCE_BIZ_DEMO_FORM`
+- Source : `BIZ_DEMO_FORM`
 - Payload JSON : actorType, city, teamSize, listingVolume, needs[], desiredPlanKey, message
 - Consentement contact obligatoire
 

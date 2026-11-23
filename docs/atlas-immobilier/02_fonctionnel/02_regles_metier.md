@@ -1,7 +1,7 @@
 # Règles métier (politiques transverses)
 
 > **Statut**: En partie implémenté (AS-IS) + politiques market-ready (TO-BE)  
-> **Dernière vérification**: 2026-01-07  
+> **Dernière vérification**: 2026-11-23 (§2 réécrit)  
 > **Source of truth**: Oui (pour les règles transverses)  
 > **Dépendances**:  
 - `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`  
@@ -26,26 +26,35 @@ Ce document centralise les règles applicables **à tous les métiers** (vente, 
 - Passage vers `CRM_CLOSED_LOST` impose `LOSS_REASON`
 - Passage vers `CRM_CLOSED_WON` impose `WON_REASON`
 
-## 2) Consentement & communications (STRICT — market-ready)
+## 2) Consentement & communications (AS-IS, 2026-11)
+
+> Réécrit le 2026-11-23 pour refléter le code (`OutboundMessageService`, `DossierWhatsAppService`, `ConsentRequestService`). La règle précédente (« GRANTED requis pour tout envoi ») bloquait la réponse à un client qui écrit en premier, et l’envoi du lien de consentement lui-même.
 
 ### Principe
-Toute communication sortante non triviale doit être conforme. Politique : **deny by default**.
+Le consentement est enregistré **par dossier, par canal et par type** (`MARKETING`, `TRANSACTIONNEL`, …). Statuts : `GRANTED`, `DENIED`, `PENDING`, `REVOKED`, `EXPIRED`. Tout refus d’envoi produit une erreur 422 et un audit `BLOCKED_BY_POLICY`.
 
-### Règle bloquante
-- Si `direction=OUTBOUND` et `channel in (WHATSAPP, SMS, EMAIL)`  
-  → consentement **GRANTED** requis (sinon refus).
+### Trois situations
 
-### Preuve (TO-BE)
-Un consentement GRANTED doit transporter une preuve minimale (meta) :
-- source (`UI`, `WHATSAPP_INBOUND`, `IMPORT`, etc.)
-- texte de preuve / référence (selon process)
-- timestamp (ou usage des champs created_at)
+| Situation | Exemple | Règle |
+|---|---|---|
+| Prospection | Pitch d’un bien, relance commerciale, campagne | `MARKETING` **GRANTED** avec preuve d’opt-in double : `doubleOptInConfirmed=true`, `optInTimestamp`, `ipAddress`. Seul le client peut la donner, via le lien de consentement |
+| Suivi du dossier | Rappel de RDV, information sur le dossier en cours | `TRANSACTIONNEL` **GRANTED** sur le canal. L’agent peut l’enregistrer lui-même ; la preuve porte `source=AGENT` (`ConsentementService.stampAgentProof`) |
+| Réponse au client | Le client a écrit sur WhatsApp il y a moins de 24 h | Aucun accord préalable requis. Refus seulement si `TRANSACTIONNEL` est `DENIED` ou `REVOKED`. Hors fenêtre de 24 h : 409, il faut un template approuvé par Meta |
+
+### Lien de consentement
+- L’agent génère un lien (`POST /api/v1/dossiers/{id}/consent-links`), valable quelques jours, et l’envoie au client, en général comme réponse WhatsApp dans la fenêtre de 24 h.
+- Le client accepte ou refuse sur une page publique (`/consentement/{token}`). L’acceptation crée le consentement `MARKETING` avec la preuve d’opt-in double (IP, horodatage, user-agent).
+
+### Politique Meta (rappel)
+- Un message du client **n’est pas** un opt-in pour des messages proactifs ultérieurs.
+- L’opt-in peut être demandé dans la conversation WhatsApp.
+- Décisions produit encore ouvertes : autoriser un pitch dans la fenêtre de 24 h d’un message client ; accepter un « OUI » dans la conversation comme opt-in.
 
 ## 3) Messages (journalisation + traçabilité)
 
 - Tout message est rattaché à un dossier (case).
 - Tout OUTBOUND :
-  - est bloqué sans consentement
+  - respecte les règles de consentement du §2
   - crée un audit event + activity `MESSAGE_LOG`
 - Inbound WhatsApp :
   - association dossier (téléphone) + idempotence
@@ -72,33 +81,33 @@ Politiques :
 - Toutes les opérations core (dossier, statut, message, rdv, consentement) génèrent un audit event.
 - Les changements de statut génèrent status_history + activity `STATUS_CHANGE`.
 
-## 6) Coop Habitat (TO-BE) — règles de gouvernance & cotisation
+## 7) Coop Habitat (TO-BE) — règles de gouvernance & cotisation
 
 > **Périmètre** : module “Coop Habitat” (groupement).  
 > **Source of truth** : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`.
 
-### 6.1 FIFO d’allocation (et non FIFO de livraison)
+### 7.1 FIFO d’allocation (et non FIFO de livraison)
 - Le rang FIFO détermine la **priorité d’attribution** d’un lot.
 - La livraison dépend des jalons du projet (`COOP_PROJECT`) ; un lot peut être “attribué” avant d’être livrable.
 
-### 6.2 Éligibilité à l’allocation (cut-off)
+### 7.2 Éligibilité à l’allocation (cut-off)
 - Un membre est éligible à l’allocation si :
   - `member_status=ACTIVE`,
   - contributions à jour à la date de cut-off (ex: toutes les échéances <= cut-off confirmées),
   - absence de blocage (litige / suspension), si activé par la gouvernance.
 
-### 6.3 Cotisation croissante (indexation) — règle de transparence
+### 7.3 Cotisation croissante (indexation) — règle de transparence
 - Toute formule d’indexation doit être :
   - lisible (table d’échéances + explication),
   - versionnée (changement de formule = nouvelle version + notification),
   - tracée (audit + PV si décision collective).
 
-### 6.4 Preuve & audit (obligatoire)
+### 7.4 Preuve & audit (obligatoire)
 - Toute décision critique doit être justifiée par un document (PV/contrat) attaché et auditée :
   - ouverture/fermeture de collecte,
   - validation d’une allocation,
   - exclusion/remplacement d’un membre,
   - modification des règles financières.
 
-### 6.5 Notifications obligatoires (Choix B)
+### 7.5 Notifications obligatoires (Choix B)
 - Appels de fonds, rappels, allocations et jalons projet déclenchent des notifications outbound (WhatsApp) via Outbox (voir `03_technique/09_notifications.md`).

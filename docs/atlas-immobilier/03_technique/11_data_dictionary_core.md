@@ -103,7 +103,7 @@
 | `annonce_id` | UUID | ❌ | FK (optionnel) |
 | `case_type_code` | text | ✅ | ex: `CRM_LEAD`, `CRM_LEAD_BUY`, `CRM_LEAD_RENT`, `CRM_MANDATE`, `CRM_SALE_TRANSACTION`, `CRM_RENTAL_TRANSACTION`, `COOP_GROUP`, `COOP_PROJECT`, `COOP_MEMBER`, `COOP_ALLOCATION_CASE` (voir nomenclature) |
 | `status_code` | text | ✅ | ex: `CRM_NEW`, `CRM_CONTACTED`, `CRM_SCREENING`, `CRM_QUALIFIED`, `CRM_VISIT_PLANNED`, `CRM_OFFER_RECEIVED`, `CRM_CLOSED_WON`, `CRM_CLOSED_LOST` (selon workflow; voir nomenclature) |
-| `source_code` | text | ✅ | ex: `LEAD_SOURCE_WHATSAPP`, `LEAD_SOURCE_FORM` |
+| `source_code` | text | ✅ | ex: `WHATSAPP`, `WEBSITE` (voir nomenclature §5.5) |
 | `contact_name` | text | ✅ | |
 | `phone` | text | ✅ | normalisé |
 | `email` | text | ❌ | |

@@ -1,7 +1,7 @@
 # Workflow Dossier — machine à états
 
 > **Statut**: Implémenté (AS-IS) + trajectoire vers workflow configurable (TO-BE)  
-> **Dernière vérification**: 2026-01-07  
+> **Dernière vérification**: 2026-11-23  
 > **Source of truth**: Oui (pour la logique workflow dossier)  
 > **Dépendances**:  
 - `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`  
@@ -18,7 +18,12 @@ Garantir que les dossiers suivent des cheminements contrôlés (transitions auto
 
 ## AS-IS (implémentation actuelle)
 
-### Fonctionnement
+### Fonctionnement (vérifié le 2026-11-23)
+- Deux modèles coexistent sur l’entité `Dossier` :
+  - l’enum `DossierStatus` : `NEW`, `QUALIFYING`, `QUALIFIED`, `APPOINTMENT`, `WON`, `LOST`, validé par `DossierStatusTransitionService` ;
+  - les colonnes `case_type` et `status_code`, validées par `DossierStatusCodeValidationService` contre les référentiels (`CASE_TYPE`, `CASE_STATUS`) et `WorkflowDefinition`.
+- Le référentiel `CASE_STATUS` seedé contient à la fois les codes `CRM_*` et les valeurs de l’enum (`NEW`, `QUALIFYING`, …).
+- Le choix d’un modèle unique fait l’objet d’un ADR dédié.
 - Le backend expose une logique de validation de transitions de statut.
 - Les transitions autorisées sont contrôlées côté service.
 - Les changements de statut alimentent un historique (status_history).

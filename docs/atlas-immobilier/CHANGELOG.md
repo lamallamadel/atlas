@@ -1,10 +1,22 @@
+# Changelog — v0.7-docs-realigned-2026-11-23
+
+Relecture des specs contre le code de `master` (commit `6c3db9ad`).
+- `05_roadmap/00_etat_avancement_mvp.md` réécrit depuis le code : stack réelle, sites et routes, AS-IS par domaine, modules livrés hors spec, écarts bloquants.
+- `05_roadmap/02_backlog_mvp_execution.md` : nouvel ordre de travail (leads multi-agences, publication gouvernée, signalements, rôles d’agence).
+- `02_fonctionnel/02_regles_metier.md` §2 : règles de consentement réelles (MARKETING en opt-in double, TRANSACTIONNEL, réponse dans la fenêtre WhatsApp de 24 h, lien de consentement).
+- WhatsApp : l’API WhatsApp Cloud de Meta remplace Twilio dans la doc (Twilio reste pour les SMS).
+- Codes : `CRM_LEAD_B2B_DEMO` unifié, raisons de perte B2B alignées sur la nomenclature, sources de lead sans préfixe (comme en base), résultats de RDV corrigés.
+- Coop Habitat : statut « backend seul ». Branding : état actuel `afroware.app` + routes `/`, `/biz`, `/pro`.
+- `docs/implementations_archive/` déplacé dans `docs/archive/implementations/` ; liens morts vers des fichiers supprimés corrigés.
+- `CLAUDE.md` : Angular 21, prochaine migration V157.
+
 # Changelog — v0.4-week3-2026-01-04
 
 > **Statut**: Historique  
 > **Dernière vérification**: 2026-01-10  
 > **Source of truth**: Non  
 > **Dépendances**:  
-- `docs/PROJECT_DOCUMENTATION_INDEX.md`
+- `docs/atlas-immobilier/README.md`
 
 ## Week 3 — Sécurité + multi-tenancy (implémenté)
 - Ajout **Keycloak** dans `infra/docker-compose.yml` + import automatique du realm (`myrealm`) et utilisateur de démonstration.

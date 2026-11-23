@@ -56,6 +56,8 @@ Valeurs autorisées (contrat):
 - `ANN_SUSPENDED`: suspendu (modération / fraude / litige)
 - `ANN_ARCHIVED`: archivé (fin de vie, non public)
 
+> **Écart avec le code (2026-11-23)** : l’enum `AnnonceStatus` vaut `DRAFT`, `PUBLISHED`, `ACTIVE`, `PAUSED`, `ARCHIVED`, sans `SUSPENDED`. Alignement prévu dans le backlog (publication gouvernée).
+
 ## 4.3 `MEDIA_TYPE` (médias annonce)
   - `MEDIA_DELETE`, `MEDIA_IMAGE`, `MEDIA_UPLOAD`
 
@@ -141,8 +143,11 @@ Ces statuts existent dans la documentation et restent valides. Leur usage exact 
 
 # 5.5 `LEAD_SOURCE` (provenance)
 
-  - `LEAD_SOURCE_WHATSAPP`, `LEAD_SOURCE_FORM`, `LEAD_SOURCE_PHONE`, `LEAD_SOURCE_BIZ_DEMO_FORM`, `LEAD_SOURCE_BIZ_CONTACT_FORM`
-  - `LEAD_SOURCE_AVITO`, `LEAD_SOURCE_MUBAWAB`, `LEAD_SOURCE_OTHER`
+  - `WHATSAPP`, `PHONE_CALL`, `SMS`, `EMAIL`, `WEBSITE`, `WALK_IN`, `REFERRAL`, `PARTNER`
+  - `FACEBOOK`, `INSTAGRAM`, `AVITO`, `MUBAWAB`, `OTHER`
+  - À ajouter au référentiel (utilisés ou spécifiés, absents de la base) : `PORTAIL`, `VITRINE`, `BIZ_DEMO_FORM`, `BIZ_CONTACT_FORM`
+
+> Aligné le 2026-11-23 sur la base (seed V15) : les sources n’ont **pas** de préfixe `LEAD_SOURCE_`, le `dict_type` suffit à les distinguer. Le front envoie aujourd’hui `PORTAIL` et `VITRINE`, absents du référentiel.
 
 
 

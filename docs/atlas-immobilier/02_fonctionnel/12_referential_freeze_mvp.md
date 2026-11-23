@@ -10,7 +10,7 @@
 ## 1) Dossiers CRM — B2B Demo
 
 ### Case Type
-- `CASE_TYPE_LEAD_B2B_DEMO`
+- `CRM_LEAD_B2B_DEMO`
 
 ### Status codes (MVP)
 - `B2B_NEW`
@@ -29,14 +29,17 @@
 - `B2B_T_LOSE` : {NEW|QUALIFIED|SCHEDULED|DONE} → LOST (require: `lostReasonCode`)
 
 ### Lost reasons (MVP)
-- `B2B_LOST_NO_BUDGET`
-- `B2B_LOST_NOT_READY`
-- `B2B_LOST_COMPETITOR`
 - `B2B_LOST_NO_RESPONSE`
+- `B2B_LOST_NO_BUDGET`
+- `B2B_LOST_NOT_FIT`
+- `B2B_LOST_COMPETITOR`
+- `B2B_LOST_TIMING`
 - `B2B_LOST_OTHER`
 
+> Aligné le 2026-11-23 sur `00_nomenclature_codes.md` §5.9 (`NOT_READY` remplacé par `NOT_FIT` et `TIMING`).
+
 ### Lead sources (Biz)
-- `LEAD_SOURCE_BIZ_DEMO_FORM`
+- `BIZ_DEMO_FORM`
 
 ---
 

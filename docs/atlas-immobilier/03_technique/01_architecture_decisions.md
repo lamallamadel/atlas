@@ -44,7 +44,7 @@ Docs :
 
 ---
 
-## Décision E — Modules activables via feature flags (entitlements)
+## Décision F — Modules activables via feature flags (entitlements)
 **Choix** : capacité “plateforme unique” grâce à des **modules activables** tenant‑scopés (`org_id`) et des quotas.
 - Source de vérité : `docs/atlas-immobilier/02_fonctionnel/05_feature_flags_plans.md`
 - Avantages : packaging produit, déploiement progressif, réduction du scope MVP.

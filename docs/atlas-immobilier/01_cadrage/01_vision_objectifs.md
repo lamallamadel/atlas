@@ -4,7 +4,6 @@
 > **Dernière vérification**: 2026-01-08  
 > **Source of truth**: Non (document de vision — la taxonomie/workflows restent la vérité opérationnelle)  
 > **Dépendances**:  
-- `docs/PRODUCT_SPECS_SUMMARY.md`  
 - `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`  
 - `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`
 

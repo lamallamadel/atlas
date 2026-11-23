@@ -4,7 +4,7 @@
 > **Dernière vérification**: 2026-01-07  
 > **Source of truth**: Non  
 > **Dépendances**:  
-- `docs/PROJECT_DOCUMENTATION_INDEX.md`
+- `docs/atlas-immobilier/README.md`
 
 ## État d’avancement (référence)
 - **Week 1** : foundations monorepo + infra PostgreSQL
@@ -58,7 +58,7 @@ Les sprints ci-dessous décrivent la suite logique (Advanced CRM).
 ## Sprint G — Agent IA & WhatsApp (Phase 2 Agentic)
 - ✅ Terminé
 - NLP Backend `agent-service` connecté au Front (CMD+K / Chat)
-- WhatsApp inbound & outbound via Twilio
+- WhatsApp inbound & outbound via l’API WhatsApp Cloud de Meta (SMS via Twilio)
 
 ## Sprint H — Automatisation & IA (Phase 2 Agentic)
 - ✅ Terminé

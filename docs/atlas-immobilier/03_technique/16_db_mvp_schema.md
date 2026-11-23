@@ -76,9 +76,9 @@ Index :
 ### 2.4 `case` (CRM)
 - `id` (PK)
 - `org_id`
-- `case_type_code` (ex: CASE_TYPE_LEAD_B2B_DEMO)
+- `case_type_code` (ex: CRM_LEAD_B2B_DEMO)
 - `status_code` (B2B_*)
-- `source_code` (LEAD_SOURCE_*)
+- `source_code` (codes `LEAD_SOURCE`)
 - `assignee_user_id` (nullable)
 - `title` (option)
 - `payload_json` (qualification, needs, plan, utm)

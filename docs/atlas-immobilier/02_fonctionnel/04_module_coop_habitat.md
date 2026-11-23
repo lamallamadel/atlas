@@ -1,6 +1,6 @@
 # Module “Coop Habitat” (groupement d’habitat participatif) — MVP v1
 
-> **Statut**: TO-BE (extension MVP v1 — non implémentée)  
+> **Statut**: Backend implémenté (entités + contrôleurs `Coop*`), aucun écran — vérifié le 2026-11-23  
 > **Dernière vérification**: 2026-01-07  
 > **Source of truth**: Oui (pour le concept Coop Habitat)  
 > **Dépendances**:  
@@ -22,10 +22,11 @@ Ajouter à Atlas Immobilier un module “**coopérative d’habitat**” (ou gro
 
 Ce module vise **la robustesse opérationnelle** (confiance, preuves, règles) avant l’intégration de paiement (fintech) : la V1 est **déclarative** (justificatifs), marketable comme “outil de gestion de coop d’habitat”.
 
-## AS-IS (aujourd’hui)
+## AS-IS (2026-11-23)
 
-- Atlas couvre le CRM immobilier “dossiers/annonces/rdv/messages/consentement/audit/timeline”.
-- Pas de gestion de groupements, de cotisations, ni d’allocation de lots.
+- Backend : entités `CoopGroup`, `CoopMember`, `CoopProject`, `CoopLot`, `CoopContribution` et leurs contrôleurs REST.
+- Pas d’écran dans le frontend.
+- Non vérifié contre cette spec : règles d’allocation FIFO, éligibilité au cut-off, indexation des cotisations, notifications WhatsApp.
 
 ## TO-BE (cible MVP v1 Coop Habitat)
 

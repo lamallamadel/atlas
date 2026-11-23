@@ -6,7 +6,7 @@
 > **Dépendances**:  
 - `docs/atlas-immobilier/02_fonctionnel/02_regles_metier.md`  
 - `docs/atlas-immobilier/03_technique/03_api_contracts.md`  
-- `WHATSAPP_INTEGRATION.md` (racine repo)
+- `docs/whatsapp-test-setup.md`
 - `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`
 
 ## Objectif
@@ -41,13 +41,15 @@ Ce document décrit l’architecture et les contrats attendus pour attaquer le m
 
 ---
 
+> **Implémentation (2026-11)** : WhatsApp passe par l’API WhatsApp Cloud de Meta (`WhatsAppCloudApiProvider`, v25.0) ; la configuration (phone_number_id, jeton, App Secret) est stockée par organisation dans `whatsapp_provider_config`, le verify token du webhook vient de `WHATSAPP_WEBHOOK_VERIFY_TOKEN`. Les SMS passent par Twilio (`TwilioSmsProvider`). Worker : `OutboundJobWorker` (scrutation toutes les 5 s, tenant posé par message).
+
 # 1) Règles produit (bloquantes)
 
-## 1.1 Consentement strict (deny by default)
-- Tout message OUTBOUND vers `WHATSAPP/SMS/EMAIL` nécessite un consentement **GRANTED** (par canal).
+## 1.1 Consentement
+- Prospection : `MARKETING` GRANTED avec opt-in double ; suivi : `TRANSACTIONNEL` GRANTED ; réponse au client dans la fenêtre WhatsApp de 24 h : pas d’accord préalable, sauf refus ou retrait. Détail : `02_regles_metier.md` §2.
 - En cas de refus :
-  - l’API répond 4xx (ex : 409/422) avec un message explicite
-  - un audit event “BLOCKED_BY_POLICY” est enregistré (recommandé)
+  - l’API répond 422 (409 hors fenêtre de 24 h) avec un message explicite
+  - un audit event `BLOCKED_BY_POLICY` est enregistré
 
 Référence : `docs/atlas-immobilier/02_fonctionnel/02_regles_metier.md`
 
@@ -144,7 +146,7 @@ Champs recommandés :
 
 # 5) WhatsApp specifics (à respecter)
 
-**Référence détaillée existante** : `WHATSAPP_INTEGRATION.md` (racine repo)
+**Référence détaillée existante** : `docs/whatsapp-test-setup.md`
 
 Points produit à intégrer dans l’implémentation :
 - Distinction template vs session message (fenêtre 24h selon règles WhatsApp)
