@@ -43,7 +43,7 @@ public class ReverseMatchingService {
     private static final Logger log = LoggerFactory.getLogger(ReverseMatchingService.class);
 
     static final Set<AnnonceStatus> MATCHABLE =
-            Set.of(AnnonceStatus.ACTIVE, AnnonceStatus.PUBLISHED, AnnonceStatus.DRAFT);
+            Set.of(AnnonceStatus.PUBLISHED, AnnonceStatus.DRAFT);
     static final Set<DossierStatus> CLOSED = Set.of(DossierStatus.WON, DossierStatus.LOST);
 
     private final AnnonceRepository annonceRepository;

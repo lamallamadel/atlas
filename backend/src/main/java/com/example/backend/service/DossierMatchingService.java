@@ -43,7 +43,7 @@ public class DossierMatchingService {
 
     public enum Scope {
         /** Annonces actives, publiées et brouillons. */
-        ALL(Set.of(AnnonceStatus.ACTIVE, AnnonceStatus.PUBLISHED, AnnonceStatus.DRAFT)),
+        ALL(Set.of(AnnonceStatus.PUBLISHED, AnnonceStatus.DRAFT)),
         /** Brouillons uniquement : biens pas encore diffusés. */
         OFF_MARKET(Set.of(AnnonceStatus.DRAFT));
 

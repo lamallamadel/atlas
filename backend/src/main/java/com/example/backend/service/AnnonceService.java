@@ -40,6 +40,8 @@ public class AnnonceService {
     @Nullable private final BrainScoringService brainScoringService;
     @Nullable private final OrganizationSettingsService organizationSettingsService;
     @Nullable private final ReverseMatchingService reverseMatchingService;
+    private final AnnoncePublicationService publicationService;
+    private final AnnonceQualityService qualityService;
 
     public AnnonceService(
             AnnonceRepository annonceRepository,
@@ -49,7 +51,11 @@ public class AnnonceService {
             @Autowired(required = false) @Nullable BrainScoringService brainScoringService,
             @Autowired(required = false) @Nullable
                     OrganizationSettingsService organizationSettingsService,
-            @Autowired(required = false) @Nullable ReverseMatchingService reverseMatchingService) {
+            @Autowired(required = false) @Nullable ReverseMatchingService reverseMatchingService,
+            AnnoncePublicationService publicationService,
+            AnnonceQualityService qualityService) {
+        this.publicationService = publicationService;
+        this.qualityService = qualityService;
         this.annonceRepository = annonceRepository;
         this.annonceMapper = annonceMapper;
         this.searchService = searchService;
@@ -92,8 +98,13 @@ public class AnnonceService {
         annonce.setCreatedAt(now);
         annonce.setUpdatedAt(now);
 
-        validateActiveAnnonce(annonce);
-        checkAnnonceQuota(orgId, annonce);
+        // Une annonce naît en brouillon ; demander un autre statut passe par les règles de
+        // publication (une annonce neuve ne peut être que publiée directement).
+        AnnonceStatus requested = annonce.getStatus();
+        annonce.setStatus(AnnonceStatus.DRAFT);
+        if (requested != null && requested != AnnonceStatus.DRAFT) {
+            changeStatus(orgId, annonce, requested);
+        }
 
         Annonce saved = annonceRepository.save(annonce);
         if (searchService != null) {
@@ -163,11 +174,12 @@ public class AnnonceService {
             throw new IllegalStateException("Cannot update an archived annonce");
         }
 
+        AnnonceStatus previous = annonce.getStatus();
         annonceMapper.updateEntity(annonce, request);
-
-        validateActiveAnnonce(annonce);
-        if (request.getStatus() != null && AnnonceStatus.ACTIVE.equals(request.getStatus())) {
-            checkAnnonceQuota(orgId, annonce);
+        AnnonceStatus requested = annonce.getStatus();
+        annonce.setStatus(previous);
+        if (requested != null && requested != previous) {
+            changeStatus(orgId, annonce, requested);
         }
 
         annonce.setUpdatedAt(LocalDateTime.now());
@@ -186,7 +198,9 @@ public class AnnonceService {
 
     @Transactional(readOnly = true)
     public Page<AnnonceResponse> list(
-            AnnonceStatus status, String q, String city, String type, Pageable pageable) {
+            AnnonceStatus requestedStatus, String q, String city, String type, Pageable pageable) {
+        // ?status=ACTIVE des anciens clients
+        final AnnonceStatus status = AnnonceStatus.normalize(requestedStatus);
 
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
@@ -305,15 +319,15 @@ public class AnnonceService {
                 }
 
                 if (request.getUpdates() != null) {
-                    if (request.getUpdates().getStatus() != null) {
-                        annonce.setStatus(request.getUpdates().getStatus());
-                    }
                     if (request.getUpdates().getCity() != null) {
                         annonce.setCity(request.getUpdates().getCity());
                     }
+                    AnnonceStatus requested =
+                            AnnonceStatus.normalize(request.getUpdates().getStatus());
+                    if (requested != null && requested != annonce.getStatus()) {
+                        changeStatus(orgId, annonce, requested);
+                    }
                 }
-
-                validateActiveAnnonce(annonce);
 
                 annonce.setUpdatedAt(LocalDateTime.now());
                 annonceRepository.save(annonce);
@@ -327,26 +341,74 @@ public class AnnonceService {
         return new BulkOperationResponse(successCount, failureCount, errors);
     }
 
-    private void validateActiveAnnonce(Annonce annonce) {
-        if (AnnonceStatus.ACTIVE.equals(annonce.getStatus())) {
-            List<String> missingFields = new ArrayList<>();
-
-            if (annonce.getTitle() == null || annonce.getTitle().trim().isEmpty()) {
-                missingFields.add("title");
-            }
-            if (annonce.getPrice() == null) {
-                missingFields.add("price");
-            }
-            if (annonce.getCity() == null || annonce.getCity().trim().isEmpty()) {
-                missingFields.add("city");
-            }
-
-            if (!missingFields.isEmpty()) {
-                throw new IllegalArgumentException(
-                        "Cannot set annonce to ACTIVE without required fields: "
-                                + String.join(", ", missingFields));
-            }
+    /**
+     * Change le statut selon les règles de publication ({@link AnnoncePublicationService}) : 409 si
+     * la transition n'existe pas, 400 si la publication est bloquée. Une suspension demandée par
+     * simple changement de statut est une pause de l'agence ({@code OWNER_PAUSE}).
+     */
+    private void changeStatus(String orgId, Annonce annonce, AnnonceStatus requested) {
+        AnnonceStatus target = AnnonceStatus.normalize(requested);
+        String code = AnnoncePublicationService.transitionCode(annonce.getStatus(), target);
+        if (code == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT,
+                    "TRANSITION_NOT_ALLOWED: impossible de passer de "
+                            + annonce.getStatus()
+                            + " à "
+                            + target);
         }
+        if (AnnoncePublicationService.T_PUBLISH.equals(code)) {
+            checkAnnonceQuota(orgId);
+        }
+        publicationService.apply(
+                annonce,
+                code,
+                AnnoncePublicationService.T_SUSPEND.equals(code) ? "OWNER_PAUSE" : null,
+                null);
+    }
+
+    /** Transitions possibles, qualité et signaux de confiance de l'annonce. */
+    @Transactional(readOnly = true)
+    public com.example.backend.dto.AnnoncePublicationResponse getPublication(Long id) {
+        Annonce annonce = findEntityById(id);
+        return com.example.backend.dto.AnnoncePublicationResponse.of(
+                annonce,
+                qualityService.evaluate(annonce),
+                publicationService.options(annonce),
+                AnnoncePublicationService.trustOverride(annonce));
+    }
+
+    @CacheEvict(
+            value = "annonce",
+            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
+    @Transactional
+    public AnnonceResponse applyTransition(
+            Long id, String transitionCode, String reasonCode, String comment) {
+        String orgId = TenantContext.getOrgId();
+        Annonce annonce = findEntityById(id);
+        if (AnnoncePublicationService.T_PUBLISH.equals(transitionCode)) {
+            checkAnnonceQuota(orgId);
+        }
+        publicationService.apply(annonce, transitionCode, reasonCode, comment);
+        annonce.setUpdatedAt(LocalDateTime.now());
+        Annonce saved = annonceRepository.save(annonce);
+        if (searchService != null) {
+            searchService.indexAnnonce(saved);
+        }
+        return annonceMapper.toResponse(saved);
+    }
+
+    @CacheEvict(
+            value = "annonce",
+            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
+    @Transactional
+    public com.example.backend.dto.AnnoncePublicationResponse overrideTrust(
+            Long id, String reason) {
+        Annonce annonce = findEntityById(id);
+        publicationService.overrideTrust(annonce, reason);
+        annonce.setUpdatedAt(LocalDateTime.now());
+        annonceRepository.save(annonce);
+        return getPublication(id);
     }
 
     @Transactional(readOnly = true)
@@ -386,7 +448,9 @@ public class AnnonceService {
 
     @Transactional(readOnly = true)
     public Page<Annonce> findAll(
-            AnnonceStatus status, String q, String city, String type, Pageable pageable) {
+            AnnonceStatus requestedStatus, String q, String city, String type, Pageable pageable) {
+        // ?status=ACTIVE des anciens clients
+        final AnnonceStatus status = AnnonceStatus.normalize(requestedStatus);
         Specification<Annonce> spec =
                 (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
@@ -439,22 +503,26 @@ public class AnnonceService {
         return annonceRepository.findAll(spec, pageable);
     }
 
-    private void checkAnnonceQuota(String orgId, Annonce annonce) {
-        if (AnnonceStatus.ACTIVE.equals(annonce.getStatus())
-                && organizationSettingsService != null) {
-            com.example.backend.dto.QuotaSettingsDto quotas =
-                    organizationSettingsService.getQuotas(orgId);
-            if (quotas != null
-                    && quotas.getMaxAnnonces() != null
-                    && quotas.getMaxAnnonces() != -1) {
-                long currentCount =
-                        annonceRepository.countByOrgIdAndStatus(orgId, AnnonceStatus.ACTIVE);
-                if (currentCount >= quotas.getMaxAnnonces()) {
-                    throw new IllegalStateException(
-                            "Annonce quota exceeded. Maximum allowed active annonces is "
-                                    + quotas.getMaxAnnonces()
-                                    + ".");
-                }
+    /** Quota d'annonces publiées de l'agence, vérifié avant chaque publication. */
+    private void checkAnnonceQuota(String orgId) {
+        if (organizationSettingsService == null) {
+            return;
+        }
+        com.example.backend.dto.QuotaSettingsDto quotas;
+        try {
+            quotas = organizationSettingsService.getQuotas(orgId);
+        } catch (com.example.backend.exception.ResourceNotFoundException e) {
+            // Agence sans réglages : aucun quota configuré (l'annonce n'est pas « introuvable »).
+            return;
+        }
+        if (quotas != null && quotas.getMaxAnnonces() != null && quotas.getMaxAnnonces() != -1) {
+            long currentCount =
+                    annonceRepository.countByOrgIdAndStatus(orgId, AnnonceStatus.PUBLISHED);
+            if (currentCount >= quotas.getMaxAnnonces()) {
+                throw new IllegalStateException(
+                        "Annonce quota exceeded. Maximum allowed published annonces is "
+                                + quotas.getMaxAnnonces()
+                                + ".");
             }
         }
     }

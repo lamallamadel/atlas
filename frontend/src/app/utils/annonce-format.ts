@@ -2,10 +2,12 @@
 
 const STATUS_LABELS: Record<string, string> = {
   DRAFT: 'Brouillon',
-  PUBLISHED: 'Publiée',
-  ACTIVE: 'Active',
-  PAUSED: 'En pause',
+  PUBLISHED: 'En ligne',
+  SUSPENDED: 'Suspendue',
   ARCHIVED: 'Archivée',
+  // Anciens noms (avant la migration V158)
+  ACTIVE: 'En ligne',
+  PAUSED: 'Suspendue',
 };
 
 export function annonceStatusLabel(status: string | null | undefined): string {

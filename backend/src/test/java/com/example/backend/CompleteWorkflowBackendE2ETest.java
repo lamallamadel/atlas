@@ -42,7 +42,10 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
             throws Exception {
         AnnonceCreateRequest annonceRequest = new AnnonceCreateRequest();
         annonceRequest.setTitle("Beautiful Apartment in Paris");
-        annonceRequest.setDescription("3 bedroom apartment with great view");
+        annonceRequest.setDescription(
+                "3 bedroom apartment with great view, fully renovated kitchen, parking and"
+                        + " elevator, close to shops and transport.");
+        annonceRequest.setPhotos(java.util.List.of("p1.jpg", "p2.jpg", "p3.jpg"));
         annonceRequest.setCategory("Apartment");
         annonceRequest.setType(AnnonceType.SALE);
         annonceRequest.setAddress("123 Rue de la Paix");
@@ -63,7 +66,7 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
                                         TENANT_ID))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.id").exists())
-                        .andExpect(jsonPath("$.status").value("ACTIVE"))
+                        .andExpect(jsonPath("$.status").value("PUBLISHED"))
                         .andReturn();
 
         AnnonceResponse annonceResponse =
@@ -72,7 +75,7 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         Long annonceId = annonceResponse.getId();
 
         assertThat(annonceId).isNotNull();
-        assertThat(annonceResponse.getStatus()).isEqualTo(AnnonceStatus.ACTIVE);
+        assertThat(annonceResponse.getStatus()).isEqualTo(AnnonceStatus.PUBLISHED);
 
         DossierCreateRequest dossierRequest = new DossierCreateRequest();
         dossierRequest.setAnnonceId(annonceId);

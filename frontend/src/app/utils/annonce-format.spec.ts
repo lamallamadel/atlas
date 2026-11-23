@@ -8,7 +8,9 @@ describe('annonce-format', () => {
   });
 
   it('statuts en français', () => {
-    expect(annonceStatusLabel('PUBLISHED')).toBe('Publiée');
+    expect(annonceStatusLabel('PUBLISHED')).toBe('En ligne');
+    expect(annonceStatusLabel('SUSPENDED')).toBe('Suspendue');
+    expect(annonceStatusLabel('ACTIVE')).toBe('En ligne'); // ancien nom
     expect(annonceStatusLabel('DRAFT')).toBe('Brouillon');
     expect(annonceStatusLabel('INCONNU')).toBe('INCONNU');
   });

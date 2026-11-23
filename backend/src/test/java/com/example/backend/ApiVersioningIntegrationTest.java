@@ -163,7 +163,7 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
         request.setCity("Nice");
         request.setPrice(new BigDecimal("1200000"));
         request.setCurrency("EUR");
-        request.setStatus(AnnonceStatus.PUBLISHED);
+        // Brouillon : ce test vérifie le format de l'API, pas les règles de publication.
 
         mockMvc.perform(
                         withTenantHeaders(
@@ -197,7 +197,7 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
         request.setCity("Marseille");
         request.setPrice(new BigDecimal("1500"));
         request.setCurrency("EUR");
-        request.setStatus(AnnonceStatus.PUBLISHED);
+        // Brouillon : ce test vérifie le format de l'API, pas les règles de publication.
 
         mockMvc.perform(
                         withTenantHeaders(

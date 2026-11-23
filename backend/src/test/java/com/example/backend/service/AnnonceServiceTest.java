@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 import com.example.backend.dto.AnnonceCreateRequest;
 import com.example.backend.dto.AnnonceResponse;
@@ -22,9 +23,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import static org.mockito.Mockito.when;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -272,7 +272,7 @@ class AnnonceServiceTest {
 
     @Test
     void update_HappyPath_ReturnsUpdatedAnnonce() {
-        AnnonceResponse created = annonceService.create(createBasicRequest());
+        AnnonceResponse created = annonceService.create(publishableRequest());
 
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setTitle("Updated Title");
@@ -313,7 +313,7 @@ class AnnonceServiceTest {
     void list_WithStatusFilter_ReturnsFilteredAnnonces() {
         annonceService.create(createBasicRequest());
 
-        AnnonceResponse published = annonceService.create(createBasicRequest());
+        AnnonceResponse published = annonceService.create(publishableRequest());
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setStatus(AnnonceStatus.PUBLISHED);
         annonceService.update(published.getId(), updateRequest);
@@ -447,7 +447,8 @@ class AnnonceServiceTest {
         AnnonceCreateRequest request = createBasicRequest();
         request.setStatus(AnnonceStatus.ACTIVE);
 
-        com.example.backend.dto.QuotaSettingsDto quotas = new com.example.backend.dto.QuotaSettingsDto(5, 100, 1000L, 0, "STARTER");
+        com.example.backend.dto.QuotaSettingsDto quotas =
+                new com.example.backend.dto.QuotaSettingsDto(5, 100, 1000L, 0, "STARTER");
         when(organizationSettingsService.getQuotas(DEFAULT_ORG)).thenReturn(quotas);
 
         assertThatThrownBy(() -> annonceService.create(request))
@@ -464,6 +465,18 @@ class AnnonceServiceTest {
         request.setCity("Paris");
         request.setPrice(BigDecimal.valueOf(100.00));
         request.setCurrency("EUR");
+        return request;
+    }
+
+    /** Requête complète : publiable selon les règles de l'étape 4 (qualité, 3 photos). */
+    private AnnonceCreateRequest publishableRequest() {
+        AnnonceCreateRequest request = createBasicRequest();
+        request.setDescription(
+                "Appartement lumineux, deux chambres, cuisine équipée, proche des commerces et"
+                        + " des transports.");
+        request.setType(com.example.backend.entity.enums.AnnonceType.SALE);
+        request.setSurface(80.0);
+        request.setPhotos(java.util.List.of("p1.jpg", "p2.jpg", "p3.jpg"));
         return request;
     }
 }

@@ -8,7 +8,7 @@ import { DsIconComponent } from '../design-system/icons/ds-icon.component';
 
 export type EntityType = 'annonce' | 'dossier' | 'property';
 
-export type AnnonceStatusType = 'DRAFT' | 'PUBLISHED' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED';
+export type AnnonceStatusType = 'DRAFT' | 'PUBLISHED' | 'SUSPENDED' | 'ARCHIVED' | 'ACTIVE' | 'PAUSED';
 export type DossierStatusType = 'NEW' | 'QUALIFYING' | 'QUALIFIED' | 'APPOINTMENT' | 'WON' | 'LOST';
 export type PropertyStatusType = 'SOLD' | 'RENTED' | 'SIGNED' | 'AVAILABLE' | 'PENDING' | 'RESERVED' | 'WITHDRAWN';
 
@@ -79,6 +79,7 @@ export class BadgeStatusComponent {
       case 'DRAFT': return 'draft';
       case 'PUBLISHED':
       case 'ACTIVE': return 'active';
+      case 'SUSPENDED':
       case 'PAUSED': return 'paused';
       case 'ARCHIVED': return 'archived';
       default: return 'neutral';
@@ -113,9 +114,10 @@ export class BadgeStatusComponent {
   private getAnnonceStatusConfig(status: AnnonceStatusType): StatusConfig {
     switch (status) {
       case 'DRAFT': return { label: 'Brouillon', icon: 'edit', description: 'En rédaction' };
-      case 'PUBLISHED': return { label: 'Publié', icon: 'check', description: 'Public', isPulse: true };
-      case 'ACTIVE': return { label: 'Actif', icon: 'check', description: 'En ligne', isPulse: true };
-      case 'PAUSED': return { label: 'En pause', icon: 'refresh', description: 'Suspendu' };
+      case 'PUBLISHED':
+      case 'ACTIVE': return { label: 'En ligne', icon: 'check', description: 'Visible sur le portail', isPulse: true };
+      case 'SUSPENDED':
+      case 'PAUSED': return { label: 'Suspendue', icon: 'refresh', description: 'Retirée du portail' };
       case 'ARCHIVED': return { label: 'Archivé', icon: 'clock', description: 'Archivé' };
       default: return { label: status, icon: 'info', description: '' };
     }

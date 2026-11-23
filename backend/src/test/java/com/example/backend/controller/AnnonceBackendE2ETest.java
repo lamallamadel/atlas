@@ -299,11 +299,17 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void createAnnonce_WithActiveStatusWithAllRequiredFields_ReturnsCreated() throws Exception {
-        // Given - ACTIVE status with all required fields
+        // Given - ACTIVE (ancien nom de PUBLISHED) avec tout ce qu'exige la publication
         AnnonceCreateRequest request = new AnnonceCreateRequest();
         request.setTitle("Test Title");
+        request.setDescription(
+                "Appartement lumineux, deux chambres, cuisine équipée, proche des commerces et"
+                        + " des transports.");
+        request.setType(AnnonceType.SALE);
+        request.setSurface(80.0);
         request.setCity("Paris");
         request.setPrice(BigDecimal.valueOf(100.00));
+        request.setPhotos(List.of("p1.jpg", "p2.jpg", "p3.jpg"));
         request.setStatus(AnnonceStatus.ACTIVE);
 
         // When & Then - Should succeed
@@ -312,7 +318,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.status").value("PUBLISHED"))
                 .andExpect(jsonPath("$.title").value("Test Title"))
                 .andExpect(jsonPath("$.city").value("Paris"))
                 .andExpect(jsonPath("$.price").value(100.00));
@@ -582,9 +588,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(createTestAnnonce(ORG1, "Beta Property", "Paris"));
 
         // When & Then - Sort by title ascending
-        mockMvc.perform(
-                        withTenantHeaders(get("/api/v1/annonces"), ORG1)
-                                .param("sort", "title,asc"))
+        mockMvc.perform(withTenantHeaders(get("/api/v1/annonces"), ORG1).param("sort", "title,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(3)))
                 .andExpect(jsonPath("$.content[0].title").value("Alpha Property"))
@@ -1290,9 +1294,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(org2Paris);
 
         // When & Then - Filter ORG1 by ACTIVE status only
-        mockMvc.perform(
-                        withTenantHeaders(get("/api/v1/annonces"), ORG1)
-                                .param("status", "ACTIVE"))
+        mockMvc.perform(withTenantHeaders(get("/api/v1/annonces"), ORG1).param("status", "ACTIVE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(3)))
                 .andExpect(jsonPath("$.totalElements").value(3));
@@ -1329,11 +1331,17 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         Annonce annonce = new Annonce();
         annonce.setOrgId(orgId);
         annonce.setTitle(title);
-        annonce.setDescription("Test Description");
+        // Annonce complète : publiable selon les règles de l'étape 4 (qualité, 3 photos).
+        annonce.setDescription(
+                "Test Description — appartement lumineux, deux chambres, cuisine équipée,"
+                        + " proche des commerces et des transports.");
         annonce.setCategory("Test Category");
+        annonce.setType(AnnonceType.SALE);
+        annonce.setSurface(80.0);
         annonce.setCity(city);
         annonce.setPrice(BigDecimal.valueOf(100.00));
         annonce.setCurrency("EUR");
+        annonce.setPhotos(List.of("p1.jpg", "p2.jpg", "p3.jpg"));
         annonce.setStatus(AnnonceStatus.DRAFT);
         return annonce;
     }

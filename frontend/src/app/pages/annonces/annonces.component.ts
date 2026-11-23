@@ -74,10 +74,9 @@ export class AnnoncesComponent implements OnInit {
 
   readonly statusFilters: DsFilterOption[] = [
     { value: 'DRAFT', label: 'Brouillons' },
-    { value: 'PUBLISHED', label: 'Publiés' },
-    { value: 'ACTIVE', label: 'Actifs' },
-    { value: 'PAUSED', label: 'En pause' },
-    { value: 'ARCHIVED', label: 'Archivés' }
+    { value: 'PUBLISHED', label: 'En ligne' },
+    { value: 'SUSPENDED', label: 'Suspendues' },
+    { value: 'ARCHIVED', label: 'Archivées' }
   ];
 
   readonly cityOptions: DsSelectOption[] = [
@@ -215,8 +214,10 @@ export class AnnoncesComponent implements OnInit {
 
   getAnnonceBadgeStatus(status: string): DsBadgeStatus {
     switch (status) {
+      case 'PUBLISHED':
       case 'ACTIVE': return 'active';
       case 'DRAFT': return 'draft';
+      case 'SUSPENDED':
       case 'PAUSED': return 'paused';
       case 'ARCHIVED': return 'archived';
       default: return 'neutral';

@@ -200,8 +200,8 @@
                   <div class="annonce-row__title">{{ a.title }}</div>
                   <div class="annonce-row__sub">{{ a.city }} · {{ formatPrice(a) }}</div>
                 </div>
-                <ds-badge [status]="a.status === 'ACTIVE' ? 'active' : a.status === 'DRAFT' ? 'draft' : 'neutral'">
-                  {{ a.status }}
+                <ds-badge [status]="(a.status === 'PUBLISHED' || a.status === 'ACTIVE') ? 'active' : a.status === 'DRAFT' ? 'draft' : 'neutral'">
+                  {{ statusLabel(a.status) }}
                 </ds-badge>
               </div>
             }

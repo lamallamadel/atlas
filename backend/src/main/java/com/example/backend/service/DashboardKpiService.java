@@ -75,7 +75,7 @@ public class DashboardKpiService {
         Long previousCount;
 
         if (period == null || period.isEmpty()) {
-            Long count = annonceRepository.countByStatusAndOrgId(AnnonceStatus.ACTIVE, orgId);
+            Long count = annonceRepository.countByStatusAndOrgId(AnnonceStatus.PUBLISHED, orgId);
             currentCount = (count != null) ? count : 0L;
             previousCount = currentCount;
         } else {
@@ -83,18 +83,19 @@ public class DashboardKpiService {
             LocalDateTime previousStartDate = getPreviousStartDateForPeriod(period, startDate);
 
             if (startDate == null || previousStartDate == null) {
-                Long count = annonceRepository.countByStatusAndOrgId(AnnonceStatus.ACTIVE, orgId);
+                Long count =
+                        annonceRepository.countByStatusAndOrgId(AnnonceStatus.PUBLISHED, orgId);
                 currentCount = (count != null) ? count : 0L;
                 previousCount = currentCount;
             } else {
                 Long current =
                         annonceRepository.countByStatusAndCreatedAtAfter(
-                                AnnonceStatus.ACTIVE, orgId, startDate);
+                                AnnonceStatus.PUBLISHED, orgId, startDate);
                 currentCount = (current != null) ? current : 0L;
 
                 Long previous =
                         annonceRepository.countByStatusAndCreatedAtBetween(
-                                AnnonceStatus.ACTIVE, orgId, previousStartDate, startDate);
+                                AnnonceStatus.PUBLISHED, orgId, previousStartDate, startDate);
                 previousCount = (previous != null) ? previous : 0L;
             }
         }

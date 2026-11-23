@@ -23,7 +23,7 @@ describe('BadgeStatusComponent', () => {
   it('should return correct status label for annonce ACTIVE', () => {
     fixture.componentRef.setInput('status', 'ACTIVE');
     fixture.componentRef.setInput('entityType', 'annonce');
-    expect(component.getStatusLabel()).toBe('Actif');
+    expect(component.getStatusLabel()).toBe('En ligne'); // ACTIVE = ancien nom de PUBLISHED
   });
 
   it('should return correct status icon for annonce ACTIVE', () => {
@@ -35,7 +35,7 @@ describe('BadgeStatusComponent', () => {
   it('should return correct status description for annonce ACTIVE', () => {
     fixture.componentRef.setInput('status', 'ACTIVE');
     fixture.componentRef.setInput('entityType', 'annonce');
-    expect(component.getStatusDescription()).toBe('En ligne');
+    expect(component.getStatusDescription()).toBe('Visible sur le portail');
   });
 
   it('should pulse for ACTIVE annonce status', () => {
