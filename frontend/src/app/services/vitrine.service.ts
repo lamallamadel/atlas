@@ -46,7 +46,7 @@ export class VitrineService {
         leadPhone: data.tel,
         leadSource: 'VITRINE',
         notes: notes,
-        caseType: 'DEMO'
+        caseType: 'CRM_LEAD_B2B_DEMO'
     }).pipe(
       map(() => ({ success: true }))
     );
@@ -65,7 +65,7 @@ export class VitrineService {
         leadPhone: data.tel || 'NOT_PROVIDED',
         leadSource: 'VITRINE',
         notes: notes,
-        caseType: 'INFO'
+        caseType: 'CRM_LEAD'
     }).pipe(
       map(() => ({ success: true }))
     );

@@ -50,7 +50,8 @@ public class DossierMapperV2 {
         response.setStatusCode(
                 dossier.getStatusCode() != null
                         ? dossier.getStatusCode()
-                        : (dossier.getStatus() != null ? dossier.getStatus().name() : null));
+                        : com.example.backend.workflow.DossierStatusCodes.toCode(
+                                dossier.getStatus()));
         response.setLossReason(dossier.getLossReason());
         response.setWonReason(dossier.getWonReason());
         response.setScore(dossier.getScore());

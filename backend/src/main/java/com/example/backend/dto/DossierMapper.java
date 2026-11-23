@@ -5,6 +5,7 @@ import com.example.backend.entity.PartiePrenanteEntity;
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AnnonceRepository;
+import com.example.backend.workflow.DossierStatusCodes;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
@@ -31,11 +32,11 @@ public class DossierMapper {
         dossier.setStatus(DossierStatus.NEW);
         dossier.setSource(request.getSource());
 
-        dossier.setCaseType(request.getCaseType());
+        dossier.setCaseType(DossierStatusCodes.effectiveCaseType(request.getCaseType()));
         dossier.setStatusCode(
                 request.getStatusCode() != null
-                        ? request.getStatusCode()
-                        : dossier.getStatus().name());
+                        ? DossierStatusCodes.normalize(request.getStatusCode())
+                        : DossierStatusCodes.toCode(dossier.getStatus()));
         dossier.setLossReason(request.getLossReason());
         dossier.setWonReason(request.getWonReason());
         dossier.setLocale(request.getLocale());
@@ -64,11 +65,11 @@ public class DossierMapper {
         dossier.setStatus(DossierStatus.NEW);
         dossier.setSource(request.getSource());
 
-        dossier.setCaseType(request.getCaseType());
+        dossier.setCaseType(DossierStatusCodes.effectiveCaseType(request.getCaseType()));
         dossier.setStatusCode(
                 request.getStatusCode() != null
-                        ? request.getStatusCode()
-                        : dossier.getStatus().name());
+                        ? DossierStatusCodes.normalize(request.getStatusCode())
+                        : DossierStatusCodes.toCode(dossier.getStatus()));
         dossier.setLossReason(request.getLossReason());
         dossier.setWonReason(request.getWonReason());
         dossier.setLocale(request.getLocale());
@@ -98,7 +99,7 @@ public class DossierMapper {
         response.setStatusCode(
                 dossier.getStatusCode() != null
                         ? dossier.getStatusCode()
-                        : (dossier.getStatus() != null ? dossier.getStatus().name() : null));
+                        : DossierStatusCodes.toCode(dossier.getStatus()));
         response.setLossReason(dossier.getLossReason());
         response.setWonReason(dossier.getWonReason());
         response.setScore(dossier.getScore());
