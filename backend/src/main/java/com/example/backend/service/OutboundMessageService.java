@@ -82,6 +82,55 @@ public class OutboundMessageService {
             java.util.Map<String, Object> payloadJson,
             String idempotencyKey,
             ConsentementType consentType) {
+        return create(
+                dossierId,
+                channel,
+                to,
+                templateCode,
+                subject,
+                payloadJson,
+                idempotencyKey,
+                consentType,
+                false);
+    }
+
+    /**
+     * Réponse à un client qui a écrit en premier, dans la fenêtre de service de 24 h de WhatsApp.
+     *
+     * <p>La politique WhatsApp n'exige l'opt-in que pour les messages proactifs envoyés hors de
+     * cette fenêtre : répondre au client ne demande donc pas d'accord enregistré. L'appelant doit
+     * avoir vérifié que la fenêtre est ouverte. Un refus ou un retrait explicite de l'accord «
+     * suivi du dossier » reste bloquant.
+     */
+    @Transactional
+    public OutboundMessageEntity createCustomerServiceReply(
+            Long dossierId,
+            MessageChannel channel,
+            String to,
+            java.util.Map<String, Object> payloadJson,
+            String idempotencyKey) {
+        return create(
+                dossierId,
+                channel,
+                to,
+                null,
+                null,
+                payloadJson,
+                idempotencyKey,
+                ConsentementType.TRANSACTIONNEL,
+                true);
+    }
+
+    private OutboundMessageEntity create(
+            Long dossierId,
+            MessageChannel channel,
+            String to,
+            String templateCode,
+            String subject,
+            java.util.Map<String, Object> payloadJson,
+            String idempotencyKey,
+            ConsentementType consentType,
+            boolean customerServiceReply) {
 
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
@@ -114,7 +163,11 @@ public class OutboundMessageService {
                 throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
             }
 
-            validateConsent(dossierId, channel, consentType);
+            if (customerServiceReply) {
+                rejectIfOptedOut(dossierId, channel);
+            } else {
+                validateConsent(dossierId, channel, consentType);
+            }
         }
 
         OutboundMessageEntity message = new OutboundMessageEntity();
@@ -167,6 +220,24 @@ public class OutboundMessageService {
         }
 
         return saved;
+    }
+
+    /** Le client a refusé ou retiré son accord « suivi du dossier » : on ne lui écrit plus. */
+    private void rejectIfOptedOut(Long dossierId, MessageChannel channel) {
+        List<ConsentementEntity> consents =
+                consentementRepository.findByDossierIdAndChannelAndConsentTypeOrderByUpdatedAtDesc(
+                        dossierId,
+                        mapMessageChannelToConsentChannel(channel),
+                        ConsentementType.TRANSACTIONNEL);
+        if (consents.isEmpty()) {
+            return;
+        }
+        ConsentementStatus status = consents.get(0).getStatus();
+        if (status == ConsentementStatus.DENIED || status == ConsentementStatus.REVOKED) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Le client a refusé ou retiré son accord pour être contacté sur ce canal.");
+        }
     }
 
     private void validateConsent(

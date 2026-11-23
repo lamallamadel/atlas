@@ -162,10 +162,10 @@
             @if (!canReplyOnWhatsApp()) {
               <p class="dd-notice" data-testid="dd-wa-consent">
                 <ds-icon name="alert-circle" [size]="16"></ds-icon>
-                Pour écrire au client ici, notez d'abord son accord « Suivi du dossier » sur WhatsApp (onglet Consentements).
+                Le client a refusé ou retiré son accord pour être contacté sur WhatsApp : vous ne pouvez plus lui écrire.
               </p>
             } @else {
-              <p class="dd-muted dd-intro">Les messages partent réellement sur WhatsApp. WhatsApp n'accepte un message libre que si le client vous a écrit dans les dernières 24 h.</p>
+              <p class="dd-muted dd-intro">Les messages partent réellement sur WhatsApp. Vous pouvez répondre librement pendant 24 h après le dernier message du client ; au-delà, WhatsApp refuse les messages libres.</p>
             }
             <app-whatsapp-messaging-container
               class="dd-whatsapp"
@@ -256,7 +256,7 @@
               </span>
             </div>
             <p class="dd-muted dd-intro">
-              <strong>Suivi du dossier</strong> : l'agent peut noter l'accord donné à l'oral.
+              <strong>Suivi du dossier</strong> : répondre à un client qui vous a écrit ne demande pas d'accord ; l'agent peut aussi noter un accord donné à l'oral.
               <strong>Prospection</strong> (propositions de biens) : le client doit confirmer lui-même, par le lien de confirmation.
             </p>
 
@@ -310,7 +310,7 @@
                     <ds-button variant="ghost" size="sm" prefixIcon="copy" (dsClick)="copyConsentLink()">Copier</ds-button>
                     <ds-button variant="marine" size="sm" prefixIcon="whatsapp" [loading]="sendingLink" (dsClick)="sendConsentLinkOnWhatsApp()">Envoyer par WhatsApp</ds-button>
                   </div>
-                  <p class="dd-muted">L'envoi par WhatsApp suit les règles habituelles : accord « suivi du dossier » et client qui vous a écrit dans les dernières 24 h. Sinon, copiez le lien.</p>
+                  <p class="dd-muted">L'envoi par WhatsApp est possible si le client vous a écrit dans les dernières 24 h. Sinon, copiez le lien et transmettez-le autrement.</p>
                 }
               </ds-card>
             }

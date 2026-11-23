@@ -92,7 +92,8 @@ class DossierWhatsAppReplyBackendE2ETest extends BaseBackendE2ETest {
         assertThat(out.get(0).getTo()).isEqualTo(PHONE);
         assertThat(out.get(0).getPayloadJson())
                 .containsEntry("body", "Bonjour Salma, la visite est confirmée.")
-                .containsEntry("kind", "AGENT_REPLY");
+                .containsEntry("kind", "AGENT_REPLY")
+                .containsEntry("legalBasis", "CONSENT");
 
         List<MessageEntity> thread =
                 messageRepository.findAll().stream()
@@ -104,8 +105,26 @@ class DossierWhatsAppReplyBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    void sans_accord_suivi_refuse_meme_avec_accord_prospection() throws Exception {
-        consent(ConsentementType.MARKETING, ConsentementStatus.GRANTED);
+    void client_qui_a_ecrit_en_premier_reponse_sans_accord_enregistre() throws Exception {
+        // Politique WhatsApp : dans la fenêtre de 24 h, répondre ne demande pas d'opt-in.
+        sessionWindowService.updateSessionWindow(ORG1, PHONE, LocalDateTime.now());
+
+        mockMvc.perform(
+                        withTenantHeaders(post(url()), ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        "{\"message\":\"Bonjour, voici le lien de confirmation\"}"))
+                .andExpect(status().isAccepted());
+
+        List<OutboundMessageEntity> out = outboundRepository.findByDossierId(dossier.getId());
+        assertThat(out).hasSize(1);
+        assertThat(out.get(0).getPayloadJson())
+                .containsEntry("legalBasis", "CUSTOMER_SERVICE_WINDOW");
+    }
+
+    @Test
+    void client_qui_a_retire_son_accord_refuse_meme_dans_la_fenetre() throws Exception {
+        consent(ConsentementType.TRANSACTIONNEL, ConsentementStatus.REVOKED);
         sessionWindowService.updateSessionWindow(ORG1, PHONE, LocalDateTime.now());
 
         mockMvc.perform(
