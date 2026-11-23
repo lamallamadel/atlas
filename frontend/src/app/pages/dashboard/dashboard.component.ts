@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { formatAnnoncePrice } from '../../utils/annonce-format';
 import { Router } from '@angular/router';
 import { DsDialogService } from '../../design-system';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -54,6 +55,8 @@ interface KpiCard {
     ]
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
+  readonly formatPrice = formatAnnoncePrice;
+
   private destroy$ = new Subject<void>();
 
   selectedPeriod$ = new BehaviorSubject<string>('TODAY');

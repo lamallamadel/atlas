@@ -8,12 +8,12 @@
     (dsClick)="toggleMenu()"
     [attr.title]="menuOpen ? 'Fermer (Alt+Q)' : 'Actions rapides (Alt+Q)'"
     ariaLabel="Actions rapides"
-    style="position: fixed; bottom: 92px; right: 24px; width: 56px; height: 56px; border-radius: 50%; box-shadow: var(--ds-shadow-lg); z-index: 1000; padding: 0; justify-content: center;">
+    style="position: fixed; bottom: 88px; right: 22px; width: 56px; height: 56px; border-radius: 50%; box-shadow: var(--ds-shadow-lg); z-index: 1000; padding: 0; justify-content: center;">
     <ds-icon [name]="menuOpen ? 'close' : 'megaphone'" [size]="24"></ds-icon>
   </ds-button>
 
   <!-- Actions Menu -->
-  <div class="quick-actions-menu-wrapper" [class.menu-open]="menuOpen" style="position: fixed; bottom: 160px; right: 24px; z-index: 1001; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; transform: translateY(20px); pointer-events: none;">
+  <div class="quick-actions-menu-wrapper" [class.menu-open]="menuOpen" style="position: fixed; bottom: 156px; right: 24px; z-index: 1001; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; transform: translateY(20px); pointer-events: none;">
     @if (menuOpen) {
       <ds-card class="quick-actions-menu" [pad]="true" elevation="md" style="width: 320px; pointer-events: auto;">
         <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--ds-divider);">

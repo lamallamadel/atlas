@@ -54,7 +54,7 @@
           @if (annonce.category) { <span>{{ annonce.category }}</span> }
         </p>
       </div>
-      <ds-badge status="neutral">{{ annonce.status }}</ds-badge>
+      <ds-badge status="neutral">{{ statusLabel(annonce.status) }}</ds-badge>
     </div>
 
     <!-- ── Grid d'infos ── -->

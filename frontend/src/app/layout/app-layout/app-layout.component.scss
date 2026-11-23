@@ -184,6 +184,8 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 0;
+  /* Place pour les boutons flottants (actions rapides, guides) : le bas de page reste lisible. */
+  padding-bottom: 88px;
 }
 
 /* ── Handset Layout ── */

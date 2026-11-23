@@ -59,7 +59,7 @@
 
   <!-- Center Content (Tabs) -->
   <div slot="center" class="ds-form-stack">
-    <ds-tabs [tabs]="dossierTabs" [activeTab]="activeTab" (tabChange)="activeTab = $event" style="margin-bottom: 24px;"></ds-tabs>
+    <ds-tabs [tabs]="dossierTabs" [activeTab]="activeTab" (tabChange)="selectTab($event)" style="margin-bottom: 24px;"></ds-tabs>
 
     @if (loading) {
       <div style="padding: 48px 0;">
@@ -120,7 +120,15 @@
           </div>
         }
 
-        @if (activeTab === 'messages') {
+        @if (activeTab === 'echanges') {
+          <div class="dd-subnav" role="group" aria-label="Vue des échanges">
+            <ds-filter-chip [active]="exchangeView === 'whatsapp'" (toggled)="exchangeView = 'whatsapp'">Conversation WhatsApp</ds-filter-chip>
+            <ds-filter-chip [active]="exchangeView === 'messages'" [count]="messages.length || null" (toggled)="exchangeView = 'messages'">Tous les canaux</ds-filter-chip>
+            <ds-filter-chip [active]="exchangeView === 'messages-sortants'" [count]="outboundMessages.length || null" (toggled)="exchangeView = 'messages-sortants'">Envois et statuts</ds-filter-chip>
+          </div>
+        }
+
+        @if (activeTab === 'echanges' && exchangeView === 'messages') {
           <div class="ds-form-stack">
             <div class="dd-panel__head">
               <h2 class="dd-panel__title">Messages</h2>
@@ -149,7 +157,7 @@
           </div>
         }
 
-        @if (activeTab === 'whatsapp' && dossier) {
+        @if (activeTab === 'echanges' && exchangeView === 'whatsapp' && dossier) {
           <ds-card [pad]="true" elevation="xs">
             @if (!canReplyOnWhatsApp()) {
               <p class="dd-notice" data-testid="dd-wa-consent">
@@ -169,7 +177,7 @@
           </ds-card>
         }
 
-        @if (activeTab === 'messages-sortants') {
+        @if (activeTab === 'echanges' && exchangeView === 'messages-sortants') {
           <div class="ds-form-stack">
             <div class="dd-panel__head">
               <h2 class="dd-panel__title">Messages sortants</h2>
@@ -357,11 +365,18 @@
           <app-document-list [dossierId]="dossier.id"></app-document-list>
         }
 
-        @if (activeTab === 'chronologie' && dossier) {
+        @if (activeTab === 'activite') {
+          <div class="dd-subnav" role="group" aria-label="Vue de l'activité">
+            <ds-filter-chip [active]="activityView === 'chronologie'" (toggled)="activityView = 'chronologie'">Chronologie</ds-filter-chip>
+            <ds-filter-chip [active]="activityView === 'historique'" (toggled)="activityView = 'historique'">Journal détaillé</ds-filter-chip>
+          </div>
+        }
+
+        @if (activeTab === 'activite' && activityView === 'chronologie' && dossier) {
           <app-activity-timeline [dossierId]="dossier.id"></app-activity-timeline>
         }
 
-        @if (activeTab === 'historique') {
+        @if (activeTab === 'activite' && activityView === 'historique') {
           <div class="ds-form-stack">
             <div class="historique-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap;">
               <div style="display: flex; gap: 16px; flex: 1; min-width: 300px;">

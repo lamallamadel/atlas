@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { annonceStatusLabel, formatAnnoncePrice } from '../../utils/annonce-format';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../services/annonce-api.service';
 import { RecentNavigationService } from '../../services/recent-navigation.service';
@@ -33,6 +34,8 @@ import {
   ],
 })
 export class AnnonceDetailComponent implements OnInit {
+  readonly statusLabel = annonceStatusLabel;
+
   annonce: AnnonceResponse | null = null;
   loading = false;
   error: string | null = null;
@@ -70,7 +73,7 @@ export class AnnonceDetailComponent implements OnInit {
           type: 'annonce',
           title: response.title,
           subtitle: response.city
-            ? `${response.city} - ${response.price ? response.price + '€' : ''}`
+            ? `${response.city} - ${formatAnnoncePrice(response)}`
             : undefined,
           route: `/pro/annonces/${response.id}`,
         });

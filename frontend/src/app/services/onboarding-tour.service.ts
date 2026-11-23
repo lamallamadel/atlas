@@ -232,11 +232,20 @@ export class OnboardingTourService {
   }
 
   private checkAutoStartTour(url: string): void {
-    if (url === '/dossiers/create' && !this.isTourCompleted('dossier-creation')) {
+    if (url === '/dossiers/create' && !this.wasTourSeen('dossier-creation')) {
       setTimeout(() => this.startDossierCreationTour(), 500);
-    } else if (url.match(/\/dossiers\/\d+/) && !this.isTourCompleted('dossier-detail')) {
+    } else if (url.match(/\/dossiers\/\d+/) && !this.wasTourSeen('dossier-detail')) {
       setTimeout(() => this.startDossierDetailTour(), 500);
     }
+  }
+
+  /**
+   * Démarrage automatique une seule fois : une visite terminée, passée ou fermée en cours de
+   * route ne se relance plus d'elle-même (elle reste disponible dans le menu Aide).
+   */
+  wasTourSeen(tourId: string): boolean {
+    const p = this.tourProgress[tourId];
+    return !!p && (p.completed || !!p.skipped || !!p.abandonedAt);
   }
 
   isTourCompleted(tourId: string): boolean {

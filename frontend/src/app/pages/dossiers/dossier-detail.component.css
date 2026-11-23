@@ -474,3 +474,4 @@ ds-card.collab-notes-card > .ds-card {
 .dd-form-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 .dd-consent-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; }
 .dd-consent-src { margin: 2px 0 0; font-size: 12px; }
+.dd-subnav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }

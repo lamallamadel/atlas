@@ -6,6 +6,9 @@
  */
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NavigationEnd, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs';
 import { GuidedTourService } from '../services/guided-tour.service';
 
 interface TourMeta {
@@ -27,6 +30,7 @@ const TOURS: TourMeta[] = [
   standalone: true,
   imports: [CommonModule],
   template: `
+    @if (visible()) {
     <div class="tl">
       <button class="tl__trigger" (click)="open = !open" [attr.aria-expanded]="open"
         aria-label="Guides interactifs" title="Guides interactifs">
@@ -62,9 +66,11 @@ const TOURS: TourMeta[] = [
         </div>
       }
     </div>
+    }
   `,
   styles: [`
-    .tl { position: fixed; bottom: 24px; right: 24px; z-index: 9000; font-family: var(--ds-font-body); }
+    /* au-dessus du bouton de l'assistant IA (bas droite, 52 px) */
+    .tl { position: fixed; bottom: 88px; right: 26px; z-index: 9000; font-family: var(--ds-font-body); }
     .tl__trigger {
       width: 48px; height: 48px; border-radius: 50%;
       background: var(--ds-marine); color: var(--ds-text-inverse); border: none; cursor: pointer;
@@ -129,6 +135,24 @@ const TOURS: TourMeta[] = [
 })
 export class TourLauncherComponent {
   open = false;
+  private readonly router = inject(Router);
+  /**
+   * Le lanceur n'apparaît que sur le tableau de bord : ailleurs il recouvrait le contenu et le
+   * bouton des actions rapides. Les guides restent accessibles depuis le tableau de bord.
+   */
+  readonly visible = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map(e => TourLauncherComponent.isDashboard(e.urlAfterRedirects)),
+      startWith(TourLauncherComponent.isDashboard(this.router.url)),
+    ),
+    { initialValue: false },
+  );
+
+  static isDashboard(url: string): boolean {
+    const path = (url || '').split(/[?#]/)[0];
+    return path === '/dashboard' || path === '/pro/dashboard' || path === '/pro';
+  }
   readonly tours = TOURS;
   readonly guidedTour = inject(GuidedTourService);
 

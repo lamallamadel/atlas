@@ -198,7 +198,7 @@
                 </div>
                 <div class="annonce-row__info">
                   <div class="annonce-row__title">{{ a.title }}</div>
-                  <div class="annonce-row__sub">{{ a.city }} · {{ a.price | number:'1.0-0' }} €</div>
+                  <div class="annonce-row__sub">{{ a.city }} · {{ formatPrice(a) }}</div>
                 </div>
                 <ds-badge [status]="a.status === 'ACTIVE' ? 'active' : a.status === 'DRAFT' ? 'draft' : 'neutral'">
                   {{ a.status }}
