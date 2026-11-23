@@ -2,6 +2,7 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
+import com.example.backend.security.DossierScope;
 import com.example.backend.workflow.DossierStatusCodes;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -17,6 +18,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "dossier")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 @EntityListeners(AuditingEntityListener.class)
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.DOSSIER_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class Dossier extends BaseEntity {
 
     @Id

@@ -8,6 +8,7 @@ import {
   DsInputComponent,
   DsSelectComponent,
   DsSkeletonComponent,
+  DsSwitchComponent,
   DsToastService,
   PageHeaderComponent,
 } from '../../design-system';
@@ -40,6 +41,7 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
     DsInputComponent,
     DsSelectComponent,
     DsSkeletonComponent,
+    DsSwitchComponent,
     PageHeaderComponent,
   ],
   template: `
@@ -49,6 +51,25 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
         titleBefore="Équipe"
         description="Membres de l'agence, rôles et invitations.">
       </ds-page-header>
+
+      <ds-card [pad]="true" elevation="xs" class="team-card">
+        <h2 class="team-title">Visibilité des dossiers</h2>
+        @if (canManage) {
+          <ds-switch
+            label="Chaque agent ne voit que ses dossiers"
+            description="Plus les dossiers à attribuer. Les managers et les administrateurs voient toujours tout."
+            [checked]="restricted() === true"
+            [disabled]="savingSettings() || restricted() === null"
+            (checkedChange)="setRestricted($event)">
+          </ds-switch>
+        } @else {
+          <p class="team-hint team-hint--flat">
+            {{ restricted()
+              ? 'Chaque agent ne voit que ses dossiers et ceux à attribuer.'
+              : 'Tous les agents voient tous les dossiers de l’agence.' }}
+          </p>
+        }
+      </ds-card>
 
       @if (inviteRoles.length) {
         <ds-card [pad]="true" elevation="xs" class="team-card">
@@ -151,6 +172,7 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
     .team-invite__submit { display: flex; align-items: flex-end; }
     .team-hint { margin: var(--ds-space-3) 0 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
     .team-hint--warn { margin: 0 0 var(--ds-space-4); }
+    .team-hint--flat { margin: 0; color: var(--ds-text); }
     .team-table { width: 100%; border-collapse: collapse; font-size: var(--ds-text-sm); }
     .team-table th { text-align: left; font-weight: 600; color: var(--ds-text-muted); padding: var(--ds-space-2) var(--ds-space-3); border-bottom: 1px solid var(--ds-border); }
     .team-table td { padding: var(--ds-space-3); border-bottom: 1px solid var(--ds-divider); vertical-align: middle; }
@@ -177,12 +199,39 @@ export class TeamComponent implements OnInit {
   readonly loading = signal(true);
   readonly busy = signal<string | null>(null);
   readonly inviting = signal(false);
+  /** `null` tant que le réglage n'est pas chargé. */
+  readonly restricted = signal<boolean | null>(null);
+  readonly savingSettings = signal(false);
   readonly rolesUnknown = computed(() => this.members().length > 0 && this.members().every(m => !m.role));
 
   draft: { firstName: string; lastName: string; email: string; role: AgencyRole } = this.emptyDraft();
 
   ngOnInit(): void {
     this.load();
+    this.api.settings().subscribe({
+      next: s => this.restricted.set(s.restrictAgentsToOwnDossiers),
+      error: () => this.restricted.set(null),
+    });
+  }
+
+  setRestricted(on: boolean): void {
+    const previous = this.restricted();
+    this.restricted.set(on);
+    this.savingSettings.set(true);
+    this.api.updateSettings({ restrictAgentsToOwnDossiers: on }).subscribe({
+      next: s => {
+        this.savingSettings.set(false);
+        this.restricted.set(s.restrictAgentsToOwnDossiers);
+        this.toast.success(on
+          ? 'Les agents ne voient plus que leurs dossiers et ceux à attribuer'
+          : 'Tous les agents voient de nouveau tous les dossiers');
+      },
+      error: err => {
+        this.savingSettings.set(false);
+        this.restricted.set(previous);
+        this.toast.error(serverMessage(err, "Le réglage n'a pas été enregistré"));
+      },
+    });
   }
 
   roleLabel(role: AgencyRole | null | undefined): string {

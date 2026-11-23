@@ -57,7 +57,10 @@ public class ReportingService {
         return response;
     }
 
-    @Cacheable(value = "pipelineSummary", key = "#orgId")
+    @Cacheable(
+            value = "pipelineSummary",
+            key = "#orgId",
+            condition = "!T(com.example.backend.security.DossierScope).isRestricted()")
     @Transactional(readOnly = true)
     public PipelineSummaryResponse generatePipelineSummary(String orgId) {
         PipelineSummaryResponse response = new PipelineSummaryResponse();
@@ -86,7 +89,10 @@ public class ReportingService {
         return response;
     }
 
-    @Cacheable(value = "funnelAnalysis", key = "#orgId + '_' + #from + '_' + #to")
+    @Cacheable(
+            value = "funnelAnalysis",
+            key = "#orgId + '_' + #from + '_' + #to",
+            condition = "!T(com.example.backend.security.DossierScope).isRestricted()")
     @Transactional(readOnly = true)
     public FunnelAnalysisResponse generateFunnelAnalysis(
             LocalDateTime from, LocalDateTime to, String orgId) {
@@ -101,7 +107,10 @@ public class ReportingService {
         return response;
     }
 
-    @Cacheable(value = "conversionFunnelBySource", key = "#orgId + '_' + #from + '_' + #to")
+    @Cacheable(
+            value = "conversionFunnelBySource",
+            key = "#orgId + '_' + #from + '_' + #to",
+            condition = "!T(com.example.backend.security.DossierScope).isRestricted()")
     @Transactional(readOnly = true)
     public Map<String, FunnelAnalysisResponse.FunnelStageMetrics> generateConversionFunnelBySource(
             LocalDateTime from, LocalDateTime to, String orgId) {
@@ -134,7 +143,8 @@ public class ReportingService {
 
     @Cacheable(
             value = "conversionFunnelByPeriod",
-            key = "#orgId + '_' + #from + '_' + #to + '_' + #periodType")
+            key = "#orgId + '_' + #from + '_' + #to + '_' + #periodType",
+            condition = "!T(com.example.backend.security.DossierScope).isRestricted()")
     @Transactional(readOnly = true)
     public Map<String, FunnelAnalysisResponse.FunnelStageMetrics>
             generateConversionFunnelByTimePeriod(
@@ -164,7 +174,10 @@ public class ReportingService {
         return funnelByPeriod;
     }
 
-    @Cacheable(value = "agentPerformance", key = "#orgId + '_' + #from + '_' + #to")
+    @Cacheable(
+            value = "agentPerformance",
+            key = "#orgId + '_' + #from + '_' + #to",
+            condition = "!T(com.example.backend.security.DossierScope).isRestricted()")
     @Transactional(readOnly = true)
     public AgentPerformanceResponse generateAgentPerformance(
             LocalDateTime from, LocalDateTime to, String orgId) {
@@ -212,7 +225,8 @@ public class ReportingService {
 
     @Cacheable(
             value = "agentMetricsDetailed",
-            key = "#agentId + '_' + #from + '_' + #to + '_' + #orgId")
+            key = "#agentId + '_' + #from + '_' + #to + '_' + #orgId",
+            condition = "!T(com.example.backend.security.DossierScope).isRestricted()")
     @Transactional(readOnly = true)
     public AgentPerformanceResponse.AgentMetrics generateDetailedAgentMetrics(
             String agentId, LocalDateTime from, LocalDateTime to, String orgId) {
@@ -251,7 +265,10 @@ public class ReportingService {
                 dossiersWon);
     }
 
-    @Cacheable(value = "revenueForecast", key = "#orgId")
+    @Cacheable(
+            value = "revenueForecast",
+            key = "#orgId",
+            condition = "!T(com.example.backend.security.DossierScope).isRestricted()")
     @Transactional(readOnly = true)
     public RevenueForecastResponse generateRevenueForecast(String orgId) {
         RevenueForecastResponse response = new RevenueForecastResponse();
@@ -327,7 +344,10 @@ public class ReportingService {
         return response;
     }
 
-    @Cacheable(value = "revenueProjections", key = "#orgId")
+    @Cacheable(
+            value = "revenueProjections",
+            key = "#orgId",
+            condition = "!T(com.example.backend.security.DossierScope).isRestricted()")
     @Transactional(readOnly = true)
     public RevenueForecastResponse generateRevenueForecastWithProjections(String orgId) {
         RevenueForecastResponse response = generateRevenueForecast(orgId);

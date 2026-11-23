@@ -3,6 +3,7 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.entity.enums.ConsentementType;
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -13,6 +14,10 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "consentement_event")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.CHILD_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class ConsentEventEntity {
 
     @Id

@@ -2,6 +2,7 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.ActivityVisibility;
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.*;
 import java.util.Map;
 import org.hibernate.annotations.Filter;
@@ -14,6 +15,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "activity")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 @EntityListeners(AuditingEntityListener.class)
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.CHILD_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class ActivityEntity extends BaseEntity {
 
     @Id

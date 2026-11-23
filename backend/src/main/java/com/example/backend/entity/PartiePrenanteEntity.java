@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import com.example.backend.entity.enums.PartiePrenanteRole;
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.*;
 import java.util.Map;
 import org.hibernate.annotations.Filter;
@@ -10,6 +11,10 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "partie_prenante")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.CHILD_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class PartiePrenanteEntity extends BaseEntity {
 
     @Id

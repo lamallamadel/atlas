@@ -1,5 +1,10 @@
 package com.example.backend.config;
 
+import com.example.backend.security.AccessPolicy;
+import com.example.backend.security.AgencyRole;
+import com.example.backend.security.DossierScope;
+import com.example.backend.service.TeamSettingsService;
+import com.example.backend.util.CurrentUser;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,14 +48,20 @@ public class HibernateFilterInterceptor implements HandlerInterceptor {
     // Absent dans les tests en tranche web (@WebMvcTest) : l'intercepteur ne fait alors rien.
     private final ObjectProvider<EntityManager> entityManagerProvider;
 
-    public HibernateFilterInterceptor(ObjectProvider<EntityManager> entityManagerProvider) {
+    private final ObjectProvider<TeamSettingsService> teamSettingsProvider;
+
+    public HibernateFilterInterceptor(
+            ObjectProvider<EntityManager> entityManagerProvider,
+            ObjectProvider<TeamSettingsService> teamSettingsProvider) {
         this.entityManagerProvider = entityManagerProvider;
+        this.teamSettingsProvider = teamSettingsProvider;
     }
 
     @Override
     public boolean preHandle(
             HttpServletRequest request, HttpServletResponse response, Object handler)
             throws IOException {
+        DossierScope.clear();
         String path = request.getRequestURI();
         if (!path.startsWith("/api/") || path.startsWith(PORTAL_PREFIX)) {
             return true; // pas de filtre sur /ping, ni sur le portail public inter-agences
@@ -87,7 +98,25 @@ public class HibernateFilterInterceptor implements HandlerInterceptor {
         Filter filter = session.enableFilter("orgIdFilter");
         filter.setParameter("orgId", orgId);
 
+        enableDossierScope(session, orgId);
         return true;
+    }
+
+    /**
+     * Périmètre « mes dossiers » : un agent (pas un manager ni un admin) d'une agence qui l'a
+     * activé ne voit que ses dossiers et ceux à attribuer. Voir {@link DossierScope}.
+     */
+    private void enableDossierScope(Session session, String orgId) {
+        if (AccessPolicy.currentRole() != AgencyRole.AGENT) {
+            return;
+        }
+        String userId = CurrentUser.id().orElse(null);
+        TeamSettingsService teamSettings = teamSettingsProvider.getIfAvailable();
+        if (userId == null || teamSettings == null || !teamSettings.restrictAgents(orgId)) {
+            return;
+        }
+        session.enableFilter(DossierScope.FILTER).setParameter(DossierScope.PARAM, userId);
+        DossierScope.enter(userId);
     }
 
     /**
@@ -113,6 +142,7 @@ public class HibernateFilterInterceptor implements HandlerInterceptor {
             HttpServletResponse response,
             Object handler,
             Exception ex) {
+        DossierScope.clear();
         try {
             EntityManager entityManager = entityManagerProvider.getIfAvailable();
             if (entityManager == null) {
@@ -120,6 +150,7 @@ public class HibernateFilterInterceptor implements HandlerInterceptor {
             }
             Session session = entityManager.unwrap(Session.class);
             session.disableFilter("orgIdFilter");
+            session.disableFilter(DossierScope.FILTER);
         } catch (Exception ignore) {
         }
     }

@@ -2,6 +2,7 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.DocumentWorkflowType;
 import com.example.backend.entity.enums.WorkflowStatus;
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -14,6 +15,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "document_workflow")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 @EntityListeners(AuditingEntityListener.class)
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.CHILD_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class DocumentWorkflowEntity extends BaseEntity {
 
     @Id

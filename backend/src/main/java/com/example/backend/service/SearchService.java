@@ -10,6 +10,7 @@ import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.search.AnnonceSearchRepository;
 import com.example.backend.repository.search.DossierSearchRepository;
+import com.example.backend.security.DossierScope;
 import com.example.backend.util.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
@@ -55,7 +56,9 @@ public class SearchService {
             String query, String type, Map<String, Object> filters, int page, int size) {
         String orgId = TenantContext.getOrgId();
 
-        if (isElasticsearchAvailable()) {
+        // L'index Elasticsearch ignore l'agent assigné : un agent restreint cherche en base, où son
+        // périmètre est appliqué (voir searchDossiersPostgres).
+        if (isElasticsearchAvailable() && !DossierScope.isRestricted()) {
             try {
                 return searchWithElasticsearch(query, type, filters, orgId, page, size);
             } catch (Exception e) {
@@ -305,6 +308,11 @@ public class SearchService {
             }
         }
 
+        // SQL natif : le filtre Hibernate du périmètre « mes dossiers » ne s'applique pas ici.
+        if (DossierScope.isRestricted()) {
+            sql.append(" AND (d.assigned_to = :dsUserId OR d.assigned_to IS NULL)");
+        }
+
         sql.append(" ORDER BY d.updated_at DESC");
         sql.append(" LIMIT :limit OFFSET :offset");
 
@@ -323,6 +331,10 @@ public class SearchService {
             if (filters.containsKey("source")) {
                 nativeQuery.setParameter("source", filters.get("source").toString());
             }
+        }
+
+        if (DossierScope.isRestricted()) {
+            nativeQuery.setParameter("dsUserId", DossierScope.userId());
         }
 
         nativeQuery.setParameter("limit", size);

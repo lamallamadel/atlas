@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import com.example.backend.entity.enums.DossierStatus;
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,6 +13,10 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "dossier_status_history")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.CHILD_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class DossierStatusHistory {
 
     @Id

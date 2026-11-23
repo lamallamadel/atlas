@@ -6,6 +6,8 @@ import com.example.backend.entity.CommentThreadEntity;
 import com.example.backend.entity.enums.CommentEntityType;
 import com.example.backend.repository.CommentRepository;
 import com.example.backend.repository.CommentThreadRepository;
+import com.example.backend.security.DossierScope;
+import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -148,7 +150,9 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<CommentSearchResult> searchComments(String query) {
-        List<CommentEntity> comments = commentRepository.searchByContent(query);
+        List<CommentEntity> comments =
+                commentRepository.searchByContent(
+                        query, TenantContext.getOrgId(), DossierScope.userId());
 
         return comments.stream().map(this::toSearchResult).collect(Collectors.toList());
     }
@@ -172,7 +176,9 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<CommentDTO> getCommentsByMention(String username) {
-        return commentRepository.findByMention(username).stream()
+        return commentRepository
+                .findByMention(username, TenantContext.getOrgId(), DossierScope.userId())
+                .stream()
                 .map(this::toCommentDTO)
                 .collect(Collectors.toList());
     }
