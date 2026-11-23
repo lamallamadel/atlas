@@ -4,6 +4,7 @@ import com.example.backend.dto.PortalLeadRequest;
 import com.example.backend.dto.PublicAnnonceResponse;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.enums.AnnonceStatus;
+import com.example.backend.service.AnnonceReportService;
 import com.example.backend.service.AnnonceService;
 import com.example.backend.service.PublicLeadService;
 import com.example.backend.util.TenantContext;
@@ -29,11 +30,15 @@ public class PortalPublicController {
 
     private final AnnonceService annonceService;
     private final PublicLeadService publicLeadService;
+    private final AnnonceReportService annonceReportService;
 
     public PortalPublicController(
-            AnnonceService annonceService, PublicLeadService publicLeadService) {
+            AnnonceService annonceService,
+            PublicLeadService publicLeadService,
+            AnnonceReportService annonceReportService) {
         this.annonceService = annonceService;
         this.publicLeadService = publicLeadService;
+        this.annonceReportService = annonceReportService;
     }
 
     @GetMapping("/annonces")
@@ -89,6 +94,33 @@ public class PortalPublicController {
     public ResponseEntity<Map<String, String>> submitLead(
             @Valid @RequestBody PortalLeadRequest request, HttpServletRequest http) {
         publicLeadService.submit(request, clientIp(http), http.getHeader("User-Agent"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("status", "RECEIVED"));
+    }
+
+    /** Corps de {@code POST /annonces/{id}/reports}. */
+    public record PortalReportRequest(
+            @jakarta.validation.constraints.NotBlank String reasonCode,
+            @jakarta.validation.constraints.Size(max = 1000) String comment,
+            @jakarta.validation.constraints.Email @jakarta.validation.constraints.Size(max = 255)
+                    String email) {}
+
+    @PostMapping("/annonces/{id}/reports")
+    @Operation(
+            summary = "Report a public annonce",
+            description =
+                    "Motif REPORT_FRAUD, REPORT_INCORRECT_INFO, REPORT_DUPLICATE, REPORT_SPAM ou"
+                            + " REPORT_OTHER. Transmis à l'agence de l'annonce")
+    public ResponseEntity<Map<String, String>> reportAnnonce(
+            @PathVariable Long id,
+            @Valid @RequestBody PortalReportRequest request,
+            HttpServletRequest http) {
+        annonceReportService.submitPublic(
+                id,
+                request.reasonCode(),
+                request.comment(),
+                request.email(),
+                clientIp(http),
+                http.getHeader("User-Agent"));
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("status", "RECEIVED"));
     }
 

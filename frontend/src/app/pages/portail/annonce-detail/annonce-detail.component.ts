@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { PortailService, Listing } from '../../../services/portail.service';
+import { PortailService, Listing, REPORT_REASONS } from '../../../services/portail.service';
 import { VitrineService, PUBLIC_CONTACT_CONSENT_TEXT, publicLeadErrorMessage } from '../../../services/vitrine.service';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
@@ -25,7 +25,10 @@ export class AnnonceDetailComponent implements OnInit {
   readonly consentText = PUBLIC_CONTACT_CONSENT_TEXT;
   reportSubmitted = false;
   leadForm = { nom: '', tel: '', email: '', message: '', consent: false };
-  reportForm = { motif: '', commentaire: '' };
+  reportForm = { motif: '', commentaire: '', email: '' };
+  reportSending = false;
+  reportError = '';
+  readonly reportReasons = REPORT_REASONS;
 
   constructor(
     public portailService: PortailService,
@@ -99,13 +102,26 @@ export class AnnonceDetailComponent implements OnInit {
     });
   }
 
-  openReportModal(): void { this.reportModalOpen = true; this.reportSubmitted = false; }
+  openReportModal(): void {
+    this.reportModalOpen = true;
+    this.reportSubmitted = false;
+    this.reportError = '';
+    this.reportForm = { motif: '', commentaire: '', email: '' };
+  }
   closeReportModal(): void { this.reportModalOpen = false; }
 
   submitReport(): void {
-    if (!this.reportForm.motif) return;
-    console.log('[Report]', this.reportForm, this.listing?.id);
-    this.reportSubmitted = true;
+    if (!this.reportForm.motif || !this.listing || this.reportSending) return;
+    this.reportSending = true;
+    this.reportError = '';
+    this.portailService.reportListing(this.listing.id, {
+      reasonCode: this.reportForm.motif,
+      comment: this.reportForm.commentaire || null,
+      email: this.reportForm.email || null,
+    }).subscribe({
+      next: () => { this.reportSending = false; this.reportSubmitted = true; },
+      error: (err) => { this.reportSending = false; this.reportError = publicLeadErrorMessage(err); },
+    });
   }
 
   openWhatsApp(): void {

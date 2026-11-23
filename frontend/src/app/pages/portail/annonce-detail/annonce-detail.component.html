@@ -212,3 +212,69 @@
     }
   </div>
 </div>
+
+<!-- REPORT MODAL -->
+<div
+  class="at-modal-overlay"
+  [class.open]="reportModalOpen"
+  tabindex="0"
+  role="presentation"
+  (click)="closeReportModal()"
+  (keydown.enter)="closeReportModal()"
+  (keydown.space)="$event.preventDefault(); closeReportModal()"
+>
+  <div
+    class="at-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="report-title"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown.enter)="$event.stopPropagation()"
+    (keydown.space)="$event.stopPropagation()"
+  >
+    <div class="at-modal-header">
+      <h2 id="report-title">Signaler l'annonce</h2>
+      <button class="at-modal-close" (click)="closeReportModal()" aria-label="Fermer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    @if (!reportSubmitted) {
+      <div class="at-modal-body">
+        <div class="at-form-stack">
+          <div class="at-form-group">
+            <label class="at-form-label" for="report-motif">Motif <span class="at-req">*</span></label>
+            <select id="report-motif" class="at-form-input" [(ngModel)]="reportForm.motif">
+              <option value="" disabled>Choisir un motif…</option>
+              @for (r of reportReasons; track r.value) {
+                <option [value]="r.value">{{ r.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="at-form-group">
+            <label class="at-form-label" for="report-comment">Précisions</label>
+            <textarea id="report-comment" class="at-form-textarea" maxlength="1000" [(ngModel)]="reportForm.commentaire"
+              placeholder="Ex. : le même bien est proposé à un autre prix, les photos ne correspondent pas…"></textarea>
+          </div>
+          <div class="at-form-group">
+            <label class="at-form-label" for="report-email">Votre e-mail (facultatif, pour être tenu informé)</label>
+            <input id="report-email" class="at-form-input" type="email" [(ngModel)]="reportForm.email" placeholder="votre@email.ma"/>
+          </div>
+          @if (reportError) {
+            <div class="at-error-banner visible" role="alert">{{ reportError }}</div>
+          }
+          <button class="at-btn at-btn-primary at-btn-lg" [disabled]="!reportForm.motif || reportSending"
+            (click)="submitReport()" style="width:100%;justify-content:center;">
+            Envoyer le signalement
+          </button>
+        </div>
+      </div>
+    }
+    @if (reportSubmitted) {
+      <div class="at-modal-body" style="text-align:center;padding:var(--ds-space-8)">
+        <h3 style="font-family:var(--ds-font-display);margin-bottom:var(--ds-space-3);">Merci pour votre signalement</h3>
+        <p style="color:var(--ds-text-muted);font-size:var(--ds-text-sm);">L'agence qui publie cette annonce va l'examiner.</p>
+      </div>
+    }
+  </div>
+</div>

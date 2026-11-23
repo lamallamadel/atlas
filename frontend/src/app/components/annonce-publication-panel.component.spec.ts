@@ -18,6 +18,7 @@ function publication(overrides: Partial<AnnoncePublication> = {}): AnnoncePublic
         allowed: true, blockers: [] },
     ],
     suspension: null,
+    openReports: 0,
     ...overrides,
   };
 }

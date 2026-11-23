@@ -112,6 +112,10 @@ export function serverMessage(err: unknown, fallback: string): string {
           </div>
         }
 
+        @if (p.openReports) {
+          <p class="pub-muted pub-reports">{{ p.openReports }} signalement(s) de visiteurs à traiter, voir plus bas.</p>
+        }
+
         @if (p.suspension) {
           <p class="pub-muted">Suspendue : {{ suspendLabel(p.suspension.reasonCode) }}
             @if (p.suspension.comment) { — {{ p.suspension.comment }} }</p>

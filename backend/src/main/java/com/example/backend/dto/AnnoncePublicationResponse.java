@@ -14,7 +14,8 @@ public record AnnoncePublicationResponse(
         Quality quality,
         Trust trust,
         List<AnnoncePublicationService.TransitionOption> transitions,
-        Map<String, Object> suspension) {
+        Map<String, Object> suspension,
+        long openReports) {
 
     public record Quality(int score, int photoCount, int minPhotos, List<Missing> missing) {}
 
@@ -34,7 +35,8 @@ public record AnnoncePublicationResponse(
             Annonce a,
             AnnonceQualityService.Quality q,
             List<AnnoncePublicationService.TransitionOption> transitions,
-            Map<String, Object> override) {
+            Map<String, Object> override,
+            long openReports) {
         Quality quality =
                 new Quality(
                         q.score(),
@@ -59,6 +61,7 @@ public record AnnoncePublicationResponse(
                 quality,
                 trust,
                 transitions,
-                suspension instanceof Map<?, ?> m ? (Map<String, Object>) m : null);
+                suspension instanceof Map<?, ?> m ? (Map<String, Object>) m : null,
+                openReports);
     }
 }
