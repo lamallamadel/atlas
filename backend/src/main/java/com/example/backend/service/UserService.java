@@ -1,25 +1,29 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.QuotaSettingsDto;
 import com.example.backend.dto.UserInviteRequest;
 import com.example.backend.dto.UserInviteResponse;
-import com.example.backend.dto.QuotaSettingsDto;
+import com.example.backend.security.AccessPolicy;
+import com.example.backend.security.AgencyRole;
+import com.example.backend.security.KeycloakAgencyRoles;
 import com.example.backend.util.TenantContext;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import jakarta.ws.rs.core.Response;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService {
@@ -51,25 +55,41 @@ public class UserService {
         this.organizationSettingsService = organizationSettingsService;
     }
 
+    /**
+     * Invite un membre dans l'agence courante : compte Keycloak rattaché à l'agence, rôle d'agence
+     * demandé, e-mail de création du mot de passe. L'admin invite tous les rôles, le manager
+     * seulement des agents.
+     */
     public UserInviteResponse inviteUser(UserInviteRequest request) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null || orgId.isBlank()) {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
+        AgencyRole role =
+                request.getRole() == null || request.getRole().isBlank()
+                        ? AgencyRole.AGENT
+                        : AgencyRole.parse(request.getRole());
+        if (role == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "INVALID_ROLE: rôle attendu ADMIN, MANAGER ou AGENT.");
+        }
+        AccessPolicy.requireCanInvite(role);
+
         QuotaSettingsDto quotas = organizationSettingsService.getQuotas(orgId);
-        UsersResource usersResource = keycloakAdminClient.realm(keycloakRealm).users();
+        RealmResource realm = keycloakAdminClient.realm(keycloakRealm);
+        UsersResource usersResource = realm.users();
 
         if (quotas != null && quotas.getMaxUsers() != null && quotas.getMaxUsers() != -1) {
-            // Search users by orgId custom attribute
-            List<UserRepresentation> orgUsers = usersResource.search(orgId, 0, 1000);
-            long count = orgUsers.stream()
-                .filter(u -> u.getAttributes() != null && u.getAttributes().containsKey("orgId") 
-                            && u.getAttributes().get("orgId").contains(orgId))
-                .count();
-                
+            long count =
+                    usersResource.searchByAttributes("orgId:" + orgId).stream()
+                            .filter(u -> !Boolean.FALSE.equals(u.isEnabled()))
+                            .count();
             if (count >= quotas.getMaxUsers()) {
-                throw new IllegalStateException("User quota exceeded. Maximum allowed users is " + quotas.getMaxUsers() + ".");
+                throw new IllegalStateException(
+                        "User quota exceeded. Maximum allowed users is "
+                                + quotas.getMaxUsers()
+                                + ".");
             }
         }
 
@@ -80,29 +100,43 @@ public class UserService {
         user.setLastName(request.getLastName());
         user.setEnabled(true);
         user.setEmailVerified(true);
-        user.setAttributes(Map.of("orgId", Arrays.asList(orgId), "tenant_id", Arrays.asList(orgId)));
+        user.setAttributes(Map.of("orgId", List.of(orgId), "tenant_id", List.of(orgId)));
 
-        Response response = usersResource.create(user);
-        
-        if (response.getStatus() != 201 && response.getStatus() != 409) {
-            throw new RuntimeException("Failed to create user in Keycloak, status: " + response.getStatus());
+        String userId;
+        try (Response response = usersResource.create(user)) {
+            if (response.getStatus() == 409) {
+                throw new IllegalStateException("User with this email already exists.");
+            }
+            if (response.getStatus() != 201) {
+                throw new RuntimeException(
+                        "Failed to create user in Keycloak, status: " + response.getStatus());
+            }
+            String path = response.getLocation().getPath();
+            userId = path.substring(path.lastIndexOf('/') + 1);
         }
-        
-        if (response.getStatus() == 409) {
-            throw new IllegalStateException("User with this email already exists.");
-        }
-        
-        String path = response.getLocation().getPath();
-        String userId = path.substring(path.lastIndexOf('/') + 1);
-        
-        // Trigger password reset email
+
+        // Sans rôle, l'invité ne pourrait rien faire : on annule la création si l'attribution
+        // échoue.
         try {
-            usersResource.get(userId).executeActionsEmail(Arrays.asList("UPDATE_PASSWORD"));
+            KeycloakAgencyRoles.setRole(realm, userId, role);
+        } catch (RuntimeException e) {
+            log.error("Failed to grant role {} to invited user {}", role, userId, e);
+            try {
+                usersResource.get(userId).remove();
+            } catch (RuntimeException cleanup) {
+                log.warn("Failed to remove half-created user {}", userId, cleanup);
+            }
+            throw new IllegalStateException(
+                    "Could not grant the requested role. User not created.");
+        }
+
+        try {
+            usersResource.get(userId).executeActionsEmail(List.of("UPDATE_PASSWORD"));
         } catch (Exception e) {
             log.warn("Failed to send password reset email to user {}, {}", userId, e.getMessage());
         }
-        
-        return new UserInviteResponse(userId, request.getEmail(), "INVITED");
+
+        return new UserInviteResponse(userId, request.getEmail(), "INVITED", role.name());
     }
 
     public String getUserDisplayName(String userId) {

@@ -15,7 +15,8 @@ public class UserInviteRequest {
     @NotBlank(message = "Last name is required")
     private String lastName;
 
-    private String role = "PRO"; // default to PRO, or could be AGENT
+    /** ADMIN, MANAGER ou AGENT ({@code PRO} accepté comme AGENT). */
+    private String role = "AGENT";
 
     public String getEmail() {
         return email;

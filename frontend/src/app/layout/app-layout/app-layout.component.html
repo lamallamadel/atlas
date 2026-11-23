@@ -56,6 +56,12 @@
       
       <div class="layout-divider" role="separator"></div>
       
+      @if (canSeeTeam) {
+        <a class="nav-link" title="Équipe" routerLink="/team" routerLinkActive="active" aria-label="Équipe">
+          <ds-icon name="users" [size]="20" aria-hidden="true"></ds-icon>
+          <span class="nav-link-title">Équipe</span>
+        </a>
+      }
       <a class="nav-link" title="Workflows" routerLink="/workflow-admin" routerLinkActive="active" aria-label="Administration">
         <ds-icon name="settings" [size]="20" aria-hidden="true"></ds-icon>
         <span class="nav-link-title">Workflows</span>

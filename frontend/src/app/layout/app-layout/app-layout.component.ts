@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, HostListener, computed, inject, signal } 
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import { AuthService } from '../../services/auth.service';
+import { isManagerOrAdmin } from '../../services/agency-role';
 import { ThemeService } from '../../services/theme.service';
 import { DossierApiService } from '../../services/dossier-api.service';
 import { NotificationApiService } from '../../services/notification-api.service';
@@ -55,6 +56,8 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
   private readonly overlay = inject(Overlay);
   private breakpointObserver = inject(BreakpointObserver);
   private authService = inject(AuthService);
+  /** Lien « Équipe » : manager et admin seulement (l'écran est aussi gardé par RoleGuard). */
+  readonly canSeeTeam = isManagerOrAdmin(this.authService);
   public themeService = inject(ThemeService);
   private dossierApiService = inject(DossierApiService);
   private notificationApiService = inject(NotificationApiService);

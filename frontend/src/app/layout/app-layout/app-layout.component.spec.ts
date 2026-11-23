@@ -35,7 +35,8 @@ describe('AppLayoutComponent', () => {
 
   beforeEach(async () => {
     mockAuthService = {
-      logout: vi.fn().mockName('AuthService.logout')};
+      logout: vi.fn().mockName('AuthService.logout'),
+      hasRole: vi.fn().mockName('AuthService.hasRole').mockReturnValue(false)};
     mockThemeService = {
       toggleTheme: vi.fn().mockName('ThemeService.toggleTheme'),
       getCurrentTheme: vi.fn().mockName('ThemeService.getCurrentTheme'),

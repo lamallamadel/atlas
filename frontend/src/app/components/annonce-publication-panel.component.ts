@@ -18,6 +18,7 @@ import {
   AnnonceTransitionOption,
 } from '../services/annonce-api.service';
 import { AuthService } from '../services/auth.service';
+import { isManagerOrAdmin } from '../services/agency-role';
 
 export const SUSPEND_REASON_LABELS: Record<AnnonceSuspendReason, string> = {
   OWNER_PAUSE: "Pause demandée par l'agence ou le propriétaire",
@@ -183,7 +184,7 @@ export class AnnoncePublicationPanelComponent implements OnInit {
   readonly suspending = signal(false);
 
   readonly qualityVariant = qualityVariant;
-  readonly isManager = this.auth.hasRole('ADMIN') || this.auth.hasRole('MANAGER');
+  readonly isManager = isManagerOrAdmin(this.auth);
 
   readonly suspendOptions: DsSelectOption[] = (Object.keys(SUSPEND_REASON_LABELS) as AnnonceSuspendReason[])
     .map(value => ({ value, label: SUSPEND_REASON_LABELS[value] }));

@@ -129,8 +129,10 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
   private checkUserRoles(): void {
     const roles = this.authService.getUserRoles();
-    this.isAdmin = roles.includes('ROLE_ADMIN') || roles.includes('admin');
-    this.isSuperAdmin = roles.includes('ROLE_SUPER_ADMIN') || roles.includes('super-admin');
+    // Le jeton Keycloak porte les rôles sans préfixe (ADMIN, SUPER_ADMIN) ; les anciennes formes
+    // restent acceptées.
+    this.isSuperAdmin = ['SUPER_ADMIN', 'ROLE_SUPER_ADMIN', 'super-admin'].some(r => roles.includes(r));
+    this.isAdmin = this.isSuperAdmin || ['ADMIN', 'ROLE_ADMIN', 'admin'].some(r => roles.includes(r));
   }
 
   private initializeTabs(): void {

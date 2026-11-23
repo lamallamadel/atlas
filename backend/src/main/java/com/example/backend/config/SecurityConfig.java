@@ -346,11 +346,16 @@ public class SecurityConfig {
                     }
                 }
 
-                // Parse role from token: mock-role-pro-token → PRO, mock-role-user-token → USER,
+                // Parse role from token: mock-role-pro-token → PRO, role-agent → AGENT,
+                // role-manager → MANAGER, mock-role-user-token → USER,
                 // default → ADMIN
                 List<String> roles;
                 if (token.contains("role-pro")) {
                     roles = List.of("PRO");
+                } else if (token.contains("role-agent")) {
+                    roles = List.of("AGENT");
+                } else if (token.contains("role-manager")) {
+                    roles = List.of("MANAGER");
                 } else if (token.contains("role-user")) {
                     roles = List.of("USER");
                 } else {
@@ -409,16 +414,34 @@ public class SecurityConfig {
      */
     private Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter() {
         return jwt ->
-                extractRoles(jwt).stream().map(this::toAuthority).collect(Collectors.toList());
+                extractRoles(jwt).stream()
+                        .flatMap(role -> toAuthorities(role).stream())
+                        .distinct()
+                        .collect(Collectors.toList());
     }
 
-    private GrantedAuthority toAuthority(String role) {
+    /**
+     * Rôles d'agence (ADR étape 6) : {@code AGENT} et l'ancien {@code PRO} sont équivalents, et un
+     * {@code MANAGER} est aussi membre de l'agence. Les deux reçoivent donc {@code ROLE_PRO}, ce
+     * qui garde valables les {@code hasAnyRole('ADMIN','PRO')} existants ; les droits fins sont
+     * décidés par {@link com.example.backend.security.AccessPolicy}.
+     */
+    static List<GrantedAuthority> toAuthorities(String role) {
         if (role == null || role.isBlank()) {
-            return new SimpleGrantedAuthority("ROLE_USER");
+            return List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }
-        if (role.equalsIgnoreCase("ADMIN")) return new SimpleGrantedAuthority("ROLE_ADMIN");
-        if (role.equalsIgnoreCase("PRO")) return new SimpleGrantedAuthority("ROLE_PRO");
-        return new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
+        String name = role.toUpperCase();
+        return switch (name) {
+            case "PRO", "AGENT" ->
+                    List.of(
+                            new SimpleGrantedAuthority("ROLE_AGENT"),
+                            new SimpleGrantedAuthority("ROLE_PRO"));
+            case "MANAGER" ->
+                    List.of(
+                            new SimpleGrantedAuthority("ROLE_MANAGER"),
+                            new SimpleGrantedAuthority("ROLE_PRO"));
+            default -> List.of(new SimpleGrantedAuthority("ROLE_" + name));
+        };
     }
 
     @SuppressWarnings("unchecked")

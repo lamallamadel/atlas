@@ -2,6 +2,8 @@ package com.example.backend.service;
 
 import com.example.backend.dto.TeamMemberResponse;
 import com.example.backend.repository.DossierRepository;
+import com.example.backend.security.AgencyRole;
+import com.example.backend.security.KeycloakAgencyRoles;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -9,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,20 +50,32 @@ public class TeamDirectoryService {
         this.realm = realm;
     }
 
+    /** Membres actifs : ceux à qui l'on peut attribuer un dossier. */
     @Transactional(readOnly = true)
     public Team team(String orgId) {
+        return team(orgId, false);
+    }
+
+    /**
+     * Membres de l'agence avec leur rôle. {@code includeDisabled} sert à l'écran « Équipe », qui
+     * montre aussi les comptes désactivés.
+     */
+    @Transactional(readOnly = true)
+    public Team team(String orgId, boolean includeDisabled) {
         try {
             Keycloak client = keycloak.getIfAvailable();
             if (client != null) {
+                RealmResource realmResource = client.realm(realm);
                 List<UserRepresentation> users =
-                        client.realm(realm).users().searchByAttributes("orgId:" + orgId);
+                        realmResource.users().searchByAttributes("orgId:" + orgId);
+                Map<String, AgencyRole> roles = rolesOrEmpty(realmResource, orgId);
                 List<TeamMemberResponse> members =
                         users.stream()
-                                .filter(u -> !Boolean.FALSE.equals(u.isEnabled()))
-                                .map(
+                                .filter(
                                         u ->
-                                                new TeamMemberResponse(
-                                                        u.getId(), displayName(u), u.getEmail()))
+                                                includeDisabled
+                                                        || !Boolean.FALSE.equals(u.isEnabled()))
+                                .map(u -> toMember(u, roles.get(u.getId())))
                                 .sorted(Comparator.comparing(TeamMemberResponse::name))
                                 .toList();
                 return new Team(members, true);
@@ -69,6 +84,24 @@ public class TeamDirectoryService {
             log.warn("Keycloak unavailable for team of org {}: {}", orgId, e.getMessage());
         }
         return new Team(localMembers(orgId), false);
+    }
+
+    static TeamMemberResponse toMember(UserRepresentation u, AgencyRole role) {
+        return new TeamMemberResponse(
+                u.getId(),
+                displayName(u),
+                u.getEmail(),
+                role == null ? null : role.name(),
+                !Boolean.FALSE.equals(u.isEnabled()));
+    }
+
+    private Map<String, AgencyRole> rolesOrEmpty(RealmResource realmResource, String orgId) {
+        try {
+            return KeycloakAgencyRoles.rolesByUser(realmResource);
+        } catch (Exception e) {
+            log.warn("Cannot read agency roles for org {}: {}", orgId, e.getMessage());
+            return Map.of();
+        }
     }
 
     private List<TeamMemberResponse> localMembers(String orgId) {

@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.enums.AnnonceStatus;
+import com.example.backend.security.AccessPolicy;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,6 @@ import java.util.Objects;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -207,10 +207,7 @@ public class AnnoncePublicationService {
      * (autre doublon, fraude apparue ensuite) la rend caduque.
      */
     public void overrideTrust(Annonce annonce, String reason) {
-        if (!isManager()) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN, "MANAGER_REQUIRED: seul un manager peut déroger.");
-        }
+        AccessPolicy.requireCanOverrideTrust();
         if (reason == null || reason.isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "REASON_REQUIRED: indiquez pourquoi vous dérogez.");
@@ -262,20 +259,6 @@ public class AnnoncePublicationService {
             annonce.setMeta(new HashMap<>(annonce.getMeta()));
         }
         return annonce.getMeta();
-    }
-
-    static boolean isManager() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            return false;
-        }
-        return auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(
-                        a ->
-                                a.equals("ROLE_ADMIN")
-                                        || a.equals("ROLE_MANAGER")
-                                        || a.equals("ROLE_SUPER_ADMIN"));
     }
 
     private static String currentUser() {

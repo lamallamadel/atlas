@@ -71,9 +71,4 @@ public final class CurrentUser {
         }
         return false;
     }
-
-    /** Manager ou administrateur (d'agence ou de la plateforme). */
-    public static boolean isManagerOrAdmin() {
-        return hasAnyRole("ADMIN", "MANAGER", "SUPER_ADMIN");
-    }
 }
