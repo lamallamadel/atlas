@@ -100,6 +100,13 @@
             <label class="at-form-label" for="d-msg">Message complémentaire</label>
             <textarea id="d-msg" class="at-form-textarea" [(ngModel)]="form.message" name="message" placeholder="Décrivez votre situation actuelle ou vos attentes spécifiques…"></textarea>
           </div>
+          <label class="at-consent-label" style="margin-top:var(--ds-space-5);">
+            <input type="checkbox" [(ngModel)]="form.consent" name="consent" id="d-consent"/>
+            {{ consentText }}
+          </label>
+          @if (errorMessage) {
+            <div class="at-error-banner visible" role="alert" style="margin-top:var(--ds-space-4);">{{ errorMessage }}</div>
+          }
           <button type="submit" class="at-btn at-btn-primary at-btn-lg" [disabled]="!isValid() || submitting"
             style="width:100%;justify-content:center;margin-top:var(--ds-space-6);">
             @if (submitting) {

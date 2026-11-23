@@ -90,6 +90,9 @@ public class TenantFilter extends OncePerRequestFilter {
                 || path.startsWith("/v3/api-docs/")
                 || path.startsWith("/api/v1/webhooks/")
                 // Page de confirmation du consentement : le client n'a pas d'organisation.
-                || path.startsWith("/api/v1/public/consent/");
+                || path.startsWith("/api/v1/public/consent/")
+                // Portail et vitrine publics : l'agence est décidée par le serveur (annonce
+                // consultée ou organisation de la plateforme), jamais par un en-tête.
+                || path.startsWith("/api/v1/portal/");
     }
 }

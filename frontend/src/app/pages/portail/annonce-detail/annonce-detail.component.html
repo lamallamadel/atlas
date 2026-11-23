@@ -189,9 +189,12 @@
           </div>
           <label class="at-consent-label">
             <input type="checkbox" [(ngModel)]="leadForm.consent" id="lead-consent"/>
-            J'accepte que mes coordonnées soient transmises à l'agent
+            {{ consentText }}
           </label>
-          <button class="at-btn at-btn-primary at-btn-lg" [disabled]="!leadForm.nom || !leadForm.tel || !leadForm.consent"
+          @if (leadError) {
+            <div class="at-error-banner visible" role="alert">{{ leadError }}</div>
+          }
+          <button class="at-btn at-btn-primary at-btn-lg" [disabled]="!leadForm.nom || (!leadForm.tel && !leadForm.email) || !leadForm.consent || leadSending"
             (click)="submitLead()" style="width:100%;justify-content:center;">
             Envoyer ma demande
           </button>

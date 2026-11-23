@@ -42,6 +42,14 @@
               </div>
             </div>
 
+            <label class="at-consent-label" style="margin-top: 16px;">
+              <input type="checkbox" [(ngModel)]="form.consent" name="consent" id="c-consent"/>
+              {{ consentText }}
+            </label>
+            @if (errorMessage) {
+              <div class="at-error-banner visible" role="alert" style="margin-top: 16px;">{{ errorMessage }}</div>
+            }
+
             <ds-button 
               variant="marine" 
               size="lg" 
