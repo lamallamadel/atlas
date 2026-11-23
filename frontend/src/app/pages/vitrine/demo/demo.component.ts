@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { VitrineService, DemoFormData } from '../../../services/vitrine.service';
+import { VitrineService, DemoFormData, PUBLIC_CONTACT_CONSENT_TEXT, publicLeadErrorMessage } from '../../../services/vitrine.service';
 import { FormsModule } from '@angular/forms';
 import { DsSelectComponent, type DsSelectOption } from '../../../design-system';
 
@@ -13,11 +13,13 @@ import { DsSelectComponent, type DsSelectOption } from '../../../design-system';
 export class DemoComponent {
   submitting = false;
   submitted = false;
+  errorMessage = '';
+  readonly consentText = PUBLIC_CONTACT_CONSENT_TEXT;
 
   form: DemoFormData = {
     nom: '', email: '', tel: '', ville: '', actorType: '',
     teamSize: '', listingVolume: '', desiredPlan: '',
-    needs: [], message: ''
+    needs: [], message: '', consent: false
   };
 
   readonly needOptions = [
@@ -68,15 +70,16 @@ export class DemoComponent {
   hasNeed(need: string): boolean { return this.form.needs.includes(need); }
 
   isValid(): boolean {
-    return !!this.form.nom && !!this.form.email && !!this.form.tel && !!this.form.actorType;
+    return !!this.form.nom && !!this.form.email && !!this.form.tel && !!this.form.actorType && this.form.consent;
   }
 
   submit(): void {
     if (!this.isValid() || this.submitting) return;
     this.submitting = true;
+    this.errorMessage = '';
     this.vitrineService.submitDemoRequest(this.form).subscribe({
       next: () => { this.submitting = false; this.submitted = true; },
-      error: () => { this.submitting = false; }
+      error: (err) => { this.submitting = false; this.errorMessage = publicLeadErrorMessage(err); }
     });
   }
 }

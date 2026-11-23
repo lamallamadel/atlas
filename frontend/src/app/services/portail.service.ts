@@ -129,10 +129,8 @@ export class PortailService {
   }
 
   getListingById(id: string): Observable<Listing> {
-    // Technically should call /api/v1/annonces/{id} but since Portal is public, 
-    // it's easier to just search and find it. Or add a getById endpoint to PortalPublicController.
-    // For now, doing a basic authenticated fetch bypass or we just add it later.
-    return this.http.get<any>(`/api/v1/annonces/${id}`).pipe(
+    // Endpoint public : annonce publiée de n'importe quelle agence, 404 sinon.
+    return this.http.get<any>(`/api/v1/portal/annonces/${id}`).pipe(
       map(res => this.mapToListing(res))
     );
   }

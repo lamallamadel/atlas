@@ -8,6 +8,7 @@ import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.dto.DossierCreateRequest;
 import com.example.backend.dto.DossierStatusPatchRequest;
+import com.example.backend.dto.PortalLeadRequest;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.WorkflowDefinition;
 import com.example.backend.entity.WorkflowTransition;
@@ -178,18 +179,24 @@ class DossierCaseTypeWorkflowBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void vitrineDemoRequestIsRecordedAsB2bDemoLead() throws Exception {
-        DossierCreateRequest r = new DossierCreateRequest();
-        r.setLeadName("Agence Démo");
-        r.setLeadPhone("+212600100007");
-        r.setLeadSource("VITRINE");
-        r.setCaseType("CRM_LEAD_B2B_DEMO");
+        PortalLeadRequest r = new PortalLeadRequest();
+        r.setName("Agence Démo");
+        r.setPhone("+212600100007");
+        r.setRequestType("DEMO");
+        r.setConsent(true);
 
         mockMvc.perform(
-                        withTenantHeaders(post("/api/v1/portal/leads"), "ORG-001")
+                        post("/api/v1/portal/leads")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(r)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.caseType").value("CRM_LEAD_B2B_DEMO"))
-                .andExpect(jsonPath("$.statusCode").value("CRM_NEW"));
+                .andExpect(status().isCreated());
+
+        Dossier saved =
+                dossierRepository.findAll().stream()
+                        .filter(d -> "+212600100007".equals(d.getLeadPhone()))
+                        .findFirst()
+                        .orElseThrow();
+        assertThat(saved.getCaseType()).isEqualTo("CRM_LEAD_B2B_DEMO");
+        assertThat(saved.getStatusCode()).isEqualTo("CRM_NEW");
     }
 }

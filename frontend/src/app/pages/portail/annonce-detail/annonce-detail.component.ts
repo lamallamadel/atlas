@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PortailService, Listing } from '../../../services/portail.service';
-import { HttpClient } from '@angular/common/http';
+import { VitrineService, PUBLIC_CONTACT_CONSENT_TEXT, publicLeadErrorMessage } from '../../../services/vitrine.service';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 
@@ -20,6 +20,9 @@ export class AnnonceDetailComponent implements OnInit {
   leadModalType: 'visite' | 'message' = 'visite';
   reportModalOpen = false;
   leadSubmitted = false;
+  leadSending = false;
+  leadError = '';
+  readonly consentText = PUBLIC_CONTACT_CONSENT_TEXT;
   reportSubmitted = false;
   leadForm = { nom: '', tel: '', email: '', message: '', consent: false };
   reportForm = { motif: '', commentaire: '' };
@@ -28,7 +31,7 @@ export class AnnonceDetailComponent implements OnInit {
     public portailService: PortailService,
     private route: ActivatedRoute,
     private router: Router,
-    private http: HttpClient
+    private vitrineService: VitrineService
   ) {}
 
   ngOnInit(): void {
@@ -68,28 +71,31 @@ export class AnnonceDetailComponent implements OnInit {
   galleryNext(): void { if (this.listing) this.galleryIndex = (this.galleryIndex + 1) % this.images.length; }
   setGalleryIndex(i: number): void { this.galleryIndex = i; }
 
-  openLeadModal(type: 'visite' | 'message'): void { this.leadModalType = type; this.leadModalOpen = true; this.leadSubmitted = false; }
+  openLeadModal(type: 'visite' | 'message'): void { this.leadModalType = type; this.leadModalOpen = true; this.leadSubmitted = false; this.leadError = ''; }
   closeLeadModal(): void { this.leadModalOpen = false; }
 
   submitLead(): void {
-    if (!this.leadForm.nom || !this.leadForm.tel || !this.leadForm.consent) return;
-    
-    // Connect to real backend
-    this.http.post('/api/v1/portal/leads', {
-        annonceId: this.listing?.id || null,
-        leadName: this.leadForm.nom,
-        leadPhone: this.leadForm.tel,
-        leadSource: 'PORTAIL',
-        notes: `[Type: ${this.leadModalType}] Email: ${this.leadForm.email} - Message: ${this.leadForm.message}`,
-        caseType: this.leadModalType === 'visite' ? 'VISITE' : 'INFO'
+    if (!this.leadForm.nom || (!this.leadForm.tel && !this.leadForm.email) || !this.leadForm.consent || this.leadSending) return;
+    this.leadSending = true;
+    this.leadError = '';
+    // Le serveur enregistre la demande dans l'agence de l'annonce (jamais celle du navigateur).
+    this.vitrineService.submitPublicLead({
+      annonceId: this.listing?.id ? Number(this.listing.id) : null,
+      requestType: this.leadModalType === 'visite' ? 'VISIT' : 'INFO',
+      name: this.leadForm.nom,
+      phone: this.leadForm.tel || null,
+      email: this.leadForm.email || null,
+      message: this.leadForm.message || null,
+      consent: this.leadForm.consent
     }).subscribe({
-        next: () => {
-            this.leadSubmitted = true;
-        },
-        error: (err) => {
-            console.error('Failed to submit lead', err);
-            this.leadSubmitted = true; // Still show success for UX fallback or handle error
-        }
+      next: () => {
+        this.leadSending = false;
+        this.leadSubmitted = true;
+      },
+      error: (err) => {
+        this.leadSending = false;
+        this.leadError = publicLeadErrorMessage(err);
+      }
     });
   }
 

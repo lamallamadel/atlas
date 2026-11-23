@@ -13,6 +13,7 @@ export interface DemoFormData {
   desiredPlan?: string;
   needs: string[];
   message?: string;
+  consent: boolean;
 }
 
 export interface ContactFormData {
@@ -21,6 +22,37 @@ export interface ContactFormData {
   tel?: string;
   sujet: string;
   message: string;
+  consent: boolean;
+}
+
+/** Texte de la case à cocher, identique à PublicLeadService.CONSENT_TEXT (preuve côté serveur). */
+export const PUBLIC_CONTACT_CONSENT_TEXT =
+  "J'accepte d'être recontacté(e) au sujet de ma demande, par téléphone, WhatsApp ou e-mail.";
+
+/** Contrat de POST /api/v1/portal/leads : l'agence et le type de dossier sont décidés par le serveur. */
+export interface PublicLeadPayload {
+  annonceId?: number | null;
+  requestType: 'VISIT' | 'INFO' | 'DEMO' | 'CONTACT';
+  name: string;
+  phone?: string | null;
+  email?: string | null;
+  message?: string | null;
+  consent: boolean;
+}
+
+/** Message lisible pour une demande publique refusée ou en échec. */
+export function publicLeadErrorMessage(err: unknown): string {
+  const detail = String((err as { error?: { detail?: string } })?.error?.detail ?? '');
+  if (detail.startsWith('CONSENT_REQUIRED')) {
+    return 'Cochez la case pour accepter d\'être recontacté(e).';
+  }
+  if (detail.startsWith('CONTACT_REQUIRED')) {
+    return 'Indiquez un téléphone ou une adresse e-mail.';
+  }
+  if (detail.startsWith('ANNONCE_NOT_FOUND')) {
+    return 'Cette annonce n\'est plus disponible.';
+  }
+  return 'Votre demande n\'a pas pu être envoyée. Réessayez dans un instant.';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,44 +61,39 @@ export class VitrineService {
   constructor(private http: HttpClient) {}
 
   submitDemoRequest(data: DemoFormData): Observable<{ success: boolean }> {
-    const notes = [
-      `[Type: DEMO_REQUEST]`,
-      `Email: ${data.email}`,
-      `Ville: ${data.ville}`,
-      `Actor Type: ${data.actorType}`,
-      `Team Size: ${data.teamSize || 'N/A'}`,
-      `Volume: ${data.listingVolume || 'N/A'}`,
-      `Plan: ${data.desiredPlan || 'N/A'}`,
-      `Needs: ${data.needs.join(', ')}`,
-      `Message: ${data.message || ''}`
-    ].join('\n');
+    const details = [
+      `Ville : ${data.ville}`,
+      `Profil : ${data.actorType}`,
+      `Taille de l'équipe : ${data.teamSize || '—'}`,
+      `Volume d'annonces : ${data.listingVolume || '—'}`,
+      `Offre souhaitée : ${data.desiredPlan || '—'}`,
+      `Besoins : ${data.needs.join(', ') || '—'}`,
+      data.message ? `Message : ${data.message}` : ''
+    ].filter(Boolean).join('\n');
 
-    return this.http.post<any>('/api/v1/portal/leads', {
-        leadName: data.nom,
-        leadPhone: data.tel,
-        leadSource: 'VITRINE',
-        notes: notes,
-        caseType: 'CRM_LEAD_B2B_DEMO'
-    }).pipe(
-      map(() => ({ success: true }))
-    );
+    return this.submitPublicLead({
+      requestType: 'DEMO',
+      name: data.nom,
+      phone: data.tel,
+      email: data.email,
+      message: details,
+      consent: data.consent
+    });
   }
 
   submitContactRequest(data: ContactFormData): Observable<{ success: boolean }> {
-    const notes = [
-      `[Type: CONTACT_FORM]`,
-      `Email: ${data.email}`,
-      `Sujet: ${data.sujet}`,
-      `Message: ${data.message}`
-    ].join('\n');
+    return this.submitPublicLead({
+      requestType: 'CONTACT',
+      name: data.nom,
+      phone: data.tel || null,
+      email: data.email,
+      message: `Sujet : ${data.sujet}\n${data.message}`,
+      consent: data.consent
+    });
+  }
 
-    return this.http.post<any>('/api/v1/portal/leads', {
-        leadName: data.nom,
-        leadPhone: data.tel || 'NOT_PROVIDED',
-        leadSource: 'VITRINE',
-        notes: notes,
-        caseType: 'CRM_LEAD'
-    }).pipe(
+  submitPublicLead(payload: PublicLeadPayload): Observable<{ success: boolean }> {
+    return this.http.post<unknown>('/api/v1/portal/leads', payload).pipe(
       map(() => ({ success: true }))
     );
   }
