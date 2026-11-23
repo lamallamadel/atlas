@@ -47,13 +47,16 @@ public class DossierController {
     private final DossierStatusHistoryService statusHistoryService;
     private final DossierStatusCodeValidationService statusCodeValidationService;
     private final DossierAdvancedFilterService advancedFilterService;
+    private final com.example.backend.service.DossierAssignmentService dossierAssignmentService;
 
     public DossierController(
             DossierService dossierService,
             com.example.backend.service.DossierMatchingService dossierMatchingService,
             DossierStatusHistoryService statusHistoryService,
             DossierStatusCodeValidationService statusCodeValidationService,
-            DossierAdvancedFilterService advancedFilterService) {
+            DossierAdvancedFilterService advancedFilterService,
+            com.example.backend.service.DossierAssignmentService dossierAssignmentService) {
+        this.dossierAssignmentService = dossierAssignmentService;
         this.dossierService = dossierService;
         this.dossierMatchingService = dossierMatchingService;
         this.statusHistoryService = statusHistoryService;
@@ -194,6 +197,12 @@ public class DossierController {
             @Parameter(description = "Search in lead name or phone (contains, case-insensitive)")
                     @RequestParam(required = false)
                     String q,
+            @Parameter(
+                            description =
+                                    "Agent : me (mes dossiers), unassigned (à attribuer) ou un"
+                                            + " identifiant d'utilisateur")
+                    @RequestParam(required = false)
+                    String assignee,
             @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0")
                     int page,
             @Parameter(description = "Page size (min=1, default=20)", example = "20")
@@ -214,8 +223,58 @@ public class DossierController {
 
         Pageable pageable = createPageable(page, size, sort);
         Page<DossierResponse> response =
-                dossierService.list(status, leadPhone, annonceId, leadSource, q, pageable);
+                dossierService.list(
+                        status, leadPhone, annonceId, leadSource, q, assignee, pageable);
         return ResponseEntity.ok(response);
+    }
+
+    /** Corps de {@code POST /{id}/assign} : agent cible, ou {@code null} pour « à attribuer ». */
+    public record AssignRequest(String userId) {}
+
+    /** Corps de {@code POST /bulk-reassign}. */
+    public record BulkReassignRequest(
+            @jakarta.validation.constraints.NotEmpty java.util.List<Long> ids, String userId) {}
+
+    @PostMapping("/{id}/claim")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO', 'MANAGER')")
+    @Operation(
+            summary = "Take an unassigned dossier",
+            description =
+                    "L'utilisateur connecté prend un dossier à attribuer ; 409 s'il est déjà suivi")
+    public ResponseEntity<DossierResponse> claim(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(dossierAssignmentService.claim(id));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/assign")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
+    @Operation(
+            summary = "Reassign a dossier",
+            description =
+                    "Manager ou admin. userId = membre de l'agence, ou null pour remettre le"
+                            + " dossier à attribuer")
+    public ResponseEntity<DossierResponse> assign(
+            @PathVariable Long id, @RequestBody AssignRequest request) {
+        try {
+            return ResponseEntity.ok(dossierAssignmentService.assign(id, request.userId()));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/bulk-reassign")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
+    @Operation(
+            summary = "Reassign several dossiers",
+            description =
+                    "Manager ou admin. À ne pas confondre avec bulk-assign, qui change le statut")
+    public ResponseEntity<com.example.backend.dto.BulkOperationResponse> bulkReassign(
+            @Valid @RequestBody BulkReassignRequest request) {
+        return ResponseEntity.ok(
+                dossierAssignmentService.bulkAssign(request.ids(), request.userId()));
     }
 
     @PatchMapping("/{id}/status")

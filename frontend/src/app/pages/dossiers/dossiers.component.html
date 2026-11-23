@@ -45,6 +45,11 @@
   <!-- ── Barre de filtres ── -->
   @if (viewMode === 'list') {
     <div class="dos-filters">
+      <div class="dos-assignee-scope" role="group" aria-label="Agent" style="display:flex;gap:var(--ds-space-2);margin-bottom:var(--ds-space-3);">
+        <ds-filter-chip [active]="assigneeScope === 'all'" (toggled)="setAssigneeScope('all')">Tous</ds-filter-chip>
+        <ds-filter-chip [active]="assigneeScope === 'me'" (toggled)="setAssigneeScope('me')">Mes dossiers</ds-filter-chip>
+        <ds-filter-chip [active]="assigneeScope === 'unassigned'" (toggled)="setAssigneeScope('unassigned')">À attribuer</ds-filter-chip>
+      </div>
       <ds-filter-bar
         [filters]="statusFilters"
         [activeFilter]="selectedStatus"

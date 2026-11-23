@@ -135,4 +135,16 @@ public interface DossierRepository
         return countByStatusInAndOrgId(
                 Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED), orgId);
     }
+
+    /** Agents déjà assignés dans l'agence : [identifiant, nom]. */
+    @Query(
+            "SELECT DISTINCT d.assignedTo, d.assignedToName FROM Dossier d WHERE d.orgId = :orgId"
+                    + " AND d.assignedTo IS NOT NULL")
+    List<Object[]> findDistinctAssigneesByOrgId(@Param("orgId") String orgId);
+
+    /** Créateurs de dossiers dans l'agence. */
+    @Query(
+            "SELECT DISTINCT d.createdBy FROM Dossier d WHERE d.orgId = :orgId"
+                    + " AND d.createdBy IS NOT NULL")
+    List<String> findDistinctCreatorsByOrgId(@Param("orgId") String orgId);
 }

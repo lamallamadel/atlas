@@ -38,6 +38,7 @@ import {
   DsDialogService,
   DsSelectComponent,
   DsSelectOption,
+  DsFilterChipComponent,
   DsInputComponent
 } from '../../design-system';
 import { CommonModule } from '@angular/common';
@@ -71,6 +72,7 @@ interface AppliedFilter {
       DsIconComponent,
       DsSelectComponent,
       DsInputComponent,
+      DsFilterChipComponent,
     ]
 })
 export class DossiersComponent implements OnInit {
@@ -129,6 +131,7 @@ export class DossiersComponent implements OnInit {
     { key: 'leadName', header: 'Nom du prospect' },
     { key: 'leadPhone', header: 'Téléphone' },
     { key: 'status', header: 'Statut', cell: (d) => DossiersComponent.STATUS_LABELS[d.status] ?? d.status ?? '' },
+    { key: 'assignedToName', header: 'Agent', cell: (d) => d.assignedTo ? (d.assignedToName || d.assignedTo) : 'À attribuer' },
     { key: 'updatedAt', header: 'Mis à jour', cell: (d) => DossiersComponent.formatDate(d.updatedAt) }
   ];
 
@@ -155,6 +158,7 @@ export class DossiersComponent implements OnInit {
         leadPhone: this.phoneFilter.trim() || undefined,
         leadSource: this.sourceFilter.trim() || undefined,
         annonceId: this.selectedAnnonceId || undefined,
+        assignee: this.assigneeScope === 'all' ? undefined : this.assigneeScope,
         q: this.searchQuery.trim() || undefined
       }).pipe(
         map(response => ({ response: response as Page<DossierResponse> | null })),
@@ -209,6 +213,16 @@ export class DossiersComponent implements OnInit {
   loadDossiers(): void {
     this.loading = true;
     this.reload$.next();
+  }
+
+  /** Tous les dossiers, les miens, ou ceux à attribuer. */
+  assigneeScope: 'all' | 'me' | 'unassigned' = 'all';
+
+  setAssigneeScope(scope: 'all' | 'me' | 'unassigned'): void {
+    if (this.assigneeScope === scope) return;
+    this.assigneeScope = scope;
+    this.currentPage = 0;
+    this.loadDossiers();
   }
 
   onStatusFilterChange(status: any): void {

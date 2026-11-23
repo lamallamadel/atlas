@@ -76,6 +76,10 @@ export interface DossierResponse {
   updatedAt: string;
   createdBy?: string;
   updatedBy?: string;
+  /** Agent assigné (identifiant Keycloak) ; absent = dossier à attribuer. */
+  assignedTo?: string | null;
+  assignedToName?: string | null;
+  assignedAt?: string | null;
 }
 
 export interface DossierCreateRequest {
@@ -131,6 +135,8 @@ export interface DossierListParams {
   leadSource?: string;
   /** Recherche dans le nom ou le téléphone du prospect. */
   q?: string;
+  /** Agent : 'me' (mes dossiers), 'unassigned' (à attribuer) ou un identifiant d'utilisateur. */
+  assignee?: string;
   annonceId?: number;
   page?: number;
   size?: number;
@@ -183,6 +189,9 @@ export class DossierApiService {
     }
     if (params.annonceId !== undefined) {
       httpParams = httpParams.set('annonceId', params.annonceId.toString());
+    }
+    if (params.assignee) {
+      httpParams = httpParams.set('assignee', params.assignee);
     }
     if (params.q !== undefined && params.q !== '') {
       httpParams = httpParams.set('q', params.q);
@@ -238,6 +247,22 @@ export class DossierApiService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
+  /** L'utilisateur connecté prend un dossier à attribuer (409 s'il est déjà suivi). */
+  claim(id: number): Observable<DossierResponse> {
+    return this.http.post<DossierResponse>(`${this.apiUrl}/${id}/claim`, {});
+  }
+
+  /** Réassigne un dossier (manager ou admin) ; userId null = remettre à attribuer. */
+  assign(id: number, userId: string | null): Observable<DossierResponse> {
+    return this.http.post<DossierResponse>(`${this.apiUrl}/${id}/assign`, { userId });
+  }
+
+  /** Réassignation groupée (manager ou admin). */
+  bulkReassign(ids: number[], userId: string | null): Observable<BulkOperationResponse> {
+    return this.http.post<BulkOperationResponse>(`${this.apiUrl}/bulk-reassign`, { ids, userId });
+  }
+
+  /** Change le statut de plusieurs dossiers (nom historique : bulk-assign). */
   bulkAssign(request: DossierBulkAssignRequest): Observable<BulkOperationResponse> {
     return this.http.post<BulkOperationResponse>(`${this.apiUrl}/bulk-assign`, request);
   }

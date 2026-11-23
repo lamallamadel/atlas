@@ -100,6 +100,9 @@ public class DossierMapper {
                 dossier.getStatusCode() != null
                         ? dossier.getStatusCode()
                         : DossierStatusCodes.toCode(dossier.getStatus()));
+        response.setAssignedTo(dossier.getAssignedTo());
+        response.setAssignedToName(dossier.getAssignedToName());
+        response.setAssignedAt(dossier.getAssignedAt());
         response.setLossReason(dossier.getLossReason());
         response.setWonReason(dossier.getWonReason());
         response.setScore(dossier.getScore());
