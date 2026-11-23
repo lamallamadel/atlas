@@ -156,3 +156,13 @@ whatsapp:
   webhook:
     # Doit être identique au « Verify token » saisi dans Meta > WhatsApp > Configuration
     verify-token: ${WHATSAPP_WEBHOOK_VERIFY_TOKEN:}
+
+# Adresse publique du frontend : les liens envoyés aux clients (confirmation du
+# consentement, portail client) commencent par elle. En production : PUBLIC_BASE_URL.
+customer-portal:
+  base-url: ${PUBLIC_BASE_URL:http://localhost:4200}
+
+atlas:
+  consent:
+    public-base-url: ${PUBLIC_BASE_URL:http://localhost:4200}
+    link-validity-days: ${CONSENT_LINK_VALIDITY_DAYS:7}

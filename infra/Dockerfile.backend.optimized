@@ -74,7 +74,8 @@ FROM alpine:3.21
 WORKDIR /app
 
 # Install minimal runtime dependencies (ca-certificates for HTTPS)
-RUN apk add --no-cache ca-certificates tini
+# tzdata : sans lui, l'image Alpine ignore TZ et l'application reste en UTC.
+RUN apk add --no-cache ca-certificates tini tzdata
 
 # Copy minimal JRE from builder
 COPY --from=jre-builder /opt/java-minimal /opt/java-minimal

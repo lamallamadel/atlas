@@ -131,15 +131,11 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <!-- AOP (aspects d'audit, @Async...) : en Spring Boot 4, le starter s'appelle
+             spring-boot-starter-aspectj (version gérée par Boot, ne pas la figer). -->
         <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
- 	</dependency>
-
- 	<dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-            <version>3.2.1</version>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
         </dependency>
 
         <dependency>

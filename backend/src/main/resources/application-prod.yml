@@ -75,3 +75,11 @@ outbound:
     email:
       enabled: ${OUTBOUND_ALERT_EMAIL_ENABLED:false}
       recipients: ${OUTBOUND_ALERT_EMAIL_RECIPIENTS:}
+
+# Liens envoyés aux clients : jamais localhost en production.
+customer-portal:
+  base-url: ${PUBLIC_BASE_URL:https://afroware.app}
+
+atlas:
+  consent:
+    public-base-url: ${PUBLIC_BASE_URL:https://afroware.app}

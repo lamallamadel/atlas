@@ -1,7 +1,9 @@
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
-RUN apk add --no-cache curl
+# tzdata : sans lui, l'image Alpine ignore TZ et l'application reste en UTC.
+RUN apk add --no-cache curl tzdata
+ENV TZ=Africa/Casablanca
 
 COPY backend/target/*.jar /app/app.jar
 

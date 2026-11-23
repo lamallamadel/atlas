@@ -50,7 +50,9 @@ FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
 # Keep curl only if you actually use an HTTP healthcheck
-RUN apk add --no-cache curl
+# tzdata : sans lui, l'image Alpine ignore TZ et l'application reste en UTC.
+RUN apk add --no-cache curl tzdata
+ENV TZ=Africa/Casablanca
 
 # Copy the built jar (avoid hardcoded jar name when possible)
 COPY --from=build /app/target/*.jar /app/app.jar
