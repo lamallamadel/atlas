@@ -81,12 +81,9 @@ public class DossierWhatsAppService {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "Ce dossier n'a pas de numéro de téléphone.");
         }
-        if (!hasFollowUpConsent(dossierId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNPROCESSABLE_ENTITY,
-                    "Pas d'accord « suivi du dossier » sur WhatsApp : enregistrez-le dans"
-                            + " l'onglet Consentements avant d'écrire au client.");
-        }
+        // Fenêtre de service WhatsApp : un message libre n'est livré que si le client a écrit
+        // dans les 24 dernières heures. Dans cette fenêtre, répondre au client ne demande pas
+        // d'opt-in (politique WhatsApp) : on ne bloque que sur un refus ou un retrait explicite.
         if (!sessionWindowService.isWithinSessionWindow(orgId, phone)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
@@ -97,16 +94,16 @@ public class DossierWhatsAppService {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("body", message);
         payload.put("kind", "AGENT_REPLY");
+        payload.put(
+                "legalBasis",
+                hasFollowUpConsent(dossierId) ? "CONSENT" : "CUSTOMER_SERVICE_WINDOW");
         OutboundMessageEntity outbound =
-                outboundMessageService.createOutboundMessage(
+                outboundMessageService.createCustomerServiceReply(
                         dossierId,
                         MessageChannel.WHATSAPP,
                         phone,
-                        null,
-                        null,
                         payload,
-                        "reply-" + dossierId + "-" + UUID.randomUUID(),
-                        ConsentementType.TRANSACTIONNEL);
+                        "reply-" + dossierId + "-" + UUID.randomUUID());
 
         MessageCreateRequest thread = new MessageCreateRequest();
         thread.setDossierId(dossierId);

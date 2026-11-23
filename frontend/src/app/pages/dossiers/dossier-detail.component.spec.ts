@@ -429,14 +429,14 @@ describe('DossierDetailComponent', () => {
       expect(component.consentSourceLabel(component.latestConsent('WHATSAPP' as any, 'MARKETING'))).toBe('confirmé par le client');
     });
 
-    it('le dernier consentement l’emporte, et la réponse WhatsApp exige l’accord « suivi »', () => {
+    it('le dernier consentement l’emporte ; seul un refus ou un retrait bloque la réponse WhatsApp', () => {
       component.consentements = [
         consent({ id: 1, consentType: 'TRANSACTIONNEL', status: 'GRANTED', updatedAt: '2026-11-19T10:00:00' }),
         consent({ id: 2, consentType: 'TRANSACTIONNEL', status: 'REVOKED', updatedAt: '2026-11-20T10:00:00' }),
       ] as any;
-      expect(component.canReplyOnWhatsApp()).toBe(false);
-      component.consentements = [consent({ id: 3, consentType: 'MARKETING' })] as any;
-      expect(component.canReplyOnWhatsApp()).toBe(false);
+      expect(component.canReplyOnWhatsApp()).toBe(false); // retrait explicite : bloqué
+      component.consentements = [] as any;
+      expect(component.canReplyOnWhatsApp()).toBe(true);  // client qui écrit en premier : réponse possible
       component.consentements = [consent({ id: 4, consentType: 'TRANSACTIONNEL' })] as any;
       expect(component.canReplyOnWhatsApp()).toBe(true);
     });

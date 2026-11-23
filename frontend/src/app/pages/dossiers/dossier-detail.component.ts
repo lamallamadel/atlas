@@ -452,8 +452,14 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
     return c?.status === ConsentementStatus.GRANTED && !this.isClientConfirmed(c);
   }
 
+  /**
+   * Dans la fenêtre de 24 h ouverte par un message du client, WhatsApp n'exige pas d'opt-in pour
+   * lui répondre : seul un refus ou un retrait explicite de l'accord « suivi » bloque l'écriture.
+   * (Le serveur vérifie la fenêtre et renvoie un message clair si elle est fermée.)
+   */
   canReplyOnWhatsApp(): boolean {
-    return this.latestConsent(ConsentementChannel.WHATSAPP, 'TRANSACTIONNEL')?.status === ConsentementStatus.GRANTED;
+    const status = this.latestConsent(ConsentementChannel.WHATSAPP, 'TRANSACTIONNEL')?.status;
+    return status !== ConsentementStatus.DENIED && status !== ConsentementStatus.REVOKED;
   }
 
   saveAgentConsent(): void {
