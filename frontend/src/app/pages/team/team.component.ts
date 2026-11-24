@@ -1,20 +1,21 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import {
+  DsAvatarComponent,
   DsBadgeComponent,
   DsButtonComponent,
   DsCardComponent,
-  DsEmptyStateComponent,
-  DsInputComponent,
+  DsCellDirective,
+  DsDialogService,
   DsSelectComponent,
-  DsSkeletonComponent,
   DsSwitchComponent,
+  DsTableComponent,
   DsToastService,
   PageHeaderComponent,
 } from '../../design-system';
-import type { DsSelectOption } from '../../design-system';
+import type { DsColumn, DsSelectOption } from '../../design-system';
 import { AuthService } from '../../services/auth.service';
-import { TeamApiService, TeamMember } from '../../services/team-api.service';
+import { InviteResponse, TeamApiService, TeamMember } from '../../services/team-api.service';
 import {
   AGENCY_ROLE_LABELS,
   AGENCY_ROLES,
@@ -23,6 +24,7 @@ import {
   invitableRoles,
 } from '../../services/agency-role';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
+import { TeamInviteDialogComponent, TeamInviteDialogData } from './team-invite-dialog.component';
 
 /**
  * Écran « Équipe » : membres de l'agence et leur rôle. Le manager invite des agents ;
@@ -34,160 +36,152 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
+    DsAvatarComponent,
     DsBadgeComponent,
     DsButtonComponent,
     DsCardComponent,
-    DsEmptyStateComponent,
-    DsInputComponent,
+    DsCellDirective,
     DsSelectComponent,
-    DsSkeletonComponent,
     DsSwitchComponent,
+    DsTableComponent,
     PageHeaderComponent,
   ],
   template: `
-    <div class="team-page">
+    <div class="pro-page ds-form-stack team-page">
       <ds-page-header
         eyebrow="Espace Pro"
-        titleBefore="Équipe"
-        description="Membres de l'agence, rôles et invitations.">
+        titleBefore="Mon"
+        titleAccent="équipe"
+        description="Membres de l'agence, rôles et accès aux dossiers.">
+        <ng-container slot="actions">
+          @if (inviteRoles.length) {
+            <ds-button variant="marine" size="md" prefixIcon="plus" (dsClick)="openInvite()">Inviter un membre</ds-button>
+          }
+        </ng-container>
       </ds-page-header>
 
-      <ds-card [pad]="true" elevation="xs" class="team-card">
-        <h2 class="team-title">Visibilité des dossiers</h2>
-        @if (canManage) {
-          <ds-switch
-            label="Chaque agent ne voit que ses dossiers"
-            description="Plus les dossiers à attribuer. Les managers et les administrateurs voient toujours tout."
-            [checked]="restricted() === true"
-            [disabled]="savingSettings() || restricted() === null"
-            (checkedChange)="setRestricted($event)">
-          </ds-switch>
-        } @else {
-          <p class="team-hint team-hint--flat">
-            {{ restricted()
-              ? 'Chaque agent ne voit que ses dossiers et ceux à attribuer.'
-              : 'Tous les agents voient tous les dossiers de l’agence.' }}
-          </p>
-        }
-      </ds-card>
-
-      @if (inviteRoles.length) {
-        <ds-card [pad]="true" elevation="xs" class="team-card">
-          <h2 class="team-title">Inviter un membre</h2>
-          <form #inviteForm="ngForm" class="team-invite" (ngSubmit)="invite(inviteForm)">
-            <ds-input label="Prénom" name="firstName" [(ngModel)]="draft.firstName" required></ds-input>
-            <ds-input label="Nom" name="lastName" [(ngModel)]="draft.lastName" required></ds-input>
-            <ds-input label="E-mail" type="email" name="email" [(ngModel)]="draft.email" required email></ds-input>
-            <ds-select
-              label="Rôle"
-              name="role"
-              [options]="inviteRoleOptions"
-              [(ngModel)]="draft.role"
-              [disabled]="inviteRoles.length === 1">
-            </ds-select>
-            <div class="team-invite__submit">
-              <ds-button variant="marine" nativeType="submit" [loading]="inviting()" [disabled]="inviting() || !!inviteForm.invalid">
-                Envoyer l'invitation
-              </ds-button>
-            </div>
-          </form>
-          <p class="team-hint">Le membre reçoit un e-mail pour choisir son mot de passe.</p>
-        </ds-card>
+      @if (!loading() && members().length) {
+        <div class="team-stats">
+          <span class="team-stats__total">{{ members().length }} membre{{ members().length > 1 ? 's' : '' }}</span>
+          <span class="team-stats__sep" aria-hidden="true">|</span>
+          <span>{{ activeCount() }} actif{{ activeCount() > 1 ? 's' : '' }}</span>
+          @if (disabledCount()) {
+            <span class="team-stats__sep" aria-hidden="true">|</span>
+            <span>{{ disabledCount() }} désactivé{{ disabledCount() > 1 ? 's' : '' }}</span>
+          }
+        </div>
       }
 
-      <ds-card [pad]="true" elevation="xs" class="team-card">
-        <h2 class="team-title">Membres</h2>
-        @if (loading()) {
-          <ds-skeleton variant="text"></ds-skeleton>
-          <ds-skeleton variant="text"></ds-skeleton>
-          <ds-skeleton variant="text"></ds-skeleton>
-        } @else if (members().length === 0) {
-          <ds-empty-state
-            [compact]="true"
-            title="Aucun membre"
-            description="L'annuaire de l'agence est vide ou indisponible.">
-          </ds-empty-state>
-        } @else {
-          @if (rolesUnknown()) {
-            <p class="team-hint team-hint--warn">
-              Rôles indisponibles : l'annuaire Keycloak ne répond pas. La liste montre les agents déjà vus dans les dossiers.
+      @if (rolesUnknown()) {
+        <div class="team-alert" role="status">
+          Rôles indisponibles : l'annuaire Keycloak ne répond pas. La liste montre les agents déjà vus dans les dossiers.
+        </div>
+      }
+
+      <ds-card [pad]="false" elevation="xs">
+        <ds-table
+          [columns]="columns"
+          [rows]="members()"
+          [loading]="loading()"
+          [loadingRowCount]="4"
+          [trackBy]="trackMember"
+          label="Membres de l'agence"
+          emptyMessage="L'annuaire de l'agence est vide ou indisponible.">
+          <ng-template dsCell="name" let-m>
+            <div class="team-member" [class.team-member--disabled]="m.enabled === false">
+              <ds-avatar [name]="m.name" size="sm" [variant]="m.enabled === false ? 'neutral' : 'marine'"></ds-avatar>
+              <div class="team-member__text">
+                <span class="team-member__name">{{ m.name }}@if (m.userId === me) { <span class="team-member__me"> (vous)</span> }</span>
+                @if (m.email) { <span class="team-member__email">{{ m.email }}</span> }
+              </div>
+            </div>
+          </ng-template>
+          <ng-template dsCell="role" let-m>
+            @if (canManage && m.role && m.userId !== me) {
+              <div class="team-role">
+                <ds-select
+                  [ariaLabelSelect]="'Rôle de ' + m.name"
+                  [options]="roleOptions"
+                  [ngModel]="m.role"
+                  (ngModelChange)="changeRole(m, $event)"
+                  [disabled]="busy() === m.userId">
+                </ds-select>
+              </div>
+            } @else {
+              <span class="team-role-label">{{ roleLabel(m.role) }}</span>
+            }
+          </ng-template>
+          <ng-template dsCell="status" let-m>
+            <ds-badge size="sm" [status]="m.enabled === false ? 'archived' : 'active'">
+              {{ m.enabled === false ? 'Désactivé' : 'Actif' }}
+            </ds-badge>
+          </ng-template>
+          <ng-template dsCell="actions" let-m>
+            @if (canManage && m.role && m.userId !== me) {
+              <ds-button
+                size="sm"
+                variant="ghost"
+                [disabled]="busy() === m.userId"
+                [ariaLabel]="(m.enabled === false ? 'Réactiver ' : 'Désactiver ') + m.name"
+                (dsClick)="toggleEnabled(m)">
+                {{ m.enabled === false ? 'Réactiver' : 'Désactiver' }}
+              </ds-button>
+            }
+          </ng-template>
+        </ds-table>
+      </ds-card>
+
+      <ds-card [pad]="true" elevation="xs">
+        <div class="team-section">
+          <div class="team-section__head">
+            <h2 class="team-section__title">Accès aux dossiers</h2>
+            <p class="team-section__desc">Les managers et les administrateurs voient toujours tous les dossiers de l'agence.</p>
+          </div>
+          @if (canManage) {
+            <ds-switch
+              label="Chaque agent ne voit que ses dossiers"
+              description="Plus les dossiers à attribuer."
+              [checked]="restricted() === true"
+              [disabled]="savingSettings() || restricted() === null"
+              (checkedChange)="setRestricted($event)">
+            </ds-switch>
+          } @else {
+            <p class="team-section__value">
+              {{ restricted()
+                ? 'Chaque agent ne voit que ses dossiers et ceux à attribuer.'
+                : 'Tous les agents voient tous les dossiers de l’agence.' }}
             </p>
           }
-          <table class="team-table" aria-label="Membres de l'agence">
-            <thead>
-              <tr><th scope="col">Membre</th><th scope="col">Rôle</th><th scope="col">Statut</th>
-                @if (canManage) { <th scope="col"><span class="sr-only">Actions</span></th> }
-              </tr>
-            </thead>
-            <tbody>
-              @for (m of members(); track m.userId) {
-                <tr [class.team-row--disabled]="m.enabled === false">
-                  <td>
-                    <span class="team-name">{{ m.name }}@if (m.userId === me) { <span class="team-me"> (vous)</span> }</span>
-                    @if (m.email) { <span class="team-email">{{ m.email }}</span> }
-                  </td>
-                  <td>
-                    @if (canManage && m.role && m.userId !== me) {
-                      <ds-select
-                        [ariaLabelSelect]="'Rôle de ' + m.name"
-                        [options]="roleOptions"
-                        [ngModel]="m.role"
-                        (ngModelChange)="changeRole(m, $event)"
-                        [disabled]="busy() === m.userId">
-                      </ds-select>
-                    } @else {
-                      {{ roleLabel(m.role) }}
-                    }
-                  </td>
-                  <td>
-                    <ds-badge size="sm" [status]="m.enabled === false ? 'archived' : 'active'">
-                      {{ m.enabled === false ? 'Désactivé' : 'Actif' }}
-                    </ds-badge>
-                  </td>
-                  @if (canManage) {
-                    <td class="team-actions">
-                      @if (m.role && m.userId !== me) {
-                        <ds-button
-                          size="sm"
-                          [variant]="m.enabled === false ? 'ghost' : 'danger'"
-                          [disabled]="busy() === m.userId"
-                          (dsClick)="toggleEnabled(m)">
-                          {{ m.enabled === false ? 'Réactiver' : 'Désactiver' }}
-                        </ds-button>
-                      }
-                    </td>
-                  }
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
+        </div>
       </ds-card>
     </div>
   `,
   styles: [`
-    .team-page { display: flex; flex-direction: column; gap: var(--ds-space-6); }
-    .team-title { margin: 0 0 var(--ds-space-4); font-size: var(--ds-text-base); font-weight: 700; color: var(--ds-marine); }
-    .team-invite { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--ds-space-4); align-items: end; }
-    .team-invite__submit { display: flex; align-items: flex-end; }
-    .team-hint { margin: var(--ds-space-3) 0 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
-    .team-hint--warn { margin: 0 0 var(--ds-space-4); }
-    .team-hint--flat { margin: 0; color: var(--ds-text); }
-    .team-table { width: 100%; border-collapse: collapse; font-size: var(--ds-text-sm); }
-    .team-table th { text-align: left; font-weight: 600; color: var(--ds-text-muted); padding: var(--ds-space-2) var(--ds-space-3); border-bottom: 1px solid var(--ds-border); }
-    .team-table td { padding: var(--ds-space-3); border-bottom: 1px solid var(--ds-divider); vertical-align: middle; }
-    .team-name { display: block; font-weight: 600; color: var(--ds-text); }
-    .team-me { font-weight: 400; color: var(--ds-text-muted); }
-    .team-email { display: block; color: var(--ds-text-muted); }
-    .team-row--disabled .team-name, .team-row--disabled .team-email { color: var(--ds-text-faint); }
-    .team-actions { text-align: right; }
-    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .team-page { gap: var(--ds-space-6); }
+    .team-stats { display: flex; gap: var(--ds-space-3); font-size: var(--ds-text-xs); color: var(--ds-text-muted); }
+    .team-stats__total { font-weight: 700; color: var(--ds-marine); }
+    .team-stats__sep { opacity: 0.3; }
+    .team-alert { padding: var(--ds-space-3) var(--ds-space-4); border-radius: var(--ds-radius-md); background: var(--ds-warning-hl); color: var(--ds-text); font-size: var(--ds-text-sm); }
+    .team-member { display: flex; align-items: center; gap: var(--ds-space-3); }
+    .team-member__text { display: flex; flex-direction: column; min-width: 0; }
+    .team-member__name { font-weight: 600; color: var(--ds-text); }
+    .team-member__me { font-weight: 400; color: var(--ds-text-muted); }
+    .team-member__email { font-size: var(--ds-text-xs); color: var(--ds-text-muted); }
+    .team-member--disabled .team-member__name, .team-member--disabled .team-member__email { color: var(--ds-text-faint); }
+    .team-role { min-width: 150px; max-width: 200px; }
+    .team-role-label { color: var(--ds-text); }
+    .team-section { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--ds-space-4) var(--ds-space-8); }
+    .team-section__head { flex: 1 1 280px; }
+    .team-section__title { margin: 0; font-size: var(--ds-text-base); font-weight: 700; color: var(--ds-marine); }
+    .team-section__desc { margin: var(--ds-space-1) 0 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
+    .team-section__value { margin: 0; font-size: var(--ds-text-sm); color: var(--ds-text); }
   `],
 })
 export class TeamComponent implements OnInit {
   private readonly api = inject(TeamApiService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(DsToastService);
+  private readonly dialog = inject(DsDialogService);
 
   readonly me = this.auth.getUserId();
   readonly canManage = agencyRoleOf(this.auth) === 'ADMIN';
@@ -203,8 +197,16 @@ export class TeamComponent implements OnInit {
   readonly restricted = signal<boolean | null>(null);
   readonly savingSettings = signal(false);
   readonly rolesUnknown = computed(() => this.members().length > 0 && this.members().every(m => !m.role));
+  readonly disabledCount = computed(() => this.members().filter(m => m.enabled === false).length);
+  readonly activeCount = computed(() => this.members().length - this.disabledCount());
 
-  draft: { firstName: string; lastName: string; email: string; role: AgencyRole } = this.emptyDraft();
+  readonly columns: DsColumn<TeamMember>[] = [
+    { key: 'name', header: 'Membre' },
+    { key: 'role', header: 'Rôle', width: '240px' },
+    { key: 'status', header: 'Statut', width: '140px' },
+    ...(this.canManage ? [{ key: 'actions', header: '', width: '140px', align: 'right' as const }] : []),
+  ];
+  readonly trackMember = (_: number, m: TeamMember) => m.userId;
 
   ngOnInit(): void {
     this.load();
@@ -238,22 +240,11 @@ export class TeamComponent implements OnInit {
     return role ? AGENCY_ROLE_LABELS[role] : '—';
   }
 
-  invite(form: NgForm): void {
-    if (form.invalid || this.inviting()) return;
-    this.inviting.set(true);
-    this.api.invite({ ...this.draft, email: this.draft.email.trim() }).subscribe({
-      next: res => {
-        this.inviting.set(false);
-        this.toast.success(`Invitation envoyée à ${res.email}`);
-        form.resetForm();
-        this.draft = this.emptyDraft();
-        this.load();
-      },
-      error: err => {
-        this.inviting.set(false);
-        this.toast.error(serverMessage(err, "L'invitation a échoué"));
-      },
-    });
+  openInvite(): void {
+    const data: TeamInviteDialogData = { roles: this.inviteRoles };
+    this.dialog
+      .open<InviteResponse>(TeamInviteDialogComponent, { data, width: '520px' })
+      .closed.subscribe(res => { if (res) this.load(); });
   }
 
   changeRole(member: TeamMember, role: AgencyRole): void {
@@ -304,9 +295,5 @@ export class TeamComponent implements OnInit {
 
   private patch(userId: string, change: Partial<TeamMember>): void {
     this.members.update(list => list.map(m => (m.userId === userId ? { ...m, ...change } : m)));
-  }
-
-  private emptyDraft(): { firstName: string; lastName: string; email: string; role: AgencyRole } {
-    return { firstName: '', lastName: '', email: '', role: this.inviteRoles.includes('AGENT') ? 'AGENT' : this.inviteRoles[0] };
   }
 }

@@ -47,6 +47,7 @@ export type { DsToastAction, DsToastType } from './primitives/ds-toast/ds-toast.
 
 /* ── Patterns ── */
 export { PageHeaderComponent }       from './patterns/page-header/page-header.component';
+export { KpiCardComponent }          from './patterns/kpi-card/kpi-card.component';
 export { FilterBarComponent }        from './patterns/filter-bar/filter-bar.component';
 export { EntityDetailLayoutComponent } from './patterns/entity-detail-layout/entity-detail-layout.component';
 export { MessagingThreadComponent }  from './patterns/messaging-thread/messaging-thread.component';

@@ -3,6 +3,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpRequest } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { NgForm } from '@angular/forms';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { TeamInviteDialogComponent } from './team-invite-dialog.component';
 import { TeamComponent } from './team.component';
 import { AuthService } from '../../services/auth.service';
 import { TeamMember } from '../../services/team-api.service';
@@ -16,6 +18,9 @@ const MEMBERS: TeamMember[] = [
   { userId: 'agent-1', name: 'Amine', email: 'amine@agence.ma', role: 'AGENT', enabled: true },
   { userId: 'agent-2', name: 'Salma', email: 'salma@agence.ma', role: 'AGENT', enabled: false },
 ];
+
+let dialogData: unknown = {};
+let closed: unknown[] = [];
 
 describe('TeamComponent', () => {
   let httpMock: HttpTestingController;
@@ -34,12 +39,16 @@ describe('TeamComponent', () => {
 
   beforeEach(() => {
     roles = ['ADMIN'];
+    dialogData = {};
+    closed = [];
     TestBed.configureTestingModule({
       imports: [TeamComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: AuthService, useValue: { hasRole: (r: string) => roles.includes(r), getUserId: () => 'admin-1' } },
+        { provide: DialogRef, useValue: { close: (r?: unknown) => closed.push(r) } },
+        { provide: DIALOG_DATA, useFactory: () => dialogData },
       ],
     });
     httpMock = TestBed.inject(HttpTestingController);
@@ -96,13 +105,23 @@ describe('TeamComponent', () => {
     expect(el.querySelectorAll('tbody ds-select').length).toBe(0);
     expect(text(el)).not.toContain('Désactiver');
 
-    cmp.draft = { firstName: 'Nadia', lastName: 'B', email: ' nadia@agence.ma ', role: 'AGENT' };
-    cmp.invite({ invalid: false, resetForm: () => undefined } as unknown as NgForm);
+    expect(text(el)).toContain('Inviter un membre');
+  });
+
+  it('sends an invitation from the dialog and closes it', () => {
+    dialogData = { roles: ['AGENT'] };
+    const fixture = TestBed.createComponent(TeamInviteDialogComponent);
+    fixture.detectChanges();
+    const dialog = fixture.componentInstance;
+    expect(dialog.roleOptions.map(o => o.value)).toEqual(['AGENT']);
+    expect(dialog.draft.role).toBe('AGENT');
+
+    dialog.draft = { firstName: 'Nadia', lastName: 'B', email: ' nadia@agence.ma ', role: 'AGENT' };
+    dialog.submit({ invalid: false } as unknown as NgForm);
     const req = httpMock.expectOne('/api/v1/users/invite');
     expect(req.request.body).toEqual({ firstName: 'Nadia', lastName: 'B', email: 'nadia@agence.ma', role: 'AGENT' });
     req.flush({ id: 'new', email: 'nadia@agence.ma', status: 'INVITED', role: 'AGENT' });
-    httpMock.expectOne(ALL).flush(MEMBERS);
-    expect(cmp.draft.email).toBe('');
+    expect(closed).toEqual([{ id: 'new', email: 'nadia@agence.ma', status: 'INVITED', role: 'AGENT' }]);
   });
 
   it('warns when roles are unknown (directory unavailable)', () => {

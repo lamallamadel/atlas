@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
   DsButtonComponent,
   DsCardComponent,
+  DsDialogService,
   DsEmptyStateComponent,
-  DsInputComponent,
+  DsIconComponent,
   DsSkeletonComponent,
   DsToastService,
   PageHeaderComponent,
@@ -14,48 +14,70 @@ import { CoopApiService, CoopGroup } from '../../services/coop-api.service';
 import { AuthService } from '../../services/auth.service';
 import { isManagerOrAdmin } from '../../services/agency-role';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
+import { CoopGroupDialogComponent } from './coop-dialogs.component';
 
 /** Groupements d'habitat de l'agence ; le manager en crée un nouveau. */
 @Component({
   selector: 'app-coop-groups',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DsButtonComponent, DsCardComponent, DsEmptyStateComponent, DsInputComponent, DsSkeletonComponent, PageHeaderComponent],
+  imports: [RouterLink, DsButtonComponent, DsCardComponent, DsEmptyStateComponent, DsIconComponent, DsSkeletonComponent, PageHeaderComponent],
   template: `
-    <div class="coop-page">
-      <ds-page-header eyebrow="Espace Pro" titleBefore="Coop habitat"
+    <div class="pro-page ds-form-stack coop-page">
+      <ds-page-header
+        eyebrow="Espace Pro"
+        titleBefore="Coop"
+        titleAccent="habitat"
         description="Groupements d'habitat participatif : membres, cotisations, projets et lots.">
+        <ng-container slot="actions">
+          @if (canEdit) {
+            <ds-button variant="marine" size="md" prefixIcon="plus" (dsClick)="openCreate()">Nouveau groupement</ds-button>
+          }
+        </ng-container>
       </ds-page-header>
 
-      @if (canEdit) {
-        <ds-card [pad]="true" elevation="xs">
-          <h2 class="coop-title">Nouveau groupement</h2>
-          <form #f="ngForm" class="coop-form" (ngSubmit)="create(f)">
-            <ds-input label="Nom" name="name" [(ngModel)]="draft.name" required></ds-input>
-            <ds-input label="Ville" name="city" [(ngModel)]="draft.city"></ds-input>
-            <ds-input label="N° d'enregistrement" name="registrationNumber" [(ngModel)]="draft.registrationNumber"></ds-input>
-            <div class="coop-form__submit">
-              <ds-button variant="marine" nativeType="submit" [disabled]="busy() || !!f.invalid">Créer</ds-button>
-            </div>
-          </form>
-        </ds-card>
-      }
-
       @if (loading()) {
-        <ds-skeleton variant="text"></ds-skeleton>
-        <ds-skeleton variant="text"></ds-skeleton>
+        <div class="coop-grid">
+          @for (i of [1, 2, 3]; track i) {
+            <ds-card [pad]="true" elevation="xs">
+              <ds-skeleton variant="heading" width="60%"></ds-skeleton>
+              <ds-skeleton variant="text" width="40%"></ds-skeleton>
+            </ds-card>
+          }
+        </div>
       } @else if (groups().length === 0) {
         <ds-card [pad]="true" elevation="xs">
-          <ds-empty-state title="Aucun groupement"
-            [description]="emptyText">
+          <ds-empty-state
+            icon="users"
+            title="Aucun groupement"
+            [description]="emptyText"
+            [ctaLabel]="canEdit ? 'Créer un groupement' : null"
+            (ctaClick)="openCreate()">
           </ds-empty-state>
         </ds-card>
       } @else {
+        <div class="coop-stats">
+          <span class="coop-stats__total">{{ groups().length }} groupement{{ groups().length > 1 ? 's' : '' }}</span>
+        </div>
         <div class="coop-grid">
           @for (g of groups(); track g.id) {
-            <a class="coop-card" [routerLink]="['/pro/coop', g.id]">
-              <span class="coop-card__name">{{ g.name }}</span>
-              <span class="coop-card__meta">{{ g.city || 'Ville non renseignée' }}@if (g.registrationNumber) { · {{ g.registrationNumber }} }</span>
+            <a class="coop-link" [routerLink]="['/pro/coop', g.id]" [attr.aria-label]="'Ouvrir ' + g.name">
+              <ds-card [pad]="true" elevation="xs" [interactive]="true">
+                <div class="coop-card">
+                  <span class="coop-card__icon" aria-hidden="true"><ds-icon name="building" [size]="20"></ds-icon></span>
+                  <div class="coop-card__body">
+                    <span class="coop-card__name" [title]="g.name">{{ g.name }}</span>
+                    <span class="coop-card__meta">
+                      <ds-icon name="map-pin" [size]="16"></ds-icon>
+                      {{ g.city || 'Ville non renseignée' }}
+                    </span>
+                    @if (g.registrationNumber) {
+                      <span class="coop-card__ref">N° {{ g.registrationNumber }}</span>
+                    }
+                  </div>
+                  <ds-icon class="coop-card__chevron" name="chevron-right" [size]="20"></ds-icon>
+                </div>
+              </ds-card>
             </a>
           }
         </div>
@@ -63,15 +85,19 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
     </div>
   `,
   styles: [`
-    .coop-page { display: flex; flex-direction: column; gap: var(--ds-space-6); }
-    .coop-title { margin: 0 0 var(--ds-space-4); font-size: var(--ds-text-base); font-weight: 700; color: var(--ds-marine); }
-    .coop-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--ds-space-4); align-items: end; }
-    .coop-form__submit { display: flex; align-items: flex-end; }
-    .coop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--ds-space-4); }
-    .coop-card { display: flex; flex-direction: column; gap: 6px; padding: var(--ds-space-4); background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); text-decoration: none; color: var(--ds-text); }
-    .coop-card:hover, .coop-card:focus-visible { border-color: var(--ds-marine); }
-    .coop-card__name { font-weight: 700; }
-    .coop-card__meta { font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
+    .coop-page { gap: var(--ds-space-6); }
+    .coop-stats { font-size: var(--ds-text-xs); color: var(--ds-text-muted); }
+    .coop-stats__total { font-weight: 700; color: var(--ds-marine); }
+    .coop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--ds-space-6); }
+    .coop-link { display: block; padding: 0; text-decoration: none; color: inherit; border-radius: var(--ds-radius-lg); }
+    .coop-link:focus-visible { outline: 2px solid var(--ds-marine); outline-offset: 2px; }
+    .coop-card { display: flex; align-items: flex-start; gap: var(--ds-space-4); min-height: 76px; text-align: left; }
+    .coop-card__icon { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 40px; height: 40px; border-radius: var(--ds-radius-md); background: var(--ds-marine-hl); color: var(--ds-marine); }
+    .coop-card__body { display: flex; flex-direction: column; gap: var(--ds-space-1); flex: 1; min-width: 0; }
+    .coop-card__name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-family: var(--ds-font-display); font-size: var(--ds-text-lg); font-weight: 700; color: var(--ds-marine); }
+    .coop-card__meta { display: inline-flex; align-items: center; gap: var(--ds-space-1); font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
+    .coop-card__ref { font-size: var(--ds-text-xs); color: var(--ds-text-faint); }
+    .coop-card__chevron { flex: none; color: var(--ds-text-faint); align-self: center; }
   `],
 })
 export class CoopGroupsComponent implements OnInit {
@@ -84,8 +110,7 @@ export class CoopGroupsComponent implements OnInit {
 
   readonly groups = signal<CoopGroup[]>([]);
   readonly loading = signal(true);
-  readonly busy = signal(false);
-  draft = { name: '', city: '', registrationNumber: '' };
+  private readonly dialog = inject(DsDialogService);
 
   ngOnInit(): void {
     this.api.groups().subscribe({
@@ -94,18 +119,9 @@ export class CoopGroupsComponent implements OnInit {
     });
   }
 
-  create(form: NgForm): void {
-    if (form.invalid) return;
-    this.busy.set(true);
-    this.api.createGroup({ name: this.draft.name.trim(), city: this.draft.city || null, registrationNumber: this.draft.registrationNumber || null }).subscribe({
-      next: g => {
-        this.busy.set(false);
-        this.groups.update(list => [...list, g]);
-        this.toast.success(`Groupement « ${g.name} » créé`);
-        form.resetForm();
-        this.draft = { name: '', city: '', registrationNumber: '' };
-      },
-      error: err => { this.busy.set(false); this.toast.error(serverMessage(err, 'La création a échoué')); },
-    });
+  openCreate(): void {
+    this.dialog
+      .open<CoopGroup>(CoopGroupDialogComponent, { width: '520px' })
+      .closed.subscribe(g => { if (g) this.groups.update(list => [...list, g]); });
   }
 }

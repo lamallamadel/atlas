@@ -1,25 +1,27 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import {
   DsBadgeComponent,
   DsButtonComponent,
-  DsEmptyStateComponent,
-  DsInputComponent,
-  DsSelectComponent,
+  DsCardComponent,
+  DsCellDirective,
+  DsDialogService,
+  DsTableComponent,
   DsToastService,
+  KpiCardComponent,
 } from '../../design-system';
-import type { DsSelectOption } from '../../design-system';
+import type { DsBadgeStatus, DsColumn } from '../../design-system';
 import {
   CONTRIBUTION_STATUS_LABELS,
   CONTRIBUTION_TYPE_LABELS,
   CoopApiService,
   CoopContribution,
-  CoopContributionType,
   CoopMember,
   formatMoney,
   toRequest,
 } from '../../services/coop-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
+import { CoopContributionDialogComponent, CoopContributionDialogData } from './coop-dialogs.component';
 
 /** Échéance dépassée et non payée : en retard, même si personne ne l'a encore marquée. */
 export function isLate(c: CoopContribution, today = new Date().toISOString().slice(0, 10)): boolean {
@@ -31,60 +33,46 @@ export function isLate(c: CoopContribution, today = new Date().toISOString().sli
   selector: 'app-coop-contributions-panel',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DsBadgeComponent, DsButtonComponent, DsEmptyStateComponent, DsInputComponent, DsSelectComponent],
+  imports: [DatePipe, DsBadgeComponent, DsButtonComponent, DsCardComponent, DsCellDirective, DsTableComponent, KpiCardComponent],
   template: `
-    <div class="cp-summary">
-      <div class="cp-stat"><span class="cp-stat__label">Appelé</span><span class="cp-stat__value">{{ money(totals().called) }}</span></div>
-      <div class="cp-stat"><span class="cp-stat__label">Payé</span><span class="cp-stat__value">{{ money(totals().paid) }}</span></div>
-      <div class="cp-stat"><span class="cp-stat__label">À payer</span><span class="cp-stat__value">{{ money(totals().due) }}</span></div>
-      <div class="cp-stat"><span class="cp-stat__label">En retard</span><span class="cp-stat__value">{{ money(totals().late) }}</span></div>
+    <div class="cp-kpis">
+      <ds-kpi-card label="Appelé" [value]="money(totals().called)" [loading]="loading()"></ds-kpi-card>
+      <ds-kpi-card label="Payé" [value]="money(totals().paid)" [loading]="loading()" valueColor="var(--ds-success)"></ds-kpi-card>
+      <ds-kpi-card label="À payer" [value]="money(totals().due)" [loading]="loading()"></ds-kpi-card>
+      <ds-kpi-card label="En retard" [value]="money(totals().late)" [loading]="loading()"
+        [valueColor]="totals().late > 0 ? 'var(--ds-error)' : null"></ds-kpi-card>
     </div>
 
-    @if (canEdit() && members().length) {
-      <form #f="ngForm" class="cp-form" (ngSubmit)="add(f)">
-        <ds-select label="Membre" name="memberId" [options]="memberOptions()" [(ngModel)]="draft.memberId" required></ds-select>
-        <ds-select label="Type" name="type" [options]="typeOptions" [(ngModel)]="draft.type" required></ds-select>
-        <ds-input label="Montant (MAD)" type="number" name="amount" [(ngModel)]="draft.amount" required></ds-input>
-        <ds-input label="Échéance" type="date" name="dueDate" [(ngModel)]="draft.dueDate"></ds-input>
-        <div class="cp-form__submit">
-          <ds-button variant="marine" nativeType="submit" [disabled]="busy() || !!f.invalid || !(+draft.amount > 0)">Appeler</ds-button>
-        </div>
-      </form>
-    }
-
-    @if (loading()) {
-      <p class="cp-muted">Chargement…</p>
-    } @else if (contributions().length === 0) {
-      <ds-empty-state [compact]="true" title="Aucune cotisation"
-        description="Les appels de fonds et versements des membres apparaîtront ici."></ds-empty-state>
-    } @else {
-      <table class="cp-table" aria-label="Cotisations du groupement">
-        <thead><tr><th scope="col">Membre</th><th scope="col">Type</th><th scope="col" class="cp-right">Montant</th><th scope="col">Échéance</th><th scope="col">Statut</th>
-          @if (canEdit()) { <th scope="col"><span class="cp-muted">Action</span></th> }</tr></thead>
-        <tbody>
-          @for (c of contributions(); track c.id) {
-            <tr>
-              <td>{{ memberName(c.memberId) }}</td>
-              <td>{{ typeLabels[c.type] }}</td>
-              <td class="cp-right">{{ money(c.amount, c.currency) }}</td>
-              <td>{{ c.dueDate || '—' }}@if (c.paymentDate) { <span class="cp-muted">payée le {{ c.paymentDate }}</span> }</td>
-              <td>
-                <ds-badge size="sm" [status]="c.status === 'PAID' ? 'success' : late(c) ? 'error' : c.status === 'CANCELLED' ? 'neutral' : 'warning'">
-                  {{ late(c) && c.status === 'PENDING' ? 'En retard' : statusLabels[c.status] }}
-                </ds-badge>
-              </td>
-              @if (canEdit()) {
-                <td>
-                  @if (c.status === 'PENDING' || c.status === 'OVERDUE') {
-                    <ds-button size="sm" variant="ghost" [disabled]="busy()" (dsClick)="markPaid(c)">Marquer payée</ds-button>
-                  }
-                </td>
-              }
-            </tr>
+    <ds-card [pad]="false" elevation="xs">
+      <ds-table
+        [columns]="columns"
+        [rows]="contributions()"
+        [loading]="loading()"
+        [loadingRowCount]="3"
+        [trackBy]="trackContribution"
+        label="Cotisations du groupement"
+        emptyMessage="Aucune cotisation : les appels de fonds et versements des membres apparaîtront ici.">
+        <ng-template dsCell="member" let-c>
+          <span class="cp-strong">{{ memberName(c.memberId) }}</span>
+        </ng-template>
+        <ng-template dsCell="type" let-c>{{ typeLabel(c) }}</ng-template>
+        <ng-template dsCell="amount" let-c>
+          <span class="cp-amount">{{ money(c.amount, c.currency) }}</span>
+        </ng-template>
+        <ng-template dsCell="dueDate" let-c>
+          {{ c.dueDate ? (c.dueDate | date: 'd MMM y') : '—' }}
+          @if (c.paymentDate) { <span class="cp-muted">payée le {{ c.paymentDate | date: 'd MMM y' }}</span> }
+        </ng-template>
+        <ng-template dsCell="status" let-c>
+          <ds-badge size="sm" [status]="badge(c)">{{ statusLabel(c) }}</ds-badge>
+        </ng-template>
+        <ng-template dsCell="actions" let-c>
+          @if (c.status === 'PENDING' || c.status === 'OVERDUE') {
+            <ds-button size="sm" variant="ghost" prefixIcon="check" [disabled]="busy()" (dsClick)="markPaid(c)">Marquer payée</ds-button>
           }
-        </tbody>
-      </table>
-    }
+        </ng-template>
+      </ds-table>
+    </ds-card>
   `,
   styleUrls: ['./coop-panel.scss'],
 })
@@ -101,10 +89,15 @@ export class CoopContributionsPanelComponent implements OnInit {
   readonly busy = signal(false);
   readonly statusLabels = CONTRIBUTION_STATUS_LABELS;
   readonly typeLabels = CONTRIBUTION_TYPE_LABELS;
-  readonly typeOptions: DsSelectOption[] = (Object.keys(CONTRIBUTION_TYPE_LABELS) as CoopContributionType[])
-    .map(t => ({ value: t, label: CONTRIBUTION_TYPE_LABELS[t] }));
-  readonly memberOptions = computed<DsSelectOption[]>(() =>
-    this.members().map(m => ({ value: m.id, label: `${m.firstName} ${m.lastName}` })));
+  private readonly dialog = inject(DsDialogService);
+  readonly trackContribution = (_: number, c: CoopContribution) => c.id;
+  readonly columns: DsColumn<CoopContribution>[] = [
+    { key: 'member', header: 'Membre' },
+    { key: 'type', header: 'Type', width: '170px' },
+    { key: 'amount', header: 'Montant', width: '150px', align: 'right' },
+    { key: 'dueDate', header: 'Échéance', width: '170px' },
+    { key: 'status', header: 'Statut', width: '130px' },
+  ];
 
   readonly totals = computed(() => {
     let called = 0, paid = 0, due = 0, late = 0;
@@ -118,46 +111,40 @@ export class CoopContributionsPanelComponent implements OnInit {
     return { called, paid, due, late };
   });
 
-  draft: { memberId: number | null; type: CoopContributionType; amount: number | string; dueDate: string } = this.empty();
-
   ngOnInit(): void {
+    if (this.canEdit()) this.columns.push({ key: 'actions', header: '', width: '170px', align: 'right' });
     this.load();
+  }
+
+  /** Ouvre la boîte d'appel de fonds (il faut au moins un membre). */
+  openAdd(): void {
+    const data: CoopContributionDialogData = { members: this.members() };
+    this.dialog
+      .open<CoopContribution>(CoopContributionDialogComponent, { data, width: '560px' })
+      .closed.subscribe(c => { if (c) this.load(); });
+  }
+
+  badge(c: CoopContribution): DsBadgeStatus {
+    if (c.status === 'PAID') return 'success';
+    if (c.status === 'CANCELLED') return 'neutral';
+    return isLate(c) ? 'error' : 'warning';
+  }
+
+  typeLabel(c: CoopContribution): string {
+    return this.typeLabels[c.type] ?? c.type;
+  }
+
+  statusLabel(c: CoopContribution): string {
+    return isLate(c) && c.status === 'PENDING' ? 'En retard' : this.statusLabels[c.status];
   }
 
   money(v: number, currency?: string | null): string {
     return formatMoney(v, currency);
   }
 
-  late(c: CoopContribution): boolean {
-    return isLate(c);
-  }
-
   memberName(id: number): string {
     const m = this.members().find(x => x.id === id);
     return m ? `${m.firstName} ${m.lastName}` : `Membre #${id}`;
-  }
-
-  add(form: NgForm): void {
-    const amount = Number(this.draft.amount);
-    if (form.invalid || !this.draft.memberId || !(amount > 0)) return;
-    this.busy.set(true);
-    this.api.createContribution({
-      memberId: this.draft.memberId,
-      type: this.draft.type,
-      amount,
-      currency: 'MAD',
-      status: 'PENDING',
-      dueDate: this.draft.dueDate || null,
-    }).subscribe({
-      next: () => {
-        this.busy.set(false);
-        this.toast.success('Appel de fonds enregistré');
-        form.resetForm();
-        this.draft = this.empty();
-        this.load();
-      },
-      error: err => { this.busy.set(false); this.toast.error(serverMessage(err, "L'enregistrement a échoué")); },
-    });
   }
 
   markPaid(c: CoopContribution): void {
@@ -179,9 +166,5 @@ export class CoopContributionsPanelComponent implements OnInit {
       next: list => { this.contributions.set(list); this.loading.set(false); },
       error: err => { this.loading.set(false); this.toast.error(serverMessage(err, 'Impossible de charger les cotisations')); },
     });
-  }
-
-  private empty() {
-    return { memberId: null as number | null, type: 'INITIAL' as CoopContributionType, amount: '' as number | string, dueDate: '' };
   }
 }
