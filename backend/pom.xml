@@ -596,6 +596,11 @@
                                 <include>**/*IT.java</include>
                                 <include>**/*IntegrationTest.java</include>
                             </includes>
+                            <!-- Même contournement que surefire : sans lui, Testcontainers négocie
+                                 l'API Docker 1.32, refusée par Docker Engine 29+. -->
+                            <systemPropertyVariables>
+                                <api.version>${dockerjava.api.version}</api.version>
+                            </systemPropertyVariables>
                         </configuration>
                     </plugin>
                 </plugins>
