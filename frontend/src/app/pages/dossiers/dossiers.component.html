@@ -31,10 +31,12 @@
         <ds-icon name="upload" [size]="20" style="margin-right: 8px;"></ds-icon>
         Importer
       </ds-button>
-      <ds-button variant="ghost" size="sm" (dsClick)="openExportDialog()" style="margin-right: 8px;">
-        <ds-icon name="download" [size]="20" style="margin-right: 8px;"></ds-icon>
-        Exporter
-      </ds-button>
+      @if (features.isEnabled('addon.export')) {
+        <ds-button variant="ghost" size="sm" (dsClick)="openExportDialog()" style="margin-right: 8px;">
+          <ds-icon name="download" [size]="20" style="margin-right: 8px;"></ds-icon>
+          Exporter
+        </ds-button>
+      }
       <ds-button variant="marine" size="md" (dsClick)="createDossier()">
         <ds-icon name="plus" [size]="20" style="margin-right: 8px;"></ds-icon>
         Nouveau dossier

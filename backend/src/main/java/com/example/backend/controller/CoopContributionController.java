@@ -2,6 +2,8 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.CoopContributionRequest;
 import com.example.backend.dto.CoopContributionResponse;
+import com.example.backend.entitlement.Feature;
+import com.example.backend.entitlement.RequiresFeature;
 import com.example.backend.entity.enums.ContributionStatus;
 import com.example.backend.entity.enums.ContributionType;
 import com.example.backend.service.CoopContributionService;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@RequiresFeature(Feature.MODULE_COOP_HABITAT)
 @RestController
 @RequestMapping("/api/v1/coop/contributions")
 @Tag(name = "Coop Contributions", description = "API for managing cooperative contributions")

@@ -2,6 +2,8 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.CoopProjectRequest;
 import com.example.backend.dto.CoopProjectResponse;
+import com.example.backend.entitlement.Feature;
+import com.example.backend.entitlement.RequiresFeature;
 import com.example.backend.entity.enums.ProjectStatus;
 import com.example.backend.service.CoopProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@RequiresFeature(Feature.MODULE_COOP_HABITAT)
 @RestController
 @RequestMapping("/api/v1/coop/projects")
 @Tag(name = "Coop Projects", description = "API for managing cooperative housing projects")

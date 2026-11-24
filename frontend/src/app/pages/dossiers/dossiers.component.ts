@@ -14,6 +14,7 @@ import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-di
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
 import { LeadImportDialogComponent } from '../../components/lead-import-dialog.component';
 import { LeadExportDialogComponent } from '../../components/lead-export-dialog.component';
+import { FeatureService } from '../../services/feature.service';
 import { ExportService } from '../../services/export.service';
 import { DossierFilterApiService } from '../../services/dossier-filter-api.service';
 import { MobileAction, MobileActionSheetComponent } from '../../components/mobile-action-sheet.component';
@@ -84,6 +85,8 @@ export class DossiersComponent implements OnInit {
   private userPreferencesService = inject(UserPreferencesService);
   private breakpointObserver = inject(BreakpointObserver);
   private dsDialogService = inject(DsDialogService);
+  /** Modules de l'agence : « Exporter » n'apparaît qu'avec l'option export. */
+  readonly features = inject(FeatureService);
   private exportService = inject(ExportService);
   private dossierFilterApi = inject(DossierFilterApiService);
   private toastService = inject(DsToastService);
@@ -178,6 +181,7 @@ export class DossiersComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.features.load();
     this.setupAnnonceAutocomplete();
     this.searchInput$.pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef)).subscribe(q => {
       this.searchQuery = q;

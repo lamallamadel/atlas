@@ -2,6 +2,8 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.CreateLotRequest;
 import com.example.backend.dto.ProgramLotDto;
+import com.example.backend.entitlement.Feature;
+import com.example.backend.entitlement.RequiresFeature;
 import com.example.backend.service.ProgramLotService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@RequiresFeature(Feature.MODULE_NEUF)
 @RestController
 @RequestMapping("/api/v1/programs/{programId}/lots")
 @Tag(name = "Program Lots", description = "API for managing lots within a real estate program")
@@ -27,8 +30,7 @@ public class ProgramLotController {
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Add a lot to a program")
     public ResponseEntity<ProgramLotDto> createLot(
-            @PathVariable Long programId,
-            @Valid @RequestBody CreateLotRequest request) {
+            @PathVariable Long programId, @Valid @RequestBody CreateLotRequest request) {
         ProgramLotDto lot = lotService.createLot(programId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(lot);
     }
