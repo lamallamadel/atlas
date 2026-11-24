@@ -31,7 +31,7 @@ public class CoopLotController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Create a new cooperative lot")
     public ResponseEntity<CoopLotResponse> create(@Valid @RequestBody CoopLotRequest request) {
         CoopLotResponse response = coopLotService.create(request);
@@ -39,7 +39,7 @@ public class CoopLotController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Get cooperative lot by ID")
     public ResponseEntity<CoopLotResponse> getById(@PathVariable Long id) {
         CoopLotResponse response = coopLotService.getById(id);
@@ -47,7 +47,7 @@ public class CoopLotController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "List cooperative lots")
     public ResponseEntity<Page<CoopLotResponse>> list(
             @RequestParam(required = false) Long projectId,
@@ -62,7 +62,7 @@ public class CoopLotController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Update cooperative lot")
     public ResponseEntity<CoopLotResponse> update(
             @PathVariable Long id, @Valid @RequestBody CoopLotRequest request) {
@@ -71,7 +71,7 @@ public class CoopLotController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Delete cooperative lot")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         coopLotService.delete(id);

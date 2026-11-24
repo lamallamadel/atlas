@@ -32,7 +32,7 @@ public class CoopContributionController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Create a new contribution")
     public ResponseEntity<CoopContributionResponse> create(
             @Valid @RequestBody CoopContributionRequest request) {
@@ -41,7 +41,7 @@ public class CoopContributionController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Get contribution by ID")
     public ResponseEntity<CoopContributionResponse> getById(@PathVariable Long id) {
         CoopContributionResponse response = coopContributionService.getById(id);
@@ -49,9 +49,10 @@ public class CoopContributionController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "List contributions")
     public ResponseEntity<Page<CoopContributionResponse>> list(
+            @RequestParam(required = false) Long groupId,
             @RequestParam(required = false) Long memberId,
             @RequestParam(required = false) Long projectId,
             @RequestParam(required = false) ContributionStatus status,
@@ -61,12 +62,12 @@ public class CoopContributionController {
             @RequestParam(defaultValue = "id,asc") String sort) {
         Pageable pageable = createPageable(page, size, sort);
         Page<CoopContributionResponse> response =
-                coopContributionService.list(memberId, projectId, status, type, pageable);
+                coopContributionService.list(groupId, memberId, projectId, status, type, pageable);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Update contribution")
     public ResponseEntity<CoopContributionResponse> update(
             @PathVariable Long id, @Valid @RequestBody CoopContributionRequest request) {
@@ -75,7 +76,7 @@ public class CoopContributionController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Delete contribution")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         coopContributionService.delete(id);

@@ -3,6 +3,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import { AuthService } from '../../services/auth.service';
 import { isManagerOrAdmin } from '../../services/agency-role';
+import { CoopApiService } from '../../services/coop-api.service';
 import { ThemeService } from '../../services/theme.service';
 import { DossierApiService } from '../../services/dossier-api.service';
 import { NotificationApiService } from '../../services/notification-api.service';
@@ -60,6 +61,12 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
   readonly canSeeTeam = isManagerOrAdmin(this.authService);
   /** Lien « Démos B2B » : seulement pour l'organisation qui reçoit les demandes de démo. */
   readonly hasB2bDemos = signal(false);
+  /**
+   * Lien « Coop » : module actif (sinon l'API répond 403) et, pour un agent, au moins un
+   * groupement ; le manager et l'admin le voient pour créer le premier.
+   */
+  readonly hasCoop = signal(false);
+  private coopApi = inject(CoopApiService);
   public themeService = inject(ThemeService);
   private dossierApiService = inject(DossierApiService);
   private notificationApiService = inject(NotificationApiService);
@@ -144,6 +151,12 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
       this.dossierApiService.countByCaseType('CRM_LEAD_B2B_DEMO').subscribe({
         next: count => this.hasB2bDemos.set(count > 0),
         error: () => this.hasB2bDemos.set(false),
+      })
+    );
+    this.subscriptions.add(
+      this.coopApi.groupCount().subscribe({
+        next: count => this.hasCoop.set(count > 0 || this.canSeeTeam),
+        error: () => this.hasCoop.set(false),
       })
     );
   }

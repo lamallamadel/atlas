@@ -1,0 +1,17 @@
+// Mise en page commune des volets d'un groupement Coop.
+:host { display: flex; flex-direction: column; gap: var(--ds-space-4); }
+.cp-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--ds-space-3); align-items: end; }
+.cp-form__submit { display: flex; align-items: flex-end; }
+.cp-table { width: 100%; border-collapse: collapse; font-size: var(--ds-text-sm); }
+.cp-table th { text-align: left; font-weight: 600; color: var(--ds-text-muted); padding: var(--ds-space-2) var(--ds-space-3); border-bottom: 1px solid var(--ds-border); }
+.cp-table td { padding: var(--ds-space-3); border-bottom: 1px solid var(--ds-divider); vertical-align: middle; }
+.cp-strong { display: block; font-weight: 600; color: var(--ds-text); }
+.cp-muted { display: block; color: var(--ds-text-muted); }
+.cp-right { text-align: right; }
+.cp-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--ds-space-3); }
+.cp-stat { padding: var(--ds-space-3); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); }
+.cp-stat__label { display: block; font-size: var(--ds-text-xs); color: var(--ds-text-muted); }
+.cp-stat__value { display: block; font-size: var(--ds-text-lg); font-weight: 700; color: var(--ds-marine); }
+.cp-project { display: flex; flex-direction: column; gap: var(--ds-space-3); padding: var(--ds-space-4); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); }
+.cp-project__head { display: flex; justify-content: space-between; align-items: center; gap: var(--ds-space-3); flex-wrap: wrap; }
+.cp-section-title { margin: 0; font-size: var(--ds-text-sm); font-weight: 700; color: var(--ds-marine); }

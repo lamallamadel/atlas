@@ -31,7 +31,7 @@ public class CoopProjectController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Create a new cooperative project")
     public ResponseEntity<CoopProjectResponse> create(
             @Valid @RequestBody CoopProjectRequest request) {
@@ -40,7 +40,7 @@ public class CoopProjectController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Get cooperative project by ID")
     public ResponseEntity<CoopProjectResponse> getById(@PathVariable Long id) {
         CoopProjectResponse response = coopProjectService.getById(id);
@@ -48,7 +48,7 @@ public class CoopProjectController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "List cooperative projects")
     public ResponseEntity<Page<CoopProjectResponse>> list(
             @RequestParam(required = false) Long groupId,
@@ -62,7 +62,7 @@ public class CoopProjectController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Update cooperative project")
     public ResponseEntity<CoopProjectResponse> update(
             @PathVariable Long id, @Valid @RequestBody CoopProjectRequest request) {
@@ -71,7 +71,7 @@ public class CoopProjectController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
     @Operation(summary = "Delete cooperative project")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         coopProjectService.delete(id);

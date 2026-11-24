@@ -115,13 +115,29 @@ public class CoopContributionService {
             ContributionStatus status,
             ContributionType type,
             Pageable pageable) {
+        return list(null, memberId, projectId, status, type, pageable);
+    }
+
+    /** Comme ci-dessus ; {@code groupId} donne le journal de tout un groupement. */
+    @Transactional(readOnly = true)
+    public Page<CoopContributionResponse> list(
+            Long groupId,
+            Long memberId,
+            Long projectId,
+            ContributionStatus status,
+            ContributionType type,
+            Pageable pageable) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
         Page<CoopContribution> contributions;
-        if (memberId != null) {
+        if (groupId != null && memberId == null) {
+            contributions =
+                    coopContributionRepository.findByMemberGroupIdAndOrgId(
+                            groupId, orgId, pageable);
+        } else if (memberId != null) {
             contributions =
                     coopContributionRepository.findByMemberIdAndOrgId(memberId, orgId, pageable);
         } else if (projectId != null) {
