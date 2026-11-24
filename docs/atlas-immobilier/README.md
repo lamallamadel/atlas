@@ -51,6 +51,7 @@ En pratique, une seule application Angular sur `afroware.app` : portail sur `/`,
 
 - **Portail public** (`atlasia.ma`) : `docs/atlas-immobilier/02_fonctionnel/06_portail_annonces_mvp.md`
 - **Site vitrine B2B** (`biz.atlasia.ma`) : `docs/atlas-immobilier/02_fonctionnel/07_site_vitrine_biz_mvp.md`
+- **Cas d'usage n°1 — propriétaire et bourse aux mandats** (TO-BE) : `docs/atlas-immobilier/02_fonctionnel/13_uc_proprietaire_mandats.md` (modèle : `docs/adr/0005-proprietaire-organisation-personnelle-et-mandat.md`)
 - **Espace Pro** (`pro.atlasia.ma`) :
   - Pipeline B2B Demo : `docs/atlas-immobilier/02_fonctionnel/09_ui_pro_crm_b2b_demo.md`
   - Publications / Listings : `docs/atlas-immobilier/02_fonctionnel/10_ui_pro_listings_publication.md`

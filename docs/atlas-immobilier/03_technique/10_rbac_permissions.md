@@ -23,7 +23,7 @@ Les rôles sont des rôles de realm Keycloak, lus dans `realm_access.roles` du j
 Choix retenus (décidés le 2026-11-23) :
 
 - `ADMIN` n'est pas renommé en `ADMIN_ORG` : 81 contrôles et les jetons existants l'utilisent.
-- `OWNER` (propriétaire) et `MODERATOR` (modération plateforme) sont hors périmètre : ils supposent un espace propriétaire et une modération centrale qui n'existent pas. La modération des signalements est faite par l'agence.
+- `OWNER` (propriétaire) et `MODERATOR` (modération plateforme) sont hors périmètre de l'étape 6 : ils supposent un espace propriétaire et une modération centrale qui n'existent pas. La modération des signalements est faite par l'agence. `OWNER` est spécifié par le cas d'usage n°1 (section ci-dessous, TO-BE).
 
 ## Matrice
 
@@ -118,3 +118,24 @@ Garde-fous :
 
 - **Réassignation d'un dossier** : ligne dans le fil d'activité, événement d'audit `ASSIGNED`, notification à l'agent.
 - **Changement de rôle et désactivation** : journalisés dans les logs applicatifs (auteur, agence, compte). La table d'audit n'accepte que des identifiants numériques, ce qui exclut les comptes Keycloak.
+
+## Propriétaire et bourse aux mandats (TO-BE, cas d'usage n°1)
+
+Spec : `02_fonctionnel/13_uc_proprietaire_mandats.md` § 10 ; modèle : ADR 0005.
+
+| Rôle Keycloak | Autorités | Portée |
+|---|---|---|
+| `OWNER` | `ROLE_OWNER` seulement (jamais `ROLE_PRO`) | Son organisation personnelle (`org_type = OWNER`) ; routes `/api/v1/owner/**` |
+| `MODERATOR` (plus tard ; `SUPER_ADMIN` en attendant) | `ROLE_MODERATOR` | Modération des annonces de particuliers, fraude, litiges de mandat |
+
+| Action | Propriétaire | Agent | Manager | Admin agence |
+|---|---|---|---|---|
+| Biens, annonce, leads, visites du propriétaire | Les siens | — | — | — |
+| Ouvrir ou annuler une demande d'accompagnement ; accepter ou refuser une proposition | Oui | — | — | — |
+| Bourse aux mandats : consulter, proposer, retirer sa proposition | — | Oui | Oui | Oui |
+| Voir les propositions de l'agence | — | Les siennes | Toutes | Toutes |
+| Lire les coordonnées et l'adresse du propriétaire | — | Si mandat `PENDING_SIGNATURE` ou `ACTIVE` de son agence | Idem | Idem |
+| Profil public et zones de l'agence | — | — | Oui | Oui |
+
+Conditions supplémentaires appliquées par le serveur : agence `verifiedPro`, module `module.mandate_marketplace` actif, quota `quota.mandate_proposals_month` non épuisé. Les objets inter-organisations passent par `MandateAccessService` ; aucune autre classe ne lève le filtre `orgIdFilter` pour eux.
+

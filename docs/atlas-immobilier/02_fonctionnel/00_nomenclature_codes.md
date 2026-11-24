@@ -267,6 +267,50 @@ Ces statuts existent dans la documentation et restent valides. Leur usage exact 
 
 ---
 
+# 10 bis) Propriétaire et mandats (cas d'usage n°1, TO-BE)
+
+Spec : `02_fonctionnel/13_uc_proprietaire_mandats.md`. Codes plateforme (non tenant-scopés) : ils portent sur des objets inter-organisations.
+
+## 10b.1 `ORG_TYPE` (type d'organisation)
+  - `AGENCY` : agence ou agent indépendant
+  - `OWNER` : organisation personnelle d'un propriétaire (un membre)
+  - `PLATFORM` : organisation de l'éditeur (vitrine Biz, démos B2B)
+
+## 10b.2 `PUBLISHER_KIND` (qui publie l'annonce)
+  - `OWNER`, `AGENCY`
+
+## 10b.3 `MREQ_STATUS` (demande d'accompagnement)
+  - `MREQ_DRAFT`, `MREQ_OPEN`, `MREQ_AWARDED`, `MREQ_EXPIRED`, `MREQ_CANCELLED`
+
+## 10b.4 `MPROP_STATUS` (proposition d'agence)
+  - `MPROP_SENT`, `MPROP_SHORTLISTED`, `MPROP_ACCEPTED`, `MPROP_DECLINED`, `MPROP_WITHDRAWN`, `MPROP_EXPIRED`
+
+## 10b.5 `MANDATE_TYPE`
+  - `MANDATE_SIMPLE` : plusieurs agences possibles, le propriétaire peut vendre lui-même
+  - `MANDATE_EXCLUSIVE` : une seule agence pendant la durée du mandat
+
+## 10b.6 `MANDATE_STATUS`
+  - `MANDATE_PENDING_SIGNATURE`, `MANDATE_ACTIVE`, `MANDATE_COMPLETED`, `MANDATE_TERMINATED`, `MANDATE_EXPIRED`
+
+## 10b.7 `MANDATE_END_REASON`
+  - `MANDATE_END_DEAL_BY_AGENCY`, `MANDATE_END_DEAL_BY_OWNER`, `MANDATE_END_DEAL_BY_OTHER`
+  - `MANDATE_END_OWNER_WITHDREW`, `MANDATE_END_AGENCY_WITHDREW`, `MANDATE_END_NOT_SIGNED`, `MANDATE_END_FRAUD`
+
+## 10b.8 `OWNER_SERVICE` (services attendus / proposés)
+  - `SVC_VALUATION`, `SVC_PHOTOS`, `SVC_VISITS`, `SVC_NEGOTIATION`, `SVC_LEGAL_FOLLOWUP`, `SVC_TENANT_SCREENING`, `SVC_RENTAL_MANAGEMENT`
+
+## 10b.9 `COMMISSION_PAYER`
+  - `PAYER_OWNER`, `PAYER_CLIENT`, `PAYER_SHARED`
+
+## 10b.10 `CASE_TYPE` utilisés
+  - `CRM_MANDATE_SALE`, `CRM_MANDATE_RENT` : dossier créé dans l'agence à l'acceptation d'une proposition (pipeline : `CRM_MANDATE_PENDING` → `CRM_MANDATE_SIGNED` → `CRM_LISTED` → transaction)
+  - `CRM_LEAD_BUY`, `CRM_LEAD_RENT` : leads reçus directement par un propriétaire, dans son organisation
+
+## 10b.11 `ANN_STATUS` — motif de suspension ajouté
+  - `MANDATE_EXCLUSIVE` : annonce du propriétaire suspendue pendant un mandat exclusif
+
+---
+
 # 11) Feature keys (modules activables)
 
 Les clés de feature flags suivent la convention:
@@ -285,6 +329,7 @@ Exemples:
 - `module.pm`
 - `module.concierge`
 - `module.cobuy`
+- `module.mandate_marketplace` (bourse aux mandats, cas d'usage n°1)
 
 ---
 

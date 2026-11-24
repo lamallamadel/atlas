@@ -111,3 +111,13 @@ Politiques :
 
 ### 7.5 Notifications obligatoires (Choix B)
 - Appels de fonds, rappels, allocations et jalons projet déclenchent des notifications outbound (WhatsApp) via Outbox (voir `03_technique/09_notifications.md`).
+
+## 8) Propriétaire et mandat (cas d'usage n°1, TO-BE)
+
+Règles détaillées et numérotées (R-PROP-01 à R-PROP-14) : `02_fonctionnel/13_uc_proprietaire_mandats.md` § 6. Principes transverses :
+- **Coordonnées du propriétaire** : jamais publiques ; transmises à une agence seulement quand il accepte sa proposition, avec un code à usage unique (preuve tracée).
+- **Un bien, plusieurs annonces** : toute annonce d'un bien déclaré par un propriétaire porte son `property_id` ; le portail affiche une seule fiche par bien et le contrôle doublon ignore les annonces d'un même bien.
+- **Exclusivité** : un mandat exclusif actif suspend l'annonce du propriétaire et interdit toute autre demande ou mandat sur le bien.
+- **Isolation** : les objets qui relient propriétaire et agence (demande, proposition, mandat, messagerie) ne se lisent qu'à travers un service d'accès qui vérifie l'appartenance à l'une des deux organisations (ADR 0005).
+- **Modération** : la première annonce d'un propriétaire est validée par la plateforme avant d'être visible.
+

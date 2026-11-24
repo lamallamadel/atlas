@@ -15,6 +15,8 @@
 - **Agent / Conseiller** : qualifie et suit les Dossiers, planifie RDV, pilote son pipeline.
 - **Responsable agence** : supervise KPI, SLA de traitement, réassignation, conversion.
 - **Propriétaire / Vendeur / Bailleur** (direct ou indirect) : fournit infos, valide actions, suit avancement.
+  Cas d'usage n°1 (TO-BE) : il a son propre espace, publie seul ou confie son bien à l'agent de son choix via la bourse aux mandats, et suit l'affaire sans se déplacer. Spec : `02_fonctionnel/13_uc_proprietaire_mandats.md`.
+- **Agent indépendant** (TO-BE) : agent sans agence, inscrit comme une agence d'une personne ; même accès à la bourse aux mandats une fois vérifié.
 - **Modérateur** (interne) : traite signalements, suspensions, doublons/fraude, trace décisions.
 
 ### Extension (V1+)

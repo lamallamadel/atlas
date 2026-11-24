@@ -44,6 +44,7 @@ Le backend reste la **source de vérité** :
 - `module.gestion_locative` : incidents, quittances, prestataires (V1.5)
 - `module.conciergerie` : services courte durée (V1.5)
 - `module.coop_habitat` : groupement/cotisations/allocation/projet (V2 — conformité)
+- `module.mandate_marketplace` : bourse aux mandats, propositions aux propriétaires (TO-BE, cas d'usage n°1) ; réservé aux agences vérifiées ; quota `quota.mandate_proposals_month` selon le plan
 
 ### Add-ons
 - `addon.boost` : mise en avant / ranking
