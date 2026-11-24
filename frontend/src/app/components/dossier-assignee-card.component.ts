@@ -10,6 +10,7 @@ import type { DsSelectOption } from '../design-system';
 import { DossierApiService, DossierResponse } from '../services/dossier-api.service';
 import { TeamApiService, TeamMember } from '../services/team-api.service';
 import { AuthService } from '../services/auth.service';
+import { isManagerOrAdmin } from '../services/agency-role';
 import { serverMessage } from './annonce-publication-panel.component';
 
 /** Valeur du sélecteur pour « à attribuer ». */
@@ -65,7 +66,7 @@ export class DossierAssigneeCardComponent implements OnInit {
   readonly unassigned = UNASSIGNED;
   readonly busy = signal(false);
   readonly members = signal<TeamMember[]>([]);
-  readonly canReassign = this.auth.hasRole('ADMIN') || this.auth.hasRole('MANAGER');
+  readonly canReassign = isManagerOrAdmin(this.auth);
 
   readonly options = computed<DsSelectOption[]>(() => {
     const list: DsSelectOption[] = [{ value: UNASSIGNED, label: 'À attribuer' }];

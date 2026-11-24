@@ -23,7 +23,8 @@ public enum AuditAction {
     APPROVE("approve"),
     REJECT("reject"),
     RELOAD("reload"),
-    CONFIG_HEALTH_CHECK("config_health_check");
+    CONFIG_HEALTH_CHECK("config_health_check"),
+    ASSIGNED("assigned");
 
     private final String value;
 

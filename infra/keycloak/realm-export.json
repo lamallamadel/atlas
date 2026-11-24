@@ -8,13 +8,20 @@
   "roles": {
     "realm": [
       {
-        "name": "ADMIN"
+        "name": "ADMIN",
+        "description": "Administrateur d'agence : équipe, réglages, intégrations"
       },
       {
-        "name": "MANAGER"
+        "name": "MANAGER",
+        "description": "Manager : vision de l'agence, réassignation, dérogations, invite des agents"
       },
       {
-        "name": "PRO"
+        "name": "PRO",
+        "description": "Ancien rôle membre d'agence, lu comme AGENT"
+      },
+      {
+        "name": "AGENT",
+        "description": "Agent : ses dossiers et ceux à attribuer"
       }
     ]
   },
@@ -74,6 +81,60 @@
       "email": "demo@local",
       "firstName": "demo",
       "lastName": "User",
+      "attributes": {
+        "orgId": [
+          "ORG-001"
+        ],
+        "tenant_id": [
+          "ORG-001"
+        ]
+      }
+    },
+    {
+      "username": "manager",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "MANAGER"
+      ],
+      "requiredActions": [],
+      "email": "manager@local",
+      "firstName": "Manager",
+      "lastName": "Demo",
+      "attributes": {
+        "orgId": [
+          "ORG-001"
+        ],
+        "tenant_id": [
+          "ORG-001"
+        ]
+      }
+    },
+    {
+      "username": "agent",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AGENT"
+      ],
+      "requiredActions": [],
+      "email": "agent@local",
+      "firstName": "Agent",
+      "lastName": "Demo",
       "attributes": {
         "orgId": [
           "ORG-001"

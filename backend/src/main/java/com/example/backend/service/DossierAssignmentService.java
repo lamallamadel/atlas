@@ -7,6 +7,7 @@ import com.example.backend.dto.TeamMemberResponse;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.repository.DossierRepository;
+import com.example.backend.security.AccessPolicy;
 import com.example.backend.util.CurrentUser;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
@@ -238,11 +239,7 @@ public class DossierAssignmentService {
     }
 
     private static void requireManager() {
-        if (!CurrentUser.isManagerOrAdmin()) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "MANAGER_REQUIRED: seul un manager ou un administrateur peut réassigner.");
-        }
+        AccessPolicy.requireCanAssign();
     }
 
     private static String requireOrg() {

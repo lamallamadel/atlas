@@ -26,9 +26,13 @@ public class UserInvitationController {
     }
 
     @PostMapping("/invite")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "Invite a new user", description = "Creates a new user in Keycloak and sends an invitation email. Enforces maxUsers quota.")
-    public ResponseEntity<UserInviteResponse> inviteUser(@Valid @RequestBody UserInviteRequest request) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'SUPER_ADMIN')")
+    @Operation(
+            summary = "Invite a new user",
+            description =
+                    "Creates a new user in Keycloak with the requested agency role (ADMIN, MANAGER, AGENT) and sends an invitation email. Admins invite any role, managers invite agents. Enforces maxUsers quota.")
+    public ResponseEntity<UserInviteResponse> inviteUser(
+            @Valid @RequestBody UserInviteRequest request) {
         UserInviteResponse response = userService.inviteUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

@@ -11,6 +11,7 @@ import { TaskListComponent } from './components/task-list.component';
 import { CalendarViewComponent } from './components/calendar-view.component';
 import { SettingsPageComponent } from './components/settings-page.component';
 import { AuthGuard } from './guards/auth.guard';
+import { RoleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   // ── Standalone pages ──────────────────────────────────────────
@@ -62,6 +63,12 @@ export const routes: Routes = [
       },
       { path: 'settings',      component: SettingsPageComponent,         data: { animation: 'SettingsPage' } },
       {
+        path: 'team',
+        loadComponent: () => import('./pages/team/team.component').then(m => m.TeamComponent),
+        canActivate: [RoleGuard],
+        data: { animation: 'TeamPage', roles: ['ADMIN', 'MANAGER', 'SUPER_ADMIN'] }
+      },
+      {
         path: 'annonces',
         loadChildren: () => import('./pages/annonces/annonces.routes').then(m => m.ANNONCES_ROUTES),
         data: { animation: 'AnnoncesPage' }
@@ -87,6 +94,7 @@ export const routes: Routes = [
   { path: 'relances',        redirectTo: 'pro/relances',  pathMatch: 'full' },
   { path: 'tasks',           redirectTo: 'pro/tasks',     pathMatch: 'full' },
   { path: 'settings',        redirectTo: 'pro/settings',  pathMatch: 'full' },
+  { path: 'team',            redirectTo: 'pro/team',      pathMatch: 'full' },
   { path: 'reports',         redirectTo: 'pro/reports',   pathMatch: 'full' },
   { path: 'observability',   redirectTo: 'pro/observability', pathMatch: 'full' },
   { path: 'search',          redirectTo: 'pro/search',    pathMatch: 'full' },
