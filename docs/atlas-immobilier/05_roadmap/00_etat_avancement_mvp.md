@@ -1,14 +1,14 @@
 # État d’avancement — MVP (AS-IS)
 
 > **Statut**: Source de vérité (AS-IS)  
-> **Dernière vérification**: 2026-11-23 (code de `master`, commit `6c3db9ad`)  
+> **Dernière vérification**: 2026-11-24 (branche `chore/release-stabilization`, étapes 1 à 7 du plan de relecture)  
 > **Source of truth**: Oui — décrit uniquement ce qui existe dans le code. Le « à faire » vit dans `02_backlog_mvp_execution.md`.  
 > **Dépendances**:  
 - `docs/atlas-immobilier/05_roadmap/02_backlog_mvp_execution.md`  
 - `docs/atlas-immobilier/03_technique/03_api_contracts.md`  
 - `docs/adr/`
 
-Ce document a été réécrit le 2026-11-23 à partir du code. La version précédente (janvier 2026) déclarait « livrés » des éléments qui ne le sont pas (publication gouvernée, signalements, API publique) et ignorait des modules présents (matching, coop backend, signature).
+Ce document a été réécrit le 2026-11-23 à partir du code, puis mis à jour le 2026-11-24 après les étapes 3 à 7 (leads multi-agences, publication gouvernée, signalements, rôles d'agence, pipeline B2B, modules, écrans Coop).
 
 ## Stack réelle
 
@@ -17,7 +17,7 @@ Ce document a été réécrit le 2026-11-23 à partir du code. La version préc�
 | Backend | Spring Boot 4.0.3, Java 25 |
 | Frontend | Angular 21 (composants standalone, signals, zone.js) |
 | Services IA | `brain/` (Python FastAPI) : `agent`, `match`, `nego`, `fraud`, `dupli`, `document`, `vision`, `proposal`, `scoring` |
-| Base | PostgreSQL 16 (prod), H2 (local, tests). Flyway jusqu’à V156 |
+| Base | PostgreSQL 16 (prod), H2 (local, tests). Flyway jusqu’à V162 |
 | Messagerie | API WhatsApp Cloud de Meta (v25.0) ; Twilio pour les SMS |
 | Identité | Keycloak (OIDC), claim `org_id` |
 | Prod | `afroware.app` derrière Nginx + Cloudflare |
@@ -37,19 +37,19 @@ Les trois « sites » de la spec sont des zones de routes d’une seule applicat
 
 | Domaine | État | Ce qui existe | Ce qui manque par rapport à la spec |
 |---|---|---|---|
-| Dossiers et workflow | Hybride | Enum `DossierStatus` (`NEW, QUALIFYING, QUALIFIED, APPOINTMENT, WON, LOST`) validé par `DossierStatusTransitionService`. En parallèle : colonnes `case_type` et `status_code`, référentiels (V15), `WorkflowDefinition`, `DossierStatusCodeValidationService` | Un modèle unique (décision : ADR 0004, `case_type` + `status_code`) ; `GET /transitions` par dossier |
+| Dossiers et workflow | Livré (ADR 0004, phases A et B) | `case_type` + `status_code` font foi : un changement de statut est validé par le workflow du type (`DossierWorkflowCatalog` ou `WorkflowDefinition` publiée), avec exigences (raison de perte, rendez-vous). `GET /dossiers/{id}/transitions`, carte « Statut » du dossier. L'enum `DossierStatus` est une projection. Historique avec codes (V161) | Phase C : écrans et kanban CRM lus depuis le code de statut, retrait de l'enum |
 | Timeline, messages, RDV, audit | Livré | Activités, messages, rendez-vous, audit, historique de statut, onglets « Échanges » et « Activité » du dossier | — |
 | Consentements | Livré, plus fin que la spec | Voir `02_fonctionnel/02_regles_metier.md` §2 : opt-in double pour MARKETING via lien public, preuve agent pour TRANSACTIONNEL, réponse dans la fenêtre de 24 h | — |
 | WhatsApp | Livré | Webhook signé (HMAC App Secret), routage par `phone_number_id`, outbox avec relance, réponse depuis le dossier, lien de consentement, templates (`WhatsAppTemplate`, envoi `type: template`) | Validation en conditions réelles d’un template approuvé par Meta, hors fenêtre de 24 h |
 | Multi-tenant | Livré | `X-Org-Id` + claim JWT `org_id` (403 si différent), filtre Hibernate après OSIV, tenant posé dans les jobs | — |
-| Portail public | Partiel | Recherche `/api/v1/portal/annonces` (toutes agences), lead `POST /api/v1/portal/leads` | Lead routé vers l’agence de l’annonce (aujourd’hui forcé sur `ORG-001`) ; endpoint public de détail (la fiche appelle l’API Pro) ; signalement (simple `console.log`) ; slugs |
-| Vitrine Biz | Partiel | Pages en place ; la démo crée un dossier `caseType: DEMO`, détails dans `notes` | Dossier `CRM_LEAD_B2B_DEMO` structuré |
-| Pipeline B2B démo | Absent | — | Statuts `B2B_*`, kanban dédié, raisons de perte |
-| Publication d’annonces | Divergent | Enum `DRAFT, PUBLISHED, ACTIVE, PAUSED, ARCHIVED`, CRUD Pro `/api/v1/annonces` | Statut `SUSPENDED`, score de qualité, minimum de photos, règle de publication |
-| Trust et modération | Partiel | Services IA `brain/fraud` et `brain/dupli`, badges IA sur les annonces | Score de doublon persisté et bloquant, override manager, signalements, file de modération |
-| RBAC | Divergent | Rôles `ADMIN`, `PRO`, `USER`, `SUPER_ADMIN` | `ADMIN_ORG`, `MANAGER`, `AGENT`, `OWNER`, `MODERATOR` ; « mes dossiers » ; réassignation contrôlée |
-| Feature flags et plans | Absent | `FeatureFlagEntity` (utilisée par le white label) | Contrôle côté API, quotas, plans |
-| Coop Habitat | Backend seul | Entités et contrôleurs groupe, membre, projet, lot, cotisation | Écrans, règles d’allocation, notifications |
+| Portail public | Livré | Recherche `/api/v1/portal/annonces` (annonces publiées), détail public sans données internes, lead `POST /api/v1/portal/leads` routé vers l'agence de l'annonce avec consentement, signalement d'annonce | Limite anti-spam sur les leads et signalements anonymes ; photos pour un visiteur non connecté ; slugs |
+| Vitrine Biz | Livré | La demande de démo crée un dossier `CRM_LEAD_B2B_DEMO` dans l'organisation plateforme, profil gardé en `lead_details` (V162) | — |
+| Pipeline B2B démo | Livré | Statuts `B2B_*` (spec 08), raisons `B2B_LOST_*`, écran kanban `/pro/b2b-demo` | Replanification dédiée, annulation du RDV à la perte |
+| Publication d’annonces | Livré | `DRAFT → PUBLISHED ⇄ SUSPENDED → ARCHIVED` (V158), score de qualité, 3 photos minimum, doublon certain ou fraude bloquants sauf dérogation manager | Dédoublonnage synchrone à la publication |
+| Trust et modération | Livré (agence) | Signalements depuis le portail (V159), file côté Pro, écarter ou suspendre l'annonce | Seuil de suspension automatique, notification de nouveau signalement, écran de file dédié |
+| RBAC | Livré | Rôles `ADMIN`, `MANAGER`, `AGENT` (`PRO` lu comme agent), `SUPER_ADMIN` ; `AccessPolicy` ; assignation des dossiers (V160) ; périmètre « mes dossiers » activable par agence ; écran « Équipe » (spec `10_rbac_permissions.md`) | `OWNER`, `MODERATOR` (hors périmètre) |
+| Feature flags et plans | Partiel | Modules par agence appliqués côté API (`@RequiresFeature`, 403) : Coop, Neuf, export des leads, signature ; actifs par défaut, gérés par le super-admin (spec 05) | Plans → modules, quotas (dossiers mensuels) |
+| Coop Habitat | Partiel | Backend CRUD et écrans `/pro/coop` : membres, cotisations, projets et lots (spec 04) | Rang FIFO, allocation avec PV, échéancier, justificatifs, WhatsApp |
 | Reporting | Livré | Dashboard, KPI, rapports planifiés | — |
 
 ## Livré hors spec
@@ -72,10 +72,16 @@ Ces modules existent sans règles métier ni critères d’acceptation écrits.
 
 ## Écarts bloquants pour une deuxième agence
 
-1. Les leads publics vont tous chez `ORG-001`.
-2. Aucune règle de publication (photos, qualité, doublons).
-3. Signalements factices.
-4. Deux modèles de statut de dossier (tranché par l’ADR 0004, migration à faire).
-5. Pas de rôles d’agence (manager, agent).
+Les cinq écarts relevés le 2026-11-23 sont traités :
+- leads routés vers l'agence de l'annonce ;
+- règles de publication ;
+- signalements réels ;
+- modèle de statut unique (phases A et B de l'ADR 0004) ;
+- rôles d'agence.
 
-L’ordre de traitement est dans `02_backlog_mvp_execution.md`.
+Points de vigilance qui restent avant d'ouvrir le portail à plusieurs agences :
+- limite anti-spam sur les formulaires publics ;
+- notification et seuil de suspension sur les signalements ;
+- audit des requêtes personnalisées (`CustomQueryService`), qui assemblent du SQL à partir de paramètres.
+
+L'ordre de traitement est dans `02_backlog_mvp_execution.md`.
