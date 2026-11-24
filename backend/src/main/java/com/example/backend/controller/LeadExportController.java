@@ -1,5 +1,7 @@
 package com.example.backend.controller;
 
+import com.example.backend.entitlement.Feature;
+import com.example.backend.entitlement.RequiresFeature;
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.exception.ErrorResponse;
@@ -37,6 +39,7 @@ public class LeadExportController {
     }
 
     @GetMapping("/export")
+    @RequiresFeature(Feature.ADDON_EXPORT)
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(
             summary = "Export leads to CSV",

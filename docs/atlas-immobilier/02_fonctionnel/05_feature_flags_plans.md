@@ -1,7 +1,7 @@
 # Feature flags & Plans (modules activables)
 
-> **Statut**: TO-BE (contrat produit/tech — applicable dès maintenant à la doc)  
-> **Dernière vérification**: 2026-01-08  
+> **Statut**: implémenté pour les modules bloquants (étape 7) ; plans et quotas encore à faire  
+> **Dernière vérification**: 2026-11-24  
 > **Source of truth**: Oui (nomenclature des clés de modules + entitlements)  
 > **Dépendances**:  
 - `docs/atlas-immobilier/03_technique/01_architecture_decisions.md`  
@@ -99,3 +99,27 @@ Recommandation : table `org_feature` (ou équivalent) :
 - Un check unique : `Entitlements.check(orgId, featureKey)`
 - Annotation/middleware : `@RequiresFeature("module.trust.basic")`
 - Quotas : `QuotaService.assertWithinLimit(orgId, "limits.dossiers.monthly_max")`
+
+## Implémentation (étape 7, décidée le 2026-11-24)
+
+- **Catalogue :** `entitlement/Feature`, qui reprend les clés ci-dessus plus `addon.esign` (signature électronique).
+- **Stockage :** table `feature_flag` (`org_id`, `feature_key`, `enabled`), sans nouvelle migration.
+  - Sans ligne, un module est **actif** : les agences existantes ne perdent rien.
+  - Le socle `core.*` est toujours actif et ne peut pas être désactivé.
+- **Contrôle :** `EntitlementService.require(feature)`, appelé par `@RequiresFeature` sur un contrôleur ou une méthode.
+  - Un module désactivé répond 403 `FEATURE_DISABLED` avec sa clé.
+  - `@SkipFeatureCheck` exempte un rappel de prestataire, comme le webhook DocuSign.
+  - L'état est gardé en mémoire 30 secondes par instance.
+- **Modules bloqués aujourd'hui :**
+  - `module.coop_habitat` : les 5 contrôleurs Coop ;
+  - `module.neuf` : programmes, lots, réservations de lots ;
+  - `addon.export` : export des leads ;
+  - `addon.esign` : signature électronique, sauf le webhook.
+
+  L'export RGPD (`/data-export`) n'est jamais bloqué.
+- **Gestion :** super-admin seulement, via `PUT /api/v1/admin/white-label/{orgId}/features/{key}?enabled=`, qui crée la ligne au besoin. `GET /api/v1/features` donne à l'écran l'état des modules de l'agence ; le bouton « Exporter » est masqué sans `addon.export`.
+- **Pas encore :**
+  - plans → modules (les plans du provisioning restent `starter` / `professional` / `enterprise`, avec leurs anciennes clés `whatsapp_integration`… non appliquées) ;
+  - quotas (`maxDossiers` reste informatif ; seul le quota d'annonces est appliqué) ;
+  - `module.trust.basic`, `addon.reporting_plus` et `addon.integrations` sont au catalogue mais non bloqués ;
+  - le JSON `features` de la configuration white label n'est pas lu.

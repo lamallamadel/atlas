@@ -1,7 +1,7 @@
 package com.example.backend.controller;
 
+import com.example.backend.entitlement.EntitlementService;
 import com.example.backend.entity.*;
-import com.example.backend.repository.FeatureFlagRepository;
 import com.example.backend.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,15 +22,15 @@ public class WhiteLabelAdminController {
 
     private final WhiteLabelService whiteLabelService;
     private final DynamicThemeService themeService;
-    private final FeatureFlagRepository featureFlagRepository;
+    private final EntitlementService entitlementService;
 
     public WhiteLabelAdminController(
             WhiteLabelService whiteLabelService,
             DynamicThemeService themeService,
-            FeatureFlagRepository featureFlagRepository) {
+            EntitlementService entitlementService) {
         this.whiteLabelService = whiteLabelService;
         this.themeService = themeService;
-        this.featureFlagRepository = featureFlagRepository;
+        this.entitlementService = entitlementService;
     }
 
     @GetMapping("/{orgId}")
@@ -66,8 +66,8 @@ public class WhiteLabelAdminController {
     @GetMapping("/{orgId}/features")
     @Operation(summary = "Get all feature flags for tenant")
     public ResponseEntity<List<FeatureFlagEntity>> getFeatures(@PathVariable String orgId) {
-        List<FeatureFlagEntity> features = featureFlagRepository.findByOrgId(orgId);
-        return ResponseEntity.ok(features);
+        // Modules du catalogue inclus, même sans ligne (actifs par défaut).
+        return ResponseEntity.ok(entitlementService.adminView(orgId));
     }
 
     @PutMapping("/{orgId}/features/{featureKey}")
@@ -77,16 +77,8 @@ public class WhiteLabelAdminController {
             @PathVariable String featureKey,
             @RequestParam boolean enabled) {
 
-        FeatureFlagEntity feature =
-                featureFlagRepository
-                        .findByOrgIdAndFeatureKey(orgId, featureKey)
-                        .orElseThrow(
-                                () ->
-                                        new IllegalArgumentException(
-                                                "Feature not found: " + featureKey));
-
-        feature.setEnabled(enabled);
-        FeatureFlagEntity updated = featureFlagRepository.save(feature);
+        // Crée la ligne au besoin pour un module du catalogue ; le socle core.* est refusé.
+        FeatureFlagEntity updated = entitlementService.setEnabled(orgId, featureKey, enabled);
         return ResponseEntity.ok(updated);
     }
 

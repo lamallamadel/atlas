@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import com.example.backend.entitlement.RequiresFeatureInterceptor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -13,9 +14,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final ObjectProvider<HibernateFilterInterceptor> interceptorProvider;
+    private final ObjectProvider<RequiresFeatureInterceptor> featureInterceptorProvider;
 
-    public WebConfig(ObjectProvider<HibernateFilterInterceptor> interceptorProvider) {
+    public WebConfig(
+            ObjectProvider<HibernateFilterInterceptor> interceptorProvider,
+            ObjectProvider<RequiresFeatureInterceptor> featureInterceptorProvider) {
         this.interceptorProvider = interceptorProvider;
+        this.featureInterceptorProvider = featureInterceptorProvider;
     }
 
     @Override
@@ -24,6 +29,11 @@ public class WebConfig implements WebMvcConfigurer {
         if (interceptor != null) {
             // Après l'intercepteur open-in-view (ordre 0), qui ouvre la session de la requête.
             registry.addInterceptor(interceptor).order(Ordered.LOWEST_PRECEDENCE);
+        }
+        // Modules de l'agence (feature flags) : 403 avant d'entrer dans un contrôleur non inclus.
+        RequiresFeatureInterceptor features = featureInterceptorProvider.getIfAvailable();
+        if (features != null) {
+            registry.addInterceptor(features);
         }
     }
 

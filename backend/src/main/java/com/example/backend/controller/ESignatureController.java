@@ -1,6 +1,9 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.*;
+import com.example.backend.entitlement.Feature;
+import com.example.backend.entitlement.RequiresFeature;
+import com.example.backend.entitlement.SkipFeatureCheck;
 import com.example.backend.entity.SignatureRequestEntity;
 import com.example.backend.service.ContractTemplateService;
 import com.example.backend.service.ESignatureService;
@@ -17,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@RequiresFeature(Feature.ADDON_ESIGN)
 @RestController
 @RequestMapping("/api/v1/esignature")
 @Tag(name = "E-Signature", description = "Electronic signature management API")
@@ -100,6 +104,7 @@ public class ESignatureController {
     }
 
     @PostMapping("/webhook")
+    @SkipFeatureCheck
     @Operation(
             summary = "DocuSign webhook callback",
             description = "Receives webhook events from DocuSign")
