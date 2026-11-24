@@ -89,6 +89,7 @@ describe('AppLayoutComponent', () => {
     const mockDossierApiService = {
       getPendingCount: vi.fn().mockName('DossierApiService.getPendingCount')};
     mockDossierApiService.getPendingCount.mockReturnValue(of(0));
+    (mockDossierApiService as Record<string, unknown>)['countByCaseType'] = vi.fn().mockReturnValue(of(0));
     const mockNotificationApiService = {
       getUnreadCount: vi.fn().mockName('NotificationApiService.getUnreadCount'),
       list: vi.fn().mockName('NotificationApiService.list')};

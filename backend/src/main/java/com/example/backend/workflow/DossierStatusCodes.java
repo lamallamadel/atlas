@@ -74,4 +74,29 @@ public final class DossierStatusCodes {
     public static String effectiveCaseType(String caseType) {
         return caseType == null || caseType.isBlank() ? DEFAULT_CASE_TYPE : caseType;
     }
+
+    /**
+     * Projection sur l'ancien enum d'un code de statut (ADR 0004, phase B) : la correspondance
+     * directe pour les codes {@code CRM_*} du pipeline historique, sinon d'après la sémantique de
+     * l'état (issue et étape de l'entonnoir). Sert aux écrans et rapports qui lisent encore l'enum.
+     */
+    public static DossierStatus project(String code, DossierWorkflow.State state) {
+        Optional<DossierStatus> direct = toEnum(code);
+        if (direct.isPresent()) {
+            return direct.get();
+        }
+        if (state == null) {
+            return DossierStatus.NEW;
+        }
+        return switch (state.stage()) {
+            case WON -> DossierStatus.WON;
+            case LOST -> DossierStatus.LOST;
+            case OPEN ->
+                    switch (state.funnelStep()) {
+                        case NEW -> DossierStatus.NEW;
+                        case QUALIFICATION -> DossierStatus.QUALIFIED;
+                        case VISIT, OFFER, CLOSING -> DossierStatus.APPOINTMENT;
+                    };
+        };
+    }
 }

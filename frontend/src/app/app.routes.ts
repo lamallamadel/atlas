@@ -63,6 +63,11 @@ export const routes: Routes = [
       },
       { path: 'settings',      component: SettingsPageComponent,         data: { animation: 'SettingsPage' } },
       {
+        path: 'b2b-demo',
+        loadComponent: () => import('./pages/b2b-demo/b2b-demo.component').then(m => m.B2bDemoComponent),
+        data: { animation: 'B2bDemoPage' }
+      },
+      {
         path: 'team',
         loadComponent: () => import('./pages/team/team.component').then(m => m.TeamComponent),
         canActivate: [RoleGuard],
@@ -95,6 +100,7 @@ export const routes: Routes = [
   { path: 'tasks',           redirectTo: 'pro/tasks',     pathMatch: 'full' },
   { path: 'settings',        redirectTo: 'pro/settings',  pathMatch: 'full' },
   { path: 'team',            redirectTo: 'pro/team',      pathMatch: 'full' },
+  { path: 'b2b-demo',        redirectTo: 'pro/b2b-demo',  pathMatch: 'full' },
   { path: 'reports',         redirectTo: 'pro/reports',   pathMatch: 'full' },
   { path: 'observability',   redirectTo: 'pro/observability', pathMatch: 'full' },
   { path: 'search',          redirectTo: 'pro/search',    pathMatch: 'full' },

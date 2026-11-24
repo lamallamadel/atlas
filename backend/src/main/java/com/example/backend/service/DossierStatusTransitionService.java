@@ -4,21 +4,21 @@ import com.example.backend.entity.Dossier;
 import com.example.backend.entity.DossierStatusHistory;
 import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.DossierStatus;
+import com.example.backend.event.DossierStatusChangedEvent;
 import com.example.backend.exception.InvalidStatusTransitionException;
 import com.example.backend.observability.MetricsService;
 import com.example.backend.repository.DossierStatusHistoryRepository;
 import com.example.backend.util.TenantContext;
+import com.example.backend.workflow.DossierStatusCodes;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import org.springframework.context.ApplicationEventPublisher;
-import com.example.backend.event.DossierStatusChangedEvent;
 
 @Service
 public class DossierStatusTransitionService {
@@ -121,6 +121,30 @@ public class DossierStatusTransitionService {
             DossierStatus toStatus,
             String userId,
             String reason) {
+        recordTransition(
+                dossier,
+                fromStatus,
+                toStatus,
+                DossierStatusCodes.toCode(fromStatus),
+                DossierStatusCodes.toCode(toStatus),
+                userId,
+                reason);
+    }
+
+    /**
+     * Enregistre un changement de statut : historique (codes et projection enum), métrique,
+     * activité et événement. Les codes font foi (ADR 0004) ; deux codes peuvent partager la même
+     * projection enum (ex. {@code B2B_SCHEDULED} et {@code B2B_DONE}).
+     */
+    @Transactional
+    public void recordTransition(
+            Dossier dossier,
+            DossierStatus fromStatus,
+            DossierStatus toStatus,
+            String fromCode,
+            String toCode,
+            String userId,
+            String reason) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
@@ -130,6 +154,8 @@ public class DossierStatusTransitionService {
         history.setDossierId(dossier.getId());
         history.setFromStatus(fromStatus);
         history.setToStatus(toStatus);
+        history.setFromCode(fromCode);
+        history.setToCode(toCode);
         history.setUserId(userId);
         history.setReason(reason);
         history.setOrgId(orgId);
@@ -142,21 +168,27 @@ public class DossierStatusTransitionService {
         metricsService.incrementDossierStatusTransition(
                 fromStatus != null ? fromStatus.name() : "NONE", toStatus.name());
 
-        logStatusChangeActivity(dossier, fromStatus, toStatus, userId, reason);
+        logStatusChangeActivity(dossier, fromStatus, toStatus, fromCode, toCode, userId, reason);
 
-        eventPublisher.publishEvent(new DossierStatusChangedEvent(this, dossier, fromStatus, toStatus, userId, reason));
+        eventPublisher.publishEvent(
+                new DossierStatusChangedEvent(this, dossier, fromStatus, toStatus, userId, reason));
     }
 
     private void logStatusChangeActivity(
             Dossier dossier,
             DossierStatus fromStatus,
             DossierStatus toStatus,
+            String fromCode,
+            String toCode,
             String userId,
             String reason) {
         if (activityService != null) {
             try {
                 String description =
-                        String.format("Status changed from %s to %s", fromStatus, toStatus);
+                        String.format(
+                                "Status changed from %s to %s",
+                                fromCode != null ? fromCode : fromStatus,
+                                toCode != null ? toCode : toStatus);
                 if (reason != null && !reason.trim().isEmpty()) {
                     description += ": " + reason;
                 }
@@ -164,6 +196,8 @@ public class DossierStatusTransitionService {
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("fromStatus", fromStatus != null ? fromStatus.name() : "NONE");
                 metadata.put("toStatus", toStatus.name());
+                metadata.put("fromStatusCode", fromCode);
+                metadata.put("toStatusCode", toCode);
                 metadata.put("userId", userId);
                 if (reason != null) {
                     metadata.put("reason", reason);

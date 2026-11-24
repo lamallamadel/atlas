@@ -58,6 +58,8 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   /** Lien « Équipe » : manager et admin seulement (l'écran est aussi gardé par RoleGuard). */
   readonly canSeeTeam = isManagerOrAdmin(this.authService);
+  /** Lien « Démos B2B » : seulement pour l'organisation qui reçoit les demandes de démo. */
+  readonly hasB2bDemos = signal(false);
   public themeService = inject(ThemeService);
   private dossierApiService = inject(DossierApiService);
   private notificationApiService = inject(NotificationApiService);
@@ -137,6 +139,13 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
     );
     
     this.updateTourProgress();
+
+    this.subscriptions.add(
+      this.dossierApiService.countByCaseType('CRM_LEAD_B2B_DEMO').subscribe({
+        next: count => this.hasB2bDemos.set(count > 0),
+        error: () => this.hasB2bDemos.set(false),
+      })
+    );
   }
 
   ngOnDestroy(): void {

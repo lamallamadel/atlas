@@ -2,16 +2,21 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.DossierStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "Request body for updating dossier status")
 public class DossierStatusPatchRequest {
 
-    @Schema(description = "New status for the dossier", example = "QUALIFIED", required = true)
-    @NotNull(message = "Status is required")
+    @Schema(
+            description =
+                    "Ancien statut (enum), déprécié : préférer statusCode. L'un des deux est requis.",
+            example = "QUALIFIED")
     private DossierStatus status;
 
-    @Schema(description = "New status code (referential)", example = "CRM_QUALIFIED")
+    @Schema(
+            description =
+                    "Code de statut cible, dans le workflow du type de dossier (ADR 0004). L'un des"
+                            + " deux est requis.",
+            example = "CRM_QUALIFIED")
     private String statusCode;
 
     @Schema(description = "Loss reason code", example = "PRICE_TOO_HIGH")

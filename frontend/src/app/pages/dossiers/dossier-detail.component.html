@@ -14,7 +14,7 @@
         {{ dossier?.leadName || 'Dossier #' + dossier?.id }}
       </h1>
       <ds-badge [status]="dossier?.status === 'WON' ? 'success' : dossier?.status === 'LOST' ? 'error' : 'active'">
-        {{ dossier?.status }}
+        {{ statusLabel }}
       </ds-badge>
     </div>
 
@@ -57,6 +57,7 @@
     </ds-card>
 
     @if (dossier) {
+      <app-dossier-status-card [dossier]="dossier" (changed)="onStatusChanged($event)"></app-dossier-status-card>
       <app-dossier-assignee-card [dossier]="dossier" (changed)="onAssigneeChanged($event)"></app-dossier-assignee-card>
     }
   </div>

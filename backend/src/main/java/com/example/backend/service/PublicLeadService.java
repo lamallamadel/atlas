@@ -138,12 +138,21 @@ public class PublicLeadService {
             dossier.setNotes(buildNotes(requestType, email, request.getMessage()));
 
             DossierResponse created = dossierService.create(dossier);
-            if (email != null) {
+            java.util.Map<String, Object> details =
+                    annonceId == null && request.getDemo() != null
+                            ? request.getDemo().toMap()
+                            : java.util.Map.of();
+            if (email != null || !details.isEmpty()) {
                 dossierRepository
                         .findById(created.getId())
                         .ifPresent(
                                 d -> {
-                                    d.setLeadEmail(email);
+                                    if (email != null) {
+                                        d.setLeadEmail(email);
+                                    }
+                                    if (!details.isEmpty()) {
+                                        d.setLeadDetails(new java.util.HashMap<>(details));
+                                    }
                                     dossierRepository.save(d);
                                 });
             }
