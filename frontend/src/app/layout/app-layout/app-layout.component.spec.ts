@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 import { AppLayoutComponent } from './app-layout.component';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
+import { CoopApiService } from '../../services/coop-api.service';
 import { DossierApiService } from '../../services/dossier-api.service';
 import { NotificationApiService } from '../../services/notification-api.service';
 import { KeyboardShortcutService } from '../../services/keyboard-shortcut.service';
@@ -109,6 +110,7 @@ describe('AppLayoutComponent', () => {
         { provide: ThemeService, useValue: mockThemeService },
         { provide: BreakpointObserver, useValue: mockBreakpointObserver },
         { provide: DossierApiService, useValue: mockDossierApiService },
+        { provide: CoopApiService, useValue: { groupCount: vi.fn().mockReturnValue(of(0)) } },
         {
           provide: NotificationApiService,
           useValue: mockNotificationApiService},

@@ -1,7 +1,7 @@
 # Module “Coop Habitat” (groupement d’habitat participatif) — MVP v1
 
-> **Statut**: Backend implémenté (entités + contrôleurs `Coop*`), aucun écran — vérifié le 2026-11-23  
-> **Dernière vérification**: 2026-01-07  
+> **Statut**: partiel — backend CRUD et écrans Pro (étape 7) ; gouvernance, FIFO, allocation et WhatsApp à faire  
+> **Dernière vérification**: 2026-11-24  
 > **Source of truth**: Oui (pour le concept Coop Habitat)  
 > **Dépendances**:  
 - `docs/atlas-immobilier/02_fonctionnel/02_regles_metier.md`  
@@ -22,11 +22,23 @@ Ajouter à Atlas Immobilier un module “**coopérative d’habitat**” (ou gro
 
 Ce module vise **la robustesse opérationnelle** (confiance, preuves, règles) avant l’intégration de paiement (fintech) : la V1 est **déclarative** (justificatifs), marketable comme “outil de gestion de coop d’habitat”.
 
-## AS-IS (2026-11-23)
+## AS-IS (aujourd’hui, 2026-11-24)
 
-- Backend : entités `CoopGroup`, `CoopMember`, `CoopProject`, `CoopLot`, `CoopContribution` et leurs contrôleurs REST.
-- Pas d’écran dans le frontend.
-- Non vérifié contre cette spec : règles d’allocation FIFO, éligibilité au cut-off, indexation des cotisations, notifications WhatsApp.
+**Backend** : CRUD `/api/v1/coop/{groups,members,projects,lots,contributions}`.
+- Accès : lecture pour les membres de l’agence ; écriture pour le manager et l’admin (`COOP_MANAGER` = `MANAGER`).
+- Le module `module.coop_habitat` peut être coupé par agence : l’API répond alors 403.
+- Le journal des cotisations se filtre par groupement (`?groupId=`).
+
+**Écrans Pro** : `/pro/coop`, liste et création des groupements, puis `/pro/coop/{id}` avec trois onglets :
+- **Membres** : ajout en « en attente », numéro d’adhésion, changement de statut ;
+- **Cotisations** : appels de fonds par membre ; totaux appelé, payé, à payer, en retard (échéance dépassée) ; « marquer payée » ;
+- **Projets et lots** : projets avec statut et budget, lots avec surface et prix. Attribuer un lot à un membre le réserve ; le libérer le rend disponible.
+
+**Écarts avec la cible ci-dessous**, à faire :
+- les statuts suivent les enums existants (`PENDING`/`ACTIVE`…, `PLANNING`/`IN_PROGRESS`…), pas encore les codes `COOP_*` ni des workflows ;
+- pas de rang FIFO distinct du numéro d’adhésion, ni de proposition d’allocation, de PV ou de cut-off ;
+- pas de plan d’échéances, d’indexation ni de pénalités ;
+- pas de justificatifs, de notifications WhatsApp, ni d’audit dédié aux actions Coop.
 
 ## TO-BE (cible MVP v1 Coop Habitat)
 

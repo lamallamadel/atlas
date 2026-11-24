@@ -20,6 +20,10 @@ public interface CoopContributionRepository
 
     Page<CoopContribution> findByMemberIdAndOrgId(Long memberId, String orgId, Pageable pageable);
 
+    /** Cotisations des membres d'un groupement (journal du groupement). */
+    Page<CoopContribution> findByMemberGroupIdAndOrgId(
+            Long groupId, String orgId, Pageable pageable);
+
     Page<CoopContribution> findByProjectIdAndOrgId(Long projectId, String orgId, Pageable pageable);
 
     Page<CoopContribution> findByStatusAndOrgId(

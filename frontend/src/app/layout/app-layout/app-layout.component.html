@@ -56,6 +56,12 @@
       
       <div class="layout-divider" role="separator"></div>
       
+      @if (hasCoop()) {
+        <a class="nav-link" title="Coop habitat" routerLink="/coop" routerLinkActive="active" aria-label="Coop habitat">
+          <ds-icon name="home" [size]="20" aria-hidden="true"></ds-icon>
+          <span class="nav-link-title">Coop</span>
+        </a>
+      }
       @if (hasB2bDemos()) {
         <a class="nav-link" title="Démos B2B" routerLink="/b2b-demo" routerLinkActive="active" aria-label="Démos B2B">
           <ds-icon name="building" [size]="20" aria-hidden="true"></ds-icon>
