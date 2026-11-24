@@ -282,6 +282,10 @@ Spec : `02_fonctionnel/13_uc_proprietaire_mandats.md`. Codes plateforme (non ten
 ## 10b.3 `MREQ_STATUS` (demande d'accompagnement)
   - `MREQ_DRAFT`, `MREQ_OPEN`, `MREQ_AWARDED`, `MREQ_EXPIRED`, `MREQ_CANCELLED`
 
+## 10b.3 bis `MREQ_VISIBILITY` (portée de la demande)
+  - `MREQ_OPEN_MARKET` : dans la bourse, visible des agences de la zone
+  - `MREQ_DIRECT` : adressée à une seule agence, hors bourse
+
 ## 10b.4 `MPROP_STATUS` (proposition d'agence)
   - `MPROP_SENT`, `MPROP_SHORTLISTED`, `MPROP_ACCEPTED`, `MPROP_DECLINED`, `MPROP_WITHDRAWN`, `MPROP_EXPIRED`
 

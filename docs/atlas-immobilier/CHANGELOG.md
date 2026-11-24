@@ -1,7 +1,7 @@
 # Changelog — v0.8-uc-proprietaire-2026-11-25
 
 Cas d'usage n°1 : le propriétaire publie seul ou confie son bien à un agent (spec TO-BE, à valider avant code).
-- `02_fonctionnel/13_uc_proprietaire_mandats.md` : parcours UC-P1 à UC-P9, matching, règles R-PROP-01 à 14, modèle, API, écrans, lots A/B/C et critères d'acceptation, questions ouvertes Q1 à Q8.
+- `02_fonctionnel/13_uc_proprietaire_mandats.md` : parcours UC-P1 à UC-P9, matching, règles R-PROP-01 à 16, modèle, API, écrans, lots A/B/C et critères d'acceptation, décisions Q1 à Q4 (propriétaire ↔ agent avant publication, demande directe, bourse gratuite avec quota, messagerie + alerte WhatsApp, indépendants admis), questions Q5 à Q8 ouvertes.
 - `docs/adr/0005` : une organisation par propriétaire ; mandat et bien (`property`) comme objets inter-organisations.
 - Intégré dans : personas, glossaire, nomenclature (§ 10 bis), règles métier (§ 8), feature flags (`module.mandate_marketplace`), RBAC (rôle `OWNER`), backlog (étapes 8 à 10).
 - Backlog : étapes 2 à 7 marquées faites.

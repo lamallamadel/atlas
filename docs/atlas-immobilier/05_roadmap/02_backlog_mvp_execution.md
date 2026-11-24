@@ -19,14 +19,14 @@ Objectif : rendre la plateforme vendable à une **deuxième agence**. L’ordre 
 | 5 | Signalements et modération | Entité de signalement, envoi depuis le portail, liste Pro, clôture, suspension de l’annonce | B5+ | Fait |
 | 6 | Rôles d’agence | `MANAGER` et `AGENT` (Keycloak), filtre « mes dossiers », réassignation réservée au manager | — | Fait |
 | 7 | Pipeline B2B, modules, Coop | Pipeline B2B démo (`CRM_LEAD_B2B_DEMO`), feature flags appliqués côté API, écrans Coop | — | Fait (+ stabilisation, branche `chore/release-stabilization`) |
-| 8 | Cas d'usage n°1 — lot A : propriétaire autonome | Rôle `OWNER`, table `organization`, organisation personnelle, code à usage unique, bien (`property`), annonce du propriétaire avec modération a priori, leads et visites dans l'espace propriétaire (spec `02_fonctionnel/13_uc_proprietaire_mandats.md`, ADR 0005) | PA-1 à PA-4 | Spec à valider (questions Q1, Q3, Q5, Q6) |
-| 9 | Cas d'usage n°1 — lot B : bourse aux mandats | Demande d'accompagnement, profils et zones d'agence, bourse, propositions, messagerie masquée, mandat, dossier `CRM_MANDATE_*`, exclusivité | PB-1 à PB-6 | Après le lot A (questions Q2, Q4, Q8) |
+| 8 | Cas d'usage n°1 — lot A : propriétaire autonome | Rôle `OWNER`, table `organization`, organisation personnelle, code à usage unique, bien (`property`), annonce du propriétaire avec modération a priori, leads et visites dans l'espace propriétaire (spec `02_fonctionnel/13_uc_proprietaire_mandats.md`, ADR 0005) | PA-1 à PA-4 | Spec validée sur Q1 à Q4 ; Q5 et Q6 à confirmer |
+| 9 | Cas d'usage n°1 — lot B : bourse aux mandats | Demande d'accompagnement ouverte ou directe (bien privé possible), annuaire et profils d'agence, zones, bourse, propositions, messagerie masquée, mandat, dossier `CRM_MANDATE_*`, exclusivité | PB-1 à PB-8 | Après le lot A (question Q8) |
 | 10 | Cas d'usage n°1 — lot C : matching et suivi | Score agents ↔ demande, invitations, acquéreurs compatibles de l'agence, suivi du mandat par le propriétaire, avis, badges, quotas | PC-1 à PC-4 | Après le lot B (question Q7) |
 
 ## Décisions ouvertes (hors chemin critique)
 - WhatsApp : autoriser un pitch dans la fenêtre de 24 h d’un message client.
 - WhatsApp : accepter un « OUI » dans la conversation comme opt-in.
-- Cas d'usage n°1 : questions Q1 à Q8 de `02_fonctionnel/13_uc_proprietaire_mandats.md` § 17.
+- Cas d'usage n°1 : questions Q5 à Q8 de `02_fonctionnel/13_uc_proprietaire_mandats.md` § 17.
 
 ## Definition of Done (global)
 - Scénarios E2E « MVP Acceptance » satisfaits : `docs/atlas-immobilier/04_qa_prod/03_e2e_acceptance_mvp.md`.

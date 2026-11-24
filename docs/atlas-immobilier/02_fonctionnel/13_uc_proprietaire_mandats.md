@@ -22,6 +22,8 @@ Un propriétaire veut vendre ou louer son bien sans passer à l'agence. Sur Atla
 4. **confier l'affaire** à l'agent choisi par un mandat, simple ou exclusif ;
 5. **suivre son bien** depuis son espace, que l'affaire soit déléguée ou non.
 
+Le propriétaire qui ne veut pas « se casser la tête » n'a pas besoin de publier : il décrit son bien, échange avec des agents **avant toute annonce publique**, et c'est l'agent mandaté qui publie. Le bien n'apparaît sur le portail qu'une fois le mandat signé.
+
 De leur côté, les agents consultent une **bourse aux mandats** : les propriétaires de leur zone qui cherchent un agent. La plateforme rapproche les deux (matching) pour que chaque demande reçoive vite quelques propositions pertinentes.
 
 | Acteur | Ce qu'il gagne |
@@ -66,12 +68,13 @@ flowchart LR
   B --> C{Comment vendre ?}
   C -->|Seul| D[Publier l'annonce]
   D --> E[Contacts, visites, offres]
-  C -->|Avec un agent| F[Demande d'accompagnement]
+  C -->|Avec un agent, sans rien publier| F[Demande d'accompagnement]
   F --> G[Bourse aux mandats]
   G --> H[Propositions d'agents]
   H --> I[Mandat simple ou exclusif]
   I --> J[Affaire dans le CRM de l'agence]
-  J --> K[Suivi par le propriétaire]
+  J --> L[L'agent publie l'annonce]
+  L --> K[Suivi par le propriétaire]
   D -.->|change d'avis| F
 ```
 
@@ -90,6 +93,7 @@ Le propriétaire décrit son bien une fois : type, transaction voulue (vente, lo
 
 - L'adresse précise et le numéro de titre foncier (facultatif) restent **privés** : jamais affichés sur le portail, transmis à une agence seulement après mandat.
 - Le bien existe indépendamment de toute annonce : c'est lui que les annonces (du propriétaire ou des agences) diffusent.
+- Un bien peut rester **privé** : sans annonce, rien n'est visible sur le portail. C'est le cas du propriétaire qui délègue d'emblée (UC-P5).
 
 ### UC-P3 — Publier soi-même
 
@@ -106,7 +110,14 @@ Le propriétaire décrit son bien une fois : type, transaction voulue (vente, lo
 
 ### UC-P5 — Dire aux agents ce qu'on attend (demande d'accompagnement)
 
-Le propriétaire ouvre une **demande d'accompagnement** sur un bien :
+C'est le parcours du propriétaire qui ne veut pas gérer la vente lui-même. Il n'a **pas besoin de publier** : la demande se fait sur un bien privé, et l'annonce publique viendra de l'agent mandaté. Deux façons de la lancer :
+
+- **Demande ouverte** : elle va dans la bourse aux mandats et toutes les agences de la zone peuvent proposer (UC-P6).
+- **Demande directe** : depuis l'annuaire ou le profil d'un agent, le propriétaire choisit « Confier mon bien à cet agent ». Seule cette agence voit la demande ; elle n'apparaît pas dans la bourse. Si l'agence ne répond pas sous 72 h ou décline, le propriétaire peut la transformer en demande ouverte.
+
+Dans les deux cas, le propriétaire et l'agent échangent par la messagerie de la plateforme avant tout mandat (UC-P7).
+
+Contenu de la **demande d'accompagnement** :
 
 | Champ | Exemple |
 |---|---|
@@ -120,7 +131,8 @@ Le propriétaire ouvre une **demande d'accompagnement** sur un bien :
 | Message libre | « Bien hérité, je vis à l'étranger » |
 
 - La demande est **ouverte 14 jours** et accepte **5 propositions au plus** (réglable par la plateforme). Au-delà, elle se ferme aux nouvelles propositions.
-- Si le bien a déjà une annonce du propriétaire, elle reste en ligne pendant la demande.
+- Si le bien a déjà une annonce du propriétaire, elle reste en ligne pendant la demande. S'il n'en a pas, il reste privé.
+- Une demande directe vise une seule agence et ne compte pas dans le plafond de 5 propositions.
 
 ### UC-P6 — Les agents trouvent les propriétaires (bourse aux mandats)
 
@@ -152,6 +164,8 @@ Le propriétaire garde la main depuis son espace :
 - visites réalisées et retours, offres reçues : ce sont les événements que l'agent marque « visibles par le propriétaire » dans le dossier ;
 - messagerie avec l'agent ;
 - décision sur une offre (accepter, refuser, contre-proposer), tracée dans le dossier de l'agence.
+
+Si le bien était privé, l'annonce de l'agence est la première publication : elle passe par les règles de publication de l'agence, sans modération a priori par la plateforme.
 
 En mandat **exclusif**, l'annonce du propriétaire est suspendue (`SUSPENDED`, motif mandat exclusif) et son URL redirige vers l'annonce de l'agence. En mandat **simple**, les annonces coexistent et le portail les regroupe sur le même bien (R-PROP-06).
 
@@ -210,6 +224,8 @@ Une statistique agrégée inter-agences (« 40 acquéreurs actifs pour ce type d
 | R-PROP-12 | Seuls les événements du dossier marqués « visible propriétaire » apparaissent dans l'espace propriétaire ; notes internes et autres prospects restent privés |
 | R-PROP-13 | Un avis sur une agence n'est possible qu'à la fin d'un mandat réel, une fois par mandat |
 | R-PROP-14 | Le propriétaire peut supprimer son compte : annonces retirées, demandes annulées ; les mandats actifs doivent d'abord être terminés ; les dossiers des agences conservent ce qui a été transmis sous mandat |
+| R-PROP-15 | Un bien sans annonce reste privé : ni le portail ni la bourse ne montrent son adresse ; seule l'annonce publiée par une agence mandatée le rend public |
+| R-PROP-16 | Une demande directe n'est visible que par l'agence choisie ; sans réponse sous 72 h ou en cas de refus, le propriétaire peut l'ouvrir à la bourse |
 
 ## 7. Confiance et conformité
 
@@ -229,7 +245,7 @@ Le choix est décrit dans l'ADR 0005. En résumé : **chaque propriétaire a son
 | `organization` (nouvelle) | Plateforme | `org_id`, `org_type` (`AGENCY`, `OWNER`, `PLATFORM`), nom affiché, `verified` |
 | `property` (nouvelle) | Organisation propriétaire | type, transaction, ville, quartier, adresse (privée), surface, pièces, caractéristiques, titre foncier (privé), `verification_status` |
 | `annonce` (existante) | Organisation qui publie | + `property_id`, `publisher_kind` (`OWNER`, `AGENCY`), `mandate_id` |
-| `mandate_request` (nouvelle) | Inter-orgs (côté propriétaire) | `owner_org_id`, `property_id`, objectif, prix, délai, types de mandat acceptés, services, commission envisagée, statut `MREQ_*`, `expires_at`, `max_proposals` |
+| `mandate_request` (nouvelle) | Inter-orgs (côté propriétaire) | `owner_org_id`, `property_id`, `visibility` (`MREQ_OPEN_MARKET`, `MREQ_DIRECT`), `target_agency_org_id` (demande directe), objectif, prix, délai, types de mandat acceptés, services, commission envisagée, statut `MREQ_*`, `expires_at`, `max_proposals` |
 | `mandate_proposal` (nouvelle) | Inter-orgs | `request_id`, `agency_org_id`, `agent_user_id`, type et durée de mandat, commission, payeur, services, estimation min/max, message, statut `MPROP_*` |
 | `mandate` (nouvelle) | Inter-orgs | `owner_org_id`, `agency_org_id`, `property_id`, `proposal_id`, type, début, fin, commission, statut `MANDATE_*`, motif de fin, `dossier_id` (côté agence), document signé |
 | `marketplace_thread` + `marketplace_message` (nouvelles) | Inter-orgs | fil propriétaire ↔ agence rattaché à une proposition ; contenu masqué avant acceptation |
@@ -307,7 +323,7 @@ Nouveau rôle Keycloak `OWNER` : il donne `ROLE_OWNER` et **pas** `ROLE_PRO`. Le
 | `GET/POST/PUT /api/v1/owner/properties` | `OWNER` | Biens du propriétaire |
 | `POST /api/v1/owner/properties/{id}/annonce` | `OWNER` | Crée ou met à jour l'annonce du propriétaire, soumise aux règles de publication |
 | `GET /api/v1/owner/leads`, `/owner/appointments` | `OWNER` | Leads et visites de son organisation |
-| `POST /api/v1/owner/mandate-requests`, `PUT …/{id}/cancel` | `OWNER` | Demandes d'accompagnement |
+| `POST /api/v1/owner/mandate-requests`, `PUT …/{id}/cancel`, `PUT …/{id}/open-to-market` | `OWNER` | Demandes d'accompagnement, ouvertes ou directes ; passage d'une demande directe à la bourse |
 | `GET /api/v1/owner/mandate-requests/{id}/proposals`, `/recommended-agencies` | `OWNER` | Propositions reçues, agences recommandées (§ 5.1) |
 | `POST /api/v1/owner/proposals/{id}/accept` (code à usage unique), `/decline`, `/shortlist` | `OWNER` | Décision ; l'acceptation crée mandat et dossier |
 | `GET /api/v1/owner/mandates/{id}` | `OWNER` | Suivi du mandat et événements visibles |
@@ -315,6 +331,7 @@ Nouveau rôle Keycloak `OWNER` : il donne `ROLE_OWNER` et **pas** `ROLE_PRO`. Le
 | `GET /api/v1/marketplace/mandate-requests/{id}` | Idem | Fiche anonymisée + acquéreurs compatibles de l'agence (§ 5.2) |
 | `POST /api/v1/marketplace/mandate-requests/{id}/proposals`, `DELETE …/proposals/{pid}` | Idem | Envoyer, retirer |
 | `GET /api/v1/marketplace/proposals?mine=` | Idem | Propositions de l'agent ou de l'agence |
+| `GET /api/v1/marketplace/direct-requests` | Idem | Demandes directes adressées à l'agence |
 | `GET/POST /api/v1/marketplace/threads/{id}/messages` | Les deux parties | Messagerie, masquage avant acceptation |
 | `GET/PUT /api/v1/agency/profile`, `/agency/zones` | Manager, admin | Profil public et zones |
 | `GET /api/public/v1/agencies?city=`, `/agencies/{id}` | Public | Annuaire et profil public des agences |
@@ -327,11 +344,11 @@ Nouveau rôle Keycloak `OWNER` : il donne `ROLE_OWNER` et **pas** `ROLE_PRO`. Le
 - Accueil : mes biens, actions à faire (contacts non lus, propositions à examiner, visite demain) ;
 - Fiche bien : annonce, statistiques, contacts, demande d'accompagnement, mandat ;
 - Contacts et visites ;
-- Trouver un agent : formulaire de demande, agents recommandés, comparateur de propositions, fil de messages ;
+- Trouver un agent : formulaire de demande (ouverte ou directe), annuaire et profils d'agents, agents recommandés, comparateur de propositions, fil de messages ;
 - Mes mandats : statut, événements visibles, offres à décider.
 
 **Espace Pro** :
-- Bourse aux mandats (`/pro/mandats`) : liste filtrable, fiche anonymisée, proposition en boîte de dialogue ;
+- Bourse aux mandats (`/pro/mandats`) : liste filtrable, fiche anonymisée, proposition en boîte de dialogue ; onglet « Demandes directes » pour celles adressées à l'agence ;
 - Mes propositions : suivi des statuts ;
 - Réglages agence : profil public, zones, spécialités ;
 - Les mandats obtenus arrivent dans « Mes dossiers » (filtre par type de dossier).
@@ -342,7 +359,8 @@ Nouveau rôle Keycloak `OWNER` : il donne `ROLE_OWNER` et **pas** `ROLE_PRO`. Le
 |---|---|---|
 | Nouveau contact sur l'annonce | Propriétaire | WhatsApp (modèle), e-mail, espace |
 | Demande ouverte correspondant à l'agence (top 10) | Agents de l'agence, selon zones | Espace Pro, e-mail |
-| Invitation à proposer | Agence invitée | Espace Pro, e-mail |
+| Invitation à proposer, demande directe | Agence visée | Espace Pro, e-mail, WhatsApp |
+| Demande directe sans réponse à 48 h | Agence visée (rappel) ; à 72 h, le propriétaire | Espace, e-mail |
 | Nouvelle proposition, nouveau message | Propriétaire | WhatsApp (modèle), espace |
 | Proposition acceptée ou non retenue | Agent | Espace Pro, e-mail |
 | Mandat à signer, signé, bientôt échu (J-15), terminé | Les deux | Espace, e-mail |
@@ -356,7 +374,7 @@ Les messages WhatsApp sortants hors fenêtre de 24 h utilisent des modèles appr
 | Lot | Contenu | Pré-requis |
 |---|---|---|
 | **A — Propriétaire autonome** | UC-P1 à UC-P4 : rôle `OWNER`, table `organization`, organisation personnelle, code à usage unique, `property`, annonce du propriétaire avec modération a priori, leads et visites dans l'espace propriétaire | Release de stabilisation en production |
-| **B — Bourse aux mandats** | UC-P5 à UC-P7 : demande, profils et zones d'agence, bourse, propositions, messagerie masquée, acceptation, mandat, dossier `CRM_MANDATE_*`, annonce d'agence liée au bien, suspension en exclusif | Lot A ; workflow mandat dans `DossierWorkflowCatalog` |
+| **B — Bourse aux mandats** | UC-P5 à UC-P7 : demande ouverte ou directe sur un bien privé ou publié, annuaire et profils d'agence, zones, bourse, propositions, messagerie masquée, acceptation, mandat, dossier `CRM_MANDATE_*`, annonce d'agence liée au bien, suspension en exclusif | Lot A ; workflow mandat dans `DossierWorkflowCatalog` |
 | **C — Matching et suivi** | Score § 5.1, invitations, acquéreurs compatibles § 5.2, suivi UC-P8, fin de mandat et avis UC-P9, badges de vérification, quotas par plan | Lot B |
 
 ### Critères d'acceptation
@@ -374,6 +392,8 @@ Les messages WhatsApp sortants hors fenêtre de 24 h utilisent des modèles appr
 - PB-4 : l'acceptation avec code crée le mandat, le dossier `CRM_MANDATE_SALE` assigné à l'agent, et révèle les coordonnées à cette seule agence ; les autres propositions passent `MPROP_DECLINED`.
 - PB-5 : en exclusif, l'annonce du propriétaire passe `SUSPENDED` et son URL redirige vers l'annonce de l'agence ; une nouvelle demande sur le bien est refusée.
 - PB-6 : en simple, deux agences publient le même bien ; le portail montre une seule fiche avec deux annonceurs ; aucune alerte doublon entre elles.
+- PB-7 : un propriétaire sans annonce envoie une demande directe à une agence ; elle n'apparaît ni sur le portail ni dans la bourse des autres agences ; après mandat, l'annonce publiée par l'agence est la première fiche publique du bien.
+- PB-8 : une demande directe restée sans réponse 72 h peut être ouverte à la bourse ; l'agence visée garde son accès.
 
 **Lot C**
 - PC-1 : le propriétaire voit 5 agences recommandées classées par score ; une agence hors zone n'y figure jamais.
@@ -401,15 +421,22 @@ Les messages WhatsApp sortants hors fenêtre de 24 h utilisent des modèles appr
 | Doublons d'annonces sur un même bien | `property_id` commun, fiche unique sur le portail (R-PROP-06) |
 | Valeur juridique du mandat | Modèle validé par un juriste ; preuve d'acceptation par code ; signature électronique si le module est actif |
 
-## 17. Questions ouvertes (à trancher avant le lot concerné)
+## 17. Décisions et questions ouvertes
+
+Décidé le 2026-11-25 :
+
+| # | Question | Décision |
+|---|---|---|
+| Q1 | « Un propriétaire peut entrer en communication avec … » | Propriétaire ↔ agent **avant toute publication** : le propriétaire qui ne veut pas gérer lui-même échange avec des agents sur un bien privé et mandate l'un d'eux, qui publie (UC-P5, demande ouverte ou directe). Pas de messagerie entre propriétaires |
+| Q2 | Facturation de la bourse aux agences | Gratuite au lancement avec quota, puis quota inclus selon le plan |
+| Q3 | Échanges prospect ↔ propriétaire | Messagerie de la plateforme + alerte WhatsApp ; numéro du propriétaire caché sauf s'il choisit de l'afficher |
+| Q4 | Agents indépendants | Admis comme agence d'une personne, avec la même vérification |
+
+Encore ouvertes (valeur par défaut retenue si rien n'est décidé avant le lot) :
 
 | # | Question | Proposition par défaut | Lot |
 |---|---|---|---|
-| Q1 | « Un propriétaire peut entrer en communication avec un proprio » : s'agit-il du prospect qui contacte le propriétaire, ou de propriétaires entre eux ? | Prospect ↔ propriétaire (UC-P4) ; pas de messagerie entre propriétaires | A |
-| Q2 | Comment la bourse est-elle facturée aux agences ? | Gratuite au lancement avec quota, puis quota par plan ; paiement à la proposition plus tard | B |
-| Q3 | Contact prospect ↔ propriétaire : messagerie de la plateforme seule, ou WhatsApp direct après accord ? | Messagerie de la plateforme + notification WhatsApp ; numéro du propriétaire affiché seulement s'il le choisit | A |
-| Q4 | Les agents indépendants (sans agence) sont-ils admis ? | Oui, comme agence d'une personne, avec la même vérification | B |
 | Q5 | Canal du code à usage unique | WhatsApp (modèle d'authentification Meta), SMS en secours | A |
-| Q6 | Modération a priori de la première annonce : par l'équipe Atlas, avec quel délai ? | Oui, objectif sous 4 h ouvrées | A |
+| Q6 | Modération a priori de la première annonce : par qui, avec quel délai ? | Équipe Atlas, objectif sous 4 h ouvrées | A |
 | Q7 | Statistique agrégée d'acquéreurs inter-agences (§ 5.3) | Non au lancement ; à proposer aux agences en option | C |
 | Q8 | Qui paie la commission par défaut, et faut-il un barème indicatif ? | Champ libre dans la proposition, sans barème imposé | B |
