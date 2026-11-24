@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
-import { trigger, transition, style, animate, query, animateChild } from '@angular/animations';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { AuthHeroComponent } from '../../design-system/patterns/auth-hero/auth-hero.component';
 import { DsButtonComponent } from '../../design-system/primitives/ds-button/ds-button.component';
 import { CommonModule } from '@angular/common';

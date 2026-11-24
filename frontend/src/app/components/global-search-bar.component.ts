@@ -1,3 +1,4 @@
+import { escapeHtml } from '../utils/escape-html';
 import { Component, OnInit, OnDestroy, HostListener, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { SearchApiService, SearchResult } from '../services/search-api.service';
@@ -279,10 +280,16 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
     return score;
   }
 
+  /**
+   * Surligne la requête dans un titre de résultat. Le texte vient des données (ex. nom d'un lead saisi
+   * sur le portail public) : il est échappé AVANT d'y insérer les balises <mark>, sinon un nom comme
+   * `<img src=x onerror=…>` s'exécuterait dans la recherche d'un agent (XSS stockée).
+   */
   private highlightText(text: string, query: string): SafeHtml {
-    if (!query || !text) return this.sanitizer.bypassSecurityTrustHtml(text);
-    const regex = new RegExp(`(${this.escapeRegex(query)})`, 'gi');
-    return this.sanitizer.bypassSecurityTrustHtml(text.replace(regex, '<mark>$1</mark>'));
+    const safe = escapeHtml(text ?? '');
+    if (!query || !safe) return this.sanitizer.bypassSecurityTrustHtml(safe);
+    const regex = new RegExp(`(${this.escapeRegex(escapeHtml(query))})`, 'gi');
+    return this.sanitizer.bypassSecurityTrustHtml(safe.replace(regex, '<mark>$1</mark>'));
   }
 
   private escapeRegex(str: string): string {

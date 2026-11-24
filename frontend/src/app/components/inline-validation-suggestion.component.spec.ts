@@ -50,7 +50,7 @@ describe('InlineValidationSuggestionComponent', () => {
       suggestedValue: 'new',
       reason: 'test',
       confidence: 'high'});
-    expect(component.getConfidenceIcon()).toBe('verified');
+    expect(component.getConfidenceIcon()).toBe('check');
 
     fixture.componentRef.setInput('suggestion', {
       field: 'test',
@@ -58,7 +58,7 @@ describe('InlineValidationSuggestionComponent', () => {
       suggestedValue: 'new',
       reason: 'test',
       confidence: 'medium'});
-    expect(component.getConfidenceIcon()).toBe('help_outline');
+    expect(component.getConfidenceIcon()).toBe('help-circle');
 
     fixture.componentRef.setInput('suggestion', {
       field: 'test',

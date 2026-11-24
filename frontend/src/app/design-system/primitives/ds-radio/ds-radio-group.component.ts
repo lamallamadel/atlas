@@ -23,7 +23,7 @@ export interface DsRadioOption {
   template: `
     <div class="ds-field" [class.ds-field--error]="error" [class.ds-field--disabled]="disabled">
       @if (label) {
-        <label class="ds-field__label">{{ label }}</label>
+        <span class="ds-field__label">{{ label }}</span>
       }
       <div class="ds-radio-group" [class.ds-radio-group--inline]="inline">
         @for (option of options; track option.value; let i = $index) {

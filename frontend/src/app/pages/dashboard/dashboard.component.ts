@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { annonceStatusLabel, formatAnnoncePrice } from '../../utils/annonce-format';
 import { Router } from '@angular/router';
 import { DsDialogService } from '../../design-system';
@@ -54,7 +54,7 @@ interface KpiCard {
       DsCardComponent,
     ]
 })
-export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   readonly formatPrice = formatAnnoncePrice;
   readonly statusLabel = annonceStatusLabel;
 
@@ -211,9 +211,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  ngAfterViewInit(): void {
-    // Charts are handled inline by KpiCardComponent via [sparkline] input
-  }
 
   ngOnDestroy(): void {
     this.destroy$.next();

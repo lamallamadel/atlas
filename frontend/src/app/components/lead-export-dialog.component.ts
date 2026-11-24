@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { DialogRef } from '@angular/cdk/dialog';
 import { LeadApiService, LeadExportRequest } from '../services/lead-api.service';
 import { DossierStatus } from '../services/dossier-api.service';
 import { CommonModule } from '@angular/common';

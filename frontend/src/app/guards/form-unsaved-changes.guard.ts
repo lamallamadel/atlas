@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { CanDeactivate } from '@angular/router';
-import { Observable, map, of } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { DsDialogService } from '../design-system';
 import { ConfirmNavigationDialogComponent } from '../components/confirm-navigation-dialog.component';
 

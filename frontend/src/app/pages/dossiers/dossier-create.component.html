@@ -135,7 +135,7 @@
                 @if (showAnnonceSuggestions) {
                   <div class="annonce-dropdown" role="listbox">
                     @for (annonce of filteredAnnonces | async; track annonce) {
-                      <button type="button" class="annonce-option" role="option"
+                      <button type="button" class="annonce-option" role="option" aria-selected="false"
                         (mousedown)="onAnnonceSelected(annonce)">
                         {{ displayAnnonceFn(annonce) }}
                       </button>

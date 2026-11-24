@@ -3,12 +3,11 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { PartiePrenanteRole } from '../services/dossier-api.service';
 import { CommonModule } from '@angular/common';
-import { 
-  DsButtonComponent, 
-  DsIconComponent, 
-  DsSelectComponent, 
-  DsSelectOption, 
-  DsSkeletonComponent,
+import {
+  DsButtonComponent,
+  DsIconComponent,
+  DsSelectComponent,
+  DsSelectOption,
   DsInputComponent,
   DsDialogHeaderComponent,
   DsDialogContentComponent,

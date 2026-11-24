@@ -214,7 +214,7 @@ export class ChartColorPaletteService {
   }
 
   generateGradient(color: string, steps = 5): string[] {
-    let rgba = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    const rgba = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
     let r: number;
     let g: number;
     let b: number;

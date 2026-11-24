@@ -4,9 +4,8 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { AppointmentStatus } from '../services/appointment-api.service';
 import { DatetimePickerComponent } from './datetime-picker.component';
 import { CommonModule } from '@angular/common';
-import { 
-  DsSkeletonComponent, 
-  DsSelectComponent, 
+import {
+  DsSelectComponent,
   DsSelectOption,
   DsButtonComponent,
   DsIconComponent,

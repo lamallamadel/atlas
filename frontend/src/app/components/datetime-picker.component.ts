@@ -13,6 +13,8 @@ import { CommonModule } from '@angular/common';
  * Atlasia V2 styled Date+Time field using native HTML5 inputs.
  * Outputs the same string format as native <input type="datetime-local">: YYYY-MM-DDTHH:mm
  */
+let nextUid = 0;
+
 @Component({
     selector: 'app-datetime-picker',
     templateUrl: './datetime-picker.component.html',
@@ -35,6 +37,9 @@ import { CommonModule } from '@angular/common';
 export class DatetimePickerComponent
   implements ControlValueAccessor, Validator, OnInit, OnDestroy
 {
+  /** Identifiant propre à l'instance : plusieurs datetime-picker peuvent coexister sur une page. */
+  readonly uid = `datetime-picker-${++nextUid}`;
+
   readonly label = input('Date et heure');
   readonly required = input(false);
 

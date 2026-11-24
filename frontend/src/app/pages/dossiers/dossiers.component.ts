@@ -5,8 +5,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
-import { DateFormatPipe } from '../../pipes/date-format.pipe';
-import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { FilterPresetService } from '../../services/filter-preset.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { DossierAction, MobileDossierCardComponent } from '../../components/mobile-dossier-card.component';
@@ -21,21 +19,20 @@ import { MobileAction, MobileActionSheetComponent } from '../../components/mobil
 import { Observable, Subject, of, timer } from 'rxjs';
 import { catchError, debounceTime, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
 import { KanbanBoardComponent } from '../../components/kanban-board.component';
-import { 
-  PageHeaderComponent, 
-  FilterBarComponent, 
+import {
+  PageHeaderComponent,
+  FilterBarComponent,
   DsFilterOption,
-  DsButtonComponent, 
-  DsBadgeComponent, 
-  DsEmptyStateComponent, 
+  DsButtonComponent,
+  DsBadgeComponent,
+  DsEmptyStateComponent,
   DsSkeletonComponent,
-  DsCardComponent, 
-  DsTableComponent, 
-  DsColumn, 
+  DsCardComponent,
+  DsTableComponent,
+  DsColumn,
   DsRowAction,
   DsIconComponent,
   DsToastService,
-  DsTab,
   DsDialogService,
   DsSelectComponent,
   DsSelectOption,

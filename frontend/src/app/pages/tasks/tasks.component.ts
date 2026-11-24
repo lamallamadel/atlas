@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -51,7 +51,7 @@ const MOCK_TASKS: Task[] = [
     DsAvatarComponent, PageHeaderComponent,
   ],
 })
-export class TasksComponent implements OnInit {
+export class TasksComponent {
   tasks: Task[] = MOCK_TASKS;
   loading = false;
   activeTab = 'all';
@@ -76,7 +76,6 @@ export class TasksComponent implements OnInit {
     urgent: 'lost', high: 'rdv', medium: 'qualification', low: 'neutral',
   };
 
-  ngOnInit(): void {}
 
   get filteredTasks(): Task[] {
     return this.tasks.filter(t => {

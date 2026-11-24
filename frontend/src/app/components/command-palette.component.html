@@ -1,5 +1,6 @@
 @if (visible$ | async) {
-  <div class="command-palette-overlay" (click)="close()" role="dialog" aria-modal="true">
+  <div class="command-palette-overlay" (click)="close()" (keydown.escape)="close()" tabindex="-1" role="dialog" aria-modal="true">
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- bloque seulement la fermeture par clic sur le fond -->
     <div class="command-palette-modal ds-card" (click)="$event.stopPropagation()" appFocusTrap elevation="md">
       <!-- Search Input -->
       <div class="palette-header" style="display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--ds-divider);">
@@ -35,8 +36,12 @@
               <div 
                 class="command-item" 
                 [class.selected]="filteredItems.indexOf(item) === selectedIndex"
+                role="option"
+                tabindex="-1"
+                [attr.aria-selected]="filteredItems.indexOf(item) === selectedIndex"
                 (mouseenter)="selectItem(filteredItems.indexOf(item))"
                 (click)="executeItem(item)"
+                (keydown.enter)="executeItem(item)"
                 style="display: flex; align-items: center; gap: 16px; padding: 10px 20px; cursor: pointer; transition: all 0.1s ease;">
                 
                 <div class="item-icon" style="display: flex; align-items: center; justify-content: center; width: 28px; color: var(--ds-text-muted);">

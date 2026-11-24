@@ -5,11 +5,10 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
-  DsSkeletonComponent, 
-  DsCardComponent, 
-  DsBadgeComponent, 
-  DsButtonComponent, 
+import {
+  DsCardComponent,
+  DsBadgeComponent,
+  DsButtonComponent,
   DsIconComponent,
   DsTabsComponent,
   DsTab

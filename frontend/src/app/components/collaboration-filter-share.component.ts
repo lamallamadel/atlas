@@ -63,9 +63,9 @@ import { CommonModule } from '@angular/common';
           </ds-input>
           
           <div class="ds-field">
-            <label class="ds-field__label">Description (optionnel)</label>
+            <label for="collaboration-filter-share-field-66" class="ds-field__label">Description (optionnel)</label>
             <div class="ds-field__wrap">
-              <textarea 
+              <textarea id="collaboration-filter-share-field-66" 
                 [(ngModel)]="newFilterDescription"
                 class="ds-field__input"
                 placeholder="Description..."

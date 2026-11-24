@@ -69,7 +69,7 @@ export class TourProgressComponent implements OnInit, OnDestroy {
     return this.completedTours.includes(tourId);
   }
 
-  startTour(tour: TourDefinition): void {
+  startTour(_tour: TourDefinition): void {
     this.onboardingTourService.startManualTour('dossier-creation');
   }
 

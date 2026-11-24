@@ -4,13 +4,11 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { MessageChannel, MessageDirection } from '../services/message-api.service';
 import { CommonModule } from '@angular/common';
 import { DatetimePickerComponent } from './datetime-picker.component';
-import { 
-  DsSkeletonComponent, 
-  DsSelectComponent, 
-  DsSelectOption, 
-  DsButtonComponent, 
+import {
+  DsSelectComponent,
+  DsSelectOption,
+  DsButtonComponent,
   DsIconComponent,
-  DsCardComponent,
   DsDialogHeaderComponent,
   DsDialogContentComponent,
   DsDialogActionsComponent

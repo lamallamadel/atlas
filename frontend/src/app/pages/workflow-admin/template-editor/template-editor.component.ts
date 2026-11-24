@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { 
   WhatsAppTemplateApiService, 
   WhatsAppTemplateRequest, 
@@ -9,15 +9,14 @@ import {
 } from '../../../services/whatsapp-template-api.service';
 import { CdkDropList } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { 
-  DsCardComponent, 
-  DsButtonComponent, 
-  DsIconComponent, 
-  DsSelectComponent, 
+import {
+  DsCardComponent,
+  DsButtonComponent,
+  DsIconComponent,
+  DsSelectComponent,
   DsSelectOption,
   DsInputComponent,
-  DsCheckboxComponent,
-  DsBadgeComponent
+  DsCheckboxComponent
 } from '../../../design-system';
 import { TemplatePreviewComponent } from '../template-preview/template-preview.component';
 

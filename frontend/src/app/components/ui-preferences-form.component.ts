@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntil, debounceTime } from 'rxjs/operators';
 import { UserPreferencesService } from '../services/user-preferences.service';
 import { ThemeService } from '../services/theme.service';
 import { NotificationService } from '../services/notification.service';

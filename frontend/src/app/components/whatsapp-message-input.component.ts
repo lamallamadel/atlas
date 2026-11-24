@@ -2,14 +2,13 @@ import { Component, ElementRef, input, output, viewChild, inject } from '@angula
 import { TemplateSelectionSheetComponent } from './template-selection-sheet.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
-  DsButtonComponent, 
-  DsIconComponent, 
+import {
+  DsButtonComponent,
+  DsIconComponent,
   DsInputComponent,
   DsSkeletonComponent,
   DsFilterChipComponent,
   DsCardComponent,
-  DsBadgeComponent,
   DsDialogService
 } from '../design-system';
 

@@ -29,6 +29,8 @@ class WhatsAppRetryAndRateLimitIntegrationTest extends BaseBackendE2ETest {
     private static final String TENANT_1 = "org-whatsapp-retry-test";
     private static final String TEST_PHONE = "+33612345678";
 
+    @Autowired private com.example.backend.service.QuotaExceededHandler quotaExceededHandler;
+
     @Autowired private OutboundMessageRepository outboundMessageRepository;
 
     @Autowired private OutboundAttemptRepository outboundAttemptRepository;
@@ -358,10 +360,18 @@ class WhatsAppRetryAndRateLimitIntegrationTest extends BaseBackendE2ETest {
 
         outboundJobWorker.processMessage(message);
 
+        // Quota dépassé : le message est mis de côté (THROTTLED), pas envoyé ni compté en échec...
         OutboundMessageEntity updated =
                 outboundMessageRepository.findById(message.getId()).orElseThrow();
-        assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.QUEUED);
+        assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.THROTTLED);
         assertThat(updated.getErrorCode()).isEqualTo("QUOTA_EXCEEDED");
+
+        // ... puis remis en file à la réinitialisation du quota (WhatsAppQuotaResetScheduler).
+        quotaExceededHandler.requeueThrottledMessages(TENANT_1);
+        OutboundMessageEntity requeued =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
+        assertThat(requeued.getStatus()).isEqualTo(OutboundMessageStatus.QUEUED);
+        assertThat(requeued.getErrorCode()).isNull();
     }
 
     @Test

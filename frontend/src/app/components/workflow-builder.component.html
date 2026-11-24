@@ -9,9 +9,9 @@
         <ds-input label="Workflow Name" formControlName="name" placeholder="e.g., Sales Lead Workflow"></ds-input>
 
         <div class="ds-field">
-          <label class="ds-field__label">Description</label>
+          <label for="workflow-builder-field-12" class="ds-field__label">Description</label>
           <div class="ds-field__wrap">
-            <textarea class="ds-field__input" formControlName="description" rows="2" style="height: auto; padding: 12px;"></textarea>
+            <textarea id="workflow-builder-field-12" class="ds-field__input" formControlName="description" rows="2" style="height: auto; padding: 12px;"></textarea>
           </div>
         </div>
 
@@ -74,9 +74,9 @@
                     </ds-select>
 
                     <div class="ds-field">
-                      <label class="ds-field__label">Color</label>
+                      <label for="workflow-builder-field-77" class="ds-field__label">Color</label>
                       <div class="ds-field__wrap">
-                        <select class="ds-field__input" formControlName="color" style="height: 38px;">
+                        <select id="workflow-builder-field-77" class="ds-field__input" formControlName="color" style="height: 38px;">
                           @for (color of stateColors; track color) {
                             <option [value]="color" [style.color]="color">● {{ color }}</option>
                           }

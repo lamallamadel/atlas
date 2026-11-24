@@ -152,7 +152,8 @@
 
   <!-- Mobile Sidebar Backdrop -->
   @if (mobileSidebarOpen()) {
-    <div class="ds-sidebar-backdrop" (click)="closeMobileSidebar()"></div>
+    <!-- Fond décoratif : le menu se ferme aussi par son bouton et par Échap. -->
+    <div class="ds-sidebar-backdrop" aria-hidden="true" (click)="closeMobileSidebar()"></div>
   }
 
   <!-- Overlays -->

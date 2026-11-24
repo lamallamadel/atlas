@@ -1,17 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { DialogRef } from '@angular/cdk/dialog';
 import { DossierApiService, DossierCreateRequest, DossierResponse } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime, switchMap } from 'rxjs/operators';
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { 
-  DsSkeletonComponent, 
-  DsButtonComponent, 
-  DsIconComponent, 
+import {
+  DsButtonComponent,
+  DsIconComponent,
   DsInputComponent,
-  DsBadgeComponent,
   DsCardComponent,
   DsDialogHeaderComponent,
   DsDialogContentComponent,

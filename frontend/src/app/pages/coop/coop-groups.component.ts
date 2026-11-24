@@ -47,7 +47,7 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
       } @else if (groups().length === 0) {
         <ds-card [pad]="true" elevation="xs">
           <ds-empty-state title="Aucun groupement"
-            [description]="canEdit ? 'Créez le premier groupement pour suivre ses membres et ses cotisations.' : 'Aucun groupement n\\'a encore été créé par votre agence.'">
+            [description]="emptyText">
           </ds-empty-state>
         </ds-card>
       } @else {
@@ -78,6 +78,9 @@ export class CoopGroupsComponent implements OnInit {
   private readonly api = inject(CoopApiService);
   private readonly toast = inject(DsToastService);
   readonly canEdit = isManagerOrAdmin(inject(AuthService));
+  readonly emptyText = this.canEdit
+    ? 'Créez le premier groupement pour suivre ses membres et ses cotisations.'
+    : "Aucun groupement n'a encore été créé par votre agence.";
 
   readonly groups = signal<CoopGroup[]>([]);
   readonly loading = signal(true);

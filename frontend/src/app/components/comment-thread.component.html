@@ -34,9 +34,9 @@
           <ds-input label="Title (optional)" formControlName="title" placeholder="Thread title"></ds-input>
           
           <div class="ds-field">
-            <label class="ds-field__label">Initial Comment</label>
+            <label [for]="uid + '-37'" class="ds-field__label">Initial Comment</label>
             <div class="ds-field__wrap">
-              <textarea
+              <textarea [id]="uid + '-37'"
                 class="ds-field__input"
                 formControlName="initialComment"
                 rows="3"

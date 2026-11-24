@@ -4,16 +4,15 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivityApiService, ActivityResponse, ActivityType, ActivityVisibility, ActivityCreateRequest, ActivityUpdateRequest } from '../services/activity-api.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { NoteFormDialogComponent, NoteFormDialogResult } from './note-form-dialog.component';
-import { 
-  DsButtonComponent, 
-  DsCardComponent, 
-  DsIconComponent, 
+import {
+  DsButtonComponent,
+  DsCardComponent,
+  DsIconComponent,
   DsToastService,
   DsSkeletonComponent,
-  DsBadgeComponent,
   DsDialogService
 } from '../design-system';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-activity-timeline',

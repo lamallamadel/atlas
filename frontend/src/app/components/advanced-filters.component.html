@@ -70,9 +70,9 @@
                 <!-- Date Input (Native) -->
                 @if (getFieldType(i) === 'date') {
                   <div class="ds-field value-field">
-                    <label class="ds-field__label">Date</label>
+                    <label [for]="'advanced-filters-field-73-' + $index" class="ds-field__label">Date</label>
                     <div class="ds-field__wrap">
-                      <input 
+                      <input [id]="'advanced-filters-field-73-' + $index" 
                         type="date" 
                         class="ds-field__input" 
                         formControlName="value" />
@@ -92,9 +92,9 @@
                 <!-- Select Input (Multiple - fallback to native for now as ds-select is single) -->
                 @if (getFieldType(i) === 'select' && isMultiSelect(i)) {
                   <div class="ds-field value-field">
-                    <label class="ds-field__label">Valeurs (multi)</label>
+                    <label [for]="'advanced-filters-field-95-' + $index" class="ds-field__label">Valeurs (multi)</label>
                     <div class="ds-field__wrap">
-                      <select multiple class="ds-field__input" formControlName="value" style="height: auto; min-height: 42px; padding: 8px;">
+                      <select [id]="'advanced-filters-field-95-' + $index" multiple class="ds-field__input" formControlName="value" style="height: auto; min-height: 42px; padding: 8px;">
                         @for (option of getFieldOptions(i); track option.value) {
                           <option [value]="option.value">{{ option.label }}</option>
                         }

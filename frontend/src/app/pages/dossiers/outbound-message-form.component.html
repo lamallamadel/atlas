@@ -45,12 +45,12 @@
     }
 
     <div class="ds-field">
-      <label class="ds-field__label">
+      <label for="outbound-message-form-field-48" class="ds-field__label">
         Contenu du message
         <span style="float: right; text-transform: none; font-weight: normal;">{{ messageContent.length }} caractères</span>
       </label>
       <div class="ds-field__wrap">
-        <textarea
+        <textarea id="outbound-message-form-field-48"
           class="ds-field__input"
           [(ngModel)]="messageContent"
           [disabled]="sending || selectedTemplate !== null"
