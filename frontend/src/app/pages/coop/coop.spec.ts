@@ -7,6 +7,15 @@ import { CoopGroupDetailComponent } from './coop-group-detail.component';
 import { CoopContributionsPanelComponent, isLate } from './coop-contributions-panel.component';
 import { CoopProjectsPanelComponent } from './coop-projects-panel.component';
 import { CoopMembersPanelComponent } from './coop-members-panel.component';
+import {
+  CoopContributionDialogComponent,
+  CoopGroupDialogComponent,
+  CoopLotDialogComponent,
+  CoopMemberDialogComponent,
+  CoopProjectDialogComponent,
+} from './coop-dialogs.component';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { Type } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { CoopContribution, CoopMember, toRequest } from '../../services/coop-api.service';
 
@@ -19,6 +28,18 @@ const MEMBERS: CoopMember[] = [
 ];
 
 const text = (el: HTMLElement) => el.textContent!.replace(/\s+/g, ' ');
+const FORM = { invalid: false } as never;
+
+let dialogData: unknown = {};
+let closed: unknown[] = [];
+
+/** Boîte de dialogue montée seule : renvoie le composant et ce qu'il a passé à close(). */
+function openDialog<T>(type: Type<T>, data: unknown = {}) {
+  dialogData = data;
+  const fixture = TestBed.createComponent(type);
+  fixture.detectChanges();
+  return { cmp: fixture.componentInstance, closed, fixture };
+}
 
 describe('Coop screens', () => {
   let httpMock: HttpTestingController;
@@ -26,12 +47,16 @@ describe('Coop screens', () => {
 
   beforeEach(() => {
     roles = ['MANAGER'];
+    dialogData = {};
+    closed = [];
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
         { provide: AuthService, useValue: { hasRole: (r: string) => roles.includes(r) } },
+        { provide: DialogRef, useValue: { close: (r?: unknown) => closed.push(r) } },
+        { provide: DIALOG_DATA, useFactory: () => dialogData },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: '9' }) } } },
       ],
     });
@@ -46,15 +71,27 @@ describe('Coop screens', () => {
     httpMock.expectOne(url('groups')).flush({ content: [{ id: 9, name: 'Coop Les Oliviers', city: 'Tanger' }], totalElements: 1 });
     fixture.detectChanges();
     expect(text(fixture.nativeElement)).toContain('Coop Les Oliviers');
-    expect(fixture.nativeElement.querySelector('a.coop-card').getAttribute('href')).toBe('/pro/coop/9');
+    expect(fixture.nativeElement.querySelector('a.coop-link').getAttribute('href')).toBe('/pro/coop/9');
+    expect(text(fixture.nativeElement)).toContain('Nouveau groupement');
+  });
 
-    const cmp = fixture.componentInstance;
+  it('creates a group from the dialog', () => {
+    const { cmp, closed } = openDialog(CoopGroupDialogComponent);
     cmp.draft = { name: ' Coop Atlas ', city: 'Rabat', registrationNumber: '' };
-    cmp.create({ invalid: false, resetForm: () => undefined } as never);
+    cmp.submit(FORM);
     const req = httpMock.expectOne(r => r.method === 'POST' && r.url === '/api/v1/coop/groups');
     expect(req.request.body).toEqual({ name: 'Coop Atlas', city: 'Rabat', registrationNumber: null });
     req.flush({ id: 10, name: 'Coop Atlas', city: 'Rabat' });
-    expect(cmp.groups().length).toBe(2);
+    expect(closed).toEqual([{ id: 10, name: 'Coop Atlas', city: 'Rabat' }]);
+  });
+
+  it('keeps the dialog open when the creation fails', () => {
+    const { cmp, closed } = openDialog(CoopGroupDialogComponent);
+    cmp.draft = { name: 'Coop Atlas', city: '', registrationNumber: '' };
+    cmp.submit(FORM);
+    httpMock.expectOne('/api/v1/coop/groups').flush({ detail: 'boom' }, { status: 500, statusText: 'Error' });
+    expect(closed).toEqual([]);
+    expect(cmp.saving()).toBe(false);
   });
 
   it('shows an agent the groups without the creation form', () => {
@@ -67,7 +104,7 @@ describe('Coop screens', () => {
     expect(text(fixture.nativeElement)).toContain('Aucun groupement');
   });
 
-  it('opens a group on its members', () => {
+  it('opens a group on its members, with the action of the open tab', () => {
     const fixture = TestBed.createComponent(CoopGroupDetailComponent);
     fixture.detectChanges();
     httpMock.expectOne(url('groups/9')).flush({ id: 9, name: 'Coop Les Oliviers', city: 'Tanger' });
@@ -77,9 +114,16 @@ describe('Coop screens', () => {
     expect(t).toContain('Coop Les Oliviers');
     expect(t).toContain('Nadia Alami');
     expect(t).toContain('Karim Bennani');
+    expect(t).toContain('Ajouter un membre');
+
+    fixture.componentInstance.selectTab('contributions');
+    fixture.detectChanges();
+    httpMock.expectOne(url('contributions', { groupId: '9' })).flush({ content: [], totalElements: 0 });
+    fixture.detectChanges();
+    expect(text(fixture.nativeElement)).toContain('Appeler une cotisation');
   });
 
-  it('adds a member as pending and changes a status', () => {
+  it('changes a member status and adds a pending member', () => {
     const fixture = TestBed.createComponent(CoopMembersPanelComponent);
     fixture.componentRef.setInput('groupId', 9);
     fixture.componentRef.setInput('members', MEMBERS);
@@ -89,18 +133,20 @@ describe('Coop screens', () => {
     let changed = 0;
     cmp.changed.subscribe(() => changed++);
 
-    cmp.draft = { firstName: 'Salma', lastName: 'Idrissi', email: ' s@x.ma ', phone: '', memberNumber: '3' };
-    cmp.add({ invalid: false, resetForm: () => undefined } as never);
-    const create = httpMock.expectOne(r => r.method === 'POST' && r.url === '/api/v1/coop/members');
-    expect(create.request.body).toMatchObject({ groupId: 9, firstName: 'Salma', email: 's@x.ma', status: 'PENDING', memberNumber: '3' });
-    create.flush({ ...MEMBERS[0], id: 3, firstName: 'Salma', lastName: 'Idrissi' });
-
     cmp.setStatus(MEMBERS[1], 'ACTIVE');
     const update = httpMock.expectOne('/api/v1/coop/members/2');
     expect(update.request.body).toMatchObject({ status: 'ACTIVE', firstName: 'Karim' });
     expect(update.request.body.id).toBeUndefined();
     update.flush({ ...MEMBERS[1], status: 'ACTIVE' });
-    expect(changed).toBe(2);
+    expect(changed).toBe(1);
+
+    const { cmp: dialog, closed } = openDialog(CoopMemberDialogComponent, { groupId: 9 });
+    dialog.draft = { firstName: 'Salma', lastName: 'Idrissi', email: ' s@x.ma ', phone: '', memberNumber: '3' };
+    dialog.submit(FORM);
+    const create = httpMock.expectOne(r => r.method === 'POST' && r.url === '/api/v1/coop/members');
+    expect(create.request.body).toMatchObject({ groupId: 9, firstName: 'Salma', email: 's@x.ma', status: 'PENDING', memberNumber: '3', phone: null });
+    create.flush({ ...MEMBERS[0], id: 3, firstName: 'Salma', lastName: 'Idrissi' });
+    expect(closed.length).toBe(1);
   });
 
   it('sums the contributions ledger and marks one paid', () => {
@@ -131,6 +177,18 @@ describe('Coop screens', () => {
     expect(cmp.totals().late).toBe(0);
   });
 
+  it('calls a contribution for a member', () => {
+    const { cmp } = openDialog(CoopContributionDialogComponent, { members: MEMBERS });
+    expect(cmp.draft.memberId).toBe(1);
+    cmp.draft = { memberId: 2, type: 'MONTHLY', amount: '3000', dueDate: '2026-12-01' };
+    cmp.submit(FORM);
+    const req = httpMock.expectOne(r => r.method === 'POST' && r.url === '/api/v1/coop/contributions');
+    expect(req.request.body).toEqual({
+      memberId: 2, type: 'MONTHLY', amount: 3000, currency: 'MAD', status: 'PENDING', dueDate: '2026-12-01',
+    });
+    req.flush({ id: 9, memberId: 2, type: 'MONTHLY', amount: 3000, currency: 'MAD', status: 'PENDING' });
+  });
+
   it('assigns a lot to a member, which reserves it', () => {
     const fixture = TestBed.createComponent(CoopProjectsPanelComponent);
     fixture.componentRef.setInput('groupId', 9);
@@ -147,13 +205,34 @@ describe('Coop screens', () => {
     });
     fixture.detectChanges();
     const cmp = fixture.componentInstance;
-    expect(text(fixture.nativeElement)).toContain('1 lot(s), 0 attribué(s)');
+    expect(text(fixture.nativeElement)).toContain('1 lot, 0 attribué');
 
     cmp.assign(cmp.lotsOf(5)[0], 1);
     const req = httpMock.expectOne('/api/v1/coop/lots/7');
     expect(req.request.body).toMatchObject({ memberId: 1, status: 'RESERVED', lotNumber: 'A1' });
     req.flush({ id: 7, projectId: 5, lotNumber: 'A1', status: 'RESERVED', memberId: 1 });
     expect(cmp.assignedCount(5)).toBe(1);
+  });
+
+  it('creates a project in preparation', () => {
+    const project = openDialog(CoopProjectDialogComponent, { groupId: 9 });
+    project.cmp.draft = { name: ' Résidence ', city: '', budget: '' };
+    project.cmp.submit(FORM);
+    const p = httpMock.expectOne(r => r.method === 'POST' && r.url === '/api/v1/coop/projects');
+    expect(p.request.body).toEqual({ groupId: 9, name: 'Résidence', city: null, status: 'PLANNING', totalBudget: null, currency: 'MAD' });
+    p.flush({ id: 5, groupId: 9, name: 'Résidence', status: 'PLANNING' });
+  });
+
+  it('creates an available lot', () => {
+    const lot = openDialog(CoopLotDialogComponent, { project: { id: 5, groupId: 9, name: 'Résidence', status: 'PLANNING' } });
+    lot.cmp.draft = { lotNumber: ' A2 ', surface: '85', price: '0' };
+    lot.cmp.submit(FORM);
+    const l = httpMock.expectOne(r => r.method === 'POST' && r.url === '/api/v1/coop/lots');
+    expect(l.request.body).toEqual({
+      projectId: 5, lotNumber: 'A2', surfaceArea: 85, price: null, currency: 'MAD', status: 'AVAILABLE', memberId: null,
+    });
+    l.flush({ id: 8, projectId: 5, lotNumber: 'A2', status: 'AVAILABLE' });
+    expect(lot.closed.length).toBe(1);
   });
 
   it('flags late contributions and strips ids from update bodies', () => {

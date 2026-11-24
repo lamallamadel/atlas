@@ -43,7 +43,7 @@ const ACTOR_LABELS: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe, RouterLink, DsBadgeComponent, DsCardComponent, DsEmptyStateComponent, DsSkeletonComponent, PageHeaderComponent],
   template: `
-    <div class="b2b-page">
+    <div class="pro-page ds-form-stack b2b-page">
       <ds-page-header
         eyebrow="Espace Pro"
         titleBefore="Démos B2B"

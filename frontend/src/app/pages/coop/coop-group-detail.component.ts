@@ -1,12 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
+  DsButtonComponent,
   DsCardComponent,
-  DsFilterChipComponent,
+  DsEmptyStateComponent,
+  DsIconComponent,
   DsSkeletonComponent,
+  DsTabsComponent,
   DsToastService,
   PageHeaderComponent,
 } from '../../design-system';
+import type { DsTab } from '../../design-system';
 import { CoopApiService, CoopGroup, CoopMember } from '../../services/coop-api.service';
 import { AuthService } from '../../services/auth.service';
 import { isManagerOrAdmin } from '../../services/agency-role';
@@ -17,6 +21,13 @@ import { CoopProjectsPanelComponent } from './coop-projects-panel.component';
 
 type Tab = 'members' | 'contributions' | 'projects';
 
+/** Action principale de l'en-tête, selon l'onglet ouvert. */
+const TAB_ACTION: Record<Tab, string> = {
+  members: 'Ajouter un membre',
+  contributions: 'Appeler une cotisation',
+  projects: 'Nouveau projet',
+};
+
 /** Fiche d'un groupement : membres, journal des cotisations, projets et lots. */
 @Component({
   selector: 'app-coop-group-detail',
@@ -24,52 +35,65 @@ type Tab = 'members' | 'contributions' | 'projects';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
+    DsButtonComponent,
     DsCardComponent,
-    DsFilterChipComponent,
+    DsEmptyStateComponent,
+    DsIconComponent,
     DsSkeletonComponent,
+    DsTabsComponent,
     PageHeaderComponent,
     CoopMembersPanelComponent,
     CoopContributionsPanelComponent,
     CoopProjectsPanelComponent,
   ],
   template: `
-    <div class="cg-page">
-      <a class="cg-back" routerLink="/pro/coop">← Groupements</a>
+    <div class="pro-page ds-form-stack cg-page">
+      <nav class="cg-breadcrumb" aria-label="Fil d'Ariane">
+        <a routerLink="/pro/coop">Coop habitat</a>
+        <ds-icon name="chevron-right" [size]="16"></ds-icon>
+        <span aria-current="page">{{ group()?.name || 'Groupement' }}</span>
+      </nav>
+
       @if (group(); as g) {
-        <ds-page-header eyebrow="Coop habitat" [titleBefore]="g.name"
-          [description]="subtitle(g)">
+        <ds-page-header eyebrow="Coop habitat" [titleBefore]="g.name" [description]="subtitle(g)">
+          <ng-container slot="actions">
+            @if (canEdit && !(tab() === 'contributions' && members().length === 0)) {
+              <ds-button variant="marine" size="md" prefixIcon="plus" (dsClick)="primaryAction()">{{ actionLabel() }}</ds-button>
+            }
+          </ng-container>
         </ds-page-header>
 
-        <div class="cg-tabs" role="tablist">
-          <ds-filter-chip [active]="tab() === 'members'" [count]="members().length || null" (toggled)="tab.set('members')">Membres</ds-filter-chip>
-          <ds-filter-chip [active]="tab() === 'contributions'" (toggled)="tab.set('contributions')">Cotisations</ds-filter-chip>
-          <ds-filter-chip [active]="tab() === 'projects'" (toggled)="tab.set('projects')">Projets et lots</ds-filter-chip>
-        </div>
+        <ds-tabs [tabs]="tabs()" [activeTab]="tab()" label="Sections du groupement" (tabChange)="selectTab($event)"></ds-tabs>
 
-        <ds-card [pad]="true" elevation="xs">
-          @switch (tab()) {
-            @case ('members') {
-              <app-coop-members-panel [groupId]="g.id" [members]="members()" [canEdit]="canEdit"
-                (changed)="loadMembers()"></app-coop-members-panel>
-            }
-            @case ('contributions') {
-              <app-coop-contributions-panel [groupId]="g.id" [members]="members()" [canEdit]="canEdit"></app-coop-contributions-panel>
-            }
-            @case ('projects') {
-              <app-coop-projects-panel [groupId]="g.id" [members]="members()" [canEdit]="canEdit"></app-coop-projects-panel>
-            }
+        @switch (tab()) {
+          @case ('members') {
+            <app-coop-members-panel [groupId]="g.id" [members]="members()" [loading]="membersLoading()" [canEdit]="canEdit"
+              (changed)="loadMembers()"></app-coop-members-panel>
           }
-        </ds-card>
+          @case ('contributions') {
+            <app-coop-contributions-panel [groupId]="g.id" [members]="members()" [canEdit]="canEdit"></app-coop-contributions-panel>
+          }
+          @case ('projects') {
+            <app-coop-projects-panel [groupId]="g.id" [members]="members()" [canEdit]="canEdit"></app-coop-projects-panel>
+          }
+        }
       } @else if (loading()) {
-        <ds-skeleton variant="text"></ds-skeleton>
+        <ds-skeleton variant="heading" width="40%"></ds-skeleton>
+        <ds-skeleton variant="rect" width="100%" height="240px"></ds-skeleton>
+      } @else {
+        <ds-card [pad]="true" elevation="xs">
+          <ds-empty-state icon="users" title="Groupement introuvable"
+            description="Il a peut-être été supprimé, ou il appartient à une autre agence."></ds-empty-state>
+        </ds-card>
       }
     </div>
   `,
   styles: [`
-    .cg-page { display: flex; flex-direction: column; gap: var(--ds-space-4); }
-    .cg-back { font-size: var(--ds-text-sm); color: var(--ds-text-muted); text-decoration: none; }
-    .cg-back:hover { color: var(--ds-marine); }
-    .cg-tabs { display: flex; gap: var(--ds-space-2); flex-wrap: wrap; }
+    .cg-page { gap: var(--ds-space-6); }
+    .cg-breadcrumb { display: flex; align-items: center; gap: var(--ds-space-2); font-size: var(--ds-text-sm); color: var(--ds-text-faint); }
+    .cg-breadcrumb a { padding: 0; color: var(--ds-text-faint); text-decoration: none; }
+    .cg-breadcrumb a:hover, .cg-breadcrumb a:focus-visible { color: var(--ds-marine); text-decoration: underline; }
+    .cg-breadcrumb span { color: var(--ds-marine); font-weight: 600; }
   `],
 })
 export class CoopGroupDetailComponent implements OnInit {
@@ -81,7 +105,19 @@ export class CoopGroupDetailComponent implements OnInit {
   readonly group = signal<CoopGroup | null>(null);
   readonly members = signal<CoopMember[]>([]);
   readonly loading = signal(true);
+  readonly membersLoading = signal(true);
   readonly tab = signal<Tab>('members');
+
+  readonly tabs = computed<DsTab[]>(() => [
+    { value: 'members', label: 'Membres', badge: this.membersLoading() ? undefined : this.members().length },
+    { value: 'contributions', label: 'Cotisations' },
+    { value: 'projects', label: 'Projets et lots' },
+  ]);
+  readonly actionLabel = computed(() => TAB_ACTION[this.tab()]);
+
+  private readonly membersPanel = viewChild(CoopMembersPanelComponent);
+  private readonly contributionsPanel = viewChild(CoopContributionsPanelComponent);
+  private readonly projectsPanel = viewChild(CoopProjectsPanelComponent);
 
   private groupId = 0;
 
@@ -95,10 +131,25 @@ export class CoopGroupDetailComponent implements OnInit {
   }
 
   subtitle(g: CoopGroup): string {
-    return [g.city, g.registrationNumber].filter(v => !!v).join(' · ') || "Groupement d'habitat";
+    return [g.city, g.registrationNumber ? `N° ${g.registrationNumber}` : null].filter(v => !!v).join(' · ') || "Groupement d'habitat";
+  }
+
+  selectTab(value: string): void {
+    this.tab.set(value as Tab);
+  }
+
+  primaryAction(): void {
+    switch (this.tab()) {
+      case 'members': this.membersPanel()?.openAdd(); break;
+      case 'contributions': this.contributionsPanel()?.openAdd(); break;
+      case 'projects': this.projectsPanel()?.openAdd(); break;
+    }
   }
 
   loadMembers(): void {
-    this.api.members(this.groupId).subscribe({ next: m => this.members.set(m), error: () => this.members.set([]) });
+    this.api.members(this.groupId).subscribe({
+      next: m => { this.members.set(m); this.membersLoading.set(false); },
+      error: () => { this.members.set([]); this.membersLoading.set(false); },
+    });
   }
 }
