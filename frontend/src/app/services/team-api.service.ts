@@ -13,6 +13,12 @@ export interface TeamMember {
   enabled?: boolean;
 }
 
+/** Réglages d'équipe de l'agence (GET/PUT /api/v1/team/settings). */
+export interface TeamSettings {
+  /** Les agents ne voient que leurs dossiers et ceux à attribuer. */
+  restrictAgentsToOwnDossiers: boolean;
+}
+
 export interface InviteRequest {
   email: string;
   firstName: string;
@@ -58,6 +64,14 @@ export class TeamApiService {
     return this.http
       .put<TeamMember>(`/api/v1/team/${encodeURIComponent(userId)}/enabled`, { enabled })
       .pipe(tap(() => this.invalidate()));
+  }
+
+  settings(): Observable<TeamSettings> {
+    return this.http.get<TeamSettings>('/api/v1/team/settings');
+  }
+
+  updateSettings(settings: TeamSettings): Observable<TeamSettings> {
+    return this.http.put<TeamSettings>('/api/v1/team/settings', settings);
   }
 
   private invalidate(): void {

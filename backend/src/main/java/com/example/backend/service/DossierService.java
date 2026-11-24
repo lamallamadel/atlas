@@ -180,9 +180,12 @@ public class DossierService {
         return dossierMapper.toResponse(saved);
     }
 
+    // Pas de cache pour un agent restreint : le dossier d'un collègue ne doit pas lui être servi,
+    // ni le sien remis en cache sous la clé de l'agence.
     @Cacheable(
             value = "dossier",
-            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
+            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()",
+            condition = "!T(com.example.backend.security.DossierScope).isRestricted()")
     @Transactional(readOnly = true)
     public DossierResponse getById(Long id) {
         String orgId = TenantContext.getOrgId();

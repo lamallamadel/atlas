@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -12,6 +13,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "workflow_transition")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 @EntityListeners(AuditingEntityListener.class)
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.CHILD_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class WorkflowTransition extends BaseEntity {
 
     @Id

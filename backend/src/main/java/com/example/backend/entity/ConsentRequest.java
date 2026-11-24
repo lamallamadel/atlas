@@ -2,6 +2,7 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementType;
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.Filter;
 
 /**
  * Demande de confirmation envoyée au client. Lue sans contexte d'organisation (page publique) :
@@ -18,6 +20,10 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "consent_request")
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.CHILD_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class ConsentRequest {
 
     @Id

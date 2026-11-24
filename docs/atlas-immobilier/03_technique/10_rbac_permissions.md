@@ -1,6 +1,6 @@
 # RBAC — Rôles d'agence et droits
 
-> **Statut** : implémenté pour les rôles d'agence (étape 6, lots A et B) ; restriction « mes dossiers » prévue au lot C  
+> **Statut** : implémenté (étape 6, lots A, B et C)  
 > **Dernière vérification** : 2026-11-23  
 > **Source of truth** : Oui (rôles, matrice, règles appliquées par le serveur)  
 > **Dépendances** :  
@@ -16,7 +16,7 @@ Les rôles sont des rôles de realm Keycloak, lus dans `realm_access.roles` du j
 |---|---|---|
 | `ADMIN` | Administrateur | Équipe, réglages, intégrations, tous les droits de l'agence |
 | `MANAGER` | Manager | Vision de toute l'agence, réassignation, dérogations, invite des agents |
-| `AGENT` | Agent | Traite les dossiers ; voit les siens et ceux à attribuer (lot C) |
+| `AGENT` | Agent | Traite les dossiers ; voit les siens et ceux à attribuer si l'agence l'a choisi |
 | `PRO` | Agent | Ancien nom, lu comme `AGENT` pour les comptes existants |
 | `SUPER_ADMIN` | — | Plateforme, au-dessus des agences ; droits d'un administrateur |
 
@@ -29,10 +29,10 @@ Choix retenus (décidés le 2026-11-23) :
 
 | Action | Agent | Manager | Admin |
 |---|---|---|---|
-| Voir les dossiers | Tous aujourd'hui ; les siens et ceux à attribuer quand le lot C est activé | Tous ceux de l'agence | Tous ceux de l'agence |
+| Voir les dossiers | Tous ; les siens et ceux à attribuer si le réglage « mes dossiers » est actif | Tous ceux de l'agence | Tous ceux de l'agence |
 | Prendre un dossier à attribuer | Oui, pour lui | Oui | Oui |
 | Réassigner un dossier | Non | Oui | Oui |
-| Changer le statut, écrire au client, RDV, consentements | Oui (sur ses dossiers au lot C) | Oui | Oui |
+| Changer le statut, écrire au client, RDV, consentements | Oui (sur les dossiers qu'il voit) | Oui | Oui |
 | Annonces : créer, modifier, publier, suspendre | Oui | Oui | Oui |
 | Déroger à un doublon ou une fraude | Non | Oui | Oui |
 | Signalements : écarter, suspendre l'annonce | Oui | Oui | Oui |
@@ -56,6 +56,43 @@ Choix retenus (décidés le 2026-11-23) :
 Un refus renvoie 403 avec un code lisible (`MANAGER_REQUIRED`, `INVITE_FORBIDDEN`, `ADMIN_REQUIRED`).
 
 **Front** (`services/agency-role.ts`). Les mêmes règles servent à masquer les boutons, mais c'est le serveur qui décide.
+
+## Périmètre « mes dossiers »
+
+Réglage d'agence `restrictAgentsToOwnDossiers` (`organization_settings.settings.team`), désactivé par défaut. Seul l'admin le change (`PUT /api/v1/team/settings`) ; tous les membres le lisent (`GET`).
+
+Quand il est actif, il s'applique aux agents seulement, et tout est décidé côté serveur.
+
+Ce qu'un agent voit :
+
+- ses dossiers et ceux à attribuer ;
+- tout ce qui se rattache à ces dossiers : messages, RDV, tâches, documents, consentements, parties prenantes, activité, scores, signatures, commentaires, audit.
+
+Le dossier d'un collègue répond 404, comme celui d'une autre agence.
+
+Mécanisme (`security/DossierScope`) :
+
+1. **Filtre Hibernate `dossierScopeFilter`.** `HibernateFilterInterceptor` l'active pour la requête. Il restreint toutes les requêtes JPQL et Criteria :
+   - sur `dossier` ;
+   - sur les 20 entités qui portent un `dossier_id` ;
+   - sur les tables génériques `comment_thread` et `audit_event` (`entity_type = 'DOSSIER'`).
+2. **Garde-fou `DossierScopeGuard`.** Ce sont des écouteurs Hibernate `POST_LOAD` et `PRE_INSERT`, car le filtre ne couvre pas `findById`. Un dossier hors périmètre, ou un élément qui s'y rattache, chargé par identifiant ou créé sur un tel dossier, déclenche un 404. Un test vérifie que la liste des entités protégées et celle des entités filtrées restent identiques.
+3. **Cas hors JPA :**
+   - recherche SQL native : clause ajoutée ;
+   - Elasticsearch : non utilisé pour un agent restreint, qui cherche en base ;
+   - recherche et mentions de commentaires : clause ajoutée, et filtre d'agence qui manquait ;
+   - requêtes personnalisées : refusées (403) ;
+   - caches du détail de dossier et du reporting : contournés.
+
+Hors périmètre volontairement :
+
+- les notifications, qui sont adressées à une personne ;
+- les réservations de lots, qui forment le stock partagé de l'agence ;
+- le portail client.
+
+Les annonces restent partagées par toute l'agence.
+
+Propagation : le réglage est gardé en mémoire 30 secondes par instance.
 
 ## Équipe
 

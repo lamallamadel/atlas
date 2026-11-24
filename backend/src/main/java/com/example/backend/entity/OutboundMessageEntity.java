@@ -2,6 +2,7 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.OutboundMessageStatus;
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.*;
 import java.util.Map;
 import org.hibernate.annotations.Filter;
@@ -17,6 +18,10 @@ import org.hibernate.type.SqlTypes;
                     columnNames = {"org_id", "idempotency_key"})
         })
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.CHILD_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class OutboundMessageEntity extends BaseEntity {
 
     @Id

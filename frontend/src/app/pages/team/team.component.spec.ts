@@ -9,6 +9,8 @@ import { TeamMember } from '../../services/team-api.service';
 
 const ALL = (r: HttpRequest<unknown>) => r.url === '/api/v1/team' && r.params.get('includeDisabled') === 'true';
 
+const SETTINGS = '/api/v1/team/settings';
+
 const MEMBERS: TeamMember[] = [
   { userId: 'admin-1', name: 'Adel', email: 'adel@agence.ma', role: 'ADMIN', enabled: true },
   { userId: 'agent-1', name: 'Amine', email: 'amine@agence.ma', role: 'AGENT', enabled: true },
@@ -23,6 +25,7 @@ describe('TeamComponent', () => {
     const fixture = TestBed.createComponent(TeamComponent);
     fixture.detectChanges();
     httpMock.expectOne(ALL).flush(MEMBERS);
+    httpMock.expectOne(SETTINGS).flush({ restrictAgentsToOwnDossiers: false });
     fixture.detectChanges();
     return fixture;
   }
@@ -106,8 +109,37 @@ describe('TeamComponent', () => {
     const fixture = TestBed.createComponent(TeamComponent);
     fixture.detectChanges();
     httpMock.expectOne(ALL).flush([{ userId: 'agent-1', name: 'agent-1' }]);
+    httpMock.expectOne(SETTINGS).flush({ restrictAgentsToOwnDossiers: false });
     fixture.detectChanges();
     expect(text(fixture.nativeElement)).toContain('Rôles indisponibles');
     expect(fixture.nativeElement.querySelectorAll('tbody ds-select').length).toBe(0);
+  });
+
+  it('lets the admin restrict agents to their own dossiers', () => {
+    const fixture = create();
+    const cmp = fixture.componentInstance;
+    expect(fixture.nativeElement.querySelector('ds-switch')).not.toBeNull();
+
+    cmp.setRestricted(true);
+    const req = httpMock.expectOne(SETTINGS);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ restrictAgentsToOwnDossiers: true });
+    req.flush({ restrictAgentsToOwnDossiers: true });
+    expect(cmp.restricted()).toBe(true);
+
+    cmp.setRestricted(false);
+    httpMock.expectOne(SETTINGS).flush({ detail: 'ADMIN_REQUIRED' }, { status: 403, statusText: 'Forbidden' });
+    expect(cmp.restricted()).toBe(true);
+  });
+
+  it('shows the visibility rule to a manager without the switch', () => {
+    roles = ['MANAGER'];
+    const fixture = TestBed.createComponent(TeamComponent);
+    fixture.detectChanges();
+    httpMock.expectOne(ALL).flush(MEMBERS);
+    httpMock.expectOne(SETTINGS).flush({ restrictAgentsToOwnDossiers: true });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('ds-switch')).toBeNull();
+    expect(text(fixture.nativeElement)).toContain('ne voit que ses dossiers et ceux à attribuer');
   });
 });

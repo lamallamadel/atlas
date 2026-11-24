@@ -4,6 +4,7 @@ import com.example.backend.dto.TeamMemberResponse;
 import com.example.backend.security.AgencyRole;
 import com.example.backend.service.TeamAdminService;
 import com.example.backend.service.TeamDirectoryService;
+import com.example.backend.service.TeamSettingsService;
 import com.example.backend.util.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,12 +32,39 @@ public class TeamController {
 
     public record EnabledRequest(@NotNull Boolean enabled) {}
 
+    public record TeamSettingsRequest(@NotNull Boolean restrictAgentsToOwnDossiers) {}
+
     private final TeamDirectoryService teamDirectory;
     private final TeamAdminService teamAdmin;
+    private final TeamSettingsService teamSettings;
 
-    public TeamController(TeamDirectoryService teamDirectory, TeamAdminService teamAdmin) {
+    public TeamController(
+            TeamDirectoryService teamDirectory,
+            TeamAdminService teamAdmin,
+            TeamSettingsService teamSettings) {
         this.teamDirectory = teamDirectory;
         this.teamAdmin = teamAdmin;
+        this.teamSettings = teamSettings;
+    }
+
+    @GetMapping("/settings")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO', 'MANAGER', 'SUPER_ADMIN')")
+    @Operation(
+            summary = "Team settings",
+            description =
+                    "restrictAgentsToOwnDossiers : les agents ne voient que leurs dossiers et ceux"
+                            + " à attribuer")
+    public ResponseEntity<TeamSettingsService.TeamSettings> settings() {
+        return ResponseEntity.ok(teamSettings.get(orgId()));
+    }
+
+    @PutMapping("/settings")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @Operation(summary = "Update team settings (admin)")
+    public ResponseEntity<TeamSettingsService.TeamSettings> updateSettings(
+            @Valid @RequestBody TeamSettingsRequest request) {
+        return ResponseEntity.ok(
+                teamSettings.update(orgId(), request.restrictAgentsToOwnDossiers()));
     }
 
     @GetMapping

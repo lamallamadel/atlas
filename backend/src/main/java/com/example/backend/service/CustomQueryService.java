@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.entity.CustomQueryEntity;
 import com.example.backend.repository.CustomQueryRepository;
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import java.util.ArrayList;
@@ -13,8 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class CustomQueryService {
@@ -93,6 +96,14 @@ public class CustomQueryService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> executeCustomQuery(
             Long id, String orgId, Map<String, Object> params) {
+        // Requête SQL libre : elle ignorerait le périmètre « mes dossiers ».
+        if (DossierScope.isRestricted()) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "SCOPE_RESTRICTED: requêtes personnalisées indisponibles en mode « mes"
+                            + " dossiers ».");
+        }
+
         CustomQueryEntity query = getCustomQuery(id, orgId);
 
         if (!query.getIsApproved()) {

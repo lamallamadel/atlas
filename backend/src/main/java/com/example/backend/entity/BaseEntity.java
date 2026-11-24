@@ -12,6 +12,9 @@ import org.springframework.data.annotation.LastModifiedBy;
 
 @MappedSuperclass
 @FilterDef(name = "orgIdFilter", parameters = @ParamDef(name = "orgId", type = String.class))
+@FilterDef(
+        name = "dossierScopeFilter",
+        parameters = @ParamDef(name = "dsUserId", type = String.class))
 public abstract class BaseEntity {
 
     @Column(name = "org_id", nullable = false, updatable = false)

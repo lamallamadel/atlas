@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import com.example.backend.entity.enums.CommentEntityType;
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,6 +13,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "comment_thread")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 @EntityListeners(AuditingEntityListener.class)
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.TYPED_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class CommentThreadEntity extends BaseEntity {
 
     @Id

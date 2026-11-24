@@ -2,6 +2,7 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.MessageDirection;
+import com.example.backend.security.DossierScope;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -12,6 +13,10 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "message")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+@Filter(
+        name = DossierScope.FILTER,
+        condition = DossierScope.CHILD_CONDITION,
+        deduceAliasInjectionPoints = false)
 public class MessageEntity extends BaseEntity {
 
     @Id
