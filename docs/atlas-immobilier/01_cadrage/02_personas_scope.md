@@ -4,7 +4,7 @@
 > **Dernière vérification**: 2026-01-08  
 > **Source of truth**: Non (les référentiels/workflows restent la vérité pour statuts/transitions)  
 > **Dépendances**:  
-- `docs/PRODUCT_SPECS_SUMMARY.md`  
+- `docs/atlas-immobilier/01_cadrage/01_vision_objectifs.md`  
 - `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`  
 - `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`  
 - `docs/atlas-immobilier/02_fonctionnel/05_feature_flags_plans.md`

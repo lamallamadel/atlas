@@ -45,7 +45,7 @@
 ## Champs requis à la création (depuis `biz`)
 - `case_type_code = CRM_LEAD_B2B_DEMO`
 - `status_code = B2B_NEW`
-- `source_code = LEAD_SOURCE_BIZ_DEMO_FORM`
+- `source_code = BIZ_DEMO_FORM`
 - `consent_contact = true`
 - payload minimal : actorType, city, needs[] (+ option teamSize/listingVolume/plan/message)
 

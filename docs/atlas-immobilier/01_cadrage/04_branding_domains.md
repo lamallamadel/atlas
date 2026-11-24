@@ -7,7 +7,16 @@ Figer des conventions *non-techniques* pour éviter les ambiguïtés dans la doc
 
 ---
 
-## 1) 3 sites — convention de nommage (MVP)
+## 0) État actuel (2026-11-23)
+Le déploiement réel diffère de la convention ci-dessous :
+- un seul domaine, `afroware.app` (Nginx + Cloudflare), avec `api.afroware.app` et `identity.afroware.app` (Keycloak) ;
+- les trois sites sont des zones de routes d’une seule application Angular : portail sur `/`, vitrine sur `/biz`, espace Pro sur `/pro`, portail client sur `/customer-portal`.
+
+Les sous-domaines `atlasia.<tld>` / `pro.` / `biz.` restent la cible de marque. Le passage aux sous-domaines suppose de séparer les cookies de session Pro (§3).
+
+---
+
+## 1) 3 sites — convention de nommage (cible)
 Atlasia est structuré en **trois sites** (même produit, audiences différentes) :
 
 - **Portail public (annonces B2C)** : `atlasia.<tld>`

@@ -17,7 +17,7 @@ Nous avons décidé d'implémenter le **Transactional Outbox Pattern** :
 
 ### Positives
 *   **Garantie de livraison At-Least-Once** : Les messages ne sont jamais perdus si une API tierce tombe.
-*   **Performance** : Les transactions HTTP des requêtes API REST frontend se terminent immédiatement sans attendre l'API Twilio.
+*   **Performance** : Les transactions HTTP des requêtes API REST frontend se terminent immédiatement sans attendre l'API du fournisseur (WhatsApp Cloud de Meta, Twilio pour les SMS).
 *   **Découplage** : La logique métier d'envoi de message est isolée de la logique de création de dossier ou d'action utilisateur.
 
 ### Négatives

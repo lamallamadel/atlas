@@ -29,13 +29,13 @@ Champs structurants :
 - `caseType` : type métier (ex: `CRM_LEAD_BUY`, `CRM_LEAD_RENT`, `CRM_MANDATE`, `CRM_SALE_TRANSACTION`, `CRM_RENTAL_TRANSACTION`, `COOP_GROUP`).
 - `statusCode` : statut courant (appartenant au workflow du type)
 - `lossReason` / `wonReason` : requis à la clôture
-- `source` : provenance du lead/case (ex: `LEAD_SOURCE_WHATSAPP`, `LEAD_SOURCE_FORM` (MVP). Extensions possibles: `LEAD_SOURCE_PHONE`, `LEAD_SOURCE_AVITO`, `LEAD_SOURCE_MUBAWAB`.).
+- `source` : provenance du lead/case (ex: `WHATSAPP`, `WEBSITE`, `PHONE_CALL`, `AVITO`). Liste : `00_nomenclature_codes.md` §5.5.
 
 ### 2) Référentiels (dictionnaires)
 Tous les éléments métier configurables sont en data (et tenant-scopés) :
 - Types de dossiers (CASE_TYPE)
 - Statuts (CASE_STATUS)
-- Raisons perte/gain (LOSS_REASON / WON_REASONN)
+- Raisons perte/gain (LOSS_REASON / WON_REASON)
 - Sources (LEAD_SOURCE)
 - Types RDV (`APPOINT_VISIT`, `APPOINT_CALL`), statuts RDV (`APPOINT_SCHEDULED`, `APPOINT_DONE`, `APPOINT_NO_SHOW`, `APPOINT_CANCELLED`), types d’activités (`ACT_*`) et canaux (`CHAN_*`).
 
@@ -101,7 +101,7 @@ L’UI n’affiche **que** les transitions atteignables depuis l’état courant
 
 ## E) RDV / activités
 **APPOINTMENT_TYPE** : `PHONE_CALL`, `OFFICE_MEETING`, `PROPERTY_VISIT`, `OWNER_VISIT`, `NOTARY_MEETING`, `SIGNING`, `SITE_VISIT`, `VIDEO_CALL`  
-**APPOINTMENT_OUTCOME** : `DONE`, `COOP_GROUP_CANCELLED`, `RESCHEDULED`, `CRM_NO_SHOW`, `PARTIAL`, `OTHER`  
+**APPOINTMENT_OUTCOME** : `DONE`, `CANCELLED`, `RESCHEDULED`, `NO_SHOW`, `PARTIAL`, `OTHER`  
 
 **ACTIVITY_TYPE** : `NOTE`, `TASK`, `STATUS_CHANGE`, `MESSAGE_LOG`, `APPOINTMENT_LOG`, `DOCUMENT_LOG`, `SYSTEM`  
 **TASK_CATEGORY** : `CALL_BACK`, `SEND_MESSAGE`, `REQUEST_DOCS`, `REVIEW_DOCS`, `PREPARE_VISIT`, `FOLLOW_UP_VISIT`, `NEGOTIATE`, `SCHEDULE_SIGNING`, `OTHER`

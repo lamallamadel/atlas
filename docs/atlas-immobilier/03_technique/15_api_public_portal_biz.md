@@ -186,9 +186,9 @@ Body :
 Réponse : `201 Created` + `{ "caseId": "C-123" }`
 
 Règles (alignement CRM) :
-- `case_type_code = CASE_TYPE_LEAD_B2B_DEMO`
+- `case_type_code = CRM_LEAD_B2B_DEMO`
 - `status_code = B2B_NEW`
-- `source_code = LEAD_SOURCE_BIZ_DEMO_FORM`
+- `source_code = BIZ_DEMO_FORM`
 
 ---
 

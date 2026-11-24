@@ -4,7 +4,7 @@
 > **Dernière vérification**: 2026-01-07  
 > **Source of truth**: Oui  
 > **Dépendances**:  
-- `docs/UAT_SCENARIOS.md`  
+- `docs/atlas-immobilier/04_qa_prod/03_e2e_acceptance_mvp.md`  
 - `docs/atlas-immobilier/03_technique/09_notifications.md`  
 - `docs/atlas-immobilier/03_technique/04_security_multi_tenancy.md`
 

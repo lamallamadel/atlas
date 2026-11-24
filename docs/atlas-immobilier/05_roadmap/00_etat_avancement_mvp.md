@@ -1,75 +1,81 @@
-# État d’avancement — MVP (AS-IS) + cible market-ready
+# État d’avancement — MVP (AS-IS)
 
 > **Statut**: Source de vérité (AS-IS)  
-> **Dernière vérification**: 2026-01-07  
-> **Source of truth**: Oui  
+> **Dernière vérification**: 2026-11-23 (code de `master`, commit `6c3db9ad`)  
+> **Source of truth**: Oui — décrit uniquement ce qui existe dans le code. Le « à faire » vit dans `02_backlog_mvp_execution.md`.  
 > **Dépendances**:  
+- `docs/atlas-immobilier/05_roadmap/02_backlog_mvp_execution.md`  
 - `docs/atlas-immobilier/03_technique/03_api_contracts.md`  
-- `docs/atlas-immobilier/03_technique/06_workflow_dossier_state_machine.md`
+- `docs/adr/`
 
-Ce document décrit **uniquement** l’état réel du projet (ce qui est présent). Les éléments “à faire” sont listés comme **écarts** vers la cible market-ready.
+Ce document a été réécrit le 2026-11-23 à partir du code. La version précédente (janvier 2026) déclarait « livrés » des éléments qui ne le sont pas (publication gouvernée, signalements, API publique) et ignorait des modules présents (matching, coop backend, signature).
 
-## AS-IS — Livré / présent
+## Stack réelle
 
-### S1 — Baseline / monorepo
-- Structure monorepo (backend/frontend/infra)
-- Docker Compose local (PostgreSQL)
-- Scripts et docs setup
+| Couche | Version |
+|---|---|
+| Backend | Spring Boot 4.0.3, Java 25 |
+| Frontend | Angular 21 (composants standalone, signals, zone.js) |
+| Services IA | `brain/` (Python FastAPI) : `agent`, `match`, `nego`, `fraud`, `dupli`, `document`, `vision`, `proposal`, `scoring` |
+| Base | PostgreSQL 16 (prod), H2 (local, tests). Flyway jusqu’à V156 |
+| Messagerie | API WhatsApp Cloud de Meta (v25.0) ; Twilio pour les SMS |
+| Identité | Keycloak (OIDC), claim `org_id` |
+| Prod | `afroware.app` derrière Nginx + Cloudflare |
 
-### S2 — Core CRM (annonces + dossiers)
-- CRUD annonces
-- CRUD dossiers + logique de déduplication
-- UI listes et détails (annonces/dossiers)
+## Sites et routes
 
-### S3 — Sécurité & multi-tenancy
-- Auth JWT
-- Isolation tenant via `X-Org-Id`
-- Rôles / protections endpoints (niveau MVP)
+Les trois « sites » de la spec sont des zones de routes d’une seule application Angular, pas trois domaines.
 
-### S4+ — Fonctionnel “CRM interne” (parties, messages, rdv, audit, timeline)
-- Workflow dossier (transitions) + historique (status history)
-- Audit via AOP + endpoints de lecture
-- Timeline / activities (notes + événements)
-- Parties prenantes (CRUD v1)
-- Messages (journalisation + timeline conversation)
-- Rendez-vous (CRUD v1)
-- Search & reporting (endpoints + dashboard)
+| Spec | Réalité |
+|---|---|
+| Portail `atlasia.<tld>` | `/` (accueil, recherche, fiche annonce, consentement, pages légales) |
+| Vitrine `biz.atlasia.<tld>` | `/biz` (accueil, agences, promoteurs, tarifs, démo, contact) |
+| Pro `pro.atlasia.<tld>` | `/pro` (dashboard, dossiers, annonces, calendrier, tâches, relances, recherche, reporting, workflow-admin, réglages) |
+| — | `/customer-portal` (portail client authentifié) |
 
-### S5+ — Consentements
-- CRUD consentements (stockage/consultation) ✅
-- Enforcement strict sur outbound (WhatsApp/SMS/Email) + preuve de consentement ✅
+## AS-IS par domaine
 
-### S6+ — WhatsApp Inbound & Outbound (Agentic Chatbot)
-- Webhook inbound : validation HMAC + idempotence + association dossier ✅
-- WhatsApp outbound : provider Twilio + templates + outbox/retry + monitoring ✅
-- Agent IA NLP intégré : qualification de leads auto et prise de RDV autonome ✅
+| Domaine | État | Ce qui existe | Ce qui manque par rapport à la spec |
+|---|---|---|---|
+| Dossiers et workflow | Hybride | Enum `DossierStatus` (`NEW, QUALIFYING, QUALIFIED, APPOINTMENT, WON, LOST`) validé par `DossierStatusTransitionService`. En parallèle : colonnes `case_type` et `status_code`, référentiels (V15), `WorkflowDefinition`, `DossierStatusCodeValidationService` | Un modèle unique (décision : ADR 0004, `case_type` + `status_code`) ; `GET /transitions` par dossier |
+| Timeline, messages, RDV, audit | Livré | Activités, messages, rendez-vous, audit, historique de statut, onglets « Échanges » et « Activité » du dossier | — |
+| Consentements | Livré, plus fin que la spec | Voir `02_fonctionnel/02_regles_metier.md` §2 : opt-in double pour MARKETING via lien public, preuve agent pour TRANSACTIONNEL, réponse dans la fenêtre de 24 h | — |
+| WhatsApp | Livré | Webhook signé (HMAC App Secret), routage par `phone_number_id`, outbox avec relance, réponse depuis le dossier, lien de consentement, templates (`WhatsAppTemplate`, envoi `type: template`) | Validation en conditions réelles d’un template approuvé par Meta, hors fenêtre de 24 h |
+| Multi-tenant | Livré | `X-Org-Id` + claim JWT `org_id` (403 si différent), filtre Hibernate après OSIV, tenant posé dans les jobs | — |
+| Portail public | Partiel | Recherche `/api/v1/portal/annonces` (toutes agences), lead `POST /api/v1/portal/leads` | Lead routé vers l’agence de l’annonce (aujourd’hui forcé sur `ORG-001`) ; endpoint public de détail (la fiche appelle l’API Pro) ; signalement (simple `console.log`) ; slugs |
+| Vitrine Biz | Partiel | Pages en place ; la démo crée un dossier `caseType: DEMO`, détails dans `notes` | Dossier `CRM_LEAD_B2B_DEMO` structuré |
+| Pipeline B2B démo | Absent | — | Statuts `B2B_*`, kanban dédié, raisons de perte |
+| Publication d’annonces | Divergent | Enum `DRAFT, PUBLISHED, ACTIVE, PAUSED, ARCHIVED`, CRUD Pro `/api/v1/annonces` | Statut `SUSPENDED`, score de qualité, minimum de photos, règle de publication |
+| Trust et modération | Partiel | Services IA `brain/fraud` et `brain/dupli`, badges IA sur les annonces | Score de doublon persisté et bloquant, override manager, signalements, file de modération |
+| RBAC | Divergent | Rôles `ADMIN`, `PRO`, `USER`, `SUPER_ADMIN` | `ADMIN_ORG`, `MANAGER`, `AGENT`, `OWNER`, `MODERATOR` ; « mes dossiers » ; réassignation contrôlée |
+| Feature flags et plans | Absent | `FeatureFlagEntity` (utilisée par le white label) | Contrôle côté API, quotas, plans |
+| Coop Habitat | Backend seul | Entités et contrôleurs groupe, membre, projet, lot, cotisation | Écrans, règles d’allocation, notifications |
+| Reporting | Livré | Dashboard, KPI, rapports planifiés | — |
 
-### S7+ — IA Agentique & Automatisation (Phase 2)
-- Coach Virtuel : Nudging comportemental sur les leads ✅
-- Scanning IA : Validation DPE & Amiante ✅
-- Contrats IA : Génération de compromis de vente pré-rempli ✅
-- Yield Management : Ajustement automatique des prix ✅
-- Anti-fraude & Doublons : Scoring IA sur les annonces ✅
-- Interface "Glass Box" (tooltips d'explicabilité de l'IA) ✅
+## Livré hors spec
 
-### S8+ — Qualité & NFR
-- NFR : rate limiting, alerting, dashboards de performance ✅
-- E2E Playwright : Suite complète de tests E2E stabilisés intégrée au pipeline CI ✅
+Ces modules existent sans règles métier ni critères d’acceptation écrits.
 
-## Écarts vers “market-ready” (TO-BE)
-- Le cœur du système et le CRM avancé sont livrés. Les prochains écarts concernent les extensions métiers B2B et Coop Habitat.
+| Module | Code |
+|---|---|
+| Matching acheteurs ↔ annonces, pitch WhatsApp avec photos, relances | `brain/match`, `PropertyPitchService`, onglet matching du dossier |
+| Négociation, documents, vision | `brain/nego`, `brain/document`, `brain/vision`, `BrainVisionClient` |
+| Lien de consentement public | `consent_request` (V156), `/api/v1/public/consent/{token}` |
+| Lots de programmes (neuf) | `ProgramLotController` |
+| Signature électronique | `ESignatureController` |
+| Portail client, portail développeur, API publique v1 | `CustomerPortalController`, `DeveloperPortalController`, `PublicApiV1Controller` |
+| White label, provisioning, onboarding tenant | `WhiteLabelAdminController`, `TenantProvisioningController`, `TenantOnboardingController` |
+| Scoring, import et export de leads | `LeadScoringConfigController`, `LeadImportController`, `LeadExportController` |
+| Yield management | `YieldManagementService` |
+| Workflows documentaires, actions planifiées | `DocumentWorkflowController`, `ScheduledWorkflowAction` (V148) |
+| Apps mobiles (CI) | `.github/workflows/mobile-android-ci.yml`, `mobile-ios-ci.yml` |
 
-## Références
-- Contrat API : `docs/atlas-immobilier/03_technique/03_api_contracts.md`
-- Workflow dossier : `docs/atlas-immobilier/03_technique/06_workflow_dossier_state_machine.md`
+## Écarts bloquants pour une deuxième agence
 
-## Extension TO-BE — Module Coop Habitat
+1. Les leads publics vont tous chez `ORG-001`.
+2. Aucune règle de publication (photos, qualité, doublons).
+3. Signalements factices.
+4. Deux modèles de statut de dossier (tranché par l’ADR 0004, migration à faire).
+5. Pas de rôles d’agence (manager, agent).
 
-- **Statut** : non implémenté (spécifié)
-- **Doc source** : `02_fonctionnel/04_module_coop_habitat.md`
-- **Dépendances** :
-  - Référentiels/workflows modulables (caseType/statusCode)
-  - Notifications outbound (Choix B) pour appels de fonds et jalons
-  - Modèle documents (PV/justificatifs) et audit
-
-Objectif : attaquer un segment “groupement/cooperative” avec une V1 déclarative (preuves) avant paiement intégré.
+L’ordre de traitement est dans `02_backlog_mvp_execution.md`.

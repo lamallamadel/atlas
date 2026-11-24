@@ -1,34 +1,23 @@
-# Atlas Immobilier — Documentation Produit & Spécifications (v0.4-week3-2026-01-04)
+# Atlas Immobilier — Documentation Produit & Spécifications
 
+> **Version**: voir `VERSION.txt` (v0.7, réalignée sur le code le 2026-11-23)  
 > **Statut**: Stable  
-> **Dernière vérification**: 2026-01-10  
-> **Source of truth**: Non  
+> **Source of truth**: Non (index)  
 > **Dépendances**:  
-- `docs/PROJECT_DOCUMENTATION_INDEX.md`
+- `docs/atlas-immobilier/05_roadmap/00_etat_avancement_mvp.md`
 
-Ce dossier regroupe le **cahier des charges**, les **spécifications fonctionnelles**, les **spécifications techniques**, ainsi que la **roadmap** d’Atlas Immobilier (CRM immobilier).
+Ce dossier regroupe le **cahier des charges**, les **spécifications fonctionnelles**, les **spécifications techniques** et la **roadmap** d’Atlas Immobilier (CRM immobilier, marché marocain).
 
-## Périmètre couvert par cette mise à jour
-Cette version consolide le **MVP Week 1 → Week 3** (fondations + CRUD + sécurité multi-tenant) et maintient les spécifications « Advanced CRM » pour la suite.
+## Comment lire cette documentation
+- **Ce qui existe** : `05_roadmap/00_etat_avancement_mvp.md` (seul document AS-IS, réécrit depuis le code).
+- **Ce qui reste à faire, dans l’ordre** : `05_roadmap/02_backlog_mvp_execution.md`.
+- **Codes et statuts** : `02_fonctionnel/00_nomenclature_codes.md` fait foi ; `12_referential_freeze_mvp.md` en est le sous-ensemble MVP.
+- **Décisions d’architecture** : `docs/adr/`.
+- Les documents marqués **TO-BE** décrivent une cible, pas l’existant.
+- `docs/archive/` contient l’historique ; ce n’est pas une spec.
 
-### Livrables réalisés (Week 1 → Week 3)
-- **Monorepo** (`backend/`, `frontend/`, `infra/`, `docs/`) + scripts de dev.
-- **Infra locale** via Docker Compose : PostgreSQL + **Keycloak** (import realm).
-- **Backend Spring Boot (Java 17)** : CRUD **Annonces** & **Dossiers**, endpoints **Dashboard** + health.
-- **Frontend Angular** : UI FR (dashboard / annonces / dossiers) + stabilisation des tests.
-- **Sécurité** : Resource Server OAuth2/JWT (Keycloak) + mapping des rôles.
-- **Multi-tenancy** : isolation stricte par `org_id` (header `X-Org-Id` + filtre Hibernate) + tests cross-tenant.
-
-### Livrables réalisés (Advanced CRM & Phase 2 Agentic Commerce)
-- **Messagerie / suivi des communications** (timeline d’activité) ✅
-- **Audit trail** (journal de changements) ✅
-- **Gestion des consentements** (RGPD / opt-in / opt-out) ✅
-- **Workflow Dossier** (machine à états + transitions) ✅
-- **Recherche & reporting** (full-text PostgreSQL + KPIs) ✅
-- **Notifications** (email/SMS, templates, async) ✅
-- **Qualité / prod readiness** (tests E2E Playwright, CI GitHub Actions, observables) ✅
-- **IA Agentique (Phase 2)** : Coach Virtuel (Nudging), Chatbot IA WhatsApp, Génération de Contrats (LLM), Yield Management dynamique, Détection de Fraude/Doublons. ✅
-- **UX/UI Calm & Mobile** : Bento Grids, Swipe-Friendly UI, palette de commandes CMD+K. ✅
+## Stack réelle (2026-11)
+Spring Boot 4.0.3 / Java 25 · Angular 21 · services IA Python (`brain/`) · PostgreSQL 16 (H2 en local) · Keycloak · API WhatsApp Cloud de Meta · prod sur `afroware.app`.
 
 ## Organisation
 - `01_cadrage/` : vision, objectifs, scope, personas
@@ -38,15 +27,13 @@ Cette version consolide le **MVP Week 1 → Week 3** (fondations + CRUD + sécur
 - `05_roadmap/` : planification par sprints, dépendances
 - `CHANGELOG.md` : évolutions et correctifs clés (dont corrections de tests FE)
 
-## Démarrage local (résumé)
-1) Lancer l'infra : `cd infra && docker compose up -d --build`
-2) Récupérer un token Keycloak (ex: user `demo`) et le coller dans l'écran Login du front.
-3) Définir l'org dans le navigateur : `localStorage.setItem('org_id','ORG1')` (ou `ORG2`).
+## Démarrage local
+Voir le `CLAUDE.md` à la racine du dépôt et `03_technique/17_runbook_dev_deploy_mvp.md`.
 
 Les détails (headers, rôles, obtention du token, isolation tenant) sont décrits dans `03_technique/04_security_multi_tenancy.md`.
 
-## Extension (TO-BE) — Coop Habitat
-Voir `02_fonctionnel/04_module_coop_habitat.md`.
+## Coop Habitat
+Backend en place (groupes, membres, projets, lots, cotisations), aucun écran. Spec : `02_fonctionnel/04_module_coop_habitat.md`.
 
 
 ## Modularité (plateforme unique)
@@ -57,7 +44,10 @@ Voir `02_fonctionnel/04_module_coop_habitat.md`.
 - Glossaire : `01_cadrage/03_glossaire.md`
 
 
-## Extension MVP — 3 sites (Portail + Biz + Pro)
+## MVP — 3 sites (Portail + Biz + Pro)
+
+En pratique, une seule application Angular sur `afroware.app` : portail sur `/`, vitrine sur `/biz`, espace Pro sur `/pro`. Les domaines `atlasia.*` ci-dessous sont la cible de marque, pas l’existant (voir `01_cadrage/04_branding_domains.md`).
+
 
 - **Portail public** (`atlasia.ma`) : `docs/atlas-immobilier/02_fonctionnel/06_portail_annonces_mvp.md`
 - **Site vitrine B2B** (`biz.atlasia.ma`) : `docs/atlas-immobilier/02_fonctionnel/07_site_vitrine_biz_mvp.md`

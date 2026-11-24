@@ -122,7 +122,7 @@ Règle :
 
 ## Alignement CRM (rappel)
 À la soumission `/demo`, création d’un dossier :
-- `case_type_code = CASE_TYPE_LEAD_B2B_DEMO`
+- `case_type_code = CRM_LEAD_B2B_DEMO`
 - `status_code = B2B_NEW`
-- `source_code = LEAD_SOURCE_BIZ_DEMO_FORM`
+- `source_code = BIZ_DEMO_FORM`
 - `payload` : `actorType/city/teamSize/listingVolume/needs/desiredPlanKey/message/utm`

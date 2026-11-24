@@ -4,7 +4,7 @@
 > **Dernière vérification**: 2026-01-07  
 > **Source of truth**: Non  
 > **Dépendances**:  
-- `docs/UAT_SCENARIOS.md`
+- `docs/atlas-immobilier/04_qa_prod/03_e2e_acceptance_mvp.md`
 
 ## 1) Provider HttpClient manquant (DashboardKpiService)
 Symptôme :
