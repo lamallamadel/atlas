@@ -146,7 +146,10 @@ describe('DossierDetailComponent', () => {
     dossierApiService = {
       getById: vi.fn().mockName('DossierApiService.getById'),
       patchStatus: vi.fn().mockName('DossierApiService.patchStatus'),
-      patchLead: vi.fn().mockName('DossierApiService.patchLead')};
+      patchLead: vi.fn().mockName('DossierApiService.patchLead'),
+      // Carte « Statut » : transitions servies par le workflow du dossier.
+      transitions: vi.fn().mockName('DossierApiService.transitions').mockReturnValue(
+        of({ caseType: 'CRM_LEAD', statusCode: 'CRM_NEW', statusLabel: 'Nouveau', stage: 'OPEN', transitions: [] }))};
     partiePrenanteApiService = {
       list: vi.fn().mockName('PartiePrenanteApiService.list'),
       create: vi.fn().mockName('PartiePrenanteApiService.create'),

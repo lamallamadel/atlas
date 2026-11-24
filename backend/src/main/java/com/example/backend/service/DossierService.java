@@ -7,6 +7,7 @@ import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierMapper;
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
+import com.example.backend.dto.DossierTransitionsResponse;
 import com.example.backend.dto.PartiePrenanteCreateRequest;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
@@ -18,11 +19,16 @@ import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import com.example.backend.workflow.DossierStatusCodes;
+import com.example.backend.workflow.DossierWorkflow;
+import com.example.backend.workflow.DossierWorkflowCatalog;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -120,6 +126,9 @@ public class DossierService {
 
         if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
             statusCodeValidationService.validateCaseType(dossier.getCaseType());
+        }
+        applyInitialState(dossier);
+        if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
             statusCodeValidationService.validateStatusCodeForCaseType(
                     dossier.getCaseType(), dossier.getStatusCode());
         }
@@ -253,8 +262,27 @@ public class DossierService {
             String q,
             String assignee,
             Pageable pageable) {
+        return list(status, leadPhone, annonceId, leadSource, q, assignee, null, pageable);
+    }
+
+    /** Comme ci-dessus, limité à un type de dossier (ex. {@code CRM_LEAD_B2B_DEMO}). */
+    @Transactional(readOnly = true)
+    public Page<DossierResponse> list(
+            DossierStatus status,
+            String leadPhone,
+            Long annonceId,
+            String leadSource,
+            String q,
+            String assignee,
+            String caseType,
+            Pageable pageable) {
         Specification<Dossier> spec =
                 (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+
+        if (caseType != null && !caseType.isBlank()) {
+            String type = caseType.trim();
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("caseType"), type));
+        }
 
         if (assignee != null && !assignee.isBlank()) {
             if ("unassigned".equalsIgnoreCase(assignee)) {
@@ -333,11 +361,6 @@ public class DossierService {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
         }
 
-        DossierStatus currentStatus = dossier.getStatus();
-        DossierStatus newStatus = request.getStatus();
-
-        transitionService.validateTransition(currentStatus, newStatus);
-
         // Les raisons de clôture sont posées avant la validation : un workflow peut les exiger.
         if (request.getLossReason() != null) {
             dossier.setLossReason(request.getLossReason());
@@ -347,37 +370,179 @@ public class DossierService {
         }
 
         String targetCode =
-                request.getStatusCode() != null
+                request.getStatusCode() != null && !request.getStatusCode().isBlank()
                         ? DossierStatusCodes.normalize(request.getStatusCode())
-                        : DossierStatusCodes.toCode(newStatus);
-
-        // ADR 0004 : tout dossier suit le workflow de son type (CRM_LEAD par défaut).
-        workflowValidationService.validateAndRecordTransition(
-                dossier,
-                DossierStatusCodes.toCode(currentStatus),
-                targetCode,
-                request.getUserId(),
-                request.getReason());
-
-        dossier.setStatus(newStatus);
-
-        if (request.getStatusCode() != null) {
-            statusCodeValidationService.validateStatusCodeForCaseType(
-                    dossier.getCaseType(), targetCode);
-            dossier.setStatusCode(targetCode);
+                        : DossierStatusCodes.toCode(request.getStatus());
+        if (targetCode == null) {
+            throw new IllegalArgumentException("STATUS_REQUIRED: indiquez statusCode (ou status).");
         }
 
-        dossier.setUpdatedAt(LocalDateTime.now());
-        Dossier updated = dossierRepository.save(dossier);
-
-        transitionService.recordTransition(
-                dossier, currentStatus, newStatus, request.getUserId(), request.getReason());
+        Dossier updated =
+                applyTransition(dossier, targetCode, request.getUserId(), request.getReason());
 
         if (searchService != null) {
             searchService.indexDossier(updated);
         }
 
         return dossierMapper.toResponse(updated);
+    }
+
+    /**
+     * Changement de statut (ADR 0004, phase B) : validé par le workflow du type de dossier, écrit
+     * dans {@code status_code} ; l'enum {@code status} en est la projection, pour les écrans et
+     * rapports qui le lisent encore.
+     */
+    private Dossier applyTransition(
+            Dossier dossier, String targetCode, String userId, String reason) {
+        DossierStatus fromStatus = dossier.getStatus();
+        String fromCode = currentCode(dossier);
+
+        // Pipeline historique : mêmes règles que le workflow système, gardées pour leurs messages.
+        if (DossierStatusCodes.toEnum(fromCode).isPresent()
+                && DossierStatusCodes.toEnum(targetCode).isPresent()
+                && isSystemWorkflow(dossier)) {
+            transitionService.validateTransition(
+                    fromStatus, DossierStatusCodes.toEnum(targetCode).get());
+        }
+
+        DossierWorkflow workflow =
+                workflowValidationService.validateAndRecordTransition(
+                        dossier, fromCode, targetCode, userId, reason);
+        statusCodeValidationService.validateStatusCodeForCaseType(
+                dossier.getCaseType(), targetCode);
+        validateLossReason(dossier, workflow, targetCode);
+
+        DossierStatus projected =
+                DossierStatusCodes.project(targetCode, workflow.state(targetCode).orElse(null));
+        dossier.setStatus(projected);
+        dossier.setStatusCode(targetCode);
+        dossier.setUpdatedAt(LocalDateTime.now());
+        Dossier saved = dossierRepository.save(dossier);
+
+        transitionService.recordTransition(
+                saved, fromStatus, projected, fromCode, targetCode, userId, reason);
+        return saved;
+    }
+
+    private List<DossierStatusCodeValidationService.Option> lossReasons(String caseType) {
+        return statusCodeValidationService.options(
+                DossierWorkflowCatalog.lossReasonCategory(
+                        DossierStatusCodes.effectiveCaseType(caseType)));
+    }
+
+    /**
+     * Une raison de perte exigée par l'état cible doit appartenir au référentiel du type de dossier
+     * (ex. {@code B2B_LOST_*} pour une démo B2B).
+     */
+    private void validateLossReason(Dossier dossier, DossierWorkflow workflow, String targetCode) {
+        boolean required =
+                workflow.state(targetCode)
+                        .map(st -> st.requires().contains("lossReason"))
+                        .orElse(false);
+        String reason = dossier.getLossReason();
+        if (!required || reason == null || reason.isBlank()) {
+            return;
+        }
+        List<DossierStatusCodeValidationService.Option> allowed =
+                lossReasons(dossier.getCaseType());
+        if (!allowed.isEmpty() && allowed.stream().noneMatch(o -> o.code().equals(reason))) {
+            throw new IllegalArgumentException(
+                    "INVALID_LOSS_REASON: raison de perte inconnue pour ce type de dossier : "
+                            + reason);
+        }
+    }
+
+    private boolean isSystemWorkflow(Dossier dossier) {
+        return workflowValidationService
+                .workflowOf(dossier.getCaseType())
+                .map(w -> DossierWorkflow.SOURCE_SYSTEM.equals(w.source()))
+                .orElse(true);
+    }
+
+    private static String currentCode(Dossier dossier) {
+        String code = DossierStatusCodes.normalize(dossier.getStatusCode());
+        return code == null || code.isBlank()
+                ? DossierStatusCodes.toCode(dossier.getStatus())
+                : code;
+    }
+
+    /**
+     * Statut courant et transitions possibles depuis celui-ci (ADR 0004) : l'écran n'affiche que
+     * ces actions. Les transitions réservées à d'autres rôles sont omises.
+     */
+    @Transactional(readOnly = true)
+    public DossierTransitionsResponse transitions(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+        Dossier dossier =
+                dossierRepository
+                        .findById(id)
+                        .filter(d -> orgId.equals(d.getOrgId()))
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + id));
+        String caseType = DossierStatusCodes.effectiveCaseType(dossier.getCaseType());
+        String current = currentCode(dossier);
+        Optional<DossierWorkflow> workflow = workflowValidationService.workflowOf(caseType);
+
+        List<DossierTransitionsResponse.Option> options = new ArrayList<>();
+        Optional<DossierWorkflow.State> currentState = workflow.flatMap(w -> w.state(current));
+        if (workflow.isPresent()) {
+            DossierWorkflow w = workflow.get();
+            for (String target : w.targetsFrom(current)) {
+                DossierWorkflow.Transition rule = w.transition(current, target).orElseThrow();
+                if (!WorkflowValidationService.isAllowedForCurrentUser(rule)) {
+                    continue;
+                }
+                Optional<DossierWorkflow.State> state = w.state(target);
+                Set<String> requires = new LinkedHashSet<>(rule.requiredFields());
+                state.ifPresent(st -> requires.addAll(st.requires()));
+                List<DossierTransitionsResponse.Reason> reasons =
+                        requires.contains("lossReason")
+                                ? lossReasons(caseType).stream()
+                                        .map(
+                                                o ->
+                                                        new DossierTransitionsResponse.Reason(
+                                                                o.code(), o.label()))
+                                        .toList()
+                                : List.of();
+                options.add(
+                        new DossierTransitionsResponse.Option(
+                                target,
+                                statusCodeValidationService.label("CASE_STATUS", target),
+                                state.map(st -> st.stage().name()).orElse(null),
+                                List.copyOf(requires),
+                                reasons));
+            }
+        }
+        return new DossierTransitionsResponse(
+                caseType,
+                current,
+                statusCodeValidationService.label("CASE_STATUS", current),
+                currentState.map(st -> st.stage().name()).orElse(null),
+                options);
+    }
+
+    /**
+     * Un dossier démarre dans l'état initial du workflow de son type quand son statut n'en fait pas
+     * partie (ex. {@code B2B_NEW} pour une demande de démo, au lieu de {@code CRM_NEW}).
+     */
+    private void applyInitialState(Dossier dossier) {
+        workflowValidationService
+                .workflowOf(dossier.getCaseType())
+                .filter(w -> w.initialState() != null)
+                .filter(w -> !w.hasState(currentCode(dossier)))
+                .ifPresent(
+                        w -> {
+                            String initial = w.initialState();
+                            dossier.setStatus(
+                                    DossierStatusCodes.project(
+                                            initial, w.state(initial).orElse(null)));
+                            dossier.setStatusCode(initial);
+                        });
     }
 
     @CacheEvict(
@@ -461,26 +626,9 @@ public class DossierService {
                     throw new EntityNotFoundException("Dossier not found with id: " + id);
                 }
 
-                DossierStatus currentStatus = dossier.getStatus();
-                DossierStatus newStatus = request.getStatus();
-
-                transitionService.validateTransition(currentStatus, newStatus);
-
-                workflowValidationService.validateAndRecordTransition(
+                applyTransition(
                         dossier,
-                        DossierStatusCodes.toCode(currentStatus),
-                        DossierStatusCodes.toCode(newStatus),
-                        request.getUserId(),
-                        request.getReason());
-
-                dossier.setStatus(newStatus);
-                dossier.setUpdatedAt(LocalDateTime.now());
-                dossierRepository.save(dossier);
-
-                transitionService.recordTransition(
-                        dossier,
-                        currentStatus,
-                        newStatus,
+                        DossierStatusCodes.toCode(request.getStatus()),
                         request.getUserId(),
                         request.getReason());
 

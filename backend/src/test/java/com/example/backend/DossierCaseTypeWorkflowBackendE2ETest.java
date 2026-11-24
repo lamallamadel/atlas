@@ -197,6 +197,7 @@ class DossierCaseTypeWorkflowBackendE2ETest extends BaseBackendE2ETest {
                         .findFirst()
                         .orElseThrow();
         assertThat(saved.getCaseType()).isEqualTo("CRM_LEAD_B2B_DEMO");
-        assertThat(saved.getStatusCode()).isEqualTo("CRM_NEW");
+        // Le pipeline B2B a son propre état initial (spec 08_workflow_b2b_demo.md).
+        assertThat(saved.getStatusCode()).isEqualTo("B2B_NEW");
     }
 }

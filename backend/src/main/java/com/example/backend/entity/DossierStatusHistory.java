@@ -40,6 +40,13 @@ public class DossierStatusHistory {
     @Column(name = "to_status", nullable = false, length = 50)
     private DossierStatus toStatus;
 
+    /** Code de nomenclature de départ (ADR 0004) ; l'enum reste une projection. */
+    @Column(name = "from_code", length = 50)
+    private String fromCode;
+
+    @Column(name = "to_code", length = 50)
+    private String toCode;
+
     @Column(name = "user_id", length = 255)
     private String userId;
 
@@ -124,5 +131,21 @@ public class DossierStatusHistory {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getFromCode() {
+        return fromCode;
+    }
+
+    public void setFromCode(String fromCode) {
+        this.fromCode = fromCode;
+    }
+
+    public String getToCode() {
+        return toCode;
+    }
+
+    public void setToCode(String toCode) {
+        this.toCode = toCode;
     }
 }

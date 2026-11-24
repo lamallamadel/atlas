@@ -94,6 +94,11 @@ public class Dossier extends BaseEntity {
     @Column(name = "search_criteria")
     private Map<String, Object> searchCriteria;
 
+    /** Informations de qualification saisies par le prospect (formulaire de démo de la vitrine). */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "lead_details")
+    private Map<String, Object> leadDetails;
+
     @Column(name = "search_criteria_updated_at")
     private LocalDateTime searchCriteriaUpdatedAt;
 
@@ -318,6 +323,14 @@ public class Dossier extends BaseEntity {
 
     public void setLocale(String locale) {
         this.locale = locale;
+    }
+
+    public Map<String, Object> getLeadDetails() {
+        return leadDetails;
+    }
+
+    public void setLeadDetails(Map<String, Object> leadDetails) {
+        this.leadDetails = leadDetails;
     }
 
     public Map<String, Object> getSearchCriteria() {

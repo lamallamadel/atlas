@@ -1,7 +1,7 @@
 # Workflow B2B Demo — Machine à états (MVP)
 
 > **case_type_code**: `CRM_LEAD_B2B_DEMO`  
-> **Statut**: TO-BE (cible MVP)  
+> **Statut**: implémenté (workflow système `DossierWorkflowCatalog`, étape 7 ; ADR 0004 phase B)  
 > **Source of truth**: Oui (pour le pipeline B2B Demo)
 
 ## Statuts (`CASE_STATUS`)
@@ -50,5 +50,19 @@
 - payload minimal : actorType, city, needs[] (+ option teamSize/listingVolume/plan/message)
 
 ## Notes d’implémentation (contrat)
-- L’UI Pro doit consommer `GET /cases/{id}/transitions` pour afficher les actions.
-- Le backend doit refuser les sauts non autorisés (409/400).
+- L’UI Pro consomme `GET /api/v1/dossiers/{id}/transitions` pour afficher les actions (carte « Statut » du dossier).
+- Le changement de statut passe par `PATCH /api/v1/dossiers/{id}/status` avec `statusCode` ; un saut non autorisé répond 400.
+
+## Écarts avec la spec (choix de l’implémentation)
+- **Rôles** : `SALES` n’existe pas. Tout membre de l’agence fait les transitions ; `REOPEN` et `REDO_DEMO` sont réservées au manager (`MANAGER`, `ADMIN`, `SUPER_ADMIN`).
+- **Exigences** :
+  - `B2B_SCHEDULED` exige un rendez-vous non annulé sur le dossier ;
+  - `B2B_LOST` exige une raison du référentiel `B2B_LOST_REASON` ;
+  - `MARK_DONE` n’exige pas que le rendez-vous soit marqué « réalisé ».
+- **Non implémentées** :
+  - `B2B_T_RESCHEDULE` : déplacer le rendez-vous suffit ;
+  - les événements `LeadEvent` dédiés : le changement de statut est journalisé dans l’historique et le fil d’activité ;
+  - l’annulation automatique du rendez-vous à la perte.
+- **Source du lead** : `VITRINE` (inchangé), pas `LEAD_SOURCE_BIZ_DEMO_FORM`.
+- **Profil saisi** : ville, profil, taille d’équipe, volume d’annonces, offre et besoins sont gardés sur le dossier (`lead_details`, V162).
+- **Écran** : kanban `/pro/b2b-demo` en lecture, une colonne par statut. Les transitions se font dans le détail du dossier.

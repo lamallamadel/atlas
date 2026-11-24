@@ -123,6 +123,40 @@ public class DossierStatusCodeValidationService {
                 .collect(Collectors.toList());
     }
 
+    /** Code et libellé d'une valeur de référentiel. */
+    public record Option(String code, String label) {}
+
+    /**
+     * Valeurs actives d'une catégorie : celles de l'organisation si elle en a, sinon les valeurs
+     * système (ADR 0004 : une organisation ne dépend pas d'un semis pour fonctionner).
+     */
+    @Transactional(readOnly = true)
+    public List<Option> options(String category) {
+        String orgId = TenantContext.getOrgId();
+        List<ReferentialEntity> rows =
+                referentialRepository
+                        .findByCategoryAndIsActiveTrueOrderByDisplayOrderAsc(category)
+                        .stream()
+                        .filter(r -> orgId == null || orgId.equals(r.getOrgId()))
+                        .toList();
+        if (rows.isEmpty()) {
+            rows = referentialSeedingService.systemDefaults(category);
+        }
+        return rows.stream().map(r -> new Option(r.getCode(), r.getLabel())).toList();
+    }
+
+    /** Libellé d'un code de référentiel (organisation, sinon système), à défaut le code. */
+    @Transactional(readOnly = true)
+    public String label(String category, String code) {
+        if (code == null) {
+            return null;
+        }
+        return findReferentialByOrg(category, code)
+                .map(ReferentialEntity::getLabel)
+                .filter(l -> l != null && !l.isBlank())
+                .orElse(code);
+    }
+
     private Optional<ReferentialEntity> findReferentialByOrg(String category, String code) {
         String orgId = TenantContext.getOrgId();
         if (orgId != null && !orgId.isBlank()) {

@@ -80,6 +80,42 @@ export interface DossierResponse {
   assignedTo?: string | null;
   assignedToName?: string | null;
   assignedAt?: string | null;
+  /** Type de dossier (ADR 0004), ex. CRM_LEAD ou CRM_LEAD_B2B_DEMO. */
+  caseType?: string | null;
+  /** Code de statut, qui fait foi (ex. CRM_QUALIFIED, B2B_SCHEDULED) ; `status` en est la projection. */
+  statusCode?: string | null;
+  lossReason?: string | null;
+  wonReason?: string | null;
+  /** Informations saisies par le prospect (formulaire de démo : city, actorType, needs…). */
+  leadDetails?: Record<string, unknown> | null;
+}
+
+/** Une transition possible depuis le statut courant (GET /dossiers/{id}/transitions). */
+export interface DossierTransitionOption {
+  statusCode: string;
+  label: string;
+  /** OPEN, WON ou LOST. */
+  stage: 'OPEN' | 'WON' | 'LOST' | null;
+  /** Ce que la transition exige : 'lossReason', 'wonReason', 'appointment'… */
+  requires: string[];
+  /** Raisons acceptées quand une raison est exigée. */
+  reasons: { code: string; label: string }[];
+}
+
+export interface DossierTransitions {
+  caseType: string;
+  statusCode: string;
+  statusLabel: string;
+  stage: 'OPEN' | 'WON' | 'LOST' | null;
+  transitions: DossierTransitionOption[];
+}
+
+/** Changement de statut par code (ADR 0004). */
+export interface DossierStatusChange {
+  statusCode: string;
+  lossReason?: string;
+  wonReason?: string;
+  reason?: string;
 }
 
 export interface DossierCreateRequest {
@@ -137,6 +173,8 @@ export interface DossierListParams {
   q?: string;
   /** Agent : 'me' (mes dossiers), 'unassigned' (à attribuer) ou un identifiant d'utilisateur. */
   assignee?: string;
+  /** Type de dossier, ex. CRM_LEAD_B2B_DEMO. */
+  caseType?: string;
   annonceId?: number;
   page?: number;
   size?: number;
@@ -193,6 +231,9 @@ export class DossierApiService {
     if (params.assignee) {
       httpParams = httpParams.set('assignee', params.assignee);
     }
+    if (params.caseType) {
+      httpParams = httpParams.set('caseType', params.caseType);
+    }
     if (params.q !== undefined && params.q !== '') {
       httpParams = httpParams.set('q', params.q);
     }
@@ -220,6 +261,21 @@ export class DossierApiService {
   patchStatus(id: number, status: DossierStatus): Observable<DossierResponse> {
     const request: DossierStatusPatchRequest = { status };
     return this.http.patch<DossierResponse>(`${this.apiUrl}/${id}/status`, request);
+  }
+
+  /** Nombre de dossiers d'un type (ex. pour afficher le pipeline B2B s'il y a des démos). */
+  countByCaseType(caseType: string): Observable<number> {
+    return this.list({ caseType, size: 1 }).pipe(map(page => page.totalElements));
+  }
+
+  /** Statut courant et transitions permises par le workflow du type de dossier. */
+  transitions(id: number): Observable<DossierTransitions> {
+    return this.http.get<DossierTransitions>(`${this.apiUrl}/${id}/transitions`);
+  }
+
+  /** Change le statut par code ; le serveur valide la transition et ses exigences. */
+  changeStatus(id: number, change: DossierStatusChange): Observable<DossierResponse> {
+    return this.http.patch<DossierResponse>(`${this.apiUrl}/${id}/status`, change);
   }
 
   patchLead(id: number, leadName: string, leadPhone: string): Observable<DossierResponse> {

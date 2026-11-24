@@ -102,6 +102,7 @@ public class DossierMapper {
                         : DossierStatusCodes.toCode(dossier.getStatus()));
         response.setAssignedTo(dossier.getAssignedTo());
         response.setAssignedToName(dossier.getAssignedToName());
+        response.setLeadDetails(dossier.getLeadDetails());
         response.setAssignedAt(dossier.getAssignedAt());
         response.setLossReason(dossier.getLossReason());
         response.setWonReason(dossier.getWonReason());

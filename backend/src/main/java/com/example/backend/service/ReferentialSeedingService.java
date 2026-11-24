@@ -41,10 +41,25 @@ public class ReferentialSeedingService {
         referentials.addAll(createLeadSourceReferentials(orgId));
         referentials.addAll(createLossReasonReferentials(orgId));
         referentials.addAll(createWonReasonReferentials(orgId));
+        referentials.addAll(createB2bLostReasonReferentials(orgId));
 
         referentialRepository.saveAll(referentials);
 
         log.info("Seeded {} referentials for organization: {}", referentials.size(), orgId);
+    }
+
+    /** Codes système actifs d'une catégorie, dans l'ordre d'affichage (non persistés). */
+    public List<ReferentialEntity> systemDefaults(String category) {
+        if (category == null) {
+            return List.of();
+        }
+        return switch (category) {
+            case "CASE_STATUS" -> createCaseStatusReferentials(SYSTEM_ORG);
+            case "LOSS_REASON" -> createLossReasonReferentials(SYSTEM_ORG);
+            case "WON_REASON" -> createWonReasonReferentials(SYSTEM_ORG);
+            case "B2B_LOST_REASON" -> createB2bLostReasonReferentials(SYSTEM_ORG);
+            default -> List.of();
+        };
     }
 
     /**
@@ -62,6 +77,7 @@ public class ReferentialSeedingService {
                     case "LEAD_SOURCE" -> createLeadSourceReferentials(SYSTEM_ORG);
                     case "LOSS_REASON" -> createLossReasonReferentials(SYSTEM_ORG);
                     case "WON_REASON" -> createWonReasonReferentials(SYSTEM_ORG);
+                    case "B2B_LOST_REASON" -> createB2bLostReasonReferentials(SYSTEM_ORG);
                     default -> List.of();
                 };
         return defaults.stream().filter(r -> code.equals(r.getCode())).findFirst();
@@ -378,6 +394,53 @@ public class ReferentialSeedingService {
                         true,
                         true));
 
+        // Pipeline B2B de démo (CRM_LEAD_B2B_DEMO, spec 08_workflow_b2b_demo.md).
+        String[][] b2b = {
+            {"B2B_NEW", "Nouvelle demande", "Demo request received"},
+            {"B2B_QUALIFIED", "Qualifiée", "Qualified"},
+            {"B2B_SCHEDULED", "Démo planifiée", "Demo scheduled"},
+            {"B2B_DONE", "Démo réalisée", "Demo done"},
+            {"B2B_WON", "Gagnée", "Won"},
+            {"B2B_LOST", "Perdue", "Lost"}
+        };
+        for (int i = 0; i < b2b.length; i++) {
+            referentials.add(
+                    createReferential(
+                            orgId,
+                            "CASE_STATUS",
+                            b2b[i][0],
+                            b2b[i][1],
+                            b2b[i][2],
+                            30 + i,
+                            true,
+                            true));
+        }
+
+        return referentials;
+    }
+
+    private List<ReferentialEntity> createB2bLostReasonReferentials(String orgId) {
+        String[][] reasons = {
+            {"B2B_LOST_NO_RESPONSE", "Sans réponse", "No response"},
+            {"B2B_LOST_NO_BUDGET", "Pas de budget", "No budget"},
+            {"B2B_LOST_NOT_FIT", "Ne correspond pas", "Not a fit"},
+            {"B2B_LOST_COMPETITOR", "Concurrent choisi", "Chose a competitor"},
+            {"B2B_LOST_TIMING", "Pas le bon moment", "Bad timing"},
+            {"B2B_LOST_OTHER", "Autre", "Other"}
+        };
+        List<ReferentialEntity> referentials = new ArrayList<>();
+        for (int i = 0; i < reasons.length; i++) {
+            referentials.add(
+                    createReferential(
+                            orgId,
+                            "B2B_LOST_REASON",
+                            reasons[i][0],
+                            reasons[i][1],
+                            reasons[i][2],
+                            i + 1,
+                            true,
+                            true));
+        }
         return referentials;
     }
 

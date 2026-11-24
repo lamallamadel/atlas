@@ -9,6 +9,7 @@ import com.example.backend.exception.WorkflowValidationException;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.WorkflowDefinitionRepository;
 import com.example.backend.repository.WorkflowTransitionRepository;
+import com.example.backend.util.CurrentUser;
 import com.example.backend.util.TenantContext;
 import com.example.backend.workflow.DossierStatusCodes;
 import com.example.backend.workflow.DossierWorkflow;
@@ -54,8 +55,21 @@ public class WorkflowValidationService {
         this.workflowResolver = workflowResolver;
     }
 
+    /** Workflow applicable à ce type de dossier dans l'organisation courante. */
+    public Optional<DossierWorkflow> workflowOf(String caseType) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+        return workflowResolver.resolve(orgId, DossierStatusCodes.effectiveCaseType(caseType));
+    }
+
+    /**
+     * Valide la transition dans le workflow du type de dossier et la journalise ; lève {@link
+     * WorkflowValidationException} si elle n'est pas permise. Renvoie le workflow appliqué.
+     */
     @Transactional
-    public void validateAndRecordTransition(
+    public DossierWorkflow validateAndRecordTransition(
             Dossier dossier, String fromStatus, String toStatus, String userId, String reason) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
@@ -116,6 +130,9 @@ public class WorkflowValidationService {
 
         validateRequiredFields(dossier, definition, rule.get(), validationErrors);
 
+        workflow.state(to)
+                .ifPresent(state -> validateStateRequirements(dossier, state, validationErrors));
+
         validateRoleBasedAuthorization(to, rule.get(), validationErrors);
 
         validatePreConditions(dossier, definition, to, validationErrors);
@@ -136,6 +153,7 @@ public class WorkflowValidationService {
         transition.setIsAllowed(true);
         transition.setValidationErrorsJson(null);
         workflowTransitionRepository.save(transition);
+        return workflow;
     }
 
     private void reject(
@@ -201,8 +219,71 @@ public class WorkflowValidationService {
         }
     }
 
+    /**
+     * Exigences de l'état cible ({@code requires}, ADR 0004) : un champ du dossier (ex. {@code
+     * lossReason}) ou {@code appointment}, au moins un rendez-vous non annulé sur le dossier.
+     */
+    private void validateStateRequirements(
+            Dossier dossier, DossierWorkflow.State state, Map<String, Object> errors) {
+        if (state.requires().isEmpty()) {
+            return;
+        }
+        @SuppressWarnings("unchecked")
+        List<String> missing =
+                (List<String>)
+                        errors.computeIfAbsent("missingRequiredFields", k -> new ArrayList<>());
+        @SuppressWarnings("unchecked")
+        List<String> messages =
+                (List<String>)
+                        errors.computeIfAbsent(
+                                "requiredFieldsActionableMessages", k -> new ArrayList<>());
+        for (String requirement : state.requires()) {
+            if (missing.contains(requirement)) {
+                continue;
+            }
+            boolean satisfied =
+                    REQUIRES_APPOINTMENT.equals(requirement)
+                            ? hasActiveAppointment(dossier)
+                            : !isBlankValue(getFieldValue(dossier, requirement));
+            if (!satisfied) {
+                missing.add(requirement);
+                messages.add(requirementMessage(requirement, state.code()));
+            }
+        }
+        if (missing.isEmpty()) {
+            errors.remove("missingRequiredFields");
+            errors.remove("requiredFieldsActionableMessages");
+        }
+    }
+
+    static final String REQUIRES_APPOINTMENT = "appointment";
+
+    private boolean hasActiveAppointment(Dossier dossier) {
+        List<AppointmentEntity> appointments = dossier.getAppointments();
+        return appointments != null
+                && appointments.stream()
+                        .anyMatch(a -> a.getStatus() != AppointmentStatus.CANCELLED);
+    }
+
+    private static String requirementMessage(String requirement, String state) {
+        return switch (requirement) {
+            case "lossReason" -> "Indiquez la raison de la perte.";
+            case "wonReason" -> "Indiquez la raison du gain.";
+            case REQUIRES_APPOINTMENT -> "Planifiez d'abord un rendez-vous sur ce dossier.";
+            default ->
+                    String.format(
+                            "Le champ '%s' est requis pour passer en %s.", requirement, state);
+        };
+    }
+
     private static boolean isBlankValue(Object value) {
         return value == null || (value instanceof String str && str.isBlank());
+    }
+
+    /** L'utilisateur courant peut-il emprunter cette transition (rôles déclarés) ? */
+    public static boolean isAllowedForCurrentUser(DossierWorkflow.Transition rule) {
+        return rule.allowedRoles().isEmpty()
+                || CurrentUser.hasAnyRole(rule.allowedRoles().toArray(String[]::new));
     }
 
     /** Rôles autorisés déclarés par la transition ; aucun rôle déclaré = pas de restriction. */

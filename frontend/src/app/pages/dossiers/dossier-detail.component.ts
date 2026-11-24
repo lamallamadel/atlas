@@ -1,4 +1,5 @@
 import { DossierAssigneeCardComponent } from '../../components/dossier-assignee-card.component';
+import { DossierStatusCardComponent } from '../../components/dossier-status-card.component';
 import { ChangeDetectorRef, Component, OnInit, OnDestroy, viewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteResponse, PartiePrenanteRole } from '../../services/dossier-api.service';
@@ -82,6 +83,7 @@ export interface WhatsAppTemplate {
     styleUrls: ['./dossier-detail.component.css'],
     imports: [
         DossierAssigneeCardComponent,
+        DossierStatusCardComponent,
       CommonModule,
       DossierMatchingComponent,
       FormsModule, 
@@ -960,6 +962,26 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
   }
 
   /** Agent changé depuis la carte « Agent » : on garde le reste du dossier affiché. */
+  /** Libellé du statut dans l'en-tête (l'enum, projection du code de statut). */
+  get statusLabel(): string {
+    if (!this.dossier) return '';
+    return this.statusOptions.find(o => o.value === this.dossier!.status)?.label ?? String(this.dossier.status);
+  }
+
+  /** Statut changé depuis la carte « Statut » : tout le dossier est rechargé (historique, activité). */
+  onStatusChanged(updated: DossierResponse): void {
+    if (!this.dossier) return;
+    this.dossier = {
+      ...this.dossier,
+      status: updated.status,
+      statusCode: updated.statusCode ?? null,
+      lossReason: updated.lossReason ?? null,
+      wonReason: updated.wonReason ?? null,
+    };
+    this.cdr.markForCheck();
+    this.loadDossier();
+  }
+
   onAssigneeChanged(updated: DossierResponse): void {
     if (!this.dossier) return;
     this.dossier = {

@@ -41,6 +41,11 @@ public class DossierResponse {
     @Schema(description = "Nom de l'agent assigné", nullable = true)
     private String assignedToName;
 
+    @Schema(
+            description =
+                    "Informations saisies par le prospect (formulaire de démo : city, actorType, needs…)")
+    private java.util.Map<String, Object> leadDetails;
+
     @Schema(description = "Date d'assignation", nullable = true)
     private LocalDateTime assignedAt;
 
@@ -264,6 +269,14 @@ public class DossierResponse {
 
     public void setAssignedToName(String assignedToName) {
         this.assignedToName = assignedToName;
+    }
+
+    public java.util.Map<String, Object> getLeadDetails() {
+        return leadDetails;
+    }
+
+    public void setLeadDetails(java.util.Map<String, Object> leadDetails) {
+        this.leadDetails = leadDetails;
     }
 
     public LocalDateTime getAssignedAt() {

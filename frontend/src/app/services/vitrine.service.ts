@@ -38,6 +38,15 @@ export interface PublicLeadPayload {
   email?: string | null;
   message?: string | null;
   consent: boolean;
+  /** Demande de démo : profil de l'agence, gardé tel quel sur le dossier (lead_details). */
+  demo?: {
+    city?: string;
+    actorType?: string;
+    teamSize?: string;
+    listingVolume?: string;
+    desiredPlan?: string;
+    needs?: string[];
+  } | null;
 }
 
 /** Message lisible pour une demande publique refusée ou en échec. */
@@ -77,7 +86,15 @@ export class VitrineService {
       phone: data.tel,
       email: data.email,
       message: details,
-      consent: data.consent
+      consent: data.consent,
+      demo: {
+        city: data.ville || undefined,
+        actorType: data.actorType || undefined,
+        teamSize: data.teamSize || undefined,
+        listingVolume: data.listingVolume || undefined,
+        desiredPlan: data.desiredPlan || undefined,
+        needs: data.needs,
+      },
     });
   }
 

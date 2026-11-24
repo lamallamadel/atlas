@@ -9,6 +9,7 @@ import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusHistoryResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
+import com.example.backend.dto.DossierTransitionsResponse;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.exception.ErrorResponse;
 import com.example.backend.service.DossierAdvancedFilterService;
@@ -203,6 +204,9 @@ public class DossierController {
                                             + " identifiant d'utilisateur")
                     @RequestParam(required = false)
                     String assignee,
+            @Parameter(description = "Type de dossier, ex. CRM_LEAD_B2B_DEMO")
+                    @RequestParam(required = false)
+                    String caseType,
             @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0")
                     int page,
             @Parameter(description = "Page size (min=1, default=20)", example = "20")
@@ -224,7 +228,7 @@ public class DossierController {
         Pageable pageable = createPageable(page, size, sort);
         Page<DossierResponse> response =
                 dossierService.list(
-                        status, leadPhone, annonceId, leadSource, q, assignee, pageable);
+                        status, leadPhone, annonceId, leadSource, q, assignee, caseType, pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -275,6 +279,17 @@ public class DossierController {
             @Valid @RequestBody BulkReassignRequest request) {
         return ResponseEntity.ok(
                 dossierAssignmentService.bulkAssign(request.ids(), request.userId()));
+    }
+
+    @GetMapping("/{id}/transitions")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(
+            summary = "Available status transitions",
+            description =
+                    "Statut courant et transitions permises par le workflow du type de dossier,"
+                            + " avec ce que chacune exige (ADR 0004)")
+    public ResponseEntity<DossierTransitionsResponse> transitions(@PathVariable Long id) {
+        return ResponseEntity.ok(dossierService.transitions(id));
     }
 
     @PatchMapping("/{id}/status")

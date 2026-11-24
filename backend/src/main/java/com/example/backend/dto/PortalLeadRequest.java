@@ -38,6 +38,55 @@ public class PortalLeadRequest {
     @Schema(description = "Accord pour être recontacté (case cochée). Obligatoire.")
     private Boolean consent;
 
+    @Schema(description = "Demande de démo (vitrine) : profil de l'agence, facultatif")
+    @jakarta.validation.Valid
+    private DemoDetails demo;
+
+    /** Profil saisi dans le formulaire de démo de la vitrine. */
+    public record DemoDetails(
+            @Size(max = 100) String city,
+            @Size(max = 50) String actorType,
+            @Size(max = 50) String teamSize,
+            @Size(max = 50) String listingVolume,
+            @Size(max = 50) String desiredPlan,
+            @Size(max = 10) java.util.List<@Size(max = 50) String> needs) {
+
+        /** Champs renseignés seulement, pour {@code dossier.lead_details}. */
+        public java.util.Map<String, Object> toMap() {
+            java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+            put(map, "city", city);
+            put(map, "actorType", actorType);
+            put(map, "teamSize", teamSize);
+            put(map, "listingVolume", listingVolume);
+            put(map, "desiredPlan", desiredPlan);
+            if (needs != null) {
+                java.util.List<String> kept =
+                        needs.stream()
+                                .filter(n -> n != null && !n.isBlank())
+                                .map(String::trim)
+                                .toList();
+                if (!kept.isEmpty()) {
+                    map.put("needs", kept);
+                }
+            }
+            return map;
+        }
+
+        private static void put(java.util.Map<String, Object> map, String key, String value) {
+            if (value != null && !value.isBlank()) {
+                map.put(key, value.trim());
+            }
+        }
+    }
+
+    public DemoDetails getDemo() {
+        return demo;
+    }
+
+    public void setDemo(DemoDetails demo) {
+        this.demo = demo;
+    }
+
     public Long getAnnonceId() {
         return annonceId;
     }
