@@ -2,10 +2,10 @@
   <div class="datetime-row" style="display: flex; gap: 12px; align-items: flex-end;">
     <div class="ds-field" style="flex: 2;">
       @if (label()) {
-        <label class="ds-field__label">{{ label() }} @if (required()) { <span style="color: var(--ds-error);">*</span> }</label>
+        <label [for]="uid + '-5'" class="ds-field__label">{{ label() }} @if (required()) { <span style="color: var(--ds-error);">*</span> }</label>
       }
       <div class="ds-field__wrap">
-        <input 
+        <input [id]="uid + '-5'" 
           type="date" 
           class="ds-field__input" 
           formControlName="date"
@@ -14,9 +14,9 @@
     </div>
 
     <div class="ds-field" style="flex: 1;">
-      <label class="ds-field__label">Heure</label>
+      <label [for]="uid + '-17'" class="ds-field__label">Heure</label>
       <div class="ds-field__wrap">
-        <input 
+        <input [id]="uid + '-17'" 
           type="time" 
           class="ds-field__input" 
           formControlName="time"

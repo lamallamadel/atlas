@@ -1,10 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { annonceStatusLabel, formatAnnoncePrice } from '../../utils/annonce-format';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
-import { ColumnConfig, RowAction } from '../../components/generic-table.component';
-import { FilterPresetService } from '../../services/filter-preset.service';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe, CommonModule } from '@angular/common';
@@ -201,7 +199,7 @@ export class AnnoncesComponent implements OnInit {
     this.applyFilters();
   }
 
-  removeFilter(filter: any): void { /* ... */ }
+  removeFilter(_filter: any): void { /* ... */ }
 
   createAnnonce(): void { this.router.navigate(['/pro/annonces/new']); }
   goToAnnonce(id: number): void { this.router.navigate(['/pro/annonces', id]); }

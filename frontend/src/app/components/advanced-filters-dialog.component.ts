@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { AdvancedFilter, FilterField, AdvancedFiltersComponent } from './advanced-filters.component';
 import { FilterPreset, FilterPresetRequest, FilterPresetService } from '../services/filter-preset.service';

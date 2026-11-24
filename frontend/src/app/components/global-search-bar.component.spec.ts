@@ -1,3 +1,5 @@
+import { SecurityContext } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -167,14 +169,19 @@ describe('GlobalSearchBarComponent', () => {
   });
 
   it('should highlight text with search query', () => {
-    const text = 'hello world';
-    const query = 'world';
+    const html = (v: unknown) => TestBed.inject(DomSanitizer).sanitize(SecurityContext.HTML, v as SafeHtml) ?? '';
 
-    const highlighted = component['highlightText'](text, query);
+    expect(html(component['highlightText']('hello world', 'world'))).toBe('hello <mark>world</mark>');
+  });
 
-    expect(highlighted).toContain('<mark>');
-    expect(highlighted).toContain('world');
-    expect(highlighted).toContain('</mark>');
+  it('should escape data before highlighting (no stored XSS from a lead name)', () => {
+    const raw = (v: unknown) => (v as { changingThisBreaksApplicationSecurity: string }).changingThisBreaksApplicationSecurity;
+
+    const out = raw(component['highlightText']('<img src=x onerror=alert(1)> Dupont', 'dupont'));
+
+    expect(out).not.toContain('<img');
+    expect(out).toBe('&lt;img src=x onerror=alert(1)&gt; <mark>Dupont</mark>');
+    expect(raw(component['highlightText']('a<b', ''))).toBe('a&lt;b');
   });
 
   it('should calculate fuzzy score correctly', () => {

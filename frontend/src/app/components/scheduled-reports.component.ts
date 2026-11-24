@@ -82,9 +82,9 @@ import {
               <ds-input label="Nom du rapport" formControlName="name" required="true" placeholder="ex. Rapport hebdomadaire des ventes"></ds-input>
               
               <div class="ds-field">
-                <label class="ds-field__label">Description</label>
+                <label for="scheduled-reports-field-85" class="ds-field__label">Description</label>
                 <div class="ds-field__wrap">
-                  <textarea class="ds-field__input" formControlName="description" rows="2" style="height: auto; padding: 12px;"></textarea>
+                  <textarea id="scheduled-reports-field-85" class="ds-field__input" formControlName="description" rows="2" style="height: auto; padding: 12px;"></textarea>
                 </div>
               </div>
 
@@ -138,9 +138,9 @@ import {
               </ds-select>
 
               <div class="ds-field">
-                <label class="ds-field__label">Destinataires (emails séparés par des virgules)</label>
+                <label for="scheduled-reports-field-141" class="ds-field__label">Destinataires (emails séparés par des virgules)</label>
                 <div class="ds-field__wrap">
-                  <textarea class="ds-field__input" formControlName="recipientsText"
+                  <textarea id="scheduled-reports-field-141" class="ds-field__input" formControlName="recipientsText"
                     placeholder="email1@example.com, email2@example.com"
                     rows="2" style="height: auto; padding: 12px;"></textarea>
                 </div>

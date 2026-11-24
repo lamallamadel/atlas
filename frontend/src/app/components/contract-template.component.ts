@@ -67,9 +67,9 @@ import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.m
               </ds-select>
               
               <div class="ds-field">
-                <label class="ds-field__label">Description</label>
+                <label for="contract-template-field-70" class="ds-field__label">Description</label>
                 <div class="ds-field__wrap">
-                  <textarea class="ds-field__input" formControlName="description" rows="3" style="height: auto; padding: 12px;"></textarea>
+                  <textarea id="contract-template-field-70" class="ds-field__input" formControlName="description" rows="3" style="height: auto; padding: 12px;"></textarea>
                 </div>
               </div>
 

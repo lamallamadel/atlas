@@ -3,15 +3,12 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { WhatsAppTemplate } from './whatsapp-message-input.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
-  DsButtonComponent, 
-  DsIconComponent, 
+import {
+  DsButtonComponent,
+  DsIconComponent,
   DsInputComponent,
   DsCardComponent,
-  DsBadgeComponent,
-  DsDialogHeaderComponent,
-  DsDialogContentComponent,
-  DsDialogActionsComponent
+  DsBadgeComponent
 } from '../design-system';
 
 export interface TemplateSelectionData {

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { CommonModule } from '@angular/common';
@@ -66,9 +66,9 @@ export interface SignatureRequestDialogData {
         </ds-input>
     
         <div class="ds-field">
-          <label class="ds-field__label">Message de l'email</label>
+          <label for="signature-request-dialog-field-69" class="ds-field__label">Message de l'email</label>
           <div class="ds-field__wrap">
-            <textarea 
+            <textarea id="signature-request-dialog-field-69" 
               class="ds-field__input" 
               formControlName="emailMessage" 
               rows="4"

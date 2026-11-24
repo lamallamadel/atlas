@@ -37,8 +37,8 @@ describe('GenericTableComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize dataSource with provided data', () => {
-    expect(component.dataSource.data).toEqual(mockData);
+  it('should initialize ds rows with provided data', () => {
+    expect(component.dsRows).toEqual(mockData);
   });
 
   it('should emit actionTriggered event when action is triggered', () => {

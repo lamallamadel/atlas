@@ -1,8 +1,8 @@
-import { Component, OnInit, OnChanges, OnDestroy, input, output, viewChild, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnChanges, OnDestroy, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
-import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { listStaggerAnimation } from '../animations';
 import { 
   DsButtonComponent, 
@@ -169,9 +169,11 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   masterToggle(): void {
-    this.isAllSelected() ?
-      this.selection.clear() :
+    if (this.isAllSelected()) {
+      this.selection.clear();
+    } else {
       this.dsRows.forEach(row => this.selection.select(row));
+    }
     this.selectionChange.emit(this.selection.selected);
     this.dsSelectedRows = [...this.selection.selected];
   }
@@ -208,7 +210,7 @@ export class GenericTableComponent implements OnInit, OnChanges, OnDestroy {
     return row[key];
   }
 
-  formatValue(value: any, column: ColumnConfig, row: any): string {
+  formatValue(value: any, _column: ColumnConfig, _row: any): string {
     if (value == null) return '—';
     return String(value);
   }

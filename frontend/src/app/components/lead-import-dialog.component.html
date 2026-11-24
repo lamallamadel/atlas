@@ -14,7 +14,12 @@
         (dragover)="onDragOver($event)"
         (dragleave)="onDragLeave($event)"
         (drop)="onDrop($event)"
-        (click)="fileInput.click()">
+        role="button"
+        tabindex="0"
+        aria-label="Choisir un fichier à importer"
+        (click)="fileInput.click()"
+        (keydown.enter)="fileInput.click()"
+        (keydown.space)="$event.preventDefault(); fileInput.click()">
         
         <input 
           #fileInput 

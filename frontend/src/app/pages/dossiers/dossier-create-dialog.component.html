@@ -74,12 +74,12 @@
       
       <div class="ds-form-stack">
         <div class="autocomplete-field ds-field" style="position: relative;">
-          <label class="ds-field__label">Rechercher une annonce</label>
+          <label for="dossier-create-dialog-field-77" class="ds-field__label">Rechercher une annonce</label>
           <div class="ds-field__wrap">
             <span class="ds-field__prefix" aria-hidden="true">
               <ds-icon name="search" [size]="20"></ds-icon>
             </span>
-            <input
+            <input id="dossier-create-dialog-field-77"
               class="ds-field__input ds-field__input--has-prefix"
               [formControl]="annonceSearchControl"
               placeholder="Titre, ville, prix..."
@@ -90,7 +90,7 @@
           @if (showAnnonceSuggestions) {
             <div class="annonce-dropdown" role="listbox">
               @for (annonce of filteredAnnonces | async; track annonce.id) {
-                <button type="button" class="annonce-option" role="option"
+                <button type="button" class="annonce-option" role="option" aria-selected="false"
                   (mousedown)="onAnnonceSelected(annonce)">
                   <span style="font-weight: 600; font-size: 14px; display: block;">{{ annonce.title }}</span>
                   <span style="font-size: 12px; color: var(--ds-text-faint);">{{ annonce.city }} • {{ annonce.price }} {{ annonce.currency }}</span>

@@ -95,7 +95,7 @@
 
             <div class="ds-form-stack">
               <div class="ds-field">
-                <label class="ds-field__label">Secret de signature</label>
+                <span class="ds-field__label">Secret de signature</span>
                 <div class="ds-field__wrap">
                   <code class="ds-field__input" style="display: flex; align-items: center; justify-content: space-between; height: 38px; padding: 0 12px;">
                     {{ selectedWebhook.secret ? selectedWebhook.secret.substring(0, 24) + '...' : 'N/A' }}
@@ -203,9 +203,9 @@
             </ds-select>
 
             <div class="ds-field">
-              <label class="ds-field__label">Description</label>
+              <label [for]="'developer-portal-field-206-' + $index" class="ds-field__label">Description</label>
               <div class="ds-field__wrap">
-                <textarea class="ds-field__input" [(ngModel)]="newApiKey.description" rows="3" style="height: auto; padding: 12px;"></textarea>
+                <textarea [id]="'developer-portal-field-206-' + $index" class="ds-field__input" [(ngModel)]="newApiKey.description" rows="3" style="height: auto; padding: 12px;"></textarea>
               </div>
             </div>
 

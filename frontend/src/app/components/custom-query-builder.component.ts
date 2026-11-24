@@ -87,9 +87,9 @@ import {
               <ds-input label="Nom de la requête" [(ngModel)]="editingQuery.name" required="true" placeholder="ex. Liste des prospects par ville"></ds-input>
               
               <div class="ds-field">
-                <label class="ds-field__label">Description</label>
+                <label for="custom-query-builder-field-90" class="ds-field__label">Description</label>
                 <div class="ds-field__wrap">
-                  <textarea class="ds-field__input" [(ngModel)]="editingQuery.description" rows="2" style="height: auto; padding: 12px;"></textarea>
+                  <textarea id="custom-query-builder-field-90" class="ds-field__input" [(ngModel)]="editingQuery.description" rows="2" style="height: auto; padding: 12px;"></textarea>
                 </div>
               </div>
 
@@ -100,9 +100,9 @@ import {
               </ds-select>
 
               <div class="ds-field">
-                <label class="ds-field__label">Requête SQL</label>
+                <label for="custom-query-builder-field-103" class="ds-field__label">Requête SQL</label>
                 <div class="ds-field__wrap">
-                  <textarea class="ds-field__input sql-editor" [(ngModel)]="editingQuery.sqlQuery"
+                  <textarea id="custom-query-builder-field-103" class="ds-field__input sql-editor" [(ngModel)]="editingQuery.sqlQuery"
                     rows="10"
                     placeholder="SELECT * FROM dossier WHERE ..."
                     style="height: auto; padding: 12px; font-family: var(--ds-font-mono); font-size: 13px;"></textarea>

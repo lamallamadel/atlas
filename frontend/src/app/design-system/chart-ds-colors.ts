@@ -83,7 +83,7 @@ export function colorToRgba(color: string, alpha: number): string {
     const m = c.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
     if (m) return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${alpha})`;
   }
-  let hex = c.startsWith('#') ? c.slice(1) : c;
+  const hex = c.startsWith('#') ? c.slice(1) : c;
   if (/^[0-9a-fA-F]{3}$/.test(hex)) {
     const r = parseInt(hex[0] + hex[0], 16);
     const g = parseInt(hex[1] + hex[1], 16);

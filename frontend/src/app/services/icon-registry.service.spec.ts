@@ -84,14 +84,10 @@ describe('IconRegistryService', () => {
 
     service.loadIcons().subscribe(() => {
       count++;
-      if (count === 2) {
-      }
     });
 
     service.loadIcons().subscribe(() => {
       count++;
-      if (count === 2) {
-      }
     });
 
     const requests = httpMock.match('/assets/icons/real-estate-icons.svg');

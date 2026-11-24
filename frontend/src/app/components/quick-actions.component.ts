@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { DsDialogService } from '../design-system';
 import { DossierResponse, DossierStatus } from '../services/dossier-api.service';
-import { MessageFormDialogComponent, MessageFormData } from './message-form-dialog.component';
+import { MessageFormDialogComponent } from './message-form-dialog.component';
 import { AppointmentFormDialogComponent, AppointmentFormData } from './appointment-form-dialog.component';
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { QuickActionsService, QuickAction, RecentAction } from '../services/quick-actions.service';

@@ -1,7 +1,8 @@
 {
   "root": true,
   "ignorePatterns": [
-    "projects/**/*"
+    "projects/**/*",
+    "src/stories/**/*"
   ],
   "overrides": [
     {
@@ -31,7 +32,10 @@
           "error",
           {
             "type": "attribute",
-            "prefix": "app",
+            "prefix": [
+              "app",
+              "ds"
+            ],
             "style": "camelCase"
           }
         ],
@@ -39,7 +43,10 @@
           "error",
           {
             "type": "element",
-            "prefix": "app",
+            "prefix": [
+              "app",
+              "ds"
+            ],
             "style": "kebab-case"
           }
         ]
@@ -71,7 +78,10 @@
           {
             "patterns": [
               {
-                "group": ["@angular/material", "@angular/material/*"],
+                "group": [
+                  "@angular/material",
+                  "@angular/material/*"
+                ],
                 "message": "Use the Atlasia Design System (ds-* components from 'design-system') instead of Angular Material. See P3 migration plan."
               }
             ]

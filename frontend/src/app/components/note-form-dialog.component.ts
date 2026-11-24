@@ -3,15 +3,14 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ActivityVisibility } from '../services/activity-api.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { 
-  DsButtonComponent, 
-  DsIconComponent, 
-  DsSelectComponent, 
+import {
+  DsButtonComponent,
+  DsIconComponent,
+  DsSelectComponent,
   DsSelectOption,
   DsDialogHeaderComponent,
   DsDialogContentComponent,
-  DsDialogActionsComponent,
-  DsCardComponent
+  DsDialogActionsComponent
 } from '../design-system';
 
 export interface NoteFormDialogData {

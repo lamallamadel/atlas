@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, FormControl, AbstractControl, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragPlaceholder } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPlaceholder } from '@angular/cdk/drag-drop';
 import {
   AnnonceApiService,
   AnnonceCreateRequest,
@@ -11,15 +11,12 @@ import {
 } from '../../services/annonce-api.service';
 import { LoadingSkeletonComponent } from '../../components/loading-skeleton.component';
 import { CommonModule } from '@angular/common';
-import { 
-  DsSkeletonComponent, 
-  DsSelectComponent, 
-  DsSelectOption, 
-  DsButtonComponent, 
-  DsIconComponent, 
+import {
+  DsSelectComponent,
+  DsSelectOption,
+  DsButtonComponent,
+  DsIconComponent,
   DsInputComponent,
-  DsBadgeComponent,
-  DsCardComponent,
   DsToastService,
   StageStepperComponent,
   DsStage

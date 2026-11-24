@@ -335,6 +335,11 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
+    // Échap ferme le menu mobile (le fond cliquable n'est pas joignable au clavier).
+    if (event.key === 'Escape' && this.mobileSidebarOpen()) {
+      this.closeMobileSidebar();
+      return;
+    }
     this.keyboardShortcutService.handleKeyDown(event);
   }
 }

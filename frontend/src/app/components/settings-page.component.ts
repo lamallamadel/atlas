@@ -8,20 +8,18 @@ import { ThemeService } from '../services/theme.service';
 import { NotificationService } from '../services/notification.service';
 import { AuthService } from '../services/auth.service';
 import { DEFAULT_PREFERENCES } from '../models/user-preferences.model';
-import { 
-  DsCardComponent, 
-  DsButtonComponent, 
-  DsIconComponent, 
-  DsSelectComponent, 
-  DsSelectOption, 
-  DsInputComponent, 
-  DsCheckboxComponent,
+import {
+  DsCardComponent,
+  DsButtonComponent,
+  DsIconComponent,
+  DsSelectComponent,
+  DsSelectOption,
+  DsInputComponent,
   DsSkeletonComponent,
   DsTabsComponent,
   DsTab,
   DsSwitchComponent,
-  DsRadioGroupComponent,
-  DsRadioOption
+  DsRadioGroupComponent
 } from '../design-system';
 import { CommonModule } from '@angular/common';
 

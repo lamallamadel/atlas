@@ -22,6 +22,9 @@
               cdkDrag
               [cdkDragDisabled]="!editable()"
               style="padding: 8px; border-radius: var(--ds-radius-md); overflow: hidden; position: relative; cursor: pointer; transition: transform 0.2s;"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="'Agrandir la photo ' + (photos().indexOf(photo) + 1)"
               (click)="openLightbox(photos().indexOf(photo))"
               (keydown.enter)="openLightbox(photos().indexOf(photo))">
               
@@ -76,7 +79,9 @@
       role="dialog"
       aria-modal="true"
       style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; flex-direction: column;"
-      (click)="closeLightbox()">
+      tabindex="-1"
+      (click)="closeLightbox()"
+      (keydown.escape)="closeLightbox()">
       
       <!-- Lightbox Header -->
       <header class="lightbox-header" style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; color: white;">
@@ -96,6 +101,7 @@
       </header>
 
       <!-- Main Image -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- bloque seulement la fermeture par clic sur le fond -->
       <div class="lightbox-main" style="flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;" (click)="$event.stopPropagation()">
         @if (currentPhotoIndex > 0) {
           <ds-button variant="icon" size="lg" (dsClick)="previousPhoto()" style="position: absolute; left: 24px; color: white; background: rgba(255,255,255,0.1);"><ds-icon name="bars-asc" [size]="32" style="transform: rotate(90deg);"></ds-icon></ds-button>
@@ -103,6 +109,7 @@
         
         <img
           [src]="getCurrentPhoto()?.url"
+          [alt]="'Photo ' + (currentPhotoIndex + 1) + ' sur ' + photos().length"
           class="lightbox-image"
           [style.transform]="'scale(' + lightboxZoom + ') translate(' + lightboxTranslateX + 'px, ' + lightboxTranslateY + 'px)'"
           style="max-width: 90%; max-height: 80vh; object-fit: contain; transition: transform 0.2s;" />
@@ -113,6 +120,7 @@
       </div>
 
       <!-- Thumbnails -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- bloque seulement la fermeture par clic sur le fond -->
       <footer class="lightbox-footer" style="padding: 24px; background: rgba(0,0,0,0.5); overflow-x: auto; display: flex; gap: 12px; justify-content: center;" (click)="$event.stopPropagation()">
         @for (photo of photos(); track photo; let i = $index) {
           <div
@@ -120,8 +128,13 @@
             [style.opacity]="i === currentPhotoIndex ? '1' : '0.4'"
             [style.border]="i === currentPhotoIndex ? '2px solid var(--ds-primary)' : '2px solid transparent'"
             style="width: 60px; height: 60px; border-radius: 4px; overflow: hidden; cursor: pointer; transition: all 0.2s;"
-            (click)="goToThumbnail(i)">
-            <img [src]="getThumbnailUrl(photo)" style="width: 100%; height: 100%; object-fit: cover;" />
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="'Voir la photo ' + (i + 1)"
+            [attr.aria-current]="i === currentPhotoIndex"
+            (click)="goToThumbnail(i)"
+            (keydown.enter)="goToThumbnail(i)">
+            <img [src]="getThumbnailUrl(photo)" alt="" style="width: 100%; height: 100%; object-fit: cover;" />
           </div>
         }
       </footer>

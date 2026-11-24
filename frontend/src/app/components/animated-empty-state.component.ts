@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { ActionButtonConfig, HelpLinkConfig } from './empty-state-actions.types';
 import { LottieAnimationType, LottieAnimationComponent } from './lottie-animation.component';

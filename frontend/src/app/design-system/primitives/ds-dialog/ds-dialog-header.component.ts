@@ -59,5 +59,7 @@ import { DsButtonComponent } from '../ds-button/ds-button.component';
 })
 export class DsDialogHeaderComponent {
   @Input() subtitle?: string;
+  // API publique du design system, utilisée par les dialogues : garder le nom `close`.
+  // eslint-disable-next-line @angular-eslint/no-output-native
   @Output() close = new EventEmitter<void>();
 }

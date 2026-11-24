@@ -45,7 +45,7 @@ export type DsTextareaResize = 'none' | 'vertical' | 'horizontal' | 'both' | 'au
         @if (error) {
           <p class="ds-field__error" [id]="inputId + '-err'" role="alert">{{ error }}</p>
         }
-        @if (showCount && maxLength != null) {
+        @if (showCount && maxLength !== null && maxLength !== undefined) {
           <span class="ds-field__count" [id]="inputId + '-count'" [class.ds-field__count--over]="(value?.length || 0) >= maxLength">
             {{ value?.length || 0 }} / {{ maxLength }}
           </span>

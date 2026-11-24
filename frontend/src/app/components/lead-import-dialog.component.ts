@@ -1,16 +1,14 @@
 import { Component, inject } from '@angular/core';
-import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { DialogRef } from '@angular/cdk/dialog';
 import { LeadApiService } from '../services/lead-api.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { 
-  DsButtonComponent, 
-  DsIconComponent, 
-  DsRadioGroupComponent, 
+import {
+  DsButtonComponent,
+  DsIconComponent,
+  DsRadioGroupComponent,
   DsRadioOption,
-  DsSkeletonComponent,
   DsCardComponent,
-  DsBadgeComponent,
   DsProgressBarComponent,
   DsToastService,
   DsDialogHeaderComponent,

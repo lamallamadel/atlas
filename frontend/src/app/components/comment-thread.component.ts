@@ -16,6 +16,8 @@ import {
   DsToastService
 } from '../design-system';
 
+let nextUid = 0;
+
 @Component({
   selector: 'app-comment-thread',
   standalone: true,
@@ -36,6 +38,9 @@ import {
   styleUrls: ['./comment-thread.component.scss']
 })
 export class CommentThreadComponent implements OnInit {
+  /** Identifiant propre à l'instance : plusieurs comment-thread peuvent coexister sur une page. */
+  readonly uid = `comment-thread-${++nextUid}`;
+
   private readonly overlay = inject(Overlay);
 
   /** Menu export du fil */

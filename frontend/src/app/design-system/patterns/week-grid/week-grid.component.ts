@@ -67,7 +67,10 @@ const TYPE_COLORS: Record<WeekGridEventType, { bg: string; text: string; border:
                     [style.background]="getColor(evt.type).bg"
                     [style.color]="getColor(evt.type).text"
                     [style.border-left]="'3px solid ' + getColor(evt.type).border"
+                    role="button"
+                    tabindex="0"
                     (click)="eventClick.emit(evt)"
+                    (keydown.enter)="eventClick.emit(evt)"
                     [title]="evt.title">
                     {{ evt.title }}
                   </div>
@@ -91,7 +94,9 @@ const TYPE_COLORS: Record<WeekGridEventType, { bg: string; text: string; border:
               [class.wg__cell--today]="day.isToday"
               role="gridcell"
               [attr.aria-label]="day.dayName + ' ' + hour + 'h'"
-              (click)="onCellClick(day.date, hour)">
+              tabindex="-1"
+              (click)="onCellClick(day.date, hour)"
+              (keydown.enter)="onCellClick(day.date, hour)">
 
               <!-- Événements dans cette cellule -->
               @for (evt of getCellEvents(day.date, hour); track evt.id) {
