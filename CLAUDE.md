@@ -109,7 +109,7 @@ docker-compose down
 
 **Authentication:** Keycloak (OAuth2/OIDC). Backend is a stateless OAuth2 Resource Server validating JWTs. Frontend uses `angular-oauth2-oidc`. When `issuer-uri` is blank/"mock", backend accepts mock tokens (for E2E tests).
 
-**Agency roles (`security/`):** realm roles `ADMIN`, `MANAGER`, `AGENT` (legacy `PRO` = agent), `SUPER_ADMIN` (platform). `SecurityConfig.toAuthorities` also grants `ROLE_PRO` to agents and managers, so `hasAnyRole('ADMIN','PRO')` means "agency member". Fine-grained rules go through `AccessPolicy` (assign, trust override, invite, team management) — don't add role checks elsewhere. Spec: `docs/atlas-immobilier/03_technique/10_rbac_permissions.md`.
+**Agency roles (`security/`):** realm roles `ADMIN`, `MANAGER`, `AGENT` (legacy `PRO` = agent), `SUPER_ADMIN` (platform), `OWNER` (private owner, personal org `org_type = OWNER`, only `/api/v1/owner/**` — every other `/api/**` route rejects it). `SecurityConfig.toAuthorities` also grants `ROLE_PRO` to agents and managers, so `hasAnyRole('ADMIN','PRO')` means "agency member". Fine-grained rules go through `AccessPolicy` (assign, trust override, invite, team management) — don't add role checks elsewhere. Spec: `docs/atlas-immobilier/03_technique/10_rbac_permissions.md`.
 
 **"My dossiers" scope (`security/DossierScope`):** when an agency enables `restrictAgentsToOwnDossiers`, `HibernateFilterInterceptor` enables `dossierScopeFilter` for agents and `DossierScopeGuard` (POST_LOAD / PRE_INSERT) returns 404 on out-of-scope loads by id. A new entity with a `dossier_id` must get the `@Filter` **and** be added to `DossierScopeGuard.GUARDED` (a test checks both lists match). Native SQL, Elasticsearch and shared caches must handle `DossierScope.isRestricted()` themselves.
 
@@ -127,10 +127,10 @@ docker-compose down
 - **PostgreSQL 16** in Docker/staging/prod; **H2** for local dev and unit tests
 - Multi-tenant `org_id` on all tables
 - **Flyway migrations are split into three folders** under `backend/src/main/resources/db/`:
-  - **`migration/`** — cross-database base migrations (V1–V162 at time of writing). Must be portable between H2 and PostgreSQL: standard SQL only, no partial indexes, no GIN/GiST, no PL/pgSQL, no `ON CONFLICT`; use the `${json_type}` placeholder for JSON/JSONB columns.
+  - **`migration/`** — cross-database base migrations (V1–V165 at time of writing). Must be portable between H2 and PostgreSQL: standard SQL only, no partial indexes, no GIN/GiST, no PL/pgSQL, no `ON CONFLICT`; use the `${json_type}` placeholder for JSON/JSONB columns.
   - **`migration-postgres/`** — PostgreSQL-only optimizations (V100–V107+): partial indexes, GIN/full-text, PL/pgSQL, upserts.
   - **`migration-h2/`** — H2-only variants (V200+) for cases where the base migration cannot be made portable. Do NOT put H2-specific DDL in the base `migration/` folder.
-- **Next available version numbers:** V163+ (highest is `V162__Add_dossier_lead_details.sql`). V140, V143, V144 are also unused slots but out-of-order migrations are risky — prefer V163+. The old V139 duplicate has been resolved: `V139__Add_whatsapp_quota_tier_and_cost_tracking.sql` stayed, the other was renumbered to `V142__Add_reminder_strategy_to_appointment.sql`.
+- **Next available version numbers:** V166+ (highest is `V165__Create_phone_verification.sql`). V140, V143, V144 are also unused slots but out-of-order migrations are risky — prefer V166+. The old V139 duplicate has been resolved: `V139__Add_whatsapp_quota_tier_and_cost_tracking.sql` stayed, the other was renumbered to `V142__Add_reminder_strategy_to_appointment.sql`.
 - In production the DB may have additional migrations applied outside this repo; always check before picking a version number: `SELECT version FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5`.
 
 ### Spring Profiles
