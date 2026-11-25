@@ -1,3 +1,4 @@
+import { DsBadgeComponent } from '../../../design-system';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PortailService, Listing, REPORT_REASONS } from '../../../services/portail.service';
@@ -9,7 +10,7 @@ import { DecimalPipe } from '@angular/common';
     selector: 'app-annonce-detail',
     templateUrl: './annonce-detail.component.html',
     styleUrls: ['./annonce-detail.component.scss'],
-    imports: [RouterLink, FormsModule, DecimalPipe]
+    imports: [RouterLink, FormsModule, DecimalPipe, DsBadgeComponent]
 })
 export class AnnonceDetailComponent implements OnInit {
 

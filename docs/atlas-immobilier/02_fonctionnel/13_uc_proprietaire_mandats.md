@@ -1,6 +1,6 @@
 # Cas d'usage n°1 — Le propriétaire publie seul ou confie son bien à un agent
 
-> **Statut**: TO-BE (spec à valider avant code)  
+> **Statut**: Lot A livré (UC-P1 à UC-P4, hors messagerie et visites) ; lots B et C TO-BE  
 > **Dernière vérification**: 2026-11-25  
 > **Source of truth**: Oui (espace propriétaire, bourse aux mandats, mandat)  
 > **Dépendances**:  
@@ -80,10 +80,13 @@ flowchart LR
 
 ### UC-P1 — Créer son compte propriétaire
 
-1. Depuis le portail (« Publier mon bien »), le visiteur saisit son nom et son téléphone.
-2. Il reçoit un code à usage unique (WhatsApp, à défaut SMS) et le saisit. Le téléphone est alors **vérifié**.
-3. Il accepte les conditions d'utilisation et la politique de confidentialité (consentement tracé).
-4. La plateforme crée son compte Keycloak (rôle `OWNER`) et son **organisation personnelle** (`org_type = OWNER`).
+1. Depuis le portail (« Publier mon bien », `/proprietaire/inscription`), le visiteur saisit son téléphone.
+2. Il reçoit un code à usage unique à 6 chiffres (WhatsApp, à défaut SMS), valable 10 minutes, 5 essais au plus. Il le saisit avec son nom, un mot de passe (8 caractères minimum) et, s'il le souhaite, son e-mail. Le téléphone est alors **vérifié**.
+3. Il accepte les conditions d'utilisation et la politique de confidentialité (version et date tracées sur l'organisation, événement d'audit).
+4. La plateforme crée son compte Keycloak (rôle `OWNER`) et son **organisation personnelle** (`org_type = OWNER`, identifiant `OWN-…`).
+5. Il se connecte ensuite avec son numéro de téléphone (identifiant Keycloak = numéro au format international sans « + ») et son mot de passe.
+
+Limites d'envoi : 3 codes par numéro par quart d'heure, 10 par adresse IP par heure.
 
 Règles : un téléphone = un compte propriétaire. L'e-mail est facultatif. Un agent d'agence qui possède un bien utilise un compte propriétaire distinct (pas de mélange des rôles dans un même jeton).
 
@@ -106,7 +109,9 @@ Le propriétaire décrit son bien une fois : type, transaction voulue (vente, lo
 1. Un prospect remplit le formulaire de contact de l'annonce, avec son consentement. Le lead arrive dans l'**espace propriétaire** (organisation du propriétaire, comme pour une agence aujourd'hui).
 2. Le propriétaire est prévenu (WhatsApp ou e-mail). Il voit le nom, le message et le téléphone du prospect, qui a accepté d'être recontacté par l'annonceur.
 3. Il répond par la messagerie de la plateforme, ou appelle le prospect. Il peut proposer des créneaux de visite ; le prospect confirme par lien.
-4. Statuts simplifiés pour le propriétaire : Nouveau, En contact, Visite prévue, Offre reçue, Clos. Ils correspondent aux codes `CRM_*` du lead (§ 9).
+4. Statuts simplifiés pour le propriétaire : Nouveau, En contact, Visite prévue, Conclu, Sans suite. Ils correspondent aux codes `CRM_*` du lead (§ 9). Le propriétaire ne voit que les changements permis par le workflow du lead qui ne demandent aucune saisie.
+
+> Lot A livré : réception des contacts dans l'espace propriétaire et changement de statut. Restent à faire : notification du propriétaire à chaque nouveau contact (point 2), réponse par la messagerie de la plateforme et proposition de créneaux de visite (point 3).
 
 ### UC-P5 — Dire aux agents ce qu'on attend (demande d'accompagnement)
 
@@ -297,7 +302,7 @@ stateDiagram-v2
 
 Ce workflow est à ajouter à `DossierWorkflowCatalog` (ADR 0004). Le passage du dossier en `CRM_CLOSED_WON` propose de clore le mandat en `MANDATE_COMPLETED`.
 
-Les leads reçus directement par le propriétaire (UC-P4) sont des dossiers `CRM_LEAD_BUY` ou `CRM_LEAD_RENT` de son organisation. Correspondance des statuts affichés : Nouveau = `CRM_NEW` ; En contact = `CRM_CONTACTED` ; Visite prévue = `CRM_VISIT_PLANNED` ; Offre reçue = `CRM_OFFER_RECEIVED` ; Clos = `CRM_CLOSED_WON` ou `CRM_CLOSED_LOST`.
+Les leads reçus directement par le propriétaire (UC-P4) sont des dossiers `CRM_LEAD_BUY` ou `CRM_LEAD_RENT` de son organisation. Correspondance des statuts affichés : Nouveau = `CRM_NEW` ; En contact = `CRM_QUALIFYING` ou `CRM_QUALIFIED` ; Visite prévue = `CRM_VISIT_PLANNED` ; Conclu = `CRM_CLOSED_WON` ; Sans suite = `CRM_CLOSED_LOST`.
 
 ## 10. Rôles et droits
 

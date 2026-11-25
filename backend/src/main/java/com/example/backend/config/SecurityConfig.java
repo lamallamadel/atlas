@@ -167,8 +167,18 @@ public class SecurityConfig {
                                                 "/api/v1/portal/**",
                                                 "/api/v1/public/consent/**")
                                         .permitAll()
+                                        // Cas d'usage n°1 (ADR 0005) : un propriétaire n'a accès
+                                        // qu'à son espace, et seul un propriétaire y a accès.
+                                        .requestMatchers("/api/v1/owner/**")
+                                        .hasRole("OWNER")
                                         .requestMatchers("/api/**")
-                                        .authenticated()
+                                        .access(
+                                                (authentication, context) ->
+                                                        new org.springframework.security
+                                                                .authorization
+                                                                .AuthorizationDecision(
+                                                                isAuthenticatedNonOwner(
+                                                                        authentication.get())))
                                         .anyRequest()
                                         .permitAll())
                 .oauth2ResourceServer(
@@ -442,6 +452,20 @@ public class SecurityConfig {
                             new SimpleGrantedAuthority("ROLE_PRO"));
             default -> List.of(new SimpleGrantedAuthority("ROLE_" + name));
         };
+    }
+
+    /** Authentifié, et pas un compte propriétaire (qui n'a accès qu'à /api/v1/owner/**). */
+    static boolean isAuthenticatedNonOwner(
+            org.springframework.security.core.Authentication authentication) {
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || authentication
+                        instanceof
+                        org.springframework.security.authentication.AnonymousAuthenticationToken) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .noneMatch(a -> "ROLE_OWNER".equals(a.getAuthority()));
     }
 
     @SuppressWarnings("unchecked")

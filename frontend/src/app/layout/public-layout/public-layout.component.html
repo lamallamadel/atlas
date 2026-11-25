@@ -27,6 +27,7 @@
             <li><a routerLink="/recherche" [class.active]="isActive('/recherche') && !currentRoute.includes('tx')">Toutes les annonces</a></li>
           </ul>
           <div class="pub-header-actions">
+            <a routerLink="/proprietaire/inscription" class="at-btn at-btn-primary at-btn-sm">Publier mon bien</a>
             <a routerLink="/pro" class="at-btn at-btn-secondary at-btn-sm">Espace Pro</a>
             <button class="pub-theme-btn" (click)="toggleTheme()" [attr.aria-label]="isDark ? 'Passer en mode clair' : 'Passer en mode sombre'">
               @if (!isDark) {
@@ -80,6 +81,7 @@
       <a routerLink="/recherche" [queryParams]="{tx:'vente'}" (click)="closeMobileMenu()">Vente</a>
       <a routerLink="/recherche" [queryParams]="{tx:'location'}" (click)="closeMobileMenu()">Location</a>
       <a routerLink="/recherche" (click)="closeMobileMenu()">Toutes les annonces</a>
+      <a routerLink="/proprietaire/inscription" (click)="closeMobileMenu()">Publier mon bien →</a>
       <a routerLink="/pro" (click)="closeMobileMenu()">Espace Pro →</a>
     }
     @if (isVitrine()) {

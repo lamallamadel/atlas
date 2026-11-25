@@ -31,6 +31,20 @@ export const routes: Routes = [
         path: '',
         loadChildren: () => import('./pages/portail/portail.routes').then(m => m.PORTAIL_ROUTES)
       },
+      // Cas d'usage n°1 — espace propriétaire (inscription publique, le reste réservé au rôle OWNER)
+      {
+        path: 'proprietaire/inscription',
+        loadComponent: () => import('./pages/owner/owner-signup.component').then(m => m.OwnerSignupComponent)
+      },
+      {
+        path: 'proprietaire',
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['OWNER'] },
+        children: [
+          { path: '', loadComponent: () => import('./pages/owner/owner-home.component').then(m => m.OwnerHomeComponent) },
+          { path: 'biens/:id', loadComponent: () => import('./pages/owner/owner-property.component').then(m => m.OwnerPropertyComponent) },
+        ]
+      },
       // Vitrine B2B (lazy-loaded)
       {
         path: 'biz',
@@ -82,6 +96,12 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/team/team.component').then(m => m.TeamComponent),
         canActivate: [RoleGuard],
         data: { animation: 'TeamPage', roles: ['ADMIN', 'MANAGER', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'moderation',
+        loadComponent: () => import('./pages/moderation/owner-moderation.component').then(m => m.OwnerModerationComponent),
+        canActivate: [RoleGuard],
+        data: { animation: 'ModerationPage', roles: ['SUPER_ADMIN'] }
       },
       {
         path: 'annonces',

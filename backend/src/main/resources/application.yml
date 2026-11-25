@@ -163,6 +163,16 @@ customer-portal:
   base-url: ${PUBLIC_BASE_URL:http://localhost:4200}
 
 atlas:
+  # Cas d'usage n°1 : comptes propriétaires (codes à usage unique, modération a priori).
+  owner:
+    otp:
+      # Modèle WhatsApp de catégorie « authentification » approuvé par Meta ; vide = SMS seul.
+      whatsapp-template: ${OWNER_OTP_WHATSAPP_TEMPLATE:}
+      whatsapp-language: ${OWNER_OTP_WHATSAPP_LANGUAGE:fr}
+      # Jamais en production : écrit le code dans les journaux si aucun fournisseur n'envoie.
+      log-codes: ${OWNER_OTP_LOG_CODES:false}
+    moderation:
+      fraud-threshold: ${OWNER_MODERATION_FRAUD_THRESHOLD:50}
   consent:
     public-base-url: ${PUBLIC_BASE_URL:http://localhost:4200}
     link-validity-days: ${CONSENT_LINK_VALIDITY_DAYS:7}

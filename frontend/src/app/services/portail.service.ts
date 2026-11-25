@@ -15,6 +15,8 @@ export interface Listing {
   desc: string;
   agent: { name: string; agency: string; initials: string };
   verified: boolean;
+  /** Cas d'usage n°1 : annonce publiée par le propriétaire lui-même. */
+  privateSeller: boolean;
   date: string;
   imgs: string[];
 }
@@ -90,10 +92,13 @@ export class PortailService {
       city: annonce.city || '',
       zone: annonce.address || '',
       surface: annonce.surface || 0,
-      pieces: annonce.meta?.pieces || 0,
       desc: annonce.description || '',
-      agent: annonce.meta?.agent || { name: 'Agent', agency: 'Agence', initials: 'AG' },
+      agent: annonce.publisherKind === 'OWNER'
+        ? { name: 'Particulier', agency: 'Annonce publiée par le propriétaire', initials: 'P' }
+        : annonce.meta?.agent || { name: 'Agent', agency: 'Agence', initials: 'AG' },
       verified: annonce.meta?.verified || false,
+      privateSeller: annonce.publisherKind === 'OWNER',
+      pieces: annonce.meta?.pieces || annonce.meta?.rooms || 0,
       date: annonce.createdAt || new Date().toISOString(),
       imgs: annonce.photos && annonce.photos.length > 0 
         ? annonce.photos 

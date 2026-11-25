@@ -119,9 +119,11 @@ Garde-fous :
 - **Réassignation d'un dossier** : ligne dans le fil d'activité, événement d'audit `ASSIGNED`, notification à l'agent.
 - **Changement de rôle et désactivation** : journalisés dans les logs applicatifs (auteur, agence, compte). La table d'audit n'accepte que des identifiants numériques, ce qui exclut les comptes Keycloak.
 
-## Propriétaire et bourse aux mandats (TO-BE, cas d'usage n°1)
+## Propriétaire et bourse aux mandats (cas d'usage n°1)
 
 Spec : `02_fonctionnel/13_uc_proprietaire_mandats.md` § 10 ; modèle : ADR 0005.
+
+Livré (lot A) : `/api/v1/owner/**` exige `ROLE_OWNER` ; toute autre route `/api/**` authentifiée refuse un jeton `OWNER` (403) ; `OwnerContext` vérifie que le claim `org_id` du jeton égale `X-Org-Id` et que l'organisation est de type `OWNER`. La modération des annonces de particuliers (`/api/v1/admin/moderation/owner-annonces`) est réservée à `SUPER_ADMIN`. La bourse aux mandats reste TO-BE (lot B).
 
 | Rôle Keycloak | Autorités | Portée |
 |---|---|---|

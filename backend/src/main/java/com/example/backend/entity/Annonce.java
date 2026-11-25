@@ -109,6 +109,27 @@ public class Annonce extends BaseEntity {
     @Column(name = "virtual_tour_url", length = 1000)
     private String virtualTourUrl;
 
+    /** Bien diffusé (cas d'usage n°1) ; vide pour une annonce d'agence sans bien déclaré. */
+    @Column(name = "property_id")
+    private Long propertyId;
+
+    /** {@code OWNER} (particulier) ou {@code AGENCY} ; vide = agence (annonces existantes). */
+    @Column(name = "publisher_kind", length = 16)
+    private String publisherKind;
+
+    /** Modération a priori des particuliers : {@code MOD_PENDING}, {@code MOD_APPROVED}, … */
+    @Column(name = "moderation_status", length = 20)
+    private String moderationStatus;
+
+    @Column(name = "moderation_note", length = 1000)
+    private String moderationNote;
+
+    @Column(name = "moderated_by", length = 255)
+    private String moderatedBy;
+
+    @Column(name = "moderated_at")
+    private LocalDateTime moderatedAt;
+
     public Long getId() {
         return id;
     }
@@ -308,5 +329,53 @@ public class Annonce extends BaseEntity {
 
     public void setVirtualTourUrl(String virtualTourUrl) {
         this.virtualTourUrl = virtualTourUrl;
+    }
+
+    public Long getPropertyId() {
+        return propertyId;
+    }
+
+    public void setPropertyId(Long propertyId) {
+        this.propertyId = propertyId;
+    }
+
+    public String getPublisherKind() {
+        return publisherKind;
+    }
+
+    public void setPublisherKind(String publisherKind) {
+        this.publisherKind = publisherKind;
+    }
+
+    public String getModerationStatus() {
+        return moderationStatus;
+    }
+
+    public void setModerationStatus(String moderationStatus) {
+        this.moderationStatus = moderationStatus;
+    }
+
+    public String getModerationNote() {
+        return moderationNote;
+    }
+
+    public void setModerationNote(String moderationNote) {
+        this.moderationNote = moderationNote;
+    }
+
+    public String getModeratedBy() {
+        return moderatedBy;
+    }
+
+    public void setModeratedBy(String moderatedBy) {
+        this.moderatedBy = moderatedBy;
+    }
+
+    public LocalDateTime getModeratedAt() {
+        return moderatedAt;
+    }
+
+    public void setModeratedAt(LocalDateTime moderatedAt) {
+        this.moderatedAt = moderatedAt;
     }
 }

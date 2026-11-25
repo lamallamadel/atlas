@@ -18,7 +18,8 @@ describe('AuthGuard', () => {
 
   beforeEach(() => {
     const authServiceSpy = {
-      isAuthenticated: vi.fn().mockName('AuthService.isAuthenticated')};
+      isAuthenticated: vi.fn().mockName('AuthService.isAuthenticated'),
+      hasRole: vi.fn().mockName('AuthService.hasRole').mockReturnValue(false)};
     const routerSpy = {
       navigate: vi.fn().mockName('Router.navigate'),
       createUrlTree: vi.fn().mockName('Router.createUrlTree')};
@@ -58,6 +59,22 @@ describe('AuthGuard', () => {
     expect(result).toBe(true);
     expect(router.createUrlTree).not.toHaveBeenCalled();
     expect(setItemSpy).not.toHaveBeenCalled();
+  });
+
+  it('sends an owner account from the Pro space to its own space', () => {
+    authService.isAuthenticated.mockReturnValue(true);
+    authService.hasRole.mockImplementation((r: string) => r === 'OWNER');
+
+    expect(guard.canActivate(mockRoute, { url: '/pro/dashboard' } as RouterStateSnapshot)).toBe(mockUrlTree);
+    expect(router.createUrlTree).toHaveBeenCalledWith(['/proprietaire']);
+  });
+
+  it('lets an owner into /proprietaire, which also starts with « /pro »', () => {
+    authService.isAuthenticated.mockReturnValue(true);
+    authService.hasRole.mockImplementation((r: string) => r === 'OWNER');
+
+    expect(guard.canActivate(mockRoute, { url: '/proprietaire/biens/1' } as RouterStateSnapshot)).toBe(true);
+    expect(router.createUrlTree).not.toHaveBeenCalled();
   });
 
   it('should deny access and redirect to /login if user is not authenticated', () => {

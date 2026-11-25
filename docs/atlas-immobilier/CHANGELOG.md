@@ -1,3 +1,13 @@
+# Changelog — v0.9-uc-proprietaire-lot-a-2026-11-25
+
+Cas d'usage n°1, lot A livré : le propriétaire publie seul (spec 13, critères PA-1 à PA-4).
+- Inscription `/proprietaire/inscription` : code à 6 chiffres (WhatsApp, SMS en secours), mot de passe, connexion avec le numéro de téléphone ; un numéro = un compte.
+- Rôle `OWNER` et organisation personnelle (`organization`, V163) ; biens (`property`, V164) ; codes de vérification (`phone_verification`, V165).
+- Annonce du propriétaire : première annonce en modération a priori, publiée ensuite directement si le score de fraude est bas ; file de modération `/pro/moderation` (super-admin).
+- Espace `/proprietaire` : biens, annonce, photos, publication, contacts reçus avec statuts simplifiés (Nouveau, En contact, Visite prévue, Conclu, Sans suite).
+- Portail : badge « Particulier », photos servies aux visiteurs non connectés.
+- Décisions Q5 (WhatsApp + SMS) et Q6 (modération par l'équipe Atlas) appliquées par défaut.
+
 # Changelog — v0.8-uc-proprietaire-2026-11-25
 
 Cas d'usage n°1 : le propriétaire publie seul ou confie son bien à un agent (spec TO-BE, à valider avant code).
