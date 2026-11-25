@@ -69,7 +69,51 @@ export interface OwnerLead {
   statusCode: string;
   statusLabel: string;
   next: OwnerStatusOption[];
+  /** Messages du prospect pas encore lus. */
+  unread: number;
   createdAt: string;
+}
+
+/** Message d'une conversation de la plateforme (propriétaire ↔ prospect). */
+export interface ThreadMessage {
+  id: number;
+  author: 'OWNER' | 'PROSPECT';
+  body: string;
+  at: string;
+}
+
+export interface VisitSlot {
+  id: number;
+  start: string;
+  end: string;
+}
+
+export interface VisitBooking {
+  id: number;
+  start: string;
+  end: string;
+  status: string;
+}
+
+export interface SlotRequest {
+  start: string;
+  end: string;
+}
+
+export interface OwnerConversation {
+  leadId: number;
+  prospectName: string | null;
+  prospectPhone: string | null;
+  prospectEmail: string | null;
+  initialMessage: string | null;
+  statusCode: string;
+  statusLabel: string;
+  next: OwnerStatusOption[];
+  annonceTitle: string | null;
+  closed: boolean;
+  messages: ThreadMessage[];
+  proposals: VisitSlot[];
+  visits: VisitBooking[];
 }
 
 export interface OwnerProfile {
@@ -168,5 +212,26 @@ export class OwnerApiService {
 
   changeLeadStatus(id: number, statusCode: string): Observable<OwnerLead> {
     return this.http.put<OwnerLead>(`${this.base}/leads/${id}/status`, { statusCode });
+  }
+
+  // ── Échanges avec le prospect (UC-P4) ──
+  conversation(leadId: number): Observable<OwnerConversation> {
+    return this.http.get<OwnerConversation>(`${this.base}/leads/${leadId}/conversation`);
+  }
+
+  sendMessage(leadId: number, body: string): Observable<OwnerConversation> {
+    return this.http.post<OwnerConversation>(`${this.base}/leads/${leadId}/messages`, { body });
+  }
+
+  proposeVisits(leadId: number, slots: SlotRequest[]): Observable<OwnerConversation> {
+    return this.http.post<OwnerConversation>(`${this.base}/leads/${leadId}/visit-proposals`, { slots });
+  }
+
+  withdrawProposals(leadId: number): Observable<OwnerConversation> {
+    return this.http.delete<OwnerConversation>(`${this.base}/leads/${leadId}/visit-proposals`);
+  }
+
+  cancelVisit(leadId: number, visitId: number): Observable<OwnerConversation> {
+    return this.http.post<OwnerConversation>(`${this.base}/leads/${leadId}/visits/${visitId}/cancel`, {});
   }
 }

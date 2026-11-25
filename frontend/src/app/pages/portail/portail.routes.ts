@@ -5,6 +5,7 @@ import { AnnonceDetailComponent } from './annonce-detail/annonce-detail.componen
 import { MentionsLegalesComponent } from './mentions-legales/mentions-legales.component';
 import { ConfidentialiteComponent } from './confidentialite/confidentialite.component';
 import { ConsentementComponent } from './consentement/consentement.component';
+import { ContactConversationComponent } from './contact-conversation/contact-conversation.component';
 
 export const PORTAIL_ROUTES: Routes = [
   { path: '', component: PortailHomeComponent },
@@ -13,4 +14,6 @@ export const PORTAIL_ROUTES: Routes = [
   { path: 'mentions-legales', component: MentionsLegalesComponent },
   { path: 'confidentialite', component: ConfidentialiteComponent },
   { path: 'consentement/:token', component: ConsentementComponent },
+  // Cas d'usage n°1 : le prospect suit son échange avec un propriétaire (lien reçu par WhatsApp ou e-mail).
+  { path: 'contact/:token', component: ContactConversationComponent },
 ];
