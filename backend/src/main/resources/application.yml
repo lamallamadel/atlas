@@ -173,6 +173,16 @@ atlas:
       log-codes: ${OWNER_OTP_LOG_CODES:false}
     moderation:
       fraud-threshold: ${OWNER_MODERATION_FRAUD_THRESHOLD:50}
+    # Alertes de la messagerie propriétaire ↔ prospect (WhatsApp, sinon e-mail, sinon SMS).
+    # Modèles « utilitaires » Meta : une variable {{1}} dans le corps, un bouton « lien » dont
+    # l'URL se termine par une variable — propriétaire : <site>/proprietaire/contacts/{{1}},
+    # prospect : <site>/contact/{{1}}. Vide = pas de WhatsApp pour cette alerte.
+    alerts:
+      owner-whatsapp-template: ${OWNER_ALERT_WHATSAPP_TEMPLATE:}
+      prospect-whatsapp-template: ${PROSPECT_ALERT_WHATSAPP_TEMPLATE:}
+      whatsapp-language: ${OWNER_ALERT_WHATSAPP_LANGUAGE:fr}
+      # Jamais en production : écrit le lien dans les journaux si aucun fournisseur n'envoie.
+      log-links: ${OWNER_ALERT_LOG_LINKS:false}
   consent:
     public-base-url: ${PUBLIC_BASE_URL:http://localhost:4200}
     link-validity-days: ${CONSENT_LINK_VALIDITY_DAYS:7}

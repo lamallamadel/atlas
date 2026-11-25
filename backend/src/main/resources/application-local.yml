@@ -71,3 +71,4 @@ storage:
 
 # Cas d'usage n°1 : en local, le code d'inscription propriétaire s'affiche dans les journaux.
 atlas.owner.otp.log-codes: true
+atlas.owner.alerts.log-links: true
