@@ -50,3 +50,5 @@ management:
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://localhost:3000}
 
+# Cas d'usage n°1 : en local, le code d'inscription propriétaire s'affiche dans les journaux.
+atlas.owner.otp.log-codes: true

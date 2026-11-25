@@ -26,13 +26,29 @@ public record PublicAnnonceResponse(
         String currency,
         List<String> photos,
         Map<String, Object> meta,
-        LocalDateTime createdAt) {
+        LocalDateTime createdAt,
+        String publisherKind) {
 
     /** Clés de {@code meta} affichables publiquement. */
     static final Set<String> PUBLIC_META_KEYS =
             Set.of("slug", "pieces", "rooms", "bedrooms", "bathrooms", "verified");
 
     public static PublicAnnonceResponse from(Annonce a) {
+        return from(a, List.of());
+    }
+
+    /**
+     * {@code uploadedPhotoIds} : photos importées (stockage), servies par le portail à {@code
+     * /api/v1/portal/annonces/{id}/media/{mediaId}}, après les liens externes.
+     */
+    public static PublicAnnonceResponse from(Annonce a, List<Long> uploadedPhotoIds) {
+        List<String> photos = new java.util.ArrayList<>();
+        if (a.getPhotos() != null) {
+            a.getPhotos().stream().filter(p -> p != null && !p.isBlank()).forEach(photos::add);
+        }
+        for (Long mediaId : uploadedPhotoIds) {
+            photos.add("/api/v1/portal/annonces/" + a.getId() + "/media/" + mediaId);
+        }
         Map<String, Object> publicMeta = new LinkedHashMap<>();
         if (a.getMeta() != null) {
             a.getMeta()
@@ -54,8 +70,9 @@ public record PublicAnnonceResponse(
                 a.getCity(),
                 a.getPrice(),
                 a.getCurrency(),
-                a.getPhotos() == null ? List.of() : List.copyOf(a.getPhotos()),
+                List.copyOf(photos),
                 publicMeta,
-                a.getCreatedAt());
+                a.getCreatedAt(),
+                "OWNER".equals(a.getPublisherKind()) ? "OWNER" : "AGENCY");
     }
 }

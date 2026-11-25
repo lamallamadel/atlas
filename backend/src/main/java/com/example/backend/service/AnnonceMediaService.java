@@ -3,6 +3,7 @@ package com.example.backend.service;
 import com.example.backend.dto.AnnonceMediaResponse;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.AnnonceMedia;
+import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.repository.AnnonceMediaRepository;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.util.TenantContext;
@@ -186,6 +187,52 @@ public class AnnonceMediaService {
         if (media.getStoragePath() == null) {
             throw new EntityNotFoundException("Ce média est un lien externe, pas un fichier");
         }
+        return new MediaContent(
+                fileStorageStrategy.retrieve(media.getStoragePath()),
+                media.getContentType(),
+                media.getFileName());
+    }
+
+    /**
+     * Photos importées d'une annonce, dans l'ordre d'affichage (portail public, sans organisation).
+     */
+    @Transactional(readOnly = true)
+    public java.util.Map<Long, List<Long>> uploadedPhotoIds(java.util.Collection<Long> annonceIds) {
+        java.util.Map<Long, List<Long>> byAnnonce = new java.util.HashMap<>();
+        for (Long annonceId : annonceIds) {
+            byAnnonce.put(
+                    annonceId,
+                    mediaRepository.findByAnnonceIdOrderByPositionAscIdAsc(annonceId).stream()
+                            .filter(m -> AnnonceMedia.TYPE_PHOTO.equals(m.getMediaType()))
+                            .filter(m -> m.getStoragePath() != null)
+                            .map(AnnonceMedia::getId)
+                            .toList());
+        }
+        return byAnnonce;
+    }
+
+    /**
+     * Photo importée d'une annonce publiée, pour le portail public : l'annonce doit être publiée et
+     * la photo lui appartenir, sinon 404.
+     */
+    @Transactional(readOnly = true)
+    public MediaContent openPublicContent(Long annonceId, Long mediaId) {
+        Annonce annonce =
+                annonceRepository
+                        .findById(annonceId)
+                        .filter(
+                                a ->
+                                        AnnonceStatus.normalize(a.getStatus())
+                                                == AnnonceStatus.PUBLISHED)
+                        .orElseThrow(() -> new EntityNotFoundException("Annonce not found"));
+        AnnonceMedia media =
+                mediaRepository
+                        .findById(mediaId)
+                        .filter(m -> m.getAnnonceId().equals(annonce.getId()))
+                        .filter(m -> m.getOrgId().equals(annonce.getOrgId()))
+                        .filter(m -> AnnonceMedia.TYPE_PHOTO.equals(m.getMediaType()))
+                        .filter(m -> m.getStoragePath() != null)
+                        .orElseThrow(() -> new EntityNotFoundException("Media not found"));
         return new MediaContent(
                 fileStorageStrategy.retrieve(media.getStoragePath()),
                 media.getContentType(),

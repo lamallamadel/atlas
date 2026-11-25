@@ -31,14 +31,17 @@ public class PortalPublicController {
     private final AnnonceService annonceService;
     private final PublicLeadService publicLeadService;
     private final AnnonceReportService annonceReportService;
+    private final com.example.backend.service.AnnonceMediaService annonceMediaService;
 
     public PortalPublicController(
             AnnonceService annonceService,
             PublicLeadService publicLeadService,
-            AnnonceReportService annonceReportService) {
+            AnnonceReportService annonceReportService,
+            com.example.backend.service.AnnonceMediaService annonceMediaService) {
         this.annonceService = annonceService;
         this.publicLeadService = publicLeadService;
         this.annonceReportService = annonceReportService;
+        this.annonceMediaService = annonceMediaService;
     }
 
     @GetMapping("/annonces")
@@ -66,7 +69,15 @@ public class PortalPublicController {
             // Use a global search (cross-tenant) for the public portal
             Page<Annonce> results =
                     annonceService.findAll(AnnonceStatus.PUBLISHED, q, city, type, pageable);
-            return ResponseEntity.ok(results.map(PublicAnnonceResponse::from));
+            java.util.Map<Long, java.util.List<Long>> photos =
+                    annonceMediaService.uploadedPhotoIds(
+                            results.getContent().stream().map(Annonce::getId).toList());
+            return ResponseEntity.ok(
+                    results.map(
+                            a ->
+                                    PublicAnnonceResponse.from(
+                                            a,
+                                            photos.getOrDefault(a.getId(), java.util.List.of()))));
         } finally {
             TenantContext.clear();
         }
@@ -79,9 +90,34 @@ public class PortalPublicController {
     public ResponseEntity<PublicAnnonceResponse> getAnnonce(@PathVariable Long id) {
         return publicLeadService
                 .findPublicAnnonce(id)
-                .map(PublicAnnonceResponse::from)
+                .map(
+                        a ->
+                                PublicAnnonceResponse.from(
+                                        a,
+                                        annonceMediaService
+                                                .uploadedPhotoIds(java.util.List.of(a.getId()))
+                                                .get(a.getId())))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/annonces/{id}/media/{mediaId}")
+    @Operation(
+            summary = "Public annonce photo",
+            description = "Photo importée d'une annonce publiée ; 404 sinon")
+    public ResponseEntity<org.springframework.core.io.InputStreamResource> annoncePhoto(
+            @PathVariable Long id, @PathVariable Long mediaId) {
+        try {
+            com.example.backend.service.AnnonceMediaService.MediaContent content =
+                    annonceMediaService.openPublicContent(id, mediaId);
+            String type = content.contentType() == null ? "image/jpeg" : content.contentType();
+            return ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.parseMediaType(type))
+                    .header("Cache-Control", "public, max-age=3600")
+                    .body(new org.springframework.core.io.InputStreamResource(content.stream()));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/leads")

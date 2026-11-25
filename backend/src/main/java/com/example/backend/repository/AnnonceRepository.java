@@ -63,4 +63,13 @@ public interface AnnonceRepository
             @Param("orgId") String orgId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
+
+    // Cas d'usage n°1 : annonce d'un bien de propriétaire, modération a priori.
+    Optional<Annonce> findFirstByOrgIdAndPropertyId(String orgId, Long propertyId);
+
+    List<Annonce> findByOrgIdAndPublisherKind(String orgId, String publisherKind);
+
+    boolean existsByOrgIdAndModerationStatus(String orgId, String moderationStatus);
+
+    List<Annonce> findByModerationStatusOrderByUpdatedAtAsc(String moderationStatus);
 }
