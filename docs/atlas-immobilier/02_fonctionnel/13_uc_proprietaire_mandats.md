@@ -1,6 +1,6 @@
 # Cas d'usage n°1 — Le propriétaire publie seul ou confie son bien à un agent
 
-> **Statut**: Lot A livré (UC-P1 à UC-P4, hors messagerie et visites) ; lots B et C TO-BE  
+> **Statut**: Lot A livré (UC-P1 à UC-P4) ; lots B et C TO-BE  
 > **Dernière vérification**: 2026-11-25  
 > **Source of truth**: Oui (espace propriétaire, bourse aux mandats, mandat)  
 > **Dépendances**:  
@@ -111,7 +111,15 @@ Le propriétaire décrit son bien une fois : type, transaction voulue (vente, lo
 3. Il répond par la messagerie de la plateforme, ou appelle le prospect. Il peut proposer des créneaux de visite ; le prospect confirme par lien.
 4. Statuts simplifiés pour le propriétaire : Nouveau, En contact, Visite prévue, Conclu, Sans suite. Ils correspondent aux codes `CRM_*` du lead (§ 9). Le propriétaire ne voit que les changements permis par le workflow du lead qui ne demandent aucune saisie.
 
-> Lot A livré : réception des contacts dans l'espace propriétaire et changement de statut. Restent à faire : notification du propriétaire à chaque nouveau contact (point 2), réponse par la messagerie de la plateforme et proposition de créneaux de visite (point 3).
+> **Livré (lot A).**
+> - Alerte au propriétaire à chaque nouveau contact.
+> - Fil d'échanges dans la plateforme (`/proprietaire/contacts/{id}`) ; la première réponse fait passer le contact « En contact ».
+> - Le prospect, sans compte, suit l'échange par un lien personnel (`/contact/{jeton}`, valable 60 jours, jeton stocké haché, envoyé à l'API dans l'en-tête `X-Conversation-Token`) : il lit, répond (20 messages par heure au plus) et choisit un créneau.
+> - Créneaux : 1 à 3 par envoi, entre 30 minutes et 60 jours à l'avance, 4 heures au plus ; un nouvel envoi remplace les créneaux en attente. Le créneau choisi crée le rendez-vous et fait passer le contact « Visite prévue » si le workflow le permet. Le propriétaire peut annuler la visite.
+> - Alertes : WhatsApp (modèle « utilitaire » de la plateforme), sinon e-mail, sinon SMS ; au prospect seulement sur les canaux où son accord « recontact » est en vigueur. Pas de nouvelle alerte de message tant que la précédente n'a pas été lue (30 minutes au plus), sauf créneaux, visite choisie ou annulée.
+> - L'adresse précise et le téléphone du propriétaire ne sont jamais montrés au prospect.
+>
+> **Restent à faire** : rappel de visite (les rappels automatiques sont coupés pour ces rendez-vous), « proposer d'autres créneaux » côté prospect.
 
 ### UC-P5 — Dire aux agents ce qu'on attend (demande d'accompagnement)
 
@@ -327,7 +335,9 @@ Nouveau rôle Keycloak `OWNER` : il donne `ROLE_OWNER` et **pas** `ROLE_PRO`. Le
 | `POST /api/public/v1/owner/signup` puis `/verify` | Public | Code à usage unique, création du compte et de l'organisation |
 | `GET/POST/PUT /api/v1/owner/properties` | `OWNER` | Biens du propriétaire |
 | `POST /api/v1/owner/properties/{id}/annonce` | `OWNER` | Crée ou met à jour l'annonce du propriétaire, soumise aux règles de publication |
-| `GET /api/v1/owner/leads`, `/owner/appointments` | `OWNER` | Leads et visites de son organisation |
+| `GET /api/v1/owner/leads`, `PUT …/{id}/status` | `OWNER` | Contacts de son organisation, statut simplifié (livré) |
+| `GET /api/v1/owner/leads/{id}/conversation`, `POST …/messages`, `POST/DELETE …/visit-proposals`, `POST …/visits/{vid}/cancel` | `OWNER` | Échanges avec le prospect, créneaux, annulation (livré) |
+| `GET /api/v1/portal/conversation`, `POST …/messages`, `POST …/visit-proposals/{id}/accept` | Public, en-tête `X-Conversation-Token` | Côté prospect : lire, répondre, choisir un créneau (livré) |
 | `POST /api/v1/owner/mandate-requests`, `PUT …/{id}/cancel`, `PUT …/{id}/open-to-market` | `OWNER` | Demandes d'accompagnement, ouvertes ou directes ; passage d'une demande directe à la bourse |
 | `GET /api/v1/owner/mandate-requests/{id}/proposals`, `/recommended-agencies` | `OWNER` | Propositions reçues, agences recommandées (§ 5.1) |
 | `POST /api/v1/owner/proposals/{id}/accept` (code à usage unique), `/decline`, `/shortlist` | `OWNER` | Décision ; l'acceptation crée mandat et dossier |
@@ -362,7 +372,8 @@ Nouveau rôle Keycloak `OWNER` : il donne `ROLE_OWNER` et **pas** `ROLE_PRO`. Le
 
 | Événement | Destinataire | Canal |
 |---|---|---|
-| Nouveau contact sur l'annonce | Propriétaire | WhatsApp (modèle), e-mail, espace |
+| Nouveau contact sur l'annonce, message du prospect, visite choisie | Propriétaire | WhatsApp (modèle), SMS, espace (livré) |
+| Réponse du propriétaire, créneaux proposés, visite annulée | Prospect | WhatsApp (modèle), e-mail, SMS, avec lien personnel (livré) |
 | Demande ouverte correspondant à l'agence (top 10) | Agents de l'agence, selon zones | Espace Pro, e-mail |
 | Invitation à proposer, demande directe | Agence visée | Espace Pro, e-mail, WhatsApp |
 | Demande directe sans réponse à 48 h | Agence visée (rappel) ; à 72 h, le propriétaire | Espace, e-mail |
@@ -389,6 +400,7 @@ Les messages WhatsApp sortants hors fenêtre de 24 h utilisent des modèles appr
 - PA-2 : le propriétaire publie un bien avec 3 photos ; l'annonce attend la modération ; validée, elle apparaît sur le portail avec le badge « Particulier », sans adresse ni téléphone.
 - PA-3 : un lead envoyé sur cette annonce arrive dans l'espace du propriétaire et dans aucune agence (test à deux agences + un propriétaire).
 - PA-4 : un compte `OWNER` reçoit 403 sur toute route `/api/v1/` réservée au Pro ; un agent reçoit 403 sur `/api/v1/owner/**`.
+- PA-5 : un nouveau contact alerte le propriétaire ; sa réponse alerte le prospect, qui la lit et répond par son lien sans compte ; le créneau choisi crée la visite, passe le contact « Visite prévue » et alerte le propriétaire ; un lien invalide ou un autre propriétaire reçoit 404.
 
 **Lot B**
 - PB-1 : une agence vérifiée de Tanger voit la demande d'un propriétaire de Tanger, anonymisée ; une agence de Rabat ne la voit pas ; une agence non vérifiée n'a pas accès à la bourse.

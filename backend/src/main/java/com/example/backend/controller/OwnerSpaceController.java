@@ -3,6 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.dto.AnnonceMediaResponse;
 import com.example.backend.entity.OrganizationEntity;
 import com.example.backend.entity.PropertyEntity;
+import com.example.backend.owner.LeadConversationService;
 import com.example.backend.owner.OwnerAnnonceService;
 import com.example.backend.owner.OwnerContext;
 import com.example.backend.owner.OwnerLeadService;
@@ -36,13 +37,16 @@ public class OwnerSpaceController {
     private final OwnerAnnonceService annonces;
     private final OwnerLeadService leads;
     private final AnnonceMediaService mediaService;
+    private final LeadConversationService conversations;
 
     public OwnerSpaceController(
             OwnerContext ownerContext,
             OwnerPropertyService properties,
             OwnerAnnonceService annonces,
             OwnerLeadService leads,
-            AnnonceMediaService mediaService) {
+            AnnonceMediaService mediaService,
+            LeadConversationService conversations) {
+        this.conversations = conversations;
         this.ownerContext = ownerContext;
         this.properties = properties;
         this.annonces = annonces;
@@ -152,6 +156,40 @@ public class OwnerSpaceController {
     public OwnerLeadService.OwnerLead changeLeadStatus(
             @PathVariable Long id, @RequestBody Map<String, String> body) {
         return leads.changeStatus(id, body.get("statusCode"));
+    }
+
+    public record MessageBody(String body) {}
+
+    public record SlotsBody(List<LeadConversationService.SlotRequest> slots) {}
+
+    /** Fil d'échanges avec le prospect ; marque ses messages comme lus. */
+    @GetMapping("/leads/{id}/conversation")
+    public LeadConversationService.OwnerConversation conversation(@PathVariable Long id) {
+        return conversations.ownerView(id);
+    }
+
+    @PostMapping("/leads/{id}/messages")
+    public LeadConversationService.OwnerConversation sendMessage(
+            @PathVariable Long id, @RequestBody MessageBody body) {
+        return conversations.ownerSend(id, body == null ? null : body.body());
+    }
+
+    /** Propose 1 à 3 créneaux de visite ; remplace les créneaux encore en attente. */
+    @PostMapping("/leads/{id}/visit-proposals")
+    public LeadConversationService.OwnerConversation proposeVisits(
+            @PathVariable Long id, @RequestBody SlotsBody body) {
+        return conversations.proposeVisits(id, body == null ? null : body.slots());
+    }
+
+    @DeleteMapping("/leads/{id}/visit-proposals")
+    public LeadConversationService.OwnerConversation withdrawProposals(@PathVariable Long id) {
+        return conversations.withdrawProposals(id);
+    }
+
+    @PostMapping("/leads/{id}/visits/{appointmentId}/cancel")
+    public LeadConversationService.OwnerConversation cancelVisit(
+            @PathVariable Long id, @PathVariable Long appointmentId) {
+        return conversations.cancelVisit(id, appointmentId);
     }
 
     private static PropertyView view(

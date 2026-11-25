@@ -2,7 +2,12 @@ package com.example.backend.owner;
 
 import com.example.backend.dto.DossierStatusPatchRequest;
 import com.example.backend.entity.Dossier;
+import com.example.backend.entity.LeadConversationEntity;
+import com.example.backend.entity.enums.MessageChannel;
+import com.example.backend.entity.enums.MessageDirection;
 import com.example.backend.repository.DossierRepository;
+import com.example.backend.repository.LeadConversationRepository;
+import com.example.backend.repository.MessageRepository;
 import com.example.backend.service.DossierService;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -40,12 +45,20 @@ public class OwnerLeadService {
     private final OwnerContext ownerContext;
     private final DossierRepository dossiers;
     private final DossierService dossierService;
+    private final LeadConversationRepository conversations;
+    private final MessageRepository messages;
 
     public OwnerLeadService(
-            OwnerContext ownerContext, DossierRepository dossiers, DossierService dossierService) {
+            OwnerContext ownerContext,
+            DossierRepository dossiers,
+            DossierService dossierService,
+            LeadConversationRepository conversations,
+            MessageRepository messages) {
         this.ownerContext = ownerContext;
         this.dossiers = dossiers;
         this.dossierService = dossierService;
+        this.conversations = conversations;
+        this.messages = messages;
     }
 
     public record StatusOption(String code, String label) {}
@@ -60,6 +73,7 @@ public class OwnerLeadService {
             String statusCode,
             String statusLabel,
             List<StatusOption> next,
+            long unread,
             LocalDateTime createdAt) {}
 
     @Transactional(readOnly = true)
@@ -87,6 +101,12 @@ public class OwnerLeadService {
         DossierStatusPatchRequest patch = new DossierStatusPatchRequest();
         patch.setStatusCode(statusCode);
         dossierService.patchStatus(id, patch);
+        return toLead(require(id));
+    }
+
+    /** Un contact du propriétaire courant (404 sinon). */
+    @Transactional(readOnly = true)
+    public OwnerLead view(Long id) {
         return toLead(require(id));
     }
 
@@ -125,6 +145,21 @@ public class OwnerLeadService {
                 code,
                 STATUS_LABELS.getOrDefault(code, code),
                 next(d),
+                unread(d.getId()),
                 d.getCreatedAt());
+    }
+
+    /** Messages du prospect que le propriétaire n'a pas encore lus. */
+    private long unread(Long dossierId) {
+        LocalDateTime read =
+                conversations
+                        .findByDossierId(dossierId)
+                        .map(LeadConversationEntity::getOwnerLastReadAt)
+                        .orElse(null);
+        return read == null
+                ? messages.countByDossier_IdAndChannelAndDirection(
+                        dossierId, MessageChannel.IN_APP, MessageDirection.INBOUND)
+                : messages.countByDossier_IdAndChannelAndDirectionAndTimestampAfter(
+                        dossierId, MessageChannel.IN_APP, MessageDirection.INBOUND, read);
     }
 }

@@ -62,4 +62,17 @@ public interface MessageRepository
             Long dossierId,
             com.example.backend.entity.enums.MessageDirection direction,
             LocalDateTime after);
+
+    /** Fil d'une conversation de la plateforme (canal {@code IN_APP}), du plus ancien au récent. */
+    List<MessageEntity> findByDossier_IdAndChannelOrderByTimestampAscIdAsc(
+            Long dossierId, MessageChannel channel);
+
+    long countByDossier_IdAndChannelAndDirectionAndTimestampAfter(
+            Long dossierId,
+            MessageChannel channel,
+            MessageDirection direction,
+            LocalDateTime after);
+
+    long countByDossier_IdAndChannelAndDirection(
+            Long dossierId, MessageChannel channel, MessageDirection direction);
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse, HttpContextToken } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
@@ -14,6 +14,9 @@ interface ProblemDetail {
   instance?: string;
   [key: string]: unknown;
 }
+
+/** Requête dont la page gère elle-même l'erreur : pas de notification globale. */
+export const SILENT_HTTP_ERRORS = new HttpContextToken<boolean>(() => false);
 
 @Injectable()
 export class CorrelationIdInterceptor implements HttpInterceptor {
@@ -50,7 +53,9 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
           correlationId: correlationId
         });
 
-        this.handleError(error, modifiedReq, correlationId);
+        if (!req.context.get(SILENT_HTTP_ERRORS)) {
+          this.handleError(error, modifiedReq, correlationId);
+        }
         this.pendingRequests.delete(correlationId);
         return throwError(() => error);
       })

@@ -50,4 +50,7 @@ public interface AppointmentRepository
             @Param("status") com.example.backend.entity.enums.AppointmentStatus status,
             @Param("windowStart") LocalDateTime windowStart,
             @Param("windowEnd") LocalDateTime windowEnd);
+
+    /** Rendez-vous d'un contact (visites du propriétaire). */
+    List<AppointmentEntity> findByDossier_Id(Long dossierId);
 }

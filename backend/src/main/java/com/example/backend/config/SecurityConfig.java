@@ -222,6 +222,7 @@ public class SecurityConfig {
                         "Content-Type",
                         "X-Org-Id",
                         "X-Correlation-Id",
+                        "X-Conversation-Token",
                         "X-XSRF-TOKEN"));
         configuration.setExposedHeaders(
                 List.of(

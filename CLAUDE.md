@@ -127,10 +127,10 @@ docker-compose down
 - **PostgreSQL 16** in Docker/staging/prod; **H2** for local dev and unit tests
 - Multi-tenant `org_id` on all tables
 - **Flyway migrations are split into three folders** under `backend/src/main/resources/db/`:
-  - **`migration/`** — cross-database base migrations (V1–V165 at time of writing). Must be portable between H2 and PostgreSQL: standard SQL only, no partial indexes, no GIN/GiST, no PL/pgSQL, no `ON CONFLICT`; use the `${json_type}` placeholder for JSON/JSONB columns.
+  - **`migration/`** — cross-database base migrations (V1–V166 at time of writing). Must be portable between H2 and PostgreSQL: standard SQL only, no partial indexes, no GIN/GiST, no PL/pgSQL, no `ON CONFLICT`; use the `${json_type}` placeholder for JSON/JSONB columns.
   - **`migration-postgres/`** — PostgreSQL-only optimizations (V100–V107+): partial indexes, GIN/full-text, PL/pgSQL, upserts.
   - **`migration-h2/`** — H2-only variants (V200+) for cases where the base migration cannot be made portable. Do NOT put H2-specific DDL in the base `migration/` folder.
-- **Next available version numbers:** V166+ (highest is `V165__Create_phone_verification.sql`). V140, V143, V144 are also unused slots but out-of-order migrations are risky — prefer V166+. The old V139 duplicate has been resolved: `V139__Add_whatsapp_quota_tier_and_cost_tracking.sql` stayed, the other was renumbered to `V142__Add_reminder_strategy_to_appointment.sql`.
+- **Next available version numbers:** V167+ (highest is `V166__Create_lead_conversation_and_visit_proposal.sql`). V140, V143, V144 are also unused slots but out-of-order migrations are risky — prefer V167+. The old V139 duplicate has been resolved: `V139__Add_whatsapp_quota_tier_and_cost_tracking.sql` stayed, the other was renumbered to `V142__Add_reminder_strategy_to_appointment.sql`.
 - In production the DB may have additional migrations applied outside this repo; always check before picking a version number: `SELECT version FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5`.
 
 ### Spring Profiles

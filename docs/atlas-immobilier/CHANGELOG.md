@@ -1,3 +1,12 @@
+# Changelog — v0.10-uc-proprietaire-messagerie-2026-11-25
+
+Cas d'usage n°1, lot A terminé : échanges propriétaire ↔ prospect et visites (UC-P4, critère PA-5).
+- Alerte au propriétaire à chaque nouveau contact, puis à chaque message ou visite choisie.
+- Fiche contact `/proprietaire/contacts/{id}` : fil d'échanges, réponse, créneaux de visite (1 à 3), annulation.
+- Page du prospect `/contact/{jeton}`, sans compte : lire, répondre, choisir un créneau ; lien valable 60 jours, jeton haché en base.
+- Alertes par la plateforme : WhatsApp (modèles `OWNER_ALERT_WHATSAPP_TEMPLATE`, `PROSPECT_ALERT_WHATSAPP_TEMPLATE`), sinon e-mail, sinon SMS, après validation de la transaction.
+- Migration V166 : `lead_conversation`, `lead_conversation_link`, `visit_proposal`.
+
 # Changelog — v0.9-uc-proprietaire-lot-a-2026-11-25
 
 Cas d'usage n°1, lot A livré : le propriétaire publie seul (spec 13, critères PA-1 à PA-4).

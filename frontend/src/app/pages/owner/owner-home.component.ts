@@ -45,7 +45,7 @@ function row(l: OwnerLead): LeadRow {
         eyebrow="Espace propriétaire"
         titleBefore="Mes"
         titleAccent="biens"
-        [description]="profile() ? 'Bonjour ' + profile()!.displayName + '. Publiez vous-même ou, bientôt, confiez votre bien à un agent.' : null">
+        [description]="greeting()">
         <ng-container slot="actions">
           <ds-button variant="ghost" size="md" (dsClick)="logout()">Se déconnecter</ds-button>
           <ds-button variant="marine" size="md" prefixIcon="plus" (dsClick)="declare()">Déclarer un bien</ds-button>
@@ -94,7 +94,10 @@ function row(l: OwnerLead): LeadRow {
             emptyMessage="Pas encore de contact. Les demandes des visiteurs de vos annonces arriveront ici.">
             <ng-template dsCell="name" let-l>
               <div class="oh-person">
-                <span class="oh-strong">{{ l.name || 'Visiteur' }}</span>
+                <span class="oh-name-line">
+                  <a class="oh-strong oh-lead-link" [routerLink]="['/proprietaire/contacts', l.id]">{{ l.name || 'Visiteur' }}</a>
+                  @if (l.unread) { <ds-badge size="sm" status="info">{{ l.unread === 1 ? '1 nouveau message' : l.unread + ' nouveaux messages' }}</ds-badge> }
+                </span>
                 <span class="oh-muted">
                   @if (l.phone) { <a [href]="'tel:' + l.phone">{{ l.phone }}</a> }
                   @if (l.email) { · <a [href]="'mailto:' + l.email">{{ l.email }}</a> }
@@ -135,6 +138,9 @@ function row(l: OwnerLead): LeadRow {
     .oh-section__title { margin: 0; font-size: var(--ds-text-base); font-weight: 700; color: var(--ds-marine); }
     .oh-person { display: flex; flex-direction: column; }
     .oh-strong { font-weight: 600; color: var(--ds-text); }
+    .oh-name-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2); }
+    .oh-lead-link { display: inline; padding: 0; color: var(--ds-marine); text-decoration: none; }
+    .oh-lead-link:hover, .oh-lead-link:focus-visible { color: var(--ds-marine); text-decoration: underline; }
     .oh-muted { font-size: var(--ds-text-xs); color: var(--ds-text-muted); }
     .oh-muted a { display: inline; padding: 0; color: inherit; }
     .oh-message { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: var(--ds-text-sm); }
@@ -168,6 +174,11 @@ export class OwnerHomeComponent implements OnInit {
     { key: 'status', header: 'Statut', width: '200px' },
   ];
   readonly trackLead = (_: number, l: LeadRow) => l.id;
+  /** « Nadia I. » se termine déjà par un point : pas de double point. */
+  readonly greeting = computed(() => {
+    const p = this.profile();
+    return p ? `Bonjour ${p.displayName.replace(/\.$/, '')}. Publiez vous-même ou, bientôt, confiez votre bien à un agent.` : null;
+  });
   state(p: OwnerProperty): ReturnType<typeof ownerAnnonceState> {
     return ownerAnnonceState(p.annonce);
   }

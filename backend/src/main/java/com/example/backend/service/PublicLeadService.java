@@ -11,6 +11,7 @@ import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.entity.enums.ConsentementType;
 import com.example.backend.entity.enums.DossierSource;
+import com.example.backend.event.PortalLeadCreatedEvent;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,13 +62,16 @@ public class PublicLeadService {
     private final DossierService dossierService;
     private final ConsentementService consentementService;
     private final String platformOrgId;
+    private final ApplicationEventPublisher events;
 
     public PublicLeadService(
             AnnonceRepository annonceRepository,
             DossierRepository dossierRepository,
             DossierService dossierService,
             ConsentementService consentementService,
-            @Value("${atlas.portal.platform-org-id:ORG-001}") String platformOrgId) {
+            @Value("${atlas.portal.platform-org-id:ORG-001}") String platformOrgId,
+            ApplicationEventPublisher events) {
+        this.events = events;
         this.annonceRepository = annonceRepository;
         this.dossierRepository = dossierRepository;
         this.dossierService = dossierService;
@@ -157,6 +162,7 @@ public class PublicLeadService {
                                 });
             }
             recordContactConsent(created.getId(), phone, email, source, ipAddress, userAgent);
+            events.publishEvent(new PortalLeadCreatedEvent(created.getId(), orgId));
             log.info(
                     "Public lead received: dossierId={}, orgId={}, caseType={}, source={}",
                     created.getId(),

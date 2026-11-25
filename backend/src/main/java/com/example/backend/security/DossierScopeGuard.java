@@ -14,6 +14,7 @@ import com.example.backend.entity.DocumentWorkflowEntity;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.DossierStatusHistory;
 import com.example.backend.entity.LeadActivity;
+import com.example.backend.entity.LeadConversationEntity;
 import com.example.backend.entity.LeadScore;
 import com.example.backend.entity.MLPrediction;
 import com.example.backend.entity.MessageEntity;
@@ -22,6 +23,7 @@ import com.example.backend.entity.PartiePrenanteEntity;
 import com.example.backend.entity.ScheduledWorkflowAction;
 import com.example.backend.entity.SignatureRequestEntity;
 import com.example.backend.entity.TaskEntity;
+import com.example.backend.entity.VisitProposalEntity;
 import com.example.backend.entity.WorkflowTransition;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManagerFactory;
@@ -72,6 +74,7 @@ public class DossierScopeGuard implements PostLoadEventListener, PreInsertEventL
                     DocumentWorkflowEntity.class,
                     DossierStatusHistory.class,
                     LeadActivity.class,
+                    LeadConversationEntity.class,
                     LeadScore.class,
                     MLPrediction.class,
                     MessageEntity.class,
@@ -80,6 +83,7 @@ public class DossierScopeGuard implements PostLoadEventListener, PreInsertEventL
                     ScheduledWorkflowAction.class,
                     SignatureRequestEntity.class,
                     TaskEntity.class,
+                    VisitProposalEntity.class,
                     WorkflowTransition.class);
 
     private static final ClassValue<Function<Object, Long>> DOSSIER_ID =
