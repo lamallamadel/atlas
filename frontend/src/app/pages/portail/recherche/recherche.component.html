@@ -102,9 +102,10 @@
               <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'" style="position: absolute; top: 12px; left: 12px;">
                 {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
               </span>
-              @if (listing.verified) {
+              @if (listing.verified || listing.privateSeller) {
                 <div class="ph-badges" style="position: absolute; top: 12px; right: 12px;">
-                  <ds-badge status="active" size="sm">Vérifié</ds-badge>
+                  @if (listing.privateSeller) { <ds-badge status="info" size="sm">Particulier</ds-badge> }
+                  @if (listing.verified) { <ds-badge status="active" size="sm">Vérifié</ds-badge> }
                 </div>
               }
             </div>

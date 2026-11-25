@@ -59,6 +59,7 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   /** Lien « Équipe » : manager et admin seulement (l'écran est aussi gardé par RoleGuard). */
   readonly canSeeTeam = isManagerOrAdmin(this.authService);
+  readonly isSuperAdmin = this.authService.hasRole('SUPER_ADMIN');
   /** Lien « Démos B2B » : seulement pour l'organisation qui reçoit les demandes de démo. */
   readonly hasB2bDemos = signal(false);
   /**
