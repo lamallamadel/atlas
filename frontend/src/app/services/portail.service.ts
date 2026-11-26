@@ -17,8 +17,16 @@ export interface Listing {
   verified: boolean;
   /** Cas d'usage n°1 : annonce publiée par le propriétaire lui-même. */
   privateSeller: boolean;
+  /** Lot B : annonceurs d'un même bien (mandats simples) ; vide s'il n'y en a qu'un. */
+  publishers: ListingPublisher[];
   date: string;
   imgs: string[];
+}
+
+export interface ListingPublisher {
+  annonceId: string;
+  kind: 'OWNER' | 'AGENCY';
+  name: string;
 }
 
 export interface City {
@@ -98,6 +106,9 @@ export class PortailService {
         : annonce.meta?.agent || { name: 'Agent', agency: 'Agence', initials: 'AG' },
       verified: annonce.meta?.verified || false,
       privateSeller: annonce.publisherKind === 'OWNER',
+      publishers: (annonce.publishers ?? []).map((p: { annonceId: number; kind: 'OWNER' | 'AGENCY'; name: string }) => ({
+        annonceId: String(p.annonceId), kind: p.kind, name: p.name,
+      })),
       pieces: annonce.meta?.pieces || annonce.meta?.rooms || 0,
       date: annonce.createdAt || new Date().toISOString(),
       imgs: annonce.photos && annonce.photos.length > 0 

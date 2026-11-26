@@ -2,7 +2,13 @@ import { AfterViewChecked, ChangeDetectionStrategy, Component, ElementRef, Event
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DsButtonComponent, DsIconComponent, DsTextareaComponent } from '../../design-system';
-import type { ThreadMessage } from '../../services/owner-api.service';
+/** Message affiché : `author` est comparé à `me`. */
+export interface ThreadItem {
+  id: number;
+  author: string;
+  body: string;
+  at: string;
+}
 
 /**
  * Fil d'échanges propriétaire ↔ prospect et zone de réponse (cas d'usage n°1, UC-P4). Partagé par
@@ -18,8 +24,8 @@ import type { ThreadMessage } from '../../services/owner-api.service';
     <div class="ct">
       <ol class="ct-list" #list role="log" aria-live="polite" [attr.aria-label]="'Échanges avec ' + otherName">
         @if (initialMessage) {
-          <li class="ct-item" [class.ct-item--mine]="me === 'PROSPECT'">
-            <span class="ct-meta">{{ me === 'PROSPECT' ? 'Votre demande' : 'Demande de ' + otherName }}</span>
+          <li class="ct-item" [class.ct-item--mine]="initialMine">
+            <span class="ct-meta">{{ initialMine ? 'Votre demande' : 'Demande de ' + otherName }}</span>
             <p class="ct-bubble ct-bubble--first">{{ initialMessage }}</p>
           </li>
         }
@@ -65,10 +71,13 @@ import type { ThreadMessage } from '../../services/owner-api.service';
   `],
 })
 export class ConversationThreadComponent implements AfterViewChecked {
-  @Input() messages: ThreadMessage[] = [];
-  @Input() me: 'OWNER' | 'PROSPECT' = 'OWNER';
+  @Input() messages: ThreadItem[] = [];
+  /** Auteur des messages de celui qui regarde (comparé à `author`). */
+  @Input() me = 'OWNER';
   @Input() otherName = '';
   @Input() initialMessage: string | null = null;
+  /** Le message initial est-il de celui qui regarde ? */
+  @Input() initialMine = false;
   @Input() closed = false;
   @Input() sending = false;
   @Input() replyLabel = 'Votre message';

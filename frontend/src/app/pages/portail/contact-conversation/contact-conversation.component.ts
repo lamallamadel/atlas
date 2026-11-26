@@ -66,6 +66,7 @@ import { ConversationThreadComponent } from '../../owner/conversation-thread.com
           <h2 class="cc-card-title">Messages</h2>
           <app-conversation-thread #thread
             me="PROSPECT"
+            [initialMine]="true"
             [otherName]="c.ownerName"
             [messages]="c.messages"
             [initialMessage]="c.initialMessage"

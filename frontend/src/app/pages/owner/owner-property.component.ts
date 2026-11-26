@@ -16,6 +16,8 @@ import {
 } from '../../design-system';
 import { OwnerAnnonce, OwnerApiService, OwnerProperty, ownerAnnonceState } from '../../services/owner-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
+import { MANDATE_TYPE_LABELS, OwnerMandateApiService, OwnerRequest, REQUEST_STATUS } from '../../services/mandate-api.service';
+import { OwnerMandateRequestDialogComponent } from './owner-mandate-request-dialog.component';
 import { OwnerPropertyDialogComponent } from './owner-property-dialog.component';
 
 /**
@@ -122,6 +124,25 @@ import { OwnerPropertyDialogComponent } from './owner-property-dialog.component'
             </ds-card>
 
             <ds-card [pad]="true" elevation="xs">
+              <div class="ds-form-stack">
+                <h2 class="op-card-title">Confier à un agent</h2>
+                @if (mandateRequest(); as r) {
+                  <div class="op-row">
+                    <ds-badge [status]="requestStatus(r).status">{{ requestStatus(r).label }}</ds-badge>
+                    <span class="op-muted">{{ requestSummary(r) }}</span>
+                  </div>
+                  <ds-button variant="ghost" size="md" [routerLink]="['/proprietaire/demandes', r.id]">
+                    {{ r.proposals.length ? 'Voir les propositions' : 'Voir la demande' }}
+                  </ds-button>
+                }
+                @if (!mandateRequest() || canAskAgain()) {
+                  <p class="op-muted">Une agence s'occupe des visites et de la négociation. Les agences ne voient ni votre adresse ni votre téléphone avant que vous en choisissiez une.</p>
+                  <ds-button variant="ghost" size="md" prefixIcon="users" (dsClick)="askAgent(p)">Demander des propositions</ds-button>
+                }
+              </div>
+            </ds-card>
+
+            <ds-card [pad]="true" elevation="xs">
               <h2 class="op-card-title">Le bien</h2>
               <dl class="op-facts">
                 <dt>Projet</dt><dd>{{ p.transactionType === 'RENT' ? 'Location' : 'Vente' }}</dd>
@@ -153,6 +174,7 @@ import { OwnerPropertyDialogComponent } from './owner-property-dialog.component'
     .op-count { margin-left: var(--ds-space-1); font-weight: 400; color: var(--ds-text-muted); }
     .op-actions { display: flex; justify-content: flex-end; }
     .op-muted { margin: 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
+    .op-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2); }
     .op-subtitle { margin: 0 0 var(--ds-space-1); font-size: var(--ds-text-sm); font-weight: 600; color: var(--ds-text); }
     .op-blockers { margin: 0; padding-left: var(--ds-space-5); font-size: var(--ds-text-sm); color: var(--ds-text); }
     .op-note { padding: var(--ds-space-3); border-radius: var(--ds-radius-md); background: var(--ds-warning-hl); font-size: var(--ds-text-sm); color: var(--ds-text); }
@@ -175,6 +197,13 @@ export class OwnerPropertyComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(DsDialogService);
 
   readonly property = signal<OwnerProperty | null>(null);
+  private readonly mandateApi = inject(OwnerMandateApiService);
+  /** Dernière demande d'accompagnement pour ce bien (lot B). */
+  readonly mandateRequest = signal<OwnerRequest | null>(null);
+  readonly canAskAgain = computed(() => {
+    const r = this.mandateRequest();
+    return !!r && (r.status === 'MREQ_EXPIRED' || r.status === 'MREQ_CANCELLED');
+  });
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly uploading = signal(false);
@@ -215,7 +244,34 @@ export class OwnerPropertyComponent implements OnInit, OnDestroy {
     return 'Brouillon : invisible sur le portail tant que vous ne publiez pas.';
   }
 
+  requestStatus(r: OwnerRequest) {
+    return REQUEST_STATUS[r.status] ?? { label: r.status, status: 'neutral' as const };
+  }
+
+  requestSummary(r: OwnerRequest): string {
+    const live = r.mandates.find(m => m.status === 'MANDATE_PENDING_SIGNATURE' || m.status === 'MANDATE_ACTIVE');
+    if (live) return `Confié à ${live.agencyName} (${MANDATE_TYPE_LABELS[live.mandateType]?.toLowerCase() ?? live.mandateType}).`;
+    const n = r.proposals.length;
+    if (r.status !== 'MREQ_OPEN') return n ? `${n} proposition${n > 1 ? 's' : ''} reçue${n > 1 ? 's' : ''}.` : 'Aucune proposition.';
+    return n ? `${n} proposition${n > 1 ? 's' : ''} à comparer.` : (r.visibility === 'MREQ_DIRECT' ? `En attente de ${r.targetAgencyName}.` : 'En attente des agences.');
+  }
+
+  askAgent(p: OwnerProperty): void {
+    this.dialog.open<OwnerRequest>(OwnerMandateRequestDialogComponent, {
+      data: { propertyId: p.id, propertyTitle: p.title, city: p.city, transactionType: p.transactionType, expectedPrice: p.expectedPrice },
+      width: '640px',
+    }).closed.subscribe(r => { if (r) this.mandateRequest.set(r); });
+  }
+
+  private loadMandateRequest(): void {
+    this.mandateApi.requests().subscribe({
+      next: list => this.mandateRequest.set(list.find(r => r.propertyId === this.id) ?? null),
+      error: () => undefined,
+    });
+  }
+
   reload(): void {
+    this.loadMandateRequest();
     this.api.property(this.id).subscribe({
       next: p => {
         this.property.set(p);
