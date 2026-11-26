@@ -97,14 +97,17 @@ public class MandateLifecycleService {
     private final TransactionTemplate transactions;
     private com.example.backend.repository.ActivityRepository activities;
     private com.example.backend.repository.AgencyReviewRepository reviews;
+    private com.example.backend.repository.MandateOfferRepository offers;
 
-    /** Lot C : suivi (événements visibles) et avis. */
+    /** Lot C : suivi (événements visibles, offres) et avis. */
     @org.springframework.beans.factory.annotation.Autowired
     void setFollowUpRepositories(
             com.example.backend.repository.ActivityRepository activities,
-            com.example.backend.repository.AgencyReviewRepository reviews) {
+            com.example.backend.repository.AgencyReviewRepository reviews,
+            com.example.backend.repository.MandateOfferRepository offers) {
         this.activities = activities;
         this.reviews = reviews;
+        this.offers = offers;
     }
 
     public MandateLifecycleService(
@@ -515,6 +518,11 @@ public class MandateLifecycleService {
                 property != null ? property.getTitle() : null,
                 listings,
                 events,
+                offers == null
+                        ? List.of()
+                        : offers.findByMandateIdOrderByCreatedAtDesc(m.getId()).stream()
+                                .map(MandateOfferService::view)
+                                .toList(),
                 live,
                 live ? OWNER_END_REASONS : List.of(),
                 canReview(m) && review == null,
@@ -609,10 +617,14 @@ public class MandateLifecycleService {
 
     /** Dossier de l'agence clos (gagné ou perdu) si son workflow le permet. */
     private void closeDossier(MandateEntity m, boolean won) {
+        moveDossier(m, won ? "CRM_CLOSED_WON" : "CRM_CLOSED_LOST");
+    }
+
+    /** Fait avancer le dossier de l'agence si son workflow l'autorise ; sinon, ne fait rien. */
+    void moveDossier(MandateEntity m, String target) {
         if (m.getDossierId() == null) {
             return;
         }
-        String target = won ? "CRM_CLOSED_WON" : "CRM_CLOSED_LOST";
         orgScope.run(
                 m.getAgencyOrgId(),
                 () -> {
@@ -627,7 +639,7 @@ public class MandateLifecycleService {
                 });
     }
 
-    private MandateEntity ownerMandateEntity(Long id) {
+    MandateEntity ownerMandateEntity(Long id) {
         String orgId = ownerContext.requireOwnerOrg().getOrgId();
         return mandates.findById(id)
                 .filter(m -> orgId.equals(m.getOwnerOrgId()))
@@ -788,6 +800,48 @@ public class MandateLifecycleService {
                                 + " : invitez une agence recommandée depuis votre demande.");
             }
         }
+        // § 13 : demande directe sans réponse, rappel à l'agence à 48 h, puis le propriétaire à
+        // 72 h (il peut alors l'ouvrir à toutes les agences, R-PROP-16). idle_alerted_at garde la
+        // dernière étape envoyée.
+        for (MandateRequestEntity r :
+                requests.findByStatusAndVisibilityOrderByOpenedAtDesc(
+                        MandateRequestEntity.MREQ_OPEN, MandateRequestEntity.MREQ_DIRECT)) {
+            if (r.getOpenedAt() == null
+                    || r.getTargetDeclinedAt() != null
+                    || !proposals.findByRequestIdOrderByCreatedAtAsc(r.getId()).isEmpty()) {
+                continue;
+            }
+            LocalDateTime ownerStep = r.getOpenedAt().plusHours(72);
+            boolean agencyDue =
+                    r.getIdleAlertedAt() == null && r.getOpenedAt().isBefore(now.minusHours(48));
+            boolean ownerDue =
+                    now.isAfter(ownerStep)
+                            && (r.getIdleAlertedAt() == null
+                                    || r.getIdleAlertedAt().isBefore(ownerStep));
+            if (agencyDue && !ownerDue) {
+                marketplace.notifyAgency(
+                        r.getTargetAgencyOrgId(),
+                        null,
+                        "Rappel : demande directe sans réponse",
+                        "Un propriétaire de "
+                                + r.getCity()
+                                + " attend votre réponse depuis 48 h. Sans réponse à 72 h, il"
+                                + " pourra ouvrir sa demande à toutes les agences.",
+                        "/pro/mandats/demandes/" + r.getId());
+            }
+            if (ownerDue) {
+                alertOwnerForRequest(
+                        r,
+                        "L'agence n'a pas répondu en 72 h : vous pouvez ouvrir votre demande à"
+                                + " toutes les agences de "
+                                + r.getCity()
+                                + ".");
+            }
+            if (agencyDue || ownerDue) {
+                r.setIdleAlertedAt(now);
+                requests.save(r);
+            }
+        }
     }
 
     private void alertOwnerForRequest(MandateRequestEntity r, String text) {
@@ -841,7 +895,7 @@ public class MandateLifecycleService {
                                                         "Mandat n°" + m.getId() + " terminé")));
     }
 
-    private MandateEntity agencyMandateEntity(Long id) {
+    MandateEntity agencyMandateEntity(Long id) {
         String agency = marketplace.requireVerifiedAgency();
         return mandates.findById(id)
                 .filter(m -> agency.equals(m.getAgencyOrgId()))
@@ -855,7 +909,8 @@ public class MandateLifecycleService {
                                         HttpStatus.NOT_FOUND, "Mandat introuvable"));
     }
 
-    private void alertOwner(MandateEntity m, String text) {
+    /** Alerte au propriétaire ; le lien ouvre le suivi du mandat ({@code /p/m<id>}). */
+    void alertOwner(MandateEntity m, String text) {
         OrganizationEntity owner = organizations.findByOrgId(m.getOwnerOrgId()).orElse(null);
         if (owner == null || owner.getOwnerPhone() == null) {
             return;
@@ -867,8 +922,8 @@ public class MandateLifecycleService {
                         null,
                         text,
                         "Atlas : votre mandat",
-                        "d" + m.getRequestId(),
-                        publicBaseUrl + "/proprietaire/demandes/" + m.getRequestId(),
+                        "m" + m.getId(),
+                        publicBaseUrl + "/proprietaire/mandats/" + m.getId(),
                         true,
                         false));
     }

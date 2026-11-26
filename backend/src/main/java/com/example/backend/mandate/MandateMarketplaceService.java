@@ -266,8 +266,10 @@ public class MandateMarketplaceService {
     /** Les 10 agences les plus pertinentes à l'ouverture (§ 5.1) : la bourse les met en avant. */
     void recordMatches(MandateRequestEntity r) {
         LocalDateTime now = LocalDateTime.now();
+        List<String> matched = new java.util.ArrayList<>();
         for (MandateMatchingService.Score s : matching.ranking(r).stream().limit(10).toList()) {
             if (invitations.findByRequestIdAndAgencyOrgId(r.getId(), s.agencyOrgId()).isEmpty()) {
+                matched.add(s.agencyOrgId());
                 com.example.backend.entity.MandateInvitationEntity i =
                         new com.example.backend.entity.MandateInvitationEntity();
                 i.setRequestId(r.getId());
@@ -278,6 +280,25 @@ public class MandateMarketplaceService {
                 invitations.save(i);
             }
         }
+        // § 13 : les 10 agences les plus pertinentes sont prévenues à l'ouverture.
+        if (!matched.isEmpty()) {
+            events.publishEvent(
+                    new AgencyAlert(
+                            List.copyOf(matched),
+                            "Nouvelle demande dans votre zone",
+                            "Un propriétaire cherche une agence pour "
+                                    + ("RENT".equals(r.getObjective()) ? "louer" : "vendre")
+                                    + " à "
+                                    + place(r)
+                                    + ". Votre agence fait partie des plus pertinentes.",
+                            "/pro/mandats/demandes/" + r.getId()));
+        }
+    }
+
+    private static String place(MandateRequestEntity r) {
+        return r.getDistrict() != null && !r.getDistrict().isBlank()
+                ? r.getDistrict() + ", " + r.getCity()
+                : r.getCity();
     }
 
     /** Agences recommandées au propriétaire : les 5 plus pertinentes (PC-1). */
@@ -357,6 +378,14 @@ public class MandateMarketplaceService {
             }
             i.setSeenAt(null);
             invitations.save(i);
+            events.publishEvent(
+                    AgencyAlert.of(
+                            agencyOrgId,
+                            "Un propriétaire vous invite",
+                            "Un propriétaire de "
+                                    + place(r)
+                                    + " vous invite à lui faire une proposition.",
+                            "/pro/mandats/demandes/" + r.getId()));
         }
         return recommended(requestId);
     }
@@ -796,8 +825,8 @@ public class MandateMarketplaceService {
     void notifyAgency(
             String agencyOrgId, String userId, String subject, String message, String url) {
         if (userId == null) {
-            // Notification in-app = un destinataire. Une demande directe n'en a pas encore :
-            // l'onglet « Demandes directes » de la bourse la signale.
+            // Pas de destinataire désigné (demande directe) : administrateurs et managers.
+            events.publishEvent(AgencyAlert.of(agencyOrgId, subject, message, url));
             return;
         }
         try {

@@ -61,7 +61,10 @@ public class AgencyDirectoryService {
             List<String> languages,
             List<String> propertyTypes,
             List<String> transactions,
-            List<Zone> zones) {}
+            List<Zone> zones,
+            Double rating,
+            int reviews,
+            List<MarketplaceViews.Review> recentReviews) {}
 
     public record ProfileRequest(
             String displayName,
@@ -98,6 +101,16 @@ public class AgencyDirectoryService {
                 split(p != null ? p.getTransactions() : null),
                 zones.findByOrgIdOrderByCityAscDistrictAsc(orgId).stream()
                         .map(z -> new Zone(z.getCity(), z.getDistrict()))
+                        .toList(),
+                rating(orgId).average(),
+                rating(orgId).count(),
+                // Lot C : avis vérifiés reçus, les 20 derniers, sans le nom du propriétaire.
+                reviews.findByAgencyOrgIdOrderByCreatedAtDesc(orgId).stream()
+                        .limit(20)
+                        .map(
+                                r ->
+                                        new MarketplaceViews.Review(
+                                                r.getRating(), r.getComment(), r.getCreatedAt()))
                         .toList());
     }
 

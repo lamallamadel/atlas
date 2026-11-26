@@ -24,11 +24,15 @@ public class MarketplaceController {
 
     private final MandateMarketplaceService marketplace;
     private final MandateLifecycleService lifecycle;
+    private final com.example.backend.mandate.MandateOfferService offers;
 
     public MarketplaceController(
-            MandateMarketplaceService marketplace, MandateLifecycleService lifecycle) {
+            MandateMarketplaceService marketplace,
+            MandateLifecycleService lifecycle,
+            com.example.backend.mandate.MandateOfferService offers) {
         this.marketplace = marketplace;
         this.lifecycle = lifecycle;
+        this.offers = offers;
     }
 
     public record MessageBody(String body) {}
@@ -108,6 +112,25 @@ public class MarketplaceController {
     @PostMapping("/mandates/{id}/end")
     public MarketplaceViews.Mandate end(@PathVariable Long id, @RequestBody EndBody body) {
         return lifecycle.endByAgency(id, body == null ? null : body.reason());
+    }
+
+    /** Offres transmises au propriétaire pour ce mandat (UC-P8). */
+    @GetMapping("/mandates/{id}/offers")
+    public List<MarketplaceViews.Offer> offers(@PathVariable Long id) {
+        return offers.agencyOffers(id);
+    }
+
+    @PostMapping("/mandates/{id}/offers")
+    public List<MarketplaceViews.Offer> submitOffer(
+            @PathVariable Long id,
+            @RequestBody com.example.backend.mandate.MandateOfferService.OfferRequest body) {
+        return offers.submit(id, body);
+    }
+
+    @PostMapping("/mandates/{id}/offers/{offerId}/withdraw")
+    public List<MarketplaceViews.Offer> withdrawOffer(
+            @PathVariable Long id, @PathVariable Long offerId) {
+        return offers.withdraw(id, offerId);
     }
 
     /** Crée (ou retrouve) le brouillon d'annonce de l'agence lié au bien. */
