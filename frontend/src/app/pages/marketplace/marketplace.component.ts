@@ -38,7 +38,7 @@ type Tab = 'market' | 'direct' | 'proposals' | 'mandates';
   template: `
     <div class="pro-page ds-form-stack mk-page">
       <ds-page-header eyebrow="Propriétaires" titleBefore="Bourse aux" titleAccent="mandats"
-        description="Des propriétaires cherchent une agence pour vendre ou louer. Faites-leur une proposition : coordonnées et adresse vous sont transmises s'ils vous choisissent.">
+        description="Des propriétaires cherchent une agence pour vendre ou louer : coordonnées et adresse vous sont transmises s'ils vous choisissent. Les invitations et les demandes les plus pertinentes pour vous sont en tête.">
         <ng-container slot="actions">
           <ds-button variant="ghost" size="md" prefixIcon="settings" routerLink="/pro/mandats/profil">Profil et zones</ds-button>
         </ng-container>
@@ -65,6 +65,12 @@ type Tab = 'market' | 'direct' | 'proposals' | 'mandates';
                 <ng-template dsCell="place" let-r>
                   <div class="mk-cell"><span class="mk-strong">{{ r.district ? r.district + ', ' : '' }}{{ r.city }}</span>
                     <span class="mk-muted">{{ r.objective === 'RENT' ? 'Location' : 'Vente' }} · {{ r.propertyType || 'Bien' }}{{ r.surface ? ' · ' + r.surface + ' m²' : '' }}</span></div>
+                </ng-template>
+                <ng-template dsCell="relevance" let-r>
+                  <span class="mk-row">
+                    <span class="mk-strong">{{ r.relevance }}</span>
+                    @if (r.invited) { <ds-badge size="sm" status="won">Invitée</ds-badge> }
+                  </span>
                 </ng-template>
                 <ng-template dsCell="price" let-r>{{ r.expectedPrice ? (r.expectedPrice | number: '1.0-0') + ' MAD' : '—' }}</ng-template>
                 <ng-template dsCell="types" let-r>{{ types(r) }}</ng-template>
@@ -165,6 +171,7 @@ export class MarketplaceComponent implements OnInit {
 
   readonly requestColumns: DsColumn<AgencyRequest>[] = [
     { key: 'place', header: 'Bien' },
+    { key: 'relevance', header: 'Pertinence', width: '140px' },
     { key: 'price', header: 'Prix souhaité', width: '150px' },
     { key: 'types', header: 'Mandat accepté', width: '180px' },
     { key: 'expires', header: 'Jusqu’au', width: '110px' },

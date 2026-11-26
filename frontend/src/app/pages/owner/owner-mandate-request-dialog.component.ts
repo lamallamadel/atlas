@@ -16,7 +16,7 @@ import {
   DsToastService,
 } from '../../design-system';
 import type { DsRadioOption, DsSelectOption } from '../../design-system';
-import { AgencyCard, MandateType, OwnerMandateApiService, OwnerRequest, RequestVisibility, SERVICE_LABELS } from '../../services/mandate-api.service';
+import { AgencyCard, MandateType, OwnerMandateApiService, OwnerRequest, RequestVisibility, SERVICE_LABELS, ratingLabel } from '../../services/mandate-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
 
 export interface OwnerMandateRequestDialogData {
@@ -60,7 +60,7 @@ export interface OwnerMandateRequestDialogData {
                   <label class="md-agency" [class.md-agency--on]="target === a.orgId">
                     <input type="radio" name="target" [value]="a.orgId" [(ngModel)]="target" required />
                     <span class="md-agency__body">
-                      <span class="md-strong">{{ a.name }}</span>
+                      <span class="md-strong">{{ a.name }}@if (rating(a); as rl) { <span class="md-rating"> · {{ rl }}</span> }</span>
                       @if (a.description) { <span class="md-muted">{{ a.description }}</span> }
                       @if (a.districts.length) { <span class="md-faint">Quartiers : {{ a.districts.join(', ') }}</span> }
                     </span>
@@ -114,6 +114,7 @@ export interface OwnerMandateRequestDialogData {
     .md-agency--on { border-color: var(--ds-marine); background: var(--ds-surface-2); }
     .md-agency input { margin-top: 3px; accent-color: var(--ds-marine); }
     .md-agency__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .md-rating { font-weight: 400; color: var(--ds-text-muted); }
     .md-strong { font-weight: 600; color: var(--ds-text); }
     .md-muted { margin: 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
     .md-faint { font-size: var(--ds-text-xs); color: var(--ds-text-faint); }
@@ -121,6 +122,7 @@ export interface OwnerMandateRequestDialogData {
   `],
 })
 export class OwnerMandateRequestDialogComponent implements OnInit {
+  rating(a: AgencyCard): string | null { return ratingLabel(a.rating, a.reviews); }
   readonly ref = inject<DialogRef<OwnerRequest>>(DialogRef);
   readonly data = inject<OwnerMandateRequestDialogData>(DIALOG_DATA);
   private readonly api = inject(OwnerMandateApiService);

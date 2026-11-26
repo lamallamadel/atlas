@@ -59,6 +59,8 @@ export interface AgencyCard {
   propertyTypes: string[];
   transactions: string[];
   districts: string[];
+  rating: number | null;
+  reviews: number;
 }
 
 export interface RequestCreate {
@@ -92,6 +94,8 @@ export interface OwnerProposal {
   status: string;
   unread: number;
   createdAt: string;
+  agencyRating: number | null;
+  agencyReviews: number;
 }
 
 export interface MandateOwnerInfo {
@@ -125,6 +129,87 @@ export interface MandateView {
   dossierId: number | null;
   annonceId: number | null;
   owner: MandateOwnerInfo | null;
+  endReason: string | null;
+  endedBy: 'OWNER' | 'AGENCY' | 'SYSTEM' | null;
+  endedAt: string | null;
+}
+
+/** Lot C — motifs de fin de mandat (UC-P9). */
+export const END_REASON_LABELS: Record<string, string> = {
+  SOLD_BY_OWNER: 'Vendu ou loué par le propriétaire',
+  SOLD_THIRD_PARTY: 'Vendu ou loué par un autre intermédiaire',
+  WITHDRAWN_OWNER: 'Retiré du marché par le propriétaire',
+  DEAL_CLOSED_AGENCY: 'Transaction conclue par l\'agence',
+  WITHDRAWN_AGENCY: 'L\'agence s\'est retirée',
+  NOT_SIGNED: 'Non signé dans le délai',
+  TERM_REACHED: 'Arrivé à échéance',
+};
+
+/** Formulations du propriétaire quand il choisit lui-même le motif. */
+export const OWNER_END_REASON_CHOICES: Record<string, string> = {
+  SOLD_BY_OWNER: 'Je l\'ai vendu ou loué moi-même',
+  SOLD_THIRD_PARTY: 'Vendu ou loué par un autre intermédiaire',
+  WITHDRAWN_OWNER: 'Je retire mon bien du marché',
+};
+
+/** Formulations de l'agence quand elle choisit le motif. */
+export const AGENCY_END_REASON_CHOICES: Record<string, string> = {
+  DEAL_CLOSED_AGENCY: 'Nous avons conclu la transaction',
+  SOLD_THIRD_PARTY: 'Vendu ou loué par un autre intermédiaire',
+  WITHDRAWN_AGENCY: 'Nous nous retirons du mandat',
+};
+
+/** Agence recommandée pour une demande (§ 5.1, 5 au plus), déjà classée par pertinence. */
+export interface RecommendedAgency {
+  orgId: string;
+  name: string;
+  description: string | null;
+  districts: string[];
+  rating: number | null;
+  reviews: number;
+  invited: boolean;
+  proposed: boolean;
+}
+
+export interface VisibleEvent {
+  id: number;
+  type: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface AgencyListing {
+  annonceId: number;
+  title: string | null;
+  status: string;
+  contacts: number;
+}
+
+export interface AgencyReview {
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+}
+
+/** Suivi d'un mandat par le propriétaire (UC-P8, UC-P9). */
+export interface MandateFollowUp {
+  mandate: MandateView;
+  requestId: number | null;
+  proposalId: number | null;
+  propertyTitle: string | null;
+  listings: AgencyListing[];
+  events: VisibleEvent[];
+  canEnd: boolean;
+  endReasons: string[];
+  canReview: boolean;
+  review: AgencyReview | null;
+}
+
+/** « 4,6 / 5 · 12 avis », ou null sans avis. */
+export function ratingLabel(rating: number | null | undefined, reviews: number | null | undefined): string | null {
+  if (rating == null || !reviews) return null;
+  const r = (Math.round(rating * 10) / 10).toLocaleString('fr-FR');
+  return `${r} / 5 · ${reviews} avis`;
 }
 
 export interface OwnerRequest {
@@ -227,5 +312,31 @@ export class OwnerMandateApiService {
 
   mandates(): Observable<MandateView[]> {
     return this.http.get<MandateView[]>(`${this.base}/mandates`);
+  }
+
+  // ---------------------------------------------------------------- lot C
+
+  recommended(requestId: number): Observable<RecommendedAgency[]> {
+    return this.http.get<RecommendedAgency[]>(`${this.base}/mandate-requests/${requestId}/recommended`);
+  }
+
+  invite(requestId: number, agencyOrgId: string): Observable<RecommendedAgency[]> {
+    return this.http.post<RecommendedAgency[]>(`${this.base}/mandate-requests/${requestId}/invitations`, { agencyOrgId });
+  }
+
+  mandate(id: number): Observable<MandateFollowUp> {
+    return this.http.get<MandateFollowUp>(`${this.base}/mandates/${id}`);
+  }
+
+  endMandate(id: number, reason: string): Observable<MandateFollowUp> {
+    return this.http.post<MandateFollowUp>(`${this.base}/mandates/${id}/end`, { reason });
+  }
+
+  review(id: number, rating: number, comment: string | null): Observable<MandateFollowUp> {
+    return this.http.post<MandateFollowUp>(`${this.base}/mandates/${id}/review`, { rating, comment });
+  }
+
+  requestPropertyVerification(propertyId: number): Observable<{ verificationStatus: string }> {
+    return this.http.post<{ verificationStatus: string }>(`${this.base}/properties/${propertyId}/verification`, {});
   }
 }

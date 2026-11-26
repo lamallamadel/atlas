@@ -7,14 +7,16 @@ import {
   DsCardComponent,
   DsEmptyStateComponent,
   DsInputComponent,
+  DsSelectComponent,
   DsSkeletonComponent,
   DsTextareaComponent,
   DsToastService,
   PageHeaderComponent,
 } from '../../design-system';
+import type { DsSelectOption } from '../../design-system';
 import { OwnerModerationApiService, PendingOwnerAnnonce } from '../../services/owner-moderation-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
-import { MarketplaceApiService } from '../../services/marketplace-api.service';
+import { MarketplaceApiService, PendingPropertyVerification } from '../../services/marketplace-api.service';
 
 /**
  * Modération a priori des annonces de particuliers (cas d'usage n°1, R-PROP-04), réservée à la
@@ -24,7 +26,7 @@ import { MarketplaceApiService } from '../../services/marketplace-api.service';
   selector: 'app-owner-moderation',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, DecimalPipe, FormsModule, DsBadgeComponent, DsButtonComponent, DsCardComponent, DsEmptyStateComponent, DsInputComponent, DsSkeletonComponent, DsTextareaComponent, PageHeaderComponent],
+  imports: [DatePipe, DecimalPipe, FormsModule, DsBadgeComponent, DsButtonComponent, DsCardComponent, DsEmptyStateComponent, DsInputComponent, DsSelectComponent, DsSkeletonComponent, DsTextareaComponent, PageHeaderComponent],
   template: `
     <div class="pro-page ds-form-stack om-page">
       <ds-page-header eyebrow="Plateforme" titleBefore="Annonces de" titleAccent="particuliers"
@@ -33,16 +35,45 @@ import { MarketplaceApiService } from '../../services/marketplace-api.service';
       <ds-card [pad]="true" elevation="xs">
         <form class="om-verify" (ngSubmit)="verifyAgency(true)">
           <div class="om-verify__text">
-            <h2 class="om-title">Vérification des agences</h2>
-            <p class="om-meta">Une agence vérifiée accède à la bourse aux mandats et apparaît dans l'annuaire des propriétaires.</p>
+            <h2 class="om-title">Vérification des comptes</h2>
+            <p class="om-meta">{{ accountKind === 'OWNER'
+              ? 'Badge « Propriétaire vérifié » après contrôle de la pièce d\\'identité. La pièce n\\'est jamais conservée.'
+              : 'Une agence vérifiée accède à la bourse aux mandats et apparaît dans l\\'annuaire des propriétaires.' }}</p>
           </div>
-          <ds-input label="Identifiant de l'organisation" name="agencyOrg" placeholder="ORG-…" [(ngModel)]="agencyOrg"></ds-input>
+          <div class="om-verify__fields">
+            <ds-select label="Compte" name="accountKind" [options]="accountKinds" [(ngModel)]="accountKind"></ds-select>
+            <ds-input label="Identifiant de l'organisation" name="agencyOrg" [placeholder]="accountKind === 'OWNER' ? 'OWN-…' : 'ORG-…'" [(ngModel)]="agencyOrg"></ds-input>
+          </div>
           <div class="om-verify__actions">
             <ds-button variant="ghost" size="md" [disabled]="!agencyOrg.trim() || verifying()" (dsClick)="verifyAgency(false)">Retirer</ds-button>
             <ds-button variant="marine" size="md" nativeType="submit" [loading]="verifying()" [disabled]="!agencyOrg.trim() || verifying()">Vérifier</ds-button>
           </div>
         </form>
       </ds-card>
+
+      @if (properties().length) {
+        <ds-card [pad]="true" elevation="xs">
+          <h2 class="om-title">Titres fonciers à contrôler</h2>
+          <p class="om-meta">Vérifiez le numéro auprès de la Conservation foncière, puis décidez. Le badge « Bien vérifié » apparaît sur le portail et dans la bourse.</p>
+          <ul class="om-props" role="list">
+            @for (p of properties(); track p.id) {
+              <li class="om-prop">
+                <div class="om-prop__text">
+                  <span class="om-strong">{{ p.title || 'Bien n°' + p.id }} · {{ p.landTitleNumber }}</span>
+                  <span class="om-meta">{{ p.ownerName || p.ownerOrgId }}{{ p.ownerPhone ? ' · ' + p.ownerPhone : '' }} · {{ p.city }}{{ p.district ? ', ' + p.district : '' }} · demandé le {{ p.requestedAt | date: 'd MMM' }}</span>
+                </div>
+                @if (!p.ownerVerified) {
+                  <ds-button variant="ghost" size="sm" [disabled]="busyProperty() === p.id" (dsClick)="verifyOwner(p)">Vérifier le propriétaire</ds-button>
+                } @else {
+                  <ds-badge size="sm" status="success">Propriétaire vérifié</ds-badge>
+                }
+                <ds-button variant="ghost" size="sm" [disabled]="busyProperty() === p.id" (dsClick)="decideProperty(p, false)">Non confirmé</ds-button>
+                <ds-button variant="marine" size="sm" prefixIcon="check" [loading]="busyProperty() === p.id" [disabled]="busyProperty() === p.id" (dsClick)="decideProperty(p, true)">Bien vérifié</ds-button>
+              </li>
+            }
+          </ul>
+        </ds-card>
+      }
 
       @if (loading()) {
         <ds-card [pad]="true" elevation="xs"><ds-skeleton variant="heading" width="40%"></ds-skeleton><ds-skeleton variant="text" width="70%"></ds-skeleton></ds-card>
@@ -88,7 +119,14 @@ import { MarketplaceApiService } from '../../services/marketplace-api.service';
     </div>
   `,
   styles: [`
-    .om-verify { display: grid; grid-template-columns: minmax(0, 2fr) minmax(200px, 1fr) auto; gap: var(--ds-space-4); align-items: end; }
+    .om-verify__fields { display: grid; grid-template-columns: 150px 250px; gap: var(--ds-space-3); }
+    @media (max-width: 900px) { .om-verify__fields { grid-template-columns: 1fr; } }
+    .om-props { display: flex; flex-direction: column; gap: var(--ds-space-4); margin: var(--ds-space-4) 0 0; padding: 0; list-style: none; }
+    .om-prop { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2) var(--ds-space-3); }
+    .om-prop__text { display: flex; flex-direction: column; flex: 1 1 320px; min-width: 0; }
+    .om-prop__text .om-meta { margin: 0; }
+    .om-strong { font-size: var(--ds-text-sm); font-weight: 600; color: var(--ds-text); }
+    .om-verify { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--ds-space-4); align-items: end; }
     @media (max-width: 900px) { .om-verify { grid-template-columns: 1fr; } }
     .om-verify__text { display: flex; flex-direction: column; gap: var(--ds-space-1); }
     .om-verify__actions { display: flex; gap: var(--ds-space-2); }
@@ -114,15 +152,49 @@ export class OwnerModerationComponent implements OnInit, OnDestroy {
   private readonly marketplace = inject(MarketplaceApiService);
   readonly verifying = signal(false);
   agencyOrg = '';
+  accountKind: 'AGENCY' | 'OWNER' = 'AGENCY';
+  readonly accountKinds: DsSelectOption[] = [{ value: 'AGENCY', label: 'Agence' }, { value: 'OWNER', label: 'Propriétaire' }];
 
-  /** Lot B : l'équipe Atlas vérifie une agence avant son accès à la bourse aux mandats. */
+  /** Lots B et C : l'équipe Atlas vérifie une agence (accès à la bourse) ou un propriétaire (badge). */
   verifyAgency(verified: boolean): void {
     const orgId = this.agencyOrg.trim();
     if (!orgId) return;
+    const owner = this.accountKind === 'OWNER';
     this.verifying.set(true);
-    this.marketplace.setVerified(orgId, verified).subscribe({
-      next: r => { this.verifying.set(false); this.toast.success(r.verified ? `${orgId} est vérifiée` : `${orgId} n'est plus vérifiée`); },
+    (owner ? this.marketplace.setOwnerVerified(orgId, verified) : this.marketplace.setVerified(orgId, verified)).subscribe({
+      next: r => {
+        this.verifying.set(false);
+        this.toast.success(r.verified ? `${orgId} est ${owner ? 'vérifié' : 'vérifiée'}` : `${orgId} n'est plus ${owner ? 'vérifié' : 'vérifiée'}`);
+      },
       error: err => { this.verifying.set(false); this.toast.error(serverMessage(err, 'Action impossible')); },
+    });
+  }
+
+  /** Lot C : titres fonciers déclarés par les propriétaires. */
+  readonly properties = signal<PendingPropertyVerification[]>([]);
+  readonly busyProperty = signal<number | null>(null);
+
+  decideProperty(p: PendingPropertyVerification, verified: boolean): void {
+    this.busyProperty.set(p.id);
+    this.marketplace.decideProperty(p.id, verified).subscribe({
+      next: () => {
+        this.busyProperty.set(null);
+        this.properties.update(list => list.filter(x => x.id !== p.id));
+        this.toast.success(verified ? 'Bien vérifié' : 'Titre foncier non confirmé');
+      },
+      error: err => { this.busyProperty.set(null); this.toast.error(serverMessage(err, 'Action impossible')); },
+    });
+  }
+
+  verifyOwner(p: PendingPropertyVerification): void {
+    this.busyProperty.set(p.id);
+    this.marketplace.setOwnerVerified(p.ownerOrgId, true).subscribe({
+      next: () => {
+        this.busyProperty.set(null);
+        this.properties.update(list => list.map(x => x.ownerOrgId === p.ownerOrgId ? { ...x, ownerVerified: true } : x));
+        this.toast.success(`${p.ownerName || p.ownerOrgId} est vérifié`);
+      },
+      error: err => { this.busyProperty.set(null); this.toast.error(serverMessage(err, 'Action impossible')); },
     });
   }
 
@@ -134,6 +206,7 @@ export class OwnerModerationComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.load();
+    this.marketplace.pendingProperties().subscribe({ next: l => this.properties.set(l), error: () => undefined });
   }
 
   ngOnDestroy(): void {

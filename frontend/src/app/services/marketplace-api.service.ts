@@ -28,6 +28,13 @@ export interface AgencyRequest {
   canPropose: boolean;
   cannotProposeReason: string | null;
   myProposal: AgencyProposal | null;
+  /** Pertinence 0–100 pour l'agence qui consulte (§ 5.1). */
+  relevance: number;
+  /** Acquéreurs compatibles dans le portefeuille de l'agence qui consulte (§ 5.2). */
+  compatibleBuyers: number;
+  invited: boolean;
+  ownerVerified: boolean;
+  propertyVerified: boolean;
 }
 
 export interface AgencyProposal {
@@ -88,6 +95,19 @@ export interface AgencyProfileRequest {
   transactions: string[];
 }
 
+export interface PendingPropertyVerification {
+  id: number;
+  title: string | null;
+  city: string | null;
+  district: string | null;
+  landTitleNumber: string;
+  ownerOrgId: string;
+  ownerName: string | null;
+  ownerPhone: string | null;
+  ownerVerified: boolean;
+  requestedAt: string;
+}
+
 /** Côté agence : `/api/v1/marketplace/...` et le profil `/api/v1/agency/marketplace-profile`. */
 @Injectable({ providedIn: 'root' })
 export class MarketplaceApiService {
@@ -143,6 +163,10 @@ export class MarketplaceApiService {
     return this.http.post<MandateView>(`${this.base}/mandates/${id}/signed`, {});
   }
 
+  endMandate(id: number, reason: string): Observable<MandateView> {
+    return this.http.post<MandateView>(`${this.base}/mandates/${id}/end`, { reason });
+  }
+
   createAnnonce(id: number): Observable<{ annonceId: number }> {
     return this.http.post<{ annonceId: number }>(`${this.base}/mandates/${id}/annonce`, {});
   }
@@ -162,5 +186,19 @@ export class MarketplaceApiService {
   /** Super-admin : vérification d'une agence. */
   setVerified(orgId: string, verified: boolean): Observable<{ orgId: string; verified: boolean }> {
     return this.http.put<{ orgId: string; verified: boolean }>(`/api/v1/admin/agencies/${encodeURIComponent(orgId)}/verification`, { verified });
+  }
+
+  /** Super-admin : badge « Propriétaire vérifié » (pièce d'identité contrôlée, non conservée). */
+  setOwnerVerified(orgId: string, verified: boolean): Observable<{ orgId: string; verified: boolean }> {
+    return this.http.put<{ orgId: string; verified: boolean }>(`/api/v1/admin/owners/${encodeURIComponent(orgId)}/verification`, { verified });
+  }
+
+  /** Super-admin : titres fonciers en attente de contrôle. */
+  pendingProperties(): Observable<PendingPropertyVerification[]> {
+    return this.http.get<PendingPropertyVerification[]>('/api/v1/admin/verifications/properties');
+  }
+
+  decideProperty(id: number, verified: boolean): Observable<{ propertyId: number; verified: boolean }> {
+    return this.http.put<{ propertyId: number; verified: boolean }>(`/api/v1/admin/properties/${id}/verification`, { verified });
   }
 }

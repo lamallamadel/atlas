@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { Router } from '@angular/router';
 import {
@@ -9,10 +10,15 @@ import {
   DsDialogContentComponent,
   DsDialogHeaderComponent,
   DsIconComponent,
+  DsRadioGroupComponent,
+  DsRadioOption,
   DsToastService,
 } from '../../design-system';
 import { MarketplaceApiService } from '../../services/marketplace-api.service';
-import { MANDATE_STATUS, MANDATE_TYPE_LABELS, MandateView, commissionLabel } from '../../services/mandate-api.service';
+import { AGENCY_END_REASON_CHOICES, END_REASON_LABELS, MANDATE_STATUS, MANDATE_TYPE_LABELS, MandateView, commissionLabel } from '../../services/mandate-api.service';
+
+/** Motifs de fin côté agence (UC-P9), dans l'ordre de l'API. */
+const AGENCY_END_REASONS = ['DEAL_CLOSED_AGENCY', 'SOLD_THIRD_PARTY', 'WITHDRAWN_AGENCY'];
 import { serverMessage } from '../../components/annonce-publication-panel.component';
 
 /**
@@ -23,7 +29,7 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
   selector: 'app-marketplace-mandate-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, DecimalPipe, DsBadgeComponent, DsButtonComponent, DsDialogActionsComponent, DsDialogContentComponent, DsDialogHeaderComponent, DsIconComponent],
+  imports: [DatePipe, DecimalPipe, FormsModule, DsBadgeComponent, DsRadioGroupComponent, DsButtonComponent, DsDialogActionsComponent, DsDialogContentComponent, DsDialogHeaderComponent, DsIconComponent],
   template: `
     <ds-dialog-header [subtitle]="typeLabel + ' · ' + m().durationMonths + ' mois'" (close)="ref.close(m())">Mandat n°{{ m().id }}</ds-dialog-header>
     <ds-dialog-content>
@@ -43,12 +49,25 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
         } @else {
           <p class="mm-muted">Ce mandat est terminé : les coordonnées du propriétaire ne sont plus affichées ici. Elles restent dans le dossier.</p>
         }
-        @if (m().status === 'MANDATE_PENDING_SIGNATURE') {
+        @if (m().endReason) {
+          <p class="mm-hint"><ds-icon name="info" [size]="16"></ds-icon><span>{{ endedLine() }}</span></p>
+        }
+        @if (ending()) {
+          <ds-radio-group name="endReason" label="Motif de fin" [options]="endOptions" [(ngModel)]="endReason"></ds-radio-group>
+          <p class="mm-hint"><ds-icon name="info" [size]="16"></ds-icon><span>Le propriétaire est prévenu du motif et pourra noter votre agence. Le dossier est clos et vos annonces du bien quittent le portail.</span></p>
+        } @else if (m().status === 'MANDATE_PENDING_SIGNATURE') {
           <p class="mm-hint"><ds-icon name="info" [size]="16"></ds-icon> Faites signer le mandat au propriétaire sous 7 jours, puis déclarez-le signé : vous pourrez alors publier le bien.</p>
         }
       </div>
     </ds-dialog-content>
     <ds-dialog-actions>
+      @if (ending()) {
+        <ds-button variant="ghost" (dsClick)="ending.set(false)">Retour</ds-button>
+        <ds-button variant="marine" prefixIcon="check" [loading]="busy()" [disabled]="busy() || !endReason()" (dsClick)="end()">Terminer le mandat</ds-button>
+      } @else {
+      @if (live()) {
+        <ds-button variant="ghost" [disabled]="busy()" (dsClick)="ending.set(true)">Terminer le mandat</ds-button>
+      }
       @if (m().dossierId) {
         <ds-button variant="ghost" prefixIcon="folder" (dsClick)="openDossier()">Ouvrir le dossier</ds-button>
       }
@@ -57,6 +76,7 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
       }
       @if (m().status === 'MANDATE_ACTIVE') {
         <ds-button variant="marine" prefixIcon="megaphone" [loading]="busy()" [disabled]="busy()" (dsClick)="annonce()">{{ m().annonceId ? 'Ouvrir l’annonce' : 'Créer l’annonce du bien' }}</ds-button>
+      }
       }
     </ds-dialog-actions>
   `,
@@ -77,11 +97,35 @@ export class MarketplaceMandateDialogComponent {
 
   readonly m = signal(inject<MandateView>(DIALOG_DATA));
   readonly busy = signal(false);
+  readonly ending = signal(false);
+  readonly endReason = signal<string | null>(null);
+  readonly endOptions: DsRadioOption[] = AGENCY_END_REASONS.map(r => ({ value: r, label: AGENCY_END_REASON_CHOICES[r] ?? r }));
   readonly typeLabel = MANDATE_TYPE_LABELS[this.m().mandateType] ?? this.m().mandateType;
   readonly commission = commissionLabel(this.m().commissionKind, this.m().commissionValue, this.m().commissionPayer);
 
   status() {
     return MANDATE_STATUS[this.m().status] ?? { label: this.m().status, status: 'neutral' as const };
+  }
+
+  live(): boolean {
+    return this.m().status === 'MANDATE_PENDING_SIGNATURE' || this.m().status === 'MANDATE_ACTIVE';
+  }
+
+  endedLine(): string {
+    const m = this.m();
+    const by = m.endedBy === 'OWNER' ? 'par le propriétaire' : m.endedBy === 'AGENCY' ? 'par votre agence' : '';
+    const reason = m.endReason ? END_REASON_LABELS[m.endReason] ?? m.endReason : '';
+    return `Terminé${by ? ' ' + by : ''} : ${reason.charAt(0).toLowerCase()}${reason.slice(1)}.`;
+  }
+
+  end(): void {
+    const reason = this.endReason();
+    if (!reason) return;
+    this.busy.set(true);
+    this.api.endMandate(this.m().id, reason).subscribe({
+      next: updated => { this.busy.set(false); this.ending.set(false); this.m.set(updated); this.toast.success('Mandat terminé, le propriétaire est prévenu'); },
+      error: err => { this.busy.set(false); this.toast.error(serverMessage(err, 'Action impossible')); },
+    });
   }
 
   signed(): void {

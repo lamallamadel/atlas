@@ -19,6 +19,8 @@ export interface Listing {
   privateSeller: boolean;
   /** Lot B : annonceurs d'un même bien (mandats simples) ; vide s'il n'y en a qu'un. */
   publishers: ListingPublisher[];
+  /** Lot C : titre foncier contrôlé par Atlas (fiche détaillée uniquement). */
+  propertyVerified: boolean;
   date: string;
   imgs: string[];
 }
@@ -109,6 +111,7 @@ export class PortailService {
       publishers: (annonce.publishers ?? []).map((p: { annonceId: number; kind: 'OWNER' | 'AGENCY'; name: string }) => ({
         annonceId: String(p.annonceId), kind: p.kind, name: p.name,
       })),
+      propertyVerified: annonce.propertyVerified === true,
       pieces: annonce.meta?.pieces || annonce.meta?.rooms || 0,
       date: annonce.createdAt || new Date().toISOString(),
       imgs: annonce.photos && annonce.photos.length > 0 
