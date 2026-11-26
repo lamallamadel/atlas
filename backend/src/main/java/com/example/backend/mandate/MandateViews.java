@@ -5,6 +5,7 @@ import static com.example.backend.entity.MandateRequestEntity.MREQ_OPEN;
 
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.MandateEntity;
+import com.example.backend.entity.MandateInvitationEntity;
 import com.example.backend.entity.MandateProposalEntity;
 import com.example.backend.entity.MandateRequestEntity;
 import com.example.backend.entity.MarketplaceMessageEntity;
@@ -24,7 +25,6 @@ import com.example.backend.repository.MarketplaceMessageRepository;
 import com.example.backend.repository.OrganizationRepository;
 import com.example.backend.repository.PropertyRepository;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
@@ -46,6 +46,8 @@ public class MandateViews {
     private final AgencyDirectoryService agencies;
     private final MarketplaceSettings settings;
     private final OrgScope orgScope;
+    private final MandateMatchingService matching;
+    private final com.example.backend.repository.MandateInvitationRepository invitations;
 
     public MandateViews(
             MandateRequestRepository requests,
@@ -57,7 +59,11 @@ public class MandateViews {
             AnnonceRepository annonces,
             AgencyDirectoryService agencies,
             MarketplaceSettings settings,
-            OrgScope orgScope) {
+            OrgScope orgScope,
+            MandateMatchingService matching,
+            com.example.backend.repository.MandateInvitationRepository invitations) {
+        this.matching = matching;
+        this.invitations = invitations;
         this.requests = requests;
         this.proposals = proposals;
         this.messages = messages;
@@ -110,7 +116,9 @@ public class MandateViews {
                                                         p.getId(),
                                                         MarketplaceMessageEntity.AGENCY,
                                                         p.getOwnerLastReadAt()),
-                                                p.getCreatedAt()))
+                                                p.getCreatedAt(),
+                                                agencies.rating(p.getAgencyOrgId()).average(),
+                                                agencies.rating(p.getAgencyOrgId()).count()))
                         .toList();
         List<Mandate> mandateViews =
                 list.stream()
@@ -178,6 +186,21 @@ public class MandateViews {
                         .map(this::agencyProposal)
                         .orElse(null);
         String reason = cannotPropose(r, agency);
+        MandateMatchingService.Score score = matching.score(r, agency);
+        boolean invited =
+                invitations
+                        .findByRequestIdAndAgencyOrgId(r.getId(), agency)
+                        .map(i -> MandateInvitationEntity.INVITED.equals(i.getKind()))
+                        .orElse(false);
+        boolean ownerVerified =
+                organizations
+                        .findByOrgId(r.getOwnerOrgId())
+                        .map(OrganizationEntity::isVerified)
+                        .orElse(false);
+        boolean propertyVerified =
+                property != null
+                        && PropertyEntity.VERIFICATION_VERIFIED.equals(
+                                property.getVerificationStatus());
         return new AgencyRequest(
                 r.getId(),
                 agency.equals(r.getTargetAgencyOrgId()),
@@ -202,7 +225,14 @@ public class MandateViews {
                 r.getExpiresAt(),
                 reason == null,
                 reason,
-                mine);
+                mine,
+                score.total(),
+                score.eligible()
+                        ? score.compatibleBuyers()
+                        : matching.compatibleBuyers(agency, r, property),
+                invited,
+                ownerVerified,
+                propertyVerified);
     }
 
     /** {@code null} si l'agence peut proposer, sinon la raison (R-PROP-07, R-PROP-11). */
@@ -229,12 +259,10 @@ public class MandateViews {
                         + " propositions.";
             }
         }
-        LocalDateTime monthStart = YearMonth.now().atDay(1).atStartOfDay();
-        if (proposals.countByAgencyOrgIdAndCreatedAtAfter(agency, monthStart)
-                >= settings.monthlyProposalQuota()) {
+        if (matching.remainingQuota(agency) <= 0) {
             return "QUOTA_REACHED: votre agence a utilisé ses "
-                    + settings.monthlyProposalQuota()
-                    + " propositions du mois.";
+                    + matching.monthlyQuota(agency)
+                    + " propositions du mois prévues par son offre.";
         }
         return null;
     }
@@ -310,7 +338,10 @@ public class MandateViews {
                 m.getSignedAt(),
                 forAgency ? m.getDossierId() : null,
                 annonceId,
-                owner);
+                owner,
+                m.getEndReason(),
+                m.getEndedBy(),
+                m.getEndedAt());
     }
 
     // ---------------------------------------------------------------- utilitaires

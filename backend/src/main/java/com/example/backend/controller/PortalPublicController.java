@@ -113,7 +113,8 @@ public class PortalPublicController {
                                 annonceMediaService
                                         .uploadedPhotoIds(java.util.List.of(a.getId()))
                                         .get(a.getId()))
-                        .withPublishers(propertyListings.publishers(a)));
+                        .withPublishers(propertyListings.publishers(a))
+                        .withPropertyVerified(propertyListings.propertyVerified(a)));
     }
 
     @GetMapping("/annonces/{id}/media/{mediaId}")

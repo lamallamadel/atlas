@@ -22,8 +22,10 @@ import {
   OwnerRequest,
   PROPOSAL_STATUS,
   REQUEST_STATUS,
+  RecommendedAgency,
   SERVICE_LABELS,
   commissionLabel,
+  ratingLabel,
 } from '../../services/mandate-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
 import { ConversationThreadComponent, ThreadItem } from './conversation-thread.component';
@@ -74,6 +76,7 @@ import { OwnerAcceptDialogComponent } from './owner-accept-dialog.component';
               <span class="or-muted">{{ mandateStatus(m).label }} · {{ m.durationMonths }} mois · commission {{ commission(m) }}{{ m.signedAt ? ' · signé le ' + (m.signedAt | date: 'd MMM y') : '' }}</span>
             </div>
             <ds-badge [status]="mandateStatus(m).status">{{ mandateStatus(m).label }}</ds-badge>
+            <ds-button variant="ghost" size="sm" [routerLink]="['/proprietaire/mandats', m.id]">Suivre le mandat</ds-button>
           </div>
         }
 
@@ -91,7 +94,7 @@ import { OwnerAcceptDialogComponent } from './owner-accept-dialog.component';
                   <div class="or-card__top">
                     <div class="or-card__who">
                       <span class="or-strong">{{ p.agencyName }}</span>
-                      @if (p.agentName) { <span class="or-muted">{{ p.agentName }}</span> }
+                      <span class="or-muted">{{ who(p) }}</span>
                     </div>
                     <ds-badge [status]="proposalStatus(p).status">{{ proposalStatus(p).label }}</ds-badge>
                   </div>
@@ -159,6 +162,29 @@ import { OwnerAcceptDialogComponent } from './owner-accept-dialog.component';
                   <p class="or-hint">Choisissez « Échanger » sur une proposition pour poser vos questions à l'agence.</p>
                 </div>
               </ds-card>
+              @if (recommended().length) {
+                <ds-card [pad]="true" elevation="xs">
+                  <h2 class="or-card-title or-card-title--tight">Agences recommandées</h2>
+                  <p class="or-muted or-gap">Les plus actives sur votre quartier et votre type de bien. Invitez-les : votre demande passe en tête de leur liste.</p>
+                  <ul class="or-reco" role="list">
+                    @for (a of recommended(); track a.orgId) {
+                      <li class="or-reco__item">
+                        <div class="or-reco__text">
+                          <span class="or-strong">{{ a.name }}</span>
+                          <span class="or-muted">{{ recoLine(a) }}</span>
+                        </div>
+                        @if (a.proposed) {
+                          <ds-badge status="success">A proposé</ds-badge>
+                        } @else if (a.invited) {
+                          <ds-badge status="info">Invitée</ds-badge>
+                        } @else {
+                          <ds-button variant="ghost" size="sm" prefixIcon="send" [disabled]="busy() || r.status !== 'MREQ_OPEN'" (dsClick)="invite(a)">Inviter</ds-button>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </ds-card>
+              }
             }
           </aside>
         </div>
@@ -185,6 +211,12 @@ import { OwnerAcceptDialogComponent } from './owner-accept-dialog.component';
     .or-card__top ds-badge { flex: none; }
     .or-card__who { display: flex; flex-direction: column; min-width: 0; }
     .or-card__actions { display: flex; flex-wrap: wrap; gap: var(--ds-space-2); justify-content: flex-end; }
+    .or-card-title.or-card-title--tight { margin-bottom: var(--ds-space-1); }
+    .or-muted.or-gap { margin-bottom: var(--ds-space-4); }
+    .or-reco { display: flex; flex-direction: column; gap: var(--ds-space-3); margin: 0; padding: 0; list-style: none; }
+    .or-reco__item { display: flex; align-items: center; gap: var(--ds-space-3); }
+    .or-reco__item ds-badge, .or-reco__item ds-button { flex: none; }
+    .or-reco__text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
     .or-card-title { margin: 0 0 var(--ds-space-3); font-size: var(--ds-text-base); font-weight: 700; color: var(--ds-marine); }
     .or-strong { font-weight: 600; color: var(--ds-text); }
     .or-muted { margin: 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
@@ -212,6 +244,8 @@ export class OwnerRequestComponent implements OnInit {
   readonly sending = signal(false);
   readonly selected = signal<OwnerProposal | null>(null);
   readonly thread = signal<MarketplaceThread | null>(null);
+  /** Lot C : 5 agences recommandées (demandes ouvertes à toutes les agences). */
+  readonly recommended = signal<RecommendedAgency[]>([]);
   readonly items = computed<ThreadItem[]>(() =>
     (this.thread()?.messages ?? []).map(m => ({ id: m.id, author: m.side, body: m.body, at: m.createdAt })));
   readonly intro = computed(() => {
@@ -238,6 +272,23 @@ export class OwnerRequestComponent implements OnInit {
   proposalStatus(p: OwnerProposal) { return PROPOSAL_STATUS[p.status] ?? { label: p.status, status: 'neutral' as const }; }
   requestStatus(r: OwnerRequest) { return REQUEST_STATUS[r.status] ?? { label: r.status, status: 'neutral' as const }; }
   mandateStatus(m: MandateView) { return MANDATE_STATUS[m.status] ?? { label: m.status, status: 'neutral' as const }; }
+
+  who(p: OwnerProposal): string {
+    return [p.agentName, ratingLabel(p.agencyRating, p.agencyReviews) ?? 'Pas encore d\'avis'].filter(Boolean).join(' · ');
+  }
+
+  recoLine(a: RecommendedAgency): string {
+    const zone = a.districts.length ? a.districts.slice(0, 3).join(', ') : 'Toute la ville';
+    return [zone, ratingLabel(a.rating, a.reviews)].filter(Boolean).join(' · ');
+  }
+
+  invite(a: RecommendedAgency): void {
+    this.busy.set(true);
+    this.api.invite(this.id, a.orgId).subscribe({
+      next: list => { this.busy.set(false); this.recommended.set(list); this.toast.success(`${a.name} est invitée à vous faire une proposition`); },
+      error: err => { this.busy.set(false); this.toast.error(serverMessage(err, 'Invitation impossible')); },
+    });
+  }
 
   /** Proposition encore acceptable (y compris une autre proposition simple après un premier mandat simple). */
   pending(p: OwnerProposal): boolean {
@@ -278,9 +329,14 @@ export class OwnerRequestComponent implements OnInit {
   private run(call: ReturnType<OwnerMandateApiService['cancel']>, done: string): void {
     this.busy.set(true);
     call.subscribe({
-      next: r => { this.busy.set(false); this.req.set(r); this.toast.success(done); },
+      next: r => { this.busy.set(false); this.req.set(r); this.loadRecommended(r); this.toast.success(done); },
       error: err => { this.busy.set(false); this.toast.error(serverMessage(err, 'Action impossible')); },
     });
+  }
+
+  private loadRecommended(r: OwnerRequest): void {
+    if (r.visibility !== 'MREQ_OPEN_MARKET' || r.status !== 'MREQ_OPEN') { this.recommended.set([]); return; }
+    this.api.recommended(r.id).subscribe({ next: list => this.recommended.set(list), error: () => this.recommended.set([]) });
   }
 
   private clearUnread(proposalId: number): void {
@@ -291,7 +347,7 @@ export class OwnerRequestComponent implements OnInit {
 
   private reload(): void {
     this.api.request(this.id).subscribe({
-      next: r => { this.req.set(r); this.loading.set(false); },
+      next: r => { this.req.set(r); this.loading.set(false); this.loadRecommended(r); },
       error: err => { this.loading.set(false); if (err?.status !== 404) this.toast.error(serverMessage(err, 'Impossible de charger la demande')); },
     });
   }

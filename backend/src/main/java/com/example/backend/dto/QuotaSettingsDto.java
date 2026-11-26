@@ -25,10 +25,18 @@ public class QuotaSettingsDto {
     @NotBlank(message = "Rate limit tier is required")
     private String rateLimitTier;
 
+    /** Propositions de la bourse aux mandats par mois ({@code -1} : illimité ; vide : défaut). */
+    @Min(value = -1, message = "Max mandate proposals must be -1 (unlimited) or positive")
+    private Integer maxMandateProposalsMonth;
+
     public QuotaSettingsDto() {}
 
     public QuotaSettingsDto(
-            Integer maxUsers, Integer maxDossiers, Long maxStorage, Integer maxAnnonces, String rateLimitTier) {
+            Integer maxUsers,
+            Integer maxDossiers,
+            Long maxStorage,
+            Integer maxAnnonces,
+            String rateLimitTier) {
         this.maxUsers = maxUsers;
         this.maxDossiers = maxDossiers;
         this.maxStorage = maxStorage;
@@ -74,5 +82,13 @@ public class QuotaSettingsDto {
 
     public void setRateLimitTier(String rateLimitTier) {
         this.rateLimitTier = rateLimitTier;
+    }
+
+    public Integer getMaxMandateProposalsMonth() {
+        return maxMandateProposalsMonth;
+    }
+
+    public void setMaxMandateProposalsMonth(Integer maxMandateProposalsMonth) {
+        this.maxMandateProposalsMonth = maxMandateProposalsMonth;
     }
 }

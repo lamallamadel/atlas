@@ -17,6 +17,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class PropertyEntity extends BaseEntity {
 
     public static final String VERIFICATION_NONE = "NONE";
+    // Lot C : titre foncier déclaré, contrôle manuel par la plateforme (badge « Bien vérifié »).
+    public static final String VERIFICATION_PENDING = "PENDING";
+    public static final String VERIFICATION_VERIFIED = "VERIFIED";
+    public static final String VERIFICATION_REJECTED = "REJECTED";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

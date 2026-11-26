@@ -95,7 +95,12 @@ public class OwnerPropertyService {
         p.setExpectedPrice(r.expectedPrice());
         p.setCurrency("MAD");
         p.setDescription(trim(r.description()));
-        p.setLandTitleNumber(trim(r.landTitleNumber()));
+        String landTitle = trim(r.landTitleNumber());
+        if (!java.util.Objects.equals(landTitle, p.getLandTitleNumber())) {
+            // Un autre titre foncier n'a pas été contrôlé : le badge « Bien vérifié » tombe.
+            p.setVerificationStatus(PropertyEntity.VERIFICATION_NONE);
+        }
+        p.setLandTitleNumber(landTitle);
     }
 
     private static String trim(String s) {

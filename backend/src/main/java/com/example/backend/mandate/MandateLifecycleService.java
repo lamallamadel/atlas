@@ -73,6 +73,7 @@ public class MandateLifecycleService {
     public static final String LISTED = "CRM_LISTED";
     public static final String PUBLISHER_AGENCY = "AGENCY";
     public static final String SUSPEND_EXCLUSIVE = "MANDATE_EXCLUSIVE";
+    public static final String SUSPEND_MANDATE_ENDED = "MANDATE_ENDED";
 
     private final MandateMarketplaceService marketplace;
     private final MandateViews views;
@@ -94,6 +95,17 @@ public class MandateLifecycleService {
     private final ApplicationEventPublisher events;
     private final String publicBaseUrl;
     private final TransactionTemplate transactions;
+    private com.example.backend.repository.ActivityRepository activities;
+    private com.example.backend.repository.AgencyReviewRepository reviews;
+
+    /** Lot C : suivi (événements visibles) et avis. */
+    @org.springframework.beans.factory.annotation.Autowired
+    void setFollowUpRepositories(
+            com.example.backend.repository.ActivityRepository activities,
+            com.example.backend.repository.AgencyReviewRepository reviews) {
+        this.activities = activities;
+        this.reviews = reviews;
+    }
 
     public MandateLifecycleService(
             MandateMarketplaceService marketplace,
@@ -399,12 +411,234 @@ public class MandateLifecycleService {
     @EventListener
     public void onDossierStatus(DossierStatusChangedEvent event) {
         Dossier d = event.getDossier();
-        if (d == null || d.getId() == null || !MANDATE_SIGNED.equals(d.getStatusCode())) {
+        if (d == null || d.getId() == null) {
             return;
         }
-        mandates.findByDossierId(d.getId())
-                .filter(m -> MandateEntity.MANDATE_PENDING_SIGNATURE.equals(m.getStatus()))
-                .ifPresent(this::activate);
+        if (MANDATE_SIGNED.equals(d.getStatusCode())) {
+            mandates.findByDossierId(d.getId())
+                    .filter(m -> MandateEntity.MANDATE_PENDING_SIGNATURE.equals(m.getStatus()))
+                    .ifPresent(this::activate);
+        } else if ("CRM_CLOSED_WON".equals(d.getStatusCode())) {
+            // Affaire conclue par l'agence : le mandat est terminé (UC-P9).
+            mandates.findByDossierId(d.getId())
+                    .filter(m -> MandateMarketplaceService.LIVE_MANDATE.contains(m.getStatus()))
+                    .ifPresent(
+                            m -> {
+                                m.setEndedBy("AGENCY");
+                                end(m, MandateEntity.MANDATE_COMPLETED, END_DEAL_CLOSED);
+                                alertOwner(
+                                        m,
+                                        agencies.agencyName(m.getAgencyOrgId())
+                                                + " a conclu l'affaire : donnez votre avis sur"
+                                                + " l'agence.");
+                            });
+        }
+    }
+
+    // ---------------------------------------------------------------- lot C : suivi et fin
+
+    public static final String END_DEAL_CLOSED = "DEAL_CLOSED_AGENCY";
+
+    /** Motifs de fin (MANDATE_END_REASON) que chaque partie peut choisir (UC-P9). */
+    public static final List<String> OWNER_END_REASONS =
+            List.of("SOLD_BY_OWNER", "SOLD_THIRD_PARTY", "WITHDRAWN_OWNER");
+
+    public static final List<String> AGENCY_END_REASONS =
+            List.of(END_DEAL_CLOSED, "SOLD_THIRD_PARTY", "WITHDRAWN_AGENCY");
+
+    /** Suivi d'un mandat par le propriétaire (UC-P8) : statut, annonces, événements visibles. */
+    @Transactional(readOnly = true)
+    public MarketplaceViews.MandateFollowUp followUp(Long id) {
+        MandateEntity m = ownerMandateEntity(id);
+        PropertyEntity property = properties.findById(m.getPropertyId()).orElse(null);
+        List<MarketplaceViews.AgencyListing> listings =
+                orgScope.unfiltered(
+                        () ->
+                                annonces.findByPropertyIdOrderByIdAsc(m.getPropertyId()).stream()
+                                        .filter(a -> m.getId().equals(a.getMandateId()))
+                                        .map(
+                                                a ->
+                                                        new MarketplaceViews.AgencyListing(
+                                                                a.getId(),
+                                                                a.getTitle(),
+                                                                AnnonceStatus.normalize(
+                                                                                a.getStatus())
+                                                                        .name(),
+                                                                zero(
+                                                                        dossiers
+                                                                                .countByAnnonceIdAndCreatedAtAfter(
+                                                                                        a.getId(),
+                                                                                        LocalDateTime
+                                                                                                .of(
+                                                                                                        2000,
+                                                                                                        1,
+                                                                                                        1,
+                                                                                                        0,
+                                                                                                        0)))))
+                                        .toList());
+        // R-PROP-12 : seuls les événements marqués visibles ; notes internes et autres prospects
+        // restent dans l'agence.
+        List<MarketplaceViews.VisibleEvent> events =
+                m.getDossierId() == null
+                        ? List.of()
+                        : orgScope.as(
+                                m.getAgencyOrgId(),
+                                () ->
+                                        activities
+                                                .findByDossierIdAndVisibilityOrderByCreatedAtDesc(
+                                                        m.getDossierId(),
+                                                        com.example.backend.entity.enums
+                                                                .ActivityVisibility.CLIENT_VISIBLE)
+                                                .stream()
+                                                .map(
+                                                        a ->
+                                                                new MarketplaceViews.VisibleEvent(
+                                                                        a.getId(),
+                                                                        a.getType() != null
+                                                                                ? a.getType().name()
+                                                                                : null,
+                                                                        a.getContent(),
+                                                                        a.getCreatedAt()))
+                                                .toList());
+        MarketplaceViews.Review review =
+                reviews.findByMandateId(m.getId())
+                        .map(
+                                r ->
+                                        new MarketplaceViews.Review(
+                                                r.getRating(), r.getComment(), r.getCreatedAt()))
+                        .orElse(null);
+        boolean live = MandateMarketplaceService.LIVE_MANDATE.contains(m.getStatus());
+        return new MarketplaceViews.MandateFollowUp(
+                views.mandate(m, false),
+                m.getRequestId(),
+                m.getProposalId(),
+                property != null ? property.getTitle() : null,
+                listings,
+                events,
+                live,
+                live ? OWNER_END_REASONS : List.of(),
+                canReview(m) && review == null,
+                review);
+    }
+
+    /** Fin du mandat par le propriétaire (UC-P9) ; l'agence est prévenue. */
+    @Transactional
+    public MarketplaceViews.MandateFollowUp endByOwner(Long id, String reason) {
+        MandateEntity m = ownerMandateEntity(id);
+        requireLive(m);
+        if (!OWNER_END_REASONS.contains(reason)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "END_REASON_INVALID: motif de fin requis.");
+        }
+        m.setEndedBy("OWNER");
+        end(m, MandateEntity.MANDATE_TERMINATED, reason);
+        closeDossier(m, false);
+        marketplace.notifyAgency(
+                m.getAgencyOrgId(),
+                m.getAgentUserId(),
+                "Mandat terminé par le propriétaire",
+                "Le propriétaire a mis fin au mandat n°" + m.getId() + ".",
+                m.getDossierId() != null ? "/pro/dossiers/" + m.getDossierId() : "/pro/mandats");
+        return followUp(id);
+    }
+
+    /** Fin du mandat par l'agence (UC-P9) ; le propriétaire est prévenu. */
+    @Transactional
+    public MarketplaceViews.Mandate endByAgency(Long id, String reason) {
+        MandateEntity m = agencyMandateEntity(id);
+        requireLive(m);
+        if (!AGENCY_END_REASONS.contains(reason)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "END_REASON_INVALID: motif de fin requis.");
+        }
+        m.setEndedBy("AGENCY");
+        boolean won = END_DEAL_CLOSED.equals(reason);
+        end(m, won ? MandateEntity.MANDATE_COMPLETED : MandateEntity.MANDATE_TERMINATED, reason);
+        closeDossier(m, won);
+        alertOwner(
+                m,
+                agencies.agencyName(m.getAgencyOrgId())
+                        + (won ? " a conclu l'affaire." : " a mis fin au mandat.")
+                        + " Donnez votre avis sur l'agence.");
+        return views.mandate(m, true);
+    }
+
+    /** Avis vérifié : une fois, après un mandat signé et terminé (R-PROP-13, PC-4). */
+    @Transactional
+    public MarketplaceViews.MandateFollowUp review(Long id, Integer rating, String comment) {
+        MandateEntity m = ownerMandateEntity(id);
+        if (!canReview(m)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "REVIEW_NOT_ALLOWED: un avis se donne à la fin d'un mandat signé.");
+        }
+        if (reviews.findByMandateId(m.getId()).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "REVIEW_EXISTS: vous avez déjà donné votre avis.");
+        }
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "RATING_INVALID: une note de 1 à 5.");
+        }
+        com.example.backend.entity.AgencyReviewEntity r =
+                new com.example.backend.entity.AgencyReviewEntity();
+        r.setMandateId(m.getId());
+        r.setOwnerOrgId(m.getOwnerOrgId());
+        r.setAgencyOrgId(m.getAgencyOrgId());
+        r.setRating(rating);
+        r.setComment(
+                comment == null || comment.isBlank()
+                        ? null
+                        : comment.strip().substring(0, Math.min(1000, comment.strip().length())));
+        r.setCreatedAt(LocalDateTime.now());
+        reviews.save(r);
+        return followUp(id);
+    }
+
+    private static boolean canReview(MandateEntity m) {
+        return m.getSignedAt() != null
+                && !MandateMarketplaceService.LIVE_MANDATE.contains(m.getStatus());
+    }
+
+    private static void requireLive(MandateEntity m) {
+        if (!MandateMarketplaceService.LIVE_MANDATE.contains(m.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "MANDATE_ENDED: ce mandat est déjà terminé.");
+        }
+    }
+
+    /** Dossier de l'agence clos (gagné ou perdu) si son workflow le permet. */
+    private void closeDossier(MandateEntity m, boolean won) {
+        if (m.getDossierId() == null) {
+            return;
+        }
+        String target = won ? "CRM_CLOSED_WON" : "CRM_CLOSED_LOST";
+        orgScope.run(
+                m.getAgencyOrgId(),
+                () -> {
+                    boolean allowed =
+                            dossierService.transitions(m.getDossierId()).transitions().stream()
+                                    .anyMatch(t -> target.equals(t.statusCode()));
+                    if (allowed) {
+                        DossierStatusPatchRequest patch = new DossierStatusPatchRequest();
+                        patch.setStatusCode(target);
+                        dossierService.patchStatus(m.getDossierId(), patch);
+                    }
+                });
+    }
+
+    private MandateEntity ownerMandateEntity(Long id) {
+        String orgId = ownerContext.requireOwnerOrg().getOrgId();
+        return mandates.findById(id)
+                .filter(m -> orgId.equals(m.getOwnerOrgId()))
+                .orElseThrow(
+                        () ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND, "Mandat introuvable"));
+    }
+
+    private static long zero(Long v) {
+        return v == null ? 0 : v;
     }
 
     private void activate(MandateEntity m) {
@@ -517,6 +751,61 @@ public class MandateLifecycleService {
                 mandates.findByStatusAndEndsAtBefore(MandateEntity.MANDATE_ACTIVE, now)) {
             end(m, MandateEntity.MANDATE_EXPIRED, "TERM_REACHED");
         }
+        // Lot C, § 13 : mandat bientôt échu (J-15), aux deux parties.
+        for (MandateEntity m :
+                mandates.findByStatusAndEndsAtBefore(
+                        MandateEntity.MANDATE_ACTIVE, now.plusDays(15))) {
+            if (m.getExpiryAlertedAt() == null) {
+                m.setExpiryAlertedAt(now);
+                mandates.save(m);
+                alertOwner(
+                        m,
+                        "Votre mandat avec "
+                                + agencies.agencyName(m.getAgencyOrgId())
+                                + " se termine dans moins de 15 jours.");
+                marketplace.notifyAgency(
+                        m.getAgencyOrgId(),
+                        m.getAgentUserId(),
+                        "Mandat bientôt échu",
+                        "Le mandat n°" + m.getId() + " se termine dans moins de 15 jours.",
+                        "/pro/mandats");
+            }
+        }
+        // § 13 : demande ouverte sans proposition après 48 h, au propriétaire.
+        for (MandateRequestEntity r :
+                requests.findByStatusAndVisibilityOrderByOpenedAtDesc(
+                        MandateRequestEntity.MREQ_OPEN, MandateRequestEntity.MREQ_OPEN_MARKET)) {
+            if (r.getIdleAlertedAt() == null
+                    && r.getOpenedAt() != null
+                    && r.getOpenedAt().isBefore(now.minusHours(48))
+                    && proposals.findByRequestIdOrderByCreatedAtAsc(r.getId()).isEmpty()) {
+                r.setIdleAlertedAt(now);
+                requests.save(r);
+                alertOwnerForRequest(
+                        r,
+                        "Pas encore de proposition pour votre bien à "
+                                + r.getCity()
+                                + " : invitez une agence recommandée depuis votre demande.");
+            }
+        }
+    }
+
+    private void alertOwnerForRequest(MandateRequestEntity r, String text) {
+        OrganizationEntity owner = organizations.findByOrgId(r.getOwnerOrgId()).orElse(null);
+        if (owner == null || owner.getOwnerPhone() == null) {
+            return;
+        }
+        events.publishEvent(
+                new PlatformAlert(
+                        PlatformAlert.Audience.OWNER,
+                        owner.getOwnerPhone(),
+                        null,
+                        text,
+                        "Atlas : votre demande",
+                        "d" + r.getId(),
+                        publicBaseUrl + "/proprietaire/demandes/" + r.getId(),
+                        true,
+                        false));
     }
 
     private void end(MandateEntity m, String status, String reason) {
@@ -526,7 +815,30 @@ public class MandateLifecycleService {
         m.setEndedAt(now);
         m.setUpdatedAt(now);
         mandates.save(m);
+        suspendAgencyAnnonces(m);
         log.info("Mandat {} terminé : {} ({})", m.getId(), status, reason);
+    }
+
+    /**
+     * Sans mandat, l'agence ne peut plus commercialiser le bien : ses annonces quittent le portail.
+     */
+    private void suspendAgencyAnnonces(MandateEntity m) {
+        orgScope.run(
+                m.getAgencyOrgId(),
+                () ->
+                        annonces.findByPropertyIdOrderByIdAsc(m.getPropertyId()).stream()
+                                .filter(a -> m.getId().equals(a.getMandateId()))
+                                .filter(
+                                        a ->
+                                                AnnonceStatus.normalize(a.getStatus())
+                                                        == AnnonceStatus.PUBLISHED)
+                                .forEach(
+                                        a ->
+                                                annonceService.applyTransition(
+                                                        a.getId(),
+                                                        AnnoncePublicationService.T_SUSPEND,
+                                                        SUSPEND_MANDATE_ENDED,
+                                                        "Mandat n°" + m.getId() + " terminé")));
     }
 
     private MandateEntity agencyMandateEntity(Long id) {

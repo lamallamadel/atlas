@@ -52,6 +52,7 @@ export const routes: Routes = [
           { path: 'biens/:id', loadComponent: () => import('./pages/owner/owner-property.component').then(m => m.OwnerPropertyComponent) },
           { path: 'contacts/:id', loadComponent: () => import('./pages/owner/owner-lead.component').then(m => m.OwnerLeadComponent) },
           { path: 'demandes/:id', loadComponent: () => import('./pages/owner/owner-request.component').then(m => m.OwnerRequestComponent) },
+          { path: 'mandats/:id', loadComponent: () => import('./pages/owner/owner-mandate.component').then(m => m.OwnerMandateComponent) },
         ]
       },
       // Vitrine B2B (lazy-loaded)

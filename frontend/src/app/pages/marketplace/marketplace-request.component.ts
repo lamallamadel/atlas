@@ -52,6 +52,22 @@ import { ConversationThreadComponent, ThreadItem } from '../owner/conversation-t
           </ng-container>
         </ds-page-header>
 
+        <div class="mr-signals" role="list" aria-label="Repères sur la demande">
+          <div class="mr-signal" role="listitem">
+            <span class="mr-signal__value">{{ r.compatibleBuyers }}&#32;</span>
+            <span class="mr-signal__label">acquéreur{{ r.compatibleBuyers > 1 ? 's' : '' }} compatible{{ r.compatibleBuyers > 1 ? 's' : '' }} dans votre portefeuille</span>
+          </div>
+          <div class="mr-signal" role="listitem">
+            <span class="mr-signal__value">{{ r.relevance }}<span class="mr-signal__unit"> / 100&#32;</span></span>
+            <span class="mr-signal__label">pertinence pour votre agence</span>
+          </div>
+          <div class="mr-badges" role="listitem">
+            @if (r.invited) { <ds-badge status="won">Le propriétaire vous invite</ds-badge> }
+            <ds-badge [status]="r.ownerVerified ? 'success' : 'neutral'">{{ r.ownerVerified ? 'Propriétaire vérifié' : 'Propriétaire non vérifié' }}</ds-badge>
+            <ds-badge [status]="r.propertyVerified ? 'success' : 'neutral'">{{ r.propertyVerified ? 'Bien vérifié' : 'Titre foncier non vérifié' }}</ds-badge>
+          </div>
+        </div>
+
         <div class="mr-layout">
           <ds-card [pad]="true" elevation="xs">
             <div class="ds-form-stack">
@@ -163,6 +179,12 @@ import { ConversationThreadComponent, ThreadItem } from '../owner/conversation-t
     .mr-breadcrumb a { padding: 0; color: var(--ds-text-faint); text-decoration: none; }
     .mr-breadcrumb a:hover, .mr-breadcrumb a:focus-visible { color: var(--ds-marine); text-decoration: underline; }
     .mr-breadcrumb span { color: var(--ds-marine); font-weight: 600; }
+    .mr-signals { display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--ds-space-4); }
+    .mr-signal { display: flex; flex-direction: column; justify-content: center; min-width: 180px; padding: var(--ds-space-3) var(--ds-space-4); border-radius: var(--ds-radius-md); background: var(--ds-marine-hl); }
+    .mr-signal__value { font-size: var(--ds-text-xl); font-weight: 700; color: var(--ds-marine); }
+    .mr-signal__unit { font-size: var(--ds-text-sm); font-weight: 400; color: var(--ds-text-muted); }
+    .mr-signal__label { font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
+    .mr-badges { display: flex; flex-wrap: wrap; align-content: center; gap: var(--ds-space-2); }
     .mr-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 1fr); gap: var(--ds-space-6); align-items: start; }
     @media (max-width: 1024px) { .mr-layout { grid-template-columns: 1fr; } }
     .mr-side { display: flex; flex-direction: column; gap: var(--ds-space-6); }

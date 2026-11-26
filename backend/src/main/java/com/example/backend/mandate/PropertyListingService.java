@@ -23,11 +23,14 @@ public class PropertyListingService {
     private final AnnonceRepository annonces;
     private final MandateRepository mandates;
     private final AgencyDirectoryService agencies;
+    private final com.example.backend.repository.PropertyRepository properties;
 
     public PropertyListingService(
             AnnonceRepository annonces,
             MandateRepository mandates,
-            AgencyDirectoryService agencies) {
+            AgencyDirectoryService agencies,
+            com.example.backend.repository.PropertyRepository properties) {
+        this.properties = properties;
         this.annonces = annonces;
         this.mandates = mandates;
         this.agencies = agencies;
@@ -89,5 +92,19 @@ public class PropertyListingService {
                                                 == AnnonceStatus.PUBLISHED)
                 .map(Annonce::getId)
                 .findFirst();
+    }
+
+    /** Badge « Bien vérifié » : le bien de l'annonce a un titre foncier contrôlé. */
+    @Transactional(readOnly = true)
+    public boolean propertyVerified(Annonce a) {
+        return a.getPropertyId() != null
+                && properties
+                        .findById(a.getPropertyId())
+                        .map(
+                                p ->
+                                        com.example.backend.entity.PropertyEntity
+                                                .VERIFICATION_VERIFIED
+                                                .equals(p.getVerificationStatus()))
+                        .orElse(false);
     }
 }

@@ -7,9 +7,32 @@ import { MarketplaceRequestComponent } from './marketplace-request.component';
 import { OwnerRequestComponent } from '../owner/owner-request.component';
 import { OwnerAcceptDialogComponent } from '../owner/owner-accept-dialog.component';
 import { OwnerLinkComponent } from '../owner/owner-link.component';
+import { OwnerMandateComponent } from '../owner/owner-mandate.component';
+import { MarketplaceMandateDialogComponent } from './marketplace-mandate-dialog.component';
+import { DsDialogService } from '../../design-system';
+import { of } from 'rxjs';
 import type { AgencyRequest } from '../../services/marketplace-api.service';
-import type { OwnerProposal, OwnerRequest } from '../../services/mandate-api.service';
-import { commissionLabel } from '../../services/mandate-api.service';
+import type { MandateFollowUp, MandateView, OwnerProposal, OwnerRequest, RecommendedAgency } from '../../services/mandate-api.service';
+import { commissionLabel, ratingLabel } from '../../services/mandate-api.service';
+
+const MANDATE: MandateView = {
+  id: 9, propertyId: 1, agencyOrgId: 'ORG-A', agencyName: 'Agence du Détroit', mandateType: 'EXCLUSIVE', durationMonths: 3,
+  commissionKind: 'PERCENT', commissionValue: 2.5, commissionPayer: 'SELLER', status: 'MANDATE_ACTIVE',
+  startsAt: '2026-11-20T10:00:00', endsAt: '2027-02-20T10:00:00', signedAt: '2026-11-22T10:00:00', dossierId: 40, annonceId: 55,
+  owner: null, endReason: null, endedBy: null, endedAt: null,
+};
+
+const FOLLOW_UP: MandateFollowUp = {
+  mandate: MANDATE, requestId: 7, proposalId: 31, propertyTitle: 'Appartement Malabata',
+  listings: [{ annonceId: 55, title: 'Appartement Malabata vue mer', status: 'PUBLISHED', contacts: 4 }],
+  events: [{ id: 1, type: 'APPOINTMENT_COMPLETED', content: 'Visite faite samedi, retour positif.', createdAt: '2026-11-24T16:00:00' }],
+  canEnd: true, endReasons: ['SOLD_BY_OWNER', 'SOLD_THIRD_PARTY', 'WITHDRAWN_OWNER'], canReview: false, review: null,
+};
+
+const RECOMMENDED: RecommendedAgency[] = [
+  { orgId: 'ORG-A', name: 'Agence du Détroit', description: null, districts: ['Malabata'], rating: 4.6, reviews: 12, invited: false, proposed: true },
+  { orgId: 'ORG-C', name: 'Agence Iberia', description: null, districts: [], rating: null, reviews: 0, invited: false, proposed: false },
+];
 
 const text = (el: HTMLElement) => el.textContent!.replace(/\s+/g, ' ');
 
@@ -17,6 +40,7 @@ const PROPOSAL: OwnerProposal = {
   id: 31, agencyOrgId: 'ORG-A', agencyName: 'Agence du Détroit', agentName: 'Karim', mandateType: 'EXCLUSIVE',
   durationMonths: 3, commissionKind: 'PERCENT', commissionValue: 2.5, commissionPayer: 'SELLER', services: ['PHOTOS'],
   estimateMin: 1350000, estimateMax: 1500000, message: null, status: 'MPROP_SENT', unread: 2, createdAt: '2026-11-25T10:00:00',
+  agencyRating: 4.64, agencyReviews: 12,
 };
 
 const OWNER_REQUEST: OwnerRequest = {
@@ -33,6 +57,7 @@ const AGENCY_REQUEST: AgencyRequest = {
   expectedPrice: 1450000, deadline: '3_MONTHS', mandateTypes: ['EXCLUSIVE'], services: [], commissionNote: null, availability: null,
   languages: null, message: 'Joignable au [coordonnées masquées].', ownerName: 'Nadia I.', status: 'MREQ_OPEN', openedAt: null,
   expiresAt: '2026-12-08T09:00:00', canPropose: true, cannotProposeReason: null, myProposal: null,
+  relevance: 78, compatibleBuyers: 3, invited: true, ownerVerified: true, propertyVerified: false,
 };
 
 let current: HttpTestingController | null = null;
@@ -66,9 +91,11 @@ describe('Bourse aux mandats', () => {
     const fixture = TestBed.createComponent(OwnerRequestComponent);
     fixture.detectChanges();
     http.expectOne('/api/v1/owner/mandate-requests/7').flush(OWNER_REQUEST);
+    http.expectOne('/api/v1/owner/mandate-requests/7/recommended').flush([]);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     expect(text(el)).toContain('Agence du Détroit');
+    expect(text(el)).toContain('Karim · 4,6 / 5 · 12 avis');
     expect(text(el)).toContain('Échanger (2)');
     // Une proposition refusée ne propose plus d'action.
     expect(fixture.componentInstance.pending(OWNER_REQUEST.proposals[1])).toBe(false);
@@ -111,6 +138,11 @@ describe('Bourse aux mandats', () => {
     // Le propriétaire n'accepte que l'exclusif : le formulaire s'aligne.
     expect(c.form.mandateType).toBe('EXCLUSIVE');
     expect(text(fixture.nativeElement)).toContain('[coordonnées masquées]');
+    expect(text(fixture.nativeElement)).toContain('3 acquéreurs compatibles dans votre portefeuille');
+    expect(text(fixture.nativeElement)).toContain('78 / 100 pertinence');
+    expect(text(fixture.nativeElement)).toContain('Le propriétaire vous invite');
+    expect(text(fixture.nativeElement)).toContain('Propriétaire vérifié');
+    expect(text(fixture.nativeElement)).toContain('Titre foncier non vérifié');
     c.commissionValue = 2;
     c.propose(AGENCY_REQUEST);
     const req = http.expectOne('/api/v1/marketplace/requests/7/proposals');
@@ -136,5 +168,96 @@ describe('Bourse aux mandats', () => {
       TestBed.createComponent(OwnerLinkComponent).detectChanges();
       expect(nav).toHaveBeenCalledWith(target, { replaceUrl: true });
     }
+  });
+
+  // ---------------------------------------------------------------- lot C
+
+  it('note moyenne arrondie, et rien sans avis', () => {
+    expect(ratingLabel(4.64, 12)).toBe('4,6 / 5 · 12 avis');
+    expect(ratingLabel(null, 0)).toBeNull();
+    expect(ratingLabel(5, 0)).toBeNull();
+  });
+
+  it('le propriétaire invite une agence recommandée', () => {
+    const { http } = setup({ id: '7' });
+    const fixture = TestBed.createComponent(OwnerRequestComponent);
+    fixture.detectChanges();
+    http.expectOne('/api/v1/owner/mandate-requests/7').flush({ ...OWNER_REQUEST, proposals: [] });
+    http.expectOne('/api/v1/owner/mandate-requests/7/recommended').flush(RECOMMENDED);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(text(el)).toContain('Agences recommandées');
+    expect(text(el)).toContain('A proposé');
+    expect(text(el)).toContain('Toute la ville');
+    fixture.componentInstance.invite(RECOMMENDED[1]);
+    const req = http.expectOne('/api/v1/owner/mandate-requests/7/invitations');
+    expect(req.request.body).toEqual({ agencyOrgId: 'ORG-C' });
+    req.flush([RECOMMENDED[0], { ...RECOMMENDED[1], invited: true }]);
+    fixture.detectChanges();
+    expect(text(el)).toContain('Invitée');
+  });
+
+  it("pas de recommandations pour une demande adressée à une seule agence", () => {
+    const { http } = setup({ id: '7' });
+    TestBed.createComponent(OwnerRequestComponent).detectChanges();
+    http.expectOne('/api/v1/owner/mandate-requests/7').flush({ ...OWNER_REQUEST, visibility: 'MREQ_DIRECT' });
+    http.expectNone('/api/v1/owner/mandate-requests/7/recommended');
+  });
+
+  it('le propriétaire suit son mandat puis y met fin avec un motif', () => {
+    const closed = { closed: of('SOLD_BY_OWNER') };
+    const { http } = setup({ id: '9' }, [{ provide: DsDialogService, useValue: { open: () => closed } }]);
+    const fixture = TestBed.createComponent(OwnerMandateComponent);
+    fixture.detectChanges();
+    http.expectOne('/api/v1/owner/mandates/9').flush(FOLLOW_UP);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(text(el)).toContain('Visite faite');
+    expect(text(el)).toContain('Visite faite samedi, retour positif.');
+    expect(text(el)).toContain('4 contacts reçus');
+    expect(text(el)).toContain('Vous pourrez noter l');
+
+    fixture.componentInstance.end();
+    const req = http.expectOne('/api/v1/owner/mandates/9/end');
+    expect(req.request.body).toEqual({ reason: 'SOLD_BY_OWNER' });
+    req.flush({
+      ...FOLLOW_UP, canEnd: false, endReasons: [], canReview: true,
+      mandate: { ...MANDATE, status: 'MANDATE_TERMINATED', endReason: 'SOLD_BY_OWNER', endedBy: 'OWNER', endedAt: '2026-11-26T10:00:00' },
+    });
+    fixture.detectChanges();
+    expect(text(el)).toContain('Vendu ou loué par le propriétaire');
+    expect(text(el)).toContain('Publier mon avis');
+  });
+
+  it("l'avis part une seule fois, avec la note choisie", () => {
+    const { http } = setup({ id: '9' });
+    const fixture = TestBed.createComponent(OwnerMandateComponent);
+    fixture.detectChanges();
+    http.expectOne('/api/v1/owner/mandates/9').flush({ ...FOLLOW_UP, canEnd: false, canReview: true, mandate: { ...MANDATE, status: 'MANDATE_COMPLETED' } });
+    const c = fixture.componentInstance;
+    c.rating = 5;
+    c.comment = '  Vendu en 6 semaines.  ';
+    c.review();
+    const req = http.expectOne('/api/v1/owner/mandates/9/review');
+    expect(req.request.body).toEqual({ rating: 5, comment: 'Vendu en 6 semaines.' });
+    req.flush({ ...FOLLOW_UP, canEnd: false, canReview: false, review: { rating: 5, comment: 'Vendu en 6 semaines.', createdAt: '2026-11-26T10:00:00' } });
+    fixture.detectChanges();
+    expect(text(fixture.nativeElement)).toContain('5 / 5');
+    expect(text(fixture.nativeElement)).not.toContain('Publier mon avis');
+  });
+
+  it("l'agence termine le mandat avec un motif", () => {
+    const { http } = setup({}, [{ provide: DIALOG_DATA, useValue: MANDATE }]);
+    const fixture = TestBed.createComponent(MarketplaceMandateDialogComponent);
+    fixture.detectChanges();
+    const c = fixture.componentInstance;
+    c.ending.set(true);
+    c.endReason.set('DEAL_CLOSED_AGENCY');
+    c.end();
+    const req = http.expectOne('/api/v1/marketplace/mandates/9/end');
+    expect(req.request.body).toEqual({ reason: 'DEAL_CLOSED_AGENCY' });
+    req.flush({ ...MANDATE, status: 'MANDATE_COMPLETED', endReason: 'DEAL_CLOSED_AGENCY', endedBy: 'AGENCY', endedAt: '2026-11-26T10:00:00' });
+    fixture.detectChanges();
+    expect(text(fixture.nativeElement)).toContain("Terminé par votre agence : transaction conclue par l'agence.");
   });
 });

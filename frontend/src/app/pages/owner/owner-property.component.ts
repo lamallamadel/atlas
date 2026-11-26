@@ -18,6 +18,13 @@ import { OwnerAnnonce, OwnerApiService, OwnerProperty, ownerAnnonceState } from 
 import { serverMessage } from '../../components/annonce-publication-panel.component';
 import { MANDATE_TYPE_LABELS, OwnerMandateApiService, OwnerRequest, REQUEST_STATUS } from '../../services/mandate-api.service';
 import { OwnerMandateRequestDialogComponent } from './owner-mandate-request-dialog.component';
+
+const VERIFICATION_STATUS: Record<string, { label: string; status: 'info' | 'success' | 'neutral' | 'error' }> = {
+  NONE: { label: 'Non vérifié', status: 'neutral' },
+  PENDING: { label: 'En cours de contrôle', status: 'info' },
+  VERIFIED: { label: 'Bien vérifié', status: 'success' },
+  REJECTED: { label: 'Titre non confirmé', status: 'error' },
+};
 import { OwnerPropertyDialogComponent } from './owner-property-dialog.component';
 
 /**
@@ -131,6 +138,9 @@ import { OwnerPropertyDialogComponent } from './owner-property-dialog.component'
                     <ds-badge [status]="requestStatus(r).status">{{ requestStatus(r).label }}</ds-badge>
                     <span class="op-muted">{{ requestSummary(r) }}</span>
                   </div>
+                  @if (liveMandate(); as m) {
+                    <ds-button variant="marine" size="md" [routerLink]="['/proprietaire/mandats', m.id]">Suivre le mandat</ds-button>
+                  }
                   <ds-button variant="ghost" size="md" [routerLink]="['/proprietaire/demandes', r.id]">
                     {{ r.proposals.length ? 'Voir les propositions' : 'Voir la demande' }}
                   </ds-button>
@@ -151,7 +161,19 @@ import { OwnerPropertyDialogComponent } from './owner-property-dialog.component'
                 <dt>Pièces</dt><dd>{{ p.rooms || '—' }}</dd>
                 <dt>Prix souhaité</dt><dd>@if (p.expectedPrice) { {{ p.expectedPrice | number: '1.0-0' }} MAD } @else { — }</dd>
                 <dt>Adresse</dt><dd>{{ p.address || '—' }} <span class="op-private"><ds-icon name="lock" [size]="12"></ds-icon> privée</span></dd>
+                <dt>Titre foncier</dt><dd>{{ p.landTitleNumber || '—' }}</dd>
+                <dt>Vérification</dt><dd><ds-badge [status]="verification().status">{{ verification().label }}</ds-badge></dd>
               </dl>
+              @if (p.verificationStatus !== 'VERIFIED' && p.verificationStatus !== 'PENDING') {
+                <div class="op-verify">
+                  <p class="op-muted">{{ p.landTitleNumber
+                    ? 'Atlas contrôle le titre foncier déclaré. Le badge « Bien vérifié » rassure acquéreurs et agences.'
+                    : 'Ajoutez le numéro du titre foncier dans la fiche du bien pour obtenir le badge « Bien vérifié ».' }}</p>
+                  @if (p.landTitleNumber) {
+                    <ds-button variant="ghost" size="sm" prefixIcon="check" [disabled]="busy()" (dsClick)="requestVerification(p)">Faire vérifier le bien</ds-button>
+                  }
+                </div>
+              }
             </ds-card>
           </aside>
         </div>
@@ -187,6 +209,7 @@ import { OwnerPropertyDialogComponent } from './owner-property-dialog.component'
     .op-facts { display: grid; grid-template-columns: auto 1fr; gap: var(--ds-space-2) var(--ds-space-4); margin: var(--ds-space-3) 0 0; font-size: var(--ds-text-sm); }
     .op-facts dt { color: var(--ds-text-muted); }
     .op-facts dd { margin: 0; color: var(--ds-text); }
+    .op-verify { display: flex; flex-direction: column; align-items: flex-start; gap: var(--ds-space-2); margin-top: var(--ds-space-4); }
     .op-private { display: inline-flex; align-items: center; gap: 2px; margin-left: var(--ds-space-1); font-size: var(--ds-text-xs); color: var(--ds-text-faint); }
   `],
 })
@@ -204,6 +227,10 @@ export class OwnerPropertyComponent implements OnInit, OnDestroy {
     const r = this.mandateRequest();
     return !!r && (r.status === 'MREQ_EXPIRED' || r.status === 'MREQ_CANCELLED');
   });
+  /** Mandat en cours (à signer ou actif) sur la dernière demande. */
+  readonly liveMandate = computed(() =>
+    this.mandateRequest()?.mandates.find(m => m.status === 'MANDATE_PENDING_SIGNATURE' || m.status === 'MANDATE_ACTIVE') ?? null);
+  readonly verification = computed(() => VERIFICATION_STATUS[this.property()?.verificationStatus ?? 'NONE'] ?? VERIFICATION_STATUS['NONE']);
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly uploading = signal(false);
@@ -254,6 +281,18 @@ export class OwnerPropertyComponent implements OnInit, OnDestroy {
     const n = r.proposals.length;
     if (r.status !== 'MREQ_OPEN') return n ? `${n} proposition${n > 1 ? 's' : ''} reçue${n > 1 ? 's' : ''}.` : 'Aucune proposition.';
     return n ? `${n} proposition${n > 1 ? 's' : ''} à comparer.` : (r.visibility === 'MREQ_DIRECT' ? `En attente de ${r.targetAgencyName}.` : 'En attente des agences.');
+  }
+
+  requestVerification(p: OwnerProperty): void {
+    this.busy.set(true);
+    this.mandateApi.requestPropertyVerification(p.id).subscribe({
+      next: r => {
+        this.busy.set(false);
+        this.property.set({ ...p, verificationStatus: r.verificationStatus });
+        this.toast.success('Demande envoyée, Atlas contrôle le titre foncier');
+      },
+      error: err => { this.busy.set(false); this.toast.error(serverMessage(err, 'Demande impossible')); },
+    });
   }
 
   askAgent(p: OwnerProperty): void {

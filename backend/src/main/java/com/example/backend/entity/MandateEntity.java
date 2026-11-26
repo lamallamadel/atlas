@@ -78,6 +78,12 @@ public class MandateEntity {
     @Column(name = "dossier_id")
     private Long dossierId;
 
+    @Column(name = "ended_by", length = 8)
+    private String endedBy;
+
+    @Column(name = "expiry_alerted_at")
+    private LocalDateTime expiryAlertedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -246,5 +252,21 @@ public class MandateEntity {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getEndedBy() {
+        return endedBy;
+    }
+
+    public void setEndedBy(String endedBy) {
+        this.endedBy = endedBy;
+    }
+
+    public LocalDateTime getExpiryAlertedAt() {
+        return expiryAlertedAt;
+    }
+
+    public void setExpiryAlertedAt(LocalDateTime expiryAlertedAt) {
+        this.expiryAlertedAt = expiryAlertedAt;
     }
 }
