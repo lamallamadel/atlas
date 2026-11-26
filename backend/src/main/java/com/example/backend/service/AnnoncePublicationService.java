@@ -39,10 +39,14 @@ public class AnnoncePublicationService {
     public static final String T_SUSPEND = "ANN_T_SUSPEND";
     public static final String T_ARCHIVE = "ANN_T_ARCHIVE";
 
-    /** Raisons de suspension (nomenclature {@code MOD_*}, plus la pause demandée par l'agence). */
+    /**
+     * Raisons de suspension (nomenclature {@code MOD_*}, plus la pause demandée par l'agence et la
+     * suspension de l'annonce d'un propriétaire sous mandat exclusif).
+     */
     public static final Set<String> SUSPEND_REASONS =
             Set.of(
                     "OWNER_PAUSE",
+                    "MANDATE_EXCLUSIVE",
                     "MOD_SUSPECT_FRAUD",
                     "MOD_ILLEGAL_CONTENT",
                     "MOD_DUPLICATE_LISTING",

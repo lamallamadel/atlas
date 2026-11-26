@@ -22,6 +22,7 @@ public enum Feature {
     MODULE_TRUST_BASIC("module.trust.basic", "Confiance : doublons et modération", false),
     MODULE_NEUF("module.neuf", "Neuf : programmes et lots", true),
     MODULE_COOP_HABITAT("module.coop_habitat", "Coop habitat", true),
+    MODULE_MANDATE_MARKETPLACE("module.mandate_marketplace", "Bourse aux mandats", true),
 
     ADDON_EXPORT("addon.export", "Export des leads", true),
     ADDON_ESIGN("addon.esign", "Signature électronique", true),

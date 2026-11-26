@@ -68,6 +68,13 @@ public class AnnonceService {
         this.organizationSettingsService = organizationSettingsService;
     }
 
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+
+    @Autowired(required = false)
+    void setEventPublisher(org.springframework.context.ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
+
     public AnnonceMapper getAnnonceMapper() {
         return this.annonceMapper;
     }
@@ -402,6 +409,13 @@ public class AnnonceService {
         if (searchService != null) {
             searchService.indexAnnonce(saved);
         }
+        if (eventPublisher != null
+                && AnnoncePublicationService.T_PUBLISH.equals(transitionCode)
+                && saved.getMandateId() != null) {
+            eventPublisher.publishEvent(
+                    new com.example.backend.event.MandateAnnoncePublishedEvent(
+                            saved.getId(), saved.getMandateId(), orgId));
+        }
         return annonceMapper.toResponse(saved);
     }
 
@@ -456,6 +470,20 @@ public class AnnonceService {
     @Transactional(readOnly = true)
     public Page<Annonce> findAll(
             AnnonceStatus requestedStatus, String q, String city, String type, Pageable pageable) {
+        return findAll(requestedStatus, q, city, type, pageable, false);
+    }
+
+    /**
+     * {@code onePerProperty} (portail) : un bien publié par plusieurs annonceurs (mandats simples,
+     * R-PROP-06) n'apparaît qu'une fois, sous sa plus ancienne annonce publiée.
+     */
+    public Page<Annonce> findAll(
+            AnnonceStatus requestedStatus,
+            String q,
+            String city,
+            String type,
+            Pageable pageable,
+            boolean onePerProperty) {
         // ?status=ACTIVE des anciens clients
         final AnnonceStatus status = AnnonceStatus.normalize(requestedStatus);
         Specification<Annonce> spec =
@@ -505,6 +533,26 @@ public class AnnonceService {
                                         criteriaBuilder.equal(root.get("type"), annonceType));
             } catch (IllegalArgumentException e) {
             }
+        }
+
+        if (onePerProperty) {
+            spec =
+                    spec.and(
+                            (root, query, cb) -> {
+                                var sub = query.subquery(Long.class);
+                                var other = sub.from(Annonce.class);
+                                sub.select(cb.min(other.<Long>get("id")))
+                                        .where(
+                                                cb.equal(
+                                                        other.get("propertyId"),
+                                                        root.get("propertyId")),
+                                                cb.equal(
+                                                        other.get("status"),
+                                                        AnnonceStatus.PUBLISHED));
+                                return cb.or(
+                                        cb.isNull(root.get("propertyId")),
+                                        cb.equal(root.get("id"), sub));
+                            });
         }
 
         return annonceRepository.findAll(spec, pageable);

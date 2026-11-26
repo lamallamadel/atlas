@@ -113,6 +113,10 @@ public class Annonce extends BaseEntity {
     @Column(name = "property_id")
     private Long propertyId;
 
+    /** Mandat sous lequel une agence publie le bien d'un propriétaire (lot B). */
+    @Column(name = "mandate_id")
+    private Long mandateId;
+
     /** {@code OWNER} (particulier) ou {@code AGENCY} ; vide = agence (annonces existantes). */
     @Column(name = "publisher_kind", length = 16)
     private String publisherKind;
@@ -377,5 +381,13 @@ public class Annonce extends BaseEntity {
 
     public void setModeratedAt(LocalDateTime moderatedAt) {
         this.moderatedAt = moderatedAt;
+    }
+
+    public Long getMandateId() {
+        return mandateId;
+    }
+
+    public void setMandateId(Long mandateId) {
+        this.mandateId = mandateId;
     }
 }

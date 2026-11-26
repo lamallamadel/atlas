@@ -32,12 +32,15 @@ public class PortalPublicController {
     private final PublicLeadService publicLeadService;
     private final AnnonceReportService annonceReportService;
     private final com.example.backend.service.AnnonceMediaService annonceMediaService;
+    private final com.example.backend.mandate.PropertyListingService propertyListings;
 
     public PortalPublicController(
             AnnonceService annonceService,
             PublicLeadService publicLeadService,
             AnnonceReportService annonceReportService,
-            com.example.backend.service.AnnonceMediaService annonceMediaService) {
+            com.example.backend.service.AnnonceMediaService annonceMediaService,
+            com.example.backend.mandate.PropertyListingService propertyListings) {
+        this.propertyListings = propertyListings;
         this.annonceService = annonceService;
         this.publicLeadService = publicLeadService;
         this.annonceReportService = annonceReportService;
@@ -68,7 +71,7 @@ public class PortalPublicController {
 
             // Use a global search (cross-tenant) for the public portal
             Page<Annonce> results =
-                    annonceService.findAll(AnnonceStatus.PUBLISHED, q, city, type, pageable);
+                    annonceService.findAll(AnnonceStatus.PUBLISHED, q, city, type, pageable, true);
             java.util.Map<Long, java.util.List<Long>> photos =
                     annonceMediaService.uploadedPhotoIds(
                             results.getContent().stream().map(Annonce::getId).toList());
@@ -88,17 +91,29 @@ public class PortalPublicController {
             summary = "Public annonce detail",
             description = "Annonce visible publiquement, toutes agences ; 404 sinon")
     public ResponseEntity<PublicAnnonceResponse> getAnnonce(@PathVariable Long id) {
-        return publicLeadService
-                .findPublicAnnonce(id)
-                .map(
-                        a ->
-                                PublicAnnonceResponse.from(
-                                        a,
-                                        annonceMediaService
-                                                .uploadedPhotoIds(java.util.List.of(a.getId()))
-                                                .get(a.getId())))
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        java.util.Optional<Annonce> visible = publicLeadService.findPublicAnnonce(id);
+        if (visible.isEmpty()) {
+            // Annonce d'un propriétaire suspendue par un mandat exclusif : redirection vers
+            // l'annonce de l'agence mandatée (R-PROP-05, PB-5).
+            return propertyListings
+                    .exclusiveReplacement(id)
+                    .<ResponseEntity<PublicAnnonceResponse>>map(
+                            target ->
+                                    ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+                                            .location(
+                                                    java.net.URI.create(
+                                                            "/api/v1/portal/annonces/" + target))
+                                            .build())
+                    .orElse(ResponseEntity.notFound().build());
+        }
+        Annonce a = visible.get();
+        return ResponseEntity.ok(
+                PublicAnnonceResponse.from(
+                                a,
+                                annonceMediaService
+                                        .uploadedPhotoIds(java.util.List.of(a.getId()))
+                                        .get(a.getId()))
+                        .withPublishers(propertyListings.publishers(a)));
     }
 
     @GetMapping("/annonces/{id}/media/{mediaId}")

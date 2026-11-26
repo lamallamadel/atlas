@@ -175,14 +175,22 @@ atlas:
       fraud-threshold: ${OWNER_MODERATION_FRAUD_THRESHOLD:50}
     # Alertes de la messagerie propriétaire ↔ prospect (WhatsApp, sinon e-mail, sinon SMS).
     # Modèles « utilitaires » Meta : une variable {{1}} dans le corps, un bouton « lien » dont
-    # l'URL se termine par une variable — propriétaire : <site>/proprietaire/contacts/{{1}},
-    # prospect : <site>/contact/{{1}}. Vide = pas de WhatsApp pour cette alerte.
+    # l'URL se termine par une variable — propriétaire : <site>/p/{{1}} (c<id> : un contact,
+    # d<id> : une demande d'accompagnement), prospect : <site>/contact/{{1}}. Vide = pas de
+    # WhatsApp pour cette alerte.
     alerts:
       owner-whatsapp-template: ${OWNER_ALERT_WHATSAPP_TEMPLATE:}
       prospect-whatsapp-template: ${PROSPECT_ALERT_WHATSAPP_TEMPLATE:}
       whatsapp-language: ${OWNER_ALERT_WHATSAPP_LANGUAGE:fr}
       # Jamais en production : écrit le lien dans les journaux si aucun fournisseur n'envoie.
       log-links: ${OWNER_ALERT_LOG_LINKS:false}
+  # Cas d'usage n°1, lot B : bourse aux mandats (R-PROP-07, R-PROP-11, R-PROP-16).
+  marketplace:
+    max-proposals: ${MARKETPLACE_MAX_PROPOSALS:5}
+    request-days: ${MARKETPLACE_REQUEST_DAYS:14}
+    direct-response-hours: ${MARKETPLACE_DIRECT_RESPONSE_HOURS:72}
+    monthly-proposal-quota: ${MARKETPLACE_MONTHLY_PROPOSAL_QUOTA:30}
+    pending-signature-days: ${MARKETPLACE_PENDING_SIGNATURE_DAYS:7}
   consent:
     public-base-url: ${PUBLIC_BASE_URL:http://localhost:4200}
     link-validity-days: ${CONSENT_LINK_VALIDITY_DAYS:7}

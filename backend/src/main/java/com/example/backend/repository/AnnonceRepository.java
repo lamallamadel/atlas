@@ -67,6 +67,12 @@ public interface AnnonceRepository
     // Cas d'usage n°1 : annonce d'un bien de propriétaire, modération a priori.
     Optional<Annonce> findFirstByOrgIdAndPropertyId(String orgId, Long propertyId);
 
+    /** Annonce publiée par une agence sous ce mandat (lot B). */
+    Optional<Annonce> findFirstByMandateIdOrderByIdAsc(Long mandateId);
+
+    /** Annonces d'un même bien (toutes organisations ; lecture portail ou sans filtre). */
+    List<Annonce> findByPropertyIdOrderByIdAsc(Long propertyId);
+
     List<Annonce> findByOrgIdAndPublisherKind(String orgId, String publisherKind);
 
     boolean existsByOrgIdAndModerationStatus(String orgId, String moderationStatus);
