@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import type { CommissionKind, CommissionPayer, MandateType, MandateView, MarketplaceThread } from './mandate-api.service';
+import type { AgencyReview, CommissionKind, CommissionPayer, MandateOffer, MandateType, MandateView, MarketplaceThread } from './mandate-api.service';
 
 /** Demande vue par une agence : anonymisée (ni adresse, ni téléphone). */
 export interface AgencyRequest {
@@ -85,6 +85,17 @@ export interface AgencySettings {
   propertyTypes: string[];
   transactions: string[];
   zones: AgencyZone[];
+  /** Lot C : note moyenne et avis vérifiés reçus (les 20 derniers). */
+  rating: number | null;
+  reviews: number;
+  recentReviews: AgencyReview[];
+}
+
+export interface OfferCreate {
+  amount: number;
+  buyerSummary?: string | null;
+  conditions?: string | null;
+  validUntil?: string | null;
 }
 
 export interface AgencyProfileRequest {
@@ -165,6 +176,18 @@ export class MarketplaceApiService {
 
   endMandate(id: number, reason: string): Observable<MandateView> {
     return this.http.post<MandateView>(`${this.base}/mandates/${id}/end`, { reason });
+  }
+
+  offers(id: number): Observable<MandateOffer[]> {
+    return this.http.get<MandateOffer[]>(`${this.base}/mandates/${id}/offers`);
+  }
+
+  submitOffer(id: number, body: OfferCreate): Observable<MandateOffer[]> {
+    return this.http.post<MandateOffer[]>(`${this.base}/mandates/${id}/offers`, body);
+  }
+
+  withdrawOffer(id: number, offerId: number): Observable<MandateOffer[]> {
+    return this.http.post<MandateOffer[]>(`${this.base}/mandates/${id}/offers/${offerId}/withdraw`, {});
   }
 
   createAnnonce(id: number): Observable<{ annonceId: number }> {

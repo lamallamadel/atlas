@@ -25,13 +25,16 @@ public class OwnerMandateController {
     private final MandateMarketplaceService marketplace;
     private final MandateLifecycleService lifecycle;
     private final com.example.backend.mandate.VerificationService verification;
+    private final com.example.backend.mandate.MandateOfferService offers;
 
     public OwnerMandateController(
             AgencyDirectoryService directory,
             MandateMarketplaceService marketplace,
             MandateLifecycleService lifecycle,
-            com.example.backend.mandate.VerificationService verification) {
+            com.example.backend.mandate.VerificationService verification,
+            com.example.backend.mandate.MandateOfferService offers) {
         this.verification = verification;
+        this.offers = offers;
         this.directory = directory;
         this.marketplace = marketplace;
         this.lifecycle = lifecycle;
@@ -139,6 +142,15 @@ public class OwnerMandateController {
     @PostMapping("/mandates/{id}/end")
     public MarketplaceViews.MandateFollowUp end(@PathVariable Long id, @RequestBody EndBody body) {
         return lifecycle.endByOwner(id, body == null ? null : body.reason());
+    }
+
+    /** Réponse du propriétaire à une offre : accepter, refuser ou contre-proposer (UC-P8). */
+    @PostMapping("/mandates/{id}/offers/{offerId}/decision")
+    public MarketplaceViews.MandateFollowUp decide(
+            @PathVariable Long id,
+            @PathVariable Long offerId,
+            @RequestBody com.example.backend.mandate.MandateOfferService.DecisionRequest body) {
+        return offers.decide(id, offerId, body);
     }
 
     @PostMapping("/mandates/{id}/review")

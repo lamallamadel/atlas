@@ -39,6 +39,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -50,6 +52,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
  * quartiers), R à Rabat, U non vérifiée à Tanger.
  */
 @BackendE2ETest
+@RecordApplicationEvents
 class MandateFollowUpBackendE2ETest extends BaseBackendE2ETest {
 
     private static final String OWNER = "OWN-fol0000001";
@@ -65,6 +68,9 @@ class MandateFollowUpBackendE2ETest extends BaseBackendE2ETest {
     @Autowired private ActivityRepository activities;
     @Autowired private BackendE2ETestDataBuilder testDataBuilder;
     @Autowired private AnnonceRepository annonces;
+    @Autowired private ApplicationEvents events;
+    @Autowired private com.example.backend.repository.MandateRequestRepository mandateRequests;
+    @Autowired private MandateLifecycleService lifecycle;
 
     @MockitoBean private OtpSender otpSender;
 
@@ -501,5 +507,243 @@ class MandateFollowUpBackendE2ETest extends BaseBackendE2ETest {
         json(owner(put("/api/v1/owner/properties/" + propertyId)), edit)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.verificationStatus").value("NONE"));
+    }
+
+    // ------------------------------------------------------------------ alertes aux agences
+
+    private List<AgencyAlert> agencyAlerts() {
+        return events.stream(AgencyAlert.class).toList();
+    }
+
+    @Test
+    void agenciesAreAlerted_topTenOnOpening_thenTheInvitedOne() throws Exception {
+        Long id = openRequest();
+        List<AgencyAlert> opening = agencyAlerts();
+        assertThat(opening).hasSize(1);
+        assertThat(opening.get(0).agencyOrgIds())
+                .contains(A, B)
+                .doesNotContain(R, U)
+                .hasSizeLessThanOrEqualTo(10);
+        assertThat(opening.get(0).path()).isEqualTo("/pro/mandats/demandes/" + id);
+        assertThat(opening.get(0).message()).contains("Malabata, Tanger");
+
+        json(
+                        owner(post("/api/v1/owner/mandate-requests/" + id + "/invitations")),
+                        Map.of("agencyOrgId", "ORG-FOL-C"))
+                .andExpect(status().isOk());
+        // Inviter deux fois la même agence ne la relance pas.
+        json(
+                        owner(post("/api/v1/owner/mandate-requests/" + id + "/invitations")),
+                        Map.of("agencyOrgId", "ORG-FOL-C"))
+                .andExpect(status().isOk());
+        List<AgencyAlert> all = agencyAlerts();
+        assertThat(all).hasSize(2);
+        assertThat(all.get(1).agencyOrgIds()).containsExactly("ORG-FOL-C");
+        assertThat(all.get(1).subject()).isEqualTo("Un propriétaire vous invite");
+    }
+
+    private Long directRequest(String target) throws Exception {
+        return read(json(
+                                owner(post("/api/v1/owner/mandate-requests")),
+                                Map.of(
+                                        "propertyId",
+                                        propertyId,
+                                        "visibility",
+                                        "MREQ_DIRECT",
+                                        "targetAgencyOrgId",
+                                        target,
+                                        "mandateTypes",
+                                        List.of("SIMPLE")))
+                        .andExpect(status().isOk()))
+                .get("id")
+                .asLong();
+    }
+
+    @Test
+    void directRequest_alertsTheAgency_remindsAt48h_thenTellsTheOwnerAt72h() throws Exception {
+        Long id = directRequest(A);
+        assertThat(agencyAlerts()).hasSize(1);
+        assertThat(agencyAlerts().get(0).agencyOrgIds()).containsExactly(A);
+
+        var r = mandateRequests.findById(id).orElseThrow();
+        r.setOpenedAt(LocalDateTime.now().minusHours(49));
+        mandateRequests.save(r);
+        lifecycle.expire();
+        assertThat(agencyAlerts()).hasSize(2);
+        assertThat(agencyAlerts().get(1).subject()).startsWith("Rappel");
+        lifecycle.expire();
+        assertThat(agencyAlerts()).hasSize(2);
+        long ownerAlerts = events.stream(com.example.backend.owner.PlatformAlert.class).count();
+
+        // 24 h plus tard : le rappel est parti à 48 h, le propriétaire est prévenu à 72 h.
+        r = mandateRequests.findById(id).orElseThrow();
+        r.setOpenedAt(LocalDateTime.now().minusHours(73));
+        r.setIdleAlertedAt(LocalDateTime.now().minusHours(25));
+        mandateRequests.save(r);
+        lifecycle.expire();
+        lifecycle.expire();
+        assertThat(agencyAlerts()).hasSize(2);
+        assertThat(
+                        events.stream(com.example.backend.owner.PlatformAlert.class)
+                                .filter(a -> a.text().contains("72 h"))
+                                .count())
+                .isEqualTo(1);
+        assertThat(events.stream(com.example.backend.owner.PlatformAlert.class).count())
+                .isEqualTo(ownerAlerts + 1);
+    }
+
+    // ------------------------------------------------------------------ offres
+
+    private String offersUrl(Long mandateId) {
+        return "/api/v1/marketplace/mandates/" + mandateId + "/offers";
+    }
+
+    private String decisionUrl(Long mandateId, long offerId) {
+        return "/api/v1/owner/mandates/" + mandateId + "/offers/" + offerId + "/decision";
+    }
+
+    private long submitOffer(Long mandateId, int amount, String buyer) throws Exception {
+        Map<String, Object> body = new HashMap<>();
+        body.put("amount", amount);
+        body.put("buyerSummary", buyer);
+        body.put("conditions", "Prêt bancaire accordé, signature sous 30 jours.");
+        return read(json(agent(post(offersUrl(mandateId)), A), body).andExpect(status().isOk()))
+                .get(0)
+                .get("id")
+                .asLong();
+    }
+
+    @Test
+    void offers_ownerAcceptsRefusesOrCounters_tracedInTheAgencyDossier() throws Exception {
+        Long id = openRequest();
+        Long mandateId = accept(propose(id, A)).get("id").asLong();
+        json(agent(post(offersUrl(mandateId)), A), Map.of("amount", 1300000))
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(agent(post("/api/v1/marketplace/mandates/" + mandateId + "/signed"), A))
+                .andExpect(status().isOk());
+        Long dossierId =
+                read(mockMvc.perform(agent(get("/api/v1/marketplace/mandates/" + mandateId), A)))
+                        .get("dossierId")
+                        .asLong();
+        json(
+                        agent(patch("/api/v1/dossiers/" + dossierId + "/status"), A),
+                        Map.of("statusCode", "CRM_LISTED"))
+                .andExpect(status().isOk());
+        json(agent(post(offersUrl(mandateId)), A), Map.of("amount", 0))
+                .andExpect(status().isBadRequest());
+
+        // Offre 1 : l'acquéreur reste anonyme, ses coordonnées sont masquées.
+        long first =
+                submitOffer(mandateId, 1300000, "Couple de Casablanca, joignable au 0661223344");
+        assertThat(dossiers.findById(dossierId).orElseThrow().getStatusCode())
+                .isEqualTo("CRM_OFFER_RECEIVED");
+        assertThat(
+                        events.stream(com.example.backend.owner.PlatformAlert.class)
+                                .filter(a -> a.text().startsWith("Nouvelle offre de 1 300 000 MAD"))
+                                .findFirst())
+                .hasValueSatisfying(a -> assertThat(a.linkParam()).isEqualTo("m" + mandateId));
+        String followUp =
+                mockMvc.perform(owner(get("/api/v1/owner/mandates/" + mandateId)))
+                        .andExpect(jsonPath("$.offers[0].status").value("OFFER_PENDING"))
+                        .andExpect(jsonPath("$.offers[0].amount").value(1300000.0))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+        assertThat(followUp).doesNotContain("0661223344").contains("Couple de Casablanca");
+
+        // Contre-proposition : au-dessus de l'offre, le dossier passe en négociation.
+        json(
+                        owner(post(decisionUrl(mandateId, first))),
+                        Map.of("decision", "COUNTER", "counterAmount", 1250000))
+                .andExpect(status().isBadRequest());
+        json(owner(post(decisionUrl(mandateId, first))), Map.of("decision", "MAYBE"))
+                .andExpect(status().isBadRequest());
+        json(
+                        owner(post(decisionUrl(mandateId, first))),
+                        Map.of(
+                                "decision",
+                                "COUNTER",
+                                "counterAmount",
+                                1400000,
+                                "comment",
+                                "Prix ferme sous 1,4 M."))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.offers[0].status").value("OFFER_COUNTERED"))
+                .andExpect(jsonPath("$.offers[0].counterAmount").value(1400000.0));
+        assertThat(dossiers.findById(dossierId).orElseThrow().getStatusCode())
+                .isEqualTo("CRM_NEGOTIATION");
+        json(owner(post(decisionUrl(mandateId, first))), Map.of("decision", "ACCEPT"))
+                .andExpect(status().isConflict());
+
+        // Offre 2 acceptée ; une 3e ne peut pas l'être tant que la 2e tient.
+        long second = submitOffer(mandateId, 1400000, "Même couple, nouvelle offre");
+        json(owner(post(decisionUrl(mandateId, second))), Map.of("decision", "ACCEPT"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.offers[0].status").value("OFFER_ACCEPTED"));
+        long third = submitOffer(mandateId, 1420000, "Investisseur");
+        json(owner(post(decisionUrl(mandateId, third))), Map.of("decision", "ACCEPT"))
+                .andExpect(status().isConflict());
+        mockMvc.perform(agent(post(offersUrl(mandateId) + "/" + second + "/withdraw"), A))
+                .andExpect(status().isOk());
+        json(owner(post(decisionUrl(mandateId, third))), Map.of("decision", "ACCEPT"))
+                .andExpect(status().isOk());
+
+        // Tracé dans le dossier de l'agence, en interne : rien de plus dans les événements
+        // visibles.
+        Dossier d = dossiers.findById(dossierId).orElseThrow();
+        List<String> notes =
+                activities.findAll().stream()
+                        .filter(
+                                a ->
+                                        a.getDossier() != null
+                                                && dossierId.equals(a.getDossier().getId()))
+                        .map(ActivityEntity::getContent)
+                        .toList();
+        assertThat(notes)
+                .anyMatch(n -> n.startsWith("Le propriétaire répond à l'offre de 1 300 000 MAD"))
+                .anyMatch(n -> n.contains("Prix ferme sous 1,4 M."))
+                .anyMatch(n -> n.equals("Le propriétaire accepte l'offre de 1 420 000 MAD."));
+        assertThat(d.getOrgId()).isEqualTo(A);
+        mockMvc.perform(owner(get("/api/v1/owner/mandates/" + mandateId)))
+                .andExpect(jsonPath("$.events.length()").value(0));
+
+        // Ni une autre agence ni un autre propriétaire n'y ont accès.
+        mockMvc.perform(agent(get(offersUrl(mandateId)), B)).andExpect(status().isNotFound());
+        OrganizationEntity other = new OrganizationEntity();
+        other.setOrgId("OWN-fol0000003");
+        other.setOrgType(OrganizationEntity.TYPE_OWNER);
+        other.setOwnerPhone("+212661000666");
+        organizations.save(other);
+        json(
+                        as(post(decisionUrl(mandateId, first)), "OWN-fol0000003", "kc-3", "OWNER"),
+                        Map.of("decision", "REFUSE"))
+                .andExpect(status().isNotFound());
+    }
+
+    // ------------------------------------------------------------------ profil de l'agence
+
+    @Test
+    void agencyProfile_showsItsOwnRatingAndRecentReviews() throws Exception {
+        Long id = openRequest();
+        Long mandateId = accept(propose(id, A)).get("id").asLong();
+        mockMvc.perform(agent(post("/api/v1/marketplace/mandates/" + mandateId + "/signed"), A))
+                .andExpect(status().isOk());
+        json(
+                        agent(post("/api/v1/marketplace/mandates/" + mandateId + "/end"), A),
+                        Map.of("reason", "DEAL_CLOSED_AGENCY"))
+                .andExpect(status().isOk());
+        json(
+                        owner(post("/api/v1/owner/mandates/" + mandateId + "/review")),
+                        Map.of("rating", 4, "comment", "Sérieux."))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(as(get("/api/v1/agency/marketplace-profile"), A, "admin-" + A, "ADMIN"))
+                .andExpect(jsonPath("$.rating").value(4.0))
+                .andExpect(jsonPath("$.reviews").value(1))
+                .andExpect(jsonPath("$.recentReviews[0].comment").value("Sérieux."));
+        mockMvc.perform(as(get("/api/v1/agency/marketplace-profile"), B, "admin-" + B, "ADMIN"))
+                .andExpect(jsonPath("$.reviews").value(0))
+                .andExpect(jsonPath("$.recentReviews.length()").value(0));
     }
 }

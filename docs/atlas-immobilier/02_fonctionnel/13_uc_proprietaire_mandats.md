@@ -176,9 +176,9 @@ Garde-fous :
 > - Mandat simple : après un premier mandat, les autres propositions simples restent acceptables, les exclusives sont écartées. Mandat exclusif : toutes les autres sont écartées.
 > - Dossier `CRM_MANDATE_SALE`/`CRM_MANDATE_RENT` créé dans l'agence, statut `CRM_MANDATE_PENDING`, assigné à l'agent auteur de la proposition, propriétaire en partie prenante `OWNER`. « Mandat signé » sur le dossier (bouton ou écran Pro) rend le mandat actif ; la publication de l'annonce de l'agence fait passer le dossier `CRM_LISTED`.
 > - Échéances (tâche horaire) : demande ouverte 14 jours ; mandat non signé sous 7 jours résilié (`NOT_SIGNED`) ; mandat actif échu (`TERM_REACHED`).
-> - Alertes : propriétaire par WhatsApp (modèle `<site>/p/{{1}}`, `d<id>` pour une demande) à chaque proposition, message d'agence, refus d'une demande directe, signature ; agent par notification in-app (message, décision, mandat).
+> - Alertes : propriétaire par WhatsApp (modèle `<site>/p/{{1}}`, `d<id>` pour une demande, `m<id>` pour le suivi d'un mandat depuis le lot C) à chaque proposition, message d'agence, refus d'une demande directe, signature ; agent par notification in-app (message, décision, mandat).
 >
-> **Restent à faire** : génération du document de mandat depuis un modèle validé par un juriste et signature en ligne ; notification des agences de la zone à l'ouverture d'une demande (lot C, avec le score § 5.1) ; notification in-app d'une demande directe (aucun destinataire désigné aujourd'hui : l'onglet « Demandes directes » la signale).
+> **Restent à faire** : génération du document de mandat depuis un modèle validé par un juriste et signature en ligne. (Les alertes aux agences, à l'ouverture et pour une demande directe, sont livrées avec le lot C.)
 
 ### UC-P8 — Suivre son bien délégué
 
@@ -204,7 +204,10 @@ Un mandat se termine par : affaire conclue par l'agence, vente par le propriéta
 > - Avis : une note de 1 à 5 et un commentaire facultatif (1 000 caractères), seulement pour un mandat signé puis terminé, une fois (`agency_review`, unique par mandat). La moyenne et le nombre d'avis s'affichent dans l'annuaire, sur les propositions et dans les recommandations.
 > - Alertes ajoutées : mandat bientôt échu (J-15) aux deux parties ; demande ouverte sans proposition après 48 h, au propriétaire.
 >
-> **Restent à faire** : décision du propriétaire sur une offre (accepter, refuser, contre-proposer) depuis son espace ; nombre de vues des annonces ; avis affichés en détail (texte) sur une fiche publique d'agence.
+> - Offres (V169, `mandate_offer`) : l'agence mandatée transmet une offre depuis le dialogue du mandat (montant, profil de l'acquéreur sans nom ni coordonnées, conditions, date de validité ; téléphones et e-mails masqués), sur un mandat signé et actif. Le dossier passe `CRM_OFFER_RECEIVED` si son workflow le permet, le propriétaire est alerté. Dans son suivi, le propriétaire accepte, refuse ou fait une contre-proposition (prix supérieur à l'offre, dossier `CRM_NEGOTIATION`) ; une seule offre acceptée à la fois, l'agence la retire si l'acquéreur se désiste. Chaque étape est tracée en note interne dans le dossier de l'agence, et l'agent assigné est prévenu.
+> - L'agence voit sa note moyenne et ses 20 derniers avis dans `/pro/mandats/profil`.
+>
+> **Restent à faire** : nombre de vues des annonces ; avis affichés en détail sur une fiche publique d'agence ; compromis et acte (hors plateforme aujourd'hui).
 
 ## 5. Matching
 
@@ -232,7 +235,7 @@ Une agence nouvelle sur la plateforme n'a ni historique ni avis : pour ne pas l'
 > **Livré (lot C).** `mandate/MandateMatchingService`. Zone : quartier couvert 35, ville entière 24,5, autres quartiers de la ville 14. Spécialité : type de bien 12 et transaction 8 (moitié si le profil ne les renseigne pas). Historique : mandats `MANDATE_COMPLETED` dans la ville, 5 et plus = 15. Réactivité : délai médian entre l'ouverture des demandes et les propositions de l'agence, 24 h ou moins = 10, 72 h ou moins = 6, au-delà 3, sans historique 5. Avis : moyenne / 5 × 10. Acquéreurs compatibles : 10 et plus = 10.
 > - À l'ouverture d'une demande à la bourse (ou quand une demande directe y est ouverte), les 10 meilleures agences sont enregistrées (`mandate_invitation`, `MATCHED`). Le propriétaire voit les 5 premières (« Agences recommandées », `GET /owner/mandate-requests/{id}/recommended`) et peut en inviter 5 au plus (`INVITED`). La bourse de l'agence est triée : invitations d'abord, puis pertinence ; colonne « Pertinence » et badge « Invitée ».
 > - Quotas par offre : `quotas.maxMandateProposalsMonth` dans les réglages de l'organisation (`-1` illimité ; absent : 30 par défaut). Une agence au quota ne peut plus proposer et sort des recommandations.
-> - **Reste à faire** : notifier les agences du top 10 et l'agence invitée (aujourd'hui, seuls le tri et le badge de la bourse les signalent : il faut un destinataire désigné dans l'agence, par exemple ses managers via Keycloak).
+> - Alertes aux agences (`AgencyAlert`, après validation de la transaction) : les 10 agences enregistrées à l'ouverture, l'agence invitée, l'agence d'une demande directe, puis un rappel à 48 h sans réponse (le propriétaire est prévenu à 72 h). Destinataires : administrateurs et managers de l'agence d'après l'annuaire Keycloak (à défaut, tous les membres actifs) ; notification dans l'espace Pro et e-mail.
 
 ### 5.2 Acquéreurs de l'agence ↔ bien
 

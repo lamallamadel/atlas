@@ -1,3 +1,12 @@
+# Changelog — v0.13-uc-proprietaire-offres-2026-11-26
+
+Cas d'usage n°1, compléments du lot C : alertes aux agences, offres, note de l'agence.
+- Alertes aux agences (`AgencyAlert`) : à l'ouverture d'une demande, les 10 agences les plus pertinentes ; l'agence invitée par le propriétaire ; l'agence d'une demande directe, puis un rappel à 48 h sans réponse (le propriétaire est prévenu à 72 h). Elles vont aux administrateurs et managers de l'agence (annuaire Keycloak, sinon tous les membres actifs), dans l'espace Pro et par e-mail.
+- Offres : l'agence mandatée transmet l'offre d'un acquéreur anonyme (montant, profil, conditions, validité) depuis le dialogue du mandat ; le propriétaire l'accepte, la refuse ou fait une contre-proposition depuis `/proprietaire/mandats/{id}`. Dossier de l'agence `CRM_OFFER_RECEIVED` puis `CRM_NEGOTIATION`, décisions tracées en note interne, agent prévenu. Une seule offre acceptée à la fois.
+- Alertes WhatsApp du propriétaire sur un mandat : lien `<site>/p/m<id>` vers le suivi du mandat.
+- Profil de l'agence `/pro/mandats/profil` : note moyenne et 20 derniers avis.
+- Migration V169 : `mandate_offer`.
+
 # Changelog — v0.12-uc-proprietaire-suivi-2026-11-26
 
 Cas d'usage n°1, lot C : matching et suivi du mandat (§ 5, UC-P8, UC-P9, critères PC-1 à PC-4).

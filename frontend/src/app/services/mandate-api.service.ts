@@ -191,6 +191,37 @@ export interface AgencyReview {
   createdAt: string;
 }
 
+export type OfferStatus = 'OFFER_PENDING' | 'OFFER_ACCEPTED' | 'OFFER_REFUSED' | 'OFFER_COUNTERED' | 'OFFER_WITHDRAWN';
+export type OfferDecision = 'ACCEPT' | 'REFUSE' | 'COUNTER';
+
+/** Offre d'un acquéreur (anonyme) transmise par l'agence mandatée. */
+export interface MandateOffer {
+  id: number;
+  amount: number;
+  currency: string;
+  buyerSummary: string | null;
+  conditions: string | null;
+  validUntil: string | null;
+  status: OfferStatus;
+  counterAmount: number | null;
+  ownerComment: string | null;
+  createdAt: string;
+  decidedAt: string | null;
+}
+
+export const OFFER_STATUS: Record<string, { label: string; status: 'info' | 'warning' | 'success' | 'neutral' | 'error' }> = {
+  OFFER_PENDING: { label: 'En attente de réponse', status: 'warning' },
+  OFFER_ACCEPTED: { label: 'Acceptée', status: 'success' },
+  OFFER_REFUSED: { label: 'Refusée', status: 'neutral' },
+  OFFER_COUNTERED: { label: 'Contre-proposition', status: 'info' },
+  OFFER_WITHDRAWN: { label: 'Retirée', status: 'neutral' },
+};
+
+/** « 1 450 000 MAD ». */
+export function madLabel(amount: number | null | undefined): string {
+  return amount == null ? '—' : `${Math.round(Number(amount)).toLocaleString('fr-FR')} MAD`;
+}
+
 /** Suivi d'un mandat par le propriétaire (UC-P8, UC-P9). */
 export interface MandateFollowUp {
   mandate: MandateView;
@@ -199,6 +230,7 @@ export interface MandateFollowUp {
   propertyTitle: string | null;
   listings: AgencyListing[];
   events: VisibleEvent[];
+  offers: MandateOffer[];
   canEnd: boolean;
   endReasons: string[];
   canReview: boolean;
@@ -330,6 +362,10 @@ export class OwnerMandateApiService {
 
   endMandate(id: number, reason: string): Observable<MandateFollowUp> {
     return this.http.post<MandateFollowUp>(`${this.base}/mandates/${id}/end`, { reason });
+  }
+
+  decideOffer(id: number, offerId: number, body: { decision: OfferDecision; counterAmount?: number | null; comment?: string | null }): Observable<MandateFollowUp> {
+    return this.http.post<MandateFollowUp>(`${this.base}/mandates/${id}/offers/${offerId}/decision`, body);
   }
 
   review(id: number, rating: number, comment: string | null): Observable<MandateFollowUp> {

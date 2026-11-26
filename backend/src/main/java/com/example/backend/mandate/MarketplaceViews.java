@@ -130,6 +130,20 @@ public final class MarketplaceViews {
 
     public record Review(Integer rating, String comment, LocalDateTime createdAt) {}
 
+    /** Offre d'un acquéreur (anonyme) transmise par l'agence, et la réponse du propriétaire. */
+    public record Offer(
+            Long id,
+            BigDecimal amount,
+            String currency,
+            String buyerSummary,
+            String conditions,
+            java.time.LocalDate validUntil,
+            String status,
+            BigDecimal counterAmount,
+            String ownerComment,
+            LocalDateTime createdAt,
+            LocalDateTime decidedAt) {}
+
     /** Suivi d'un mandat par le propriétaire (UC-P8, UC-P9). */
     public record MandateFollowUp(
             Mandate mandate,
@@ -138,6 +152,7 @@ public final class MarketplaceViews {
             String propertyTitle,
             List<AgencyListing> listings,
             List<VisibleEvent> events,
+            List<Offer> offers,
             boolean canEnd,
             List<String> endReasons,
             boolean canReview,

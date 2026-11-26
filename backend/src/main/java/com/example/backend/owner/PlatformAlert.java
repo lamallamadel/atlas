@@ -29,6 +29,8 @@ public record PlatformAlert(
 
     public enum Audience {
         OWNER,
-        PROSPECT
+        PROSPECT,
+        /** Administrateurs et managers d'une agence (bourse aux mandats) : e-mail seulement. */
+        AGENCY
     }
 }

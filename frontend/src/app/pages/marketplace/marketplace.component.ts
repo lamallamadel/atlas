@@ -230,7 +230,7 @@ export class MarketplaceComponent implements OnInit {
   openProposal(p: AgencyProposal): void { this.router.navigate(['/pro/mandats/demandes', p.requestId]); }
 
   openMandate(m: MandateView): void {
-    this.dialog.open<MandateView>(MarketplaceMandateDialogComponent, { data: m, width: '560px' })
+    this.dialog.open<MandateView>(MarketplaceMandateDialogComponent, { data: m, width: '680px' })
       .closed.subscribe(updated => {
         if (updated) this.mandates.set(this.mandates().map(x => x.id === updated.id ? updated : x));
       });

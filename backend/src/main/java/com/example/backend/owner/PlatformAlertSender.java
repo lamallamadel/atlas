@@ -57,7 +57,7 @@ public class PlatformAlertSender {
     }
 
     /** Renvoie le canal utilisé, ou {@code null} si l'alerte n'a pas pu partir. */
-    String send(PlatformAlert alert) {
+    public String send(PlatformAlert alert) {
         String template =
                 alert.audience() == PlatformAlert.Audience.OWNER ? ownerTemplate : prospectTemplate;
         if (alert.phone() != null
@@ -140,7 +140,11 @@ public class PlatformAlertSender {
                                 + HtmlUtils.htmlEscape(alert.text())
                                 + "</p><p><a href=\""
                                 + link
-                                + "\">Ouvrir la conversation</a></p>"
+                                + "\">"
+                                + (alert.audience() == PlatformAlert.Audience.AGENCY
+                                        ? "Ouvrir dans Atlas Pro"
+                                        : "Ouvrir la conversation")
+                                + "</a></p>"
                                 + "<p style=\"color:gray;font-size:12px\">Atlas Immobilier</p>"
                                 + "</body></html>"));
         return m;
