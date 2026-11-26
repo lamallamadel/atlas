@@ -87,6 +87,9 @@ public class MandateRequestEntity {
     @Column(name = "target_declined_at")
     private LocalDateTime targetDeclinedAt;
 
+    @Column(name = "idle_alerted_at")
+    private LocalDateTime idleAlertedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -279,5 +282,13 @@ public class MandateRequestEntity {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getIdleAlertedAt() {
+        return idleAlertedAt;
+    }
+
+    public void setIdleAlertedAt(LocalDateTime idleAlertedAt) {
+        this.idleAlertedAt = idleAlertedAt;
     }
 }

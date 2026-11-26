@@ -91,6 +91,8 @@ public class MandateMarketplaceService {
     private final NotificationService notifications;
     private final ApplicationEventPublisher events;
     private final String publicBaseUrl;
+    private final MandateMatchingService matching;
+    private final com.example.backend.repository.MandateInvitationRepository invitations;
 
     public MandateMarketplaceService(
             OwnerContext ownerContext,
@@ -105,7 +107,11 @@ public class MandateMarketplaceService {
             MandateViews views,
             NotificationService notifications,
             ApplicationEventPublisher events,
+            MandateMatchingService matching,
+            com.example.backend.repository.MandateInvitationRepository invitations,
             @Value("${atlas.consent.public-base-url:http://localhost:4200}") String publicBaseUrl) {
+        this.matching = matching;
+        this.invitations = invitations;
         this.ownerContext = ownerContext;
         this.requests = requests;
         this.proposals = proposals;
@@ -195,6 +201,9 @@ public class MandateMarketplaceService {
         r.setCreatedAt(now);
         r.setUpdatedAt(now);
         requests.save(r);
+        if (MREQ_OPEN_MARKET.equals(visibility)) {
+            recordMatches(r);
+        }
         if (target != null) {
             notifyAgency(
                     target,
@@ -248,7 +257,108 @@ public class MandateMarketplaceService {
         r.setExpiresAt(now.plusDays(settings.requestDays()));
         r.setUpdatedAt(now);
         requests.save(r);
+        recordMatches(r);
         return views.ownerRequest(r);
+    }
+
+    // =================================================================== lot C : rapprochement
+
+    /** Les 10 agences les plus pertinentes à l'ouverture (§ 5.1) : la bourse les met en avant. */
+    void recordMatches(MandateRequestEntity r) {
+        LocalDateTime now = LocalDateTime.now();
+        for (MandateMatchingService.Score s : matching.ranking(r).stream().limit(10).toList()) {
+            if (invitations.findByRequestIdAndAgencyOrgId(r.getId(), s.agencyOrgId()).isEmpty()) {
+                com.example.backend.entity.MandateInvitationEntity i =
+                        new com.example.backend.entity.MandateInvitationEntity();
+                i.setRequestId(r.getId());
+                i.setAgencyOrgId(s.agencyOrgId());
+                i.setKind(com.example.backend.entity.MandateInvitationEntity.MATCHED);
+                i.setScore(s.total());
+                i.setCreatedAt(now);
+                invitations.save(i);
+            }
+        }
+    }
+
+    /** Agences recommandées au propriétaire : les 5 plus pertinentes (PC-1). */
+    @Transactional(readOnly = true)
+    public List<MarketplaceViews.RecommendedAgency> recommended(Long requestId) {
+        MandateRequestEntity r = ownerRequest(requestId);
+        java.util.Set<String> proposed =
+                proposals.findByRequestIdOrderByCreatedAtAsc(r.getId()).stream()
+                        .map(MandateProposalEntity::getAgencyOrgId)
+                        .collect(java.util.stream.Collectors.toSet());
+        java.util.Map<String, AgencyDirectoryService.AgencyCard> cards =
+                agencies.directory(r.getCity(), r.getObjective()).stream()
+                        .collect(
+                                java.util.stream.Collectors.toMap(
+                                        AgencyDirectoryService.AgencyCard::orgId, c -> c));
+        return matching.ranking(r).stream()
+                .limit(5)
+                .map(
+                        s -> {
+                            AgencyDirectoryService.AgencyCard c = cards.get(s.agencyOrgId());
+                            boolean invited =
+                                    invitations
+                                            .findByRequestIdAndAgencyOrgId(
+                                                    r.getId(), s.agencyOrgId())
+                                            .map(
+                                                    i ->
+                                                            com.example.backend.entity
+                                                                    .MandateInvitationEntity.INVITED
+                                                                    .equals(i.getKind()))
+                                            .orElse(false);
+                            return new MarketplaceViews.RecommendedAgency(
+                                    s.agencyOrgId(),
+                                    c != null ? c.name() : agencies.agencyName(s.agencyOrgId()),
+                                    c != null ? c.description() : null,
+                                    c != null ? c.districts() : List.of(),
+                                    c != null ? c.rating() : null,
+                                    c != null ? c.reviews() : 0,
+                                    invited,
+                                    proposed.contains(s.agencyOrgId()));
+                        })
+                .toList();
+    }
+
+    /** Le propriétaire invite une agence recommandée à proposer (5 invitations au plus). */
+    @Transactional
+    public List<MarketplaceViews.RecommendedAgency> invite(Long requestId, String agencyOrgId) {
+        MandateRequestEntity r = ownerRequest(requestId);
+        if (!MREQ_OPEN.equals(r.getStatus()) || !MREQ_OPEN_MARKET.equals(r.getVisibility())) {
+            throw conflict(
+                    "REQUEST_CLOSED: invitez une agence sur une demande ouverte à la bourse.");
+        }
+        MandateMatchingService.Score s = matching.score(r, agencyOrgId);
+        if (!s.eligible()) {
+            throw bad("AGENCY_INVALID: cette agence ne couvre pas votre bien.");
+        }
+        long invited =
+                invitations.findByRequestIdOrderByScoreDesc(r.getId()).stream()
+                        .filter(
+                                i ->
+                                        com.example.backend.entity.MandateInvitationEntity.INVITED
+                                                .equals(i.getKind()))
+                        .count();
+        com.example.backend.entity.MandateInvitationEntity i =
+                invitations
+                        .findByRequestIdAndAgencyOrgId(r.getId(), agencyOrgId)
+                        .orElseGet(com.example.backend.entity.MandateInvitationEntity::new);
+        if (!com.example.backend.entity.MandateInvitationEntity.INVITED.equals(i.getKind())) {
+            if (invited >= 5) {
+                throw conflict("INVITATIONS_FULL: 5 invitations au plus par demande.");
+            }
+            i.setRequestId(r.getId());
+            i.setAgencyOrgId(agencyOrgId);
+            i.setKind(com.example.backend.entity.MandateInvitationEntity.INVITED);
+            i.setScore(s.total());
+            if (i.getCreatedAt() == null) {
+                i.setCreatedAt(LocalDateTime.now());
+            }
+            i.setSeenAt(null);
+            invitations.save(i);
+        }
+        return recommended(requestId);
     }
 
     @Transactional
@@ -312,6 +422,11 @@ public class MandateMarketplaceService {
                 .filter(r -> !r.getExpiresAt().isBefore(LocalDateTime.now()))
                 .filter(r -> agencies.covers(agency, r.getCity()))
                 .map(r -> views.agencyRequest(r, agency))
+                // Invitations d'abord, puis par pertinence (§ 5.1).
+                .sorted(
+                        java.util.Comparator.comparing(AgencyRequest::invited)
+                                .thenComparingInt(AgencyRequest::relevance)
+                                .reversed())
                 .toList();
     }
 

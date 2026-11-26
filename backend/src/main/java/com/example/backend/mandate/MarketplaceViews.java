@@ -50,7 +50,9 @@ public final class MarketplaceViews {
             String message,
             String status,
             long unread,
-            LocalDateTime createdAt) {}
+            LocalDateTime createdAt,
+            Double agencyRating,
+            int agencyReviews) {}
 
     public record OwnerRequest(
             Long id,
@@ -102,7 +104,44 @@ public final class MarketplaceViews {
             LocalDateTime expiresAt,
             boolean canPropose,
             String cannotProposeReason,
-            AgencyProposal myProposal) {}
+            AgencyProposal myProposal,
+            int relevance,
+            int compatibleBuyers,
+            boolean invited,
+            boolean ownerVerified,
+            boolean propertyVerified) {}
+
+    /** Agence recommandée au propriétaire (§ 5.1, top 5), sans le détail du score. */
+    public record RecommendedAgency(
+            String orgId,
+            String name,
+            String description,
+            List<String> districts,
+            Double rating,
+            int reviews,
+            boolean invited,
+            boolean proposed) {}
+
+    /** Événement du dossier de l'agence marqué « visible par le client » (R-PROP-12). */
+    public record VisibleEvent(Long id, String type, String content, LocalDateTime createdAt) {}
+
+    /** Annonce de l'agence pour le bien, et contacts reçus. */
+    public record AgencyListing(Long annonceId, String title, String status, long contacts) {}
+
+    public record Review(Integer rating, String comment, LocalDateTime createdAt) {}
+
+    /** Suivi d'un mandat par le propriétaire (UC-P8, UC-P9). */
+    public record MandateFollowUp(
+            Mandate mandate,
+            Long requestId,
+            Long proposalId,
+            String propertyTitle,
+            List<AgencyListing> listings,
+            List<VisibleEvent> events,
+            boolean canEnd,
+            List<String> endReasons,
+            boolean canReview,
+            Review review) {}
 
     public record AgencyProposal(
             Long id,
@@ -145,7 +184,10 @@ public final class MarketplaceViews {
             LocalDateTime signedAt,
             Long dossierId,
             Long annonceId,
-            Owner owner) {}
+            Owner owner,
+            String endReason,
+            String endedBy,
+            LocalDateTime endedAt) {}
 
     public record Owner(
             String name,

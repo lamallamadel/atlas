@@ -24,11 +24,14 @@ public class OwnerMandateController {
     private final AgencyDirectoryService directory;
     private final MandateMarketplaceService marketplace;
     private final MandateLifecycleService lifecycle;
+    private final com.example.backend.mandate.VerificationService verification;
 
     public OwnerMandateController(
             AgencyDirectoryService directory,
             MandateMarketplaceService marketplace,
-            MandateLifecycleService lifecycle) {
+            MandateLifecycleService lifecycle,
+            com.example.backend.mandate.VerificationService verification) {
+        this.verification = verification;
         this.directory = directory;
         this.marketplace = marketplace;
         this.lifecycle = lifecycle;
@@ -105,6 +108,50 @@ public class OwnerMandateController {
     @GetMapping("/mandates")
     public List<MarketplaceViews.Mandate> mandates() {
         return lifecycle.ownerMandates();
+    }
+
+    // ---------------------------------------------------------------- lot C
+
+    public record InviteBody(String agencyOrgId) {}
+
+    public record EndBody(String reason) {}
+
+    public record ReviewBody(Integer rating, String comment) {}
+
+    /** Les 5 agences les plus pertinentes pour la demande (§ 5.1). */
+    @GetMapping("/mandate-requests/{id}/recommended")
+    public List<MarketplaceViews.RecommendedAgency> recommended(@PathVariable Long id) {
+        return marketplace.recommended(id);
+    }
+
+    @PostMapping("/mandate-requests/{id}/invitations")
+    public List<MarketplaceViews.RecommendedAgency> invite(
+            @PathVariable Long id, @RequestBody InviteBody body) {
+        return marketplace.invite(id, body == null ? null : body.agencyOrgId());
+    }
+
+    /** Suivi du mandat (UC-P8) : statut, annonces de l'agence, événements visibles. */
+    @GetMapping("/mandates/{id}")
+    public MarketplaceViews.MandateFollowUp mandate(@PathVariable Long id) {
+        return lifecycle.followUp(id);
+    }
+
+    @PostMapping("/mandates/{id}/end")
+    public MarketplaceViews.MandateFollowUp end(@PathVariable Long id, @RequestBody EndBody body) {
+        return lifecycle.endByOwner(id, body == null ? null : body.reason());
+    }
+
+    @PostMapping("/mandates/{id}/review")
+    public MarketplaceViews.MandateFollowUp review(
+            @PathVariable Long id, @RequestBody ReviewBody body) {
+        return lifecycle.review(
+                id, body == null ? null : body.rating(), body == null ? null : body.comment());
+    }
+
+    /** Demande du badge « Bien vérifié » (titre foncier déclaré). */
+    @PostMapping("/properties/{id}/verification")
+    public Map<String, String> requestVerification(@PathVariable Long id) {
+        return Map.of("verificationStatus", verification.requestPropertyVerification(id));
     }
 
     private static String clientIp(HttpServletRequest http) {

@@ -28,7 +28,8 @@ public record PublicAnnonceResponse(
         Map<String, Object> meta,
         LocalDateTime createdAt,
         String publisherKind,
-        List<Publisher> publishers) {
+        List<Publisher> publishers,
+        boolean propertyVerified) {
 
     /**
      * Annonceur d'un bien publié par plusieurs (mandats simples, R-PROP-06) : la fiche du portail
@@ -52,7 +53,29 @@ public record PublicAnnonceResponse(
                 meta,
                 createdAt,
                 publisherKind,
-                List.copyOf(list));
+                List.copyOf(list),
+                propertyVerified);
+    }
+
+    /** Lot C : badge « Bien vérifié » (titre foncier contrôlé par la plateforme). */
+    public PublicAnnonceResponse withPropertyVerified(boolean verified) {
+        return new PublicAnnonceResponse(
+                id,
+                title,
+                description,
+                category,
+                type,
+                address,
+                surface,
+                city,
+                price,
+                currency,
+                photos,
+                meta,
+                createdAt,
+                publisherKind,
+                publishers,
+                verified);
     }
 
     /** Clés de {@code meta} affichables publiquement. */
@@ -100,6 +123,7 @@ public record PublicAnnonceResponse(
                 publicMeta,
                 a.getCreatedAt(),
                 "OWNER".equals(a.getPublisherKind()) ? "OWNER" : "AGENCY",
-                List.of());
+                List.of(),
+                false);
     }
 }

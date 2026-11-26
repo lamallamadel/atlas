@@ -47,6 +47,7 @@ public class AnnoncePublicationService {
             Set.of(
                     "OWNER_PAUSE",
                     "MANDATE_EXCLUSIVE",
+                    "MANDATE_ENDED",
                     "MOD_SUSPECT_FRAUD",
                     "MOD_ILLEGAL_CONTENT",
                     "MOD_DUPLICATE_LISTING",

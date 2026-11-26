@@ -36,12 +36,15 @@ public class AgencyDirectoryService {
     private final AgencyZoneRepository zones;
     private final OrganizationRepository organizations;
     private final OrgScope orgScope;
+    private final com.example.backend.repository.AgencyReviewRepository reviews;
 
     public AgencyDirectoryService(
             AgencyProfileRepository profiles,
             AgencyZoneRepository zones,
             OrganizationRepository organizations,
-            OrgScope orgScope) {
+            OrgScope orgScope,
+            com.example.backend.repository.AgencyReviewRepository reviews) {
+        this.reviews = reviews;
         this.profiles = profiles;
         this.zones = zones;
         this.organizations = organizations;
@@ -75,7 +78,9 @@ public class AgencyDirectoryService {
             List<String> languages,
             List<String> propertyTypes,
             List<String> transactions,
-            List<String> districts) {}
+            List<String> districts,
+            Double rating,
+            int reviews) {}
 
     // ---------------------------------------------------------------- côté agence
 
@@ -265,11 +270,29 @@ public class AgencyDirectoryService {
                                         split(p != null ? p.getLanguages() : null),
                                         split(p != null ? p.getPropertyTypes() : null),
                                         tx,
-                                        districts));
+                                        districts,
+                                        rating(orgId).average(),
+                                        rating(orgId).count()));
                     }
                     out.sort(java.util.Comparator.comparing(AgencyCard::name));
                     return out;
                 });
+    }
+
+    /** Note moyenne sur 5 (une décimale, ou {@code null}) et nombre d'avis vérifiés. */
+    public record Rating(Double average, int count) {}
+
+    public Rating rating(String orgId) {
+        var list = reviews.findByAgencyOrgIdOrderByCreatedAtDesc(orgId);
+        if (list.isEmpty()) {
+            return new Rating(null, 0);
+        }
+        double avg =
+                list.stream()
+                        .mapToInt(com.example.backend.entity.AgencyReviewEntity::getRating)
+                        .average()
+                        .orElse(0);
+        return new Rating(Math.round(avg * 10) / 10.0, list.size());
     }
 
     // ---------------------------------------------------------------- utilitaires

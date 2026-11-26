@@ -102,6 +102,14 @@ public class MarketplaceController {
         return lifecycle.markSigned(id);
     }
 
+    public record EndBody(String reason) {}
+
+    /** Fin du mandat par l'agence (UC-P9), motif obligatoire. */
+    @PostMapping("/mandates/{id}/end")
+    public MarketplaceViews.Mandate end(@PathVariable Long id, @RequestBody EndBody body) {
+        return lifecycle.endByAgency(id, body == null ? null : body.reason());
+    }
+
     /** Crée (ou retrouve) le brouillon d'annonce de l'agence lié au bien. */
     @PostMapping("/mandates/{id}/annonce")
     public Map<String, Long> annonce(@PathVariable Long id) {
