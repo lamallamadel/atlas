@@ -2,8 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 /**
- * Lien court des alertes WhatsApp du propriétaire (`/p/c12`, `/p/d5`) : le modèle Meta n'a qu'une
- * variable en fin d'URL. « c » ouvre un contact, « d » une demande d'accompagnement.
+ * Lien court des alertes WhatsApp du propriétaire (`/p/c12`, `/p/d5`, `/p/m9`) : le modèle Meta n'a qu'une
+ * variable en fin d'URL. « c » ouvre un contact, « d » une demande d'accompagnement, « m » le suivi d'un mandat.
  */
 @Component({
   selector: 'app-owner-link',
@@ -16,9 +16,10 @@ export class OwnerLinkComponent implements OnInit {
 
   ngOnInit(): void {
     const ref = this.route.snapshot.paramMap.get('ref') ?? '';
-    const match = /^([cd])(\d+)$/.exec(ref);
+    const match = /^([cdm])(\d+)$/.exec(ref);
     const target = !match ? ['/proprietaire']
       : match[1] === 'c' ? ['/proprietaire/contacts', match[2]]
+      : match[1] === 'm' ? ['/proprietaire/mandats', match[2]]
       : ['/proprietaire/demandes', match[2]];
     this.router.navigate(target, { replaceUrl: true });
   }

@@ -23,9 +23,13 @@ import {
   MANDATE_STATUS,
   MANDATE_TYPE_LABELS,
   MandateFollowUp,
+  MandateOffer,
+  OFFER_STATUS,
   OwnerMandateApiService,
   commissionLabel,
+  madLabel,
 } from '../../services/mandate-api.service';
+import { OfferDialogData, OfferDialogResult, OwnerOfferDialogComponent } from './owner-offer-dialog.component';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
 import { EndMandateDialogData, OwnerEndMandateDialogComponent } from './owner-end-mandate-dialog.component';
 
@@ -94,6 +98,34 @@ const LISTING_STATUS: Record<string, { label: string; status: 'info' | 'warning'
 
         <div class="om-layout">
           <div class="om-main">
+            @if (x.offers.length) {
+              <ds-card [pad]="true" elevation="xs">
+                <h2 class="om-card-title">Offres reçues</h2>
+                <ul class="om-offers" role="list">
+                  @for (o of x.offers; track o.id) {
+                    <li class="om-offer" [class.om-offer--pending]="o.status === 'OFFER_PENDING'">
+                      <div class="om-offer__head">
+                        <span class="om-offer__amount">{{ mad(o.amount) }}</span>
+                        <ds-badge [status]="offerStatus(o).status">{{ offerStatus(o).label }}</ds-badge>
+                      </div>
+                      @if (o.buyerSummary) { <span class="om-strong">{{ o.buyerSummary }}</span> }
+                      @if (o.conditions) { <span class="om-muted om-pre">{{ o.conditions }}</span> }
+                      <span class="om-muted">Reçue le {{ o.createdAt | date: 'd MMMM' }}{{ o.validUntil ? ' · valable jusqu\\'au ' + (o.validUntil | date: 'd MMMM') : '' }}</span>
+                      @if (o.status === 'OFFER_COUNTERED') {
+                        <span class="om-muted">Votre contre-proposition : <strong>{{ mad(o.counterAmount) }}</strong></span>
+                      }
+                      @if (o.ownerComment) { <p class="om-quote">{{ o.ownerComment }}</p> }
+                      @if (o.status === 'OFFER_PENDING' && x.mandate.status === 'MANDATE_ACTIVE') {
+                        <div class="om-actions">
+                          <ds-button variant="marine" size="sm" [disabled]="busy()" (dsClick)="answer(o)">Répondre</ds-button>
+                        </div>
+                      }
+                    </li>
+                  }
+                </ul>
+              </ds-card>
+            }
+
             <ds-card [pad]="true" elevation="xs">
               <h2 class="om-card-title">Ce que l'agence partage avec vous</h2>
               @if (timeline().length) {
@@ -197,9 +229,16 @@ const LISTING_STATUS: Record<string, { label: string; status: 'info' | 'warning'
     .om-listing__text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
     .om-listing ds-badge { flex: none; }
     .om-review { display: flex; flex-direction: column; gap: var(--ds-space-2); }
-    .om-rating { display: inline-flex; align-items: center; gap: var(--ds-space-1); font-weight: 700; color: var(--ds-copper); }
+    .om-rating { display: inline-flex; align-items: center; gap: var(--ds-space-1); font-weight: 700; color: var(--ds-primary); }
     .om-quote { margin: 0; padding: var(--ds-space-3); border-radius: var(--ds-radius-md); background: var(--ds-surface-2); font-size: var(--ds-text-sm); white-space: pre-line; }
     .om-actions { display: flex; justify-content: flex-end; }
+    .om-offers { display: flex; flex-direction: column; gap: var(--ds-space-4); margin: 0; padding: 0; list-style: none; }
+    .om-offer { display: flex; flex-direction: column; gap: var(--ds-space-1); padding: var(--ds-space-4); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); }
+    .om-offer--pending { border-color: var(--ds-primary); }
+    .om-offer__head { display: flex; align-items: center; justify-content: space-between; gap: var(--ds-space-3); }
+    .om-offer__head ds-badge { flex: none; }
+    .om-offer__amount { font-size: var(--ds-text-lg); font-weight: 700; color: var(--ds-marine); font-variant-numeric: tabular-nums; }
+    .om-pre { white-space: pre-line; }
   `],
 })
 export class OwnerMandateComponent implements OnInit {
@@ -244,6 +283,8 @@ export class OwnerMandateComponent implements OnInit {
     if (!x) return null;
     const contacts = x.listings.reduce((n, l) => n + l.contacts, 0);
     const parts = [`${this.typeLabel()}`];
+    const pending = x.offers.filter(o => o.status === 'OFFER_PENDING').length;
+    if (pending) parts.push(`${pending} offre${pending > 1 ? 's' : ''} à examiner`);
     if (x.listings.length) parts.push(`${contacts} contact${contacts > 1 ? 's' : ''} sur ${x.listings.length > 1 ? 'ses annonces' : 'son annonce'}`);
     parts.push(`${x.events.length} événement${x.events.length > 1 ? 's' : ''} partagé${x.events.length > 1 ? 's' : ''}`);
     return parts.join(' · ');
@@ -264,6 +305,28 @@ export class OwnerMandateComponent implements OnInit {
     this.api.mandate(this.id).subscribe({
       next: f => { this.f.set(f); this.loading.set(false); },
       error: err => { this.loading.set(false); if (err?.status !== 404) this.toast.error(serverMessage(err, 'Impossible de charger le mandat')); },
+    });
+  }
+
+  mad(v: number | null): string { return madLabel(v); }
+  offerStatus(o: MandateOffer) { return OFFER_STATUS[o.status] ?? { label: o.status, status: 'neutral' as const }; }
+
+  answer(o: MandateOffer): void {
+    const x = this.f();
+    if (!x) return;
+    const data: OfferDialogData = { offer: o, agencyName: x.mandate.agencyName, acceptBlocked: x.offers.some(y => y.status === 'OFFER_ACCEPTED') };
+    this.dialog.open<OfferDialogResult>(OwnerOfferDialogComponent, { data, width: '560px' }).closed.subscribe(r => {
+      if (!r) return;
+      this.busy.set(true);
+      this.api.decideOffer(this.id, o.id, r).subscribe({
+        next: f => {
+          this.busy.set(false);
+          this.f.set(f);
+          this.toast.success(r.decision === 'ACCEPT' ? 'Offre acceptée, l’agence est prévenue'
+            : r.decision === 'COUNTER' ? 'Contre-proposition envoyée à l’agence' : 'Offre refusée, l’agence est prévenue');
+        },
+        error: err => { this.busy.set(false); this.toast.error(serverMessage(err, 'Réponse impossible')); },
+      });
     });
   }
 

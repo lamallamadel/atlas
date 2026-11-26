@@ -10,9 +10,12 @@ import { OwnerLinkComponent } from '../owner/owner-link.component';
 import { OwnerMandateComponent } from '../owner/owner-mandate.component';
 import { MarketplaceMandateDialogComponent } from './marketplace-mandate-dialog.component';
 import { DsDialogService } from '../../design-system';
+import { OwnerOfferDialogComponent } from '../owner/owner-offer-dialog.component';
+import { AgencyMarketplaceProfileComponent } from './agency-marketplace-profile.component';
+import { AuthService } from '../../services/auth.service';
 import { of } from 'rxjs';
 import type { AgencyRequest } from '../../services/marketplace-api.service';
-import type { MandateFollowUp, MandateView, OwnerProposal, OwnerRequest, RecommendedAgency } from '../../services/mandate-api.service';
+import type { MandateFollowUp, MandateOffer, MandateView, OwnerProposal, OwnerRequest, RecommendedAgency } from '../../services/mandate-api.service';
 import { commissionLabel, ratingLabel } from '../../services/mandate-api.service';
 
 const MANDATE: MandateView = {
@@ -26,7 +29,13 @@ const FOLLOW_UP: MandateFollowUp = {
   mandate: MANDATE, requestId: 7, proposalId: 31, propertyTitle: 'Appartement Malabata',
   listings: [{ annonceId: 55, title: 'Appartement Malabata vue mer', status: 'PUBLISHED', contacts: 4 }],
   events: [{ id: 1, type: 'APPOINTMENT_COMPLETED', content: 'Visite faite samedi, retour positif.', createdAt: '2026-11-24T16:00:00' }],
+  offers: [],
   canEnd: true, endReasons: ['SOLD_BY_OWNER', 'SOLD_THIRD_PARTY', 'WITHDRAWN_OWNER'], canReview: false, review: null,
+};
+
+const OFFER: MandateOffer = {
+  id: 3, amount: 1300000, currency: 'MAD', buyerSummary: 'Couple, prêt accordé', conditions: 'Signature sous 30 jours',
+  validUntil: null, status: 'OFFER_PENDING', counterAmount: null, ownerComment: null, createdAt: '2026-11-26T10:00:00', decidedAt: null,
 };
 
 const RECOMMENDED: RecommendedAgency[] = [
@@ -161,7 +170,7 @@ describe('Bourse aux mandats', () => {
   });
 
   it('les liens courts des alertes mènent au contact ou à la demande', () => {
-    for (const [ref, target] of [['c12', ['/proprietaire/contacts', '12']], ['d5', ['/proprietaire/demandes', '5']], ['x', ['/proprietaire']]] as const) {
+    for (const [ref, target] of [['c12', ['/proprietaire/contacts', '12']], ['d5', ['/proprietaire/demandes', '5']], ['m9', ['/proprietaire/mandats', '9']], ['x', ['/proprietaire']]] as const) {
       TestBed.resetTestingModule();
       setup({ ref });
       const nav = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
@@ -249,6 +258,7 @@ describe('Bourse aux mandats', () => {
   it("l'agence termine le mandat avec un motif", () => {
     const { http } = setup({}, [{ provide: DIALOG_DATA, useValue: MANDATE }]);
     const fixture = TestBed.createComponent(MarketplaceMandateDialogComponent);
+    http.expectOne('/api/v1/marketplace/mandates/9/offers').flush([]);
     fixture.detectChanges();
     const c = fixture.componentInstance;
     c.ending.set(true);
@@ -259,5 +269,78 @@ describe('Bourse aux mandats', () => {
     req.flush({ ...MANDATE, status: 'MANDATE_COMPLETED', endReason: 'DEAL_CLOSED_AGENCY', endedBy: 'AGENCY', endedAt: '2026-11-26T10:00:00' });
     fixture.detectChanges();
     expect(text(fixture.nativeElement)).toContain("Terminé par votre agence : transaction conclue par l'agence.");
+  });
+
+  it('le propriétaire répond à une offre depuis le suivi du mandat', () => {
+    const answer = { decision: 'COUNTER', counterAmount: 1400000, comment: 'Prix ferme' };
+    const { http } = setup({ id: '9' }, [{ provide: DsDialogService, useValue: { open: () => ({ closed: of(answer) }) } }]);
+    const fixture = TestBed.createComponent(OwnerMandateComponent);
+    fixture.detectChanges();
+    http.expectOne('/api/v1/owner/mandates/9').flush({ ...FOLLOW_UP, offers: [OFFER] });
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(text(el)).toContain('Offres reçues');
+    expect(text(el)).toContain('1 offre à examiner');
+    expect(text(el)).toContain('Couple, prêt accordé');
+    fixture.componentInstance.answer(OFFER);
+    const req = http.expectOne('/api/v1/owner/mandates/9/offers/3/decision');
+    expect(req.request.body).toEqual(answer);
+    req.flush({ ...FOLLOW_UP, offers: [{ ...OFFER, status: 'OFFER_COUNTERED', counterAmount: 1400000, ownerComment: 'Prix ferme' }] });
+    fixture.detectChanges();
+    expect(text(el)).toContain('Contre-proposition');
+    expect(text(el)).not.toContain('Répondre');
+  });
+
+  it("la contre-proposition doit dépasser l'offre ; accepter est bloqué si une offre l'est déjà", () => {
+    const { closed } = setup({}, [{ provide: DIALOG_DATA, useValue: { offer: OFFER, agencyName: 'Agence du Détroit', acceptBlocked: true } }]);
+    const fixture = TestBed.createComponent(OwnerOfferDialogComponent);
+    fixture.detectChanges();
+    const c = fixture.componentInstance;
+    expect(c.options[0].disabled).toBe(true);
+    c.decision.set('COUNTER');
+    c.counter.set(1200000);
+    expect(c.counterError()).toContain('supérieur');
+    expect(c.valid()).toBe(false);
+    c.counter.set('1450000');
+    c.comment = '  Prix ferme ';
+    expect(c.valid()).toBe(true);
+    c.confirm();
+    expect(closed).toEqual([{ decision: 'COUNTER', counterAmount: 1450000, comment: 'Prix ferme' }]);
+  });
+
+  it("l'agence transmet une offre puis la retire", () => {
+    const { http } = setup({}, [{ provide: DIALOG_DATA, useValue: MANDATE }]);
+    const fixture = TestBed.createComponent(MarketplaceMandateDialogComponent);
+    http.expectOne('/api/v1/marketplace/mandates/9/offers').flush([]);
+    fixture.detectChanges();
+    expect(text(fixture.nativeElement)).toContain('Aucune offre transmise');
+    const c = fixture.componentInstance;
+    c.offering.set(true);
+    c.offer = { amount: '1300000', buyerSummary: ' Couple ', conditions: '', validUntil: '' };
+    c.submitOffer();
+    const req = http.expectOne('/api/v1/marketplace/mandates/9/offers');
+    expect(req.request.body).toEqual({ amount: 1300000, buyerSummary: 'Couple', conditions: null, validUntil: null });
+    req.flush([OFFER]);
+    fixture.detectChanges();
+    expect(c.offering()).toBe(false);
+    expect(text(fixture.nativeElement)).toContain('1 300 000 MAD · Couple, prêt accordé');
+    c.withdraw(OFFER);
+    http.expectOne('/api/v1/marketplace/mandates/9/offers/3/withdraw').flush([{ ...OFFER, status: 'OFFER_WITHDRAWN' }]);
+    expect(c.offers()[0].status).toBe('OFFER_WITHDRAWN');
+  });
+
+  it("le profil de l'agence montre sa note et ses avis", () => {
+    const { http } = setup({}, [{ provide: AuthService, useValue: { hasRole: () => true } }]);
+    const fixture = TestBed.createComponent(AgencyMarketplaceProfileComponent);
+    fixture.detectChanges();
+    http.expectOne('/api/v1/agency/marketplace-profile').flush({
+      orgId: 'ORG-A', verified: true, displayName: 'Agence du Détroit', description: null, languages: [], propertyTypes: [],
+      transactions: ['SALE'], zones: [{ city: 'Tanger', district: null }], rating: 4.5, reviews: 2,
+      recentReviews: [{ rating: 5, comment: 'Vendu en 6 semaines.', createdAt: '2027-01-12T10:00:00' }, { rating: 4, comment: null, createdAt: '2026-12-01T10:00:00' }],
+    });
+    fixture.detectChanges();
+    const el = text(fixture.nativeElement);
+    expect(el).toContain('4,5 / 5 · 2 avis');
+    expect(el).toContain('Vendu en 6 semaines.');
   });
 });

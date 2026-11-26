@@ -10,12 +10,14 @@ import {
   DsDialogContentComponent,
   DsDialogHeaderComponent,
   DsIconComponent,
+  DsInputComponent,
   DsRadioGroupComponent,
   DsRadioOption,
+  DsTextareaComponent,
   DsToastService,
 } from '../../design-system';
 import { MarketplaceApiService } from '../../services/marketplace-api.service';
-import { AGENCY_END_REASON_CHOICES, END_REASON_LABELS, MANDATE_STATUS, MANDATE_TYPE_LABELS, MandateView, commissionLabel } from '../../services/mandate-api.service';
+import { AGENCY_END_REASON_CHOICES, END_REASON_LABELS, MANDATE_STATUS, MANDATE_TYPE_LABELS, MandateOffer, MandateView, OFFER_STATUS, commissionLabel, madLabel } from '../../services/mandate-api.service';
 
 /** Motifs de fin côté agence (UC-P9), dans l'ordre de l'API. */
 const AGENCY_END_REASONS = ['DEAL_CLOSED_AGENCY', 'SOLD_THIRD_PARTY', 'WITHDRAWN_AGENCY'];
@@ -29,7 +31,7 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
   selector: 'app-marketplace-mandate-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, DecimalPipe, FormsModule, DsBadgeComponent, DsRadioGroupComponent, DsButtonComponent, DsDialogActionsComponent, DsDialogContentComponent, DsDialogHeaderComponent, DsIconComponent],
+  imports: [DatePipe, DecimalPipe, FormsModule, DsBadgeComponent, DsInputComponent, DsRadioGroupComponent, DsTextareaComponent, DsButtonComponent, DsDialogActionsComponent, DsDialogContentComponent, DsDialogHeaderComponent, DsIconComponent],
   template: `
     <ds-dialog-header [subtitle]="typeLabel + ' · ' + m().durationMonths + ' mois'" (close)="ref.close(m())">Mandat n°{{ m().id }}</ds-dialog-header>
     <ds-dialog-content>
@@ -52,16 +54,50 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
         @if (m().endReason) {
           <p class="mm-hint"><ds-icon name="info" [size]="16"></ds-icon><span>{{ endedLine() }}</span></p>
         }
-        @if (ending()) {
+        @if (offering()) {
+          <h3 class="mm-subtitle">Transmettre une offre au propriétaire</h3>
+          <ds-input label="Montant (MAD)" name="amount" type="number" prefixIcon="coin" [(ngModel)]="offer.amount"></ds-input>
+          <ds-input label="Profil de l'acquéreur" name="buyer" placeholder="Couple, primo-accédant, prêt bancaire accordé" [(ngModel)]="offer.buyerSummary"></ds-input>
+          <ds-textarea label="Conditions" name="conditions" [rows]="3" [maxLength]="1000" placeholder="Financement, délai de signature, conditions suspensives" [(ngModel)]="offer.conditions"></ds-textarea>
+          <ds-input label="Valable jusqu'au (facultatif)" name="validUntil" type="date" [(ngModel)]="offer.validUntil"></ds-input>
+          <p class="mm-hint"><ds-icon name="lock" [size]="16"></ds-icon><span>Ni nom ni coordonnées de l'acquéreur : le propriétaire voit son profil seulement. Téléphones et e-mails sont masqués.</span></p>
+        } @else if (ending()) {
           <ds-radio-group name="endReason" label="Motif de fin" [options]="endOptions" [(ngModel)]="endReason"></ds-radio-group>
           <p class="mm-hint"><ds-icon name="info" [size]="16"></ds-icon><span>Le propriétaire est prévenu du motif et pourra noter votre agence. Le dossier est clos et vos annonces du bien quittent le portail.</span></p>
         } @else if (m().status === 'MANDATE_PENDING_SIGNATURE') {
           <p class="mm-hint"><ds-icon name="info" [size]="16"></ds-icon> Faites signer le mandat au propriétaire sous 7 jours, puis déclarez-le signé : vous pourrez alors publier le bien.</p>
         }
+        @if (!offering() && !ending() && (m().status === 'MANDATE_ACTIVE' || offers().length)) {
+          <section class="mm-offers" aria-label="Offres">
+            <div class="mm-offers__head">
+              <h3 class="mm-subtitle">Offres</h3>
+              @if (m().status === 'MANDATE_ACTIVE') {
+                <ds-button variant="ghost" size="sm" prefixIcon="plus" [disabled]="busy()" (dsClick)="offering.set(true)">Transmettre une offre</ds-button>
+              }
+            </div>
+            @for (o of offers(); track o.id) {
+              <div class="mm-offer">
+                <div class="mm-offer__text">
+                  <span class="mm-strong">{{ mad(o.amount) }}{{ o.buyerSummary ? ' · ' + o.buyerSummary : '' }}</span>
+                  <span class="mm-muted">{{ offerLine(o) }}</span>
+                </div>
+                <ds-badge size="sm" [status]="offerStatus(o).status">{{ offerStatus(o).label }}</ds-badge>
+                @if (o.status === 'OFFER_PENDING' || o.status === 'OFFER_ACCEPTED' || o.status === 'OFFER_COUNTERED') {
+                  <ds-button variant="ghost" size="sm" [disabled]="busy()" (dsClick)="withdraw(o)">Retirer</ds-button>
+                }
+              </div>
+            } @empty {
+              <p class="mm-muted">Aucune offre transmise. Le propriétaire répond depuis son espace ; il est alerté par WhatsApp.</p>
+            }
+          </section>
+        }
       </div>
     </ds-dialog-content>
     <ds-dialog-actions>
-      @if (ending()) {
+      @if (offering()) {
+        <ds-button variant="ghost" (dsClick)="offering.set(false)">Retour</ds-button>
+        <ds-button variant="marine" prefixIcon="send" [loading]="busy()" [disabled]="busy() || !offerValid()" (dsClick)="submitOffer()">Transmettre l'offre</ds-button>
+      } @else if (ending()) {
         <ds-button variant="ghost" (dsClick)="ending.set(false)">Retour</ds-button>
         <ds-button variant="marine" prefixIcon="check" [loading]="busy()" [disabled]="busy() || !endReason()" (dsClick)="end()">Terminer le mandat</ds-button>
       } @else {
@@ -85,6 +121,13 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
     .mm-facts dt { color: var(--ds-text-muted); }
     .mm-facts dd { margin: 0; color: var(--ds-text); overflow-wrap: anywhere; }
     .mm-link { display: inline; padding: 0; color: var(--ds-marine); }
+    .mm-subtitle { margin: 0; font-size: var(--ds-text-sm); font-weight: 700; color: var(--ds-marine); }
+    .mm-strong { font-size: var(--ds-text-sm); font-weight: 600; color: var(--ds-text); }
+    .mm-offers { display: flex; flex-direction: column; gap: var(--ds-space-3); padding-top: var(--ds-space-4); border-top: 1px solid var(--ds-border); }
+    .mm-offers__head { display: flex; align-items: center; justify-content: space-between; gap: var(--ds-space-3); }
+    .mm-offer { display: flex; align-items: center; gap: var(--ds-space-3); }
+    .mm-offer__text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .mm-offer ds-badge, .mm-offer ds-button { flex: none; }
     .mm-muted { margin: 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
     .mm-hint { display: flex; gap: var(--ds-space-2); align-items: flex-start; margin: 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
   `],
@@ -98,6 +141,9 @@ export class MarketplaceMandateDialogComponent {
   readonly m = signal(inject<MandateView>(DIALOG_DATA));
   readonly busy = signal(false);
   readonly ending = signal(false);
+  readonly offering = signal(false);
+  readonly offers = signal<MandateOffer[]>([]);
+  offer: { amount: number | string | null; buyerSummary: string; conditions: string; validUntil: string } = { amount: null, buyerSummary: '', conditions: '', validUntil: '' };
   readonly endReason = signal<string | null>(null);
   readonly endOptions: DsRadioOption[] = AGENCY_END_REASONS.map(r => ({ value: r, label: AGENCY_END_REASON_CHOICES[r] ?? r }));
   readonly typeLabel = MANDATE_TYPE_LABELS[this.m().mandateType] ?? this.m().mandateType;
@@ -105,6 +151,53 @@ export class MarketplaceMandateDialogComponent {
 
   status() {
     return MANDATE_STATUS[this.m().status] ?? { label: this.m().status, status: 'neutral' as const };
+  }
+
+  constructor() {
+    if (this.m().status !== 'MANDATE_PENDING_SIGNATURE') {
+      this.api.offers(this.m().id).subscribe({ next: l => this.offers.set(l), error: () => undefined });
+    }
+  }
+
+  mad(v: number | null): string { return madLabel(v); }
+  offerStatus(o: MandateOffer) { return OFFER_STATUS[o.status] ?? { label: o.status, status: 'neutral' as const }; }
+
+  offerLine(o: MandateOffer): string {
+    const parts = [`Transmise le ${new Date(o.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`];
+    if (o.status === 'OFFER_COUNTERED') parts.push(`contre-proposition à ${madLabel(o.counterAmount)}`);
+    if (o.ownerComment) parts.push(`« ${o.ownerComment} »`);
+    return parts.join(' · ');
+  }
+
+  offerValid(): boolean { return Number(this.offer.amount) > 0; }
+
+  submitOffer(): void {
+    const amount = Number(this.offer.amount);
+    if (!(amount > 0)) return;
+    this.busy.set(true);
+    this.api.submitOffer(this.m().id, {
+      amount,
+      buyerSummary: this.offer.buyerSummary.trim() || null,
+      conditions: this.offer.conditions.trim() || null,
+      validUntil: this.offer.validUntil || null,
+    }).subscribe({
+      next: list => {
+        this.busy.set(false);
+        this.offers.set(list);
+        this.offering.set(false);
+        this.offer = { amount: null, buyerSummary: '', conditions: '', validUntil: '' };
+        this.toast.success('Offre transmise, le propriétaire est alerté');
+      },
+      error: err => { this.busy.set(false); this.toast.error(serverMessage(err, 'Transmission impossible')); },
+    });
+  }
+
+  withdraw(o: MandateOffer): void {
+    this.busy.set(true);
+    this.api.withdrawOffer(this.m().id, o.id).subscribe({
+      next: list => { this.busy.set(false); this.offers.set(list); this.toast.success('Offre retirée, le propriétaire est prévenu'); },
+      error: err => { this.busy.set(false); this.toast.error(serverMessage(err, 'Action impossible')); },
+    });
   }
 
   live(): boolean {

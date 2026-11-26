@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -14,6 +15,7 @@ import {
   PageHeaderComponent,
 } from '../../design-system';
 import { AgencySettings, AgencyZone, MarketplaceApiService } from '../../services/marketplace-api.service';
+import { ratingLabel } from '../../services/mandate-api.service';
 import { AuthService } from '../../services/auth.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
 
@@ -26,7 +28,7 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule, RouterLink,
+    DatePipe, FormsModule, RouterLink,
     DsBadgeComponent, DsButtonComponent, DsCardComponent, DsCheckboxComponent, DsIconComponent, DsInputComponent,
     DsSkeletonComponent, DsTextareaComponent, PageHeaderComponent,
   ],
@@ -96,6 +98,29 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
             </form>
           </ds-card>
         </div>
+
+        <ds-card [pad]="true" elevation="xs">
+          <div class="ap-reviews-head">
+            <h2 class="ap-card-title">Avis des propriétaires</h2>
+            @if (rating(s); as r) { <span class="ap-rating"><ds-icon name="star" [size]="16"></ds-icon><span>{{ r }}</span></span> }
+          </div>
+          <p class="ap-muted ap-gap">Un propriétaire note votre agence à la fin d'un mandat signé, une seule fois. La moyenne apparaît dans l'annuaire, sur vos propositions et dans les recommandations.</p>
+          @if (s.recentReviews.length) {
+            <ul class="ap-reviews" role="list">
+              @for (r of s.recentReviews; track $index) {
+                <li class="ap-review">
+                  <div class="ap-review__head">
+                    <span class="ap-strong">{{ r.rating }} / 5</span>
+                    <span class="ap-muted">{{ r.createdAt | date: 'd MMM y' }}</span>
+                  </div>
+                  @if (r.comment) { <p class="ap-quote">{{ r.comment }}</p> }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="ap-muted">Pas encore d'avis.</p>
+          }
+        </ds-card>
       } @else {
         <ds-skeleton variant="rect" width="100%" height="280px"></ds-skeleton>
       }
@@ -116,6 +141,15 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
     .ap-legend { margin-bottom: var(--ds-space-2); padding: 0; font-size: var(--ds-text-xs); font-weight: 600; color: var(--ds-text-muted); letter-spacing: 1.2px; text-transform: uppercase; }
     .ap-zone { display: grid; grid-template-columns: 1fr 1fr auto; gap: var(--ds-space-3); align-items: end; }
     .ap-actions { display: flex; justify-content: flex-end; }
+    .ap-reviews-head { display: flex; align-items: center; justify-content: space-between; gap: var(--ds-space-3); }
+    .ap-rating { display: inline-flex; align-items: center; gap: var(--ds-space-1); font-weight: 700; color: var(--ds-primary); }
+    .ap-muted.ap-gap { margin: var(--ds-space-1) 0 var(--ds-space-4); }
+    .ap-strong { font-size: var(--ds-text-sm); font-weight: 700; color: var(--ds-text); }
+    .ap-reviews { display: flex; flex-direction: column; gap: var(--ds-space-3); margin: 0; padding: 0; list-style: none; }
+    .ap-review { display: flex; flex-direction: column; gap: var(--ds-space-1); padding-bottom: var(--ds-space-3); border-bottom: 1px solid var(--ds-border); }
+    .ap-review:last-child { padding-bottom: 0; border-bottom: 0; }
+    .ap-review__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--ds-space-3); }
+    .ap-quote { margin: 0; font-size: var(--ds-text-sm); color: var(--ds-text); white-space: pre-line; }
     .ap-actions--split { justify-content: space-between; }
   `],
 })
@@ -136,6 +170,8 @@ export class AgencyMarketplaceProfileComponent implements OnInit {
   sale = true;
   rent = true;
   zones: AgencyZone[] = [{ city: '', district: null }];
+
+  rating(s: AgencySettings): string | null { return ratingLabel(s.rating, s.reviews); }
 
   ngOnInit(): void {
     this.api.settings().subscribe({
