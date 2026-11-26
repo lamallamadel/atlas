@@ -115,6 +115,8 @@ docker-compose down
 
 **Dossier status (ADR 0004):** `case_type` + `status_code` are the source of truth; transitions are validated by the case type's workflow (`workflow/DossierWorkflowCatalog` or a published `WorkflowDefinition`). The `DossierStatus` enum is a projection — write status changes with a `statusCode`, and read allowed moves from `GET /api/v1/dossiers/{id}/transitions`.
 
+**Mandate marketplace (`mandate/`, ADR 0005):** `mandate_request`, `mandate_proposal`, `marketplace_message` and `mandate` link an owner org and an agency org, so they carry both ids and have no `orgIdFilter`: access goes only through `MandateMarketplaceService` / `MandateLifecycleService`. Use `OrgScope.as(orgId, …)` to work in another org (e.g. create the agency dossier from an owner request) and `OrgScope.unfiltered(…)` for cross-org reads. Only verified agencies (`organization.verified`) reach the marketplace.
+
 **Agency modules (`entitlement/`):** `@RequiresFeature(Feature.X)` on a controller returns 403 `FEATURE_DISABLED` when the module is off for the org (`feature_flag`; no row = enabled; `core.*` always on). Webhooks from providers use `@SkipFeatureCheck`.
 
 **Outbound messaging:** Outbox pattern with retry/DLQ for WhatsApp, email, SMS.
@@ -127,10 +129,10 @@ docker-compose down
 - **PostgreSQL 16** in Docker/staging/prod; **H2** for local dev and unit tests
 - Multi-tenant `org_id` on all tables
 - **Flyway migrations are split into three folders** under `backend/src/main/resources/db/`:
-  - **`migration/`** — cross-database base migrations (V1–V166 at time of writing). Must be portable between H2 and PostgreSQL: standard SQL only, no partial indexes, no GIN/GiST, no PL/pgSQL, no `ON CONFLICT`; use the `${json_type}` placeholder for JSON/JSONB columns.
+  - **`migration/`** — cross-database base migrations (V1–V167 at time of writing). Must be portable between H2 and PostgreSQL: standard SQL only, no partial indexes, no GIN/GiST, no PL/pgSQL, no `ON CONFLICT`; use the `${json_type}` placeholder for JSON/JSONB columns.
   - **`migration-postgres/`** — PostgreSQL-only optimizations (V100–V107+): partial indexes, GIN/full-text, PL/pgSQL, upserts.
   - **`migration-h2/`** — H2-only variants (V200+) for cases where the base migration cannot be made portable. Do NOT put H2-specific DDL in the base `migration/` folder.
-- **Next available version numbers:** V167+ (highest is `V166__Create_lead_conversation_and_visit_proposal.sql`). V140, V143, V144 are also unused slots but out-of-order migrations are risky — prefer V167+. The old V139 duplicate has been resolved: `V139__Add_whatsapp_quota_tier_and_cost_tracking.sql` stayed, the other was renumbered to `V142__Add_reminder_strategy_to_appointment.sql`.
+- **Next available version numbers:** V168+ (highest is `V167__Create_mandate_marketplace.sql`). V140, V143, V144 are also unused slots but out-of-order migrations are risky — prefer V168+. The old V139 duplicate has been resolved: `V139__Add_whatsapp_quota_tier_and_cost_tracking.sql` stayed, the other was renumbered to `V142__Add_reminder_strategy_to_appointment.sql`.
 - In production the DB may have additional migrations applied outside this repo; always check before picking a version number: `SELECT version FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5`.
 
 ### Spring Profiles
