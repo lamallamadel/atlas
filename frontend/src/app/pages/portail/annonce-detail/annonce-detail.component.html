@@ -99,6 +99,23 @@
       </div>
       <!-- RIGHT COLUMN — SIDEBAR CONTACT -->
       <aside class="ad-sidebar">
+        <!-- Lot B : bien publié par plusieurs annonceurs (mandats simples) -->
+        @if (listing.publishers.length > 1) {
+          <div class="ad-publishers">
+            <p class="ad-publishers-title">Ce bien est proposé par {{ listing.publishers.length }} annonceurs</p>
+            <ul class="ad-publishers-list">
+              @for (p of listing.publishers; track p.annonceId) {
+                <li>
+                  @if (p.annonceId === listing.id) {
+                    <span class="ad-publisher-current">{{ p.name }}</span>
+                  } @else {
+                    <a class="ad-publisher-link" [routerLink]="['/annonces', p.annonceId]">{{ p.name }}</a>
+                  }
+                </li>
+              }
+            </ul>
+          </div>
+        }
         <!-- Agent card -->
         <div class="ad-agent-card">
           <div class="ad-agent-header">

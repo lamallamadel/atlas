@@ -1,3 +1,15 @@
+# Changelog — v0.11-uc-proprietaire-bourse-2026-11-26
+
+Cas d'usage n°1, lot B : bourse aux mandats (UC-P5 à UC-P7, critères PB-1 à PB-8).
+- Propriétaire : « Demander des propositions » (toutes les agences vérifiées de la ville, ou une agence de l'annuaire), comparaison des propositions, échanges, acceptation confirmée par code.
+- Agence : `/pro/mandats` (bourse de ses zones, demandes directes, propositions, mandats), fiche anonymisée, proposition, mandat obtenu avec coordonnées, signature déclarée, annonce du bien liée au mandat ; profil public et zones `/pro/mandats/profil`.
+- Plateforme : vérification des agences par le super-admin ; module `module.mandate_marketplace`.
+- Coordonnées masquées dans les messages tant que la proposition n'est pas acceptée (téléphones de 9 chiffres ou plus, e-mails, liens WhatsApp et Telegram).
+- Exclusif : annonce du propriétaire suspendue (`MANDATE_EXCLUSIVE`), redirection 301 vers l'annonce de l'agence, plus de nouvelle demande. Simple : une seule fiche portail pour le bien, avec la liste des annonceurs.
+- Nouveau type de dossier `CRM_MANDATE_SALE` / `CRM_MANDATE_RENT` et statuts `CRM_MANDATE_PENDING`, `CRM_MANDATE_SIGNED`, `CRM_LISTED`, `CRM_COMPROMISE_SIGNED`.
+- Alertes WhatsApp du propriétaire : un seul modèle, bouton `<site>/p/{{1}}` (`c<id>` contact, `d<id>` demande) — remplace l'URL `/proprietaire/contacts/{{1}}` du lot A.
+- Migration V167 : `agency_profile`, `agency_zone`, `mandate_request`, `mandate_proposal`, `marketplace_message`, `mandate`, `annonce.mandate_id`.
+
 # Changelog — v0.10-uc-proprietaire-messagerie-2026-11-25
 
 Cas d'usage n°1, lot A terminé : échanges propriétaire ↔ prospect et visites (UC-P4, critère PA-5).

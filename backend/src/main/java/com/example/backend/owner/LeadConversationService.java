@@ -468,6 +468,7 @@ public class LeadConversationService {
             return;
         }
         String id = String.valueOf(dossier.getId());
+        // Modèle WhatsApp propriétaire : bouton <site>/p/{{1}} ; « c<id> » ouvre le contact.
         events.publishEvent(
                 new PlatformAlert(
                         PlatformAlert.Audience.OWNER,
@@ -475,7 +476,7 @@ public class LeadConversationService {
                         null,
                         text,
                         "Atlas : du nouveau sur votre annonce",
-                        id,
+                        "c" + id,
                         publicBaseUrl + "/proprietaire/contacts/" + id,
                         true,
                         false));

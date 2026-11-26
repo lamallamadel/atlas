@@ -156,6 +156,27 @@ public class ReferentialSeedingService {
                         6,
                         true,
                         true));
+        // Cas d'usage n°1, lot B : dossiers d'agence nés d'un mandat de la bourse.
+        referentials.add(
+                createReferential(
+                        orgId,
+                        "CASE_TYPE",
+                        "CRM_MANDATE_SALE",
+                        "Mandat de vente",
+                        "Sale mandate from the owner marketplace",
+                        7,
+                        true,
+                        true));
+        referentials.add(
+                createReferential(
+                        orgId,
+                        "CASE_TYPE",
+                        "CRM_MANDATE_RENT",
+                        "Mandat de location",
+                        "Rental mandate from the owner marketplace",
+                        8,
+                        true,
+                        true));
 
         return referentials;
     }
@@ -320,6 +341,47 @@ public class ReferentialSeedingService {
                         "Perdu",
                         "Closed lost",
                         17,
+                        true,
+                        true));
+        // Cas d'usage n°1, lot B : pipeline du mandat (spec 13 § 9).
+        referentials.add(
+                createReferential(
+                        orgId,
+                        "CASE_STATUS",
+                        "CRM_MANDATE_PENDING",
+                        "Mandat à signer",
+                        "Mandate awaiting signature",
+                        40,
+                        true,
+                        true));
+        referentials.add(
+                createReferential(
+                        orgId,
+                        "CASE_STATUS",
+                        "CRM_MANDATE_SIGNED",
+                        "Mandat signé",
+                        "Mandate signed",
+                        41,
+                        true,
+                        true));
+        referentials.add(
+                createReferential(
+                        orgId,
+                        "CASE_STATUS",
+                        "CRM_LISTED",
+                        "En commercialisation",
+                        "Listed",
+                        42,
+                        true,
+                        true));
+        referentials.add(
+                createReferential(
+                        orgId,
+                        "CASE_STATUS",
+                        "CRM_COMPROMISE_SIGNED",
+                        "Compromis signé",
+                        "Preliminary contract signed",
+                        43,
                         true,
                         true));
 

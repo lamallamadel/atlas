@@ -44,13 +44,17 @@ public class OwnerAnnonceService {
     private final AnnoncePublicationService publicationService;
     private final int fraudThreshold;
 
+    private final com.example.backend.repository.MandateRepository mandates;
+
     public OwnerAnnonceService(
             OwnerPropertyService propertyService,
             AnnonceService annonceService,
             AnnonceRepository annonces,
             AnnonceMediaService mediaService,
             AnnoncePublicationService publicationService,
+            com.example.backend.repository.MandateRepository mandates,
             @Value("${atlas.owner.moderation.fraud-threshold:50}") int fraudThreshold) {
+        this.mandates = mandates;
         this.propertyService = propertyService;
         this.annonceService = annonceService;
         this.annonces = annonces;
@@ -141,6 +145,26 @@ public class OwnerAnnonceService {
     @Transactional
     public OwnerAnnonceView requestPublication(Long propertyId) {
         Annonce annonce = require(propertyId);
+        // R-PROP-05 : sous mandat exclusif, seule l'annonce de l'agence est en ligne.
+        boolean exclusive =
+                mandates
+                        .findByPropertyIdAndStatusIn(
+                                propertyId,
+                                java.util.Set.of(
+                                        com.example.backend.entity.MandateEntity
+                                                .MANDATE_PENDING_SIGNATURE,
+                                        com.example.backend.entity.MandateEntity.MANDATE_ACTIVE))
+                        .stream()
+                        .anyMatch(
+                                m ->
+                                        com.example.backend.entity.MandateEntity.EXCLUSIVE.equals(
+                                                m.getMandateType()));
+        if (exclusive) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "EXCLUSIVE_MANDATE: votre bien est confié en exclusivité à une agence ; c'est"
+                            + " son annonce qui est en ligne.");
+        }
         AnnonceStatus status = AnnonceStatus.normalize(annonce.getStatus());
         if (status == AnnonceStatus.PUBLISHED
                 || MOD_PENDING.equals(annonce.getModerationStatus())) {

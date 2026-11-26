@@ -27,7 +27,33 @@ public record PublicAnnonceResponse(
         List<String> photos,
         Map<String, Object> meta,
         LocalDateTime createdAt,
-        String publisherKind) {
+        String publisherKind,
+        List<Publisher> publishers) {
+
+    /**
+     * Annonceur d'un bien publié par plusieurs (mandats simples, R-PROP-06) : la fiche du portail
+     * les liste tous.
+     */
+    public record Publisher(Long annonceId, String kind, String name) {}
+
+    public PublicAnnonceResponse withPublishers(List<Publisher> list) {
+        return new PublicAnnonceResponse(
+                id,
+                title,
+                description,
+                category,
+                type,
+                address,
+                surface,
+                city,
+                price,
+                currency,
+                photos,
+                meta,
+                createdAt,
+                publisherKind,
+                List.copyOf(list));
+    }
 
     /** Clés de {@code meta} affichables publiquement. */
     static final Set<String> PUBLIC_META_KEYS =
@@ -73,6 +99,7 @@ public record PublicAnnonceResponse(
                 List.copyOf(photos),
                 publicMeta,
                 a.getCreatedAt(),
-                "OWNER".equals(a.getPublisherKind()) ? "OWNER" : "AGENCY");
+                "OWNER".equals(a.getPublisherKind()) ? "OWNER" : "AGENCY",
+                List.of());
     }
 }

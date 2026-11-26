@@ -123,7 +123,7 @@ Garde-fous :
 
 Spec : `02_fonctionnel/13_uc_proprietaire_mandats.md` § 10 ; modèle : ADR 0005.
 
-Livré (lot A) : `/api/v1/owner/**` exige `ROLE_OWNER` ; toute autre route `/api/**` authentifiée refuse un jeton `OWNER` (403) ; `OwnerContext` vérifie que le claim `org_id` du jeton égale `X-Org-Id` et que l'organisation est de type `OWNER`. La modération des annonces de particuliers (`/api/v1/admin/moderation/owner-annonces`) est réservée à `SUPER_ADMIN`. La bourse aux mandats reste TO-BE (lot B).
+Livré (lot A) : `/api/v1/owner/**` exige `ROLE_OWNER` ; toute autre route `/api/**` authentifiée refuse un jeton `OWNER` (403) ; `OwnerContext` vérifie que le claim `org_id` du jeton égale `X-Org-Id` et que l'organisation est de type `OWNER`. La modération des annonces de particuliers (`/api/v1/admin/moderation/owner-annonces`) est réservée à `SUPER_ADMIN`. Bourse aux mandats (lot B, livré) : `/api/v1/marketplace/**` et `/api/v1/agency/marketplace-profile` exigent un membre d'agence (`ADMIN` ou `PRO`) et le module `module.mandate_marketplace` ; la bourse refuse une agence non vérifiée (403 `AGENCY_NOT_VERIFIED`). Un agent ne voit que ses propositions ; un manager ou un administrateur voit celles de l'agence et règle le profil et les zones. Un agent restreint à « mes dossiers » ne voit que les mandats qui lui sont confiés. La vérification d'une agence est réservée à `SUPER_ADMIN`.
 
 | Rôle Keycloak | Autorités | Portée |
 |---|---|---|

@@ -42,6 +42,11 @@ export class AnnonceDetailComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.portailService.getListingById(params['id']).subscribe({
         next: (res) => {
+          // Annonce d'un particulier passée en exclusivité à une agence : le serveur redirige
+          // vers l'annonce de l'agence ; l'adresse de la page suit.
+          if (res.id !== String(params['id'])) {
+            this.router.navigate(['/annonces', res.id], { replaceUrl: true });
+          }
           this.listing = res;
           this.galleryIndex = 0;
           

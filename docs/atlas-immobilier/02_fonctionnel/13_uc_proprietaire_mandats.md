@@ -1,6 +1,6 @@
 # Cas d'usage n°1 — Le propriétaire publie seul ou confie son bien à un agent
 
-> **Statut**: Lot A livré (UC-P1 à UC-P4) ; lots B et C TO-BE  
+> **Statut**: Lots A et B livrés (UC-P1 à UC-P7) ; lot C TO-BE  
 > **Dernière vérification**: 2026-11-25  
 > **Source of truth**: Oui (espace propriétaire, bourse aux mandats, mandat)  
 > **Dépendances**:  
@@ -168,6 +168,17 @@ Garde-fous :
 4. La plateforme crée le **mandat** (`MANDATE_PENDING_SIGNATURE`) et génère le document de mandat à partir du modèle. Signature en ligne si le module signature est actif, sinon signature papier déclarée par l'agence.
 5. Dès l'acceptation, l'agence reçoit les coordonnées du propriétaire et l'adresse du bien. Un **dossier `CRM_MANDATE_SALE` ou `CRM_MANDATE_RENT`** est créé dans son CRM, avec le propriétaire en partie prenante `OWNER`.
 6. Les autres propositions passent en « Non retenue » ; leurs agents sont prévenus.
+
+> **Livré (lot B).**
+> - Côté propriétaire : bouton « Demander des propositions » sur la fiche du bien, demande ouverte à la bourse ou directe (annuaire des agences vérifiées de la ville), page `/proprietaire/demandes/{id}` qui compare les propositions, fil d'échanges par proposition, acceptation en deux temps (consentement explicite au partage, puis code envoyé par WhatsApp ou SMS, objet `MANDATE_ACCEPT`).
+> - Côté agence : `/pro/mandats` (onglets Bourse, Demandes directes, Mes propositions, Mandats), fiche anonymisée et formulaire de proposition, « Je ne peux pas » pour une demande directe, mandat obtenu avec coordonnées et adresse, « Déclarer le mandat signé », « Créer l'annonce du bien » (brouillon lié au bien et au mandat, quartier affiché, jamais l'adresse). Profil public et zones : `/pro/mandats/profil` (manager ou administrateur).
+> - Plateforme : vérification d'une agence par le super-admin (`/pro/moderation`, `PUT /api/v1/admin/agencies/{orgId}/verification`) ; seule une agence vérifiée accède à la bourse et figure dans l'annuaire ; module `module.mandate_marketplace`.
+> - Mandat simple : après un premier mandat, les autres propositions simples restent acceptables, les exclusives sont écartées. Mandat exclusif : toutes les autres sont écartées.
+> - Dossier `CRM_MANDATE_SALE`/`CRM_MANDATE_RENT` créé dans l'agence, statut `CRM_MANDATE_PENDING`, assigné à l'agent auteur de la proposition, propriétaire en partie prenante `OWNER`. « Mandat signé » sur le dossier (bouton ou écran Pro) rend le mandat actif ; la publication de l'annonce de l'agence fait passer le dossier `CRM_LISTED`.
+> - Échéances (tâche horaire) : demande ouverte 14 jours ; mandat non signé sous 7 jours résilié (`NOT_SIGNED`) ; mandat actif échu (`TERM_REACHED`).
+> - Alertes : propriétaire par WhatsApp (modèle `<site>/p/{{1}}`, `d<id>` pour une demande) à chaque proposition, message d'agence, refus d'une demande directe, signature ; agent par notification in-app (message, décision, mandat).
+>
+> **Restent à faire** : génération du document de mandat depuis un modèle validé par un juriste et signature en ligne ; notification des agences de la zone à l'ouverture d'une demande (lot C, avec le score § 5.1) ; notification in-app d'une demande directe (aucun destinataire désigné aujourd'hui : l'onglet « Demandes directes » la signale).
 
 ### UC-P8 — Suivre son bien délégué
 

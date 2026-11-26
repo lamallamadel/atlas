@@ -133,7 +133,7 @@ class OwnerConversationBackendE2ETest extends BaseBackendE2ETest {
         PlatformAlert alert = sent.get(0);
         assertThat(alert.phone()).isEqualTo(OWNER_PHONE);
         assertThat(alert.text()).contains("Nouveau contact", "Appartement Malabata", "Yasmine B.");
-        assertThat(alert.linkParam()).isEqualTo(String.valueOf(leadId));
+        assertThat(alert.linkParam()).isEqualTo("c" + leadId);
         assertThat(alert.linkUrl()).endsWith("/proprietaire/contacts/" + leadId);
     }
 

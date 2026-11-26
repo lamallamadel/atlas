@@ -27,6 +27,13 @@ export const routes: Routes = [
     component: PublicLayoutComponent,
     children: [
       // Portail B2C (lazy-loaded)
+      // Liens courts des alertes WhatsApp du propriétaire (/p/c12, /p/d5)
+      {
+        path: 'p/:ref',
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['OWNER'] },
+        loadComponent: () => import('./pages/owner/owner-link.component').then(m => m.OwnerLinkComponent)
+      },
       {
         path: '',
         loadChildren: () => import('./pages/portail/portail.routes').then(m => m.PORTAIL_ROUTES)
@@ -44,6 +51,7 @@ export const routes: Routes = [
           { path: '', loadComponent: () => import('./pages/owner/owner-home.component').then(m => m.OwnerHomeComponent) },
           { path: 'biens/:id', loadComponent: () => import('./pages/owner/owner-property.component').then(m => m.OwnerPropertyComponent) },
           { path: 'contacts/:id', loadComponent: () => import('./pages/owner/owner-lead.component').then(m => m.OwnerLeadComponent) },
+          { path: 'demandes/:id', loadComponent: () => import('./pages/owner/owner-request.component').then(m => m.OwnerRequestComponent) },
         ]
       },
       // Vitrine B2B (lazy-loaded)
@@ -98,6 +106,27 @@ export const routes: Routes = [
         canActivate: [RoleGuard],
         data: { animation: 'TeamPage', roles: ['ADMIN', 'MANAGER', 'SUPER_ADMIN'] }
       },
+      // Cas d'usage n°1, lot B — bourse aux mandats, côté agence
+      {
+        path: 'mandats',
+        loadComponent: () => import('./pages/marketplace/marketplace.component').then(m => m.MarketplaceComponent),
+        data: { animation: 'MarketplacePage' }
+      },
+      {
+        path: 'mandats/profil',
+        loadComponent: () => import('./pages/marketplace/agency-marketplace-profile.component').then(m => m.AgencyMarketplaceProfileComponent),
+        data: { animation: 'MarketplaceProfilePage' }
+      },
+      {
+        path: 'mandats/demandes/:id',
+        loadComponent: () => import('./pages/marketplace/marketplace-request.component').then(m => m.MarketplaceRequestComponent),
+        data: { animation: 'MarketplaceRequestPage' }
+      },
+      {
+        path: 'mandats/propositions/:proposalId',
+        loadComponent: () => import('./pages/marketplace/marketplace-request.component').then(m => m.MarketplaceRequestComponent),
+        data: { animation: 'MarketplaceProposalPage' }
+      },
       {
         path: 'moderation',
         loadComponent: () => import('./pages/moderation/owner-moderation.component').then(m => m.OwnerModerationComponent),
@@ -133,6 +162,7 @@ export const routes: Routes = [
   { path: 'team',            redirectTo: 'pro/team',      pathMatch: 'full' },
   { path: 'b2b-demo',        redirectTo: 'pro/b2b-demo',  pathMatch: 'full' },
   { path: 'coop',            redirectTo: 'pro/coop',      pathMatch: 'full' },
+  { path: 'mandats',         redirectTo: 'pro/mandats',   pathMatch: 'full' },
   { path: 'reports',         redirectTo: 'pro/reports',   pathMatch: 'full' },
   { path: 'observability',   redirectTo: 'pro/observability', pathMatch: 'full' },
   { path: 'search',          redirectTo: 'pro/search',    pathMatch: 'full' },

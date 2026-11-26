@@ -6,6 +6,7 @@ import {
   DsButtonComponent,
   DsCardComponent,
   DsEmptyStateComponent,
+  DsInputComponent,
   DsSkeletonComponent,
   DsTextareaComponent,
   DsToastService,
@@ -13,6 +14,7 @@ import {
 } from '../../design-system';
 import { OwnerModerationApiService, PendingOwnerAnnonce } from '../../services/owner-moderation-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
+import { MarketplaceApiService } from '../../services/marketplace-api.service';
 
 /**
  * Modération a priori des annonces de particuliers (cas d'usage n°1, R-PROP-04), réservée à la
@@ -22,11 +24,25 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
   selector: 'app-owner-moderation',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, DecimalPipe, FormsModule, DsBadgeComponent, DsButtonComponent, DsCardComponent, DsEmptyStateComponent, DsSkeletonComponent, DsTextareaComponent, PageHeaderComponent],
+  imports: [DatePipe, DecimalPipe, FormsModule, DsBadgeComponent, DsButtonComponent, DsCardComponent, DsEmptyStateComponent, DsInputComponent, DsSkeletonComponent, DsTextareaComponent, PageHeaderComponent],
   template: `
     <div class="pro-page ds-form-stack om-page">
       <ds-page-header eyebrow="Plateforme" titleBefore="Annonces de" titleAccent="particuliers"
         description="Premières annonces des propriétaires, ou annonces au score de fraude élevé, à valider avant mise en ligne."></ds-page-header>
+
+      <ds-card [pad]="true" elevation="xs">
+        <form class="om-verify" (ngSubmit)="verifyAgency(true)">
+          <div class="om-verify__text">
+            <h2 class="om-title">Vérification des agences</h2>
+            <p class="om-meta">Une agence vérifiée accède à la bourse aux mandats et apparaît dans l'annuaire des propriétaires.</p>
+          </div>
+          <ds-input label="Identifiant de l'organisation" name="agencyOrg" placeholder="ORG-…" [(ngModel)]="agencyOrg"></ds-input>
+          <div class="om-verify__actions">
+            <ds-button variant="ghost" size="md" [disabled]="!agencyOrg.trim() || verifying()" (dsClick)="verifyAgency(false)">Retirer</ds-button>
+            <ds-button variant="marine" size="md" nativeType="submit" [loading]="verifying()" [disabled]="!agencyOrg.trim() || verifying()">Vérifier</ds-button>
+          </div>
+        </form>
+      </ds-card>
 
       @if (loading()) {
         <ds-card [pad]="true" elevation="xs"><ds-skeleton variant="heading" width="40%"></ds-skeleton><ds-skeleton variant="text" width="70%"></ds-skeleton></ds-card>
@@ -72,6 +88,10 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
     </div>
   `,
   styles: [`
+    .om-verify { display: grid; grid-template-columns: minmax(0, 2fr) minmax(200px, 1fr) auto; gap: var(--ds-space-4); align-items: end; }
+    @media (max-width: 900px) { .om-verify { grid-template-columns: 1fr; } }
+    .om-verify__text { display: flex; flex-direction: column; gap: var(--ds-space-1); }
+    .om-verify__actions { display: flex; gap: var(--ds-space-2); }
     .om-page { gap: var(--ds-space-6); }
     .om-count { margin: 0; font-size: var(--ds-text-xs); font-weight: 700; color: var(--ds-marine); }
     .om-item { display: flex; flex-direction: column; gap: var(--ds-space-4); }
@@ -91,6 +111,20 @@ import { serverMessage } from '../../components/annonce-publication-panel.compon
 export class OwnerModerationComponent implements OnInit, OnDestroy {
   private readonly api = inject(OwnerModerationApiService);
   private readonly toast = inject(DsToastService);
+  private readonly marketplace = inject(MarketplaceApiService);
+  readonly verifying = signal(false);
+  agencyOrg = '';
+
+  /** Lot B : l'équipe Atlas vérifie une agence avant son accès à la bourse aux mandats. */
+  verifyAgency(verified: boolean): void {
+    const orgId = this.agencyOrg.trim();
+    if (!orgId) return;
+    this.verifying.set(true);
+    this.marketplace.setVerified(orgId, verified).subscribe({
+      next: r => { this.verifying.set(false); this.toast.success(r.verified ? `${orgId} est vérifiée` : `${orgId} n'est plus vérifiée`); },
+      error: err => { this.verifying.set(false); this.toast.error(serverMessage(err, 'Action impossible')); },
+    });
+  }
 
   readonly items = signal<PendingOwnerAnnonce[]>([]);
   readonly loading = signal(true);

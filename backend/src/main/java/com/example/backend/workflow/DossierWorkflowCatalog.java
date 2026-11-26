@@ -36,7 +36,61 @@ public final class DossierWorkflowCatalog {
                     DossierStatusCodes.DEFAULT_CASE_TYPE,
                     "CRM_LEAD_BUY",
                     "CRM_LEAD_RENT",
-                    "CRM_LEAD_B2B_DEMO");
+                    "CRM_LEAD_B2B_DEMO",
+                    "CRM_MANDATE_SALE",
+                    "CRM_MANDATE_RENT");
+
+    /** Dossiers d'agence nés d'un mandat confié par un propriétaire (cas d'usage n°1, lot B). */
+    public static final Set<String> MANDATE_CASE_TYPES =
+            Set.of("CRM_MANDATE_SALE", "CRM_MANDATE_RENT");
+
+    public static final String MANDATE_PENDING = "CRM_MANDATE_PENDING";
+    public static final String MANDATE_SIGNED = "CRM_MANDATE_SIGNED";
+    public static final String LISTED = "CRM_LISTED";
+    public static final String VISIT_DONE = "CRM_VISIT_DONE";
+    public static final String OFFER_RECEIVED = "CRM_OFFER_RECEIVED";
+    public static final String NEGOTIATION = "CRM_NEGOTIATION";
+    public static final String COMPROMISE_SIGNED = "CRM_COMPROMISE_SIGNED";
+
+    private static final List<State> MANDATE_STATES =
+            List.of(
+                    new State(MANDATE_PENDING, Stage.OPEN, FunnelStep.NEW, List.of()),
+                    new State(MANDATE_SIGNED, Stage.OPEN, FunnelStep.QUALIFICATION, List.of()),
+                    new State(LISTED, Stage.OPEN, FunnelStep.QUALIFICATION, List.of()),
+                    new State(CRM_VISIT_PLANNED, Stage.OPEN, FunnelStep.VISIT, List.of()),
+                    new State(VISIT_DONE, Stage.OPEN, FunnelStep.VISIT, List.of()),
+                    new State(OFFER_RECEIVED, Stage.OPEN, FunnelStep.OFFER, List.of()),
+                    new State(NEGOTIATION, Stage.OPEN, FunnelStep.OFFER, List.of()),
+                    new State(COMPROMISE_SIGNED, Stage.OPEN, FunnelStep.CLOSING, List.of()),
+                    new State(CRM_CLOSED_WON, Stage.WON, FunnelStep.CLOSING, List.of()),
+                    new State(CRM_CLOSED_LOST, Stage.LOST, FunnelStep.CLOSING, List.of()));
+
+    /** Spec 13 § 9 : mandat, commercialisation, visites, offre, compromis, issue. */
+    private static final List<Transition> MANDATE_TRANSITIONS =
+            List.of(
+                    open(MANDATE_PENDING, MANDATE_SIGNED),
+                    open(MANDATE_PENDING, CRM_CLOSED_LOST),
+                    open(MANDATE_SIGNED, LISTED),
+                    open(MANDATE_SIGNED, CRM_CLOSED_LOST),
+                    open(LISTED, CRM_VISIT_PLANNED),
+                    open(LISTED, OFFER_RECEIVED),
+                    open(LISTED, CRM_CLOSED_LOST),
+                    open(CRM_VISIT_PLANNED, VISIT_DONE),
+                    open(CRM_VISIT_PLANNED, LISTED),
+                    open(CRM_VISIT_PLANNED, CRM_CLOSED_LOST),
+                    open(VISIT_DONE, CRM_VISIT_PLANNED),
+                    open(VISIT_DONE, OFFER_RECEIVED),
+                    open(VISIT_DONE, LISTED),
+                    open(VISIT_DONE, CRM_CLOSED_LOST),
+                    open(OFFER_RECEIVED, NEGOTIATION),
+                    open(OFFER_RECEIVED, COMPROMISE_SIGNED),
+                    open(OFFER_RECEIVED, LISTED),
+                    open(OFFER_RECEIVED, CRM_CLOSED_LOST),
+                    open(NEGOTIATION, COMPROMISE_SIGNED),
+                    open(NEGOTIATION, LISTED),
+                    open(NEGOTIATION, CRM_CLOSED_LOST),
+                    open(COMPROMISE_SIGNED, CRM_CLOSED_WON),
+                    open(COMPROMISE_SIGNED, CRM_CLOSED_LOST));
 
     private static final List<State> LEAD_STATES =
             List.of(
@@ -107,6 +161,16 @@ public final class DossierWorkflowCatalog {
     public static Optional<DossierWorkflow> systemWorkflow(String caseType) {
         if (caseType == null || !SYSTEM_CASE_TYPES.contains(caseType)) {
             return Optional.empty();
+        }
+        if (MANDATE_CASE_TYPES.contains(caseType)) {
+            return Optional.of(
+                    new DossierWorkflow(
+                            caseType,
+                            DossierWorkflow.SOURCE_SYSTEM,
+                            null,
+                            MANDATE_PENDING,
+                            MANDATE_STATES,
+                            MANDATE_TRANSITIONS));
         }
         if (B2B_CASE_TYPE.equals(caseType)) {
             return Optional.of(
