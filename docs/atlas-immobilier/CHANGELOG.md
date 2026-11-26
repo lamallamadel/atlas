@@ -1,3 +1,15 @@
+# Changelog — v0.12-uc-proprietaire-suivi-2026-11-26
+
+Cas d'usage n°1, lot C : matching et suivi du mandat (§ 5, UC-P8, UC-P9, critères PC-1 à PC-4).
+- Score de pertinence des agences pour une demande (zone, spécialité, historique, réactivité, avis, acquéreurs compatibles ; valeurs neutres pour une agence de moins de 3 mois) ; filtres stricts : vérifiée, module actif, quota restant, zone, transaction et type de bien.
+- Propriétaire : « Agences recommandées » (5) et « Inviter » (5 au plus) sur la page de la demande ; note des agences dans l'annuaire et sur les propositions ; suivi `/proprietaire/mandats/{id}` (événements marqués visibles, annonces de l'agence et contacts) ; « Terminer le mandat » avec motif ; avis une fois après un mandat signé et terminé ; « Faire vérifier le bien ».
+- Agence : bourse triée (invitations, puis pertinence), colonne « Pertinence », badge « Invitée » ; fiche de la demande avec le nombre d'acquéreurs compatibles de l'agence et les badges de vérification ; « Terminer le mandat » avec motif dans le dialogue du mandat.
+- Plateforme : file « Titres fonciers à contrôler » et vérification des propriétaires dans `/pro/moderation` ; quota `quotas.maxMandateProposalsMonth` par organisation.
+- Fin de mandat : dossier de l'agence clos (gagné ou perdu), annonces de l'agence suspendues (`MANDATE_ENDED`) ; `CRM_CLOSED_WON` sur le dossier termine le mandat.
+- Alertes : mandat bientôt échu (J-15) aux deux parties ; demande sans proposition après 48 h au propriétaire.
+- Portail : badge « Bien vérifié » sur la fiche annonce.
+- Migration V168 : `mandate_invitation`, `agency_review`, `mandate.ended_by`, `mandate.expiry_alerted_at`, `mandate_request.idle_alerted_at`.
+
 # Changelog — v0.11-uc-proprietaire-bourse-2026-11-26
 
 Cas d'usage n°1, lot B : bourse aux mandats (UC-P5 à UC-P7, critères PB-1 à PB-8).

@@ -1,7 +1,7 @@
 # Cas d'usage n°1 — Le propriétaire publie seul ou confie son bien à un agent
 
-> **Statut**: Lots A et B livrés (UC-P1 à UC-P7) ; lot C TO-BE  
-> **Dernière vérification**: 2026-11-25  
+> **Statut**: Lots A, B et C livrés (UC-P1 à UC-P9)  
+> **Dernière vérification**: 2026-11-26  
 > **Source of truth**: Oui (espace propriétaire, bourse aux mandats, mandat)  
 > **Dépendances**:  
 - `docs/adr/0005-proprietaire-organisation-personnelle-et-mandat.md` (choix de modèle)  
@@ -197,6 +197,15 @@ En mandat **exclusif**, l'annonce du propriétaire est suspendue (`SUSPENDED`, m
 
 Un mandat se termine par : affaire conclue par l'agence, vente par le propriétaire ou un tiers, échéance, retrait d'une partie, fraude. Le motif est obligatoire (`MANDATE_END_REASON`). Le propriétaire peut ensuite noter l'agence (avis vérifié, rattaché à un mandat réel) et rouvrir une demande.
 
+> **Livré (lot C, UC-P8 et UC-P9).**
+> - Suivi `/proprietaire/mandats/{id}` (lien « Suivre le mandat » sur la fiche du bien et sur la demande) : statut, type, commission, dates ; annonces de l'agence liées au mandat avec le nombre de contacts reçus ; chronologie des seuls événements du dossier de l'agence marqués « Public (visible par le client) » (`ActivityVisibility.CLIENT_VISIBLE`, R-PROP-12), lus dans l'organisation de l'agence. Les échanges avec l'agence restent sur la page de la demande.
+> - Fin du mandat, motif obligatoire. Propriétaire : `SOLD_BY_OWNER`, `SOLD_THIRD_PARTY`, `WITHDRAWN_OWNER` (mandat `MANDATE_TERMINATED`, dossier de l'agence `CRM_CLOSED_LOST`). Agence (dialogue du mandat dans `/pro/mandats`) : `DEAL_CLOSED_AGENCY` (mandat `MANDATE_COMPLETED`, dossier `CRM_CLOSED_WON`), `SOLD_THIRD_PARTY`, `WITHDRAWN_AGENCY`. L'autre partie est prévenue ; `ended_by` garde qui a mis fin. Passer le dossier `CRM_CLOSED_WON` dans le CRM termine aussi le mandat (`DEAL_CLOSED_AGENCY`).
+> - Toute fin de mandat (y compris `NOT_SIGNED` et `TERM_REACHED`) suspend les annonces publiées de l'agence pour ce mandat (motif `MANDATE_ENDED`) : sans mandat, l'agence ne commercialise plus le bien.
+> - Avis : une note de 1 à 5 et un commentaire facultatif (1 000 caractères), seulement pour un mandat signé puis terminé, une fois (`agency_review`, unique par mandat). La moyenne et le nombre d'avis s'affichent dans l'annuaire, sur les propositions et dans les recommandations.
+> - Alertes ajoutées : mandat bientôt échu (J-15) aux deux parties ; demande ouverte sans proposition après 48 h, au propriétaire.
+>
+> **Restent à faire** : décision du propriétaire sur une offre (accepter, refuser, contre-proposer) depuis son espace ; nombre de vues des annonces ; avis affichés en détail (texte) sur une fiche publique d'agence.
+
 ## 5. Matching
 
 Trois rapprochements, du plus simple au plus délicat.
@@ -220,9 +229,16 @@ Usage : top 5 affiché au propriétaire (« Agents recommandés », avec bouton 
 
 Une agence nouvelle sur la plateforme n'a ni historique ni avis : pour ne pas l'exclure, ces deux critères prennent une valeur neutre (la moitié du poids) pendant ses 3 premiers mois.
 
+> **Livré (lot C).** `mandate/MandateMatchingService`. Zone : quartier couvert 35, ville entière 24,5, autres quartiers de la ville 14. Spécialité : type de bien 12 et transaction 8 (moitié si le profil ne les renseigne pas). Historique : mandats `MANDATE_COMPLETED` dans la ville, 5 et plus = 15. Réactivité : délai médian entre l'ouverture des demandes et les propositions de l'agence, 24 h ou moins = 10, 72 h ou moins = 6, au-delà 3, sans historique 5. Avis : moyenne / 5 × 10. Acquéreurs compatibles : 10 et plus = 10.
+> - À l'ouverture d'une demande à la bourse (ou quand une demande directe y est ouverte), les 10 meilleures agences sont enregistrées (`mandate_invitation`, `MATCHED`). Le propriétaire voit les 5 premières (« Agences recommandées », `GET /owner/mandate-requests/{id}/recommended`) et peut en inviter 5 au plus (`INVITED`). La bourse de l'agence est triée : invitations d'abord, puis pertinence ; colonne « Pertinence » et badge « Invitée ».
+> - Quotas par offre : `quotas.maxMandateProposalsMonth` dans les réglages de l'organisation (`-1` illimité ; absent : 30 par défaut). Une agence au quota ne peut plus proposer et sort des recommandations.
+> - **Reste à faire** : notifier les agences du top 10 et l'agence invitée (aujourd'hui, seuls le tri et le badge de la bourse les signalent : il faut un destinataire désigné dans l'agence, par exemple ses managers via Keycloak).
+
 ### 5.2 Acquéreurs de l'agence ↔ bien
 
 Quand un agent consulte une demande, la plateforme compte les dossiers acheteurs ou locataires **de sa propre agence** dont les critères correspondent au bien (même moteur que `ReverseMatchingService`). Le calcul reste dans l'organisation de l'agence : aucune donnée ne circule entre agences. C'est un argument concret pour la proposition (« j'ai déjà 12 acquéreurs pour ce type de bien »).
+
+> **Livré (lot C).** Dossiers ouverts de l'agence avec des critères de recherche : transaction, ville et type de bien compatibles, budget maximum + 10 %, budget minimum − 20 %, surface ± 10 %. Seul le nombre est renvoyé (`compatibleBuyers` sur la fiche de la demande), jamais les dossiers.
 
 ### 5.3 Bien du propriétaire ↔ prospects du portail
 
@@ -255,6 +271,7 @@ Une statistique agrégée inter-agences (« 40 acquéreurs actifs pour ce type d
 
 - **Identité** : téléphone vérifié (R-PROP-01). Vérification d'identité légère en V1 (CNIE contrôlée par un modérateur, pièce non conservée au-delà du contrôle) donnant le badge « Propriétaire vérifié ».
 - **Propriété** : numéro de titre foncier ou attestation déclaré par le propriétaire, contrôle manuel, badge « Bien vérifié ». Facultatif, mais exigé pour lever une suspension pour fraude.
+- **Livré (lot C)** : « Faire vérifier le bien » sur la fiche du bien (titre foncier requis, statut `PENDING`) ; file « Titres fonciers à contrôler » et vérification des propriétaires dans `/pro/moderation` (super-admin, `GET /admin/verifications/properties`, `PUT /admin/properties/{id}/verification`, `PUT /admin/owners/{orgId}/verification`). Changer le numéro de titre foncier fait retomber le badge (`NONE`). Badges visibles des agences sur la fiche de la demande ; « Bien vérifié » sur la fiche portail de l'annonce.
 - **Agences** : seules les agences `verifiedPro` accèdent à la bourse. La profession d'agent immobilier n'a pas encore de statut légal au Maroc (projet de loi en attente depuis 2014) : la vérification est celle de la plateforme (RC, ICE, identité du gérant).
 - **Données personnelles (loi 09-08)** : la plateforme collecte les données du propriétaire pour la mise en relation ; elles ne sont transmises à une agence qu'avec son accord explicite (R-PROP-09), qui devient alors responsable de leur traitement pour le mandat. La déclaration du traitement auprès de la CNDP est à mettre à jour.
 - **Procurations (loi 31.18)** : depuis le 1er juin 2026, une procuration portant sur un droit réel doit être enregistrée. Le mandat de commercialisation n'est pas une procuration : il ne permet pas à l'agent de signer la vente. La spec ne prévoit aucune procuration ; l'écran du mandat le rappelle.
