@@ -1,3 +1,13 @@
+# Changelog — v0.14-donnees-demo-2026-11-27
+
+Données de démonstration métier et comptes démo (`03_technique/18_donnees_demo.md`).
+- Seed `db/demo/demo-seed.sql` (PostgreSQL et H2), chargé une fois au démarrage en profil `dev` par `DemoSeedLoader` (`atlas.demo.seed-enabled`) : 10 agences (directeur, manager, 2 agents ; une non vérifiée), 10 propriétaires, 20 biens en vente et en location à Tanger, Casablanca, Rabat et Marrakech, annonces de particuliers, bourse, demandes directes, 9 mandats (à signer, actifs, terminés, résiliés), offres, avis, 54 dossiers, visites, tâches et notifications. ORG-001 et les données E2E ne changent pas.
+- Comptes démo sur `/login` (hors build de production) : jeton `mock-demo-…` dont le backend reprend `sub`, rôles et `org_id`, en mode mock uniquement.
+- Générateur `scripts/demo/gen_demo_seed.py` (seed et liste des comptes du front).
+- Correctif : la bourse et les recommandations répondaient 500 pour toute agence sans réglages (`organization_settings`) : la lecture du quota marquait la transaction en échec.
+- Correctif : la progression des visites guidées était enregistrée sous un identifiant commun (`demo-user`) pour tous les utilisateurs, et synchronisée sans jeton avant la connexion.
+- Les erreurs 500 inattendues sont maintenant journalisées (`GlobalExceptionHandler`).
+
 # Changelog — v0.13-uc-proprietaire-offres-2026-11-26
 
 Cas d'usage n°1, compléments du lot C : alertes aux agences, offres, note de l'agence.
