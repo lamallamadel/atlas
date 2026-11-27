@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { AuthService } from './auth.service';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { Router } from '@angular/router';
+import { demoToken } from '../pages/login/demo-token';
+import { DEMO_ACCOUNTS } from '../pages/login/demo-accounts';
 
 function buildJwt(payload: any): string {
   const header = { alg: 'HS256', typ: 'JWT' };
@@ -111,5 +113,13 @@ describe('AuthService', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/login'], {
       replaceUrl: true});
     expect(oauthService.logOut).toHaveBeenCalled();
+  });
+
+  it('lit un compte démo : rôles, utilisateur et organisation du jeton mock-demo', () => {
+    const owner = DEMO_ACCOUNTS.find(a => a.sub === 'demo-owner-05')!;
+    service.login(demoToken(owner));
+    expect(service.getUserRoles()).toEqual(['OWNER']);
+    expect(service.getUserId()).toBe('demo-owner-05');
+    expect(service.hasRole('OWNER')).toBe(true);
   });
 });

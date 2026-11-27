@@ -3,9 +3,11 @@ package com.example.backend.mandate;
 import com.example.backend.dto.TeamMemberResponse;
 import com.example.backend.owner.PlatformAlert;
 import com.example.backend.owner.PlatformAlertSender;
+import com.example.backend.security.AgencyRole;
 import com.example.backend.service.NotificationService;
 import com.example.backend.service.TeamDirectoryService;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class AgencyAlertSender {
 
     private static final Logger log = LoggerFactory.getLogger(AgencyAlertSender.class);
-    private static final Set<String> RECIPIENT_ROLES = Set.of("ADMIN", "MANAGER");
+    private static final Set<String> RECIPIENT_ROLES =
+            Set.of(AgencyRole.ADMIN.name(), AgencyRole.MANAGER.name());
 
     private final TeamDirectoryService team;
     private final NotificationService notifications;
@@ -46,9 +49,16 @@ public class AgencyAlertSender {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onAlert(AgencyAlert alert) {
+        Map<String, TeamDirectoryService.Team> teams;
+        try {
+            teams = team.teams(alert.agencyOrgIds());
+        } catch (RuntimeException e) {
+            log.warn("Alerte agences {} non envoyée : {}", alert.agencyOrgIds(), e.getMessage());
+            return;
+        }
         for (String orgId : alert.agencyOrgIds()) {
             try {
-                send(orgId, alert);
+                send(orgId, teams.get(orgId).members(), alert);
             } catch (RuntimeException e) {
                 log.warn("Alerte agence {} non envoyée : {}", orgId, e.getMessage());
             }
@@ -56,8 +66,8 @@ public class AgencyAlertSender {
     }
 
     /** Renvoie le nombre de destinataires prévenus. */
-    int send(String orgId, AgencyAlert alert) {
-        List<TeamMemberResponse> recipients = recipients(team.team(orgId).members());
+    int send(String orgId, List<TeamMemberResponse> members, AgencyAlert alert) {
+        List<TeamMemberResponse> recipients = recipients(members);
         for (TeamMemberResponse m : recipients) {
             notifications.createInAppNotification(
                     orgId, null, m.userId(), alert.subject(), alert.message(), alert.path());

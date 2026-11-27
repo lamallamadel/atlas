@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { formatAnnoncePrice } from '../utils/annonce-format';
 import { Observable } from 'rxjs';
 
 /** Cas d'usage n°1, lot B — bourse aux mandats (types partagés propriétaire / agence). */
@@ -217,9 +218,19 @@ export const OFFER_STATUS: Record<string, { label: string; status: 'info' | 'war
   OFFER_WITHDRAWN: { label: 'Retirée', status: 'neutral' },
 };
 
-/** « 1 450 000 MAD ». */
+/** « 1 450 000 MAD », « — » sans montant. */
 export function madLabel(amount: number | null | undefined): string {
-  return amount == null ? '—' : `${Math.round(Number(amount)).toLocaleString('fr-FR')} MAD`;
+  return amount == null ? '—' : formatAnnoncePrice({ price: Number(amount), currency: 'MAD' });
+}
+
+/** Libellé et couleur du badge d'une offre. */
+export function offerStatusOf(o: Pick<MandateOffer, 'status'>): { label: string; status: 'info' | 'warning' | 'success' | 'neutral' | 'error' } {
+  return OFFER_STATUS[o.status] ?? { label: o.status, status: 'neutral' };
+}
+
+/** Une offre se retire tant qu'elle n'est ni refusée ni déjà retirée (comme le backend). */
+export function canWithdrawOffer(status: OfferStatus): boolean {
+  return status === 'OFFER_PENDING' || status === 'OFFER_ACCEPTED' || status === 'OFFER_COUNTERED';
 }
 
 /** Suivi d'un mandat par le propriétaire (UC-P8, UC-P9). */

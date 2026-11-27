@@ -5,6 +5,7 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.security.AgencyRole;
 import com.example.backend.security.KeycloakAgencyRoles;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,13 +63,34 @@ public class TeamDirectoryService {
      */
     @Transactional(readOnly = true)
     public Team team(String orgId, boolean includeDisabled) {
+        return team(orgId, includeDisabled, null);
+    }
+
+    /**
+     * Membres actifs de plusieurs agences (alertes de la bourse) : les rôles du realm, communs à
+     * toutes, sont lus une seule fois au lieu d'une fois par agence.
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Team> teams(Collection<String> orgIds) {
+        Keycloak client = keycloak.getIfAvailable();
+        Map<String, AgencyRole> roles =
+                client == null ? null : rolesOrEmpty(client.realm(realm), "plusieurs agences");
+        Map<String, Team> out = new LinkedHashMap<>();
+        for (String orgId : orgIds) {
+            out.put(orgId, team(orgId, false, roles));
+        }
+        return out;
+    }
+
+    private Team team(String orgId, boolean includeDisabled, Map<String, AgencyRole> knownRoles) {
         try {
             Keycloak client = keycloak.getIfAvailable();
             if (client != null) {
                 RealmResource realmResource = client.realm(realm);
                 List<UserRepresentation> users =
                         realmResource.users().searchByAttributes("orgId:" + orgId);
-                Map<String, AgencyRole> roles = rolesOrEmpty(realmResource, orgId);
+                Map<String, AgencyRole> roles =
+                        knownRoles != null ? knownRoles : rolesOrEmpty(realmResource, orgId);
                 List<TeamMemberResponse> members =
                         users.stream()
                                 .filter(

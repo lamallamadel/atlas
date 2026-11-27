@@ -91,6 +91,8 @@ public class AgencyDirectoryService {
     public AgencySettings mySettings() {
         String orgId = requireOrg();
         AgencyProfileEntity p = profiles.findByOrgId(orgId).orElse(null);
+        var received = reviews.findByAgencyOrgIdOrderByCreatedAtDesc(orgId);
+        Rating rating = rating(received);
         return new AgencySettings(
                 orgId,
                 isVerified(orgId),
@@ -102,10 +104,10 @@ public class AgencyDirectoryService {
                 zones.findByOrgIdOrderByCityAscDistrictAsc(orgId).stream()
                         .map(z -> new Zone(z.getCity(), z.getDistrict()))
                         .toList(),
-                rating(orgId).average(),
-                rating(orgId).count(),
+                rating.average(),
+                rating.count(),
                 // Lot C : avis vérifiés reçus, les 20 derniers, sans le nom du propriétaire.
-                reviews.findByAgencyOrgIdOrderByCreatedAtDesc(orgId).stream()
+                received.stream()
                         .limit(20)
                         .map(
                                 r ->
@@ -275,6 +277,7 @@ public class AgencyDirectoryService {
                                         .map(AgencyZoneEntity::getDistrict)
                                         .filter(Objects::nonNull)
                                         .toList();
+                        Rating rating = rating(orgId);
                         out.add(
                                 new AgencyCard(
                                         orgId,
@@ -284,8 +287,8 @@ public class AgencyDirectoryService {
                                         split(p != null ? p.getPropertyTypes() : null),
                                         tx,
                                         districts,
-                                        rating(orgId).average(),
-                                        rating(orgId).count()));
+                                        rating.average(),
+                                        rating.count()));
                     }
                     out.sort(java.util.Comparator.comparing(AgencyCard::name));
                     return out;
@@ -296,7 +299,10 @@ public class AgencyDirectoryService {
     public record Rating(Double average, int count) {}
 
     public Rating rating(String orgId) {
-        var list = reviews.findByAgencyOrgIdOrderByCreatedAtDesc(orgId);
+        return rating(reviews.findByAgencyOrgIdOrderByCreatedAtDesc(orgId));
+    }
+
+    private static Rating rating(List<com.example.backend.entity.AgencyReviewEntity> list) {
         if (list.isEmpty()) {
             return new Rating(null, 0);
         }

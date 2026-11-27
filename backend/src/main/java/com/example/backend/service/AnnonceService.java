@@ -563,13 +563,10 @@ public class AnnonceService {
         if (organizationSettingsService == null) {
             return;
         }
-        com.example.backend.dto.QuotaSettingsDto quotas;
-        try {
-            quotas = organizationSettingsService.getQuotas(orgId);
-        } catch (com.example.backend.exception.ResourceNotFoundException e) {
-            // Agence sans réglages : aucun quota configuré (l'annonce n'est pas « introuvable »).
-            return;
-        }
+        // findQuotas, pas getQuotas : son exception « pas de réglages », même rattrapée, annulerait
+        // la transaction de publication. Agence sans réglages = aucun quota configuré.
+        com.example.backend.dto.QuotaSettingsDto quotas =
+                organizationSettingsService.findQuotas(orgId).orElse(null);
         if (quotas != null && quotas.getMaxAnnonces() != null && quotas.getMaxAnnonces() != -1) {
             long currentCount =
                     annonceRepository.countByOrgIdAndStatus(orgId, AnnonceStatus.PUBLISHED);

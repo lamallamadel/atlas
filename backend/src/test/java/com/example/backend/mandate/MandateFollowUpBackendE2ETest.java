@@ -3,7 +3,6 @@ package com.example.backend.mandate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -36,8 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.RecordApplicationEvents;
@@ -71,6 +68,8 @@ class MandateFollowUpBackendE2ETest extends BaseBackendE2ETest {
     @Autowired private ApplicationEvents events;
     @Autowired private com.example.backend.repository.MandateRequestRepository mandateRequests;
     @Autowired private MandateLifecycleService lifecycle;
+    @Autowired private MandateMatchingService matching;
+    @Autowired private org.springframework.transaction.PlatformTransactionManager txManager;
 
     @MockitoBean private OtpSender otpSender;
 
@@ -139,16 +138,7 @@ class MandateFollowUpBackendE2ETest extends BaseBackendE2ETest {
     private <T extends MockHttpServletRequestBuilder> T as(
             T builder, String org, String subject, String... roles) {
         builder.header(TENANT_HEADER, org).header(CORRELATION_ID_HEADER, "fol-test");
-        builder.with(
-                jwt().jwt(createMockJwt(org, subject, roles))
-                        .authorities(
-                                java.util.Arrays.stream(roles)
-                                        .map(
-                                                r ->
-                                                        (GrantedAuthority)
-                                                                new SimpleGrantedAuthority(
-                                                                        "ROLE_" + r))
-                                        .toList()));
+        builder.with(jwtAs(org, subject, roles));
         return builder;
     }
 
@@ -745,5 +735,21 @@ class MandateFollowUpBackendE2ETest extends BaseBackendE2ETest {
         mockMvc.perform(as(get("/api/v1/agency/marketplace-profile"), B, "admin-" + B, "ADMIN"))
                 .andExpect(jsonPath("$.reviews").value(0))
                 .andExpect(jsonPath("$.recentReviews.length()").value(0));
+    }
+
+    // ------------------------------------------------------------------ régression
+
+    /**
+     * Une agence sans réglages (cas général) : le quota par défaut s'applique sans marquer la
+     * transaction pour annulation. Avant correction, la bourse renvoyait 500 au commit ; la
+     * transaction du test, annulée de toute façon, ne le montrait pas.
+     */
+    @Test
+    void quotaOfAnAgencyWithoutSettings_doesNotPoisonTheTransaction() {
+        var tx = new org.springframework.transaction.support.TransactionTemplate(txManager);
+        tx.setPropagationBehavior(
+                org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        Long remaining = tx.execute(status -> matching.remainingQuota("ORG-WITHOUT-SETTINGS"));
+        assertThat(remaining).isEqualTo(30L);
     }
 }

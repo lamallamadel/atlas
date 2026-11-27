@@ -165,3 +165,31 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* Comptes démo (hors production) */
+.login-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.login-demo__hint {
+  margin-top: 0;
+}
+
+.login-demo__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.login-demo__pick {
+  display: flex;
+  gap: 8px;
+}
+
+.login-demo__pick .login-input {
+  flex: 1;
+  min-width: 0;
+}

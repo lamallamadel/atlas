@@ -15,6 +15,13 @@ public class MandateOfferEntity {
     public static final String OFFER_COUNTERED = "OFFER_COUNTERED";
     public static final String OFFER_WITHDRAWN = "OFFER_WITHDRAWN";
 
+    /** Une offre se retire tant qu'elle n'est ni refusée ni déjà retirée. */
+    public static boolean isWithdrawable(String status) {
+        return OFFER_PENDING.equals(status)
+                || OFFER_ACCEPTED.equals(status)
+                || OFFER_COUNTERED.equals(status);
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

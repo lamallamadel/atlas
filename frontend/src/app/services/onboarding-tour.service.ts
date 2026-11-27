@@ -129,14 +129,14 @@ export class OnboardingTourService {
     }
   }
 
+  /** Sujet du jeton courant ; null hors connexion (aucune synchronisation serveur). */
   private getUserId(): string | null {
-    // Get user ID from auth service or use a default for demo
-    try {
-      return (this.authService as { getCurrentUserId?: () => string }).getCurrentUserId?.() || 'demo-user';
-    } catch {
-      return 'demo-user';
+    if (!this.authService.isAuthenticated()) {
+      return null;
     }
+    return this.authService.getUserId();
   }
+
 
   private trackAnalytics(analytics: TourAnalytics): void {
     try {

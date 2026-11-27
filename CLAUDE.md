@@ -107,7 +107,7 @@ docker-compose down
 
 **Multi-tenancy:** Row-level isolation via `org_id` column on all tables. Hibernate `@FilterDef(name="orgIdFilter")` on `BaseEntity`. Frontend sends `X-Org-Id` header.
 
-**Authentication:** Keycloak (OAuth2/OIDC). Backend is a stateless OAuth2 Resource Server validating JWTs. Frontend uses `angular-oauth2-oidc`. When `issuer-uri` is blank/"mock", backend accepts mock tokens (for E2E tests).
+**Authentication:** Keycloak (OAuth2/OIDC). Backend is a stateless OAuth2 Resource Server validating JWTs. Frontend uses `angular-oauth2-oidc`. When `issuer-uri` is blank/"mock", backend accepts mock tokens (for E2E tests); `mock-demo-<b64 header>.<b64 payload>.<sig>` tokens take `sub`, `roles` and `org_id` from the payload (demo accounts on `/login`, see below).
 
 **Agency roles (`security/`):** realm roles `ADMIN`, `MANAGER`, `AGENT` (legacy `PRO` = agent), `SUPER_ADMIN` (platform), `OWNER` (private owner, personal org `org_type = OWNER`, only `/api/v1/owner/**` — every other `/api/**` route rejects it). `SecurityConfig.toAuthorities` also grants `ROLE_PRO` to agents and managers, so `hasAnyRole('ADMIN','PRO')` means "agency member". Fine-grained rules go through `AccessPolicy` (assign, trust override, invite, team management) — don't add role checks elsewhere. Spec: `docs/atlas-immobilier/03_technique/10_rbac_permissions.md`.
 
@@ -137,7 +137,7 @@ docker-compose down
 
 ### Spring Profiles
 - `local` — H2, no external deps
-- `dev` — H2 with seed data
+- `dev` — H2 with seed data (`SeedDataLoader`: ORG-001/ORG-002) plus the business demo seed `db/demo/demo-seed.sql` (`DemoSeedLoader`, disable with `atlas.demo.seed-enabled=false`): 10 agencies `DEMO-*`, 10 owners `OWN-DEMO*`, 20 properties, one-click demo accounts on `/login`. Never edit the seed or `frontend/src/app/pages/login/demo-accounts.ts` by hand: regenerate both with `scripts/demo/gen_demo_seed.py`. Doc: `docs/atlas-immobilier/03_technique/18_donnees_demo.md`
 - `test` — H2 (auto-applied by JUnit)
 - `staging` / `prod` — PostgreSQL (requires `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` env vars)
 - `e2e-h2-mock`, `e2e-postgres-mock`, `e2e-h2-keycloak`, `e2e-postgres-keycloak` — E2E test profiles

@@ -28,7 +28,7 @@ Spring Boot 4.0.3 / Java 25 · Angular 21 · services IA Python (`brain/`) · Po
 - `CHANGELOG.md` : évolutions et correctifs clés (dont corrections de tests FE)
 
 ## Démarrage local
-Voir le `CLAUDE.md` à la racine du dépôt et `03_technique/17_runbook_dev_deploy_mvp.md`.
+Voir le `CLAUDE.md` à la racine du dépôt et `03_technique/17_runbook_dev_deploy_mvp.md`. Données et comptes de démonstration : `03_technique/18_donnees_demo.md`.
 
 Les détails (headers, rôles, obtention du token, isolation tenant) sont décrits dans `03_technique/04_security_multi_tenancy.md`.
 

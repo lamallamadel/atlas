@@ -45,19 +45,15 @@ class AgencyAlertSenderTest {
         TeamDirectoryService team = mock(TeamDirectoryService.class);
         NotificationService notifications = mock(NotificationService.class);
         PlatformAlertSender mail = mock(PlatformAlertSender.class);
-        when(team.team("ORG-A"))
-                .thenReturn(
-                        new TeamDirectoryService.Team(
-                                List.of(
-                                        member("a", "ADMIN", true),
-                                        new TeamMemberResponse("m", "M", null, "MANAGER", true)),
-                                true));
         AgencyAlertSender sender =
                 new AgencyAlertSender(team, notifications, mail, "https://afroware.app");
 
         int sent =
                 sender.send(
                         "ORG-A",
+                        List.of(
+                                member("a", "ADMIN", true),
+                                new TeamMemberResponse("m", "M", null, "MANAGER", true)),
                         AgencyAlert.of(
                                 "ORG-A",
                                 "Un propriétaire vous invite",
@@ -88,10 +84,18 @@ class AgencyAlertSenderTest {
     void oneFailingAgencyDoesNotStopTheOthers() {
         TeamDirectoryService team = mock(TeamDirectoryService.class);
         NotificationService notifications = mock(NotificationService.class);
-        when(team.team("ORG-A")).thenThrow(new IllegalStateException("Keycloak"));
-        when(team.team("ORG-B"))
+        when(team.teams(List.of("ORG-A", "ORG-B")))
                 .thenReturn(
-                        new TeamDirectoryService.Team(List.of(member("b", "ADMIN", true)), true));
+                        java.util.Map.of(
+                                "ORG-A",
+                                new TeamDirectoryService.Team(
+                                        List.of(member("a", "ADMIN", true)), true),
+                                "ORG-B",
+                                new TeamDirectoryService.Team(
+                                        List.of(member("b", "ADMIN", true)), true)));
+        when(notifications.createInAppNotification(
+                        eq("ORG-A"), any(), any(), any(), any(), any()))
+                .thenThrow(new IllegalStateException("notification"));
         new AgencyAlertSender(team, notifications, mock(PlatformAlertSender.class), "")
                 .onAlert(new AgencyAlert(List.of("ORG-A", "ORG-B"), "S", "M", "/pro/mandats"));
         verify(notifications)

@@ -452,7 +452,11 @@ public class MandateLifecycleService {
     /** Suivi d'un mandat par le propriétaire (UC-P8) : statut, annonces, événements visibles. */
     @Transactional(readOnly = true)
     public MarketplaceViews.MandateFollowUp followUp(Long id) {
-        MandateEntity m = ownerMandateEntity(id);
+        return followUp(ownerMandateEntity(id));
+    }
+
+    /** Suivi d'un mandat déjà chargé et contrôlé ({@link #ownerMandateEntity}). */
+    MarketplaceViews.MandateFollowUp followUp(MandateEntity m) {
         PropertyEntity property = properties.findById(m.getPropertyId()).orElse(null);
         List<MarketplaceViews.AgencyListing> listings =
                 orgScope.unfiltered(
@@ -518,11 +522,9 @@ public class MandateLifecycleService {
                 property != null ? property.getTitle() : null,
                 listings,
                 events,
-                offers == null
-                        ? List.of()
-                        : offers.findByMandateIdOrderByCreatedAtDesc(m.getId()).stream()
-                                .map(MandateOfferService::view)
-                                .toList(),
+                offers.findByMandateIdOrderByCreatedAtDesc(m.getId()).stream()
+                        .map(MandateOfferService::view)
+                        .toList(),
                 live,
                 live ? OWNER_END_REASONS : List.of(),
                 canReview(m) && review == null,
@@ -790,7 +792,7 @@ public class MandateLifecycleService {
             if (r.getIdleAlertedAt() == null
                     && r.getOpenedAt() != null
                     && r.getOpenedAt().isBefore(now.minusHours(48))
-                    && proposals.findByRequestIdOrderByCreatedAtAsc(r.getId()).isEmpty()) {
+                    && !proposals.existsByRequestId(r.getId())) {
                 r.setIdleAlertedAt(now);
                 requests.save(r);
                 alertOwnerForRequest(
@@ -806,9 +808,7 @@ public class MandateLifecycleService {
         for (MandateRequestEntity r :
                 requests.findByStatusAndVisibilityOrderByOpenedAtDesc(
                         MandateRequestEntity.MREQ_OPEN, MandateRequestEntity.MREQ_DIRECT)) {
-            if (r.getOpenedAt() == null
-                    || r.getTargetDeclinedAt() != null
-                    || !proposals.findByRequestIdOrderByCreatedAtAsc(r.getId()).isEmpty()) {
+            if (r.getOpenedAt() == null || r.getTargetDeclinedAt() != null) {
                 continue;
             }
             LocalDateTime ownerStep = r.getOpenedAt().plusHours(72);
@@ -818,6 +818,10 @@ public class MandateLifecycleService {
                     now.isAfter(ownerStep)
                             && (r.getIdleAlertedAt() == null
                                     || r.getIdleAlertedAt().isBefore(ownerStep));
+            // La requête des propositions seulement quand une étape est due.
+            if ((!agencyDue && !ownerDue) || proposals.existsByRequestId(r.getId())) {
+                continue;
+            }
             if (agencyDue && !ownerDue) {
                 marketplace.notifyAgency(
                         r.getTargetAgencyOrgId(),
@@ -837,10 +841,8 @@ public class MandateLifecycleService {
                                 + r.getCity()
                                 + ".");
             }
-            if (agencyDue || ownerDue) {
-                r.setIdleAlertedAt(now);
-                requests.save(r);
-            }
+            r.setIdleAlertedAt(now);
+            requests.save(r);
         }
     }
 

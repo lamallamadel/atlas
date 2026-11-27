@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { OnboardingTourService } from './onboarding-tour.service';
@@ -45,6 +45,25 @@ describe('OnboardingTourService', () => {
 
   afterEach(() => {
     localStorage.clear();
+  });
+
+  it('does not sync tour progress before login (no anonymous call)', () => {
+    const http = TestBed.inject(HttpTestingController);
+    http.expectNone(r => r.url.includes('/tour-progress'));
+    service.resetAllTours();
+    http.expectNone(r => r.url.includes('/tour-progress'));
+  });
+
+  it('syncs tour progress under the signed-in user, never a shared id', () => {
+    const http = TestBed.inject(HttpTestingController);
+    const b64 = (o: object) => btoa(JSON.stringify(o)).replace(/=+$/, '');
+    localStorage.setItem(
+      'auth_token',
+      `x.${b64({ sub: 'demo-detroit-agent1', exp: Math.floor(Date.now() / 1000) + 3600 })}.sig`
+    );
+    service.resetAllTours();
+    const req = http.expectOne('/api/v1/user-preferences/demo-detroit-agent1/tour-progress');
+    expect(req.request.method).toBe('PUT');
   });
 
   it('should be created', () => {
