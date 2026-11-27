@@ -93,6 +93,37 @@
     </div>
   </form>
 
+  @if (demoEnabled) {
+    <section class="login-demo" aria-labelledby="login-demo-title">
+      <div class="login-sep" role="separator">
+        <span id="login-demo-title">comptes démo</span>
+      </div>
+      <p class="login-hint login-demo__hint">Données de démonstration : 10 agences, 10 propriétaires, 20 biens. Backend en mode mock requis.</p>
+      <div class="login-demo__quick">
+        @for (q of demoQuick; track q.account.sub) {
+          <button class="login-btn login-btn--ghost" type="button" [disabled]="isLoading"
+            [attr.aria-label]="q.label + ' : ' + q.account.name + ', ' + q.account.group"
+            (click)="demoLogin(q.account)">{{ q.label }}</button>
+        }
+      </div>
+      <div class="login-field">
+        <label class="login-label" for="demoAccount">Autre compte démo</label>
+        <div class="login-demo__pick">
+          <select id="demoAccount" class="login-input" [(ngModel)]="demoSelected" [disabled]="isLoading">
+            @for (g of demoGroups; track g.name) {
+              <optgroup [label]="g.name">
+                @for (a of g.accounts; track a.sub) {
+                  <option [value]="a.sub">{{ optionLabel(a) }}</option>
+                }
+              </optgroup>
+            }
+          </select>
+          <button class="login-btn login-btn--ghost" type="button" [disabled]="isLoading" (click)="demoLogin(demoAccount(demoSelected))">Entrer</button>
+        </div>
+      </div>
+    </section>
+  }
+
   <p class="login-legal">
     En vous connectant, vous acceptez les
     <a href="/biz" tabindex="0">Conditions d'utilisation</a>

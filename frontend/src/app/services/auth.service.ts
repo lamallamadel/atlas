@@ -268,7 +268,9 @@ export class AuthService {
     // base64url -> base64
     const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
     const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
-    const decoded = atob(padded);
-    return JSON.parse(decoded);
+    // UTF-8 : un nom accentué (« Leïla ») reste lisible.
+    const binary = atob(padded);
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
   }
 }

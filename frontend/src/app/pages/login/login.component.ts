@@ -3,6 +3,9 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { AuthHeroComponent } from '../../design-system/patterns/auth-hero/auth-hero.component';
+import { environment } from '../../../environments/environment';
+import { DEMO_ACCOUNTS, DemoAccount } from './demo-accounts';
+import { demoLanding, demoToken } from './demo-token';
 
 @Component({
     selector: 'app-login',
@@ -15,6 +18,24 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
   isLoading = false;
   logoPath: string | null = null;
+
+  /** Comptes démo (seed db/demo) : hors production, le backend doit être en mode mock. */
+  readonly demoEnabled = !environment.production;
+  readonly demoQuick: { label: string; account: DemoAccount }[] = [
+    ['Agent', 'demo-detroit-agent1'],
+    ['Manager', 'demo-detroit-manager'],
+    ['Directeur', 'demo-detroit-directeur'],
+    ['Propriétaire', 'demo-owner-01'],
+    ['Super-admin', 'demo-superadmin'],
+  ].map(([label, sub]) => ({ label, account: DEMO_ACCOUNTS.find(a => a.sub === sub)! }));
+  readonly demoGroups: { name: string; accounts: DemoAccount[] }[] = DEMO_ACCOUNTS.reduce(
+    (groups, a) => {
+      const g = groups.find(x => x.name === a.group);
+      if (g) g.accounts.push(a); else groups.push({ name: a.group, accounts: [a] });
+      return groups;
+    },
+    [] as { name: string; accounts: DemoAccount[] }[]);
+  demoSelected = 'demo-detroit-agent1';
 
   constructor(
     private authService: AuthService,
@@ -129,6 +150,29 @@ export class LoginComponent implements OnInit {
       this.isLoading = false;
       this.cdr.markForCheck();
     }
+  }
+
+  /** Connexion avec un compte démo : jeton mock-demo, organisation du compte, page d'arrivée. */
+  async demoLogin(account: DemoAccount | undefined): Promise<void> {
+    if (!account) return;
+    this.errorMessage = '';
+    this.isLoading = true;
+    localStorage.setItem('org_id', account.orgId);
+    this.authService.login(demoToken(account));
+    const ok = await this.router.navigate([demoLanding(account)]);
+    if (!ok) {
+      this.errorMessage = 'Erreur de navigation. Veuillez réessayer.';
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  optionLabel(a: DemoAccount): string {
+    return a.roles.includes('OWNER') ? a.name : `${a.label} — ${a.name}`;
+  }
+
+  demoAccount(sub: string): DemoAccount | undefined {
+    return DEMO_ACCOUNTS.find(a => a.sub === sub);
   }
 
   private generateMockToken(roles: string[] = ['USER']): string {
