@@ -95,31 +95,30 @@
             class="sr-listing-card"
             (click)="navigateToDetail(listing)"
             role="button" tabindex="0"
-            (keydown.enter)="navigateToDetail(listing)"
-            style="cursor: pointer;">
-            <div class="sr-listing-img" style="position: relative; border-radius: var(--ds-radius-md); overflow: hidden;">
-              <img [src]="listing.imgs && listing.imgs.length > 0 ? listing.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="listing.title" loading="lazy" width="360" height="220" style="width: 100%; object-fit: cover; transition: transform 0.3s ease;"/>
-              <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'" style="position: absolute; top: 12px; left: 12px;">
+            (keydown.enter)="navigateToDetail(listing)">
+            <div class="sr-listing-img">
+              <img [src]="listing.imgs && listing.imgs.length > 0 ? listing.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="listing.title" loading="lazy" width="360" height="220"/>
+              <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
                 {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
               </span>
               @if (listing.verified || listing.privateSeller) {
-                <div class="ph-badges" style="position: absolute; top: 12px; right: 12px;">
+                <div class="ph-badges">
                   @if (listing.privateSeller) { <ds-badge status="info" size="sm">Particulier</ds-badge> }
                   @if (listing.verified) { <ds-badge status="active" size="sm">Vérifié</ds-badge> }
                 </div>
               }
             </div>
-            <div class="ph-listing-body" style="padding: 16px 0;">
-              <div class="ph-price" style="font-size: 18px; font-weight: 700; color: var(--ds-marine); margin-bottom: 4px;">{{formatPrice(listing.price, listing.tx)}}</div>
-              <div class="ph-title" style="font-size: 15px; font-weight: 600; color: var(--ds-text); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{listing.title}}</div>
-              <div class="ph-location" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ds-text-muted); margin-bottom: 12px;">
+            <div class="ph-listing-body">
+              <div class="ph-price">{{formatPrice(listing.price, listing.tx)}}</div>
+              <div class="ph-title" [title]="listing.title">{{listing.title}}</div>
+              <div class="ph-location">
                 <ds-icon name="map-pin" [size]="16"></ds-icon>
-                {{listing.zone}}, {{listing.city}}
+                <span>{{listing.zone}}, {{listing.city}}</span>
               </div>
-              <div class="ph-meta" style="display: flex; gap: 16px; font-size: 12px; color: var(--ds-text-faint);">
-                <span class="ph-meta-item" style="display: flex; align-items: center; gap: 4px;"><ds-icon name="maximize" [size]="16"></ds-icon>{{listing.surface}} m²</span>
-                <span class="ph-meta-item" style="display: flex; align-items: center; gap: 4px;"><ds-icon name="grid" [size]="16"></ds-icon>{{listing.pieces}} pièces</span>
-                <span class="ph-meta-date" style="margin-left: auto;">{{listing.agent.agency}}</span>
+              <div class="ph-meta">
+                <span class="ph-meta-item"><ds-icon name="maximize" [size]="16"></ds-icon>{{listing.surface}} m²</span>
+                <span class="ph-meta-item"><ds-icon name="grid" [size]="16"></ds-icon>{{listing.pieces}} pièces</span>
+                <span class="ph-meta-date" [title]="listing.agent.agency">{{listing.agent.agency}}</span>
               </div>
             </div>
           </article>

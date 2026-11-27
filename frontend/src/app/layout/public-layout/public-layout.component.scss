@@ -193,9 +193,13 @@
   margin-bottom: var(--ds-space-10);
 }
 
+/* Liens du pied de page : la règle globale des cibles tactiles (a { padding: 8px 16px;
+   justify-content: center }) centrait le logo et décalait les liens sous les titres. */
 .pub-footer-logo {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  padding: 0;
   gap: var(--ds-space-2);
   text-decoration: none;
   font-family: var(--ds-font-display);
@@ -233,6 +237,9 @@
 }
 
 .pub-footer-links a {
+  padding: 0;
+  justify-content: flex-start;
+  text-align: left;
   font-size: var(--ds-text-sm);
   color: oklch(1 0 0 / 0.55);
   text-decoration: none;
