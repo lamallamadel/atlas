@@ -1,11 +1,9 @@
 import { DEMO_ACCOUNTS } from './demo-accounts';
 import { demoLanding, demoToken } from './demo-token';
+import { decodeBase64Url } from '../../utils/base64url';
 
 function payload(token: string): Record<string, unknown> {
-  const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-  const padded = part + '='.repeat((4 - (part.length % 4)) % 4);
-  const bytes = Uint8Array.from(atob(padded), c => c.charCodeAt(0));
-  return JSON.parse(new TextDecoder().decode(bytes));
+  return JSON.parse(decodeBase64Url(token.split('.')[1]));
 }
 
 describe('comptes démo', () => {

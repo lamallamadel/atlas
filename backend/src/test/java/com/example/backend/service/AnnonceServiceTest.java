@@ -449,7 +449,8 @@ class AnnonceServiceTest {
 
         com.example.backend.dto.QuotaSettingsDto quotas =
                 new com.example.backend.dto.QuotaSettingsDto(5, 100, 1000L, 0, "STARTER");
-        when(organizationSettingsService.getQuotas(DEFAULT_ORG)).thenReturn(quotas);
+        when(organizationSettingsService.findQuotas(DEFAULT_ORG))
+                .thenReturn(java.util.Optional.of(quotas));
 
         assertThatThrownBy(() -> annonceService.create(request))
                 .isInstanceOf(IllegalStateException.class)

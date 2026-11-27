@@ -17,10 +17,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Offres sur un bien sous mandat (UC-P8) : l'agence mandatée transmet l'offre d'un acquéreur, le
@@ -74,14 +72,14 @@ public class MandateOfferService {
     public List<MarketplaceViews.Offer> submit(Long mandateId, OfferRequest in) {
         MandateEntity m = lifecycle.agencyMandateEntity(mandateId);
         if (!MandateEntity.MANDATE_ACTIVE.equals(m.getStatus())) {
-            throw conflict(
+            throw MandateMarketplaceService.conflict(
                     "MANDATE_NOT_ACTIVE: une offre se transmet sur un mandat signé et en cours.");
         }
         if (in == null || in.amount() == null || in.amount().signum() <= 0) {
-            throw bad("AMOUNT_REQUIRED: indiquez le montant de l'offre.");
+            throw MandateMarketplaceService.bad("AMOUNT_REQUIRED: indiquez le montant de l'offre.");
         }
         if (in.validUntil() != null && in.validUntil().isBefore(LocalDate.now())) {
-            throw bad("VALID_UNTIL_PAST: la date de validité est passée.");
+            throw MandateMarketplaceService.bad("VALID_UNTIL_PAST: la date de validité est passée.");
         }
         LocalDateTime now = LocalDateTime.now();
         MandateOfferEntity o = new MandateOfferEntity();
@@ -113,10 +111,8 @@ public class MandateOfferService {
     public List<MarketplaceViews.Offer> withdraw(Long mandateId, Long offerId) {
         MandateEntity m = lifecycle.agencyMandateEntity(mandateId);
         MandateOfferEntity o = offer(m, offerId);
-        if (!MandateOfferEntity.OFFER_PENDING.equals(o.getStatus())
-                && !MandateOfferEntity.OFFER_ACCEPTED.equals(o.getStatus())
-                && !MandateOfferEntity.OFFER_COUNTERED.equals(o.getStatus())) {
-            throw conflict("OFFER_CLOSED: cette offre est déjà close.");
+        if (!MandateOfferEntity.isWithdrawable(o.getStatus())) {
+            throw MandateMarketplaceService.conflict("OFFER_CLOSED: cette offre est déjà close.");
         }
         o.setStatus(MandateOfferEntity.OFFER_WITHDRAWN);
         o.setUpdatedAt(LocalDateTime.now());
@@ -134,25 +130,20 @@ public class MandateOfferService {
             Long mandateId, Long offerId, DecisionRequest in) {
         MandateEntity m = lifecycle.ownerMandateEntity(mandateId);
         if (!MandateEntity.MANDATE_ACTIVE.equals(m.getStatus())) {
-            throw conflict("MANDATE_ENDED: ce mandat n'est plus en cours.");
+            throw MandateMarketplaceService.conflict("MANDATE_ENDED: ce mandat n'est plus en cours.");
         }
         MandateOfferEntity o = offer(m, offerId);
         if (!MandateOfferEntity.OFFER_PENDING.equals(o.getStatus())) {
-            throw conflict("OFFER_CLOSED: vous avez déjà répondu à cette offre.");
+            throw MandateMarketplaceService.conflict("OFFER_CLOSED: vous avez déjà répondu à cette offre.");
         }
         String decision = in == null || in.decision() == null ? "" : in.decision();
         String comment = in == null ? null : clean(in.comment(), 1000);
         String line;
         switch (decision) {
             case ACCEPT -> {
-                boolean alreadyAccepted =
-                        offers.findByMandateIdOrderByCreatedAtDesc(m.getId()).stream()
-                                .anyMatch(
-                                        x ->
-                                                MandateOfferEntity.OFFER_ACCEPTED.equals(
-                                                        x.getStatus()));
-                if (alreadyAccepted) {
-                    throw conflict(
+                if (offers.existsByMandateIdAndStatus(
+                        m.getId(), MandateOfferEntity.OFFER_ACCEPTED)) {
+                    throw MandateMarketplaceService.conflict(
                             "OFFER_ALREADY_ACCEPTED: vous avez déjà accepté une offre ; l'agence"
                                     + " doit la retirer avant que vous en acceptiez une autre.");
                 }
@@ -166,10 +157,10 @@ public class MandateOfferService {
             case COUNTER -> {
                 BigDecimal counter = in.counterAmount();
                 if (counter == null || counter.signum() <= 0) {
-                    throw bad("COUNTER_REQUIRED: indiquez le prix de votre contre-proposition.");
+                    throw MandateMarketplaceService.bad("COUNTER_REQUIRED: indiquez le prix de votre contre-proposition.");
                 }
                 if (counter.compareTo(o.getAmount()) <= 0) {
-                    throw bad(
+                    throw MandateMarketplaceService.bad(
                             "COUNTER_TOO_LOW: la contre-proposition doit dépasser l'offre ;"
                                     + " sinon, acceptez-la.");
                 }
@@ -183,7 +174,7 @@ public class MandateOfferService {
                                 + mad(o.getCounterAmount())
                                 + ".";
             }
-            default -> throw bad("DECISION_INVALID: accepter, refuser ou contre-proposer.");
+            default -> throw MandateMarketplaceService.bad("DECISION_INVALID: accepter, refuser ou contre-proposer.");
         }
         LocalDateTime now = LocalDateTime.now();
         o.setOwnerComment(comment);
@@ -197,7 +188,7 @@ public class MandateOfferService {
                 "Réponse du propriétaire à une offre",
                 line,
                 m.getDossierId() != null ? "/pro/dossiers/" + m.getDossierId() : "/pro/mandats");
-        return lifecycle.followUp(m.getId());
+        return lifecycle.followUp(m);
     }
 
     // ---------------------------------------------------------------- commun
@@ -227,10 +218,7 @@ public class MandateOfferService {
     private MandateOfferEntity offer(MandateEntity m, Long offerId) {
         return offers.findById(offerId)
                 .filter(o -> m.getId().equals(o.getMandateId()))
-                .orElseThrow(
-                        () ->
-                                new ResponseStatusException(
-                                        HttpStatus.NOT_FOUND, "Offre introuvable"));
+                .orElseThrow(() -> MandateMarketplaceService.notFound("Offre introuvable"));
     }
 
     /** Trace interne au dossier de l'agence (l'offre a sa propre vue chez le propriétaire). */
@@ -250,10 +238,7 @@ public class MandateOfferService {
                                             a.setType(ActivityType.NOTE);
                                             a.setContent(content);
                                             a.setVisibility(ActivityVisibility.INTERNAL);
-                                            LocalDateTime now = LocalDateTime.now();
-                                            a.setCreatedAt(now);
-                                            a.setUpdatedAt(now);
-                                            activities.save(a);
+                                            activities.save(a); // dates : BaseEntity
                                         }));
     }
 
@@ -269,13 +254,5 @@ public class MandateOfferService {
     static String mad(BigDecimal amount) {
         NumberFormat f = NumberFormat.getIntegerInstance(Locale.FRANCE);
         return f.format(amount.setScale(0, RoundingMode.HALF_UP)).replace(' ', ' ') + " MAD";
-    }
-
-    private static ResponseStatusException bad(String message) {
-        return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
-    }
-
-    private static ResponseStatusException conflict(String message) {
-        return new ResponseStatusException(HttpStatus.CONFLICT, message);
     }
 }

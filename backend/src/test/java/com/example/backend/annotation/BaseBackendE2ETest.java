@@ -145,6 +145,11 @@ public abstract class BaseBackendE2ETest {
     }
 
     protected RequestPostProcessor jwtWithRoles(String orgId, String... roles) {
+        return jwtAs(orgId, "test-user", roles);
+    }
+
+    /** Comme {@link #jwtWithRoles} pour un utilisateur précis ({@code sub}). */
+    protected RequestPostProcessor jwtAs(String orgId, String subject, String... roles) {
         String[] effectiveRoles = (roles == null || roles.length == 0) ? new String[] { "ADMIN" } : roles;
         List<GrantedAuthority> authorities = Arrays.stream(effectiveRoles)
                 .filter(role -> role != null && !role.isBlank())
@@ -153,7 +158,7 @@ public abstract class BaseBackendE2ETest {
                 .map(authority -> (GrantedAuthority) authority)
                 .toList();
 
-        return jwt().jwt(createMockJwt(orgId, "test-user", effectiveRoles))
+        return jwt().jwt(createMockJwt(orgId, subject, effectiveRoles))
                 .authorities(authorities);
     }
 }

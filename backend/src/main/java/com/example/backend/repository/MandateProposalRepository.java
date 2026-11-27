@@ -10,6 +10,8 @@ public interface MandateProposalRepository extends JpaRepository<MandateProposal
 
     List<MandateProposalEntity> findByRequestIdOrderByCreatedAtAsc(Long requestId);
 
+    boolean existsByRequestId(Long requestId);
+
     Optional<MandateProposalEntity> findByRequestIdAndAgencyOrgId(
             Long requestId, String agencyOrgId);
 

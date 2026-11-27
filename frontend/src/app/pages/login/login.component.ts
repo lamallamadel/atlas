@@ -28,13 +28,15 @@ export class LoginComponent implements OnInit {
     ['Propriétaire', 'demo-owner-01'],
     ['Super-admin', 'demo-superadmin'],
   ].map(([label, sub]) => ({ label, account: DEMO_ACCOUNTS.find(a => a.sub === sub)! }));
-  readonly demoGroups: { name: string; accounts: DemoAccount[] }[] = DEMO_ACCOUNTS.reduce(
+  /** Comptes groupés, libellés calculés une fois (la liste est fixe). */
+  readonly demoGroups: { name: string; accounts: { sub: string; label: string }[] }[] = DEMO_ACCOUNTS.reduce(
     (groups, a) => {
+      const option = { sub: a.sub, label: a.roles.includes('OWNER') ? a.name : `${a.label} — ${a.name}` };
       const g = groups.find(x => x.name === a.group);
-      if (g) g.accounts.push(a); else groups.push({ name: a.group, accounts: [a] });
+      if (g) g.accounts.push(option); else groups.push({ name: a.group, accounts: [option] });
       return groups;
     },
-    [] as { name: string; accounts: DemoAccount[] }[]);
+    [] as { name: string; accounts: { sub: string; label: string }[] }[]);
   demoSelected = 'demo-detroit-agent1';
 
   constructor(
@@ -165,10 +167,6 @@ export class LoginComponent implements OnInit {
       this.isLoading = false;
       this.cdr.markForCheck();
     }
-  }
-
-  optionLabel(a: DemoAccount): string {
-    return a.roles.includes('OWNER') ? a.name : `${a.label} — ${a.name}`;
   }
 
   demoAccount(sub: string): DemoAccount | undefined {

@@ -113,7 +113,7 @@
             @for (g of demoGroups; track g.name) {
               <optgroup [label]="g.name">
                 @for (a of g.accounts; track a.sub) {
-                  <option [value]="a.sub">{{ optionLabel(a) }}</option>
+                  <option [value]="a.sub">{{ a.label }}</option>
                 }
               </optgroup>
             }

@@ -24,10 +24,10 @@ import {
   MANDATE_TYPE_LABELS,
   MandateFollowUp,
   MandateOffer,
-  OFFER_STATUS,
   OwnerMandateApiService,
   commissionLabel,
   madLabel,
+  offerStatusOf,
 } from '../../services/mandate-api.service';
 import { OfferDialogData, OfferDialogResult, OwnerOfferDialogComponent } from './owner-offer-dialog.component';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
@@ -102,17 +102,18 @@ const LISTING_STATUS: Record<string, { label: string; status: 'info' | 'warning'
               <ds-card [pad]="true" elevation="xs">
                 <h2 class="om-card-title">Offres reçues</h2>
                 <ul class="om-offers" role="list">
-                  @for (o of x.offers; track o.id) {
+                  @for (r of offerRows(); track r.offer.id) {
+                    @let o = r.offer;
                     <li class="om-offer" [class.om-offer--pending]="o.status === 'OFFER_PENDING'">
                       <div class="om-offer__head">
-                        <span class="om-offer__amount">{{ mad(o.amount) }}</span>
-                        <ds-badge [status]="offerStatus(o).status">{{ offerStatus(o).label }}</ds-badge>
+                        <span class="om-offer__amount">{{ r.amount }}</span>
+                        <ds-badge [status]="r.badge.status">{{ r.badge.label }}</ds-badge>
                       </div>
                       @if (o.buyerSummary) { <span class="om-strong">{{ o.buyerSummary }}</span> }
                       @if (o.conditions) { <span class="om-muted om-pre">{{ o.conditions }}</span> }
                       <span class="om-muted">Reçue le {{ o.createdAt | date: 'd MMMM' }}{{ o.validUntil ? ' · valable jusqu\\'au ' + (o.validUntil | date: 'd MMMM') : '' }}</span>
                       @if (o.status === 'OFFER_COUNTERED') {
-                        <span class="om-muted">Votre contre-proposition : <strong>{{ mad(o.counterAmount) }}</strong></span>
+                        <span class="om-muted">Votre contre-proposition : <strong>{{ r.counter }}</strong></span>
                       }
                       @if (o.ownerComment) { <p class="om-quote">{{ o.ownerComment }}</p> }
                       @if (o.status === 'OFFER_PENDING' && x.mandate.status === 'MANDATE_ACTIVE') {
@@ -289,6 +290,14 @@ export class OwnerMandateComponent implements OnInit {
     parts.push(`${x.events.length} événement${x.events.length > 1 ? 's' : ''} partagé${x.events.length > 1 ? 's' : ''}`);
     return parts.join(' · ');
   });
+  /** Offres prêtes à afficher, recalculées seulement quand le suivi change. */
+  readonly offerRows = computed(() =>
+    (this.f()?.offers ?? []).map(o => ({
+      offer: o,
+      amount: madLabel(o.amount),
+      counter: madLabel(o.counterAmount),
+      badge: offerStatusOf(o),
+    })));
   readonly timeline = computed<DsTimelineEvent[]>(() =>
     (this.f()?.events ?? []).map(e => ({
       date: e.createdAt,
@@ -307,9 +316,6 @@ export class OwnerMandateComponent implements OnInit {
       error: err => { this.loading.set(false); if (err?.status !== 404) this.toast.error(serverMessage(err, 'Impossible de charger le mandat')); },
     });
   }
-
-  mad(v: number | null): string { return madLabel(v); }
-  offerStatus(o: MandateOffer) { return OFFER_STATUS[o.status] ?? { label: o.status, status: 'neutral' as const }; }
 
   answer(o: MandateOffer): void {
     const x = this.f();

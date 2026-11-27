@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { OAuthService, AuthConfig } from 'angular-oauth2-oidc';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { decodeBase64Url } from '../utils/base64url';
 
 interface JwtPayload {
   sub?: string;
@@ -264,13 +265,7 @@ export class AuthService {
       throw new Error('Invalid token format');
     }
 
-    const payload = parts[1];
-    // base64url -> base64
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
     // UTF-8 : un nom accentué (« Leïla ») reste lisible.
-    const binary = atob(padded);
-    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
-    return JSON.parse(new TextDecoder().decode(bytes));
+    return JSON.parse(decodeBase64Url(parts[1]));
   }
 }

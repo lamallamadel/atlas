@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,8 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /**
@@ -45,16 +42,7 @@ class DemoSeedBackendE2ETest extends BaseBackendE2ETest {
     private <T extends MockHttpServletRequestBuilder> T as(
             T builder, String org, String sub, String... roles) {
         builder.header(TENANT_HEADER, org).header(CORRELATION_ID_HEADER, "demo-seed");
-        builder.with(
-                jwt().jwt(createMockJwt(org, sub, roles))
-                        .authorities(
-                                java.util.Arrays.stream(roles)
-                                        .map(
-                                                r ->
-                                                        (GrantedAuthority)
-                                                                new SimpleGrantedAuthority(
-                                                                        "ROLE_" + r))
-                                        .toList()));
+        builder.with(jwtAs(org, sub, roles));
         return builder;
     }
 

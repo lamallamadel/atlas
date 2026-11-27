@@ -429,6 +429,11 @@ public class SecurityConfig {
                     "email",
                     "phone_number");
 
+    private static final com.fasterxml.jackson.databind.ObjectMapper DEMO_PAYLOAD_READER =
+            new com.fasterxml.jackson.databind.ObjectMapper();
+    private static final com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>
+            DEMO_PAYLOAD_TYPE = new com.fasterxml.jackson.core.type.TypeReference<>() {};
+
     /** Jeton de démonstration : claims lus dans la charge utile JSON (base64url). */
     static Jwt demoJwt(String token) {
         String[] parts = token.substring(MOCK_DEMO_PREFIX.length()).split("\\.");
@@ -439,13 +444,8 @@ public class SecurityConfig {
         try {
             byte[] json =
                     java.util.Base64.getUrlDecoder()
-                            .decode(parts[1].replace('+', '-').replace('/', '_').replace("=", ""));
-            payload =
-                    new com.fasterxml.jackson.databind.ObjectMapper()
-                            .readValue(
-                                    json,
-                                    new com.fasterxml.jackson.core.type.TypeReference<
-                                            Map<String, Object>>() {});
+                            .decode(parts[1].replace('+', '-').replace('/', '_'));
+            payload = DEMO_PAYLOAD_READER.readValue(json, DEMO_PAYLOAD_TYPE);
         } catch (Exception e) {
             throw new org.springframework.security.oauth2.jwt.BadJwtException(
                     "Invalid demo token payload", e);

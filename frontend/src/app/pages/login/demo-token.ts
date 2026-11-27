@@ -1,12 +1,5 @@
 import { DemoAccount } from './demo-accounts';
-
-/** Base64url d'une chaîne UTF-8 (les noms démo ont des accents). */
-function base64Url(value: string): string {
-  const bytes = new TextEncoder().encode(value);
-  let binary = '';
-  bytes.forEach(b => (binary += String.fromCharCode(b)));
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
+import { encodeBase64Url } from '../../utils/base64url';
 
 /**
  * Jeton « mock-demo-<en-tête>.<charge utile>.demo » : le backend en mode mock lit sub, rôles et
@@ -25,7 +18,7 @@ export function demoToken(account: DemoAccount, nowSeconds = Math.floor(Date.now
     iat: nowSeconds,
     exp: nowSeconds + 8 * 3600,
   };
-  return `mock-demo-${base64Url(JSON.stringify(header))}.${base64Url(JSON.stringify(payload))}.demo`;
+  return `mock-demo-${encodeBase64Url(JSON.stringify(header))}.${encodeBase64Url(JSON.stringify(payload))}.demo`;
 }
 
 /** Page d'arrivée selon le profil. */
