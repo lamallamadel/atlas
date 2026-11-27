@@ -20,6 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final org.slf4j.Logger UNEXPECTED_LOG =
+            org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     private static final String PROBLEM_JSON_MEDIA_TYPE = "application/problem+json";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -309,6 +312,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleGenericException(
             Exception ex, HttpServletRequest request) {
+        // Sans cette trace, un 500 ne laisse rien dans les journaux.
+        UNEXPECTED_LOG.error(
+                "Erreur inattendue sur {} {}", request.getMethod(), request.getRequestURI(), ex);
         ProblemDetail problemDetail =
                 new ProblemDetail(
                         "about:blank",

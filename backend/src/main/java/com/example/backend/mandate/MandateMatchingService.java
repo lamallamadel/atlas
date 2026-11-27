@@ -13,7 +13,6 @@ import com.example.backend.entity.MandateRequestEntity;
 import com.example.backend.entity.OrganizationEntity;
 import com.example.backend.entity.PropertyEntity;
 import com.example.backend.entity.enums.DossierStatus;
-import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.AgencyProfileRepository;
 import com.example.backend.repository.AgencyZoneRepository;
 import com.example.backend.repository.DossierRepository;
@@ -265,14 +264,14 @@ public class MandateMatchingService {
     /** Propositions du mois prévues par le plan de l'agence ({@code -1} : illimité). */
     public int monthlyQuota(String agency) {
         if (organizationSettings != null) {
-            try {
-                QuotaSettingsDto q =
-                        orgScope.unfiltered(() -> organizationSettings.getQuotas(agency));
-                if (q != null && q.getMaxMandateProposalsMonth() != null) {
-                    return q.getMaxMandateProposalsMonth();
-                }
-            } catch (ResourceNotFoundException e) {
-                // Agence sans réglages : quota par défaut.
+            // findQuotas, pas getQuotas : son exception « pas de réglages » marquerait la
+            // transaction de la requête pour annulation (500 au commit).
+            Integer max =
+                    orgScope.unfiltered(() -> organizationSettings.findQuotas(agency))
+                            .map(QuotaSettingsDto::getMaxMandateProposalsMonth)
+                            .orElse(null);
+            if (max != null) {
+                return max;
             }
         }
         return settings.monthlyProposalQuota();

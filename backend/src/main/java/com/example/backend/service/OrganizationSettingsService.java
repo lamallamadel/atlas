@@ -323,6 +323,18 @@ public class OrganizationSettingsService {
         return extractWorkflow(entity.getSettings());
     }
 
+    /**
+     * Quotas de l'organisation, vide si elle n'a pas de réglages. À préférer à {@link
+     * #getQuotas(String)} dans une transaction en cours : l'exception de celle-ci, même rattrapée,
+     * marque la transaction de l'appelant pour annulation.
+     */
+    @Transactional(readOnly = true)
+    public java.util.Optional<QuotaSettingsDto> findQuotas(String orgId) {
+        return organizationSettingsRepository
+                .findByOrgId(orgId)
+                .map(entity -> extractQuotas(entity.getSettings()));
+    }
+
     @Transactional(readOnly = true)
     public QuotaSettingsDto getQuotas(String orgId) {
         logger.debug("Getting quota settings for orgId={}", orgId);

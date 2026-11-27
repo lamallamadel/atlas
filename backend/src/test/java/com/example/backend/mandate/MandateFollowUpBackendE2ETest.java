@@ -71,6 +71,8 @@ class MandateFollowUpBackendE2ETest extends BaseBackendE2ETest {
     @Autowired private ApplicationEvents events;
     @Autowired private com.example.backend.repository.MandateRequestRepository mandateRequests;
     @Autowired private MandateLifecycleService lifecycle;
+    @Autowired private MandateMatchingService matching;
+    @Autowired private org.springframework.transaction.PlatformTransactionManager txManager;
 
     @MockitoBean private OtpSender otpSender;
 
@@ -745,5 +747,21 @@ class MandateFollowUpBackendE2ETest extends BaseBackendE2ETest {
         mockMvc.perform(as(get("/api/v1/agency/marketplace-profile"), B, "admin-" + B, "ADMIN"))
                 .andExpect(jsonPath("$.reviews").value(0))
                 .andExpect(jsonPath("$.recentReviews.length()").value(0));
+    }
+
+    // ------------------------------------------------------------------ régression
+
+    /**
+     * Une agence sans réglages (cas général) : le quota par défaut s'applique sans marquer la
+     * transaction pour annulation. Avant correction, la bourse renvoyait 500 au commit ; la
+     * transaction du test, annulée de toute façon, ne le montrait pas.
+     */
+    @Test
+    void quotaOfAnAgencyWithoutSettings_doesNotPoisonTheTransaction() {
+        var tx = new org.springframework.transaction.support.TransactionTemplate(txManager);
+        tx.setPropagationBehavior(
+                org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        Long remaining = tx.execute(status -> matching.remainingQuota("ORG-WITHOUT-SETTINGS"));
+        assertThat(remaining).isEqualTo(30L);
     }
 }
