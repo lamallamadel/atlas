@@ -316,6 +316,13 @@ public class SecurityConfig {
                             "Token cannot be blank");
                 }
 
+                // Comptes de démonstration (page de connexion, seed db/demo) :
+                // "mock-demo-<en-tête>.<charge utile>.<signature>" — la charge utile donne sub,
+                // rôles, org_id et nom. Mode mock uniquement (issuer vide ou "mock").
+                if (token.startsWith(MOCK_DEMO_PREFIX)) {
+                    return demoJwt(token);
+                }
+
                 // Handle expired tokens by returning a JWT with past expiration time
                 // This allows Spring Security's JwtTimestampValidator to reject with 401
                 if (token.contains("expired")) {
@@ -407,6 +414,64 @@ public class SecurityConfig {
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(withIssuer, withTimestamp));
 
         return decoder;
+    }
+
+    static final String MOCK_DEMO_PREFIX = "mock-demo-";
+
+    private static final java.util.Set<String> DEMO_CLAIMS =
+            java.util.Set.of(
+                    "sub",
+                    "org_id",
+                    "name",
+                    "given_name",
+                    "family_name",
+                    "preferred_username",
+                    "email",
+                    "phone_number");
+
+    /** Jeton de démonstration : claims lus dans la charge utile JSON (base64url). */
+    static Jwt demoJwt(String token) {
+        String[] parts = token.substring(MOCK_DEMO_PREFIX.length()).split("\\.");
+        if (parts.length != 3) {
+            throw new org.springframework.security.oauth2.jwt.BadJwtException("Invalid demo token");
+        }
+        Map<String, Object> payload;
+        try {
+            byte[] json =
+                    java.util.Base64.getUrlDecoder()
+                            .decode(parts[1].replace('+', '-').replace('/', '_').replace("=", ""));
+            payload =
+                    new com.fasterxml.jackson.databind.ObjectMapper()
+                            .readValue(
+                                    json,
+                                    new com.fasterxml.jackson.core.type.TypeReference<
+                                            Map<String, Object>>() {});
+        } catch (Exception e) {
+            throw new org.springframework.security.oauth2.jwt.BadJwtException(
+                    "Invalid demo token payload", e);
+        }
+        Object sub = payload.get("sub");
+        if (!(sub instanceof String s) || s.isBlank()) {
+            throw new org.springframework.security.oauth2.jwt.BadJwtException(
+                    "Demo token without sub");
+        }
+        List<String> roles =
+                payload.get("roles") instanceof List<?> list
+                        ? list.stream().map(String::valueOf).toList()
+                        : List.of();
+        var builder =
+                Jwt.withTokenValue(token)
+                        .header("alg", "none")
+                        .claim("roles", roles)
+                        .claim("realm_access", Map.of("roles", roles))
+                        .issuedAt(Instant.now())
+                        .expiresAt(Instant.now().plusSeconds(8 * 3600));
+        for (String claim : DEMO_CLAIMS) {
+            if (payload.get(claim) instanceof String v && !v.isBlank()) {
+                builder.claim(claim, v);
+            }
+        }
+        return builder.build();
     }
 
     @Bean
