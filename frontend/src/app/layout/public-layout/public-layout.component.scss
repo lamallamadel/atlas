@@ -178,9 +178,11 @@
 }
 
 /* ─── FOOTER ─── */
+/* Pied de page toujours foncé : textes clairs fixes (--ds-text-inverse devient sombre en mode
+   sombre). Fond marine foncé dans les deux thèmes, voir _atlasia-public-portal.scss. */
 .pub-footer {
   background: var(--ds-marine);
-  color: var(--ds-text-inverse);
+  color: white;
   padding-block: var(--ds-space-12) var(--ds-space-6);
 }
 
@@ -200,7 +202,7 @@
   font-size: 1.125rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--ds-text-inverse);
+  color: white;
   margin-bottom: var(--ds-space-4);
 }
 
@@ -237,7 +239,7 @@
   transition: color var(--ds-transition-fast);
 }
 
-.pub-footer-links a:hover { color: var(--ds-text-inverse); }
+.pub-footer-links a:hover { color: white; }
 
 .pub-footer-bottom {
   display: flex;

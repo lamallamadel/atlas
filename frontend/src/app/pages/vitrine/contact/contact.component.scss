@@ -1,10 +1,16 @@
 :host { display: block; }
 .ct-layout { display: grid; grid-template-columns: 1fr 340px; gap: var(--ds-space-8); align-items: start; }
 .ct-info { background: var(--ds-marine); border-radius: var(--ds-radius-xl); padding: var(--ds-space-8); color: white; }
-.ct-info h3 { color: white; }
+/* Panneau marine : textes clairs, quel que soit le thème (pas de styles en ligne qui les écrasent). */
+/* En mode sombre, --ds-marine devient un bleu clair : le marine foncé y est --ds-marine-hl. */
+:host-context([data-theme='dark']) .ct-info,
+:host-context(.dark-theme) .ct-info { background: var(--ds-marine-hl); }
+.ct-info-title { font-family: var(--ds-font-display); color: white; margin: 0 0 var(--ds-space-6); }
 .ct-info-items { display: flex; flex-direction: column; gap: var(--ds-space-5); }
 .ct-info-item { display: flex; align-items: flex-start; gap: var(--ds-space-4); font-size: var(--ds-text-sm); color: oklch(1 0 0 / 0.65); line-height: 1.6; }
 .ct-info-item strong { color: white; display: block; margin-bottom: 2px; }
+.ct-info-item span { display: block; }
 .ct-info-icon { width: 36px; height: 36px; border-radius: var(--ds-radius-md); background: oklch(1 0 0 / 0.08); display: flex; align-items: center; justify-content: center; color: var(--ds-primary); flex-shrink: 0; }
+.ct-info-cta { margin-top: var(--ds-space-8); width: 100%; display: inline-flex; justify-content: center; gap: var(--ds-space-2); text-decoration: none; }
 .at-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 @media (max-width: 900px) { .ct-layout { grid-template-columns: 1fr; } }

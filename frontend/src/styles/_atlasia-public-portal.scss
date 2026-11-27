@@ -430,6 +430,14 @@ app-annonce-detail [class*="summary"] {
     var(--ds-marine) !important;
 }
 
+/* En mode sombre, --ds-marine devient un bleu clair : le marine foncé y est --ds-marine-hl. */
+[data-theme='dark'] .pub-footer,
+.dark-theme .pub-footer {
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--ds-primary) 12%, transparent), transparent 26rem),
+    var(--ds-marine-hl) !important;
+}
+
 .pub-footer-links a:hover {
   color: var(--ds-primary-highlight) !important;
 }

@@ -76,25 +76,25 @@
         </ds-card>
       }
 
-      <div class="ct-info ds-form-stack">
-        <h3 style="font-family:var(--ds-font-display); margin-bottom: 24px; color: var(--ds-marine);">Informations</h3>
-        <div class="ct-info-items ds-form-stack">
-          <div class="ct-info-item" style="display: flex; gap: 16px;">
-            <div class="ct-info-icon" style="color: var(--ds-primary);"><ds-icon name="map-pin" [size]="20"></ds-icon></div>
-            <div style="font-size: 14px;"><strong style="color: var(--ds-text);">Siège social</strong><br/><span style="color: var(--ds-text-muted);">Casablanca, Maroc</span></div>
+      <div class="ct-info">
+        <h3 class="ct-info-title">Informations</h3>
+        <div class="ct-info-items">
+          <div class="ct-info-item">
+            <div class="ct-info-icon"><ds-icon name="map-pin" [size]="20"></ds-icon></div>
+            <div><strong>Siège social</strong><span>Casablanca, Maroc</span></div>
           </div>
-          <div class="ct-info-item" style="display: flex; gap: 16px;">
-            <div class="ct-info-icon" style="color: var(--ds-primary);"><ds-icon name="mail" [size]="20"></ds-icon></div>
-            <div style="font-size: 14px;"><strong style="color: var(--ds-text);">Email</strong><br/><span style="color: var(--ds-text-muted);">contact&#64;atlasia.ma</span></div>
+          <div class="ct-info-item">
+            <div class="ct-info-icon"><ds-icon name="mail" [size]="20"></ds-icon></div>
+            <div><strong>Email</strong><span>contact&#64;atlasia.ma</span></div>
           </div>
-          <div class="ct-info-item" style="display: flex; gap: 16px;">
-            <div class="ct-info-icon" style="color: var(--ds-primary);"><ds-icon name="clock" [size]="20"></ds-icon></div>
-            <div style="font-size: 14px;"><strong style="color: var(--ds-text);">Horaires</strong><br/><span style="color: var(--ds-text-muted);">Lun–Ven, 9h–18h (GMT+1)</span></div>
+          <div class="ct-info-item">
+            <div class="ct-info-icon"><ds-icon name="clock" [size]="20"></ds-icon></div>
+            <div><strong>Horaires</strong><span>Lun–Ven, 9h–18h (GMT+1)</span></div>
           </div>
         </div>
-        <a class="ds-btn ds-btn--marine ds-btn--md" style="margin-top: 32px; width: 100%; display: inline-flex; text-decoration: none;" routerLink="/biz/demo">
+        <a class="at-btn at-btn-primary ct-info-cta" routerLink="/biz/demo">
           Planifier une démo
-          <ds-icon name="chevron-right" [size]="16" style="margin-left: 8px;"></ds-icon>
+          <ds-icon name="chevron-right" [size]="16"></ds-icon>
         </a>
       </div>
     </div>
