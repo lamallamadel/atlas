@@ -50,11 +50,6 @@
   white-space: nowrap;
 }
 
-.pub-logo-biz {
-  color: var(--ds-primary);
-  font-style: italic;
-}
-
 /* Nav */
 .pub-nav {
   display: flex;
@@ -96,14 +91,17 @@
 }
 
 /* Theme toggle */
+/* padding: 0 — la règle globale des cibles tactiles (button { padding: 8px 16px; min 40px })
+   ne laissait que 6 px à l'icône dans ce bouton rond. */
 .pub-theme-btn {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
   border-radius: var(--ds-radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-text-muted);
+  color: var(--ds-text);
   border: 1.5px solid var(--ds-border);
   background: transparent;
   cursor: pointer;
@@ -111,16 +109,23 @@
   flex-shrink: 0;
 }
 
+.pub-theme-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .pub-theme-btn:hover {
-  color: var(--ds-text);
-  border-color: var(--ds-text-muted);
+  color: var(--ds-primary);
+  border-color: var(--ds-primary);
 }
 
 /* Mobile hamburger */
 .pub-mobile-btn {
   display: none;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
   border-radius: var(--ds-radius-md);
   align-items: center;
   justify-content: center;
@@ -199,7 +204,6 @@
   margin-bottom: var(--ds-space-4);
 }
 
-.pub-footer-logo em { color: var(--ds-primary); font-style: italic; }
 
 .pub-footer-desc {
   font-size: var(--ds-text-sm);
