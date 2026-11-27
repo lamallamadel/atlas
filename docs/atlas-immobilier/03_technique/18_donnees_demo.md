@@ -15,12 +15,22 @@ Fichiers :
 
 **Stack locale** (`infra/docker-compose.local.yml`, profils `h2,local,dev`) : rien à faire. Au démarrage, `DemoSeedLoader` passe après `SeedDataLoader` (ORG-001/ORG-002) et charge le seed une seule fois. S'il trouve l'organisation `DEMO-DETROIT`, il ne fait rien. En cas d'erreur, la transaction est annulée et l'erreur est journalisée ; l'application démarre quand même.
 
-Pour repartir de zéro :
+L'image du backend ne compile pas le code : `infra/Dockerfile.backend` copie `backend/target/*.jar`. Après une mise à jour du dépôt, reconstruire le jar avant l'image, sinon le conteneur garde l'ancien backend (sans données démo, et qui lit un jeton `mock-demo-…` comme un simple jeton mock administrateur : l'espace propriétaire répond alors 403).
+
+```powershell
+cd backend
+mvn clean package -DskipTests
+cd ..\infra
+docker compose -f docker-compose.local.yml up -d --build backend
+docker logs -f backend_app | Select-String "démonstration"
+```
+
+Pour repartir de zéro (même chose, avec `down -v` avant `up`) :
 
 ```powershell
 cd infra
 docker compose -f docker-compose.local.yml down -v
-docker compose -f docker-compose.local.yml up -d
+docker compose -f docker-compose.local.yml up -d --build
 ```
 
 Pour ne pas charger les données : `atlas.demo.seed-enabled=false` (variable d'environnement `ATLAS_DEMO_SEEDENABLED=false`).
