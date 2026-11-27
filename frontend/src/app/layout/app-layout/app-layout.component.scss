@@ -13,10 +13,14 @@
   background: var(--ds-bg);
 }
 
+/* Caché hors écran jusqu'au focus clavier. Translation de 100 % de sa propre hauteur, et non
+   un top fixe : la règle globale des cibles tactiles (min-height 40px + padding) le rendait plus
+   haut que les 40 px de décalage, et son bas apparaissait en filet orange au-dessus du menu. */
 .skip-to-content {
   position: absolute;
-  top: -40px;
+  top: 0;
   left: 0;
+  transform: translateY(-100%);
   background: var(--ds-primary);
   color: var(--ds-text-inverse);
   padding: var(--ds-space-2) var(--ds-space-4);
@@ -27,7 +31,7 @@
 }
 
 .skip-to-content:focus {
-  top: 0;
+  transform: none;
 }
 
 /* ── Sidebar ── */
