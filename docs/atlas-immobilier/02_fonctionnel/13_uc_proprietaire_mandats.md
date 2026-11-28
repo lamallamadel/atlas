@@ -488,3 +488,16 @@ Encore ouvertes (valeur par défaut retenue si rien n'est décidé avant le lot)
 | Q6 | Modération a priori de la première annonce : par qui, avec quel délai ? | Équipe Atlas, objectif sous 4 h ouvrées | A |
 | Q7 | Statistique agrégée d'acquéreurs inter-agences (§ 5.3) | Non au lancement ; à proposer aux agences en option | C |
 | Q8 | Qui paie la commission par défaut, et faut-il un barème indicatif ? | Champ libre dans la proposition, sans barème imposé | B |
+
+## 18. Phase « vendeur » (2026-11-28)
+
+Issue de la contre-critique fonctionnelle (feuille de route « Maintenant / Ensuite / Plus tard », étape « Ensuite »).
+
+| Sujet | Règle |
+|---|---|
+| Repère de prix | Prix au m² des annonces publiées comparables (même type de bien, même transaction ; une annonce par bien ; le bien lui-même exclu), toutes agences confondues. Quartier si au moins 3 références, sinon ville, sinon aucun chiffre. Fourchette = 1er et 3e quartiles × surface, arrondie à 10 000 MAD (vente) ou 100 MAD (location). Toujours libellé « prix affichés, pas prix vendus ». Position du prix souhaité : sous, dans ou au-dessus de la fourchette, à 5 % près. |
+| Net vendeur | Vente seulement. Base : prix souhaité de la demande, sinon milieu de l'estimation de l'agence. Part du vendeur : payeur propriétaire 100 %, partagée 50 %, acquéreur 0 %. Hors impôts et frais de notaire. « Meilleur net » seulement entre au moins deux propositions ouvertes calculées sur le prix souhaité, sans égalité. |
+| Distribution des leads | Réglage d'équipe `leadRouting` (administrateur) : `SHARED_QUEUE` (défaut, le lead reste « à attribuer »), `LISTING_AGENT` (l'agent qui a publié l'annonce, s'il est actif ; sinon tour de rôle), `ROUND_ROBIN` (l'agent actif dont la dernière attribution est la plus ancienne ; agents d'abord, sinon tous les membres). Un lead déjà attribué n'est jamais repris. Attribution tracée dans le fil du dossier et notifiée. |
+| Vérification des agences | L'agence non vérifiée voit les étapes (profil, zones, RC et ICE, contrôle Atlas) et le nombre de demandes ouvertes dans ses zones. Seuls l'administrateur et les managers déposent la demande ; ICE à 15 chiffres. Statuts : `NONE`, `PENDING`, `REJECTED` (motif obligatoire, montré à l'agence, qui peut renvoyer), `VERIFIED`. `organization.verified` reste la seule source de vérité de l'accès. |
+| Ouverture des zones | Une ville est « ouverte » quand au moins 3 agences vérifiées la couvrent. Suivi sur 90 jours des demandes à la bourse : ouvertes, sans proposition après 72 h, délai médian jusqu'à la première proposition, part des demandes confiées. Vue `/pro/zones` (super-admin). L'indicateur éclaire la décision ; il ne bloque pas encore les demandes des propriétaires dans une ville en préparation. |
+

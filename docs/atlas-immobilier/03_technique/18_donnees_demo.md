@@ -117,13 +117,17 @@ Organisations `OWN-DEMO01` à `OWN-DEMO10`, rôle `OWNER`, téléphone `+2126000
 
 Chaque mandat a son dossier côté agence, positionné sur le workflow (`CRM_OFFER_RECEIVED`, `CRM_VISIT_PLANNED`, `CRM_LISTED`, `CRM_CLOSED_WON`…). Les agences ont aussi 40 dossiers d'acquéreurs et de locataires avec critères de recherche : la bourse calcule des « acquéreurs compatibles » et les recommandations restent dans les zones de chaque agence. On y trouve encore des rendez-vous, des tâches, des notes internes et des notes visibles du propriétaire, et des notifications non lues dans l'espace Pro.
 
+Les agences publient aussi 49 annonces de leur stock propre (hors bourse, sans bien lié, quartier dans l'adresse) : elles peuplent le portail et servent de comparables au repère de prix des propriétaires (au moins 3 par quartier pour la plupart des biens, sinon la ville).
+
 ## Parcours conseillés
 
 1. **Propriétaire** (Nadia I.) : *Mes biens* → *Appartement 3 pièces vue mer* → *Suivre le mandat* : répondre à l'offre en attente, lire ce que l'agence partage.
 2. **Manager** (Détroit) : *Mandats* → *Bourse* : la villa de Boubana avec sa pertinence ; *Mes propositions*, *Mandats*.
 3. **Agent** (Détroit) : *Dossiers* : les leads et le dossier du mandat P01 avec ses transitions.
-4. **Super-admin** : *Modération* : titres fonciers de P03 et P14, annonce P12 à valider.
-5. **Agence non vérifiée** : n'importe quel compte Kech Immo Nouvelle → *Mandats* : accès refusé.
+4. **Super-admin** : *Modération* : Kech Immo Nouvelle à vérifier (RC et ICE), titres fonciers de P03 et P14, annonce P12 à valider ; *Zones* : Tanger et Casablanca ouvertes, les autres villes en préparation.
+5. **Agence non vérifiée** : directeur ou manager de Kech Immo Nouvelle → *Mandats* : chemin de vérification, demande en cours d'examen.
+6. **Propriétaire** (Nadia I.) : fiche de l'appartement de Malabata → *Repère de prix* ; Karim B. → demande de la villa de Boubana : net vendeur des trois propositions.
+7. **Administrateur** (Détroit) : *Équipe* → *Distribution des leads* : choisir le tour de rôle, puis envoyer un contact depuis le portail.
 
 ## Modifier les données
 

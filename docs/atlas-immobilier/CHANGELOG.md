@@ -1,3 +1,13 @@
+# Changelog — v0.16-vendeur-2026-11-28
+
+Phase « vendeur » de la contre-critique fonctionnelle du 28 novembre 2026 (spec 13 § 18).
+- Repère de prix : fourchette tirée des prix affichés des annonces publiées comparables (même type de bien, même transaction), dans le quartier puis la ville, 3 références au moins (`GET /api/v1/owner/properties/{id}/price-reference`). Carte sur la fiche du bien du propriétaire et rappel dans la demande de mandat, avec la mention « prix affichés, pas prix vendus ».
+- Net vendeur sur chaque proposition d'agence (vente) : prix souhaité moins la part de commission du vendeur ; badge « Meilleur net » entre propositions ouvertes.
+- Distribution des leads du portail (réglage d'équipe `leadRouting`, écran Équipe) : file partagée (par défaut), agent de l'annonce, tour de rôle. Attribution tracée et notifiée.
+- Vérification des agences : au lieu du refus de la bourse, l'agence voit ce qui manque, le nombre de demandes ouvertes dans ses zones, dépose RC et ICE et suit sa demande ; l'équipe Atlas valide ou refuse avec un motif (`/pro/moderation`). Migration V170.
+- Ouverture des zones (`/pro/zones`, super-admin) : agences vérifiées par ville (critère : 3), demandes sans proposition après 72 h, délai médian jusqu'à la première proposition, part des demandes confiées.
+- Données démo : 49 annonces du stock propre des agences (comparables du repère de prix) ; Kech Immo Nouvelle en attente de vérification.
+
 # Changelog — v0.15-parite-2026-11-28
 
 Phase « parité » de la contre-critique fonctionnelle du 28 novembre 2026.
