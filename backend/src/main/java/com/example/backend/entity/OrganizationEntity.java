@@ -31,6 +31,25 @@ public class OrganizationEntity {
     @Column(name = "verified", nullable = false)
     private boolean verified;
 
+    /** Demande de vérification en cours ({@code PENDING}) ou refusée ({@code REJECTED}). */
+    @Column(name = "verification_status", length = 16)
+    private String verificationStatus;
+
+    @Column(name = "verification_rc", length = 64)
+    private String verificationRc;
+
+    @Column(name = "verification_ice", length = 32)
+    private String verificationIce;
+
+    @Column(name = "verification_contact", length = 255)
+    private String verificationContact;
+
+    @Column(name = "verification_requested_at")
+    private LocalDateTime verificationRequestedAt;
+
+    @Column(name = "verification_note", length = 500)
+    private String verificationNote;
+
     @Column(name = "owner_user_id", length = 255)
     private String ownerUserId;
 
@@ -134,5 +153,53 @@ public class OrganizationEntity {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public void setVerificationStatus(String verificationStatus) {
+        this.verificationStatus = verificationStatus;
+    }
+
+    public String getVerificationRc() {
+        return verificationRc;
+    }
+
+    public void setVerificationRc(String verificationRc) {
+        this.verificationRc = verificationRc;
+    }
+
+    public String getVerificationIce() {
+        return verificationIce;
+    }
+
+    public void setVerificationIce(String verificationIce) {
+        this.verificationIce = verificationIce;
+    }
+
+    public String getVerificationContact() {
+        return verificationContact;
+    }
+
+    public void setVerificationContact(String verificationContact) {
+        this.verificationContact = verificationContact;
+    }
+
+    public LocalDateTime getVerificationRequestedAt() {
+        return verificationRequestedAt;
+    }
+
+    public void setVerificationRequestedAt(LocalDateTime verificationRequestedAt) {
+        this.verificationRequestedAt = verificationRequestedAt;
+    }
+
+    public String getVerificationNote() {
+        return verificationNote;
+    }
+
+    public void setVerificationNote(String verificationNote) {
+        this.verificationNote = verificationNote;
     }
 }

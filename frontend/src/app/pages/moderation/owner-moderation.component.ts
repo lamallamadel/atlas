@@ -16,7 +16,7 @@ import {
 import type { DsSelectOption } from '../../design-system';
 import { OwnerModerationApiService, PendingOwnerAnnonce } from '../../services/owner-moderation-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
-import { MarketplaceApiService, PendingPropertyVerification } from '../../services/marketplace-api.service';
+import { MarketplaceApiService, PendingAgencyVerification, PendingPropertyVerification } from '../../services/marketplace-api.service';
 
 /**
  * Modération a priori des annonces de particuliers (cas d'usage n°1, R-PROP-04), réservée à la
@@ -50,6 +50,28 @@ import { MarketplaceApiService, PendingPropertyVerification } from '../../servic
           </div>
         </form>
       </ds-card>
+
+      @if (agencies().length) {
+        <ds-card [pad]="true" elevation="xs">
+          <h2 class="om-title">Agences à vérifier</h2>
+          <p class="om-meta">Contrôlez le registre de commerce et l'ICE (registre du commerce, simpl.ma), puis décidez. Une agence vérifiée accède à la bourse aux mandats ; un refus doit dire à l'agence quoi corriger.</p>
+          <ul class="om-props" role="list">
+            @for (a of agencies(); track a.orgId) {
+              <li class="om-prop om-prop--agency">
+                <div class="om-prop__text">
+                  <span class="om-strong">{{ a.name }} · {{ a.rc }} · ICE {{ a.ice }}</span>
+                  <span class="om-meta">{{ a.cities.join(', ') || 'Aucune zone' }}{{ a.contact ? ' · ' + a.contact : '' }} · demandé le {{ a.requestedAt | date: 'd MMM' }}</span>
+                </div>
+                <div class="om-agency__decision">
+                  <ds-input [ariaLabelInput]="'Motif du refus pour ' + a.name" name="note-{{ a.orgId }}" placeholder="Motif du refus (montré à l'agence)" [ngModel]="agencyNotes()[a.orgId] || ''" (ngModelChange)="setAgencyNote(a.orgId, $event)"></ds-input>
+                  <ds-button variant="ghost" size="sm" [disabled]="busyAgency() === a.orgId || !(agencyNotes()[a.orgId] || '').trim()" (dsClick)="decideAgency(a, false)">Refuser</ds-button>
+                  <ds-button variant="marine" size="sm" prefixIcon="check" [disabled]="busyAgency() === a.orgId" (dsClick)="decideAgency(a, true)">Vérifier l'agence</ds-button>
+                </div>
+              </li>
+            }
+          </ul>
+        </ds-card>
+      }
 
       @if (properties().length) {
         <ds-card [pad]="true" elevation="xs">
@@ -121,6 +143,8 @@ import { MarketplaceApiService, PendingPropertyVerification } from '../../servic
   styles: [`
     .om-verify__fields { display: grid; grid-template-columns: 150px 250px; gap: var(--ds-space-3); }
     @media (max-width: 900px) { .om-verify__fields { grid-template-columns: 1fr; } }
+    .om-agency__decision { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2); flex: 1 1 420px; justify-content: flex-end; }
+    .om-agency__decision ds-input { flex: 1 1 240px; }
     .om-props { display: flex; flex-direction: column; gap: var(--ds-space-4); margin: var(--ds-space-4) 0 0; padding: 0; list-style: none; }
     .om-prop { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2) var(--ds-space-3); }
     .om-prop__text { display: flex; flex-direction: column; flex: 1 1 320px; min-width: 0; }
@@ -170,6 +194,27 @@ export class OwnerModerationComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Demandes de vérification déposées par les agences (chemin de vérification). */
+  readonly agencies = signal<PendingAgencyVerification[]>([]);
+  readonly busyAgency = signal<string | null>(null);
+  readonly agencyNotes = signal<Record<string, string>>({});
+
+  setAgencyNote(orgId: string, note: string): void {
+    this.agencyNotes.update(n => ({ ...n, [orgId]: note }));
+  }
+
+  decideAgency(a: PendingAgencyVerification, verified: boolean): void {
+    this.busyAgency.set(a.orgId);
+    this.marketplace.setVerified(a.orgId, verified, verified ? null : this.agencyNotes()[a.orgId]).subscribe({
+      next: () => {
+        this.busyAgency.set(null);
+        this.agencies.update(list => list.filter(x => x.orgId !== a.orgId));
+        this.toast.success(verified ? `${a.name} est vérifiée` : `Demande de ${a.name} refusée`);
+      },
+      error: err => { this.busyAgency.set(null); this.toast.error(serverMessage(err, 'Action impossible')); },
+    });
+  }
+
   /** Lot C : titres fonciers déclarés par les propriétaires. */
   readonly properties = signal<PendingPropertyVerification[]>([]);
   readonly busyProperty = signal<number | null>(null);
@@ -207,6 +252,7 @@ export class OwnerModerationComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.load();
     this.marketplace.pendingProperties().subscribe({ next: l => this.properties.set(l), error: () => undefined });
+    this.marketplace.pendingAgencies().subscribe({ next: l => this.agencies.set(l), error: () => undefined });
   }
 
   ngOnDestroy(): void {

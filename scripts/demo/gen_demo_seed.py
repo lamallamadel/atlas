@@ -246,6 +246,11 @@ for n, o in OWN.items():
 rows.append(dict(org_id=q("DEMO-PLATFORM"), org_type=q("AGENCY"), display_name=q("Atlas — équipe plateforme"), verified=q(True),
                  owner_user_id="NULL", owner_phone="NULL", terms_version="NULL", terms_accepted_at="NULL", created_at=ago(500), updated_at=ago(1)))
 insert("organization", rows)
+w("-- Kech Immo Nouvelle (non vérifiée) a déposé sa demande de vérification : elle attend l'équipe Atlas")
+w("UPDATE organization SET verification_status = 'PENDING', verification_rc = 'RC 145872 Marrakech', "
+  "verification_ice = '002871456000071', verification_contact = 'Direction, 0524 00 00 00', "
+  f"verification_requested_at = {ago(2)} WHERE org_id = 'DEMO-KECH';")
+w()
 
 w("-- Profils et zones des agences (bourse aux mandats)")
 insert("agency_profile", [dict(org_id=q(a["org"]), display_name=q(a["name"]), description=q(a["desc"]), languages=q(a["langs"]),

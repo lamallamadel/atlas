@@ -19,20 +19,32 @@ public class AdminAgencyVerificationController {
 
     private final AgencyDirectoryService directory;
     private final com.example.backend.mandate.VerificationService verification;
+    private final com.example.backend.mandate.AgencyVerificationService agencyVerification;
 
     public AdminAgencyVerificationController(
             AgencyDirectoryService directory,
-            com.example.backend.mandate.VerificationService verification) {
+            com.example.backend.mandate.VerificationService verification,
+            com.example.backend.mandate.AgencyVerificationService agencyVerification) {
         this.directory = directory;
         this.verification = verification;
+        this.agencyVerification = agencyVerification;
     }
 
-    public record VerificationBody(boolean verified) {}
+    public record VerificationBody(boolean verified, String note) {}
 
+    /** Demandes de vérification d'agences en attente, les plus anciennes d'abord. */
+    @GetMapping("/verifications/agencies")
+    public java.util.List<com.example.backend.mandate.AgencyVerificationService.PendingAgency>
+            pendingAgencies() {
+        return agencyVerification.pending();
+    }
+
+    /** Valide l'agence ou refuse sa demande ({@code note} obligatoire, montrée à l'agence). */
     @PutMapping("/agencies/{orgId}/verification")
     public ResponseEntity<Map<String, Object>> verify(
             @PathVariable String orgId, @RequestBody VerificationBody body) {
-        directory.setVerified(orgId, body != null && body.verified());
+        agencyVerification.decide(
+                orgId, body != null && body.verified(), body == null ? null : body.note());
         return ResponseEntity.ok(Map.of("orgId", orgId, "verified", directory.isVerified(orgId)));
     }
 

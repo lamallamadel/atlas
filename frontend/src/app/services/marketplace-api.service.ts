@@ -119,6 +119,29 @@ export interface PendingPropertyVerification {
   requestedAt: string;
 }
 
+/** Vérification de l'agence (accès à la bourse) : statut, pièces déposées, ce qui manque. */
+export interface AgencyVerification {
+  status: 'VERIFIED' | 'PENDING' | 'REJECTED' | 'NONE';
+  rc: string | null;
+  ice: string | null;
+  contact: string | null;
+  requestedAt: string | null;
+  /** Motif d'un refus, écrit par l'équipe Atlas. */
+  note: string | null;
+  missing: ('PROFILE' | 'ZONES')[];
+  openRequestsInZones: number;
+}
+
+export interface PendingAgencyVerification {
+  orgId: string;
+  name: string;
+  rc: string | null;
+  ice: string | null;
+  contact: string | null;
+  requestedAt: string | null;
+  cities: string[];
+}
+
 /** Côté agence : `/api/v1/marketplace/...` et le profil `/api/v1/agency/marketplace-profile`. */
 @Injectable({ providedIn: 'root' })
 export class MarketplaceApiService {
@@ -206,9 +229,22 @@ export class MarketplaceApiService {
     return this.http.put<AgencySettings>(`${this.profileBase}/zones`, zones);
   }
 
-  /** Super-admin : vérification d'une agence. */
-  setVerified(orgId: string, verified: boolean): Observable<{ orgId: string; verified: boolean }> {
-    return this.http.put<{ orgId: string; verified: boolean }>(`/api/v1/admin/agencies/${encodeURIComponent(orgId)}/verification`, { verified });
+  verification(): Observable<AgencyVerification> {
+    return this.http.get<AgencyVerification>(`${this.profileBase}/verification`);
+  }
+
+  requestVerification(body: { rc: string; ice: string; contact?: string | null }): Observable<AgencyVerification> {
+    return this.http.post<AgencyVerification>(`${this.profileBase}/verification`, body);
+  }
+
+  /** Super-admin : vérification d'une agence ; un refus porte un motif montré à l'agence. */
+  setVerified(orgId: string, verified: boolean, note?: string | null): Observable<{ orgId: string; verified: boolean }> {
+    return this.http.put<{ orgId: string; verified: boolean }>(`/api/v1/admin/agencies/${encodeURIComponent(orgId)}/verification`, { verified, note: note ?? null });
+  }
+
+  /** Super-admin : demandes de vérification d'agences en attente. */
+  pendingAgencies(): Observable<PendingAgencyVerification[]> {
+    return this.http.get<PendingAgencyVerification[]>('/api/v1/admin/verifications/agencies');
   }
 
   /** Super-admin : badge « Propriétaire vérifié » (pièce d'identité contrôlée, non conservée). */

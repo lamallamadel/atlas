@@ -15,10 +15,11 @@ import {
   PageHeaderComponent,
 } from '../../design-system';
 import type { DsColumn, DsTab } from '../../design-system';
-import { AgencyProposal, AgencyRequest, AgencySettings, MarketplaceApiService } from '../../services/marketplace-api.service';
+import { AgencyProposal, AgencyRequest, AgencySettings, AgencyVerification, MarketplaceApiService } from '../../services/marketplace-api.service';
 import { MANDATE_STATUS, MANDATE_TYPE_LABELS, MandateView, PROPOSAL_STATUS, commissionLabel } from '../../services/mandate-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
 import { MarketplaceMandateDialogComponent } from './marketplace-mandate-dialog.component';
+import { AgencyVerificationPanelComponent } from './agency-verification-panel.component';
 
 type Tab = 'market' | 'direct' | 'proposals' | 'mandates';
 
@@ -33,7 +34,7 @@ type Tab = 'market' | 'direct' | 'proposals' | 'mandates';
   imports: [
     DatePipe, DecimalPipe, RouterLink,
     DsBadgeComponent, DsButtonComponent, DsCardComponent, DsCellDirective, DsEmptyStateComponent,
-    DsIconComponent, DsTableComponent, DsTabsComponent, PageHeaderComponent,
+    DsIconComponent, DsTableComponent, DsTabsComponent, PageHeaderComponent, AgencyVerificationPanelComponent,
   ],
   template: `
     <div class="pro-page ds-form-stack mk-page">
@@ -44,7 +45,9 @@ type Tab = 'market' | 'direct' | 'proposals' | 'mandates';
         </ng-container>
       </ds-page-header>
 
-      @if (blocked(); as reason) {
+      @if (verification(); as v) {
+        <app-agency-verification-panel [verification]="v" (changed)="verification.set($event)"></app-agency-verification-panel>
+      } @else if (blocked(); as reason) {
         <ds-card [pad]="true" elevation="xs">
           <ds-empty-state icon="lock" [title]="reason.title" [description]="reason.text"></ds-empty-state>
         </ds-card>
@@ -156,6 +159,8 @@ export class MarketplaceComponent implements OnInit {
   readonly proposals = signal<AgencyProposal[]>([]);
   readonly mandates = signal<MandateView[]>([]);
   readonly blocked = signal<{ title: string; text: string } | null>(null);
+  /** Agence non vérifiée : chemin de vérification à la place de la bourse. */
+  readonly verification = signal<AgencyVerification | null>(null);
 
   readonly tabs = computed<DsTab[]>(() => {
     const toAnswer = this.direct().filter(r => r.canPropose).length;
@@ -203,9 +208,13 @@ export class MarketplaceComponent implements OnInit {
         this.settings.set(s);
         if (!s.verified) {
           this.loading.set(false);
-          this.blocked.set({
-            title: 'Votre agence n’est pas encore vérifiée',
-            text: 'La bourse aux mandats est réservée aux agences vérifiées par Atlas. Complétez votre profil et vos zones, puis contactez l’équipe Atlas pour la vérification.',
+          // Chemin de vérification plutôt qu'un refus sec ; à défaut, le message d'origine.
+          this.api.verification().subscribe({
+            next: v => this.verification.set(v),
+            error: () => this.blocked.set({
+              title: 'Votre agence n’est pas encore vérifiée',
+              text: 'La bourse aux mandats est réservée aux agences vérifiées par Atlas. Complétez votre profil et vos zones, puis demandez la vérification.',
+            }),
           });
           return;
         }

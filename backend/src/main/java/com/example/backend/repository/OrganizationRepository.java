@@ -8,5 +8,7 @@ public interface OrganizationRepository extends JpaRepository<OrganizationEntity
 
     Optional<OrganizationEntity> findByOrgId(String orgId);
 
+    java.util.List<OrganizationEntity> findByVerificationStatus(String verificationStatus);
+
     boolean existsByOwnerPhone(String ownerPhone);
 }

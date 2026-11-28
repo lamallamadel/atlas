@@ -42,6 +42,9 @@ INSERT INTO organization (org_id, org_type, display_name, verified, owner_user_i
     ('OWN-DEMO10', 'OWNER', 'Rachid S.', FALSE, 'demo-owner-10', '+212600000110', '2026-11-25', CURRENT_TIMESTAMP - INTERVAL '50' DAY, CURRENT_TIMESTAMP - INTERVAL '50' DAY, CURRENT_TIMESTAMP - INTERVAL '1' DAY),
     ('DEMO-PLATFORM', 'AGENCY', 'Atlas — équipe plateforme', TRUE, NULL, NULL, NULL, NULL, CURRENT_TIMESTAMP - INTERVAL '500' DAY, CURRENT_TIMESTAMP - INTERVAL '1' DAY);
 
+-- Kech Immo Nouvelle (non vérifiée) a déposé sa demande de vérification : elle attend l'équipe Atlas
+UPDATE organization SET verification_status = 'PENDING', verification_rc = 'RC 145872 Marrakech', verification_ice = '002871456000071', verification_contact = 'Direction, 0524 00 00 00', verification_requested_at = CURRENT_TIMESTAMP - INTERVAL '2' DAY WHERE org_id = 'DEMO-KECH';
+
 -- Profils et zones des agences (bourse aux mandats)
 INSERT INTO agency_profile (org_id, display_name, description, languages, property_types, transactions, created_at, updated_at, created_by, updated_by) VALUES
     ('DEMO-DETROIT', 'Agence du Détroit', 'Agence de quartier à Tanger depuis 2012 : vente et location sur Malabata, Marshan et le centre-ville.', 'français,darija,espagnol', 'Appartement,Villa', 'SALE,RENT', CURRENT_TIMESTAMP - INTERVAL '300' DAY, CURRENT_TIMESTAMP - INTERVAL '5' DAY, 'demo-detroit-directeur', 'demo-detroit-directeur'),
