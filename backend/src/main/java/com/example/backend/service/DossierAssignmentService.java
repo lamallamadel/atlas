@@ -141,7 +141,34 @@ public class DossierAssignmentService {
         return new BulkOperationResponse(ok, errors.size(), errors);
     }
 
+    /**
+     * Attribution automatique d'un lead entrant ({@link LeadRoutingService}) : sans contrôle de
+     * rôle, uniquement sur un dossier encore à attribuer. {@code rule} explique le choix dans le
+     * fil du dossier et dans la notification.
+     */
+    @Transactional
+    public void autoAssign(Dossier dossier, String userId, String userName, String rule) {
+        if (dossier.getAssignedTo() != null) {
+            return;
+        }
+        apply(
+                dossier,
+                userId,
+                userName,
+                true,
+                "Attribution automatique à " + userName + " (" + rule + ")");
+    }
+
     private void apply(Dossier dossier, String userId, String userName, boolean byManager) {
+        apply(dossier, userId, userName, byManager, null);
+    }
+
+    private void apply(
+            Dossier dossier,
+            String userId,
+            String userName,
+            boolean byManager,
+            @Nullable String override) {
         String previous = dossier.getAssignedTo();
         String previousName = nameOrId(dossier);
         if (Objects.equals(previous, userId)) {
@@ -155,11 +182,13 @@ public class DossierAssignmentService {
 
         String actor = CurrentUser.displayName().orElse("Système");
         String description =
-                userId == null
-                        ? actor + " a remis le dossier à attribuer"
-                        : byManager
-                                ? actor + " a assigné le dossier à " + userName
-                                : userName + " a pris le dossier";
+                override != null
+                        ? override
+                        : userId == null
+                                ? actor + " a remis le dossier à attribuer"
+                                : byManager
+                                        ? actor + " a assigné le dossier à " + userName
+                                        : userName + " a pris le dossier";
         Map<String, Object> meta = new HashMap<>();
         meta.put("previousAssignee", previous);
         meta.put("previousAssigneeName", previousName);
@@ -190,7 +219,7 @@ public class DossierAssignmentService {
                         dossier.getId(),
                         userId,
                         "Nouveau dossier assigné",
-                        actor
+                        (override != null ? "Atlas" : actor)
                                 + " vous a assigné le dossier de "
                                 + (dossier.getLeadName() != null
                                         ? dossier.getLeadName()

@@ -14,9 +14,13 @@ export interface TeamMember {
 }
 
 /** Réglages d'équipe de l'agence (GET/PUT /api/v1/team/settings). */
+export type LeadRouting = 'SHARED_QUEUE' | 'LISTING_AGENT' | 'ROUND_ROBIN';
+
 export interface TeamSettings {
   /** Les agents ne voient que leurs dossiers et ceux à attribuer. */
   restrictAgentsToOwnDossiers: boolean;
+  /** Distribution des leads du portail (file partagée par défaut). */
+  leadRouting?: LeadRouting;
 }
 
 export interface InviteRequest {
@@ -70,7 +74,7 @@ export class TeamApiService {
     return this.http.get<TeamSettings>('/api/v1/team/settings');
   }
 
-  updateSettings(settings: TeamSettings): Observable<TeamSettings> {
+  updateSettings(settings: Partial<TeamSettings>): Observable<TeamSettings> {
     return this.http.put<TeamSettings>('/api/v1/team/settings', settings);
   }
 

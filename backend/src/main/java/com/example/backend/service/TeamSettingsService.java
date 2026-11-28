@@ -17,8 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Réglages d'équipe d'une agence, rangés dans {@code organization_settings.settings.team}.
- * Aujourd'hui un seul : {@code restrictAgentsToOwnDossiers}, désactivé par défaut.
+ * Réglages d'équipe d'une agence, rangés dans {@code organization_settings.settings.team}. {@code
+ * restrictAgentsToOwnDossiers} (désactivé par défaut) et {@code leadRouting}, la distribution des
+ * leads du portail ({@code SHARED_QUEUE} par défaut, cf. {@link LeadRoutingService}).
  *
  * <p>Lu à chaque requête d'un agent : la valeur est gardée en mémoire {@value #TTL_SECONDS}
  * secondes par instance. Un changement prend donc effet au plus tard après ce délai sur les autres
@@ -31,8 +32,10 @@ public class TeamSettingsService {
     static final long TTL_SECONDS = 30;
     static final String SECTION = "team";
     static final String RESTRICT_KEY = "restrictAgentsToOwnDossiers";
+    static final String ROUTING_KEY = "leadRouting";
 
-    public record TeamSettings(boolean restrictAgentsToOwnDossiers) {}
+    public record TeamSettings(
+            boolean restrictAgentsToOwnDossiers, LeadRoutingService.Mode leadRouting) {}
 
     private record Cached(boolean value, Instant until) {}
 
@@ -59,14 +62,32 @@ public class TeamSettingsService {
         return value;
     }
 
+    /** Distribution des leads (lu à chaque lead, sans cache : rare). */
+    @Transactional(readOnly = true)
+    public LeadRoutingService.Mode leadRouting(String orgId) {
+        return repository
+                .findByOrgId(orgId)
+                .map(s -> readRouting(s.getSettings()))
+                .orElse(LeadRoutingService.Mode.SHARED_QUEUE);
+    }
+
     @Transactional(readOnly = true)
     public TeamSettings get(String orgId) {
-        return new TeamSettings(restrictAgents(orgId));
+        return new TeamSettings(restrictAgents(orgId), leadRouting(orgId));
     }
 
     /** Réservé à l'administrateur de l'agence. */
     @Transactional
     public TeamSettings update(String orgId, boolean restrictAgentsToOwnDossiers) {
+        return update(orgId, restrictAgentsToOwnDossiers, null);
+    }
+
+    /** Réservé à l'administrateur de l'agence. {@code null} laisse le réglage inchangé. */
+    @Transactional
+    public TeamSettings update(
+            String orgId,
+            @Nullable Boolean restrictAgentsToOwnDossiers,
+            @Nullable LeadRoutingService.Mode leadRouting) {
         AccessPolicy.requireCanManageTeam();
         OrganizationSettings entity =
                 repository
@@ -85,18 +106,38 @@ public class TeamSettingsService {
         if (settings.get(SECTION) instanceof Map<?, ?> existing) {
             existing.forEach((k, v) -> team.put(String.valueOf(k), v));
         }
-        team.put(RESTRICT_KEY, restrictAgentsToOwnDossiers);
+        if (restrictAgentsToOwnDossiers != null) {
+            team.put(RESTRICT_KEY, restrictAgentsToOwnDossiers);
+        }
+        if (leadRouting != null) {
+            team.put(ROUTING_KEY, leadRouting.name());
+        }
         settings.put(SECTION, team);
         entity.setSettings(settings);
         repository.save(entity);
 
         cache.remove(orgId);
         evictOrganizationSettingsCache();
+        TeamSettings result = new TeamSettings(readRestrict(settings), readRouting(settings));
         log.info(
-                "Team settings updated: org={} restrictAgentsToOwnDossiers={}",
+                "Team settings updated: org={} restrictAgentsToOwnDossiers={} leadRouting={}",
                 orgId,
-                restrictAgentsToOwnDossiers);
-        return new TeamSettings(restrictAgentsToOwnDossiers);
+                result.restrictAgentsToOwnDossiers(),
+                result.leadRouting());
+        return result;
+    }
+
+    static LeadRoutingService.Mode readRouting(Map<String, Object> settings) {
+        if (settings != null
+                && settings.get(SECTION) instanceof Map<?, ?> team
+                && team.get(ROUTING_KEY) instanceof String v) {
+            try {
+                return LeadRoutingService.Mode.valueOf(v);
+            } catch (IllegalArgumentException ignored) {
+                // valeur inconnue : file partagée
+            }
+        }
+        return LeadRoutingService.Mode.SHARED_QUEUE;
     }
 
     static boolean readRestrict(Map<String, Object> settings) {

@@ -32,7 +32,10 @@ public class TeamController {
 
     public record EnabledRequest(@NotNull Boolean enabled) {}
 
-    public record TeamSettingsRequest(@NotNull Boolean restrictAgentsToOwnDossiers) {}
+    /** Champs absents : réglage inchangé. */
+    public record TeamSettingsRequest(
+            Boolean restrictAgentsToOwnDossiers,
+            com.example.backend.service.LeadRoutingService.Mode leadRouting) {}
 
     private final TeamDirectoryService teamDirectory;
     private final TeamAdminService teamAdmin;
@@ -53,7 +56,8 @@ public class TeamController {
             summary = "Team settings",
             description =
                     "restrictAgentsToOwnDossiers : les agents ne voient que leurs dossiers et ceux"
-                            + " à attribuer")
+                            + " à attribuer ; leadRouting : SHARED_QUEUE, LISTING_AGENT ou"
+                            + " ROUND_ROBIN")
     public ResponseEntity<TeamSettingsService.TeamSettings> settings() {
         return ResponseEntity.ok(teamSettings.get(orgId()));
     }
@@ -64,7 +68,8 @@ public class TeamController {
     public ResponseEntity<TeamSettingsService.TeamSettings> updateSettings(
             @Valid @RequestBody TeamSettingsRequest request) {
         return ResponseEntity.ok(
-                teamSettings.update(orgId(), request.restrictAgentsToOwnDossiers()));
+                teamSettings.update(
+                        orgId(), request.restrictAgentsToOwnDossiers(), request.leadRouting()));
     }
 
     @GetMapping

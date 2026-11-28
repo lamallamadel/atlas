@@ -142,6 +142,13 @@ public interface DossierRepository
                     + " AND d.assignedTo IS NOT NULL")
     List<Object[]> findDistinctAssigneesByOrgId(@Param("orgId") String orgId);
 
+    /** Dernière attribution de chaque membre (tour de rôle de la distribution des leads). */
+    @Query(
+            "SELECT d.assignedTo, MAX(d.assignedAt) FROM Dossier d WHERE d.orgId = :orgId"
+                    + " AND d.assignedTo IN :userIds GROUP BY d.assignedTo")
+    List<Object[]> findLastAssignmentByAssignee(
+            @Param("orgId") String orgId, @Param("userIds") java.util.Collection<String> userIds);
+
     /** Créateurs de dossiers dans l'agence. */
     @Query(
             "SELECT DISTINCT d.createdBy FROM Dossier d WHERE d.orgId = :orgId"

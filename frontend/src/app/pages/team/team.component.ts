@@ -7,15 +7,16 @@ import {
   DsCardComponent,
   DsCellDirective,
   DsDialogService,
+  DsRadioGroupComponent,
   DsSelectComponent,
   DsSwitchComponent,
   DsTableComponent,
   DsToastService,
   PageHeaderComponent,
 } from '../../design-system';
-import type { DsColumn, DsSelectOption } from '../../design-system';
+import type { DsColumn, DsRadioOption, DsSelectOption } from '../../design-system';
 import { AuthService } from '../../services/auth.service';
-import { InviteResponse, TeamApiService, TeamMember } from '../../services/team-api.service';
+import { InviteResponse, LeadRouting, TeamApiService, TeamMember } from '../../services/team-api.service';
 import {
   AGENCY_ROLE_LABELS,
   AGENCY_ROLES,
@@ -41,6 +42,7 @@ import { TeamInviteDialogComponent, TeamInviteDialogData } from './team-invite-d
     DsButtonComponent,
     DsCardComponent,
     DsCellDirective,
+    DsRadioGroupComponent,
     DsSelectComponent,
     DsSwitchComponent,
     DsTableComponent,
@@ -154,6 +156,27 @@ import { TeamInviteDialogComponent, TeamInviteDialogData } from './team-invite-d
           }
         </div>
       </ds-card>
+
+      <ds-card [pad]="true" elevation="xs">
+        <div class="team-section team-section--stack">
+          <div class="team-section__head">
+            <h2 class="team-section__title">Distribution des leads</h2>
+            <p class="team-section__desc">Qui reçoit un contact arrivé par le portail ou la vitrine. L'agent choisi est prévenu tout de suite ; un manager peut toujours réattribuer.</p>
+          </div>
+          @if (canManage) {
+            <ds-radio-group
+              label="Règle de distribution"
+              name="leadRouting"
+              [options]="routingOptions"
+              [ngModel]="routing()"
+              [disabled]="savingSettings() || routing() === null"
+              (ngModelChange)="setRouting($event)">
+            </ds-radio-group>
+          } @else {
+            <p class="team-section__value">{{ routingLabel() }}</p>
+          }
+        </div>
+      </ds-card>
     </div>
   `,
   styles: [`
@@ -171,6 +194,8 @@ import { TeamInviteDialogComponent, TeamInviteDialogData } from './team-invite-d
     .team-role { min-width: 150px; max-width: 200px; }
     .team-role-label { color: var(--ds-text); }
     .team-section { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--ds-space-4) var(--ds-space-8); }
+    .team-section--stack { flex-direction: column; align-items: stretch; }
+    .team-section--stack .team-section__head { flex: none; }
     .team-section__head { flex: 1 1 280px; }
     .team-section__title { margin: 0; font-size: var(--ds-text-base); font-weight: 700; color: var(--ds-marine); }
     .team-section__desc { margin: var(--ds-space-1) 0 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
@@ -196,6 +221,14 @@ export class TeamComponent implements OnInit {
   /** `null` tant que le réglage n'est pas chargé. */
   readonly restricted = signal<boolean | null>(null);
   readonly savingSettings = signal(false);
+  readonly routing = signal<LeadRouting | null>(null);
+  readonly routingOptions: DsRadioOption[] = [
+    { value: 'SHARED_QUEUE', label: 'File partagée', description: 'Le lead reste « à attribuer » ; le premier agent disponible le prend.' },
+    { value: 'LISTING_AGENT', label: "Agent de l'annonce", description: "Le lead va à l'agent qui a publié l'annonce ; à défaut, tour de rôle." },
+    { value: 'ROUND_ROBIN', label: 'Tour de rôle', description: "Chaque lead va à l'agent qui attend un nouveau dossier depuis le plus longtemps." },
+  ];
+  readonly routingLabel = computed(() =>
+    this.routingOptions.find(o => o.value === this.routing())?.label ?? 'File partagée');
   readonly rolesUnknown = computed(() => this.members().length > 0 && this.members().every(m => !m.role));
   readonly disabledCount = computed(() => this.members().filter(m => m.enabled === false).length);
   readonly activeCount = computed(() => this.members().length - this.disabledCount());
@@ -211,8 +244,30 @@ export class TeamComponent implements OnInit {
   ngOnInit(): void {
     this.load();
     this.api.settings().subscribe({
-      next: s => this.restricted.set(s.restrictAgentsToOwnDossiers),
+      next: s => {
+        this.restricted.set(s.restrictAgentsToOwnDossiers);
+        this.routing.set(s.leadRouting ?? 'SHARED_QUEUE');
+      },
       error: () => this.restricted.set(null),
+    });
+  }
+
+  setRouting(mode: LeadRouting): void {
+    const previous = this.routing();
+    if (mode === previous) return;
+    this.routing.set(mode);
+    this.savingSettings.set(true);
+    this.api.updateSettings({ leadRouting: mode }).subscribe({
+      next: s => {
+        this.savingSettings.set(false);
+        this.routing.set(s.leadRouting ?? 'SHARED_QUEUE');
+        this.toast.success(`Distribution des leads : ${this.routingLabel().toLowerCase()}`);
+      },
+      error: err => {
+        this.savingSettings.set(false);
+        this.routing.set(previous);
+        this.toast.error(serverMessage(err, "Le réglage n'a pas été enregistré"));
+      },
     });
   }
 
