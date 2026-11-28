@@ -124,7 +124,7 @@
         <!-- Notifications -->
         <span cdkOverlayOrigin #notificationOrigin="cdkOverlayOrigin">
           @let unread = (unreadNotificationCount$ | async) ?? 0;
-          <ds-button variant="icon" (dsClick)="toggleNotificationMenu()">
+          <ds-button variant="icon" (dsClick)="toggleNotificationMenu()" [ariaLabel]="unread > 0 ? 'Notifications, ' + unread + ' non lue' + (unread > 1 ? 's' : '') : 'Notifications'">
             <div style="position: relative;">
               <ds-icon name="bell" [size]="20"></ds-icon>
               @if (unread > 0) {
