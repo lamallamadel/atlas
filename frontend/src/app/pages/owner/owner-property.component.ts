@@ -14,7 +14,7 @@ import {
   DsToastService,
   PageHeaderComponent,
 } from '../../design-system';
-import { OwnerAnnonce, OwnerApiService, OwnerProperty, ownerAnnonceState } from '../../services/owner-api.service';
+import { OwnerAnnonce, OwnerApiService, OwnerProperty, PRICE_POSITION_LABELS, PriceReference, ownerAnnonceState, pricePosition } from '../../services/owner-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
 import { MANDATE_TYPE_LABELS, OwnerMandateApiService, OwnerRequest, REQUEST_STATUS } from '../../services/mandate-api.service';
 import { OwnerMandateRequestDialogComponent } from './owner-mandate-request-dialog.component';
@@ -132,6 +132,29 @@ import { OwnerPropertyDialogComponent } from './owner-property-dialog.component'
 
             <ds-card [pad]="true" elevation="xs">
               <div class="ds-form-stack">
+                <h2 class="op-card-title">Repère de prix</h2>
+                @if (priceRef(); as ref) {
+                  @if (ref.available) {
+                    <p class="op-range">
+                      <span class="op-range__value">{{ ref.low | number: '1.0-0' }} – {{ ref.high | number: '1.0-0' }} MAD{{ p.transactionType === 'RENT' ? ' / mois' : '' }}</span>
+                      <span class="op-muted">Milieu : {{ ref.mid | number: '1.0-0' }} MAD · {{ ref.perM2Median | number: '1.0-0' }} MAD/m²</span>
+                    </p>
+                    @if (position(); as pos) {
+                      <ds-badge [status]="pos === 'within' ? 'success' : pos === 'above' ? 'warning' : 'info'">{{ positionLabels[pos] }}</ds-badge>
+                    }
+                    <p class="op-muted">D'après {{ ref.comparables }} annonces {{ p.propertyType ? ('« ' + p.propertyType + ' » ') : '' }}publiées {{ ref.scope === 'DISTRICT' ? 'à ' + ref.area : 'dans tout ' + ref.area }}, rapportées à vos {{ p.surface }} m².</p>
+                    <p class="op-caveat"><ds-icon name="info" [size]="16"></ds-icon> Ce sont des prix affichés, pas des prix de vente constatés : les ventes se concluent souvent en dessous.</p>
+                  } @else {
+                    <p class="op-muted">{{ p.surface ? 'Pas encore assez d’annonces comparables dans votre quartier ou votre ville pour donner une fourchette fiable.' : 'Indiquez la surface du bien pour obtenir une fourchette.' }}</p>
+                  }
+                } @else {
+                  <ds-skeleton variant="text" width="70%"></ds-skeleton>
+                }
+              </div>
+            </ds-card>
+
+            <ds-card [pad]="true" elevation="xs">
+              <div class="ds-form-stack">
                 <h2 class="op-card-title">Confier à un agent</h2>
                 @if (mandateRequest(); as r) {
                   <div class="op-row">
@@ -210,6 +233,9 @@ import { OwnerPropertyDialogComponent } from './owner-property-dialog.component'
     .op-facts dt { color: var(--ds-text-muted); }
     .op-facts dd { margin: 0; color: var(--ds-text); }
     .op-verify { display: flex; flex-direction: column; align-items: flex-start; gap: var(--ds-space-2); margin-top: var(--ds-space-4); }
+    .op-range { display: flex; flex-direction: column; gap: var(--ds-space-1); margin: 0; }
+    .op-range__value { font-size: var(--ds-text-lg); font-weight: 700; color: var(--ds-marine); font-variant-numeric: tabular-nums; }
+    .op-caveat { display: flex; gap: var(--ds-space-1); align-items: flex-start; margin: 0; font-size: var(--ds-text-xs); color: var(--ds-text-muted); }
     .op-private { display: inline-flex; align-items: center; gap: 2px; margin-left: var(--ds-space-1); font-size: var(--ds-text-xs); color: var(--ds-text-faint); }
   `],
 })
@@ -236,6 +262,10 @@ export class OwnerPropertyComponent implements OnInit, OnDestroy {
   readonly uploading = signal(false);
   readonly busy = signal(false);
   readonly photoUrls = signal<Record<number, string>>({});
+  /** Repère de prix du bien (prix affichés du quartier ou de la ville). */
+  readonly priceRef = signal<PriceReference | null>(null);
+  readonly positionLabels = PRICE_POSITION_LABELS;
+  readonly position = computed(() => pricePosition(this.property()?.expectedPrice, this.priceRef()));
 
   readonly annonce = computed<OwnerAnnonce | null>(() => this.property()?.annonce ?? null);
   readonly state = computed(() => ownerAnnonceState(this.annonce()));
@@ -297,7 +327,7 @@ export class OwnerPropertyComponent implements OnInit, OnDestroy {
 
   askAgent(p: OwnerProperty): void {
     this.dialog.open<OwnerRequest>(OwnerMandateRequestDialogComponent, {
-      data: { propertyId: p.id, propertyTitle: p.title, city: p.city, transactionType: p.transactionType, expectedPrice: p.expectedPrice },
+      data: { propertyId: p.id, propertyTitle: p.title, city: p.city, transactionType: p.transactionType, expectedPrice: p.expectedPrice, priceReference: this.priceRef() },
       width: '640px',
     }).closed.subscribe(r => { if (r) this.mandateRequest.set(r); });
   }
@@ -311,6 +341,10 @@ export class OwnerPropertyComponent implements OnInit, OnDestroy {
 
   reload(): void {
     this.loadMandateRequest();
+    this.api.priceReference(this.id).subscribe({
+      next: ref => this.priceRef.set(ref),
+      error: () => this.priceRef.set({ available: false } as PriceReference),
+    });
     this.api.property(this.id).subscribe({
       next: p => {
         this.property.set(p);

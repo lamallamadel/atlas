@@ -103,4 +103,14 @@ public interface AnnonceRepository
                     + " order by p.district")
     List<String> findPublicDistrictsInCity(
             @Param("status") AnnonceStatus status, @Param("city") String city);
+
+    /** Annonces publiées d'une ville, toutes agences, pour le repère de prix du propriétaire. */
+    @Query(
+            "select a from Annonce a where a.status = :status and lower(a.city) = lower(:city)"
+                    + " and a.type in :types and a.surface > 0 and a.price > 0")
+    List<Annonce> findPublishedPricedInCity(
+            @Param("status") AnnonceStatus status,
+            @Param("city") String city,
+            @Param("types")
+                    java.util.Collection<com.example.backend.entity.enums.AnnonceType> types);
 }

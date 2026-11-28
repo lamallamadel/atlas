@@ -482,6 +482,68 @@ for m in MANDATES:
     rows.append(annonce_row(AG[m["ag"]]["org"], p, st, "AGENCY", u(m["ag"], m["agent"])["sub"], m["signed"] - 1, mandate=mandate_id(m["k"])))
 insert("annonce", rows)
 
+# Stock propre des agences (hors bourse) : annonces publiées, sans bien lié. Elles peuplent le
+# portail et servent de références au repère de prix des propriétaires (au moins 3 comparables
+# par quartier pour la plupart des biens de démo). Prix au m² : ordres de grandeur publics 2025-2026.
+# (agence, ville, quartier, type, transaction, prix au m², [(surface, pièces), ...])
+STOCK = [
+    ("detroit", "Tanger", "Malabata", "Appartement", "SALE", 15500, [(78, 3), (105, 4), (64, 2)]),
+    ("detroit", "Tanger", "Marshan", "Appartement", "SALE", 16500, [(120, 4), (88, 3)]),
+    ("detroit", "Tanger", "Centre", "Appartement", "SALE", 13500, [(95, 3), (70, 2)]),
+    ("tangerimmo", "Tanger", "Centre", "Studio", "RENT", 120, [(35, 1), (42, 1)]),
+    ("tangerimmo", "Tanger", "Malabata", "Studio", "RENT", 115, [(40, 1)]),
+    ("iberia", "Tanger", "Iberia", "Appartement", "RENT", 65, [(100, 4), (125, 5), (90, 3)]),
+    ("iberia", "Tanger", "Boubana", "Villa", "SALE", 14000, [(280, 6), (350, 7), (300, 6)]),
+    ("casaprestige", "Casablanca", "Anfa", "Appartement", "SALE", 24000, [(140, 4), (175, 5), (120, 3)]),
+    ("casaprestige", "Casablanca", "Aïn Diab", "Villa", "SALE", 22000, [(380, 7), (450, 8)]),
+    ("casaprestige", "Casablanca", "Anfa", "Villa", "SALE", 26000, [(400, 7)]),
+    ("maarif", "Casablanca", "Maârif", "Appartement", "SALE", 18000, [(85, 3), (110, 4)]),
+    ("maarif", "Casablanca", "Bourgogne", "Appartement", "SALE", 17000, [(95, 3), (80, 2)]),
+    ("maarif", "Casablanca", "Maârif", "Appartement", "RENT", 95, [(65, 2), (80, 3), (55, 2)]),
+    ("agdal", "Rabat", "Agdal", "Appartement", "SALE", 15000, [(110, 4), (95, 3), (130, 4)]),
+    ("agdal", "Rabat", "Hay Riad", "Appartement", "SALE", 16000, [(140, 4)]),
+    ("agdal", "Rabat", "Hay Riad", "Appartement", "RENT", 70, [(120, 4), (140, 5)]),
+    ("agdal", "Rabat", "Agdal", "Appartement", "RENT", 80, [(100, 3)]),
+    ("souissi", "Rabat", "Souissi", "Villa", "SALE", 20000, [(550, 8), (650, 9), (480, 7)]),
+    ("palmeraie", "Marrakech", "Guéliz", "Appartement", "SALE", 14500, [(90, 3), (75, 2), (110, 4)]),
+    ("palmeraie", "Marrakech", "Hivernage", "Appartement", "SALE", 18000, [(95, 3)]),
+    ("palmeraie", "Marrakech", "Médina", "Riad", "SALE", 13000, [(220, 5), (260, 6), (180, 4)]),
+    ("palmeraie", "Marrakech", "Hivernage", "Appartement", "RENT", 105, [(70, 2), (85, 3)]),
+    ("palmeraie", "Marrakech", "Guéliz", "Appartement", "RENT", 90, [(80, 3)]),
+]
+# Écarts déterministes autour du prix au m² du quartier (pas d'aléatoire : le seed reste stable).
+SPREAD = [1.0, 0.92, 1.08, 0.96, 1.05]
+
+def stock_title(typ, tx, district, rooms):
+    if typ == "Studio":
+        return f"Studio meublé {district}"
+    if typ in ("Villa", "Riad"):
+        return f"{typ} {rooms} pièces, {district}"
+    return f"Appartement {rooms} pièces {district}" + (" à louer" if tx == "RENT" else "")
+
+w("-- Stock propre des agences : annonces publiées hors bourse (portail et repère de prix)")
+rows = []
+n = 0
+for ag, city, district, typ, tx, per_m2, units in STOCK:
+    agents = [x for x in AG[ag]["u"] if "agent" in x]
+    for j, (surface, rooms) in enumerate(units):
+        factor = SPREAD[(n + j) % len(SPREAD)]
+        raw = per_m2 * surface * factor
+        price = int(round(raw / (100 if tx == "RENT" else 10000)) * (100 if tx == "RENT" else 10000))
+        agent = u(ag, agents[(n + j) % len(agents)])
+        title = stock_title(typ, tx, district, rooms)
+        rows.append(dict(org_id=q(AG[ag]["org"]), title=q(title),
+                         description=q(f"{title} à {city}. Bien présenté par {AG[ag]['name']}."),
+                         category=q(typ), type=q(tx), address=q(district), surface=q(float(surface)), city=q(city),
+                         price=q(price), currency=q("MAD"), status=q("PUBLISHED"),
+                         photos_json=js(PHOTOS[typ]), meta_json=js({"rooms": rooms}),
+                         property_id="NULL", publisher_kind=q("AGENCY"), moderation_status=q(None),
+                         moderated_by=q(None), moderated_at="NULL", mandate_id="NULL",
+                         created_at=ago(60 - 2 * (n + j) % 55), updated_at=ago(1),
+                         created_by=q(agent["sub"]), updated_by=q(agent["sub"])))
+    n += len(units)
+insert("annonce", rows)
+
 # ------------------------------------------------------------------ dossiers
 
 DOSSIERS = []   # dict(org, lead_name, ...)

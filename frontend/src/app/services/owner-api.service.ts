@@ -28,6 +28,36 @@ export interface OwnerAnnonce {
   photos: OwnerPhoto[];
 }
 
+/** Repère de prix (prix affichés des annonces comparables), cf. PriceReferenceService. */
+export interface PriceReference {
+  available: boolean;
+  scope: 'DISTRICT' | 'CITY' | null;
+  area: string | null;
+  comparables: number;
+  perM2Low: number | null;
+  perM2Median: number | null;
+  perM2High: number | null;
+  low: number | null;
+  mid: number | null;
+  high: number | null;
+  currency: string;
+  basis: 'ASKING_PRICES';
+}
+
+/** Position d'un prix souhaité dans la fourchette : sous, dans ou au-dessus (à 5 % près). */
+export function pricePosition(price: number | null | undefined, ref: PriceReference | null): 'below' | 'within' | 'above' | null {
+  if (!price || !ref?.available || ref.low == null || ref.high == null) return null;
+  if (price < ref.low * 0.95) return 'below';
+  if (price > ref.high * 1.05) return 'above';
+  return 'within';
+}
+
+export const PRICE_POSITION_LABELS: Record<'below' | 'within' | 'above', string> = {
+  below: 'Sous la fourchette du marché affiché',
+  within: 'Dans la fourchette du marché affiché',
+  above: 'Au-dessus de la fourchette : attendez-vous à négocier',
+};
+
 export interface OwnerProperty {
   id: number;
   title: string;
@@ -198,6 +228,10 @@ export class OwnerApiService {
 
   property(id: number): Observable<OwnerProperty> {
     return this.http.get<OwnerProperty>(`${this.base}/properties/${id}`);
+  }
+
+  priceReference(id: number): Observable<PriceReference> {
+    return this.http.get<PriceReference>(`${this.base}/properties/${id}/price-reference`);
   }
 
   createProperty(request: OwnerPropertyRequest): Observable<OwnerProperty> {

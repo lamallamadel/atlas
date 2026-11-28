@@ -38,6 +38,7 @@ public class OwnerSpaceController {
     private final OwnerLeadService leads;
     private final AnnonceMediaService mediaService;
     private final LeadConversationService conversations;
+    private final com.example.backend.owner.PriceReferenceService priceReference;
 
     public OwnerSpaceController(
             OwnerContext ownerContext,
@@ -45,8 +46,10 @@ public class OwnerSpaceController {
             OwnerAnnonceService annonces,
             OwnerLeadService leads,
             AnnonceMediaService mediaService,
-            LeadConversationService conversations) {
+            LeadConversationService conversations,
+            com.example.backend.owner.PriceReferenceService priceReference) {
         this.conversations = conversations;
+        this.priceReference = priceReference;
         this.ownerContext = ownerContext;
         this.properties = properties;
         this.annonces = annonces;
@@ -95,6 +98,13 @@ public class OwnerSpaceController {
     @GetMapping("/properties/{id}")
     public PropertyView getProperty(@PathVariable Long id) {
         return view(properties.get(id), annonces.view(id));
+    }
+
+    /** Repère de prix : prix affichés des annonces comparables du quartier ou de la ville. */
+    @GetMapping("/properties/{id}/price-reference")
+    public com.example.backend.owner.PriceReferenceService.PriceReference priceReference(
+            @PathVariable Long id) {
+        return priceReference.forOwnerProperty(id);
     }
 
     @PutMapping("/properties/{id}")

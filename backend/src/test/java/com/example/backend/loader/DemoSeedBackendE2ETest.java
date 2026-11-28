@@ -218,6 +218,50 @@ class DemoSeedBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
+    void priceReference_usesDistrictAskingPrices() throws Exception {
+        Long p01 =
+                jdbc.queryForObject(
+                        "SELECT id FROM property WHERE org_id = 'OWN-DEMO01' AND district = 'Malabata'",
+                        Long.class);
+        mockMvc.perform(
+                        as(
+                                get("/api/v1/owner/properties/" + p01 + "/price-reference"),
+                                "OWN-DEMO01",
+                                "demo-owner-01",
+                                "OWNER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(true))
+                .andExpect(jsonPath("$.scope").value("DISTRICT"))
+                .andExpect(jsonPath("$.area").value("Malabata"))
+                .andExpect(jsonPath("$.comparables").value(greaterThanOrEqualTo(3)))
+                .andExpect(jsonPath("$.basis").value("ASKING_PRICES"));
+        JsonNode ref =
+                objectMapper.readTree(
+                        mockMvc.perform(
+                                        as(
+                                                get(
+                                                        "/api/v1/owner/properties/"
+                                                                + p01
+                                                                + "/price-reference"),
+                                                "OWN-DEMO01",
+                                                "demo-owner-01",
+                                                "OWNER"))
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString());
+        assertThat(ref.get("low").asDouble()).isLessThanOrEqualTo(ref.get("mid").asDouble());
+        assertThat(ref.get("mid").asDouble()).isLessThanOrEqualTo(ref.get("high").asDouble());
+        // Un autre propriétaire n'a pas accès au bien.
+        mockMvc.perform(
+                        as(
+                                get("/api/v1/owner/properties/" + p01 + "/price-reference"),
+                                "OWN-DEMO02",
+                                "demo-owner-02",
+                                "OWNER"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void portalListsOwnerAndAgencyListings_withPhotos() throws Exception {
         String page =
                 mockMvc.perform(

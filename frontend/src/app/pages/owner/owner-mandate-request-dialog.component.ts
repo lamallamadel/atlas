@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   DsButtonComponent,
@@ -18,6 +19,7 @@ import {
 import type { DsRadioOption, DsSelectOption } from '../../design-system';
 import { AgencyCard, MandateType, OwnerMandateApiService, OwnerRequest, RequestVisibility, SERVICE_LABELS, ratingLabel } from '../../services/mandate-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
+import { PRICE_POSITION_LABELS, PriceReference, pricePosition } from '../../services/owner-api.service';
 
 export interface OwnerMandateRequestDialogData {
   propertyId: number;
@@ -25,6 +27,8 @@ export interface OwnerMandateRequestDialogData {
   city: string;
   transactionType: 'SALE' | 'RENT';
   expectedPrice: number | null;
+  /** Fourchette des prix affichés, montrée sous le prix souhaité. */
+  priceReference?: PriceReference | null;
 }
 
 /**
@@ -37,6 +41,7 @@ export interface OwnerMandateRequestDialogData {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    DecimalPipe,
     FormsModule, DsButtonComponent, DsCheckboxComponent, DsDialogActionsComponent, DsDialogContentComponent,
     DsDialogHeaderComponent, DsIconComponent, DsInputComponent, DsRadioGroupComponent, DsSelectComponent,
     DsSkeletonComponent, DsTextareaComponent,
@@ -87,6 +92,13 @@ export interface OwnerMandateRequestDialogData {
             <ds-input [label]="data.transactionType === 'RENT' ? 'Loyer souhaité (MAD)' : 'Prix souhaité (MAD)'" name="price" type="number" [(ngModel)]="price"></ds-input>
             <ds-select label="Échéance" name="deadline" [options]="deadlines" [(ngModel)]="deadline"></ds-select>
           </div>
+          @if (data.priceReference?.available) {
+            <p class="md-muted md-ref" aria-live="polite">
+              Repère Atlas : {{ data.priceReference!.low | number: '1.0-0' }} – {{ data.priceReference!.high | number: '1.0-0' }} MAD
+              (prix affichés à {{ data.priceReference!.area }}, pas prix vendus).
+              @if (position(); as pos) { <strong>{{ positionLabels[pos] }}.</strong> }
+            </p>
+          }
           <ds-input label="Vos disponibilités pour les visites" name="availability" placeholder="Ex. le samedi matin, en semaine après 18 h" [(ngModel)]="availability"></ds-input>
           <div class="md-row">
             <ds-input label="Langues souhaitées" name="languages" placeholder="Ex. français, darija" [(ngModel)]="languages"></ds-input>
@@ -116,6 +128,7 @@ export interface OwnerMandateRequestDialogData {
     .md-agency__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .md-rating { font-weight: 400; color: var(--ds-text-muted); }
     .md-strong { font-weight: 600; color: var(--ds-text); }
+    .md-ref strong { color: var(--ds-text); font-weight: 600; }
     .md-muted { margin: 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
     .md-faint { font-size: var(--ds-text-xs); color: var(--ds-text-faint); }
     .md-help { display: flex; gap: var(--ds-space-2); align-items: flex-start; margin: 0; font-size: var(--ds-text-sm); color: var(--ds-text-muted); }
@@ -151,6 +164,10 @@ export class OwnerMandateRequestDialogComponent implements OnInit {
   exclusive = true;
   services = new Set<string>(['VISITS', 'PHOTOS']);
   price: number | null = this.data.expectedPrice;
+  readonly positionLabels = PRICE_POSITION_LABELS;
+  position(): 'below' | 'within' | 'above' | null {
+    return pricePosition(this.price ? Number(this.price) : null, this.data.priceReference ?? null);
+  }
   deadline = '3_MONTHS';
   availability = '';
   languages = '';

@@ -1,4 +1,4 @@
-import { ownerPropertyState } from './owner-api.service';
+import { PriceReference, ownerPropertyState, pricePosition } from './owner-api.service';
 
 describe('ownerPropertyState', () => {
   it('shows the agency listing when an active mandate has published it', () => {
@@ -21,5 +21,22 @@ describe('ownerPropertyState', () => {
 
   it('falls back on the owner listing without a running mandate', () => {
     expect(ownerPropertyState(null, null)).toEqual({ label: "Pas d'annonce", status: 'draft', detail: null });
+  });
+});
+
+describe('pricePosition', () => {
+  const ref = { available: true, low: 1_300_000, mid: 1_420_000, high: 1_550_000 } as PriceReference;
+
+  it('places the asking price against the range, with a 5 % tolerance', () => {
+    expect(pricePosition(1_200_000, ref)).toBe('below');
+    expect(pricePosition(1_250_000, ref)).toBe('within');
+    expect(pricePosition(1_450_000, ref)).toBe('within');
+    expect(pricePosition(1_700_000, ref)).toBe('above');
+  });
+
+  it('says nothing without a price or a usable range', () => {
+    expect(pricePosition(null, ref)).toBeNull();
+    expect(pricePosition(1_400_000, { available: false } as PriceReference)).toBeNull();
+    expect(pricePosition(1_400_000, null)).toBeNull();
   });
 });
