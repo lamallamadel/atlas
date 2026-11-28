@@ -1,3 +1,5 @@
+<a href="#pub-main" class="pub-skip-link" (click)="skipToContent($event, 'pub-main')">Passer au contenu principal</a>
+
 <header class="pub-header" id="pub-header" [class.pub-header--scrolled]="scrolled">
   <div class="at-container">
     <div class="pub-header-inner">
@@ -92,7 +94,7 @@
 </header>
 
 <!-- Page Content -->
-<main id="pub-main">
+<main id="pub-main" tabindex="-1">
   <router-outlet></router-outlet>
 </main>
 

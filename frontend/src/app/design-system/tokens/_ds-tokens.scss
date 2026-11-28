@@ -16,7 +16,7 @@
   /* ── Text ── */
   --ds-text:         #18160f;
   --ds-text-muted:   #605c52;
-  --ds-text-faint:   #a8a49a;
+  --ds-text-faint:   #6e6a60; /* 4,7:1 minimum sur les fonds clairs (WCAG 1.4.3) ; était #a8a49a, 2,3:1 */
   --ds-text-inverse: #ffffff;
 
   /* ── Marine — primary brand ── */
@@ -26,7 +26,7 @@
   --ds-marine-hl:    #dce8f2;
 
   /* ── Terracotta — accent (warmer, redder copper) ── */
-  --ds-primary:        #c85a2a;
+  --ds-primary:        #b55126; /* 5:1 sur blanc, 4,8:1 en fond sous texte blanc (WCAG 1.4.3) ; était #c85a2a, 4,2:1 */
   --ds-primary-hover:  #a8451c;
   --ds-primary-active: #7a3012;
   --ds-primary-hl:     #f7d9c6;
@@ -37,7 +37,7 @@
   --ds-success-hl: #e8f5e9;
   --ds-error:      #c62828;
   --ds-error-hl:   #ffebee;
-  --ds-warning:    #e65100;
+  --ds-warning:    #ce4800; /* 4,6:1 sur blanc ; était #e65100, 3,8:1 */
   --ds-warning-hl: #fff3e0;
 
   /* ── Type families ── */

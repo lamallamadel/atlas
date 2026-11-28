@@ -8,6 +8,29 @@
    PUBLIC LAYOUT — Header, Footer, Mobile Nav
    ============================================================ */
 
+/* Lien d'évitement : caché au-dessus de l'écran, visible au focus clavier (WCAG 2.4.1). */
+.pub-skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  transform: translateY(-100%);
+  background: var(--ds-primary);
+  color: var(--ds-text-inverse);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 var(--ds-radius-sm) 0;
+}
+
+.pub-skip-link:focus {
+  transform: none;
+}
+
+#pub-main:focus {
+  outline: none;
+}
+
 /* ─── HEADER ─── */
 .pub-header {
   position: sticky;

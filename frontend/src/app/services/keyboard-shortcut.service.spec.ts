@@ -20,6 +20,29 @@ describe('KeyboardShortcutService', () => {
     routerSpy = TestBed.inject(Router) as AngularVitestPartialMock<Router>;
   });
 
+  it('leaves Enter and Space to the focused link or button (WCAG 2.1.1)', () => {
+    for (const html of ['<a href="#x">lien</a>', '<button>bouton</button>', '<div role="button" tabindex="0">div</div>']) {
+      const host = document.createElement('div');
+      host.innerHTML = html;
+      document.body.appendChild(host);
+      const target = host.firstElementChild as HTMLElement;
+      for (const key of ['Enter', ' ']) {
+        const event = new KeyboardEvent('keydown', { key, cancelable: true });
+        Object.defineProperty(event, 'target', { value: target });
+        expect(service.handleKeyDown(event)).toBe(false);
+        expect(event.defaultPrevented).toBe(false);
+      }
+      host.remove();
+    }
+  });
+
+  it('still opens the selected list item with Enter outside interactive elements', () => {
+    const event = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    Object.defineProperty(event, 'target', { value: document.body });
+    expect(service.handleKeyDown(event)).toBe(true);
+    expect(event.defaultPrevented).toBe(true);
+  });
+
   it('should be created', () => {
     expect(service).toBeTruthy();
   });

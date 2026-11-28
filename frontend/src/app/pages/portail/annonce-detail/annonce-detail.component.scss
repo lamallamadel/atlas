@@ -242,12 +242,13 @@
 .ad-contact-btns { display: flex; flex-direction: column; gap: var(--ds-space-2); }
 
 .ad-whatsapp-btn {
-  background: color-mix(in srgb, var(--ds-success) 22%, rgb(37 211 102));
+  /* Vert du design system : le vert WhatsApp sous texte blanc n'atteignait que 2,4:1. */
+  background: var(--ds-success);
   color: var(--ds-text-inverse);
   border: none;
 }
 .ad-whatsapp-btn:hover {
-  background: color-mix(in srgb, var(--ds-success) 45%, rgb(18 140 126));
+  background: color-mix(in srgb, var(--ds-success) 80%, black);
 }
 
 .ad-ref-text { font-size: 10px; color: var(--ds-text-faint); text-align: center; margin-top: var(--ds-space-3); }

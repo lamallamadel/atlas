@@ -26,6 +26,16 @@ describe('DsInputComponent', () => {
     expect(component.inputId).toMatch(/^ds-input-/);
   });
 
+  it('is a combobox only when it drives an autocomplete list (aria-expanded needs that role)', () => {
+    const input = (): HTMLInputElement => fixture.debugElement.query(By.css('input')).nativeElement;
+    expect(input().getAttribute('role')).toBeNull();
+    fixture.componentRef.setInput('ariaAutocomplete', 'list');
+    fixture.componentRef.setInput('ariaExpanded', false);
+    fixture.detectChanges();
+    expect(input().getAttribute('role')).toBe('combobox');
+    expect(input().getAttribute('aria-expanded')).toBe('false');
+  });
+
   describe('label', () => {
     it('does not render label by default', () => {
       const label = fixture.debugElement.query(By.css('.ds-field__label'));

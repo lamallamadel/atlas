@@ -192,6 +192,12 @@ export class KeyboardShortcutService {
       return false;
     }
 
+    // Entrée et Espace activent le lien ou le bouton qui a le focus (WCAG 2.1.1) : un raccourci
+    // ne doit jamais leur voler cette action.
+    if ((event.key === 'Enter' || event.key === ' ') && KeyboardShortcutService.isInteractive(target)) {
+      return false;
+    }
+
     const key = this.getKeyString(event);
     
     if (this.shortcuts.has(key) && !this.shortcuts.get(key)?.sequence) {
@@ -221,6 +227,14 @@ export class KeyboardShortcutService {
     }
 
     return false;
+  }
+
+  /** Élément que le clavier active lui-même (lien, bouton, champ de choix, onglet…). */
+  static isInteractive(el: HTMLElement | null): boolean {
+    return !!el?.closest?.(
+      'a[href], button, select, summary, [role="button"], [role="link"], [role="menuitem"], ' +
+      '[role="option"], [role="tab"], [role="checkbox"], [role="switch"], [role="combobox"]'
+    );
   }
 
   private getKeyString(event: KeyboardEvent): string {

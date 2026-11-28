@@ -21,6 +21,17 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router) {}
 
+  /**
+   * Lien « Passer au contenu » : focus sur le contenu principal sans changer d'URL (avec
+   * <base href="/">, un simple href="#…" renverrait vers la racine du site).
+   */
+  skipToContent(event: Event, id: string): void {
+    event.preventDefault();
+    const target = document.getElementById(id);
+    target?.focus();
+    target?.scrollIntoView({ block: 'start' });
+  }
+
   ngOnInit(): void {
     // Detect system preference
     const saved = localStorage.getItem('atlasia-theme');

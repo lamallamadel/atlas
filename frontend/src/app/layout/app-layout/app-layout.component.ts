@@ -127,6 +127,17 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
     this.unreadNotificationCount$ = this.notificationApiService.getUnreadCount();
   }
 
+  /**
+   * Lien « Passer au contenu » : focus sur le contenu principal sans changer d'URL (avec
+   * <base href="/">, un simple href="#…" renverrait vers la racine du site).
+   */
+  skipToContent(event: Event, id: string): void {
+    event.preventDefault();
+    const target = document.getElementById(id);
+    target?.focus();
+    target?.scrollIntoView({ block: 'start' });
+  }
+
   ngOnInit(): void {
     this.subscriptions.add(
       this.isHandset$.subscribe(isHandset => {

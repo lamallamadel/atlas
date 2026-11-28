@@ -1,5 +1,5 @@
 <div class="ds-app-layout" [class.ds-app-layout--sidebar-closed]="!sidebarOpen()" [class.ds-app-layout--handset]="isHandset$ | async">
-  <a href="#main-content" class="skip-to-content">Passer au contenu principal</a>
+  <a href="#main-content" class="skip-to-content" (click)="skipToContent($event, 'main-content')">Passer au contenu principal</a>
 
   <app-keyboard-shortcuts></app-keyboard-shortcuts>
   <app-command-palette></app-command-palette>
@@ -139,7 +139,7 @@
 
         <!-- User -->
         <span cdkOverlayOrigin #userOrigin="cdkOverlayOrigin">
-          <ds-button variant="icon" (dsClick)="toggleUserMenu()" class="user-avatar-btn">
+          <ds-button variant="icon" (dsClick)="toggleUserMenu()" class="user-avatar-btn" ariaLabel="Mon compte">
             <ds-icon name="user" [size]="24"></ds-icon>
           </ds-button>
         </span>

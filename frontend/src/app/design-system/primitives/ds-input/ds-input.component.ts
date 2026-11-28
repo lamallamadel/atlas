@@ -34,6 +34,7 @@ import { DsIconComponent } from '../../icons/ds-icon.component';
           [attr.aria-label]="ariaLabelInput || null"
           [attr.aria-invalid]="error ? 'true' : null"
           [attr.aria-describedby]="error ? inputId + '-err' : null"
+          [attr.role]="ariaAutocomplete ? 'combobox' : null"
           [attr.aria-expanded]="ariaExpanded === null ? null : ariaExpanded"
           [attr.aria-controls]="ariaControls || null"
           [attr.aria-autocomplete]="ariaAutocomplete || null"
