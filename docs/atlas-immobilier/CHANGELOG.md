@@ -1,3 +1,11 @@
+# Changelog — v0.15-parite-2026-11-28
+
+Phase « parité » de la contre-critique fonctionnelle du 28 novembre 2026.
+- Portail : critères de recherche appliqués par le serveur avant la pagination (prix, surface, pièces, type de bien, quartier) ; facettes réelles (`/api/v1/portal/facets`) ; tri par prix réparé ; agence nommée sur les cartes ; cartes en vrais liens ; plus de « 0 pièces ».
+- Propriétaire : l'accueil affiche le mandat en cours (« En ligne — Annonce publiée par… », « Sous mandat », « Mandat à signer ») au lieu de « Pas d'annonce ».
+- Accessibilité : 0 violation WCAG 2.1 AA sur 11 écrans (51 avant) ; Entrée active de nouveau liens et boutons dans l'espace Pro (un raccourci global l'annulait) ; liens « Passer au contenu » sans changement d'URL, ajoutés au portail ; test E2E `accessibility-portail.spec.ts`.
+- Leads : accusé de réception automatique d'un contact du portail (module `module.lead_auto_ack`), par WhatsApp avec le modèle Meta `lead_acknowledgement` si l'agence a configuré son numéro, sinon par e-mail.
+
 # Changelog — v0.14-donnees-demo-2026-11-27
 
 Données de démonstration métier et comptes démo (`03_technique/18_donnees_demo.md`).

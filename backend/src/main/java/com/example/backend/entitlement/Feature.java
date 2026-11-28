@@ -23,6 +23,8 @@ public enum Feature {
     MODULE_NEUF("module.neuf", "Neuf : programmes et lots", true),
     MODULE_COOP_HABITAT("module.coop_habitat", "Coop habitat", true),
     MODULE_MANDATE_MARKETPLACE("module.mandate_marketplace", "Bourse aux mandats", true),
+    MODULE_LEAD_AUTO_ACK(
+            "module.lead_auto_ack", "Accusé de réception automatique des contacts", false),
 
     ADDON_EXPORT("addon.export", "Export des leads", true),
     ADDON_ESIGN("addon.esign", "Signature électronique", true),

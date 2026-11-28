@@ -45,6 +45,7 @@ Le backend reste la **source de vérité** :
 - `module.conciergerie` : services courte durée (V1.5)
 - `module.coop_habitat` : groupement/cotisations/allocation/projet (V2 — conformité)
 - `module.mandate_marketplace` : bourse aux mandats, propositions aux propriétaires (TO-BE, cas d'usage n°1) ; réservé aux agences vérifiées ; quota `quota.mandate_proposals_month` selon le plan
+- `module.lead_auto_ack` : accusé de réception automatique d'un contact du portail (livré, phase « parité ») ; WhatsApp si l'agence a configuré son numéro et fait approuver le modèle Meta `lead_acknowledgement` (corps : {{1}} prénom, {{2}} bien, {{3}} agence), sinon e-mail ; jamais pour une annonce de particulier ; actif par défaut
 
 ### Add-ons
 - `addon.boost` : mise en avant / ranking
