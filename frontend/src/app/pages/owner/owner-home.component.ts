@@ -17,7 +17,8 @@ import {
   PageHeaderComponent,
 } from '../../design-system';
 import type { DsColumn, DsSelectOption } from '../../design-system';
-import { OwnerApiService, OwnerLead, OwnerProfile, OwnerProperty, ownerAnnonceState } from '../../services/owner-api.service';
+import { OwnerApiService, OwnerLead, OwnerMandateSummary, OwnerProfile, OwnerProperty, ownerPropertyState } from '../../services/owner-api.service';
+import { OwnerMandateApiService } from '../../services/mandate-api.service';
 import { AuthService } from '../../services/auth.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
 import { OwnerPropertyDialogComponent } from './owner-property-dialog.component';
@@ -74,6 +75,9 @@ function row(l: OwnerLead): LeadRow {
                     <span class="oh-card__name" [title]="p.title">{{ p.title }}</span>
                     <ds-badge size="sm" [status]="state(p).status">{{ state(p).label }}</ds-badge>
                   </div>
+                  @if (state(p).detail; as detail) {
+                    <span class="oh-card__meta">{{ detail }}</span>
+                  }
                   <span class="oh-card__meta"><ds-icon name="map-pin" [size]="16"></ds-icon>{{ p.city }}@if (p.district) { · {{ p.district }} }</span>
                   <span class="oh-card__price">
                     @if (p.annonce?.price ?? p.expectedPrice; as price) { {{ price | number: '1.0-0' }} MAD } @else { Prix à définir }
@@ -149,6 +153,7 @@ function row(l: OwnerLead): LeadRow {
 })
 export class OwnerHomeComponent implements OnInit {
   private readonly api = inject(OwnerApiService);
+  private readonly mandateApi = inject(OwnerMandateApiService);
   private readonly dialog = inject(DsDialogService);
   private readonly toast = inject(DsToastService);
   private readonly router = inject(Router);
@@ -156,6 +161,8 @@ export class OwnerHomeComponent implements OnInit {
 
   readonly profile = signal<OwnerProfile | null>(null);
   readonly properties = signal<OwnerProperty[]>([]);
+  /** Mandat en cours (actif ou à signer) par bien. */
+  readonly mandates = signal<Map<number, OwnerMandateSummary>>(new Map());
   readonly leads = signal<LeadRow[]>([]);
   readonly loading = signal(true);
   readonly busyLead = signal<number | null>(null);
@@ -177,10 +184,10 @@ export class OwnerHomeComponent implements OnInit {
   /** « Nadia I. » se termine déjà par un point : pas de double point. */
   readonly greeting = computed(() => {
     const p = this.profile();
-    return p ? `Bonjour ${p.displayName.replace(/\.$/, '')}. Publiez vous-même ou, bientôt, confiez votre bien à un agent.` : null;
+    return p ? `Bonjour ${p.displayName.replace(/\.$/, '')}. Publiez vous-même ou confiez votre bien à une agence.` : null;
   });
-  state(p: OwnerProperty): ReturnType<typeof ownerAnnonceState> {
-    return ownerAnnonceState(p.annonce);
+  state(p: OwnerProperty): ReturnType<typeof ownerPropertyState> {
+    return ownerPropertyState(p.annonce, this.mandates().get(p.id) ?? null);
   }
 
   ngOnInit(): void {
@@ -194,6 +201,14 @@ export class OwnerHomeComponent implements OnInit {
       error: err => { this.loading.set(false); this.toast.error(serverMessage(err, 'Impossible de charger vos biens')); },
     });
     this.api.leads().subscribe({ next: l => this.leads.set(l.map(row)), error: () => this.leads.set([]) });
+    this.mandateApi.mandates().subscribe({
+      next: list => this.mandates.set(new Map(
+        list
+          .filter(m => m.status === 'MANDATE_ACTIVE' || m.status === 'MANDATE_PENDING_SIGNATURE')
+          .map(m => [m.propertyId, { status: m.status, agencyName: m.agencyName, annonceId: m.annonceId }]),
+      )),
+      error: () => this.mandates.set(new Map()),
+    });
   }
 
   declare(): void {

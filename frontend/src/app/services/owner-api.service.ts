@@ -142,6 +142,37 @@ export function ownerAnnonceState(a: OwnerAnnonce | null): { label: string; stat
   return { label: 'Brouillon', status: 'draft' };
 }
 
+/** Mandat en cours sur un bien, tel que l'accueil du propriétaire le résume. */
+export interface OwnerMandateSummary {
+  status: string;
+  agencyName: string;
+  annonceId: number | null;
+}
+
+/**
+ * État du bien pour son propriétaire : un mandat en cours prime sur sa propre annonce (sous
+ * mandat exclusif, l'annonce du propriétaire est suspendue et c'est celle de l'agence qui est en
+ * ligne). Sans mandat en cours, l'état de son annonce.
+ */
+export function ownerPropertyState(
+  annonce: OwnerAnnonce | null,
+  mandate: OwnerMandateSummary | null,
+): { label: string; status: 'draft' | 'warning' | 'active' | 'error' | 'paused'; detail: string | null } {
+  if (mandate?.status === 'MANDATE_ACTIVE') {
+    return {
+      label: mandate.annonceId ? 'En ligne' : 'Sous mandat',
+      status: 'active',
+      detail: mandate.annonceId
+        ? `Annonce publiée par ${mandate.agencyName}`
+        : `Confié à ${mandate.agencyName}, annonce en préparation`,
+    };
+  }
+  if (mandate?.status === 'MANDATE_PENDING_SIGNATURE') {
+    return { label: 'Mandat à signer', status: 'warning', detail: `Avec ${mandate.agencyName}` };
+  }
+  return { ...ownerAnnonceState(annonce), detail: null };
+}
+
 @Injectable({ providedIn: 'root' })
 export class OwnerApiService {
   private readonly http = inject(HttpClient);
