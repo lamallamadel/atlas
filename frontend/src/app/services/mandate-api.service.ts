@@ -52,6 +52,41 @@ export function commissionLabel(kind: string, value: number, payer?: string): st
   return payer ? `${v} · ${PAYER_LABELS[payer] ?? payer}` : v;
 }
 
+/** Part de la commission à la charge du vendeur selon le payeur. */
+const SELLER_SHARE: Record<string, number> = { SELLER: 1, SHARED: 0.5, BUYER: 0 };
+
+export interface SellerNet {
+  /** Prix de référence : prix souhaité du propriétaire, sinon milieu de l'estimation de l'agence. */
+  basis: number;
+  basisSource: 'ASKED' | 'ESTIMATE';
+  /** Commission à la charge du vendeur (MAD). */
+  sellerFee: number;
+  net: number;
+}
+
+/**
+ * Net vendeur d'une proposition (vente seulement) : ce qui reste au propriétaire une fois sa part
+ * de commission payée, sur son prix souhaité ou, à défaut, sur l'estimation de l'agence. Hors
+ * impôts et frais de notaire. {@code null} pour une location ou sans prix de référence.
+ */
+export function sellerNet(
+  objective: 'SALE' | 'RENT',
+  expectedPrice: number | null,
+  p: Pick<OwnerProposal, 'commissionKind' | 'commissionValue' | 'commissionPayer' | 'estimateMin' | 'estimateMax'>,
+): SellerNet | null {
+  if (objective !== 'SALE') return null;
+  let basis = expectedPrice && expectedPrice > 0 ? expectedPrice : null;
+  const basisSource: SellerNet['basisSource'] = basis ? 'ASKED' : 'ESTIMATE';
+  if (!basis) {
+    const est = [p.estimateMin, p.estimateMax].filter((v): v is number => !!v && v > 0);
+    if (!est.length) return null;
+    basis = est.reduce((a, b) => a + b, 0) / est.length;
+  }
+  const fee = p.commissionKind === 'PERCENT' ? (basis * Number(p.commissionValue)) / 100 : Number(p.commissionValue);
+  const sellerFee = Math.round(fee * (SELLER_SHARE[p.commissionPayer] ?? 1));
+  return { basis: Math.round(basis), basisSource, sellerFee, net: Math.round(basis) - sellerFee };
+}
+
 export interface AgencyCard {
   orgId: string;
   name: string;

@@ -25,6 +25,8 @@ import {
   RecommendedAgency,
   SERVICE_LABELS,
   commissionLabel,
+  SellerNet,
+  sellerNet,
   ratingLabel,
 } from '../../services/mandate-api.service';
 import { serverMessage } from '../../components/annonce-publication-panel.component';
@@ -101,6 +103,14 @@ import { OwnerAcceptDialogComponent } from './owner-accept-dialog.component';
                   <dl class="or-facts">
                     <dt>Mandat</dt><dd>{{ typeLabel(p.mandateType) }}, {{ p.durationMonths }} mois</dd>
                     <dt>Commission</dt><dd>{{ commission(p) }}</dd>
+                    @if (net(r, p); as n) {
+                      <dt>Net vendeur</dt>
+                      <dd>
+                        <span class="or-net">{{ n.net | number: '1.0-0' }} MAD</span>
+                        @if (bestNetId() === p.id) { <ds-badge status="success">Meilleur net</ds-badge> }
+                        <span class="or-hint">{{ n.sellerFee ? ('− ' + (n.sellerFee | number: '1.0-0') + ' MAD de commission à votre charge') : 'Commission payée par l’acquéreur' }}, sur {{ n.basisSource === 'ASKED' ? 'votre prix souhaité' : 'l’estimation de l’agence' }} de {{ n.basis | number: '1.0-0' }} MAD. Hors impôts et frais de notaire.</span>
+                      </dd>
+                    }
                     @if (p.estimateMin || p.estimateMax) {
                       <dt>Estimation</dt><dd>{{ p.estimateMin | number: '1.0-0' }} – {{ p.estimateMax | number: '1.0-0' }} MAD</dd>
                     }
@@ -204,6 +214,8 @@ import { OwnerAcceptDialogComponent } from './owner-accept-dialog.component';
     .or-breadcrumb span { color: var(--ds-marine); font-weight: 600; }
     .or-layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(300px, 2fr); gap: var(--ds-space-6); align-items: start; }
     @media (max-width: 1024px) { .or-layout { grid-template-columns: 1fr; } }
+    .or-net { margin-right: var(--ds-space-2); font-weight: 700; color: var(--ds-marine); font-variant-numeric: tabular-nums; }
+    .or-hint { display: block; margin-top: var(--ds-space-1); font-size: var(--ds-text-xs); color: var(--ds-text-muted); }
     .or-proposals, .or-side { display: flex; flex-direction: column; gap: var(--ds-space-4); }
     .or-card { display: flex; flex-direction: column; gap: var(--ds-space-3); }
     .or-card--on { outline: 2px solid var(--ds-marine); border-radius: var(--ds-radius-lg); }
@@ -265,6 +277,23 @@ export class OwnerRequestComponent implements OnInit {
 
   typeLabel(t: string): string { return MANDATE_TYPE_LABELS[t] ?? t; }
   types(r: OwnerRequest): string { return r.mandateTypes.map(t => this.typeLabel(t)).join(' ou '); }
+  net(r: OwnerRequest, p: OwnerProposal): SellerNet | null {
+    return sellerNet(r.objective, r.expectedPrice, p);
+  }
+
+  /** Proposition au meilleur net vendeur, quand au moins deux sont comparables et encore ouvertes. */
+  readonly bestNetId = computed(() => {
+    const r = this.req();
+    if (!r) return null;
+    const nets = r.proposals
+      .filter(p => this.pending(p))
+      .map(p => ({ id: p.id, n: sellerNet(r.objective, r.expectedPrice, p) }))
+      .filter((x): x is { id: number; n: SellerNet } => !!x.n && x.n.basisSource === 'ASKED');
+    if (nets.length < 2) return null;
+    const best = nets.reduce((a, b) => (b.n.net > a.n.net ? b : a));
+    return nets.some(x => x.id !== best.id && x.n.net === best.n.net) ? null : best.id;
+  });
+
   commission(p: { commissionKind: string; commissionValue: number; commissionPayer: string }): string {
     return commissionLabel(p.commissionKind, p.commissionValue, p.commissionPayer);
   }
