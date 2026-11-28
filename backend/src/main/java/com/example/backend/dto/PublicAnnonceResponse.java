@@ -29,7 +29,9 @@ public record PublicAnnonceResponse(
         LocalDateTime createdAt,
         String publisherKind,
         List<Publisher> publishers,
-        boolean propertyVerified) {
+        boolean propertyVerified,
+        String agencyName,
+        Integer rooms) {
 
     /**
      * Annonceur d'un bien publié par plusieurs (mandats simples, R-PROP-06) : la fiche du portail
@@ -54,7 +56,9 @@ public record PublicAnnonceResponse(
                 createdAt,
                 publisherKind,
                 List.copyOf(list),
-                propertyVerified);
+                propertyVerified,
+                agencyName,
+                rooms);
     }
 
     /** Lot C : badge « Bien vérifié » (titre foncier contrôlé par la plateforme). */
@@ -75,7 +79,35 @@ public record PublicAnnonceResponse(
                 createdAt,
                 publisherKind,
                 publishers,
-                verified);
+                verified,
+                agencyName,
+                rooms);
+    }
+
+    /**
+     * Carte du portail : nom de l'agence qui publie (null pour un particulier) et nombre de pièces
+     * connu (méta de l'annonce, sinon fiche du bien ; null si inconnu, jamais 0 par défaut).
+     */
+    public PublicAnnonceResponse withListingInfo(String agency, Integer roomCount) {
+        return new PublicAnnonceResponse(
+                id,
+                title,
+                description,
+                category,
+                type,
+                address,
+                surface,
+                city,
+                price,
+                currency,
+                photos,
+                meta,
+                createdAt,
+                publisherKind,
+                publishers,
+                propertyVerified,
+                agency,
+                roomCount != null ? roomCount : rooms);
     }
 
     /** Clés de {@code meta} affichables publiquement. */
@@ -124,6 +156,32 @@ public record PublicAnnonceResponse(
                 a.getCreatedAt(),
                 "OWNER".equals(a.getPublisherKind()) ? "OWNER" : "AGENCY",
                 List.of(),
-                false);
+                false,
+                null,
+                roomsFromMeta(a.getMeta()));
+    }
+
+    /** Nombre de pièces porté par la méta (« rooms » ou « pieces »), null si absent ou nul. */
+    static Integer roomsFromMeta(Map<String, Object> meta) {
+        if (meta == null) {
+            return null;
+        }
+        for (String key : List.of("rooms", "pieces")) {
+            Object v = meta.get(key);
+            if (v instanceof Number n && n.intValue() > 0) {
+                return n.intValue();
+            }
+            if (v instanceof String str) {
+                try {
+                    int parsed = Integer.parseInt(str.trim());
+                    if (parsed > 0) {
+                        return parsed;
+                    }
+                } catch (NumberFormatException ignored) {
+                    // valeur libre non numérique : inconnue
+                }
+            }
+        }
+        return null;
     }
 }

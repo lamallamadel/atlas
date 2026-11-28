@@ -78,4 +78,29 @@ public interface AnnonceRepository
     boolean existsByOrgIdAndModerationStatus(String orgId, String moderationStatus);
 
     List<Annonce> findByModerationStatusOrderByUpdatedAtAsc(String moderationStatus);
+
+    // Facettes du portail : valeurs réellement présentes parmi les annonces publiées.
+
+    @Query(
+            "select distinct a.city from Annonce a where a.status = :status and a.city is not null"
+                    + " order by a.city")
+    List<String> findPublicCities(@Param("status") AnnonceStatus status);
+
+    @Query(
+            "select distinct a.category from Annonce a where a.status = :status"
+                    + " and a.category is not null order by a.category")
+    List<String> findPublicCategories(@Param("status") AnnonceStatus status);
+
+    @Query(
+            "select distinct a.category from Annonce a where a.status = :status"
+                    + " and a.category is not null and a.city = :city order by a.category")
+    List<String> findPublicCategoriesInCity(
+            @Param("status") AnnonceStatus status, @Param("city") String city);
+
+    @Query(
+            "select distinct p.district from Annonce a, PropertyEntity p where a.propertyId = p.id"
+                    + " and a.status = :status and p.district is not null and a.city = :city"
+                    + " order by p.district")
+    List<String> findPublicDistrictsInCity(
+            @Param("status") AnnonceStatus status, @Param("city") String city);
 }

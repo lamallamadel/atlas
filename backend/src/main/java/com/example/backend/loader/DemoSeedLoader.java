@@ -76,7 +76,7 @@ public class DemoSeedLoader {
         }
     }
 
-    static boolean alreadyLoaded(Connection c) throws SQLException {
+    public static boolean alreadyLoaded(Connection c) throws SQLException {
         try (PreparedStatement ps =
                 c.prepareStatement("SELECT COUNT(*) FROM organization WHERE org_id = ?")) {
             ps.setString(1, MARKER_ORG);

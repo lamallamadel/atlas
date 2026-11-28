@@ -484,6 +484,35 @@ public class AnnonceService {
             String type,
             Pageable pageable,
             boolean onePerProperty) {
+        return findAll(requestedStatus, q, city, type, pageable, onePerProperty, null);
+    }
+
+    /**
+     * Critères du portail appliqués en base, avant la pagination : prix, surface, type de bien
+     * (catégorie), quartier et nombre de pièces (fiche du bien liée ; une annonce sans bien ou au
+     * nombre de pièces inconnu ne correspond pas quand le critère est posé).
+     */
+    public record PortalFilters(
+            java.math.BigDecimal priceMin,
+            java.math.BigDecimal priceMax,
+            Double surfaceMin,
+            Double surfaceMax,
+            Integer rooms,
+            String category,
+            String district) {
+
+        /** {@code rooms} à partir duquel le critère devient « au moins » (4 = « 4 et plus »). */
+        public static final int ROOMS_OR_MORE = 4;
+    }
+
+    public Page<Annonce> findAll(
+            AnnonceStatus requestedStatus,
+            String q,
+            String city,
+            String type,
+            Pageable pageable,
+            boolean onePerProperty,
+            PortalFilters portal) {
         // ?status=ACTIVE des anciens clients
         final AnnonceStatus status = AnnonceStatus.normalize(requestedStatus);
         Specification<Annonce> spec =
@@ -555,7 +584,78 @@ public class AnnonceService {
                             });
         }
 
+        if (portal != null) {
+            spec = spec.and(portalSpec(portal));
+        }
+
         return annonceRepository.findAll(spec, pageable);
+    }
+
+    /** Valeurs proposées par les filtres du portail : seulement ce qui est publié. */
+    public record PortalFacets(
+            java.util.List<String> cities,
+            java.util.List<String> categories,
+            java.util.List<String> districts) {}
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public PortalFacets portalFacets(String city) {
+        boolean withCity = city != null && !city.isBlank();
+        return new PortalFacets(
+                annonceRepository.findPublicCities(AnnonceStatus.PUBLISHED),
+                withCity
+                        ? annonceRepository.findPublicCategoriesInCity(
+                                AnnonceStatus.PUBLISHED, city.trim())
+                        : annonceRepository.findPublicCategories(AnnonceStatus.PUBLISHED),
+                withCity
+                        ? annonceRepository.findPublicDistrictsInCity(
+                                AnnonceStatus.PUBLISHED, city.trim())
+                        : java.util.List.of());
+    }
+
+    private static Specification<Annonce> portalSpec(PortalFilters f) {
+        return (root, query, cb) -> {
+            java.util.List<jakarta.persistence.criteria.Predicate> all =
+                    new java.util.ArrayList<>();
+            if (f.priceMin() != null) {
+                all.add(cb.greaterThanOrEqualTo(root.get("price"), f.priceMin()));
+            }
+            if (f.priceMax() != null) {
+                all.add(cb.lessThanOrEqualTo(root.get("price"), f.priceMax()));
+            }
+            if (f.surfaceMin() != null) {
+                all.add(cb.greaterThanOrEqualTo(root.get("surface"), f.surfaceMin()));
+            }
+            if (f.surfaceMax() != null) {
+                all.add(cb.lessThanOrEqualTo(root.get("surface"), f.surfaceMax()));
+            }
+            if (f.category() != null && !f.category().isBlank()) {
+                all.add(
+                        cb.equal(
+                                cb.lower(root.get("category")), f.category().trim().toLowerCase()));
+            }
+            if (f.district() != null && !f.district().isBlank()) {
+                String district = f.district().trim().toLowerCase();
+                var sub = query.subquery(Long.class);
+                var p = sub.from(com.example.backend.entity.PropertyEntity.class);
+                sub.select(p.<Long>get("id"))
+                        .where(
+                                cb.equal(p.get("id"), root.get("propertyId")),
+                                cb.equal(cb.lower(p.get("district")), district));
+                all.add(cb.or(cb.exists(sub), cb.equal(cb.lower(root.get("address")), district)));
+            }
+            if (f.rooms() != null && f.rooms() > 0) {
+                var sub = query.subquery(Long.class);
+                var p = sub.from(com.example.backend.entity.PropertyEntity.class);
+                jakarta.persistence.criteria.Predicate roomsMatch =
+                        f.rooms() >= PortalFilters.ROOMS_OR_MORE
+                                ? cb.greaterThanOrEqualTo(p.<Integer>get("rooms"), f.rooms())
+                                : cb.equal(p.get("rooms"), f.rooms());
+                sub.select(p.<Long>get("id"))
+                        .where(cb.equal(p.get("id"), root.get("propertyId")), roomsMatch);
+                all.add(cb.exists(sub));
+            }
+            return cb.and(all.toArray(jakarta.persistence.criteria.Predicate[]::new));
+        };
     }
 
     /** Quota d'annonces publiées de l'agence, vérifié avant chaque publication. */

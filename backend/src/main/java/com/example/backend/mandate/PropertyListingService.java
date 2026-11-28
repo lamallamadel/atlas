@@ -107,4 +107,46 @@ public class PropertyListingService {
                                                 .equals(p.getVerificationStatus()))
                         .orElse(false);
     }
+
+    /**
+     * Cartes du portail, en deux requêtes pour toute la page : nom de l'agence qui publie et nombre
+     * de pièces de la fiche du bien (pour les annonces dont la méta ne le donne pas).
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, ListingInfo> listingInfo(List<Annonce> page) {
+        Map<String, String> names =
+                agencies.names(
+                        page.stream()
+                                .filter(a -> !"OWNER".equals(a.getPublisherKind()))
+                                .map(Annonce::getOrgId)
+                                .filter(java.util.Objects::nonNull)
+                                .distinct()
+                                .toList());
+        Map<Long, Integer> rooms = new java.util.HashMap<>();
+        properties
+                .findAllById(
+                        page.stream()
+                                .map(Annonce::getPropertyId)
+                                .filter(java.util.Objects::nonNull)
+                                .distinct()
+                                .toList())
+                .forEach(
+                        p -> {
+                            if (p.getRooms() != null && p.getRooms() > 0) {
+                                rooms.put(p.getId(), p.getRooms());
+                            }
+                        });
+        Map<Long, ListingInfo> out = new java.util.HashMap<>();
+        for (Annonce a : page) {
+            String agency = "OWNER".equals(a.getPublisherKind()) ? null : names.get(a.getOrgId());
+            Integer r = a.getPropertyId() == null ? null : rooms.get(a.getPropertyId());
+            out.put(a.getId(), new ListingInfo(agency, r));
+        }
+        return out;
+    }
+
+    /**
+     * Nom de l'agence (null pour un particulier) et pièces de la fiche du bien (null si inconnu).
+     */
+    public record ListingInfo(String agencyName, Integer rooms) {}
 }

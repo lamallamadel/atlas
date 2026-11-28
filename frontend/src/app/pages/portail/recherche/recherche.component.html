@@ -22,8 +22,29 @@
         label="Ville"
         [options]="villeOptions"
         [(ngModel)]="filters.ville"
-        (valueChange)="applyFilters()"
+        (valueChange)="onVilleChange()"
         prefixIcon="map-pin">
+      </ds-select>
+    </div>
+
+    @if (villeChoisie() && quartierOptions.length > 1) {
+      <div class="sr-filter-group">
+        <ds-select
+          label="Quartier"
+          [options]="quartierOptions"
+          [(ngModel)]="filters.quartier"
+          (valueChange)="onQuartierChange()">
+        </ds-select>
+      </div>
+    }
+
+    <!-- Type de bien -->
+    <div class="sr-filter-group">
+      <ds-select
+        label="Type de bien"
+        [options]="categorieOptions"
+        [(ngModel)]="filters.categorie"
+        (valueChange)="onCategorieChange()">
       </ds-select>
     </div>
 
@@ -91,11 +112,7 @@
     @if (displayedListings.length > 0) {
       <div class="sr-grid">
         @for (listing of displayedListings; track listing.id) {
-          <article
-            class="sr-listing-card"
-            (click)="navigateToDetail(listing)"
-            role="button" tabindex="0"
-            (keydown.enter)="navigateToDetail(listing)">
+          <a class="sr-listing-card" [routerLink]="['/annonces', listing.id]">
             <div class="sr-listing-img">
               <img [src]="listing.imgs && listing.imgs.length > 0 ? listing.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="listing.title" loading="lazy" width="360" height="220"/>
               <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
@@ -113,15 +130,17 @@
               <div class="ph-title" [title]="listing.title">{{listing.title}}</div>
               <div class="ph-location">
                 <ds-icon name="map-pin" [size]="16"></ds-icon>
-                <span>{{listing.zone}}, {{listing.city}}</span>
+                <span>{{listing.zone ? listing.zone + ', ' : ''}}{{listing.city}}</span>
               </div>
               <div class="ph-meta">
                 <span class="ph-meta-item"><ds-icon name="maximize" [size]="16"></ds-icon>{{listing.surface}} m²</span>
-                <span class="ph-meta-item"><ds-icon name="grid" [size]="16"></ds-icon>{{listing.pieces}} pièces</span>
+                @if (listing.pieces) {
+                  <span class="ph-meta-item"><ds-icon name="grid" [size]="16"></ds-icon>{{listing.pieces}} {{listing.pieces > 1 ? 'pièces' : 'pièce'}}</span>
+                }
                 <span class="ph-meta-date" [title]="listing.agent.agency">{{listing.agent.agency}}</span>
               </div>
             </div>
-          </article>
+          </a>
         }
       </div>
     }

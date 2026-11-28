@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { PortailService, Listing, FilterState } from '../../../services/portail.service';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { PortailService, Listing, FilterState, PortalFacets } from '../../../services/portail.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { 
@@ -19,6 +19,7 @@ import {
     imports: [
       CommonModule,
       FormsModule,
+      RouterLink,
       DsButtonComponent,
       DsIconComponent,
       DsSelectComponent,
@@ -33,23 +34,20 @@ export class RechercheComponent implements OnInit {
 
   filters: FilterState = {
     tx: '', ville: '', prixMin: null, prixMax: null,
-    surfMin: null, surfMax: null, pieces: 0, sort: 'recent', page: 1
+    surfMin: null, surfMax: null, pieces: 0, sort: 'recent', page: 1,
+    categorie: '', quartier: ''
   };
 
-  readonly villeOptions: DsSelectOption[] = [
-    { value: '', label: 'Toutes les villes' },
-    { value: 'Casablanca', label: 'Casablanca' },
-    { value: 'Rabat', label: 'Rabat' },
-    { value: 'Tanger', label: 'Tanger' },
-    { value: 'Marrakech', label: 'Marrakech' },
-    { value: 'Fès', label: 'Fès' },
-    { value: 'Agadir', label: 'Agadir' }
-  ];
+  /** Options tirées des annonces publiées (facettes du serveur), jamais d'une liste figée. */
+  villeOptions: DsSelectOption[] = [{ value: '', label: 'Toutes les villes' }];
+  categorieOptions: DsSelectOption[] = [{ value: '', label: 'Tous les types' }];
+  quartierOptions: DsSelectOption[] = [{ value: '', label: 'Tous les quartiers' }];
 
   readonly sortOptions: DsSelectOption[] = [
     { value: 'recent', label: 'Plus récents' },
-    { value: 'price_asc', label: 'Prix croissant' },
-    { value: 'price_desc', label: 'Prix décroissant' }
+    { value: 'prix-asc', label: 'Prix croissant' },
+    { value: 'prix-desc', label: 'Prix décroissant' },
+    { value: 'surface-desc', label: 'Surface décroissante' }
   ];
 
   leadModalOpen = false;
@@ -66,9 +64,34 @@ export class RechercheComponent implements OnInit {
       if (params['tx'])     this.filters.tx    = params['tx'];
       if (params['ville'])  this.filters.ville  = params['ville'];
       if (params['prixMax']) this.filters.prixMax = +params['prixMax'];
+      if (params['categorie']) this.filters.categorie = params['categorie'];
+      if (params['quartier']) this.filters.quartier = params['quartier'];
+      this.loadFacets();
       this.applyFilters();
     });
   }
+
+  villeChoisie(): boolean { return !!this.filters.ville; }
+
+  /** Villes et types de bien publiés ; quartiers de la ville choisie. */
+  loadFacets(): void {
+    this.portailService.getFacets(this.filters.ville || undefined).subscribe((f: PortalFacets) => {
+      this.villeOptions = [{ value: '', label: 'Toutes les villes' }, ...f.cities.map(c => ({ value: c, label: c }))];
+      this.categorieOptions = [{ value: '', label: 'Tous les types' }, ...f.categories.map(c => ({ value: c, label: c }))];
+      this.quartierOptions = [{ value: '', label: 'Tous les quartiers' }, ...f.districts.map(d => ({ value: d, label: d }))];
+      if (this.filters.categorie && !f.categories.includes(this.filters.categorie)) this.filters.categorie = '';
+    });
+  }
+
+  onVilleChange(): void {
+    this.filters.quartier = '';
+    this.filters.page = 1;
+    this.loadFacets();
+    this.applyFilters();
+  }
+
+  onQuartierChange(): void { this.filters.page = 1; this.applyFilters(); }
+  onCategorieChange(): void { this.filters.page = 1; this.applyFilters(); }
 
   applyFilters(): void {
     this.portailService.searchAnnonces(this.filters).subscribe(res => {
@@ -89,7 +112,8 @@ export class RechercheComponent implements OnInit {
   }
 
   resetFilters(): void {
-    this.filters = { tx: '', ville: '', prixMin: null, prixMax: null, surfMin: null, surfMax: null, pieces: 0, sort: 'recent', page: 1 };
+    this.filters = { tx: '', ville: '', prixMin: null, prixMax: null, surfMin: null, surfMax: null, pieces: 0, sort: 'recent', page: 1, categorie: '', quartier: '' };
+    this.loadFacets();
     this.applyFilters();
   }
 
@@ -104,6 +128,5 @@ export class RechercheComponent implements OnInit {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
-  navigateToDetail(l: Listing): void { this.router.navigate(['/annonces', l.id]); }
   formatPrice(p: number, tx: 'vente' | 'location'): string { return this.portailService.formatPrice(p, tx); }
 }

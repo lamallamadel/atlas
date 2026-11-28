@@ -55,6 +55,13 @@ public class PortalPublicController {
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String type,
+            @RequestParam(required = false) java.math.BigDecimal priceMin,
+            @RequestParam(required = false) java.math.BigDecimal priceMax,
+            @RequestParam(required = false) Double surfaceMin,
+            @RequestParam(required = false) Double surfaceMax,
+            @RequestParam(required = false) Integer rooms,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String district,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id,desc") String sort) {
@@ -63,24 +70,58 @@ public class PortalPublicController {
         // (HibernateFilterInterceptor), la recherche couvre toutes les agences.
         try {
             String[] sortParams = sort.split(",");
+            String sortField = SORTABLE.contains(sortParams[0]) ? sortParams[0] : "id";
             Sort.Direction direction =
-                    sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
-                            ? Sort.Direction.DESC
-                            : Sort.Direction.ASC;
-            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+                    sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc")
+                            ? Sort.Direction.ASC
+                            : Sort.Direction.DESC;
+            Pageable pageable =
+                    PageRequest.of(
+                            Math.max(page, 0),
+                            Math.min(Math.max(size, 1), 50),
+                            Sort.by(direction, sortField).and(Sort.by(Sort.Direction.DESC, "id")));
 
-            // Use a global search (cross-tenant) for the public portal
+            // Tous les critères sont appliqués en base, avant la pagination : le total et les
+            // pages correspondent toujours à la recherche.
+            AnnonceService.PortalFilters filters =
+                    new AnnonceService.PortalFilters(
+                            priceMin, priceMax, surfaceMin, surfaceMax, rooms, category, district);
             Page<Annonce> results =
-                    annonceService.findAll(AnnonceStatus.PUBLISHED, q, city, type, pageable, true);
+                    annonceService.findAll(
+                            AnnonceStatus.PUBLISHED, q, city, type, pageable, true, filters);
             java.util.Map<Long, java.util.List<Long>> photos =
                     annonceMediaService.uploadedPhotoIds(
                             results.getContent().stream().map(Annonce::getId).toList());
+            java.util.Map<Long, com.example.backend.mandate.PropertyListingService.ListingInfo>
+                    info = propertyListings.listingInfo(results.getContent());
             return ResponseEntity.ok(
                     results.map(
-                            a ->
-                                    PublicAnnonceResponse.from(
-                                            a,
-                                            photos.getOrDefault(a.getId(), java.util.List.of()))));
+                            a -> {
+                                var i = info.get(a.getId());
+                                return PublicAnnonceResponse.from(
+                                                a,
+                                                photos.getOrDefault(a.getId(), java.util.List.of()))
+                                        .withListingInfo(
+                                                i == null ? null : i.agencyName(),
+                                                i == null ? null : i.rooms());
+                            }));
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    /** Colonnes de tri acceptées ; toute autre valeur retombe sur les plus récentes. */
+    static final java.util.Set<String> SORTABLE =
+            java.util.Set.of("id", "price", "surface", "createdAt");
+
+    @GetMapping("/facets")
+    @Operation(
+            summary = "Portal search facets",
+            description = "Villes, types de bien et quartiers présents parmi les annonces publiées")
+    public ResponseEntity<AnnonceService.PortalFacets> facets(
+            @RequestParam(required = false) String city) {
+        try {
+            return ResponseEntity.ok(annonceService.portalFacets(city));
         } finally {
             TenantContext.clear();
         }
@@ -107,6 +148,7 @@ public class PortalPublicController {
                     .orElse(ResponseEntity.notFound().build());
         }
         Annonce a = visible.get();
+        var info = propertyListings.listingInfo(java.util.List.of(a)).get(a.getId());
         return ResponseEntity.ok(
                 PublicAnnonceResponse.from(
                                 a,
@@ -114,7 +156,8 @@ public class PortalPublicController {
                                         .uploadedPhotoIds(java.util.List.of(a.getId()))
                                         .get(a.getId()))
                         .withPublishers(propertyListings.publishers(a))
-                        .withPropertyVerified(propertyListings.propertyVerified(a)));
+                        .withPropertyVerified(propertyListings.propertyVerified(a))
+                        .withListingInfo(info.agencyName(), info.rooms()));
     }
 
     @GetMapping("/annonces/{id}/media/{mediaId}")
