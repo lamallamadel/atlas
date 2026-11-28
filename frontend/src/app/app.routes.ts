@@ -129,6 +129,12 @@ export const routes: Routes = [
         data: { animation: 'MarketplaceProposalPage' }
       },
       {
+        path: 'zones',
+        loadComponent: () => import('./pages/zones/marketplace-zones.component').then(m => m.MarketplaceZonesComponent),
+        canActivate: [RoleGuard],
+        data: { animation: 'ZonesPage', roles: ['SUPER_ADMIN'] }
+      },
+      {
         path: 'moderation',
         loadComponent: () => import('./pages/moderation/owner-moderation.component').then(m => m.OwnerModerationComponent),
         canActivate: [RoleGuard],

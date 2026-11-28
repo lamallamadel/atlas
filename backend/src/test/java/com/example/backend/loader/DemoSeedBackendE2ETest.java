@@ -262,6 +262,29 @@ class DemoSeedBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
+    void liquidity_tangerIsOpen_andMarrakechStillBuilding() throws Exception {
+        mockMvc.perform(
+                        as(
+                                get("/api/v1/admin/marketplace/liquidity"),
+                                "DEMO-PLATFORM",
+                                "super-1",
+                                "SUPER_ADMIN"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.minVerifiedAgencies").value(3))
+                .andExpect(jsonPath("$.zones[0].status").value("OPEN"))
+                .andExpect(jsonPath("$.zones[?(@.city == 'Tanger')].status").value(hasItem("OPEN")))
+                .andExpect(
+                        jsonPath("$.zones[?(@.city == 'Tanger')].openRequests")
+                                .value(hasItem(greaterThanOrEqualTo(1))))
+                .andExpect(
+                        jsonPath("$.zones[?(@.city == 'Marrakech')].pendingAgencies")
+                                .value(hasItem(1)))
+                .andExpect(
+                        jsonPath("$.zones[?(@.city == 'Marrakech')].status")
+                                .value(hasItem("BUILDING")));
+    }
+
+    @Test
     void portalListsOwnerAndAgencyListings_withPhotos() throws Exception {
         String page =
                 mockMvc.perform(

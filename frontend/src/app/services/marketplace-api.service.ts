@@ -142,6 +142,33 @@ export interface PendingAgencyVerification {
   cities: string[];
 }
 
+export interface ZoneLiquidity {
+  city: string;
+  /** OPEN : critère d'ouverture atteint ; BUILDING : zone en préparation. */
+  status: 'OPEN' | 'BUILDING';
+  verifiedAgencies: number;
+  pendingAgencies: number;
+  requests: number;
+  openRequests: number;
+  staleRequests: number;
+  medianHoursToFirstProposal: number | null;
+  awardRate: number | null;
+}
+
+export interface MarketplaceLiquidity {
+  minVerifiedAgencies: number;
+  staleHours: number;
+  windowDays: number;
+  zones: ZoneLiquidity[];
+}
+
+/** « 5 h », « 2,5 j » : délai lisible à partir d'heures. */
+export function formatDelay(hours: number | null): string {
+  if (hours == null) return '—';
+  if (hours < 48) return `${String(Math.round(hours * 10) / 10).replace('.', ',')} h`;
+  return `${String(Math.round((hours / 24) * 10) / 10).replace('.', ',')} j`;
+}
+
 /** Côté agence : `/api/v1/marketplace/...` et le profil `/api/v1/agency/marketplace-profile`. */
 @Injectable({ providedIn: 'root' })
 export class MarketplaceApiService {
@@ -240,6 +267,11 @@ export class MarketplaceApiService {
   /** Super-admin : vérification d'une agence ; un refus porte un motif montré à l'agence. */
   setVerified(orgId: string, verified: boolean, note?: string | null): Observable<{ orgId: string; verified: boolean }> {
     return this.http.put<{ orgId: string; verified: boolean }>(`/api/v1/admin/agencies/${encodeURIComponent(orgId)}/verification`, { verified, note: note ?? null });
+  }
+
+  /** Super-admin : liquidité de la bourse ville par ville. */
+  liquidity(): Observable<MarketplaceLiquidity> {
+    return this.http.get<MarketplaceLiquidity>('/api/v1/admin/marketplace/liquidity');
   }
 
   /** Super-admin : demandes de vérification d'agences en attente. */

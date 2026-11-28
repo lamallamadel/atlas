@@ -20,17 +20,26 @@ public class AdminAgencyVerificationController {
     private final AgencyDirectoryService directory;
     private final com.example.backend.mandate.VerificationService verification;
     private final com.example.backend.mandate.AgencyVerificationService agencyVerification;
+    private final com.example.backend.mandate.MarketplaceLiquidityService liquidity;
 
     public AdminAgencyVerificationController(
             AgencyDirectoryService directory,
             com.example.backend.mandate.VerificationService verification,
-            com.example.backend.mandate.AgencyVerificationService agencyVerification) {
+            com.example.backend.mandate.AgencyVerificationService agencyVerification,
+            com.example.backend.mandate.MarketplaceLiquidityService liquidity) {
+        this.liquidity = liquidity;
         this.directory = directory;
         this.verification = verification;
         this.agencyVerification = agencyVerification;
     }
 
     public record VerificationBody(boolean verified, String note) {}
+
+    /** Liquidité de la bourse par ville : critère d'ouverture et signaux de tenue de promesse. */
+    @GetMapping("/marketplace/liquidity")
+    public com.example.backend.mandate.MarketplaceLiquidityService.Liquidity liquidity() {
+        return liquidity.liquidity();
+    }
 
     /** Demandes de vérification d'agences en attente, les plus anciennes d'abord. */
     @GetMapping("/verifications/agencies")
