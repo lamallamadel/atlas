@@ -50,7 +50,7 @@ import { MarketplaceApiService, MarketplaceLiquidity, ZoneLiquidity, formatDelay
           </ng-template>
           <ng-template dsCell="stale" let-z><span class="mz-num" [class.mz-alert]="z.staleRequests > 0">{{ z.staleRequests }}</span></ng-template>
           <ng-template dsCell="delay" let-z><span class="mz-num">{{ delay(z.medianHoursToFirstProposal) }}</span></ng-template>
-          <ng-template dsCell="award" let-z><span class="mz-num">{{ z.awardRate == null ? '—' : (z.awardRate * 100).toFixed(0) + ' %' }}</span></ng-template>
+          <ng-template dsCell="award" let-z><span class="mz-num">{{ z.awardRate === null ? '—' : (z.awardRate * 100).toFixed(0) + ' %' }}</span></ng-template>
         </ds-table>
       </ds-card>
       <p class="mz-note">Critère d'ouverture : au moins {{ data()?.minVerifiedAgencies ?? 3 }} agences vérifiées couvrent la ville. Demandes ouvertes à la bourse sur les {{ data()?.windowDays ?? 90 }} derniers jours ; les demandes adressées à une seule agence ne comptent pas.</p>
